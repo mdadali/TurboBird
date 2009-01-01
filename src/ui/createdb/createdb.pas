@@ -16,22 +16,42 @@ type
   { TfmCreateDB }
 
   TfmCreateDB = class(TForm)
+    bbCancel: TBitBtn;
     bbCreate: TBitBtn;
     bbReg: TBitBtn;
     btBrowse: TButton;
-    bbCancel: TBitBtn;
     cbCharset: TComboBox;
+    chkboxReserveSpace: TCheckBox;
+    chkboxForcedWrites: TCheckBox;
     cmbBoxServers: TComboBox;
-    edUserName: TEdit;
-    edNewDatabase: TEdit;
+    comboxPageSize: TComboBox;
+    comboxSQLDialect: TComboBox;
+    edtRole: TEdit;
     edPassword: TEdit;
+    edtSweepInterval: TEdit;
+    edNewDatabase: TEdit;
+    edtServerType: TEdit;
+    edtServerVersion: TEdit;
+    edUserName: TEdit;
+    grboxDatabase: TGroupBox;
+    grboxServer: TGroupBox;
+    grboxUser: TGroupBox;
     IBDatabase1: TIBDatabase;
-    Image1: TImage;
     Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    Panel1: TPanel;
+    Panel2: TPanel;
+    pnlTop: TPanel;
+    pnlBottom: TPanel;
     SaveDialog1: TSaveDialog;
     procedure bbCreateClick(Sender: TObject);
     procedure bbRegClick(Sender: TObject);
@@ -86,7 +106,12 @@ begin
 end;
 
 procedure TfmCreateDB.FormShow(Sender: TObject);
+var ServerRec: TServerRecord;
 begin
+  ServerRec := GetServerRecordFromFileByName(cmbBoxServers.Text);
+  edUserName.Text := ServerRec.UserName;
+  edPassword.Text := ServerRec.Password;
+
   frmThemeSelector.btnApplyClick(self);
 end;
 
@@ -101,22 +126,24 @@ begin
   else begin
     IBDatabase1.DatabaseName := cmbBoxServers.Text;
     if StrToIntDef(ServerRec.Port, 0) <> 0 then
-      IBDatabase1.DatabaseName := IBDatabase1.DatabaseName + '/' + ServerRec.Port + ':';
+      IBDatabase1.DatabaseName := IncludeTrailingPathDelimiter(IBDatabase1.DatabaseName) + ServerRec.Port + ':';
     IBDatabase1.DatabaseName := IBDatabase1.DatabaseName + edNewDatabase.Text;
   end;
 
   FPort := ServerRec.Port;
 
   cbCharset.ItemIndex := fmCreateDB.cbCharset.Items.IndexOf(ServerRec.Charset);
-  edUserName.Text := ServerRec.UserName;
-  edPassword.Text := ServerRec.Password;
 
   IBDatabase1.Params.Clear;
+  IBDatabase1.LoginPrompt := false;
 
   IBDatabase1.Params.Add('user_name=' + edUserName.Text);
   IBDatabase1.Params.Add('password=' + edPassword.Text);
   IBDatabase1.Params.Add('lc_ctype=' + cbCharset.Text);
-  IBDatabase1.LoginPrompt := false;
+
+  IBDatabase1.SQLDialect := StrToInt(Trim(comboxSQLDialect.Text));
+  //IBDatabase1.Params.Add('page_size=' + Trim(comboxPageSize.Text));
+  //IBDatabase1.Params.Add('sweep_interval=' + edtSweepInterval.Text);
 
   IBDatabase1.CreateIfNotExists := true;
 end;
@@ -142,6 +169,7 @@ end;
 
 procedure TfmCreateDB.bbRegClick(Sender: TObject);
 var cboxItems: TStringList;
+    FileNameOnly: string;
 begin
   try
     cboxItems := GetServerListFromTreeView;
@@ -152,7 +180,11 @@ begin
 
     fmReg.edtFBClient.Text := IBDatabase1.FirebirdLibraryPathName;
 
-    fmReg.edTitle.Clear;
+    FileNameOnly := edNewDatabase.Text;
+    FileNameOnly := ExtractFileName(FileNameOnly);
+    FileNameOnly := ChangeFileExt(FileNameOnly, '');
+    fmReg.edTitle.Text := FileNameOnly;
+
     fmReg.edDatabaseName.Text:= IBDatabase1.DatabaseName;
     fmReg.edUserName.Text:= edUserName.Text;
     fmReg.edPassword.Text:= edPassword.Text;

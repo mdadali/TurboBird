@@ -154,14 +154,10 @@ var
   TableName, FieldName: string;
 begin
   TableName := Trim(FTableName);
-  if IsObjectNameCaseSensitive(TableName) then
-    if not IsObjectNameQuoted(TableName) then
-      TableName := MakeObjectNameQuoted(TableName);
+  TableName := MakeCaseSensitiveAuto(TableName);
 
   FieldName := Trim(edFieldName.Text);
-  if IsObjectNameCaseSensitive(FieldName) then
-    if not IsObjectNameQuoted(FieldName) then
-      FieldName := MakeObjectNameQuoted(FieldName);
+  FieldName := MakeCaseSensitiveAuto(FieldName);
 
   if FRefreshButton = nil then
     Clk := nil

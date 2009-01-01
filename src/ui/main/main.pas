@@ -3650,6 +3650,8 @@ end;
 (****************  Connect As  *****************)
 procedure TfmMain.lmConnectAsClick(Sender: TObject);
 begin
+  lmDisconnectClick(nil);
+
   if ConnectToDBAs(TPNodeInfos(tvMain.Selected.Data)^.dbIndex, True) then
     tvMain.Selected.Expand(False)
   else

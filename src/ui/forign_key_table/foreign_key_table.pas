@@ -8,6 +8,8 @@ uses
   Classes, SysUtils, DB, Forms, Controls, Graphics, Dialogs, DBCtrls,
   IBDatabase, IBTable, RxDBGrid, ExtCtrls,
 
+  Variants,
+
   turbocommon,
   uthemeselector;
 
@@ -31,8 +33,8 @@ type
                    ATransaction: TIBTransaction;
                    AForeignKeyInfo: TForeignKeyInfo);
 
-    function GetSelectedValue: Variant;
-    function GetForeignKeyField: string;
+    function GetSelectedValues: Variant;   // Variant-Array
+    function GetForeignKeyFields: string;  // Feldliste mit ;
 
     property ForeignKeyInfo: TForeignKeyInfo read  FForeignKeyInfo;
   end;
@@ -41,15 +43,38 @@ implementation
 
 {$R *.lfm}
 
-function TfrmForeignKeyTable.GetSelectedValue: Variant;
+function TfrmForeignKeyTable.GetSelectedValues: Variant;
+var
+  FieldList: TStringList;
+  i: Integer;
 begin
-  Result := IBTableForeingKey.FieldByName(
-              FForeignKeyInfo.MasterField).Value;
+  Result := Null;
+
+  if not IBTableForeingKey.Active then Exit;
+  if IBTableForeingKey.IsEmpty then Exit;
+
+  FieldList := TStringList.Create;
+  try
+    FieldList.Delimiter := ';';
+    FieldList.StrictDelimiter := True;
+    FieldList.DelimitedText := FForeignKeyInfo.MasterFields;
+
+    Result := VarArrayCreate([0, FieldList.Count - 1], varVariant);
+
+    for i := 0 to FieldList.Count - 1 do
+      Result[i] :=
+        IBTableForeingKey.FieldByName(
+          Trim(FieldList[i])
+        ).Value;
+
+  finally
+    FieldList.Free;
+  end;
 end;
 
-function TfrmForeignKeyTable.GetForeignKeyField: string;
+function TfrmForeignKeyTable.GetForeignKeyFields: string;
 begin
-  Result := FForeignKeyInfo.ForeignField;
+  Result := FForeignKeyInfo.ForeignFields;
 end;
 
 procedure TfrmForeignKeyTable.FormShow(Sender: TObject);

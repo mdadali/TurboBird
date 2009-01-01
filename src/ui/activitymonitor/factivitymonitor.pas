@@ -269,54 +269,6 @@ begin
   grdTransactions.OptimizeColumnsWidthAll;
 end;
 
-{procedure TfrmActivityMonitor.LoadStatements;
-var
-  ID: Int64;
-begin
-  qryStatements.Close;
-
-  ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
-  if ID < 0 then Exit;
-
-  qryStatements.SQL.Text :=
-    'SELECT * FROM MON$STATEMENTS '+
-    'WHERE MON$ATTACHMENT_ID = :ID';
-
-  qryStatements.ParamByName('ID').AsLargeInt := ID;
-
-  qryStatements.Open;  grdStatements.OptimizeColumnsWidthAll;
-end; }
-
-{procedure TfrmActivityMonitor.LoadStatements;
-var
-  ID: Int64;
-begin
-  qryStatements.Close;
-
-  // Attachment ID ermitteln
-  ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
-  if ID < 0 then Exit;
-
-  // Abfrage: MON$STATE als lesbaren Text
-  qryStatements.SQL.Text :=
-    'SELECT MON$STATEMENT_ID,'+
-    '       MON$SQL_TEXT,'+
-    '       CASE MON$STATE '+
-    '            WHEN 0 THEN ''idle'' '+
-    '            WHEN 1 THEN ''active'' '+
-    '            WHEN 2 THEN ''stalled'' '+
-    '            ELSE ''unknown'' '+
-    '       END AS MON$STATE,'+
-    '       MON$ATTACHMENT_ID '+
-    'FROM MON$STATEMENTS '+
-    'WHERE MON$ATTACHMENT_ID = :ID';
-
-  qryStatements.ParamByName('ID').AsLargeInt := ID;
-
-  qryStatements.Open;
-  grdStatements.OptimizeColumnsWidthAll;
-end;}
-
 procedure TfrmActivityMonitor.LoadStatements;
 var
   ID: Int64;
@@ -406,37 +358,6 @@ end;
 { ============================================= }
 { Exec Admin SQL }
 { ============================================= }
-{procedure TfrmActivityMonitor.ExecSQL(
-  const SQL: String;
-  const ID: Int64);
-var
-  q: TIBQuery;
-begin
-  if IsMyAttachment(ID) then
-  begin
-    ShowMessage(
-      'Cannot kill own attachment.');
-    Exit;
-  end;
-
-  q := TIBQuery.Create(nil);
-
-  try
-    q.Database := IBDatabase;
-    q.Transaction := trExec;
-
-    q.SQL.Text := SQL;
-    q.ParamByName('ID').AsLargeInt := ID;
-
-    q.ExecSQL;
-
-    trExec.Commit;
-    trExec.StartTransaction;
-  finally
-    q.Free;
-  end;
-end;}
-
 procedure TfrmActivityMonitor.ExecSQL(const SQL: String; const ID: Int64);
 begin
   if IsMyAttachment(ID) then
