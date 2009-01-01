@@ -22,6 +22,8 @@ uses
   IBDatabase,
   IBDatabaseInfo,
   IBQuery,
+  IBCustomDataSet,
+  IBTable,
 
   Variants,
 
@@ -298,13 +300,13 @@ type
     Visible: boolean;
   end;
 
-
+type
   TForeignKeyInfo = record
     ConstraintName: string;
     ForeignTable: string;
-    ForeignField: string;
+    ForeignFields: string;   // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
     MasterTable: string;
-    MasterField: string;
+    MasterFields: string;    // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
   end;
 
   TForeignKeyInfoArray = array of TForeignKeyInfo;
@@ -446,6 +448,8 @@ function MatchesFilter(const AText, AFilter: string): Boolean;
 function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
 function  IsObjectNameQuoted(const AStr: string): Boolean;
 function  MakeObjectNameQuoted(AObjectName: string): string;
+function  MakeCaseSensitiveAuto(const AObjectName: string): string;
+
 procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 function  StripQuotes(const S: string): string;
 
@@ -573,6 +577,10 @@ function ColorBValue(AColor: TColor): Byte;
 function StrToFontStyles(const S: string): TFontStyles;
 function FontStylesToStr(AStyles: TFontStyles): string;
 
+//Arrays
+function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
+
+
 implementation
 
 uses Reg;
@@ -650,6 +658,26 @@ end;
 function MakeObjectNameQuoted(AObjectName: string): string;
 begin
   result := '"' + AObjectName + '"';
+end;
+
+function MakeCaseSensitiveAuto(const AObjectName: string): string;
+var
+  S: string;
+begin
+  S := Trim(AObjectName);
+
+  if S = '' then
+    Exit(S);
+
+  // Bereits quoted → nichts ändern
+  if IsObjectNameQuoted(S) then
+    Exit(S);
+
+  // Nur wenn NICHT komplett uppercase → quoten
+  if IsObjectNameCaseSensitive(S) then
+    Result := '"' + S + '"'
+  else
+    Result := S;  // Nur Uppercase → kein Quote nötig
 end;
 
 procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
@@ -2970,6 +2998,87 @@ begin
 
   // exakt
   Result := Text = Filter;
+end;
+
+
+function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
+var
+  MetaQuery, DimQuery: TIBQuery;
+  TableName, FieldName, TypeName: string;
+  FieldType, FieldSubType, Dimensions, FieldLength: Integer;
+  DimStr: string;
+begin
+  Result := '';
+  FieldName := Field.FieldName;
+
+  // Wir brauchen den Tabellen-Namen
+  if Field.DataSet is TIBTable then
+    TableName := TIBTable(Field.DataSet).TableName
+  else
+    Exit;
+
+  MetaQuery := TIBQuery.Create(nil);
+  DimQuery := TIBQuery.Create(nil);
+  try
+    MetaQuery.Database := DB;
+    DimQuery.Database := DB;
+
+    // 1. Feldmetadaten holen
+    MetaQuery.SQL.Text :=
+      'SELECT f.RDB$FIELD_NAME AS TYPENAME, f.RDB$FIELD_TYPE, f.RDB$FIELD_SUB_TYPE, ' +
+      'f.RDB$DIMENSIONS, f.RDB$FIELD_LENGTH ' +
+      'FROM RDB$RELATION_FIELDS rf ' +
+      'JOIN RDB$FIELDS f ON rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
+      'WHERE rf.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(TableName)) +
+      ' AND rf.RDB$FIELD_NAME = ' + QuotedStr(UpperCase(FieldName));
+    MetaQuery.Open;
+    if MetaQuery.EOF then Exit;
+
+    TypeName := Trim(MetaQuery.FieldByName('TYPENAME').AsString);
+    FieldType := MetaQuery.FieldByName('RDB$FIELD_TYPE').AsInteger;
+    FieldSubType := MetaQuery.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
+    Dimensions := MetaQuery.FieldByName('RDB$DIMENSIONS').AsInteger;
+    FieldLength := MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger; // <-- jetzt verfügbar
+
+    // 2. Dimensionen abfragen
+    DimQuery.SQL.Text :=
+      'SELECT RDB$LOWER_BOUND, RDB$UPPER_BOUND ' +
+      'FROM RDB$FIELD_DIMENSIONS ' +
+      'WHERE RDB$FIELD_NAME = ' + QuotedStr(TypeName) +
+      ' ORDER BY RDB$DIMENSION';
+    DimQuery.Open;
+
+    DimStr := '';
+    while not DimQuery.EOF do
+    begin
+      if DimStr <> '' then DimStr := DimStr + ' x ';
+      DimStr := DimStr + Format('%d..%d', [
+        DimQuery.FieldByName('RDB$LOWER_BOUND').AsInteger,
+        DimQuery.FieldByName('RDB$UPPER_BOUND').AsInteger
+      ]);
+      DimQuery.Next;
+    end;
+
+    // 3. Datentyp bestimmen
+    case FieldType of
+      7: Result := Format('Array[%s] of SMALLINT', [DimStr]);       // SMALLINT
+      8: Result := Format('Array[%s] of INTEGER', [DimStr]);        // INTEGER
+      10: Result := Format('Array[%s] of FLOAT', [DimStr]);         // FLOAT
+      12: Result := Format('Array[%s] of DATE', [DimStr]);          // DATE/TIME
+      14: Result := Format('Array[%s] of CHAR', [DimStr]);          // CHAR
+      37: // VARCHAR
+        begin
+          // Länge ermitteln
+          Result := Format('Array[%s] of VARCHAR(%d)', [DimStr, MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger]);
+        end;
+      261: Result := Format('Array[%s] of BLOB', [DimStr]);         // BLOB
+      else Result := Format('Array[%s] of UNKNOWN', [DimStr]);
+    end;
+
+  finally
+    MetaQuery.Free;
+    DimQuery.Free;
+  end;
 end;
 
 

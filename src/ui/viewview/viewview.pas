@@ -16,6 +16,7 @@ type
   { TfmViewView }
 
   TfmViewView = class(TForm)
+    CheckBox1: TCheckBox;
     edName: TEdit;
       GroupBox1: TGroupBox;
       Label1: TLabel;
@@ -24,7 +25,6 @@ type
     seScript: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
   private
@@ -50,10 +50,6 @@ begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
-end;
-
-procedure TfmViewView.FormCreate(Sender: TObject);
-begin
 end;
 
 procedure TfmViewView.FormKeyDown(Sender: TObject; var Key: Word;

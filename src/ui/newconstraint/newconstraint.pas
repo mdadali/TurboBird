@@ -88,9 +88,7 @@ begin
   begin
     if clxOnFields.Checked[i] then
     begin
-      if IsObjectNameCaseSensitive(clxOnFields.Items[i]) and
-         not IsObjectNameQuoted(clxOnFields.Items[i]) then
-        clxOnFields.Items[i] := MakeObjectNameQuoted(clxOnFields.Items[i]);
+      clxOnFields.Items[i] := MakeCaseSensitiveAuto(clxOnFields.Items[i]);
       CurrFields := CurrFields + clxOnFields.Items[i] + ', ';
     end;
   end;
@@ -103,9 +101,7 @@ begin
   begin
     if clxForFields.Checked[i] then
     begin
-      if IsObjectNameCaseSensitive(clxForFields.Items[i]) and
-         not IsObjectNameQuoted(clxForFields.Items[i]) then
-        clxForFields.Items[i] := MakeObjectNameQuoted(clxForFields.Items[i]);
+      clxForFields.Items[i] := MakeCaseSensitiveAuto(clxForFields.Items[i]);
       ForFields := ForFields + clxForFields.Items[i] + ', ';
     end;
   end;

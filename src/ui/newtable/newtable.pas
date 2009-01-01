@@ -73,18 +73,14 @@ var
   TableName: string;
 begin
   TableName := Trim(turbocommon.ExtractObjectName(edNewTable.Text));
-  if IsObjectNameCaseSensitive(TableName) then
-    if not IsObjectNameQuoted(TableName) then
-      TableName := MakeObjectNameQuoted(TableName);
+  TableName := MakeCaseSensitiveAuto(TableName);
 
   Result:= 'create table ' + TableName + ' (' + LineEnding;
   for i:= 1 to StringGrid1.RowCount - 1 do
     if Trim(StringGrid1.Cells[0, i]) <> '' then
     begin
       FieldLine := Trim(StringGrid1.Cells[0, i]); // Field Name
-      if IsObjectNameCaseSensitive(FieldLine) then
-        if not IsObjectNameQuoted(FieldLine) then
-          FieldLine := MakeObjectNameQuoted(FieldLine);
+      FieldLine := MakeCaseSensitiveAuto(FieldLine);
 
       FieldType:= StringGrid1.Cells[1, i];
       if FieldType = 'UUID' then
@@ -112,9 +108,6 @@ begin
         PKey:= Trim(PKey + PKey_Quoted) + ',';
         GeneratorName:= Trim(edNewTable.Text) + '_' + StringGrid1.Cells[0, i] + '_Gen';
         KeyField:= Trim(StringGrid1.Cells[0, i]); // Generator should work if there is only one Key field
-        //if IsObjectNameCaseSensitive(KeyField) then
-          //if not IsObjectNameQuoted(KeyField) then
-            //KeyField := MakeObjectNameQuoted(KeyField);
       end;
       // Default value
       if Trim(StringGrid1.Cells[5, i]) <> '' then
@@ -136,9 +129,7 @@ begin
   begin
     Delete(PKey, Length(PKey), 1);
 
-    if IsObjectNameCaseSensitive(PKey) then
-      if not IsObjectNameQuoted(PKey) then
-        PKey := MakeObjectNameQuoted(PKey);
+    PKey := MakeCaseSensitiveAuto(PKey);
 
     Result:= Result + ', ' + LineEnding + ' constraint ' + edNewTable.Text + '_pk_1 primary key (' + PKey + ') ' + LineEnding;
   end;
@@ -312,17 +303,13 @@ begin
   begin
     turbocommon.MetaDataChanged := true;
     TableName := edNewTable.Text;
-    if IsObjectNameCaseSensitive(TableName) then
-      if not IsObjectNameQuoted(TableName) then
-        TableName := MakeObjectNameQuoted(TableName);
+    TableName := MakeCaseSensitiveAuto(TableName);
 
     List:= TStringList.Create;
     try
       List.Text:= GenerateCreateSQL(KeyField, GeneratorName);
 
-      if IsObjectNameCaseSensitive(KeyField) then
-        if not IsObjectNameQuoted(KeyField) then
-          KeyField := MakeObjectNameQuoted(KeyField);
+      KeyField := MakeCaseSensitiveAuto(KeyField);
 
       if cxCreateGen.Checked then
       begin;
