@@ -1,0 +1,58 @@
+object fmCallProc: TfmCallProc
+  Left = 395
+  Height = 334
+  Top = 157
+  Width = 400
+  ActiveControl = StringGrid1
+  Caption = 'Call stored procedure: '
+  ClientHeight = 334
+  ClientWidth = 400
+  OnActivate = FormActivate
+  OnClose = FormClose
+  Position = poScreenCenter
+  LCLVersion = '1.2.6.0'
+  object StringGrid1: TStringGrid
+    Left = 0
+    Height = 280
+    Top = 0
+    Width = 400
+    Align = alTop
+    Anchors = [akTop, akLeft, akBottom]
+    ColCount = 3
+    Columns = <    
+      item
+        Title.Caption = 'Param Value'
+        Width = 120
+      end    
+      item
+        ReadOnly = True
+        Title.Caption = 'Param Name'
+        Width = 120
+      end    
+      item
+        ReadOnly = True
+        Title.Caption = 'Type'
+        Width = 120
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll]
+    TabOrder = 0
+  end
+  object BitBtn1: TBitBtn
+    Left = 264
+    Height = 34
+    Top = 290
+    Width = 126
+    Align = alRight
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Around = 10
+    Caption = 'Call'
+    Color = clForm
+    Default = True
+    Kind = bkOK
+    ModalResult = 1
+    OnClick = BitBtn1Click
+    TabOrder = 1
+  end
+end

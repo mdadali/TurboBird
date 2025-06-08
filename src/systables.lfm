@@ -1,0 +1,24 @@
+object dmSysTables: TdmSysTables
+  OldCreateOrder = False
+  Height = 174
+  HorizontalOffset = 460
+  VerticalOffset = 249
+  Width = 313
+  object sqQuery: TSQLQuery
+    FieldDefs = <>
+    AutoCalcFields = False
+    Params = <>
+    Macros = <>
+    Left = 216
+    Top = 32
+  end
+  object IBConnection1: TIBConnection
+    Connected = False
+    LoginPrompt = False
+    KeepConnection = False
+    CheckTransactionParams = False
+    UseConnectionCharSetIfNone = False
+    Left = 61
+    Top = 54
+  end
+end

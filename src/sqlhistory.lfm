@@ -1,0 +1,143 @@
+object fmSQLHistory: TfmSQLHistory
+  Left = 318
+  Height = 449
+  Top = 119
+  Width = 808
+  Caption = 'SQL History'
+  ClientHeight = 449
+  ClientWidth = 808
+  OnClose = FormClose
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '1.2.6.0'
+  object DBGrid1: TDBGrid
+    Left = 5
+    Height = 365
+    Top = 5
+    Width = 798
+    Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Around = 5
+    Color = clWindow
+    Columns = <>
+    DataSource = Datasource1
+    Options = [dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgMultiselect]
+    ReadOnly = True
+    TabOrder = 0
+    TitleStyle = tsNative
+    OnDblClick = DBGrid1DblClick
+  end
+  object bbInsert: TBitBtn
+    Left = 0
+    Height = 30
+    Top = 392
+    Width = 152
+    Anchors = [akLeft, akBottom]
+    Caption = 'Insert in SQL Query'
+    OnClick = bbInsertClick
+    TabOrder = 1
+  end
+  object bbDelete: TBitBtn
+    Left = 152
+    Height = 30
+    Top = 392
+    Width = 81
+    Anchors = [akLeft, akBottom]
+    Cancel = True
+    Caption = 'Delete'
+    Kind = bkCancel
+    OnClick = bbDeleteClick
+    TabOrder = 2
+  end
+  object GroupBox1: TGroupBox
+    Left = 240
+    Height = 74
+    Top = 375
+    Width = 568
+    Align = alRight
+    Anchors = [akLeft, akRight, akBottom]
+    Caption = 'Export to text file'
+    ClientHeight = 53
+    ClientWidth = 562
+    TabOrder = 3
+    object cxAfterDate: TCheckBox
+      Left = 0
+      Height = 21
+      Top = 2
+      Width = 148
+      Caption = 'Only after the date'
+      OnClick = cxAfterDateClick
+      TabOrder = 0
+    end
+    object DateEdit1: TDateEdit
+      Left = 152
+      Height = 24
+      Top = 2
+      Width = 104
+      CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
+      OKCaption = 'OK'
+      CancelCaption = 'Cancel'
+      DateOrder = doNone
+      ButtonWidth = 23
+      CharCase = ecNormal
+      NumGlyphs = 1
+      MaxLength = 0
+      TabOrder = 1
+      Visible = False
+    end
+    object Label1: TLabel
+      Left = 296
+      Height = 16
+      Top = 5
+      Width = 61
+      Caption = 'SQL Type'
+      ParentColor = False
+    end
+    object cbSQLType: TComboBox
+      Left = 360
+      Height = 25
+      Top = 2
+      Width = 100
+      ItemHeight = 16
+      ItemIndex = 0
+      Items.Strings = (
+        'All'
+        'DDL,DML'
+        'DDL'
+        'DML'
+        'Select'
+      )
+      Style = csDropDownList
+      TabOrder = 2
+      Text = 'All'
+    end
+    object bbExport: TBitBtn
+      Left = 472
+      Height = 30
+      Top = -4
+      Width = 75
+      Caption = 'Export'
+      OnClick = bbExportClick
+      TabOrder = 3
+    end
+  end
+  object cxOverwrite: TCheckBox
+    Left = 8
+    Height = 21
+    Top = 462
+    Width = 174
+    Caption = 'Overwrite existing SQL'
+    TabOrder = 4
+  end
+  object Datasource1: TDataSource
+    left = 127
+    top = 12
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '.sql'
+    Filter = 'SQL File|*.sql|All files|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    left = 608
+    top = 144
+  end
+end
