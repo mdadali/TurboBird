@@ -263,20 +263,19 @@ end;
 procedure TfmNewEditField.EnableDisableControls;
 var
   FieldType: string;
-  IsTextType, IsNumericType, IsFloatType: Boolean;
+  IsTextType, IsNumericType, IsScaledType: Boolean;
 begin
   // Bestimme den aktuell gewählten Datentyp (Großbuchstaben für Vergleich)
   FieldType := UpperCase(cbType.Text);
-
-  // Typgruppen bestimmen
   IsTextType := (FieldType = 'CHAR') or (FieldType = 'VARCHAR');
-  IsNumericType := (FieldType = 'NUMERIC') or (FieldType = 'DECIMAL') or (FieldType = 'INTEGER') or (FieldType = 'BIGINT') or (FieldType = 'SMALLINT');
-  IsFloatType := (FieldType = 'FLOAT') or (FieldType = 'DOUBLE PRECISION');
+
+  // Reihenfolge evtl. fix, aber meist bearbeitbar
+  seOrder.Enabled := True; // oder abhängig von Logik
 
   // Field name darf nur im Neuanlage-Modus geändert werden
   edFieldName.Enabled := FFormMode = foNew;
-
   // Beschreibung und Default-Wert sind immer editierbar
+
   edDescription.Enabled := True;
   edDefault.Enabled := True;
   cxAllowNull.Enabled := True;
@@ -288,11 +287,12 @@ begin
   cbCharset.Enabled := IsTextType;
   cbCollation.Enabled := IsTextType;
 
-  // Scale nur bei NUMERIC, DECIMAL, FLOAT, DOUBLE
-  seScale.Enabled := IsNumericType or IsFloatType;
+  // Typgruppen bestimmen
+  //IsNumericType := (FieldType = 'INTEGER') or (FieldType = 'BIGINT') or (FieldType = 'SMALLINT');
+  IsScaledType := ((FieldType = 'NUMERIC') or (FieldType = 'DECIMAL'));
 
-  // Reihenfolge evtl. fix, aber meist bearbeitbar
-  seOrder.Enabled := True; // oder abhängig von Logik
+  // Scale nur bei NUMERIC, DECIMAL, FLOAT, DOUBLE
+  seScale.Enabled := IsScaledType;
 end;
 
 procedure TfmNewEditField.Init(dbIndex: Integer; TableName: string;
