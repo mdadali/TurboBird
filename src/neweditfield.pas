@@ -36,15 +36,16 @@ type
     seScale: TSpinEdit;
     procedure bbAddClick(Sender: TObject);
     procedure cbCharsetEditingDone(Sender: TObject);
+    procedure cbTypeChange(Sender: TObject);
     procedure cbTypeEditingDone(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
   private
     FDBIndex: Integer;
     FTableName: string;
+    FFormMode: TFormMode;
     FRefreshButton: TBitBtn;
   public
-    fFormMode: TFormMode;
     OldFieldName: string;
     OldFieldType: string;
     OldFieldSize: integer;
@@ -63,6 +64,7 @@ type
       Size, Scale, Order: Integer;
       AllowNull: Boolean;
       RefreshButton: TBitBtn);
+    procedure EnableDisableControls;
     { public declarations }
   end; 
 
@@ -204,7 +206,11 @@ begin
   end;
 end;
 
-
+procedure TfmNewEditField.cbTypeChange(Sender: TObject);
+begin
+  seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
+  EnableDisableControls;
+end;
 
 procedure TfmNewEditField.cbTypeEditingDone(Sender: TObject);
 begin
@@ -213,7 +219,7 @@ begin
   {todo: (low priority) allow/disallow gui elements when using domain datatypes.
    Check what can be overridden (e.g. collate for text-type domain fields)}
   // Allow character set, lblCollation for text type fields; otherwise disable
-  case cbType.Text of
+{  case cbType.Text of
     'CHAR','CSTRING','VARCHAR':
     begin
       // Allow character set/lblCollation for text type fields
@@ -235,6 +241,7 @@ begin
       seScale.Enabled:= false;
     end;
   end;
+}
 end;
 
 procedure TfmNewEditField.FormClose(Sender: TObject;
@@ -253,6 +260,41 @@ begin
   // db charset
 end;
 
+procedure TfmNewEditField.EnableDisableControls;
+var
+  FieldType: string;
+  IsTextType, IsNumericType, IsFloatType: Boolean;
+begin
+  // Bestimme den aktuell gewählten Datentyp (Großbuchstaben für Vergleich)
+  FieldType := UpperCase(cbType.Text);
+
+  // Typgruppen bestimmen
+  IsTextType := (FieldType = 'CHAR') or (FieldType = 'VARCHAR');
+  IsNumericType := (FieldType = 'NUMERIC') or (FieldType = 'DECIMAL') or (FieldType = 'INTEGER') or (FieldType = 'BIGINT') or (FieldType = 'SMALLINT');
+  IsFloatType := (FieldType = 'FLOAT') or (FieldType = 'DOUBLE PRECISION');
+
+  // Field name darf nur im Neuanlage-Modus geändert werden
+  edFieldName.Enabled := FFormMode = foNew;
+
+  // Beschreibung und Default-Wert sind immer editierbar
+  edDescription.Enabled := True;
+  edDefault.Enabled := True;
+  cxAllowNull.Enabled := True;
+
+  // Größe nur bei CHAR, VARCHAR und evtl. bei BLOB subtypes sinnvoll
+  seSize.Enabled := IsTextType;
+
+  // Charset und Collation nur bei TEXT-Typen
+  cbCharset.Enabled := IsTextType;
+  cbCollation.Enabled := IsTextType;
+
+  // Scale nur bei NUMERIC, DECIMAL, FLOAT, DOUBLE
+  seScale.Enabled := IsNumericType or IsFloatType;
+
+  // Reihenfolge evtl. fix, aber meist bearbeitbar
+  seOrder.Enabled := True; // oder abhängig von Logik
+end;
+
 procedure TfmNewEditField.Init(dbIndex: Integer; TableName: string;
   FormMode: TFormMode;
   FieldName, FieldType,
@@ -265,7 +307,9 @@ begin
   cbType.Clear;
 
   // Load basic datatypes for fields into combobox....
-  dmSysTables.GetBasicTypes(cbType.Items);
+  //dmSysTables.GetBasicTypes(cbType.Items);
+  dmSysTables.GetAllTypes(cbType.Items);
+
   // ... add domain types for fields
   dmSysTables.GetDomainTypes(dbIndex, cbType.Items);
 
@@ -286,7 +330,13 @@ begin
   OldDescription:= Description;
   edFieldName.Text:= OldFieldName;
   seSize.Value:= OldFieldSize;
-  cbType.Text:= OldFieldType;
+  seScale.Value := Abs(Scale);
+  //cbType.Text:= OldFieldType;   //new-lib
+  if IsSizedTypeName(OldFieldType) then
+    cbType.ItemIndex := cbType.Items.IndexOf(GetNameFromSizedTypeName(OldFieldType))
+  else
+    cbType.ItemIndex := cbType.Items.IndexOf(OldFieldType);
+
   cxAllowNull.Checked:= OldAllowNull;
   seOrder.Value:= OldOrder;
   edDefault.Text:= OldDefault;
@@ -301,6 +351,7 @@ begin
     bbAdd.Caption:= 'Add';
     Caption:= 'Add new field in : ' + TableName;
   end;
+  EnableDisableControls;
 end;
 
 initialization

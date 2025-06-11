@@ -14,6 +14,7 @@ uses
   Forms, Controls, Graphics, Dialogs, Menus, ComCtrls, Reg, QueryWindow, Grids,
   ExtCtrls, Buttons, StdCtrls, TableManage, dbugintf, turbocommon, importtable,
   DB, IniFiles, Types,
+  fSetFBClient,
   uArrayQuery,
   fTestFunction,
   udb_udf_fetcher,
@@ -114,6 +115,8 @@ type
     lmTestUDRProcedure: TMenuItem;
     lmDropDomain: TMenuItem;
     lmDropUser: TMenuItem;
+    lmSetFBClient: TMenuItem;
+    lmDisconnectAll: TMenuItem;
     mnOptions: TMenuItem;
     mnEditorFont: TMenuItem;
     toolbarImages: TImageList;
@@ -222,6 +225,7 @@ type
     procedure lmCopyTableClick(Sender: TObject);
     procedure lmCreateDBClick(Sender: TObject);
     procedure lmDBInfoClick(Sender: TObject);
+    procedure lmDisconnectAllClick(Sender: TObject);
     procedure lmDisconnectClick(Sender: TObject);
     procedure lmDropDomainClick(Sender: TObject);
     procedure lmDropFireBirdFunctionClick(Sender: TObject);
@@ -281,6 +285,7 @@ type
     procedure lmScriptInsertClick(Sender: TObject);
     procedure lmScriptTableCreateClick(Sender: TObject);
     procedure lmScriptUpdateClick(Sender: TObject);
+    procedure lmSetFBClientClick(Sender: TObject);
     procedure lmSetGenClick(Sender: TObject);
     procedure lmSweepClick(Sender: TObject);
     procedure lmTableManageClick(Sender: TObject);
@@ -1328,6 +1333,53 @@ begin
   fmDBInfo.Init(dbIndex);
 end;
 
+procedure TfmMain.lmDisconnectAllClick(Sender: TObject);
+var
+  dbIndex, i, j, k: Integer;
+  TabSheet: TTabSheet;
+begin
+  // Alle Verbindungen durchgehen
+  for dbIndex := 0 to Length(RegisteredDatabases) - 1 do
+  begin
+    if RegisteredDatabases[dbIndex].IBConnection.Connected then
+    begin
+      // Verbindung trennen
+      RegisteredDatabases[dbIndex].IBConnection.Close;
+
+      // Tabs schließen, die zu dieser Verbindung gehören
+      for i := PageControl1.PageCount - 1 downto 0 do
+      begin
+        if (PageControl1.Pages[i] as TComponent).Tag = dbIndex then
+        begin
+          TabSheet := PageControl1.Pages[i] as TTabSheet;
+
+          // Unterformulare schließen
+          for j := 0 to TabSheet.ControlCount - 1 do
+          begin
+            if TabSheet.Controls[j] is TForm then
+            begin
+              (TabSheet.Controls[j] as TForm).Close;
+              Break;
+            end;
+          end;
+
+          // TabSheet freigeben
+          TabSheet.Free;
+        end;
+      end;
+
+      // Knoten im TreeView einklappen, falls vorhanden
+      for k := 0 to tvMain.Items.Count - 1 do
+      begin
+        if Assigned(tvMain.Items[k].Data) and
+           (TPNodeInfos(tvMain.Items[k].Data)^.dbIndex = dbIndex) then
+        begin
+          tvMain.Items[k].Collapse(True);
+        end;
+      end;
+    end;
+  end;
+end;
 procedure TfmMain.lmDisconnectClick(Sender: TObject);
 var
   dbIndex: Integer;
@@ -3731,6 +3783,13 @@ begin
   end;
 end;
 
+procedure TfmMain.lmSetFBClientClick(Sender: TObject);
+begin
+   lmDisconnectAllClick(nil);
+   if not SetFBClient(1) then
+     Application.Terminate;
+end;
+
 (******************  Set generator value  *********************)
 
 procedure TfmMain.lmSetGenClick(Sender: TObject);
@@ -4189,7 +4248,6 @@ begin
 
   SQLQuery1.SQLConnection := RegisteredDatabases[DatabaseIndex].IBConnection;
   SQLQuery1.SQLConnection.Params.Add('sql-dialect=3');
-  SQLQuery1.SQLConnection.Params.SaveToFile('C:\Users\maurog\Downloads\Firebird-4.0.2.2816-0-x64\sqlparams.txt');
   SQLQuery1.Close;
   {A bit unclear why the transaction needs to be committed but at least do it
   before changing the query's transaction}

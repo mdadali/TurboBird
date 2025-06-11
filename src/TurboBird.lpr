@@ -17,7 +17,7 @@ uses
   cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Controls, zcomponent, memdslaz, main, CreateDb, Reg, QueryWindow,
+  Forms, Dialogs, Controls, zcomponent, memdslaz, main, CreateDb, Reg, QueryWindow,
   ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
   CreateTrigger, EditTable, CallProc, EditDataFullRec, UDFInfo, ViewDomain,
   NewDomain, SysTables, NewConstraint, NewEditField, Calen, Scriptdb,
@@ -25,8 +25,8 @@ uses
   PermissionManage, SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo,
   sysutils, Comparison, Update, topologicalsort, UnitFirebirdServices,
   turbocommon, importtable, fileimport, csvdocument, udb_firebird_struct_helper,
-  udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
-  fTestFunction, uArrayQuery;
+  udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,  fbcommon,
+  fTestFunction, uArrayQuery, fSetFBClient;
 
 const
   Major = 1;
@@ -36,7 +36,7 @@ const
   VersionDate = '2010 - Jan 2015';
 {$IFDEF Unix}
 {$DEFINE extdecl:=cdecl}
-    fbclib = 'libfbclient.' + sharedsuffix + '.2';
+
 {$ENDIF}
 {$IFDEF Windows}
   {$DEFINE extdecl:=stdcall}
@@ -47,22 +47,23 @@ const
 
 {$R *.res}
 
+
 var
   SAbout: TfmAbout;
   ErrorMessage: string;
-  IBaseLibraryHandle : TLibHandle;
   {$IFDEF UNIX}
   SLib: TSQLDBLibraryLoader;
   {$ENDIF}
+
 begin
   Application.Initialize;
 
   // Load library using SQLDBLibraryLoader in Linux, OSX,...
   {$IFDEF UNIX}
-  SLib:= TSQLDBLibraryLoader.Create(nil);
-  SLib.ConnectionType:= 'Firebird';
-  SLib.LibraryName:= 'libfbclient.so.2'; //todo: is this correct for OSX?
-  SLib.Enabled:= True;
+  //SLib:= TSQLDBLibraryLoader.Create(nil);
+  //SLib.ConnectionType:= 'Firebird';
+  //SLib.LibraryName:= 'libfbclient.so.2'; //todo: is this correct for OSX?
+  //SLib.Enabled:= True;
   {$ENDIF}
 
   {$IFDEF DEBUG}
@@ -75,18 +76,21 @@ begin
     DeleteFile('heap.trc');
   SetHeapTraceOutput('heap.trc');
   {$ENDIF DEBUG}
-  IBaseLibraryHandle:= LoadLibrary(fbclib);
 
   // search for all compatible FireBird libraries in Windows
   {$IFDEF Windows}
-  if IBaseLibraryHandle = NilHandle then
-    IBaseLibraryHandle:= LoadLibrary(seclib);
-  if IBaseLibraryHandle = NilHandle then
-    IBaseLibraryHandle:= LoadLibrary(thirdlib);
+  {
+  if fbcommon.IBaseLibraryHandle = NilHandle then
+    fbcommon.IBaseLibraryHandle:= LoadLibrary(seclib);
+  if fbcommon.IBaseLibraryHandle = NilHandle then
+    fbcommon.IBaseLibraryHandle:= LoadLibrary(thirdlib);
+  }
   {$ENDIF}
 
-  // Check Firebird library existence
-  if (IBaseLibraryHandle = nilhandle) then
+  if not SetFBClient(0) then  exit;     //wrong inifile setting
+  InitialiseIBase60(fbcommon.IBaseLibrary);
+  //InitialiseIBase60(fbcommon.IBaseLibrary);
+  {if (IBaseLibraryHandle = nilhandle) then
   begin
     ErrorMessage:= Format('Unable to load Firebird library: %s.' + LineEnding +
       'Please follow the Firebird documentation to install the Firebird client on your system.',
@@ -100,6 +104,8 @@ begin
     {$ENDIF}
     Application.MessageBox(PChar(ErrorMessage), 'Warning', 0);
   end;
+
+  end;}
 
   SAbout:= TfmAbout.Create(nil);
   SAbout.BorderStyle:= bsNone;
@@ -132,7 +138,7 @@ begin
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   Application.CreateForm(TfmCopyTable, fmCopyTable);
   SAbout.Free;
-  InitialiseIBase60;
+  //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
   //Application.CreateForm(TfrmTestFunction, frmTestFunction);
   Application.Run;
   ReleaseIBase60;

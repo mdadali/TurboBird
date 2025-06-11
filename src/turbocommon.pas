@@ -7,7 +7,7 @@ SysTables covers functionality for which a db connection is required. }
 interface
 
 uses
-  Classes, SysUtils, Dialogs, sqldb,
+  Classes, SysUtils, StrUtils, Dialogs, sqldb,  RegExpr,
   fbcommon;
 
 const
@@ -348,11 +348,16 @@ const
     'Packages', 'PackageFunctions', 'PackageProcedures',
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
+function IsSizedTypeName(const ATypeName: string): Boolean;
+function GetNameFromSizedTypeName(const ATypeName: string): string;
+function GetSizeFromSizedTypeName(const ATypeName: string): string;
+procedure GetPrecisionAndScaleFromSizedTypeName(const ATypeName: string; out Precision, Scale: string);
 function ExtractObjectName(const Input: string): string; // Tables(11) -> Tables
 function FormatNodeCaptionnWithCount(const Text: string; Count: Integer): string;
 function GetClearNodeText(const ANodeText: string): string;
 function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
 function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
+
 
 // Retrieve available collations for specified Characterset into Collations
 function GetCollations(const Characterset: string; var Collations: TStringList): boolean;
@@ -378,6 +383,91 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+function IsSizedTypeName(const ATypeName: string): Boolean;
+var
+  S: string;
+  LParen, RParen, I, CommaPos: Integer;
+  Params, CleanParams, P, Sc: string;
+  DummyInt1, DummyInt2: Integer;
+begin
+  S := Trim(ATypeName);
+  LParen := Pos('(', S);
+  RParen := Pos(')', S);
+  Result := False;
+
+  if (LParen > 0) and (RParen > LParen) then
+  begin
+    Params := Copy(S, LParen + 1, RParen - LParen - 1);
+
+    // Alle Leerzeichen entfernen
+    CleanParams := '';
+    for I := 1 to Length(Params) do
+      if not (Params[I] in [' ', #9, #13, #10]) then
+        CleanParams := CleanParams + Params[I];
+
+    CommaPos := Pos(',', CleanParams);
+
+    if CommaPos = 0 then
+    begin
+      Result := TryStrToInt(CleanParams, DummyInt1);
+    end
+    else if CommaPos > 1 then
+    begin
+      P := Copy(CleanParams, 1, CommaPos - 1);
+      Sc := Copy(CleanParams, CommaPos + 1, Length(CleanParams) - CommaPos);
+      Result := TryStrToInt(P, DummyInt1) and TryStrToInt(Sc, DummyInt2);
+    end;
+  end;
+end;
+
+function GetNameFromSizedTypeName(const ATypeName: string): string;
+var
+  LParen: Integer;
+begin
+  Result := Trim(ATypeName);
+  LParen := Pos('(', Result);
+  if LParen > 0 then
+    Result := Trim(Copy(Result, 1, LParen - 1));
+end;
+
+function GetSizeFromSizedTypeName(const ATypeName: string): string;
+var
+  Precision, Scale: string;
+begin
+  GetPrecisionAndScaleFromSizedTypeName(ATypeName, Precision, Scale);
+  Result := Precision;
+end;
+
+procedure GetPrecisionAndScaleFromSizedTypeName(const ATypeName: string;
+  out Precision, Scale: string);
+var
+  S: string;
+  LParen, RParen, CommaPos: Integer;
+  Params: string;
+begin
+  Precision := '';
+  Scale := '';
+  S := Trim(ATypeName);
+  LParen := Pos('(', S);
+  RParen := Pos(')', S);
+  if (LParen > 0) and (RParen > LParen) then
+  begin
+    Params := Trim(Copy(S, LParen + 1, RParen - LParen - 1));
+    CommaPos := Pos(',', Params);
+    if CommaPos = 0 then
+    begin
+      Precision := Trim(Params);
+      Scale := '0';
+    end
+    else
+    begin
+      Precision := Trim(Copy(Params, 1, CommaPos - 1));
+      Scale := Trim(Copy(Params, CommaPos + 1, MaxInt));
+    end;
+  end;
+end;
+
 
 function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
 begin
@@ -415,8 +505,6 @@ begin
     else                Result := tvotNone; // fallback
   end;
 end;
-
-
 
 function ExtractObjectName(const Input: string): string;
 var

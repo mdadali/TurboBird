@@ -91,6 +91,9 @@ type
 
     // Add field types into List
     procedure GetBasicTypes(List: TStrings);
+    procedure GetExtendedTypes(List: TStrings);
+    procedure GetAllTypes(List: TStrings);
+
     // Gets domain types; used in addition to basic types for GUI selections
     procedure GetDomainTypes(dbIndex: Integer; List: TStrings);
     function GetDefaultTypeSize(dbIndex: Integer; TypeName: string): Integer;
@@ -1197,6 +1200,9 @@ begin
             (TypeName = 'TIME WITH TIME ZONE') or
             (TypeName = 'TIMESTAMP') or
             (TypeName = 'TIMESTAMP WITH TIME ZONE') or
+            (TypeName = 'DECIMAL') or
+            (TypeName = 'NUMERIC') or
+            (TypeName = 'CHAR') or
             (TypeName = 'VARCHAR') then
        // gültiger Typ – keine Änderung
 
@@ -1231,7 +1237,7 @@ begin
       // Optional: AList[i] := TypeName + ' {unknown}';
     end;
   end;
-  //AList.SaveToFile(ExtractFilePath(Application.ExeName) + 'FBDataTypes_After');
+  //Types_After');
 end;
 
 procedure TdmSysTables.GetBasicTypes(List: TStrings);
@@ -1249,14 +1255,85 @@ begin
     sqQuery.Open;
     while not sqQuery.Eof do
     begin
-      List.Add(sqQuery.FieldByName('RDB$TYPE_NAME').AsString);
+      List.Add(Trim(sqQuery.FieldByName('RDB$TYPE_NAME').AsString));
       sqQuery.Next;
     end;
   finally
-    List.SaveToFile('c:\users\maurog\types.txt');
+    //List.SaveToFile('types.txt');
     CleanFirebirdTypeList(List);
   end;
 end;
+
+procedure TdmSysTables.GetExtendedTypes(List: TStrings);
+var
+  qCheck: TSQLQuery;
+  HasDecimal, HasNumeric, HasChar: Boolean;
+begin
+  List.Clear;
+  qCheck := TSQLQuery.Create(nil);
+  try
+    qCheck.DataBase := sqQuery.DataBase;
+    qCheck.Transaction := sqQuery.Transaction;
+
+    // Prüft auf DECIMAL und NUMERIC
+    qCheck.SQL.Text :=
+      'SELECT DISTINCT RDB$FIELD_PRECISION ' +
+      'FROM RDB$FIELDS ' +
+      'WHERE RDB$FIELD_PRECISION IS NOT NULL AND RDB$FIELD_PRECISION > 0';
+    qCheck.Open;
+
+    HasDecimal := not qCheck.IsEmpty;
+    HasNumeric := HasDecimal; // intern gleichbehandelt
+    qCheck.Close;
+
+    // Prüft auf CHAR-Typ
+    qCheck.SQL.Text :=
+      'SELECT 1 FROM RDB$FIELDS ' +
+      'WHERE RDB$FIELD_TYPE = 14 ROWS 1';
+    qCheck.Open;
+    HasChar := not qCheck.IsEmpty;
+    qCheck.Close;
+
+    if HasDecimal then
+      List.Add('DECIMAL');
+    if HasNumeric then
+      List.Add('NUMERIC');
+    if HasChar then
+      List.Add('CHAR');
+  finally
+    qCheck.Free;
+  end;
+end;
+
+procedure TdmSysTables.GetAllTypes(List: TStrings);
+var
+  BasicList, ExtendedList: TStringList;
+  i: Integer;
+begin
+  List.Clear;
+
+  BasicList := TStringList.Create;
+  ExtendedList := TStringList.Create;
+  try
+    GetBasicTypes(BasicList);
+    GetExtendedTypes(ExtendedList);
+
+    // Beide Listen zusammenführen
+    for i := 0 to BasicList.Count - 1 do
+      if List.IndexOf(BasicList[i]) = -1 then
+        List.Add(BasicList[i]);
+
+    for i := 0 to ExtendedList.Count - 1 do
+      if List.IndexOf(ExtendedList[i]) = -1 then
+        List.Add(ExtendedList[i]);
+
+  finally
+    BasicList.Free;
+    ExtendedList.Free;
+    CleanFirebirdTypeList(List);
+  end;
+end;
+
 //end-newlib
 
 procedure TdmSysTables.GetDomainTypes(dbIndex: Integer; List: TStrings);

@@ -1,2 +1,3 @@
 # Ignoriere alle Dateien im bin-Verzeichnis
 bin/
+git_update.sh

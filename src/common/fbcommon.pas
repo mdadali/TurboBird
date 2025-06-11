@@ -5,7 +5,9 @@ unit fbcommon;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB;
+  Classes, SysUtils, IBConnection, SQLDB, IniFiles,
+  fSetFBClient, Controls, Dialogs,
+  ibase60dyn;
 
 type
   TRoutineType = (
@@ -24,6 +26,8 @@ type
     Connection: TIBConnection;
   end;
 
+function SetFBClient(Sender: word): boolean;
+
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
 function StrToRoutineType(const AStr: string): TRoutineType;
 function IsFunctionRoutine(RT: TRoutineType): Boolean;
@@ -37,7 +41,102 @@ function GetAllFunctionsAsQuery: string;
 function GetAllProceduresAsQuery: string;
 function GetAllRoutinesAsQuery: string;
 
+var IBaseLibraryHandle : TLibHandle;
+    IBaseLibrary: string;
+
 implementation
+
+function GetClientLibraryPath: string;
+var ini: TIniFile;
+begin
+  ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'turbobird.ini');
+  try
+    Result := ini.ReadString('Firebird', 'ClientLib', '');
+  finally
+    ini.Free;
+  end;
+end;
+
+procedure SaveClientLibraryPath(const path: string);
+var
+  ini: TIniFile;
+begin
+  ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'turbobird.ini');
+  try
+    ini.WriteString('Firebird', 'ClientLib', path);
+  finally
+    ini.Free;
+  end;
+end;
+
+function SetFBClient(Sender: Word): Boolean;
+var
+  fbclibOld, fbclibNew: string;
+  caption0, caption1: string;
+begin
+  caption0 :=
+    'FireBird client in TurboBird.ini does not exist or is invalid.' + sLineBreak +
+    'Please select a version from the list below or' + sLineBreak +
+    'use the "Browse" button to choose a valid version.' + sLineBreak +
+    'Then test your selection with the "Test" button.';
+  caption1 := 'Select a Firebird client library from the list below.';
+
+  Result := false;
+  // Wenn zur Laufzeit aufgerufen: alte Bibliothek entladen
+  if Sender = 1 then
+  begin
+    if IBaseLibraryHandle <> 0 then
+    begin
+      //ReleaseIBase60;
+      UnloadLibrary(IBaseLibraryHandle);
+    end;
+    IBaseLibraryHandle := 0;
+    fbclibOld := ' ';
+  end else
+  begin
+    // Aktuell gespeicherter Pfad zur Client-Bibliothek
+    fbclibOld := GetClientLibraryPath;
+    fbclibNew := fbclibOld;
+  end;
+
+  // Erster Ladeversuch mit fbclibOld
+
+  IBaseLibraryHandle := LoadLibrary(PChar(fbclibOld));
+
+
+  // Falls Laden fehlschlägt → Dialog zur Auswahl neuer Bibliothek
+  if IBaseLibraryHandle = 0 then
+  begin
+    frmSetFBClient := TfrmSetFBClient.Create(nil);
+    if Sender = 0 then frmSetFBClient.lblInfo.Caption :=  caption0
+    else frmSetFBClient.lblInfo.Caption := caption1;
+    try
+      if frmSetFBClient.ShowModal = mrOk then
+      begin
+        fbclibNew := frmSetFBClient.FBClientLibPath;
+        //IBaseLibraryHandle := InitialiseIBase60(fbclibNew);
+        IBaseLibraryHandle := LoadLibrary(PChar(fbclibNew));
+        if IBaseLibraryHandle = 0 then
+        begin
+          ShowMessage('An error occurred while loading the selected Firebird client library: ' + fbclibNew);
+          Exit;
+        end;
+        // Falls neue Bibliothek abweicht, speichern
+        if fbclibNew <> fbclibOld then
+          SaveClientLibraryPath(fbclibNew);
+      end
+      else
+      begin
+        ShowMessage('Firebird client library was not set. The application will now close..');
+        Exit;
+      end;
+    finally
+      frmSetFBClient.Free;
+    end;
+  end;
+  result := true;
+  IBaseLibrary := fbclibNew;
+end;
 
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
 begin
@@ -379,6 +478,12 @@ begin
     GetAllProceduresAsQuery + LineEnding +
     'ORDER BY NAME';
 end;
+
+initialization
+  IBaseLibraryHandle := 0;
+  IBaseLibrary       := ' ';
+
+finalization
 
 end.
 

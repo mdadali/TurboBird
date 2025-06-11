@@ -334,12 +334,12 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="C:/daten/mustafa/entwicklung/windows/lazarus/FireBird/Firebird-5.0.2.1613-0-windows-x64/TurboBird"/>
+            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
+            <UnitOutputDirectory Value="..bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -427,7 +427,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="73">
+    <Units Count="74">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -506,6 +506,7 @@
         <ComponentName Value="fmNewGen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewGen"/>
       </Unit10>
       <Unit11>
         <Filename Value="enterpass.pas"/>
@@ -706,6 +707,7 @@
       <Unit38>
         <Filename Value="unitfirebirdservices.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="UnitFirebirdServices"/>
       </Unit38>
       <Unit39>
         <Filename Value="turbocommon.inc"/>
@@ -855,6 +857,14 @@
         <Filename Value="common/fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit72>
+      <Unit73>
+        <Filename Value="fsetfbclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmSetFBClient"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fSetFBClient"/>
+      </Unit73>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
