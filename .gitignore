@@ -1,3 +1,4 @@
 # Ignoriere alle Dateien im bin-Verzeichnis
 bin/
 git_update.sh
+src/..bin/x86_64-win64/debug/unitoutput/
