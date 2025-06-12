@@ -1,7 +1,7 @@
 object fmNewEditField: TfmNewEditField
-  Left = 319
+  Left = 489
   Height = 389
-  Top = 121
+  Top = 140
   Width = 376
   ActiveControl = edFieldName
   BorderIcons = [biSystemMenu]
@@ -99,7 +99,7 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 5
   end
   object bbAdd: TBitBtn
-    Left = 224
+    Left = 225
     Height = 30
     Top = 352
     Width = 75
