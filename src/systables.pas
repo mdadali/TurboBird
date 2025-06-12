@@ -102,7 +102,7 @@ type
     // Gets details of field for given database/table/field
     function GetFieldInfo(dbIndex: Integer; TableName, FieldName: string;
       var FieldType: string;
-      var FieldSize: integer; var FieldScale: integer;
+      var FieldSize: integer; var FieldPrecision: integer; var FieldScale: integer;
       var NotNull: Boolean;
       var DefaultValue, CharacterSet, Collation, Description : string): Boolean;
 
@@ -1398,7 +1398,7 @@ end;
 
 function TdmSysTables.GetFieldInfo(dbIndex: Integer; TableName, FieldName: string;
   var FieldType: string;
-  var FieldSize: integer; var FieldScale: integer;
+  var FieldSize: integer;  var FieldPrecision: integer; var FieldScale: integer;
   var NotNull: Boolean;
   var DefaultValue, CharacterSet, Collation, Description : string): Boolean;
 begin
@@ -1409,6 +1409,7 @@ begin
     ' r.RDB$NULL_FLAG AS field_not_null_constraint, ' +
     ' f.RDB$FIELD_LENGTH AS field_length, ' +
     ' f.RDB$Character_LENGTH AS characterlength, ' + {character_length seems a reserved word }
+    ' f.RDB$FIELD_PRECISION AS field_precision, ' +
     ' f.RDB$FIELD_PRECISION AS field_precision, ' +
     ' f.RDB$FIELD_SCALE AS field_scale, ' +
     ' f.RDB$FIELD_TYPE as field_type_int, ' +
@@ -1462,6 +1463,7 @@ begin
         // Reset other value to avoid strange values
         FieldSize:= 0;
       end;
+      FieldPrecision:= FieldByName('field_precision').AsInteger;
       FieldScale:= FieldByName('field_scale').AsInteger;
       NotNull:= (FieldByName('field_not_null_constraint').AsString = '1');
       Collation:= trim(FieldByName('field_collation').AsString);

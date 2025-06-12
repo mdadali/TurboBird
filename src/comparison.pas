@@ -800,6 +800,7 @@ var
   AFieldName: string;
   FieldSize, CFieldSize: integer;
   FieldScale, CFieldScale: integer;
+  FieldPrecision, CFieldPrecision: integer;
   FieldType, DefaultValue, Characterset, Collation, Description: string;
   CFieldType, CDefaultValue, CCharacterset, CCollation, CDescription: string;
   NotNull, CNotNull: Boolean;
@@ -822,10 +823,10 @@ begin
 
     // Read all field properties
     dmSysTables.GetFieldInfo(FDBIndex, ATableName, AFieldName,
-      FieldType, FieldSize, FieldScale, NotNull,
+      FieldType, FieldSize, FieldPrecision, FieldScale, NotNull,
       DefaultValue, CharacterSet, Collation, Description);
     dmSysTables.GetFieldInfo(cbComparedDatabase.ItemIndex, ATableName, AFieldName,
-      CFieldType, CFieldSize, CFieldScale, CNotNull,
+      CFieldType, CFieldSize, CFieldPrecision, CFieldScale, CNotNull,
       CDefaultValue, CCharacterSet, CCollation, CDescription);
 
     // Compare
@@ -1295,7 +1296,7 @@ var
   i: Integer;
   ATableName, AFieldName: string;
   Line: string;
-  FieldSize, FieldScale: Integer;
+  FieldSize, FieldPrecision, FieldScale: Integer;
   NotNull: Boolean;
   DefaultValue, Characterset, Collation, Description: string;
   FieldType: string;
@@ -1315,7 +1316,7 @@ begin
     System.Delete(Line, 1, Pos(',', Line));
     AFieldName:= Line;
     dmSysTables.GetFieldInfo(FDBIndex, ATableName, AFieldName,
-      FieldType, FieldSize, FieldScale, NotNull,
+      FieldType, FieldSize, FieldPrecision, FieldScale, NotNull,
       DefaultValue, CharacterSet, Collation, Description);
 
     // Script new field
@@ -1324,7 +1325,7 @@ begin
       Line:= Line + '(' + IntToStr(FieldSize) + ')'
     else if (Pos('DECIMAL', Line) > 0) or (Pos('NUMERIC', Line) > 0) then
       Line:= Line + '(' +
-        IntToStr(FieldSize) + ',' +
+        IntToStr(FieldPrecision) + ',' +
         IntToStr(FieldScale) + ')';
 
     // Default value
@@ -1439,6 +1440,7 @@ var
   cFieldType, cDefaultValue, cCharacterset, cCollation, cDescription: string;
   FieldSize, cFieldSize: integer;
   FieldScale, cFieldScale: integer;
+  FieldPrecision, cFieldPrecision: integer;
   NullFlag: string;
   NotNull, cNotNull: Boolean;
   ScriptList: TStringList;
@@ -1460,10 +1462,10 @@ begin
       AFieldName:= Line;
 
       dmSysTables.GetFieldInfo(FDBIndex, ATableName,
-        AFieldName, FieldType, FieldSize, FieldScale, NotNull,
+        AFieldName, FieldType, FieldSize, FieldPrecision, FieldScale, NotNull,
         DefaultValue, Characterset, Collation, Description);
       dmSysTables.GetFieldInfo(cbComparedDatabase.ItemIndex, ATableName,
-        AFieldName, CFieldType, CFieldSize, CFieldScale, CNotNull,
+        AFieldName, CFieldType, CFieldSize, cFieldPrecision, CFieldScale, CNotNull,
         cDefaultValue, cCharacterset, cCollation, cDescription);
 
       ScriptList.Clear;
@@ -1478,7 +1480,7 @@ begin
         else if (FieldType = 'DECIMAL') or
            (FieldType = 'NUMERIC') then
           Line:= Line + '(' +
-            IntToStr(FieldSize) + ',' +
+            IntToStr(FieldPrecision) + ',' +
             IntToStr(FieldScale) + ')';
         Line:= Line + ';';
         ScriptList.Add(Line);

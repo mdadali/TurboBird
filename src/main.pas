@@ -452,7 +452,7 @@ begin
 
     SaveAndCloseSQLHistory;
 
-    lmDisconnectClick(nil);
+    lmDisconnectAllClick(nil);
 
     ReleaseRegisteredDatabases;
 
@@ -1832,7 +1832,7 @@ var
   dbIndex: Integer;
   FieldName: string;
   FieldType, DefaultValue: string;
-  Size, Scale: Integer;
+  Size, Scale, Precision: Integer;
   Description, Characterset, Collation: string;
   NotNull: Boolean;
 begin
@@ -1840,7 +1840,7 @@ begin
   dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Parent.Data)^.dbIndex;
   FieldName:= Copy(SelNode.Text, 1, Pos(' ', SelNode.Text) - 1);
   if dmSysTables.GetFieldInfo(dbIndex, SelNode.Parent.Text, FieldName,
-    FieldType, Size, Scale, NotNull,
+    FieldType, Size, Precision, Scale, NotNull,
     DefaultValue, Characterset, Collation, Description) then
   begin
     fmNewEditField:= TfmNewEditField.Create(nil);
@@ -1848,7 +1848,7 @@ begin
       FieldName, FieldType,
       CharacterSet, Collation,
       DefaultValue, Description,
-      Size, Scale,
+      Size, Precision, Scale,
       //PtrInt(SelNode.Data),
       TPNodeInfos(SelNode.Data)^.dbIndex,
       not NotNull, nil);

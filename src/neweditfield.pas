@@ -29,8 +29,10 @@ type
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
+    Label8: TLabel;
     lblCharset: TLabel;
     lblCollation: TLabel;
+    sePrecision: TSpinEdit;
     seSize: TSpinEdit;
     seOrder: TSpinEdit;
     seScale: TSpinEdit;
@@ -49,6 +51,7 @@ type
     OldFieldName: string;
     OldFieldType: string;
     OldFieldSize: integer;
+    OldFieldPrecision: integer;
     OldFieldScale: integer;
     OldAllowNull: Boolean;
     OldOrder: integer;
@@ -61,7 +64,7 @@ type
       FieldName, FieldType,
       CharacterSet, Collation,
       DefaultValue, Description: string;
-      Size, Scale, Order: Integer;
+      Size, Precision, Scale, Order: Integer;
       AllowNull: Boolean;
       RefreshButton: TBitBtn);
     procedure EnableDisableControls;
@@ -93,8 +96,13 @@ begin
     Line:= cbType.Text;
     if (Line='CHAR') or
       (Line='CSTRING') or
-      (Line='VARCHAR') then
+       (Line='VARCHAR') then
       Line:= Line + '(' + IntToStr(seSize.Value) + ')';
+
+    if (Line='DECIMAL') or
+       (Line='NUMERIC') then
+       Line:= Line + '(' + IntToStr(sePrecision.Value) + ',' +
+         IntToStr(seScale.Value)+');' + LineEnding;
 
     // Default value
     if Trim(edDefault.Text) <> '' then
@@ -128,6 +136,7 @@ begin
     // Check type/size/scale change
     if (cbType.Text <> OldFieldType) or
       (seSize.Value <> OldFieldSize) or
+      (sePrecision.Value <> OldFieldPrecision) or
       (seScale.Value <> OldFieldScale) then
     begin
       Line:= Line + 'ALTER TABLE ' + FTableName +
@@ -136,7 +145,7 @@ begin
 
       if (cbType.Text='NUMERIC') or
        (cbType.Text='DECIMAL') then
-        Line:= Line + '(' + IntToStr(seSize.Value) + ',' +
+        Line:= Line + '(' + IntToStr(sePrecision.Value) + ',' +
           IntToStr(seScale.Value)+');' + LineEnding
       else
       if (cbType.Text='CHAR') or
@@ -292,6 +301,7 @@ begin
   IsScaledType := ((FieldType = 'NUMERIC') or (FieldType = 'DECIMAL'));
 
   // Scale nur bei NUMERIC, DECIMAL, FLOAT, DOUBLE
+  sePrecision.Enabled := IsScaledType;
   seScale.Enabled := IsScaledType;
 end;
 
@@ -300,7 +310,7 @@ procedure TfmNewEditField.Init(dbIndex: Integer; TableName: string;
   FieldName, FieldType,
   CharacterSet, Collation,
   DefaultValue, Description: string;
-  Size, Scale, Order: integer;
+  Size, Precision, Scale, Order: integer;
   AllowNull: Boolean;
   RefreshButton: TBitBtn);
 begin
@@ -320,6 +330,7 @@ begin
 
   OldFieldName:= FieldName;
   OldFieldSize:= Size;
+  OldFieldPrecision := Precision;
   OldFieldScale:= Scale;
   OldFieldType:= FieldType;
   OldAllowNull:= AllowNull;
@@ -330,6 +341,7 @@ begin
   OldDescription:= Description;
   edFieldName.Text:= OldFieldName;
   seSize.Value:= OldFieldSize;
+  sePrecision.Value := Precision;
   seScale.Value := Abs(Scale);
   //cbType.Text:= OldFieldType;   //new-lib
   if IsSizedTypeName(OldFieldType) then

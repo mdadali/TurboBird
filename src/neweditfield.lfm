@@ -1,13 +1,13 @@
 object fmNewEditField: TfmNewEditField
-  Left = 783
-  Height = 387
-  Top = 109
+  Left = 319
+  Height = 389
+  Top = 121
   Width = 376
   ActiveControl = edFieldName
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'fmNewEditField'
-  ClientHeight = 387
+  ClientHeight = 389
   ClientWidth = 376
   OnClose = FormClose
   OnCreate = FormCreate
@@ -38,9 +38,9 @@ object fmNewEditField: TfmNewEditField
     ParentColor = False
   end
   object Label4: TLabel
-    Left = 8
+    Left = 224
     Height = 20
-    Top = 116
+    Top = 77
     Width = 76
     Caption = 'Field Order'
     ParentColor = False
@@ -99,7 +99,7 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 5
   end
   object bbAdd: TBitBtn
-    Left = 230
+    Left = 224
     Height = 30
     Top = 352
     Width = 75
@@ -109,9 +109,9 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 6
   end
   object seOrder: TSpinEdit
-    Left = 101
+    Left = 312
     Height = 30
-    Top = 112
+    Top = 77
     Width = 50
     MaxValue = 10000
     TabOrder = 4
@@ -140,19 +140,19 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 10
   end
   object Label7: TLabel
-    Left = 191
+    Left = 224
     Height = 20
-    Top = 81
+    Top = 112
     Width = 35
     Caption = 'Scale'
     ParentColor = False
   end
   object seScale: TSpinEdit
-    Left = 230
+    Left = 312
     Height = 30
     Hint = 'Sets decimal scale for numeric/decimal datatypes'
-    Top = 77
-    Width = 75
+    Top = 113
+    Width = 50
     Enabled = False
     MaxValue = 18
     ParentShowHint = False
@@ -196,5 +196,22 @@ object fmNewEditField: TfmNewEditField
     ParentShowHint = False
     ShowHint = True
     TabOrder = 9
+  end
+  object Label8: TLabel
+    Left = 8
+    Height = 20
+    Top = 113
+    Width = 61
+    Caption = 'Precision'
+    ParentColor = False
+  end
+  object sePrecision: TSpinEdit
+    Left = 100
+    Height = 30
+    Top = 112
+    Width = 76
+    MaxValue = 10000
+    TabOrder = 11
+    Value = 1
   end
 end

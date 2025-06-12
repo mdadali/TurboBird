@@ -164,7 +164,7 @@ var
   fmNewEditField: TfmNewEditField;
   FieldName, FieldType,
   DefaultValue, Characterset, Collation, Description: string;
-  FieldOrder, FieldSize, FieldScale: Integer;
+  FieldOrder, FieldSize, FieldPrecision, FieldScale: Integer;
   AllowNull: Boolean;
 begin
   fmNewEditField:= TfmNewEditField.Create(nil);
@@ -185,7 +185,7 @@ begin
     fmNewEditField.Init(FDBIndex, FTableName, foEdit,
       FieldName, FieldType, Characterset, Collation,
       DefaultValue, Description,
-      FieldSize, FieldScale, FieldOrder, AllowNull, bbRefresh);
+      FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull, bbRefresh);
 
     Caption:= 'Edit field: ' + OldFieldName;
 
@@ -329,7 +329,7 @@ begin
   begin
     Init(FDBIndex, FTableName, foNew,
       '', '', '', '', '', '',
-      0, 0, 0, True, bbRefresh);
+      0, 0, 0, 0, True, bbRefresh);
     Caption:= 'Add new field to Table: ' + FTableName;
     Show;
   end;
