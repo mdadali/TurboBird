@@ -1,13 +1,13 @@
 object fmNewEditField: TfmNewEditField
-  Left = 489
-  Height = 389
-  Top = 140
+  Left = 393
+  Height = 407
+  Top = 176
   Width = 376
   ActiveControl = edFieldName
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'fmNewEditField'
-  ClientHeight = 389
+  ClientHeight = 407
   ClientWidth = 376
   OnClose = FormClose
   OnCreate = FormCreate
@@ -38,7 +38,7 @@ object fmNewEditField: TfmNewEditField
     ParentColor = False
   end
   object Label4: TLabel
-    Left = 224
+    Left = 216
     Height = 20
     Top = 77
     Width = 76
@@ -48,24 +48,24 @@ object fmNewEditField: TfmNewEditField
   object Label5: TLabel
     Left = 8
     Height = 20
-    Top = 192
+    Top = 232
     Width = 90
     Caption = 'Default Value'
     ParentColor = False
   end
   object edFieldName: TEdit
-    Left = 100
+    Left = 110
     Height = 30
     Top = 8
-    Width = 268
+    Width = 251
     TabOrder = 0
   end
   object cbType: TComboBox
-    Left = 101
+    Left = 110
     Height = 32
     Hint = 'Data type for this field'
     Top = 40
-    Width = 267
+    Width = 249
     AutoComplete = True
     AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
     Color = 16249563
@@ -78,7 +78,7 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 1
   end
   object seSize: TSpinEdit
-    Left = 101
+    Left = 110
     Height = 30
     Hint = 'Size of field. For text fields: size in characters, not bytes'
     Top = 77
@@ -91,7 +91,7 @@ object fmNewEditField: TfmNewEditField
   object cxAllowNull: TCheckBox
     Left = 8
     Height = 22
-    Top = 152
+    Top = 272
     Width = 92
     Caption = 'Allow Null'
     Checked = True
@@ -99,9 +99,9 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 5
   end
   object bbAdd: TBitBtn
-    Left = 225
+    Left = 284
     Height = 30
-    Top = 352
+    Top = 368
     Width = 75
     Caption = 'Add'
     Color = clForm
@@ -109,38 +109,38 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 6
   end
   object seOrder: TSpinEdit
-    Left = 312
+    Left = 304
     Height = 30
     Top = 77
-    Width = 50
+    Width = 57
     MaxValue = 10000
     TabOrder = 4
     Value = 1
   end
   object edDefault: TEdit
-    Left = 101
+    Left = 112
     Height = 30
-    Top = 186
-    Width = 204
+    Top = 232
+    Width = 249
     TabOrder = 7
   end
   object Label6: TLabel
     Left = 8
     Height = 20
     Top = 304
-    Width = 113
-    Caption = 'Field Description'
+    Width = 117
+    Caption = 'Field Description:'
     ParentColor = False
   end
   object edDescription: TEdit
-    Left = 8
+    Left = 9
     Height = 30
-    Top = 320
-    Width = 361
+    Top = 328
+    Width = 352
     TabOrder = 10
   end
   object Label7: TLabel
-    Left = 224
+    Left = 216
     Height = 20
     Top = 112
     Width = 35
@@ -148,11 +148,11 @@ object fmNewEditField: TfmNewEditField
     ParentColor = False
   end
   object seScale: TSpinEdit
-    Left = 312
+    Left = 304
     Height = 30
     Hint = 'Sets decimal scale for numeric/decimal datatypes'
-    Top = 113
-    Width = 50
+    Top = 112
+    Width = 57
     Enabled = False
     MaxValue = 18
     ParentShowHint = False
@@ -160,11 +160,11 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 3
   end
   object cbCharset: TComboBox
-    Left = 101
+    Left = 110
     Height = 30
     Hint = 'New field character setIF IT DIFFERS from database character set'
-    Top = 224
-    Width = 124
+    Top = 152
+    Width = 251
     ItemHeight = 0
     OnEditingDone = cbCharsetEditingDone
     TabOrder = 8
@@ -172,7 +172,7 @@ object fmNewEditField: TfmNewEditField
   object lblCharset: TLabel
     Left = 8
     Height = 20
-    Top = 228
+    Top = 152
     Width = 52
     Caption = 'Charset'
     ParentColor = False
@@ -180,17 +180,17 @@ object fmNewEditField: TfmNewEditField
   object lblCollation: TLabel
     Left = 8
     Height = 20
-    Top = 268
+    Top = 192
     Width = 59
     Caption = 'Collation'
     ParentColor = False
   end
   object cbCollation: TComboBox
-    Left = 101
+    Left = 110
     Height = 30
     Hint = 'Collation of new field IF IT DIFFERS from database collation'
-    Top = 264
-    Width = 124
+    Top = 192
+    Width = 249
     Enabled = False
     ItemHeight = 0
     ParentShowHint = False
@@ -206,7 +206,7 @@ object fmNewEditField: TfmNewEditField
     ParentColor = False
   end
   object sePrecision: TSpinEdit
-    Left = 100
+    Left = 110
     Height = 30
     Top = 112
     Width = 76

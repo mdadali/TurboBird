@@ -5,7 +5,7 @@ unit SysTables;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils, StrUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
   DB, Dialogs, dbugintf, turbocommon, ZConnection, ZDataset,
   uArrayQuery;
 
@@ -1203,6 +1203,7 @@ begin
             (TypeName = 'DECIMAL') or
             (TypeName = 'NUMERIC') or
             (TypeName = 'CHAR') or
+            (TypeName = 'UUID') or
             (TypeName = 'VARCHAR') then
        // gültiger Typ – keine Änderung
 
@@ -1260,14 +1261,14 @@ begin
     end;
   finally
     //List.SaveToFile('types.txt');
-    CleanFirebirdTypeList(List);
+    //CleanFirebirdTypeList(List);
   end;
 end;
 
 procedure TdmSysTables.GetExtendedTypes(List: TStrings);
 var
   qCheck: TSQLQuery;
-  HasDecimal, HasNumeric, HasChar: Boolean;
+  HasDecimal, HasNumeric, HasChar, HasUUID: Boolean;
 begin
   List.Clear;
   qCheck := TSQLQuery.Create(nil);
@@ -1275,31 +1276,39 @@ begin
     qCheck.DataBase := sqQuery.DataBase;
     qCheck.Transaction := sqQuery.Transaction;
 
-    // Prüft auf DECIMAL und NUMERIC
+    // DECIMAL / NUMERIC
     qCheck.SQL.Text :=
       'SELECT DISTINCT RDB$FIELD_PRECISION ' +
       'FROM RDB$FIELDS ' +
       'WHERE RDB$FIELD_PRECISION IS NOT NULL AND RDB$FIELD_PRECISION > 0';
     qCheck.Open;
-
     HasDecimal := not qCheck.IsEmpty;
-    HasNumeric := HasDecimal; // intern gleichbehandelt
+    HasNumeric := HasDecimal;
     qCheck.Close;
 
-    // Prüft auf CHAR-Typ
+    // CHAR
     qCheck.SQL.Text :=
-      'SELECT 1 FROM RDB$FIELDS ' +
-      'WHERE RDB$FIELD_TYPE = 14 ROWS 1';
+      'SELECT 1 FROM RDB$FIELDS WHERE RDB$FIELD_TYPE = 14 ROWS 1';
     qCheck.Open;
     HasChar := not qCheck.IsEmpty;
     qCheck.Close;
 
-    if HasDecimal then
-      List.Add('DECIMAL');
-    if HasNumeric then
-      List.Add('NUMERIC');
-    if HasChar then
-      List.Add('CHAR');
+    // UUID
+    qCheck.SQL.Text :=
+      'SELECT 1 FROM RDB$FIELDS ' +
+      'WHERE RDB$FIELD_TYPE = 14 ' + // CHAR
+      'AND RDB$FIELD_LENGTH = 16 ' +
+      'AND RDB$CHARACTER_SET_ID = 1 ' + // 1 = OCTETS
+      'ROWS 1';
+    qCheck.Open;
+    HasUUID := not qCheck.IsEmpty;
+    qCheck.Close;
+
+    if HasDecimal then List.Add('DECIMAL');
+    if HasNumeric then List.Add('NUMERIC');
+    if HasChar then List.Add('CHAR');
+    if HasUUID then List.Add('UUID');
+
   finally
     qCheck.Free;
   end;
@@ -1442,7 +1451,9 @@ begin
           FieldByName('field_sub_type').AsInteger,
           FieldByName('field_length').AsInteger,
           FieldByName('field_precision').AsInteger,
-          FieldByName('field_scale').AsInteger);
+          FieldByName('field_scale').AsInteger,
+          FieldByName('field_charset').AsString
+          );
         // Array should really be [lowerbound:upperbound] (if dimension is 0)
         // but for now don't bother as arrays are not supported anyway
         // Assume 0 dimension, 1 lower bound; just fill in upper bound
@@ -1469,7 +1480,10 @@ begin
       Collation:= trim(FieldByName('field_collation').AsString);
       CharacterSet:= trim(FieldByName('field_charset').AsString);
       // Note: no trim here - defaultvalue could be an empty string
-      DefaultValue:= FieldByName('field_default_source').AsString;
+      //DefaultValue:= FieldByName('field_default_source').AsString;
+      DefaultValue := Trim(FieldByName('field_default_source').AsString);
+      if AnsiStartsText('DEFAULT ', DefaultValue) then
+        system.Delete(DefaultValue, 1, Length('DEFAULT '));
       Description:= trim(FieldByName('field_description').AsString);
     end;
   end;

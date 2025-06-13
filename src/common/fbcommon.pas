@@ -28,6 +28,7 @@ type
 
 function SetFBClient(Sender: word): boolean;
 
+function NormalizeFloatForSQL(Value: Double): string;
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
 function StrToRoutineType(const AStr: string): TRoutineType;
 function IsFunctionRoutine(RT: TRoutineType): Boolean;
@@ -45,6 +46,14 @@ var IBaseLibraryHandle : TLibHandle;
     IBaseLibrary: string;
 
 implementation
+
+function NormalizeFloatForSQL(Value: Double): string;
+begin
+  Result := FloatToStrF(Value, ffGeneral, 15, 0);
+  // Sicherheitshalber: ersetze evtl. Komma durch Punkt
+  Result := StringReplace(Result, ',', '.', [rfReplaceAll]);
+end;
+
 
 function GetClientLibraryPath: string;
 var ini: TIniFile;

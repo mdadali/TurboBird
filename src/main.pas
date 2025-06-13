@@ -1853,7 +1853,7 @@ begin
       TPNodeInfos(SelNode.Data)^.dbIndex,
       not NotNull, nil);
 
-    fmNewEditField.Show;
+    fmNewEditField.ShowModal;
   end
   else
     ShowMessage('Unable to locate the field: ' + SelNode.Text);

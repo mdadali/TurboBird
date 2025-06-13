@@ -370,7 +370,7 @@ procedure GetFieldType(FieldQuery: TSQLQuery; var FieldType: string; var FieldSi
 // as subtype/length/scale (use -1 for empty/unknown values)
 function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
-  Precision: integer = -1; Scale: integer = -1
+  Precision: integer = -1; Scale: integer = -1; CharacterSet: string = ''
 ): string;
 // Tries to guess if an RDB$RELATION_FIELDS.RDB$FIELD_SOURCE domain name for a column is system-generated.
 function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
@@ -639,69 +639,10 @@ begin
 end;
 
 (**************  Get Firebird Type name  *****************)
-//newlib
-{function GetFBTypeName(Index: Integer;
-  SubType: integer=-1; FieldLength: integer=-1;
-  Precision: integer=-1; Scale: integer=-1
-  ): string;
-begin
-  //todo: (low priority) add Firebird 3.0 beta BOOLEAN datatype number
-  case Index of
-    //newlib
-    23:  Result:= 'BOOLEAN';
-    //end-newlib
-    // See also
-    // http://firebirdsql.org/manual/migration-mssql-data-types.html
-    // http://stackoverflow.com/questions/12070162/how-can-i-get-the-table-description-fields-and-types-from-firebird-with-dbexpr
-    BlobType : Result:= 'BLOB';
-    14 : Result:= 'CHAR';
-    CStringType : Result:= 'CSTRING'; // probably null-terminated string used for UDFs
-    12 : Result:= 'DATE';
-    11 : Result:= 'D_FLOAT';
-    16 : Result:= 'BIGINT'; // Further processed below
-    27 : Result:= 'DOUBLE PRECISION';
-    10 : Result:= 'FLOAT';
-    8  : Result:= 'INTEGER'; // further processed below
-    9  : Result:= 'QUAD'; // ancient VMS 64 bit datatype; see also IB6 Language Reference RDB$FIELD_TYPE
-    7  : Result:= 'SMALLINT'; // further processed below
-    13 : Result:= 'TIME';
-    35 : Result:= 'TIMESTAMP';
-    VarCharType : Result:= 'VARCHAR';
-  else
-    Result:= 'Unknown Type';
-  end;
-  // Subtypes for numeric types
-  if Index in [7, 8, 16] then
-  begin
-    if SubType = 0 then {integer}
-    begin
-      case Index of
-        7: Result:= 'SMALLINT';
-        8: Result:= 'INTEGER';
-        16: Result:= 'BIGINT';
-      end;
-    end
-    else
-    begin
-      // Numeric/decimal: use precision/scale
-      if SubType = 1 then
-        Result:= 'Numeric('
-      else
-      if SubType = 2 then
-        Result:= 'Decimal(';
-
-      if Precision=-1 then {sensible default}
-        Result:= Result + '2,'
-      else
-        Result:= Result + IntToStr(Precision)+',';
-      Result:= Result + IntToStr(Abs(Scale)) + ') ';
-    end;
-  end;
-end;
-}
 function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
-  Precision: integer = -1; Scale: integer = -1
+  Precision: integer = -1; Scale: integer = -1;
+  CharacterSet: string = ''
 ): string;
 begin
   case Index of
@@ -768,8 +709,12 @@ begin
       Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
     end;
   end;
+
+  if (Index = 14) and (FieldLength = 16) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
+      Result := 'UUID';
 end;
 //end-newlib
+
 function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
 begin
   // Unfortunately there does not seem to be a way to search the system tables to find out

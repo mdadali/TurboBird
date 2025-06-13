@@ -189,7 +189,7 @@ begin
 
     Caption:= 'Edit field: ' + OldFieldName;
 
-    fmNewEditField.Show;
+    fmNewEditField.ShowModal;
   end;
 end;
 
