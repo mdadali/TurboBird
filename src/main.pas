@@ -5093,10 +5093,8 @@ begin
         Cells[4, RowCount - 1]:= '1';
 
       // Default Value
-      DefaultValue:= FieldByName('Field_Default_Source').AsString;
-      if Pos('default', DefaultValue) > 0 then
-        DefaultValue:= Trim(StringReplace(DefaultValue, 'default', '', []));
-      Cells[5, RowCount - 1]:= DefaultValue;
+      DefaultValue := FieldByName('Field_Default_Source').AsString;
+      Cells[5, RowCount - 1] := ExtractDefaultValue(DefaultValue);
 
       Cells[6, RowCount - 1]:= FieldByName('Field_Description').AsString;
       Next;

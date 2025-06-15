@@ -15,6 +15,7 @@ type
 
   TfmNewEditField = class(TForm)
     bbAdd: TBitBtn;
+    bbGenUUID: TBitBtn;
     cbCharset: TComboBox;
     cbCollation: TComboBox;
     cbType: TComboBox;
@@ -37,6 +38,7 @@ type
     seOrder: TSpinEdit;
     seScale: TSpinEdit;
     procedure bbAddClick(Sender: TObject);
+    procedure bbGenUUIDClick(Sender: TObject);
     procedure cbCharsetEditingDone(Sender: TObject);
     procedure cbTypeChange(Sender: TObject);
     procedure cbTypeEditingDone(Sender: TObject);
@@ -231,6 +233,7 @@ begin
   if fFormMode = foNew then  // Neues Feld
   begin
     BaseType := cbType.Text;
+    bbGenUUID.Enabled := cbType.Text = 'UUID';
 
     // UUID-Spezialbehandlung
     if BaseType = 'UUID' then
@@ -295,104 +298,9 @@ begin
 
     fmMain.ShowCompleteQueryWindow(FDBIndex, 'Add new field to Table: ' + FTableName, Line, Clk);
   end
-  {else  // Existierendes Feld bearbeiten
-  begin
-    Line := '';
-    BaseType := cbType.Text;
-
-    // Name geändert?
-    if UpperCase(Trim(edFieldName.Text)) <> OldFieldName then
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + OldFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
-
-    // Typ geändert?
-    if (cbType.Text <> OldFieldType) or
-       (seSize.Value <> OldFieldSize) or
-       (sePrecision.Value <> OldFieldPrecision) or
-       (seScale.Value <> OldFieldScale) then
-    begin
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' TYPE ';
-
-      if BaseType = 'UUID' then
-      begin
-        Line := Line + 'CHAR(16) CHARACTER SET OCTETS';
-      end else
-      begin
-        Line := Line + cbType.Text;
-
-        if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') then
-          Line := Line + '(' + IntToStr(sePrecision.Value) + ',' + IntToStr(seScale.Value) + ')'
-        else if (cbType.Text = 'CHAR') or (cbType.Text = 'CSTRING') or (cbType.Text = 'VARCHAR') then
-          Line := Line + '(' + IntToStr(seSize.Value) + ')';
-      end;
-
-      Line := Line + ';' + LineEnding;
-    end;
-
-    // Charset / Collation geändert?
-    if (NewCharset <> OldCharacterSet) or (NewCollation <> OldCollation) then
-    begin
-      TempFieldName := edFieldName.Text + '_NEW';
-
-      if BaseType = 'UUID' then
-        FieldDef := 'CHAR(16) CHARACTER SET OCTETS'
-      else
-      begin
-        FieldDef := cbType.Text;
-        if (FieldDef = 'CHAR') or (FieldDef = 'CSTRING') or (FieldDef = 'VARCHAR') then
-          FieldDef := FieldDef + '(' + IntToStr(seSize.Value) + ')';
-
-        if NewCharset <> '' then
-          FieldDef := FieldDef + ' CHARACTER SET ' + NewCharset;
-        if NewCollation <> '' then
-          FieldDef := FieldDef + ' COLLATE ' + NewCollation;
-      end;
-
-      Line := Line + '-- Charset or Collation change requires field recreation:' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
-      Line := Line + 'UPDATE ' + FTableName + ' SET ' + TempFieldName + ' = ' + edFieldName.Text + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' DROP ' + edFieldName.Text + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + TempFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
-    end;
-
-    // Feldposition
-    if seOrder.Value <> OldOrder then
-    begin
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
-              ' POSITION ' + IntToStr(seOrder.Value) + ';' + LineEnding;
-    end;
-
-    // NOT NULL
-    if cxAllowNull.Checked <> OldAllowNull then
-    begin
-      if cxAllowNull.Checked then
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' DROP NOT NULL;' + LineEnding
-      else
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' SET NOT NULL;' + LineEnding;
-    end;
-
-    // Default-Wert
-    if edDefault.Text <> OldDefault then
-    begin
-      if Trim(edDefault.Text) <> '' then
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
-                ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding
-      else
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
-                ' DROP DEFAULT;' + LineEnding;
-    end;
-
-    // Beschreibung
-    if edDescription.Text <> OldDescription then
-    begin
-      Line := Line + 'COMMENT ON COLUMN ' + FTableName + '.' + edFieldName.Text +
-              ' IS ' + QuotedStr(edDescription.Text) + ';' + LineEnding;
-    end;
-
-    if Line <> '' then
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit field: ' + OldFieldName, Line, Clk);
-  end;}
   else  // Existierendes Feld bearbeiten
   begin
+    bbGenUUID.Enabled := cbType.Text = 'UUID';
     Line := '';
     BaseType := cbType.Text;
 
@@ -492,7 +400,8 @@ begin
             Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
                     ' SET DEFAULT ' + StringReplace(FloatToStrF(TmpFloat, ffGeneral, 15, 0), ',', '.', [rfReplaceAll]) + ';' + LineEnding;
           end
-          else if (cbType.Text = 'CHAR') or (cbType.Text = 'VARCHAR') or (cbType.Text = 'CSTRING') then
+          else if (cbType.Text = 'CHAR') or (cbType.Text = 'VARCHAR') or (cbType.Text = 'CSTRING')
+            or (cbType.Text = 'BLOB') then
           begin
             Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
                     ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding;
@@ -527,6 +436,24 @@ begin
   Close;
 end;
 
+procedure TfmNewEditField.bbGenUUIDClick(Sender: TObject);
+var
+  UUIDStr: string;
+begin
+  UUIDStr := Trim(edDefault.Text);
+  if IsValidUUIDHex(UUIDStr) then
+  begin
+    if MessageDlg('The current UUID value is valid. Do you really want to replace it?',
+                  mtConfirmation, [mbYes, mbCancel], 0) = mrCancel then
+      Exit;
+  end;
+
+  // UUID neu setzen, wenn nicht abgebrochen wurde
+  edDefault.Text := CreateUUIDHexLiteral;
+end;
+
+  // Neue UUID generieren
+
 procedure TfmNewEditField.cbCharsetEditingDone(Sender: TObject);
 var
   Collations: TStringList;
@@ -547,6 +474,7 @@ end;
 procedure TfmNewEditField.cbTypeChange(Sender: TObject);
 begin
   seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
+  bbGenUUID.Enabled := cbType.Text = 'UUID';
   EnableDisableControls;
 end;
 
@@ -612,6 +540,8 @@ begin
   FieldType := Trim(UpperCase(cbType.Text));
   IsTextType := (FieldType = 'CHAR') or (FieldType = 'VARCHAR');
 
+  edDefault.Enabled := (FieldType <> 'UUID');
+  bbGenUUID.Enabled := (FieldType = 'UUID'); ;
   // Reihenfolge evtl. fix, aber meist bearbeitbar
   seOrder.Enabled := True; // oder abhängig von Logik
 
@@ -620,7 +550,6 @@ begin
   // Beschreibung und Default-Wert sind immer editierbar
 
   edDescription.Enabled := True;
-  edDefault.Enabled := True;
   cxAllowNull.Enabled := True;
 
   // Größe nur bei CHAR, VARCHAR und evtl. bei BLOB subtypes sinnvoll

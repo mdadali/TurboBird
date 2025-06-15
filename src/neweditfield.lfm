@@ -1,7 +1,7 @@
 object fmNewEditField: TfmNewEditField
-  Left = 393
+  Left = 412
   Height = 407
-  Top = 176
+  Top = 111
   Width = 376
   ActiveControl = edFieldName
   BorderIcons = [biSystemMenu]
@@ -121,7 +121,7 @@ object fmNewEditField: TfmNewEditField
     Left = 112
     Height = 30
     Top = 232
-    Width = 249
+    Width = 208
     TabOrder = 7
   end
   object Label6: TLabel
@@ -213,5 +213,18 @@ object fmNewEditField: TfmNewEditField
     MaxValue = 10000
     TabOrder = 11
     Value = 1
+  end
+  object bbGenUUID: TBitBtn
+    Left = 326
+    Height = 30
+    Hint = 'Generate a new UUID value in hexadecimal format'
+    Top = 232
+    Width = 35
+    Caption = 'Gen'
+    Enabled = False
+    OnClick = bbGenUUIDClick
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 12
   end
 end

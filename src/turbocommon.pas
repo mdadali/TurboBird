@@ -348,6 +348,9 @@ const
     'Packages', 'PackageFunctions', 'PackageProcedures',
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
+function ExtractDefaultValue(const DefaultSource: string): string;
+function IsValidUUIDHex(const S: string): Boolean;
+function CreateUUIDHexLiteral: string;
 function IsSizedTypeName(const ATypeName: string): Boolean;
 function GetNameFromSizedTypeName(const ATypeName: string): string;
 function GetSizeFromSizedTypeName(const ATypeName: string): string;
@@ -383,6 +386,48 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+function ExtractDefaultValue(const DefaultSource: string): string;
+var
+  Src: string;
+begin
+  Src := Trim(DefaultSource);
+  if AnsiStartsText('DEFAULT', Src) then
+  begin
+    // Entferne das 'DEFAULT'-Keyword (case-insensitive)
+    Result := Trim(Copy(Src, 8, Length(Src)));
+  end
+  else
+    Result := Src;
+end;
+
+function IsValidUUIDHex(const S: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := (Length(S) = 35) and
+            (Copy(S, 1, 2) = 'x''') and
+            (Copy(S, 35, 1) = '''');
+  if Result then
+    for i := 3 to 34 do
+      if not (UpCase(S[i]) in ['0'..'9', 'A'..'F']) then
+        Exit(False);
+end;
+
+function CreateUUIDHexLiteral: string;
+var
+  GUID: TGUID;
+  UUIDBytes: array[0..15] of Byte;
+  i: Integer;
+begin
+  CreateGUID(GUID);
+  Move(GUID.D1, UUIDBytes[0], 16);  // GUID in Byte-Array kopieren
+
+  Result := 'x''';
+  for i := 0 to 15 do
+    Result := Result + IntToHex(UUIDBytes[i], 2);
+  Result := Result + '''';
+end;
 
 function IsSizedTypeName(const ATypeName: string): Boolean;
 var
