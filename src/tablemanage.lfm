@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 387
+  Left = 341
   Height = 448
-  Top = 323
+  Top = 223
   Width = 998
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'

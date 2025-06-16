@@ -233,7 +233,7 @@ begin
   if fFormMode = foNew then  // Neues Feld
   begin
     BaseType := cbType.Text;
-    bbGenUUID.Enabled := cbType.Text = 'UUID';
+    bbGenUUID.Visible := cbType.Text = 'UUID';
 
     // UUID-Spezialbehandlung
     if BaseType = 'UUID' then
@@ -300,7 +300,7 @@ begin
   end
   else  // Existierendes Feld bearbeiten
   begin
-    bbGenUUID.Enabled := cbType.Text = 'UUID';
+    bbGenUUID.Visible := cbType.Text = 'UUID';
     Line := '';
     BaseType := cbType.Text;
 
@@ -474,7 +474,7 @@ end;
 procedure TfmNewEditField.cbTypeChange(Sender: TObject);
 begin
   seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
-  bbGenUUID.Enabled := cbType.Text = 'UUID';
+  bbGenUUID.Visible := cbType.Text = 'UUID';
   EnableDisableControls;
 end;
 
@@ -541,7 +541,7 @@ begin
   IsTextType := (FieldType = 'CHAR') or (FieldType = 'VARCHAR');
 
   edDefault.Enabled := (FieldType <> 'UUID');
-  bbGenUUID.Enabled := (FieldType = 'UUID'); ;
+  bbGenUUID.Visible := (FieldType = 'UUID'); ;
   // Reihenfolge evtl. fix, aber meist bearbeitbar
   seOrder.Enabled := True; // oder abhängig von Logik
 

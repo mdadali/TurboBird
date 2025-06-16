@@ -109,7 +109,7 @@ object fmNewEditField: TfmNewEditField
     TabOrder = 6
   end
   object seOrder: TSpinEdit
-    Left = 304
+    Left = 302
     Height = 30
     Top = 77
     Width = 57
@@ -118,16 +118,16 @@ object fmNewEditField: TfmNewEditField
     Value = 1
   end
   object edDefault: TEdit
-    Left = 112
+    Left = 110
     Height = 30
     Top = 232
-    Width = 208
+    Width = 249
     TabOrder = 7
   end
   object Label6: TLabel
-    Left = 8
+    Left = 9
     Height = 20
-    Top = 304
+    Top = 312
     Width = 117
     Caption = 'Field Description:'
     ParentColor = False
@@ -135,7 +135,7 @@ object fmNewEditField: TfmNewEditField
   object edDescription: TEdit
     Left = 9
     Height = 30
-    Top = 328
+    Top = 336
     Width = 352
     TabOrder = 10
   end
@@ -148,7 +148,7 @@ object fmNewEditField: TfmNewEditField
     ParentColor = False
   end
   object seScale: TSpinEdit
-    Left = 304
+    Left = 302
     Height = 30
     Hint = 'Sets decimal scale for numeric/decimal datatypes'
     Top = 112
@@ -215,16 +215,16 @@ object fmNewEditField: TfmNewEditField
     Value = 1
   end
   object bbGenUUID: TBitBtn
-    Left = 326
+    Left = 110
     Height = 30
     Hint = 'Generate a new UUID value in hexadecimal format'
-    Top = 232
-    Width = 35
-    Caption = 'Gen'
-    Enabled = False
+    Top = 264
+    Width = 249
+    Caption = 'Gen UUID'
     OnClick = bbGenUUIDClick
     ParentShowHint = False
     ShowHint = True
     TabOrder = 12
+    Visible = False
   end
 end

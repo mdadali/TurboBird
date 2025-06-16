@@ -224,13 +224,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewEditField"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="434"/>
-        <CursorPos Y="448"/>
+        <TopLine Value="524"/>
+        <CursorPos X="20" Y="544"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit22>
       <Unit23>
         <Filename Value="calen.pas"/>
@@ -263,6 +261,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TableManage"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="168"/>
         <CursorPos X="32" Y="179"/>
@@ -891,123 +890,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="tablemanage.pas"/>
-        <Caret Line="6" Column="55"/>
+        <Caret Line="584" Column="30" TopLine="565"/>
       </Position1>
       <Position2>
         <Filename Value="tablemanage.pas"/>
-        <Caret Line="182" Column="27" TopLine="162"/>
+        <Caret Line="586" Column="30" TopLine="567"/>
       </Position2>
       <Position3>
         <Filename Value="tablemanage.pas"/>
-        <Caret Line="508" Column="12" TopLine="488"/>
+        <Caret Line="185" TopLine="174"/>
       </Position3>
       <Position4>
-        <Filename Value="tablemanage.pas"/>
-        <Caret Line="584" Column="30" TopLine="565"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="3909" TopLine="3902"/>
       </Position4>
       <Position5>
-        <Filename Value="tablemanage.pas"/>
-        <Caret Line="586" Column="30" TopLine="567"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="5061" TopLine="5049"/>
       </Position5>
       <Position6>
-        <Filename Value="tablemanage.pas"/>
-        <Caret Line="185" TopLine="174"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="5062" TopLine="5049"/>
       </Position6>
       <Position7>
         <Filename Value="main.pas"/>
-        <Caret Line="3909" TopLine="3902"/>
+        <Caret Line="5063" TopLine="5053"/>
       </Position7>
       <Position8>
         <Filename Value="main.pas"/>
-        <Caret Line="5061" TopLine="5049"/>
+        <Caret Line="3909" Column="15" TopLine="3903"/>
       </Position8>
       <Position9>
         <Filename Value="main.pas"/>
-        <Caret Line="5062" TopLine="5049"/>
+        <Caret Line="396" Column="21" TopLine="386"/>
       </Position9>
       <Position10>
         <Filename Value="main.pas"/>
-        <Caret Line="5063" TopLine="5053"/>
+        <Caret Line="3909" Column="20" TopLine="3899"/>
       </Position10>
       <Position11>
         <Filename Value="main.pas"/>
-        <Caret Line="3909" Column="15" TopLine="3903"/>
+        <Caret Line="5093" Column="42" TopLine="5083"/>
       </Position11>
       <Position12>
         <Filename Value="main.pas"/>
-        <Caret Line="396" Column="21" TopLine="386"/>
+        <Caret Line="5096" TopLine="5083"/>
       </Position12>
       <Position13>
         <Filename Value="main.pas"/>
-        <Caret Line="3909" Column="20" TopLine="3899"/>
+        <Caret Line="3909" TopLine="3898"/>
       </Position13>
       <Position14>
         <Filename Value="main.pas"/>
-        <Caret Line="5093" Column="42" TopLine="5083"/>
+        <Caret Line="5096" TopLine="5085"/>
       </Position14>
       <Position15>
         <Filename Value="main.pas"/>
-        <Caret Line="5096" TopLine="5083"/>
+        <Caret Line="5097" TopLine="5085"/>
       </Position15>
       <Position16>
         <Filename Value="main.pas"/>
-        <Caret Line="3909" TopLine="3898"/>
+        <Caret Line="5098" TopLine="5085"/>
       </Position16>
       <Position17>
-        <Filename Value="main.pas"/>
-        <Caret Line="5096" TopLine="5085"/>
+        <Filename Value="neweditfield.pas"/>
+        <Caret Line="465" Column="13" TopLine="457"/>
       </Position17>
       <Position18>
-        <Filename Value="main.pas"/>
-        <Caret Line="5097" TopLine="5085"/>
+        <Filename Value="neweditfield.pas"/>
+        <Caret Line="530" TopLine="521"/>
       </Position18>
       <Position19>
-        <Filename Value="main.pas"/>
-        <Caret Line="5098" TopLine="5085"/>
+        <Filename Value="neweditfield.pas"/>
+        <Caret Line="524" Column="33" TopLine="521"/>
       </Position19>
       <Position20>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="465" Column="13" TopLine="457"/>
+        <Caret Line="530" Column="20" TopLine="521"/>
       </Position20>
       <Position21>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="530" TopLine="521"/>
+        <Caret Line="528" Column="39" TopLine="521"/>
       </Position21>
       <Position22>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="524" Column="33" TopLine="521"/>
+        <Caret Line="462" Column="25" TopLine="452"/>
       </Position22>
       <Position23>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="530" Column="20" TopLine="521"/>
+        <Caret Line="445" TopLine="433"/>
       </Position23>
       <Position24>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="528" Column="39" TopLine="521"/>
+        <Caret Line="448" TopLine="436"/>
       </Position24>
       <Position25>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="462" Column="25" TopLine="452"/>
+        <Caret Line="445" TopLine="436"/>
       </Position25>
       <Position26>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="445" TopLine="433"/>
+        <Caret Line="446" Column="19" TopLine="435"/>
       </Position26>
       <Position27>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="448" TopLine="436"/>
+        <Caret Line="449" Column="68" TopLine="441"/>
       </Position27>
       <Position28>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="445" TopLine="436"/>
+        <Caret Line="4" Column="21"/>
       </Position28>
       <Position29>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="446" Column="19" TopLine="435"/>
+        <Caret Line="18" Column="14"/>
       </Position29>
       <Position30>
         <Filename Value="neweditfield.pas"/>
-        <Caret Line="449" Column="68" TopLine="441"/>
+        <Caret Line="32" Column="24" TopLine="22"/>
       </Position30>
     </JumpHistory>
     <RunParams>

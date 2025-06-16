@@ -29,15 +29,15 @@ LazarusResources.Add('TfmNewEditField','FORMDATA',[
   +'Allow Null'#7'Checked'#9#5'State'#7#9'cbChecked'#8'TabOrder'#2#5#0#0#7'TBit'
   +'Btn'#5'bbAdd'#4'Left'#3#28#1#6'Height'#2#30#3'Top'#3'p'#1#5'Width'#2'K'#7'C'
   +'aption'#6#3'Add'#5'Color'#7#6'clForm'#7'OnClick'#7#10'bbAddClick'#8'TabOrde'
-  +'r'#2#6#0#0#9'TSpinEdit'#7'seOrder'#4'Left'#3'0'#1#6'Height'#2#30#3'Top'#2'M'
+  +'r'#2#6#0#0#9'TSpinEdit'#7'seOrder'#4'Left'#3'.'#1#6'Height'#2#30#3'Top'#2'M'
   +#5'Width'#2'9'#8'MaxValue'#3#16''''#8'TabOrder'#2#4#5'Value'#2#1#0#0#5'TEdit'
-  +#9'edDefault'#4'Left'#2'p'#6'Height'#2#30#3'Top'#3#232#0#5'Width'#3#208#0#8
-  +'TabOrder'#2#7#0#0#6'TLabel'#6'Label6'#4'Left'#2#8#6'Height'#2#20#3'Top'#3'0'
+  +#9'edDefault'#4'Left'#2'n'#6'Height'#2#30#3'Top'#3#232#0#5'Width'#3#249#0#8
+  +'TabOrder'#2#7#0#0#6'TLabel'#6'Label6'#4'Left'#2#9#6'Height'#2#20#3'Top'#3'8'
   +#1#5'Width'#2'u'#7'Caption'#6#18'Field Description:'#11'ParentColor'#8#0#0#5
-  +'TEdit'#13'edDescription'#4'Left'#2#9#6'Height'#2#30#3'Top'#3'H'#1#5'Width'#3
+  +'TEdit'#13'edDescription'#4'Left'#2#9#6'Height'#2#30#3'Top'#3'P'#1#5'Width'#3
   +'`'#1#8'TabOrder'#2#10#0#0#6'TLabel'#6'Label7'#4'Left'#3#216#0#6'Height'#2#20
   +#3'Top'#2'p'#5'Width'#2'#'#7'Caption'#6#5'Scale'#11'ParentColor'#8#0#0#9'TSp'
-  +'inEdit'#7'seScale'#4'Left'#3'0'#1#6'Height'#2#30#4'Hint'#6'0Sets decimal sc'
+  +'inEdit'#7'seScale'#4'Left'#3'.'#1#6'Height'#2#30#4'Hint'#6'0Sets decimal sc'
   +'ale for numeric/decimal datatypes'#3'Top'#2'p'#5'Width'#2'9'#7'Enabled'#8#8
   +'MaxValue'#2#18#14'ParentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#3#0#0#9'TCo'
   +'mboBox'#9'cbCharset'#4'Left'#2'n'#6'Height'#2#30#4'Hint'#6'@New field chara'
@@ -53,8 +53,8 @@ LazarusResources.Add('TfmNewEditField','FORMDATA',[
   +'l'#6'Label8'#4'Left'#2#8#6'Height'#2#20#3'Top'#2'q'#5'Width'#2'='#7'Caption'
   +#6#9'Precision'#11'ParentColor'#8#0#0#9'TSpinEdit'#11'sePrecision'#4'Left'#2
   +'n'#6'Height'#2#30#3'Top'#2'p'#5'Width'#2'L'#8'MaxValue'#3#16''''#8'TabOrder'
-  +#2#11#5'Value'#2#1#0#0#7'TBitBtn'#9'bbGenUUID'#4'Left'#3'F'#1#6'Height'#2#30
-  +#4'Hint'#6'/Generate a new UUID value in hexadecimal format'#3'Top'#3#232#0#5
-  +'Width'#2'#'#7'Caption'#6#3'Gen'#7'Enabled'#8#7'OnClick'#7#14'bbGenUUIDClick'
-  +#14'ParentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#12#0#0#0
+  +#2#11#5'Value'#2#1#0#0#7'TBitBtn'#9'bbGenUUID'#4'Left'#2'n'#6'Height'#2#30#4
+  +'Hint'#6'/Generate a new UUID value in hexadecimal format'#3'Top'#3#8#1#5'Wi'
+  +'dth'#3#249#0#7'Caption'#6#8'Gen UUID'#7'OnClick'#7#14'bbGenUUIDClick'#14'Pa'
+  +'rentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#12#7'Visible'#8#0#0#0
 ]);
