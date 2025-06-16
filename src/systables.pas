@@ -1452,7 +1452,8 @@ begin
           FieldByName('field_length').AsInteger,
           FieldByName('field_precision').AsInteger,
           FieldByName('field_scale').AsInteger,
-          FieldByName('field_charset').AsString
+          FieldByName('field_charset').AsString,
+          FieldByName('characterlength').AsInteger
           );
         // Array should really be [lowerbound:upperbound] (if dimension is 0)
         // but for now don't bother as arrays are not supported anyway

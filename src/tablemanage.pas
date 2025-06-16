@@ -172,15 +172,22 @@ begin
    from a query is awful. Rework to use e.g. the function}
   with sgFields, fmNewEditField do
   begin
-    Characterset:= ''; //todo: support character set in field editing: add column to grid
-    Collation:= ''; //todo: support collation in field editing: add column to grid
-    FieldName:= Cells[1, Row];
-    FieldType:= Cells[2, Row];
-    FieldSize:= StrtoInt(Cells[3, Row]);
-    FieldScale:= 0; //todo support fieldscale in field editing!!!
-    AllowNull:= Boolean(StrToInt(Cells[4, Row]));
-    DefaultValue:= Cells[5, Row];
-    Description:= Cells[6, Row];
+    FieldName:= Trim(Cells[1, Row]);
+    FieldType:= Trim(Cells[2, Row]);
+    FieldSize:= StrtoInt(Trim(Cells[3, Row]));
+    if Trim(Cells[4, Row]) <> '' then
+      FieldPrecision := StrToInt(Trim(Cells[4, Row]))
+    else
+      FieldPrecision := 0;
+    if Trim(Cells[5, Row]) <> '' then
+      FieldScale := StrToInt(Trim(Cells[5, Row]))
+    else
+      FieldScale := 0;
+    Characterset:= Trim(Cells[6, Row]); //todo: support character set in field editing: add column to grid
+    Collation:= Trim(Cells[7, Row]);//todo: support collation in field editing: add column to grid
+    AllowNull:= Boolean(StrToInt(Trim(Cells[8, Row])));
+    DefaultValue := Trim(Cells[9, Row]);
+    Description  := Trim(Cells[10, Row]);
     FieldOrder:= Row;
     fmNewEditField.Init(FDBIndex, FTableName, foEdit,
       FieldName, FieldType, Characterset, Collation,

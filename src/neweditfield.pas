@@ -44,6 +44,7 @@ type
     procedure cbTypeEditingDone(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FDBIndex: Integer;
     FTableName: string;
@@ -298,7 +299,7 @@ begin
 
     fmMain.ShowCompleteQueryWindow(FDBIndex, 'Add new field to Table: ' + FTableName, Line, Clk);
   end
-  else  // Existierendes Feld bearbeiten
+  {else  // Existierendes Feld bearbeiten
   begin
     bbGenUUID.Visible := cbType.Text = 'UUID';
     Line := '';
@@ -339,6 +340,143 @@ begin
 
     // Charset / Collation geändert?
     if (NewCharset <> OldCharacterSet) or (NewCollation <> OldCollation) then
+    begin
+      TempFieldName := edFieldName.Text + '_NEW';
+
+      if BaseType = 'UUID' then
+        FieldDef := 'CHAR(16) CHARACTER SET OCTETS'
+      else
+      begin
+        FieldDef := cbType.Text;
+        if (FieldDef = 'CHAR') or (FieldDef = 'CSTRING') or (FieldDef = 'VARCHAR') then
+          FieldDef := FieldDef + '(' + IntToStr(seSize.Value) + ')';
+
+        if NewCharset <> '' then
+          FieldDef := FieldDef + ' CHARACTER SET ' + NewCharset;
+
+        if NewCollation <> '' then
+          FieldDef := FieldDef + ' COLLATE ' + NewCollation;
+      end;
+
+      Line := Line + '-- Charset or Collation change requires field recreation:' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
+      Line := Line + 'UPDATE ' + FTableName + ' SET ' + TempFieldName + ' = ' + edFieldName.Text + ';' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + FTableName + ' DROP ' + edFieldName.Text + ';' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + TempFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
+    end;
+
+    // Feldposition
+    if seOrder.Value <> OldOrder then
+    begin
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+              ' POSITION ' + IntToStr(seOrder.Value) + ';' + LineEnding;
+    end;
+
+    // NOT NULL
+    if cxAllowNull.Checked <> OldAllowNull then
+    begin
+      if cxAllowNull.Checked then
+        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' DROP NOT NULL;' + LineEnding
+      else
+        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' SET NOT NULL;' + LineEnding;
+    end;
+
+    // Default value
+    if edDefault.Text <> OldDefault then
+    begin
+      if Trim(edDefault.Text) <> '' then
+      begin
+        try
+          if (cbType.Text = 'INTEGER') or (cbType.Text = 'SMALLINT') or (cbType.Text = 'BIGINT') then
+          begin
+            TmpInt := StrToInt(edDefault.Text);
+            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+                    ' SET DEFAULT ' + IntToStr(TmpInt) + ';' + LineEnding;
+          end
+          else if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') or
+                  (cbType.Text = 'FLOAT') or (cbType.Text = 'DOUBLE PRECISION') or
+                  (cbType.Text = 'REAL') then
+          begin
+            TmpFloat := StrToFloat(edDefault.Text);
+            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+                    ' SET DEFAULT ' + StringReplace(FloatToStrF(TmpFloat, ffGeneral, 15, 0), ',', '.', [rfReplaceAll]) + ';' + LineEnding;
+          end
+          else if (cbType.Text = 'CHAR') or (cbType.Text = 'VARCHAR') or (cbType.Text = 'CSTRING')
+            or (cbType.Text = 'BLOB') then
+          begin
+            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+                    ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding;
+          end
+          else
+          begin
+            // Fallback for other types without validation
+            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+                    ' SET DEFAULT ' + edDefault.Text + ';' + LineEnding;
+          end;
+        except
+          on E: Exception do
+            raise Exception.Create('Invalid default value for type "' + cbType.Text + '": ' + E.Message);
+        end;
+      end
+      else
+        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+                ' DROP DEFAULT;' + LineEnding;
+    end;
+
+    // Beschreibung
+    if edDescription.Text <> OldDescription then
+    begin
+      Line := Line + 'COMMENT ON COLUMN ' + FTableName + '.' + edFieldName.Text +
+              ' IS ' + QuotedStr(edDescription.Text) + ';' + LineEnding;
+    end;
+
+    if Line <> '' then
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit field: ' + OldFieldName, Line, Clk);
+  end; }
+
+  else  // Existierendes Feld bearbeiten
+  begin
+    bbGenUUID.Visible := cbType.Text = 'UUID';
+    Line := '';
+    BaseType := cbType.Text;
+
+    // Name geändert?
+    if UpperCase(Trim(edFieldName.Text)) <> OldFieldName then
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + OldFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
+
+    // Typ oder Charset geändert?
+    if (cbType.Text <> OldFieldType) or
+       (seSize.Value <> OldFieldSize) or
+       (sePrecision.Value <> OldFieldPrecision) or
+       (seScale.Value <> OldFieldScale) or
+       ((NewCharset <> OldCharacterSet) and not (BaseType = 'UUID')) then
+    begin
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' TYPE ';
+
+      if BaseType = 'UUID' then
+        Line := Line + 'CHAR(16) CHARACTER SET OCTETS'
+      else
+      begin
+        Line := Line + cbType.Text;
+
+        if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') then
+          Line := Line + '(' + IntToStr(sePrecision.Value) + ',' + IntToStr(seScale.Value) + ')'
+        else if (cbType.Text = 'CHAR') or (cbType.Text = 'CSTRING') or (cbType.Text = 'VARCHAR') then
+          Line := Line + '(' + IntToStr(seSize.Value) + ')';
+
+        if NewCharset <> '' then
+          Line := Line + ' CHARACTER SET ' + NewCharset;
+      end;
+
+      Line := Line + ';' + LineEnding;
+    end;
+
+    // Collation separat ändern
+    if (NewCharset = OldCharacterSet) and (NewCollation <> '') and (NewCollation <> OldCollation) and not (BaseType = 'UUID') then
+    begin
+      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' COLLATE ' + NewCollation + ';' + LineEnding;
+    end
+    else if (NewCharset <> OldCharacterSet) or (NewCollation <> OldCollation) then
     begin
       TempFieldName := edFieldName.Text + '_NEW';
 
@@ -474,7 +612,6 @@ end;
 procedure TfmNewEditField.cbTypeChange(Sender: TObject);
 begin
   seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
-  bbGenUUID.Visible := cbType.Text = 'UUID';
   EnableDisableControls;
 end;
 
@@ -526,6 +663,11 @@ begin
   // db charset
 end;
 
+procedure TfmNewEditField.FormShow(Sender: TObject);
+begin
+  EnableDisableControls;
+end;
+
 procedure TfmNewEditField.EnableDisableControls;
 var
   FieldType: string;
@@ -538,10 +680,11 @@ var
 begin
   // Bestimme den aktuell gewählten Datentyp (Großbuchstaben für Vergleich)
   FieldType := Trim(UpperCase(cbType.Text));
+
   IsTextType := (FieldType = 'CHAR') or (FieldType = 'VARCHAR');
 
   edDefault.Enabled := (FieldType <> 'UUID');
-  bbGenUUID.Visible := (FieldType = 'UUID'); ;
+
   // Reihenfolge evtl. fix, aber meist bearbeitbar
   seOrder.Enabled := True; // oder abhängig von Logik
 
@@ -557,11 +700,17 @@ begin
 
   // Charset und Collation nur bei TEXT-Typen
   IsUUID := (FieldType = 'UUID'); // ((FieldType = 'CHAR') and (FieldSize = 16) and (FieldCharSet = 'OCTETS'));
+  bbGenUUID.Visible := (FieldType = 'UUID');
+  if IsUUID then
+  begin
+  end;
   cbCharset.Enabled := (IsTextType or (IsUUID and (FFormMode = foNew)));
   if cbCharset.Enabled and IsUUID then
   begin
     cbCharSet.ItemIndex := cbCharSet.Items.IndexOf('OCTETS');
     cbCharSet.Enabled := false;
+    cbCollation.Items.Clear;
+    cbCollation.Enabled := false;
   end;
 
   cbCollation.Enabled := IsTextType;
@@ -615,10 +764,11 @@ begin
   seOrder.Value:= OldOrder;
   OldDefault:= DefaultValue;
   edDefault.Text:= OldDefault;
-  OldCharacterSet:= CharacterSet;
+  OldCharacterSet:= Trim(CharacterSet);
   cbCharset.ItemIndex := cbCharset.items.IndexOf(OldCharacterSet);
+
   cbCharsetEditingDone(nil); //fill collation combobox
-  OldCollation:= Collation;
+  OldCollation:= Trim(Collation);
   if OldCharacterSet <> 'OCTETS' then
     cbCollation.ItemIndex := cbCollation.items.IndexOf(OldCollation)
   else

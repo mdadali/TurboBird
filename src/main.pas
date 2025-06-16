@@ -5053,11 +5053,14 @@ procedure TfmMain.ViewTableFields(ATableName: string; dbIndex: Integer;
 var
   FieldSize: integer;
   FieldType: string;
+  CleanTypeName: string;
   i: Integer;
   PKFieldsList: TStringList;
   DefaultValue: string;
   PKIndexName: string;
   ConstraintName: string;
+  TmpInt: integer;
+  IsUUID: boolean;
 begin
   try
     GetFields(dbIndex, ATableName, nil);
@@ -5076,7 +5079,18 @@ begin
       GetFieldType(SQLQuery1,FieldType,FieldSize);
       Cells[2, RowCount - 1]:= FieldType;
 
-      // Computed fields (Calculated)
+      CleanTypeName := GetNameFromSizedTypeName(FieldType);
+
+      IsUUID := (CleanTypeName = 'CHAR') and  (FieldByName('Field_Length').AsInteger = 16)
+        and (Trim(UpperCase(FieldByName('Field_Charset').AsString)) = 'OCTETS');
+
+      If isUUID then
+      begin
+        FieldType := 'UUID';
+        Cells[7, RowCount - 1] := '';  //collation   ignore...
+      end;
+
+        // Computed fields (Calculated)
       if FieldByName('computed_source').AsString <> '' then
         Cells[2, RowCount - 1]:= FieldByName('computed_source').AsString;
 
@@ -5086,17 +5100,32 @@ begin
       else // why show byte size for numerical fields like integer fields?
         Cells[3, RowCount - 1]:= FieldByName('Field_Length').AsString;
 
+      if (CleanTypeName = 'DECIMAL') or (CleanTypeName = 'NUMERIC') then
+      begin
+        Cells[4, RowCount - 1]:= FieldByName('field_precision').AsString;
+        TmpInt := Abs(FieldByName('field_scale').AsInteger);
+        Cells[5, RowCount - 1]:= IntToStr(TmpInt);
+      end;
+
+      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR') or (CleanTypeName = 'UUID'))  then
+      begin
+        Cells[6, RowCount - 1]:= FieldByName('field_charset').AsString;
+      end;
+
+      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR')) and (not IsUUID) then
+        Cells[7, RowCount - 1]:= FieldByName('field_collation').AsString;
+
       // Null/Not null
       if FieldByName('field_not_null_constraint').AsString = '1' then
-        Cells[4, RowCount - 1]:= '0'
+        Cells[8, RowCount - 1]:= '0'
       else
-        Cells[4, RowCount - 1]:= '1';
+        Cells[8, RowCount - 1]:= '1';
 
       // Default Value
       DefaultValue := FieldByName('Field_Default_Source').AsString;
-      Cells[5, RowCount - 1] := ExtractDefaultValue(DefaultValue);
+      Cells[9, RowCount - 1] := ExtractDefaultValue(DefaultValue);
 
-      Cells[6, RowCount - 1]:= FieldByName('Field_Description').AsString;
+      Cells[10, RowCount - 1]:= FieldByName('Field_Description').AsString;
       Next;
     end;
     SQLQuery1.Close;
@@ -5215,7 +5244,9 @@ begin
               FieldByName('field_sub_type').AsInteger,
               FieldByName('field_length').AsInteger,
               FieldByName('field_precision').AsInteger,
-              FieldByName('field_scale').AsInteger
+              FieldByName('field_scale').AsInteger,
+              FieldByName('field_charset').AsString,
+              FieldByName('characterlength').AsInteger
             ) + ArraySuffix;
 
           FieldNode := tvMain.Items.AddChild(Node, FieldTitle);

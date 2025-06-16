@@ -373,7 +373,7 @@ procedure GetFieldType(FieldQuery: TSQLQuery; var FieldType: string; var FieldSi
 // as subtype/length/scale (use -1 for empty/unknown values)
 function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
-  Precision: integer = -1; Scale: integer = -1; CharacterSet: string = ''
+  Precision: integer = -1; Scale: integer = -1; CharacterSet: string = ''; CharacterLengt: integer = -1
 ): string;
 // Tries to guess if an RDB$RELATION_FIELDS.RDB$FIELD_SOURCE domain name for a column is system-generated.
 function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
@@ -662,7 +662,9 @@ begin
       FieldQuery.FieldByName('field_sub_type').AsInteger,
       FieldQuery.FieldByName('field_length').AsInteger,
       FieldQuery.FieldByName('field_precision').AsInteger,
-      FieldQuery.FieldByName('field_scale').AsInteger);
+      FieldQuery.FieldByName('field_scale').AsInteger,
+      FieldQuery.FieldByName('field_charset').Asstring,
+      FieldQuery.FieldByName('characterlength').AsInteger);
     // Array should really be [lowerbound:upperbound] (if dimension is 0)
     // but for now don't bother as arrays are not supported anyway
     // Assume 0 dimension, 1 lower bound; just fill in upper bound
@@ -687,7 +689,7 @@ end;
 function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
   Precision: integer = -1; Scale: integer = -1;
-  CharacterSet: string = ''
+  CharacterSet: string = ''; CharacterLengt: integer = -1
 ): string;
 begin
   case Index of
@@ -723,7 +725,8 @@ begin
   if Index in [14, 37] then
   begin
     if FieldLength > 0 then
-      Result := Result + '(' + IntToStr(FieldLength) + ')';
+      //Result := Result + '(' + IntToStr(FieldLength) + ')';
+      Result := Result + '(' + IntToStr(CharacterLengt) + ')';
   end;
 
   // Numerische Typen mit SubType (NUMERIC/DECIMAL)
@@ -755,7 +758,7 @@ begin
     end;
   end;
 
-  if (Index = 14) and (FieldLength = 16) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
+  if (Index = 14) and (CharacterLengt = 16) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
       Result := 'UUID';
 end;
 //end-newlib

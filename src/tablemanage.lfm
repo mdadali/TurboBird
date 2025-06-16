@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 341
+  Left = 670
   Height = 448
-  Top = 223
+  Top = 242
   Width = 998
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -36,7 +36,7 @@ object fmTableManage: TfmTableManage
         Width = 984
         Align = alTop
         Anchors = [akTop, akLeft, akRight, akBottom]
-        ColCount = 7
+        ColCount = 11
         Columns = <        
           item
             ButtonStyle = cbsCheckboxColumn
@@ -61,6 +61,18 @@ object fmTableManage: TfmTableManage
             Title.Font.Color = 16657685
             Title.Font.Style = [fsBold]
             Title.Caption = 'Size'
+          end        
+          item
+            Title.Caption = 'Precision'
+          end        
+          item
+            Title.Caption = 'Scale'
+          end        
+          item
+            Title.Caption = 'CharSet'
+          end        
+          item
+            Title.Caption = 'Collation'
           end        
           item
             ButtonStyle = cbsCheckboxColumn
