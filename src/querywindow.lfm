@@ -183,9 +183,9 @@ object fmQueryWindow: TfmQueryWindow
       end
       object cxAutoCommit: TCheckBox
         Left = 430
-        Height = 19
+        Height = 22
         Top = 2
-        Width = 93
+        Width = 111
         Caption = 'Auto Commit'
         Checked = True
         State = cbChecked

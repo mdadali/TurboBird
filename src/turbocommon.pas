@@ -7,7 +7,7 @@ SysTables covers functionality for which a db connection is required. }
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Dialogs, sqldb,  RegExpr,
+  Classes, SysUtils, StrUtils, Dialogs, DB, sqldb, IBConnection,  RegExpr,
   fbcommon;
 
 const
@@ -348,6 +348,8 @@ const
     'Packages', 'PackageFunctions', 'PackageProcedures',
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
+procedure AssignIBConnection(Target, Source: TIBConnection);
+function StripQuotes(const S: string): string;
 function ExtractDefaultValue(const DefaultSource: string): string;
 function IsValidUUIDHex(const S: string): Boolean;
 function CreateUUIDHexLiteral: string;
@@ -386,6 +388,31 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+procedure AssignIBConnection(Target, Source: TIBConnection);
+begin
+  if (Target = nil) or (Source = nil) then
+    Exit;
+  Target.Connected := False;
+  Target.DatabaseName := Source.DatabaseName;
+  Target.HostName := Source.HostName;
+  Target.UserName := Source.UserName;
+  Target.Password := Source.Password;
+  Target.Port := Source.Port;
+  Target.CharSet := Source.CharSet;
+  Target.Params.Assign(Source.Params);
+  Target.LoginPrompt := Source.LoginPrompt;
+  Target.KeepConnection := Source.KeepConnection;
+  Target.Tag := Source.Tag;
+end;
+
+function StripQuotes(const S: string): string;
+begin
+  if (Length(S) >= 2) and (S[1] = '''') and (S[Length(S)] = '''') then
+    Result := Copy(S, 2, Length(S) - 2)
+  else
+    Result := S;
+end;
 
 function ExtractDefaultValue(const DefaultSource: string): string;
 var

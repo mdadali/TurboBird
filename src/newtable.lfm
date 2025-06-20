@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 520
+  Left = 600
   Height = 618
-  Top = 128
+  Top = 109
   Width = 589
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -14,9 +14,9 @@ object fmNewTable: TfmNewTable
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 8
-    Height = 13
+    Height = 16
     Top = 12
-    Width = 84
+    Width = 85
     Caption = 'New Table name'
     Font.Height = -11
     ParentColor = False
@@ -24,7 +24,7 @@ object fmNewTable: TfmNewTable
   end
   object edNewTable: TEdit
     Left = 8
-    Height = 23
+    Height = 30
     Top = 32
     Width = 238
     OnKeyUp = edNewTableKeyUp
@@ -139,18 +139,18 @@ object fmNewTable: TfmNewTable
   end
   object cxCreateGen: TCheckBox
     Left = 18
-    Height = 19
-    Top = 501
-    Width = 259
+    Height = 22
+    Top = 498
+    Width = 331
     Anchors = [akLeft, akBottom]
     Caption = 'Create Auto increment Generator and Trigger'
     TabOrder = 4
   end
   object cxGrantPermission: TCheckBox
     Left = 16
-    Height = 19
-    Top = 534
-    Width = 49
+    Height = 22
+    Top = 531
+    Width = 62
     Anchors = [akLeft, akBottom]
     Caption = 'Grant'
     OnChange = cxGrantPermissionChange
@@ -158,12 +158,12 @@ object fmNewTable: TfmNewTable
   end
   object cbPermission: TComboBox
     Left = 88
-    Height = 23
-    Top = 534
+    Height = 28
+    Top = 529
     Width = 145
     Anchors = [akLeft, akBottom]
     Enabled = False
-    ItemHeight = 15
+    ItemHeight = 0
     ItemIndex = 0
     Items.Strings = (
       'Full'
@@ -176,9 +176,9 @@ object fmNewTable: TfmNewTable
   end
   object laPermission: TLabel
     Left = 240
-    Height = 15
-    Top = 538
-    Width = 72
+    Height = 20
+    Top = 533
+    Width = 91
     Anchors = [akLeft, akBottom]
     Caption = 'Permission to'
     ParentColor = False
@@ -186,11 +186,11 @@ object fmNewTable: TfmNewTable
   end
   object cbRolesUsers: TComboBox
     Left = 352
-    Height = 23
-    Top = 533
+    Height = 30
+    Top = 526
     Width = 181
     Anchors = [akLeft, akBottom]
-    ItemHeight = 15
+    ItemHeight = 0
     Items.Strings = (
       'Full'
       'Read '

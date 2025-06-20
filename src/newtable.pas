@@ -74,6 +74,8 @@ begin
     begin
       FieldLine:= StringGrid1.Cells[0, i]; // Field Name
       FieldType:= StringGrid1.Cells[1, i];
+      if FieldType = 'UUID' then
+        FieldType := 'CHAR(16) CHARACTER SET OCTETS';
       FieldLine:= FieldLine + ' ' + FieldType;
 
       // Char size
@@ -139,10 +141,12 @@ begin
 
   StringGrid1.Columns[1].PickList.Clear;
   // Add Basic types
-  dmSysTables.GetBasicTypes(StringGrid1.Columns[1].PickList);
+  //dmSysTables.GetBasicTypes(StringGrid1.Columns[1].PickList);
+  dmSysTables.GetAllTypes(StringGrid1.Columns[1].PickList);
 
-  // Add Domain types
+  ///Add Domain types
   dmSysTables.GetDomainTypes(dbIndex, StringGrid1.Columns[1].PickList);
+
   for i:= 1 to StringGrid1.RowCount - 1 do
   begin
     StringGrid1.Cells[0, i]:= '';

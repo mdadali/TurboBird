@@ -26,7 +26,7 @@ uses
   sysutils, Comparison, Update, topologicalsort, UnitFirebirdServices,
   turbocommon, importtable, fileimport, csvdocument, udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,  fbcommon,
-  fTestFunction, uArrayQuery, fSetFBClient;
+  fTestFunction, uArrayQuery, fSetFBClient, fFirebirdConfig;
 
 const
   Major = 1;
@@ -138,6 +138,7 @@ begin
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   Application.CreateForm(TfmCopyTable, fmCopyTable);
   SAbout.Free;
+  //Application.CreateForm(TfmFirebirdConfig, fmFirebirdConfig);
   //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
   //Application.CreateForm(TfrmTestFunction, frmTestFunction);
   Application.Run;

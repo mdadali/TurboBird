@@ -427,7 +427,7 @@
         <PackageName Value="LCL"/>
       </Item8>
     </RequiredPackages>
-    <Units Count="74">
+    <Units Count="75">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -865,6 +865,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
       </Unit73>
+      <Unit74>
+        <Filename Value="ffirebirdconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmFirebirdConfig"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fFirebirdConfig"/>
+      </Unit74>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

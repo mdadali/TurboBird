@@ -2663,6 +2663,10 @@ object fmMain: TfmMain
       }
       OnClick = lmDBInfoClick
     end
+    object lmFirebirdConfig: TMenuItem
+      Caption = 'Server Configuration'
+      OnClick = lmFirebirdConfigClick
+    end
     object lmSeparator2: TMenuItem
       Caption = '-'
     end

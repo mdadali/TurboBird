@@ -135,11 +135,9 @@ type
 var
   dmSysTables: TdmSysTables;
 
-  //newlib
   FBVersionMajor: Integer = 0;
   FBVersionMinor: Integer = 0;
   FBVersionNumber: single = 0.0;
-  //end-newlib
 
 procedure DetectFBVersion(Connection: TSQLConnection);
 
@@ -1337,9 +1335,19 @@ begin
         List.Add(ExtendedList[i]);
 
   finally
+
     BasicList.Free;
     ExtendedList.Free;
     CleanFirebirdTypeList(List);
+
+    DetectFBVersion(sqQuery.SQLConnection);
+    if FBVersionMajor = 3 then
+      List.SaveToFile('FB3Types.txt')
+    else if FBVersionMajor = 4 then
+      List.SaveToFile('FB4Types.txt')
+    else if FBVersionMajor = 5 then
+      List.SaveToFile('FB5Types.txt');
+
   end;
 end;
 

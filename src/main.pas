@@ -17,6 +17,7 @@ uses
   fSetFBClient,
   uArrayQuery,
   fTestFunction,
+  fFirebirdConfig,
   udb_udf_fetcher,
 
   udb_udr_func_fetcher,
@@ -117,6 +118,7 @@ type
     lmDropUser: TMenuItem;
     lmSetFBClient: TMenuItem;
     lmDisconnectAll: TMenuItem;
+    lmFirebirdConfig: TMenuItem;
     mnOptions: TMenuItem;
     mnEditorFont: TMenuItem;
     toolbarImages: TImageList;
@@ -240,6 +242,7 @@ type
     procedure lmDropViewClick(Sender: TObject);
     procedure lmEditFieldClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
+    procedure lmFirebirdConfigClick(Sender: TObject);
     procedure lmGetPackageFunctionClick(Sender: TObject);
     procedure lmGetPackageProcedureClick(Sender: TObject);
     procedure lmGetPackageUDRFunctionClick(Sender: TObject);
@@ -1872,6 +1875,38 @@ begin
   TmpQueryStr  := TmpQueryList.Text;
   TmpQueryList.Free;
   ShowCompleteQueryWindow(dbIndex, 'Edit Package ' + tvMain.Selected.Text, TmpQueryStr, nil);
+end;
+
+procedure TfmMain.lmFirebirdConfigClick(Sender: TObject);
+var Rec: TDatabaseRec;
+    dbIndex: Integer; Title: string; ATab: TTabSheet;
+    fmFirebirdConfig: TfmFirebirdConfig;
+begin
+    dbIndex :=  TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+    Rec := RegisteredDatabases[dbIndex];
+
+    Title := 'Configure FireBird Server';
+    fmFirebirdConfig:= FindCustomForm(Title, TfmFirebirdConfig) as TfmFirebirdConfig;
+
+    if fmFirebirdConfig = nil then
+    begin
+      fmFirebirdConfig := TfmFirebirdConfig.Create(Application);
+      ATab:= TTabSheet.Create(self);
+      ATab.Parent:= PageControl1;
+      fmFirebirdConfig.Parent:= ATab;
+      fmFirebirdConfig.Left:= 0;
+      fmFirebirdConfig.Top:= 0;
+      fmFirebirdConfig.BorderStyle:= bsNone;
+      fmFirebirdConfig.Align:= alClient;
+      fmFirebirdConfig.Caption:= Title;
+  end else;
+    ATab:= fmFirebirdConfig.Parent as TTabSheet;
+
+  PageControl1.ActivePage:= ATab;
+  ATab.Tag:= dbIndex;
+  ATab.Caption:= Title;
+  fmFirebirdConfig.Init(dbIndex);
+  fmFirebirdConfig.Show;
 end;
 
 procedure TfmMain.lmGetPackageFunctionClick(Sender: TObject);
@@ -4245,6 +4280,33 @@ begin
     ' LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
     ' WHERE r.RDB$RELATION_NAME=''%s'' ' +
     ' ORDER BY r.RDB$FIELD_POSITION;';
+
+
+{  QueryTemplate :=
+    'SELECT r.RDB$FIELD_NAME AS field_name, ' +
+    ' CAST(r.RDB$DESCRIPTION AS VARCHAR(255)) AS field_description, ' +
+    ' CAST(r.RDB$DEFAULT_SOURCE AS VARCHAR(255)) AS field_default_source, ' +
+    ' r.RDB$NULL_FLAG AS field_not_null_constraint, ' +
+    ' f.RDB$FIELD_LENGTH AS field_length, ' +
+    ' f.RDB$CHARACTER_LENGTH AS characterlength, ' +
+    ' f.RDB$FIELD_PRECISION AS field_precision, ' +
+    ' f.RDB$FIELD_SCALE AS field_scale, ' +
+    ' f.RDB$FIELD_TYPE AS field_type_int, ' +
+    ' f.RDB$FIELD_SUB_TYPE AS field_sub_type, ' +
+    ' coll.RDB$COLLATION_NAME AS field_collation, ' +
+    ' cset.RDB$CHARACTER_SET_NAME AS field_charset, ' +
+    ' CAST(f.RDB$COMPUTED_SOURCE AS VARCHAR(255)) AS computed_source, ' +
+    ' dim.RDB$UPPER_BOUND AS array_upper_bound, ' +
+    ' r.RDB$FIELD_SOURCE AS field_source ' +
+    'FROM RDB$RELATION_FIELDS r ' +
+    'LEFT JOIN RDB$FIELDS f ON r.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
+    'LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID ' +
+    '  AND f.RDB$CHARACTER_SET_ID = coll.RDB$CHARACTER_SET_ID ' +
+    'LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
+    'LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
+    'WHERE r.RDB$RELATION_NAME = ''%s'' ' +
+    'ORDER BY r.RDB$FIELD_POSITION;';
+ }
 
   SQLQuery1.SQLConnection := RegisteredDatabases[DatabaseIndex].IBConnection;
   SQLQuery1.SQLConnection.Params.Add('sql-dialect=3');

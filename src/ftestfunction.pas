@@ -96,24 +96,6 @@ uses main;
 
 { TfrmTestFunction }
 
-procedure AssignIBConnection(Target, Source: TIBConnection);
-begin
-  if (Target = nil) or (Source = nil) then
-    Exit;
-  Target.Connected := False;
-  Target.DatabaseName := Source.DatabaseName;
-  Target.HostName := Source.HostName;
-  Target.UserName := Source.UserName;
-  Target.Password := Source.Password;
-  Target.Port := Source.Port;
-  Target.CharSet := Source.CharSet;
-  Target.Params.Assign(Source.Params);
-  Target.LoginPrompt := Source.LoginPrompt;
-  Target.KeepConnection := Source.KeepConnection;
-  Target.Tag := Source.Tag;
-end;
-
-
 constructor TfrmTestFunction.CreateForRoutine(AOwner: TComponent; ARoutineInfo: TRoutineInfo);
 begin
   inherited Create(AOwner);
