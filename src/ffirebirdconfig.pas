@@ -6,8 +6,9 @@ interface
 
 uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,  ComCtrls, FileUtil,
-  SysTables, turbocommon, fbcommon;
+  IniFiles, Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,
+  ComCtrls, FileUtil, SynEdit, synhighlighterunixshellscript, SynHighlighterIni,
+  SynHighlighterJScript, SysTables, turbocommon, fbcommon;
 
 type
 
@@ -15,16 +16,22 @@ type
 
   TfmFirebirdConfig = class(TForm)
     bbClose: TSpeedButton;
+    bbExport: TButton;
+    bbExport1: TButton;
+    bbImport: TBitBtn;
+    bbImportFB3Config: TBitBtn;
+    bbRestoreDefaults: TBitBtn;
+    bbRestoreDefaults1: TBitBtn;
     bbSave: TBitBtn;
+    bbSaveFB3Config: TBitBtn;
     BufDataset1: TBufDataset;
     DataSource1: TDataSource;
-    dbcboxChanged: TDBCheckBox;
-    dbcboxConfigIsSet: TDBCheckBox;
     dbedtActiveValue: TDBEdit;
-    dbedtSource: TDBEdit;
     dbedtFileValue: TDBEdit;
+    dbedtSource: TDBEdit;
     DBGrid1: TDBGrid;
     DBNavigator1: TDBNavigator;
+    DBNavigator2: TDBNavigator;
     GroupBox1: TGroupBox;
     IBConnection1: TIBConnection;
     Label1: TLabel;
@@ -34,13 +41,28 @@ type
     lbServerMode: TLabel;
     lbServer: TLabel;
     lbServerVersion: TLabel;
+    OpenDialog1: TOpenDialog;
+    PageControl1: TPageControl;
     Panel13: TPanel;
     Panel2: TPanel;
+    Panel3: TPanel;
+    SaveDialog1: TSaveDialog;
     SQLQuery1: TSQLQuery;
     SQLTransaction1: TSQLTransaction;
+    SynEdit1: TSynEdit;
+    SynIniSyn1: TSynIniSyn;
+    SynJScriptSyn1: TSynJScriptSyn;
+    SynUNIXShellScriptSyn1: TSynUNIXShellScriptSyn;
+    tsFB3Config: TTabSheet;
+    tsFB4Config: TTabSheet;
     procedure bbCloseClick(Sender: TObject);
+    procedure bbExportClick(Sender: TObject);
+    procedure bbImportClick(Sender: TObject);
+    procedure bbImportFB3ConfigClick(Sender: TObject);
+    procedure bbRestoreDefaultsClick(Sender: TObject);
     procedure bbSaveClick(Sender: TObject);
-    procedure bbtCloseClick(Sender: TObject);
+    procedure bbSaveFB3ConfigClick(Sender: TObject);
+    procedure DataSource1UpdateData(Sender: TObject);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
   private
@@ -51,57 +73,256 @@ type
     constructor create(AOwner: TComponent); override;
     destructor  destroy; override;
     procedure init(AdbIndex: integer);
+    procedure InitForFB3;
   end;
 
 //var
   //fmFirebirdConfig: TfmFirebirdConfig;
 
+var
+  IniF: TIniFile;
+  DataSetLoaded: boolean;
+
 implementation
 
 uses main;
-
-function GuessFirebirdConfPath(const SecurityDbPath: string): string;
-begin
-  Result := IncludeTrailingPathDelimiter(ExtractFilePath(SecurityDbPath)) + 'firebird.conf';
-end;
-
-function LoadFirebirdConfToList(const AFileName: string): TStringList;
-var
-  Lines: TStringList;
-  i: Integer;
-  Line, Key, Value: string;
-begin
-  Result := TStringList.Create;
-  Result.NameValueSeparator := '=';
-  Result.CaseSensitive := False;
-
-  if not FileExists(AFileName) then Exit;
-
-  Lines := TStringList.Create;
-  try
-    Lines.LoadFromFile(AFileName);
-    for i := 0 to Lines.Count - 1 do
-    begin
-      Line := Trim(Lines[i]);
-      if (Line = '') or (Line[1] = '#') then Continue;
-      if Pos('=', Line) > 0 then
-      begin
-        Key := Trim(Copy(Line, 1, Pos('=', Line) - 1));
-        Value := Trim(Copy(Line, Pos('=', Line) + 1, MaxInt));
-        Result.Values[Key] := Value;
-      end;
-    end;
-  finally
-    Lines.Free;
-  end;
-end;
-
-
 
 procedure TfmFirebirdConfig.bbCloseClick(Sender: TObject);
 begin
   close;
   self.Parent.Free;
+end;
+
+procedure TfmFirebirdConfig.bbExportClick(Sender: TObject);
+var
+  SL: TStringList;
+  JSONStr: string;
+  JSONObj: TStringList;
+  i: Integer;
+  Line: string;
+  Field: TField;
+  FileExt: string;
+  BaseName: string;
+begin
+  SaveDialog1.Filter :=
+    'CSV-Dateien (*.csv)|*.csv|' +
+    'JSON-Dateien (*.json)|*.json';
+
+  if not SaveDialog1.Execute then
+    Exit;
+
+  // Determine selected extension from filter index
+  case SaveDialog1.FilterIndex of
+    1: FileExt := '.csv';
+    2: FileExt := '.json';
+  else
+    FileExt := '';
+  end;
+
+  // Ensure correct file extension
+  BaseName := SaveDialog1.FileName;
+  if LowerCase(ExtractFileExt(BaseName)) <> FileExt then
+    BaseName := ChangeFileExt(BaseName, FileExt);
+
+  SL := TStringList.Create;
+  try
+    BufDataset1.DisableControls;
+    try
+      BufDataset1.First;
+
+      if FileExt = '.json' then
+      begin
+        // Export to JSON
+        SL.Add('[');
+        while not BufDataset1.EOF do
+        begin
+          JSONObj := TStringList.Create;
+          try
+            for i := 0 to BufDataset1.FieldCount - 1 do
+            begin
+              Field := BufDataset1.Fields[i];
+              if Field.FieldName = 'Changed' then
+                Continue;
+
+              JSONObj.Add(Format('"%s": "%s"', [Field.FieldName,
+                StringReplace(Field.AsString, '"', '\"', [rfReplaceAll])]));
+            end;
+            JSONStr := '  {' + StringReplace(Trim(JSONObj.Text), LineEnding, ', ', [rfReplaceAll]) + ' }';
+            SL.Add(JSONStr + ',');
+          finally
+            JSONObj.Free;
+          end;
+          BufDataset1.Next;
+        end;
+
+        // Remove trailing comma
+        if (SL.Count > 1) and SL[SL.Count - 1].EndsWith(',') then
+          SL[SL.Count - 1] := Copy(SL[SL.Count - 1], 1, Length(SL[SL.Count - 1]) - 1);
+        SL.Add(']');
+      end
+      else
+      begin
+        // Export to CSV
+        Line := '';
+        for i := 0 to BufDataset1.FieldCount - 1 do
+        begin
+          Field := BufDataset1.Fields[i];
+          if Field.FieldName = 'Changed' then
+            Continue;
+
+          Line := Line + Field.FieldName + ';';
+        end;
+        Delete(Line, Length(Line), 1); // Remove trailing ;
+        SL.Add(Line);
+
+        while not BufDataset1.EOF do
+        begin
+          Line := '';
+          for i := 0 to BufDataset1.FieldCount - 1 do
+          begin
+            Field := BufDataset1.Fields[i];
+            if Field.FieldName = 'Changed' then
+              Continue;
+
+            Line := Line + Field.AsString + ';';
+          end;
+          Delete(Line, Length(Line), 1); // Remove trailing ;
+          SL.Add(Line);
+          BufDataset1.Next;
+        end;
+      end;
+
+      // Save to file
+      SL.SaveToFile(BaseName);
+      ShowMessage('Export successfully saved to: ' + BaseName);
+    finally
+      BufDataset1.EnableControls;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure TfmFirebirdConfig.bbImportClick(Sender: TObject);
+var
+  SL: TStringList;
+  Line, FileName, BackupName: string;
+  CSVFields: TStringList;
+  i, RowID: Integer;
+  FieldCount: Integer;
+begin
+  if not OpenDialog1.Execute then
+    Exit;
+
+  FileName := OpenDialog1.FileName;
+
+  if not FileExists(FileName) then
+  begin
+    ShowMessage('Selected file does not exist.');
+    Exit;
+  end;
+
+  // Backup der aktuellen firebird.conf anlegen
+  if not FileExists(FFirebirdConfPath) then
+  begin
+    ShowMessage('firebird.conf not found: ' + FFirebirdConfPath);
+    Exit;
+  end;
+
+  BackupName := FFirebirdConfPath + '.bak';
+  try
+    CopyFile(PChar(FFirebirdConfPath), PChar(BackupName), False);
+  except
+    on E: Exception do
+    begin
+      ShowMessage('Could not create backup of firebird.conf: ' + E.Message);
+      Exit;
+    end;
+  end;
+
+  SL := TStringList.Create;
+  CSVFields := TStringList.Create;
+  try
+    SL.LoadFromFile(FileName);
+
+    // Skip Header (first row)
+    for i := 1 to SL.Count - 1 do
+    begin
+      Line := Trim(SL[i]);
+      if Line = '' then Continue;
+
+      CSVFields.Delimiter := ';';
+      CSVFields.StrictDelimiter := True;
+      CSVFields.DelimitedText := Line;
+
+      FieldCount := CSVFields.Count;
+      if FieldCount < 7 then Continue; // mindestens 7 Spalten erwartet
+
+      if not TryStrToInt(CSVFields[0], RowID) then Continue;
+
+      // Datensatz mit passender ID finden
+      BufDataset1.First;
+      while not BufDataset1.EOF do
+      begin
+        if BufDataset1.FieldByName('ID').AsInteger = RowID then
+        begin
+          if BufDataset1.FieldByName('FileValue').AsString <> CSVFields[3] then
+          begin
+            BufDataset1.Edit;
+            BufDataset1.FieldByName('FileValue').AsString := CSVFields[3];
+            BufDataset1.FieldByName('Changed').AsBoolean := True;
+            BufDataset1.Post;
+          end;
+          Break;
+        end;
+        BufDataset1.Next;
+      end;
+    end;
+    ShowMessage('Configuration import completed. Backup created: ' + BackupName);
+  finally
+    CSVFields.Free;
+    SL.Free;
+  end;
+end;
+
+procedure TfmFirebirdConfig.bbImportFB3ConfigClick(Sender: TObject);
+var IniF: TIniFile;
+begin
+  if OpenDialog1.Execute then
+  begin
+    IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
+    try
+      FFirebirdConfPath := OpenDialog1.FileName;
+      synEdit1.Lines.LoadFromFile(FFirebirdConfPath);
+      IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
+    finally
+      IniF.Free;
+    end;
+  end;
+end;
+
+procedure TfmFirebirdConfig.bbRestoreDefaultsClick(Sender: TObject);
+begin
+  BufDataset1.DisableControls;
+  try
+    BufDataset1.First;
+    while not BufDataset1.EOF do
+    begin
+      // Nur zurücksetzen, wenn DefaultValue vorhanden ist
+      if (Trim(BufDataset1.FieldByName('DefaultValue').AsString) <> '') then
+      begin
+        BufDataset1.Edit;
+        BufDataset1.FieldByName('FileValue').AsString := BufDataset1.FieldByName('DefaultValue').AsString;
+        BufDataset1.FieldByName('Changed').AsBoolean := True;
+        BufDataset1.Post;
+      end;
+      BufDataset1.Next;
+    end;
+  finally
+    BufDataset1.EnableControls;
+  end;
+
+  ShowMessage('All values have been reset to their defaults.');
 end;
 
 procedure TfmFirebirdConfig.bbSaveClick(Sender: TObject);
@@ -199,9 +420,24 @@ begin
   end;
 end;
 
-procedure TfmFirebirdConfig.bbtCloseClick(Sender: TObject);
+procedure TfmFirebirdConfig.bbSaveFB3ConfigClick(Sender: TObject);
 begin
+  try
+    SynEdit1.Lines.SaveToFile(FFirebirdConfPath);
+    ShowMessage('Configuration file saved successfully.');
+  except
+    on E: Exception do
+      ShowMessage('Error saving configuration file: ' + E.Message);
+  end;
+end;
 
+procedure TfmFirebirdConfig.DataSource1UpdateData(Sender: TObject);
+begin
+  if DataSetLoaded then
+  begin
+    Datasource1.DataSet.FieldByName('Changed').AsBoolean := true;
+    Datasource1.DataSet.FieldByName('Config_Is_Set').AsBoolean := true;
+  end;
 end;
 
 procedure TfmFirebirdConfig.DBNavigator1Click(Sender: TObject;
@@ -231,111 +467,200 @@ begin
   inherited;
 end;
 
+function GuessFirebirdConfPath(const SecurityDbPath: string): string;
+begin
+  Result := IncludeTrailingPathDelimiter(ExtractFilePath(SecurityDbPath)) + 'firebird.conf';
+end;
+
+function LoadFirebirdConfToList(const AFileName: string): TStringList;
+var
+  Lines: TStringList;
+  i, SepPos: Integer;
+  Line, Key, Value: string;
+begin
+  Result := TStringList.Create;
+  Result.NameValueSeparator := '=';
+  Result.CaseSensitive := False;
+
+  if not FileExists(AFileName) then Exit;
+
+  Lines := TStringList.Create;
+  try
+    Lines.LoadFromFile(AFileName);
+    for i := 0 to Lines.Count - 1 do
+    begin
+      Line := Trim(Lines[i]);
+      if Line = '' then Continue;
+
+      // Suche nach einfachem '='
+      SepPos := Pos('=', Line);
+      if SepPos = 0 then Continue;
+
+      // Prüfen, ob direkt nach '=' noch ein '=' folgt (== vermeiden)
+      if (SepPos < Length(Line)) and (Line[SepPos + 1] = '=') then
+        Continue; // Zeile überspringen, weil '==' vorhanden
+
+      Key := Trim(Copy(Line, 1, SepPos - 1));
+      Value := Trim(Copy(Line, SepPos + 1, MaxInt));
+
+      // Prüfen, ob Schlüssel schon vorhanden
+      if Result.IndexOfName(Key) < 0 then
+        Result.Values[Key] := Value;
+    end;
+  finally
+    Lines.Free;
+  end;
+end;
+
+procedure TfmFirebirdConfig.InitForFB3;
+begin
+  IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
+  try
+    FFirebirdConfPath := IniF.ReadString('FireBird', 'ConfPath', '');
+    if FileExists(FFirebirdConfPath) then
+      SynEdit1.Lines.LoadFromFile(FFirebirdConfPath)
+    else
+    begin
+      ShowMessage('The file specified in the ini file does not exist. Please select a valid configuration file in the next dialog.');
+
+      // Open file dialog to select a valid Firebird config file
+      if OpenDialog1.Execute then
+      begin
+        FFirebirdConfPath := OpenDialog1.FileName;
+        SynEdit1.Lines.LoadFromFile(FFirebirdConfPath);
+        // Optionally save the selected path back to the ini file
+        IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
+      end
+      else
+      begin
+        ShowMessage('No valid file was selected.');
+      end;
+    end;
+  finally
+    IniF.Free;
+  end;
+end;
+
 procedure TfmFirebirdConfig.Init(AdbIndex: Integer);
 var
   Rec: TDatabaseRec;
   ConfList: TStringList;
   ConfName, ConfVal, ConfSource, SecDbPath: string;
 begin
-  if SQLQuery1.Active then SQLQuery1.Close;
-  if IBConnection1.Connected then IBConnection1.Connected := False;
-
   FdbIndex := AdbIndex;
   Rec := fmMain.RegisteredDatabases[FdbIndex];
   AssignIBConnection(IBConnection1, Rec.IBConnection);
   IBConnection1.Connected := True;
+
   DetectFBVersion(IBConnection1);
   lbServerVersion.Caption := IntToStr(FBVersionMajor) + '.' + IntToStr(FBVersionMinor);
-
-  // RDB$CONFIG lesen
-  //SQLQuery1.SQL.Text := 'SELECT RDB$CONFIG_NAME, RDB$CONFIG_VALUE, RDB$CONFIG_SOURCE FROM RDB$CONFIG';
-  SQLQuery1.SQL.Text := 'SELECT * FROM RDB$CONFIG';
-  SQLQuery1.Open;
-
-  // firebird.conf Pfad finden
-  SQLQuery1.First;
-  while not SQLQuery1.EOF do
+  if  FBVersionMajor < 4 then
   begin
-    if Trim(SQLQuery1.FieldByName('RDB$CONFIG_NAME').AsString) = 'SecurityDatabase' then
+    tsFB3Config.TabVisible := true;
+    InitForFB3;
+  end
+  else begin
+    tsFB4Config.TabVisible := true;
+
+    if SQLQuery1.Active then SQLQuery1.Close;
+    if IBConnection1.Connected then IBConnection1.Connected := False;
+
+    // RDB$CONFIG lesen
+    //SQLQuery1.SQL.Text := 'SELECT RDB$CONFIG_NAME, RDB$CONFIG_VALUE, RDB$CONFIG_SOURCE FROM RDB$CONFIG';
+    SQLQuery1.SQL.Text := 'SELECT * FROM RDB$CONFIG';
+    SQLQuery1.Open;
+
+    // firebird.conf Pfad finden
+    SQLQuery1.First;
+    while not SQLQuery1.EOF do
     begin
-      SecDbPath := Trim(SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString);
-      FFirebirdConfPath := GuessFirebirdConfPath(SecDbPath);
-      Break;
+      if Trim(SQLQuery1.FieldByName('RDB$CONFIG_NAME').AsString) = 'SecurityDatabase' then
+      begin
+        SecDbPath := Trim(SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString);
+        FFirebirdConfPath := GuessFirebirdConfPath(SecDbPath);
+        Break;
+      end;
+      SQLQuery1.Next;
     end;
-    SQLQuery1.Next;
+
+    // file lesen
+    FFirebirdConfLines.Clear;
+    if FileExists(FFirebirdConfPath) then
+      FFirebirdConfLines.LoadFromFile(FFirebirdConfPath);
+
+    ConfList := LoadFirebirdConfToList(FFirebirdConfPath);
+
+    // Dataset füllen
+    BufDataset1.DisableControls;
+
+    BufDataset1.Close;
+    BufDataset1.Clear;
+
+    BufDataset1.FieldDefs.Add('ID', ftInteger);
+    BufDataset1.FieldDefs.Add('Name', ftString, 200);
+    BufDataset1.FieldDefs.Add('ActiveValue', ftString, 250);
+    BufDataset1.FieldDefs.Add('FileValue', ftString, 250);
+    BufDataset1.FieldDefs.Add('DefaultValue', ftString, 250);
+    BufDataset1.FieldDefs.Add('Source', ftString, 250);
+    BufDataset1.FieldDefs.Add('Config_is_set', ftBoolean);
+    BufDataset1.FieldDefs.Add('Changed', ftBoolean);
+
+    BufDataset1.CreateDataset;
+
+    dbedtActiveValue.DataField  := 'ActiveValue';
+    dbedtsource.DataField       := 'Source';
+    dbedtFileValue.DataField    := 'FileValue';
+
+    SQLQuery1.First;
+
+    while not SQLQuery1.EOF do
+    begin
+      ConfName := Trim(SQLQuery1.FieldByName('RDB$CONFIG_NAME').AsString);
+
+      if UpperCASE(ConfName) = 'SERVERMODE' then
+        lbServerMode.Caption := SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString;
+
+      ConfVal := Trim(SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString);
+      ConfSource := Trim(SQLQuery1.FieldByName('RDB$CONFIG_SOURCE').AsString);
+
+      BufDataset1.Append;
+
+      BufDataset1.FieldByName('ID').AsInteger := SQLQuery1.FieldByName('RDB$CONFIG_ID').AsInteger;
+      BufDataset1.FieldByName('Name').AsString := ConfName;
+      BufDataset1.FieldByName('ActiveValue').AsString := ConfVal;
+      BufDataset1.FieldByName('DefaultValue').AsString := SQLQuery1.FieldByName('RDB$CONFIG_DEFAULT').AsString;
+      BufDataset1.FieldByName('FileValue').AsString := ConfList.Values[ConfName];
+      BufDataset1.FieldByName('Source').AsString := ConfSource;
+      BufDataset1.FieldByName('Changed').AsBoolean := False;
+      BufDataset1.FieldByName('Config_is_set').AsBoolean := SQLQuery1.FieldByName('RDB$CONFIG_IS_SET').AsBoolean;
+
+      BufDataset1.FieldByName('Changed').Visible := false;
+
+      BufDataset1.Post;
+      SQLQuery1.Next;
+    end;
+
+    ConfList.Free;
+    BufDataset1.First;
+    BufDataset1.EnableControls;
+
+    DBGrid1.Columns[0].Width := 30;
+    DBGrid1.Columns[1].Width := 250;
+    DBGrid1.Columns[2].Width := 300;
+    DBGrid1.Columns[3].Width := 100;
+    DBGrid1.Columns[4].Width := 100;
+    DBGrid1.Columns[5].Width := 100;
+
+    DBGrid1.Columns[0].ReadOnly := true;
+    DBGrid1.Columns[1].ReadOnly := true;
+    DBGrid1.Columns[2].ReadOnly := true;
+    //DBGrid1.Columns[3].ReadOnly := true;
+    DBGrid1.Columns[4].ReadOnly := true;
+    DBGrid1.Columns[5].ReadOnly := true;
+    DBGrid1.Columns[6].ReadOnly := true;
+
+    DataSetLoaded := true;
   end;
-
-  // file lesen
-  FFirebirdConfLines.Clear;
-  if FileExists(FFirebirdConfPath) then
-    FFirebirdConfLines.LoadFromFile(FFirebirdConfPath);
-
-  ConfList := LoadFirebirdConfToList(FFirebirdConfPath);
-
-  // Dataset füllen
-  BufDataset1.DisableControls;
-
-  BufDataset1.Close;
-  BufDataset1.Clear;
-
-  BufDataset1.FieldDefs.Add('ID', ftInteger);
-  BufDataset1.FieldDefs.Add('Name', ftString, 200);
-  BufDataset1.FieldDefs.Add('ActiveValue', ftString, 250);
-  BufDataset1.FieldDefs.Add('Source', ftString, 250);
-  BufDataset1.FieldDefs.Add('FileValue', ftString, 250);
-  BufDataset1.FieldDefs.Add('Changed', ftBoolean);
-  BufDataset1.FieldDefs.Add('Config_is_set', ftBoolean);
-
-  BufDataset1.CreateDataset;
-
-  dbedtActiveValue.DataField  := 'ActiveValue';
-  dbedtsource.DataField       := 'Source';
-  dbedtFileValue.DataField    := 'FileValue';
-  dbcboxChanged.DataField     := 'Changed';
-  dbcboxConfigIsSet.DataField := 'Config_is_set';
-
-  SQLQuery1.First;
-
-  while not SQLQuery1.EOF do
-  begin
-    ConfName := Trim(SQLQuery1.FieldByName('RDB$CONFIG_NAME').AsString);
-
-    if UpperCASE(ConfName) = 'SERVERMODE' then
-      lbServerMode.Caption := SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString;
-
-    ConfVal := Trim(SQLQuery1.FieldByName('RDB$CONFIG_VALUE').AsString);
-    ConfSource := Trim(SQLQuery1.FieldByName('RDB$CONFIG_SOURCE').AsString);
-
-    BufDataset1.Append;
-
-    BufDataset1.FieldByName('ID').AsInteger := SQLQuery1.FieldByName('RDB$CONFIG_ID').AsInteger;
-    BufDataset1.FieldByName('Name').AsString := ConfName;
-    BufDataset1.FieldByName('ActiveValue').AsString := ConfVal;
-    BufDataset1.FieldByName('Source').AsString := ConfSource;
-    BufDataset1.FieldByName('FileValue').AsString := ConfList.Values[ConfName];
-    BufDataset1.FieldByName('Changed').AsBoolean := False;
-    BufDataset1.FieldByName('Config_is_set').AsBoolean := SQLQuery1.FieldByName('RDB$CONFIG_IS_SET').AsBoolean;
-
-    BufDataset1.Post;
-
-    SQLQuery1.Next;
-  end;
-
-  BufDataset1.FieldByName('ID').ReadOnly := true;
-  BufDataset1.FieldByName('Name').ReadOnly := true;
-  BufDataset1.FieldByName('ActiveValue').ReadOnly := true;
-  BufDataset1.FieldByName('Source').ReadOnly := true;
-
-  ConfList.Free;
-  BufDataset1.First;
-  BufDataset1.EnableControls;
-
-  DBGrid1.Columns[0].Width := 30;
-  DBGrid1.Columns[1].Width := 250;
-  DBGrid1.Columns[2].Width := 300;
-  DBGrid1.Columns[3].Width := 100;
-  DBGrid1.Columns[4].Width := 100;
-
 end;
 
 {$R *.lfm}
