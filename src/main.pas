@@ -6377,6 +6377,20 @@ begin
             CNode.SelectedIndex:= 56;
             TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
             TPNodeInfos(CNode.Data)^.dbIndex := i;
+
+              CNode:= tvMain.Items.AddChild(CNode, 'Functions');
+              CNode.ImageIndex:= 52;
+              CNode.SelectedIndex:= 52;
+              TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRFunctionRoot;
+              TPNodeInfos(CNode.Data)^.dbIndex := i;
+              CNode := CNode.Parent;
+
+              CNode:= tvMain.Items.AddChild(CNode, 'Procedures');
+              CNode.ImageIndex:= 53;
+              CNode.SelectedIndex:= 53;
+              TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRProcedureRoot;
+              TPNodeInfos(CNode.Data)^.dbIndex := i;
+              CNode := CNode.Parent;
           end;
 
           Inc(i);

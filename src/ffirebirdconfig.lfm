@@ -1,7 +1,7 @@
 object fmFirebirdConfig: TfmFirebirdConfig
-  Left = 347
+  Left = 359
   Height = 538
-  Top = 111
+  Top = 101
   Width = 880
   ActiveControl = Panel13
   Caption = 'Firebird Config'
@@ -110,7 +110,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
     TabIndex = 1
     TabOrder = 1
     object tsFB4Config: TTabSheet
-      Caption = 'FireBird V >3 Configuration'
+      Caption = 'FireBird Configuration'
       ClientHeight = 480
       ClientWidth = 876
       TabVisible = False
@@ -204,7 +204,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         Width = 876
         Align = alBottom
         Caption = 'Fields'
-        ClientHeight = 132
+        ClientHeight = 150
         ClientWidth = 872
         TabOrder = 2
         object Label2: TLabel
@@ -263,7 +263,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
       end
     end
     object tsFB3Config: TTabSheet
-      Caption = 'FireBird V <= 3 Configuration'
+      Caption = 'FireBird Configuration'
       ClientHeight = 480
       ClientWidth = 876
       TabVisible = False
@@ -284,7 +284,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         Gutter.MouseActions = <>
         RightGutter.Width = 0
         RightGutter.MouseActions = <>
-        Highlighter = SynIniSyn1
+        Highlighter = SynUNIXShellScriptSyn1
         Keystrokes = <        
           item
             Command = ecUp
@@ -728,6 +728,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         MouseLinkColor.Foreground = clBlue
         LineHighlightColor.Background = clNone
         LineHighlightColor.Foreground = clNone
+        OnChange = SynEdit1Change
         inline SynLeftGutterPartList1: TSynGutterPartList
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
@@ -770,7 +771,6 @@ object fmFirebirdConfig: TfmFirebirdConfig
         Top = 440
         Width = 876
         Align = alBottom
-        Caption = 'Panel3'
         ClientHeight = 40
         ClientWidth = 876
         TabOrder = 1
@@ -778,8 +778,8 @@ object fmFirebirdConfig: TfmFirebirdConfig
           Left = 1
           Height = 38
           Top = 1
-          Width = 491
-          Align = alClient
+          Width = 295
+          Align = alLeft
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
           ChildSizing.EnlargeVertical = crsScaleChilds
@@ -788,7 +788,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 38
-          ClientWidth = 491
+          ClientWidth = 295
           DataSource = DataSource1
           OnClick = DBNavigator1Click
           Options = []
@@ -797,44 +797,56 @@ object fmFirebirdConfig: TfmFirebirdConfig
           VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbEdit, nbPost, nbCancel, nbRefresh]
         end
         object bbSaveFB3Config: TBitBtn
-          Left = 492
+          Left = 579
           Height = 38
           Top = 1
           Width = 87
           Align = alRight
           Caption = 'Save'
+          Enabled = False
           OnClick = bbSaveFB3ConfigClick
           TabOrder = 1
         end
-        object bbExport1: TButton
-          Left = 660
-          Height = 38
-          Top = 1
-          Width = 87
-          Align = alRight
-          Caption = 'Export...'
-          OnClick = bbExportClick
-          TabOrder = 2
-        end
-        object bbImportFB3Config: TBitBtn
-          Left = 579
+        object bbLoadFB3Config: TBitBtn
+          Left = 666
           Height = 38
           Top = 1
           Width = 81
           Align = alRight
-          Caption = 'Import...'
-          OnClick = bbImportFB3ConfigClick
-          TabOrder = 3
+          Caption = 'Load...'
+          OnClick = bbLoadFB3ConfigClick
+          TabOrder = 2
         end
-        object bbRestoreDefaults1: TBitBtn
+        object bbRestoreFB3Defaults: TBitBtn
           Left = 747
           Height = 38
           Top = 1
           Width = 128
           Align = alRight
           Caption = 'Restore Defaults'
-          OnClick = bbRestoreDefaultsClick
+          Enabled = False
+          OnClick = bbRestoreFB3DefaultsClick
+          TabOrder = 3
+        end
+        object edtsearch: TEdit
+          Left = 296
+          Height = 38
+          Top = 1
+          Width = 200
+          Align = alRight
+          OnKeyPress = edtsearchKeyPress
           TabOrder = 4
+          Text = 'Search string'
+        end
+        object bbSearch: TBitBtn
+          Left = 496
+          Height = 38
+          Top = 1
+          Width = 83
+          Align = alRight
+          Caption = 'Search'
+          OnClick = bbSearchClick
+          TabOrder = 5
         end
       end
     end
@@ -925,10 +937,5 @@ object fmFirebirdConfig: TfmFirebirdConfig
     Enabled = False
     Left = 230
     Top = 316
-  end
-  object SynJScriptSyn1: TSynJScriptSyn
-    Enabled = False
-    Left = 158
-    Top = 274
   end
 end

@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
   IniFiles, Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,
-  ComCtrls, FileUtil, SynEdit, synhighlighterunixshellscript, SynHighlighterIni,
+  ComCtrls, FileUtil, StrUtils, SynEdit, synhighlighterunixshellscript, SynHighlighterIni,
   SynHighlighterJScript, SysTables, turbocommon, fbcommon;
 
 type
@@ -17,13 +17,13 @@ type
   TfmFirebirdConfig = class(TForm)
     bbClose: TSpeedButton;
     bbExport: TButton;
-    bbExport1: TButton;
     bbImport: TBitBtn;
-    bbImportFB3Config: TBitBtn;
+    bbLoadFB3Config: TBitBtn;
     bbRestoreDefaults: TBitBtn;
-    bbRestoreDefaults1: TBitBtn;
+    bbRestoreFB3Defaults: TBitBtn;
     bbSave: TBitBtn;
     bbSaveFB3Config: TBitBtn;
+    bbSearch: TBitBtn;
     BufDataset1: TBufDataset;
     DataSource1: TDataSource;
     dbedtActiveValue: TDBEdit;
@@ -32,6 +32,7 @@ type
     DBGrid1: TDBGrid;
     DBNavigator1: TDBNavigator;
     DBNavigator2: TDBNavigator;
+    edtsearch: TEdit;
     GroupBox1: TGroupBox;
     IBConnection1: TIBConnection;
     Label1: TLabel;
@@ -51,20 +52,23 @@ type
     SQLTransaction1: TSQLTransaction;
     SynEdit1: TSynEdit;
     SynIniSyn1: TSynIniSyn;
-    SynJScriptSyn1: TSynJScriptSyn;
     SynUNIXShellScriptSyn1: TSynUNIXShellScriptSyn;
     tsFB3Config: TTabSheet;
     tsFB4Config: TTabSheet;
     procedure bbCloseClick(Sender: TObject);
     procedure bbExportClick(Sender: TObject);
     procedure bbImportClick(Sender: TObject);
-    procedure bbImportFB3ConfigClick(Sender: TObject);
+    procedure bbLoadFB3ConfigClick(Sender: TObject);
     procedure bbRestoreDefaultsClick(Sender: TObject);
+    procedure bbRestoreFB3DefaultsClick(Sender: TObject);
     procedure bbSaveClick(Sender: TObject);
     procedure bbSaveFB3ConfigClick(Sender: TObject);
+    procedure bbSearchClick(Sender: TObject);
     procedure DataSource1UpdateData(Sender: TObject);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
+    procedure edtsearchKeyPress(Sender: TObject; var Key: char);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure SynEdit1Change(Sender: TObject);
   private
     FdbIndex: Integer;
     FFirebirdConfPath: string;
@@ -285,7 +289,7 @@ begin
   end;
 end;
 
-procedure TfmFirebirdConfig.bbImportFB3ConfigClick(Sender: TObject);
+procedure TfmFirebirdConfig.bbLoadFB3ConfigClick(Sender: TObject);
 var IniF: TIniFile;
 begin
   if OpenDialog1.Execute then
@@ -323,6 +327,11 @@ begin
   end;
 
   ShowMessage('All values have been reset to their defaults.');
+end;
+
+procedure TfmFirebirdConfig.bbRestoreFB3DefaultsClick(Sender: TObject);
+begin
+  //
 end;
 
 procedure TfmFirebirdConfig.bbSaveClick(Sender: TObject);
@@ -425,10 +434,43 @@ begin
   try
     SynEdit1.Lines.SaveToFile(FFirebirdConfPath);
     ShowMessage('Configuration file saved successfully.');
+    bbSaveFB3Config.Enabled := false;
   except
     on E: Exception do
       ShowMessage('Error saving configuration file: ' + E.Message);
   end;
+end;
+
+procedure TfmFirebirdConfig.bbSearchClick(Sender: TObject);
+var
+  SearchText, FullText: string;
+  FoundPos: Integer;
+  StartPoint, EndPoint: TPoint;
+begin
+  SearchText := edtsearch.Text;
+  if SearchText = '' then Exit;
+
+  FullText := SynEdit1.Text;
+  FoundPos := Pos(SearchText, FullText);
+
+  if FoundPos > 0 then
+  begin
+    // Convert flat index to (X,Y) position
+    StartPoint := SynEdit1.CharIndexToRowCol(FoundPos);
+    EndPoint := SynEdit1.CharIndexToRowCol(FoundPos + Length(SearchText));
+
+    StartPoint.X := StartPoint.X -1;
+    EndPoint.X   := EndPoint.X -1;
+
+    // Set selection
+    SynEdit1.BlockBegin := StartPoint;
+    SynEdit1.BlockEnd := EndPoint;
+
+    SynEdit1.CaretXY := EndPoint;
+    SynEdit1.SetFocus;
+  end
+  else
+    ShowMessage('Not found');
 end;
 
 procedure TfmFirebirdConfig.DataSource1UpdateData(Sender: TObject);
@@ -447,10 +489,24 @@ begin
     BufDataset1.ApplyUpdates;
 end;
 
+procedure TfmFirebirdConfig.edtsearchKeyPress(Sender: TObject; var Key: char);
+begin
+  if Key = #13 then // Enter key
+  begin
+    Key := #0; // prevent beep sound
+    bbSearchClick(nil);
+  end;
+end;
+
 procedure TfmFirebirdConfig.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
   CloseAction := caFree;
+end;
+
+procedure TfmFirebirdConfig.SynEdit1Change(Sender: TObject);
+begin
+  bbSaveFB3Config.Enabled := true;
 end;
 
 constructor TfmFirebirdConfig.Create(AOwner: TComponent);
