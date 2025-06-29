@@ -1,5 +1,5 @@
 object frmSetFBClient: TfrmSetFBClient
-  Left = 849
+  Left = 791
   Height = 398
   Top = 222
   Width = 573
@@ -755,7 +755,6 @@ object frmSetFBClient: TfrmSetFBClient
     TabOrder = 4
   end
   object OpenDialog1: TOpenDialog
-    FileName = '/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/bin/x86_64-linux/debug/TurboBird/C:\Users\maurog\Downloads\Firebird-4.0.2.2816-0-x64\sqlparams.txt'
     InitialDir = '/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/bin/x86_64-linux/debug/TurboBird/'
     Left = 352
     Top = 192

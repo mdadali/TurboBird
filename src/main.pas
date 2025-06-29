@@ -4692,7 +4692,7 @@ var
   StoredProcNode, UDFNode, FBFunctionNode,
   PackageNode, PackageFuncsNone, PackageProcsNode, PackagesUDFsNode,
   PackagesUDRsNode, PackagesUDRFuncsNode, PackagesUDRProcsNode,
-  UDRsNode, SysTableNode,
+  UDRsNode, UDRsFuncNode, UDRsProcNode, SysTableNode,
   DomainsNode, ExceptionNode: TTreeNode;
   RoleNode, UserNode: TTreeNode;
   i, x: Integer;
@@ -5037,6 +5037,9 @@ begin
           UDRsNode:= Node;
           UDRsNode.DeleteChildren;
 
+          //UDRsFuncNode :=  Node.Items[0];
+          //UDRsFuncNode.DeleteChildren;
+
           //Get UDR-Functions
           Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUDRFunctions, Count);
           if Count > 0 then
@@ -5057,6 +5060,9 @@ begin
           end;
 
           //Get UDR-Procedures
+          //UDRsProcNode := Node.Items[1];
+          //UDRsProcNode.DeleteChildren;
+
           Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUDRProcedures, TmpCount);
           if TmpCount > 0 then
           begin
@@ -5074,7 +5080,7 @@ begin
             end;
             UDRsNode.Items[1].Text := 'Procedures (' + IntToStr(UDRsNode.Items[1].Count) + ')';
           end;
-          Node.Text:= ANodeText + ' (' + IntToStr(Count + TmpCount) + ')';
+          UDRsNode.Text:= ANodeText + ' (' + IntToStr(Count + TmpCount) + ')';
         end;
 
       if not Node.Expanded then
@@ -5943,7 +5949,7 @@ begin
     if NodeText = 'UDRs' then //
       Filter:= 42
    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRFunctionRoot then
+    if (TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRFunctionRoot)then
       filter := 43
     else
      if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRFunction then
@@ -5954,7 +5960,6 @@ begin
    else
      if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRProcedure then
        filter := 46
-
 
    else
       Filter:= -1;
@@ -6075,10 +6080,10 @@ begin
 
           'FBFunctions': lmTestFireBirdFunctionClick(nil);
 
-          //'UDRs':
-          //begin
-
-          //end;
+          'UDRs':
+          begin
+            //FillObjectRoot(Node);
+          end;
 
           'Generators': lmViewGenClick(nil);
           'Triggers': lmViewTriggerClick(nil);
@@ -6378,7 +6383,7 @@ begin
             TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
             TPNodeInfos(CNode.Data)^.dbIndex := i;
 
-              CNode:= tvMain.Items.AddChild(CNode, 'Functions');
+              {CNode:= tvMain.Items.AddChild(CNode, 'Functions');
               CNode.ImageIndex:= 52;
               CNode.SelectedIndex:= 52;
               TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRFunctionRoot;
@@ -6390,7 +6395,7 @@ begin
               CNode.SelectedIndex:= 53;
               TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRProcedureRoot;
               TPNodeInfos(CNode.Data)^.dbIndex := i;
-              CNode := CNode.Parent;
+              CNode := CNode.Parent;}
           end;
 
           Inc(i);

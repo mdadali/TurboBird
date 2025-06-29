@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 406
+  Left = 422
   Height = 459
-  Top = 171
+  Top = 328
   Width = 942
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -3402,7 +3402,7 @@ object fmMain: TfmMain
       end
     end
     object lmNewUDRFunction: TMenuItem
-      Tag = 43
+      Tag = 42
       Caption = 'New UDR-Function'
       OnClick = lmNewUDRFunctionClick
     end
@@ -3423,7 +3423,7 @@ object fmMain: TfmMain
       end
     end
     object lmNewUDRProcedure: TMenuItem
-      Tag = 45
+      Tag = 42
       Caption = 'New UDR-Procedure'
       OnClick = lmNewUDRProcedureClick
     end

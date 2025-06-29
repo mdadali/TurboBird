@@ -1,7 +1,7 @@
 object fmFirebirdConfig: TfmFirebirdConfig
-  Left = 359
+  Left = 426
   Height = 538
-  Top = 101
+  Top = 103
   Width = 880
   ActiveControl = Panel13
   Caption = 'Firebird Config'
@@ -204,7 +204,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         Width = 876
         Align = alBottom
         Caption = 'Fields'
-        ClientHeight = 150
+        ClientHeight = 132
         ClientWidth = 872
         TabOrder = 2
         object Label2: TLabel
@@ -879,8 +879,8 @@ object fmFirebirdConfig: TfmFirebirdConfig
   object DataSource1: TDataSource
     DataSet = BufDataset1
     OnUpdateData = DataSource1UpdateData
-    Left = 720
-    Top = 88
+    Left = 728
+    Top = 104
   end
   object BufDataset1: TBufDataset
     MaxIndexesCount = 4
@@ -920,7 +920,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
   object OpenDialog1: TOpenDialog
     Filter = 'firebird.conf'
     Left = 85
-    Top = 109
+    Top = 104
   end
   object SaveDialog1: TSaveDialog
     Left = 80
@@ -929,13 +929,13 @@ object fmFirebirdConfig: TfmFirebirdConfig
   object SynUNIXShellScriptSyn1: TSynUNIXShellScriptSyn
     DefaultFilter = 'UNIX Shell Scripts (*.sh)|*.sh'
     Enabled = False
-    Left = 378
-    Top = 333
+    Left = 384
+    Top = 192
   end
   object SynIniSyn1: TSynIniSyn
     DefaultFilter = 'INI Files (*.ini)|*.ini'
     Enabled = False
-    Left = 230
-    Top = 316
+    Left = 248
+    Top = 192
   end
 end

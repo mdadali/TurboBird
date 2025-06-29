@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#150#1#6'Height'#3#203#1#3'Top'#3#171#0#5
+  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#166#1#6'Height'#3#203#1#3'Top'#3'H'#1#5
   +'Width'#3#174#3#13'ActiveControl'#7#6'tvMain'#7'Caption'#6#28'TurboBird Admi'
   +'n for FireBird'#12'ClientHeight'#3#177#1#11'ClientWidth'#3#174#3#5'Color'#7
   +#6'clForm'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10'BB'#0#0'>B'#0#0#0#0#1#0#1#0
@@ -4023,14 +4023,14 @@ LazarusResources.Add('TfmMain','FORMDATA',[
   +'ropFireBirdFunction'#7'Caption'#6#22'Drop FireBird-Function'#7'OnClick'#7#27
   +'lmDropFireBirdFunctionClick'#0#0#9'TMenuItem'#22'lmTestFireBirdFunction'#7
   +'Caption'#6#22'Test FireBird-Function'#7'OnClick'#7#27'lmTestFireBirdFunctio'
-  +'nClick'#0#0#0#9'TMenuItem'#16'lmNewUDRFunction'#3'Tag'#2'+'#7'Caption'#6#16
+  +'nClick'#0#0#0#9'TMenuItem'#16'lmNewUDRFunction'#3'Tag'#2'*'#7'Caption'#6#16
   +'New UDR-Function'#7'OnClick'#7#21'lmNewUDRFunctionClick'#0#0#9'TMenuItem'#13
   +'lmUDRFunction'#3'Tag'#2','#7'Caption'#6#15'UDR-Function...'#0#9'TMenuItem'
   +#17'lmEditUDRFunction'#7'Caption'#6#17'Edit UDR-Function'#7'OnClick'#7#22'lm'
   +'EditUDRFunctionClick'#0#0#9'TMenuItem'#17'lmDropUDRFunction'#7'Caption'#6#17
   +'Drop UDR-Function'#7'OnClick'#7#22'lmDropUDRFunctionClick'#0#0#9'TMenuItem'
   +#17'lmTestUDRFunction'#7'Caption'#6#17'Test UDR-Function'#7'OnClick'#7#22'lm'
-  +'TestUDRFunctionClick'#0#0#0#9'TMenuItem'#17'lmNewUDRProcedure'#3'Tag'#2'-'#7
+  +'TestUDRFunctionClick'#0#0#0#9'TMenuItem'#17'lmNewUDRProcedure'#3'Tag'#2'*'#7
   +'Caption'#6#17'New UDR-Procedure'#7'OnClick'#7#22'lmNewUDRProcedureClick'#0#0
   +#9'TMenuItem'#14'lmUDRProcedure'#3'Tag'#2'.'#7'Caption'#6#16'UDR Procedure..'
   ,'.'#0#9'TMenuItem'#18'lmEditUDRProcedure'#7'Caption'#6#18'Edit UDR-Procedure'

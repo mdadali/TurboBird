@@ -58,9 +58,9 @@ implementation
 
 procedure TfrmSetFBClient.FormCreate(Sender: TObject);
 begin
-  lstSuggestions.Items.Add('/opt/firebird/lib/libfbclient.so');
-  lstSuggestions.Items.Add('/usr/lib/x86_64-linux-gnu/libfbclient.so.2');
-  lstSuggestions.Items.Add('/usr/lib64/libfbclient.so.2');
+  //lstSuggestions.Items.Add('/opt/firebird/lib/libfbclient.so');
+  //lstSuggestions.Items.Add('/usr/lib/x86_64-linux-gnu/libfbclient.so.2');
+  //lstSuggestions.Items.Add('/usr/lib64/libfbclient.so.2');
 
   edtClientLib.Text := '';
   btnOK.Enabled := False;
@@ -73,7 +73,7 @@ end;
 
 procedure TfrmSetFBClient.btnBrowserClick(Sender: TObject);
 begin
-  OpenDialog1.Filter := 'Firebird Client Library|libfbclient.so*';
+  OpenDialog1.Filter := 'Firebird Client Library|*.so*;*.dll';
   if OpenDialog1.Execute then
     edtClientLib.Text := OpenDialog1.FileName;
 end;

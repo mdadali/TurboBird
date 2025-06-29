@@ -78,6 +78,7 @@ type
     destructor  destroy; override;
     procedure init(AdbIndex: integer);
     procedure InitForFB3;
+    function GetOptionValue(AOption: string): string;
   end;
 
 //var
@@ -570,6 +571,7 @@ end;
 
 procedure TfmFirebirdConfig.InitForFB3;
 begin
+  lbServerMode.Caption := GetOptionValue('ServerMode');
   IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
   try
     FFirebirdConfPath := IniF.ReadString('FireBird', 'ConfPath', '');
@@ -597,6 +599,35 @@ begin
   end;
 end;
 
+function TfmFirebirdConfig.GetOptionValue(AOption: string): string;
+var
+  i, PosEqual: Integer;
+  Line, OptionName, OptionValue: string;
+begin
+  Result := '';
+  for i := 0 to SynEdit1.Lines.Count - 1 do
+  begin
+    Line := Trim(SynEdit1.Lines[i]);
+
+    // Ignore comments and empty lines
+    if (Line = '') or (Line[1] = '#') then
+      Continue;
+
+    // Find position of '='
+    PosEqual := Pos('=', Line);
+    if PosEqual = 0 then Continue;
+
+    OptionName := Trim(Copy(Line, 1, PosEqual - 1));
+    OptionValue := Trim(Copy(Line, PosEqual + 1, MaxInt));
+
+    if SameText(OptionName, AOption) then
+    begin
+      Result := OptionValue;
+      Exit;
+    end;
+  end;
+end;
+
 procedure TfmFirebirdConfig.Init(AdbIndex: Integer);
 var
   Rec: TDatabaseRec;
@@ -613,11 +644,12 @@ begin
   if  FBVersionMajor < 4 then
   begin
     tsFB3Config.TabVisible := true;
+    tsFB3Config.Visible    := true;
     InitForFB3;
   end
   else begin
     tsFB4Config.TabVisible := true;
-
+    tsFB4Config.Visible := true;
     if SQLQuery1.Active then SQLQuery1.Close;
     if IBConnection1.Connected then IBConnection1.Connected := False;
 
