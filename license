@@ -1,0 +1,12 @@
+## License
+
+This project is based on the original TurboBird source code:
+👉 https://code.sd/turbobird/
+
+Licensing:
+
+-The **GUI components** are licensed under the **GNU General Public License (GPL)**.
+-The **non-visual units (Pascal source code / logic)** are licensed under the **GNU Lesser General Public License (LGPL)**.
+
+This reflects the original author's intent as stated on the homepage:
+> "License: GPL for GUI, and LGPL for Units."

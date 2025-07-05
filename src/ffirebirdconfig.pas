@@ -299,6 +299,7 @@ begin
     try
       FFirebirdConfPath := OpenDialog1.FileName;
       synEdit1.Lines.LoadFromFile(FFirebirdConfPath);
+      lbServerMode.Caption := GetOptionValue('ServerMode');
       IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
     finally
       IniF.Free;
@@ -434,7 +435,9 @@ procedure TfmFirebirdConfig.bbSaveFB3ConfigClick(Sender: TObject);
 begin
   try
     SynEdit1.Lines.SaveToFile(FFirebirdConfPath);
-    ShowMessage('Configuration file saved successfully.');
+    //lbServerMode.Caption := GetOptionValue('ServerMode');
+    ShowMessage('Configuration file saved successfully.' + sLineBreak +
+                'Note: Changes will not take effect until the Firebird server is restarted.');
     bbSaveFB3Config.Enabled := false;
   except
     on E: Exception do
@@ -451,7 +454,10 @@ begin
   SearchText := edtsearch.Text;
   if SearchText = '' then Exit;
 
-  FullText := SynEdit1.Text;
+  // Convert both to lowercase for case-insensitive search
+  FullText := LowerCase(SynEdit1.Text);
+  SearchText := LowerCase(SearchText);
+
   FoundPos := Pos(SearchText, FullText);
 
   if FoundPos > 0 then
@@ -460,8 +466,8 @@ begin
     StartPoint := SynEdit1.CharIndexToRowCol(FoundPos);
     EndPoint := SynEdit1.CharIndexToRowCol(FoundPos + Length(SearchText));
 
-    StartPoint.X := StartPoint.X -1;
-    EndPoint.X   := EndPoint.X -1;
+    StartPoint.X := StartPoint.X - 1;
+    EndPoint.X := EndPoint.X - 1;
 
     // Set selection
     SynEdit1.BlockBegin := StartPoint;
@@ -471,7 +477,7 @@ begin
     SynEdit1.SetFocus;
   end
   else
-    ShowMessage('Not found');
+    ShowMessage('Text not found.');
 end;
 
 procedure TfmFirebirdConfig.DataSource1UpdateData(Sender: TObject);
@@ -571,12 +577,14 @@ end;
 
 procedure TfmFirebirdConfig.InitForFB3;
 begin
-  lbServerMode.Caption := GetOptionValue('ServerMode');
   IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
   try
     FFirebirdConfPath := IniF.ReadString('FireBird', 'ConfPath', '');
     if FileExists(FFirebirdConfPath) then
-      SynEdit1.Lines.LoadFromFile(FFirebirdConfPath)
+    begin
+      SynEdit1.Lines.LoadFromFile(FFirebirdConfPath);
+      lbServerMode.Caption := GetOptionValue('ServerMode');
+    end
     else
     begin
       ShowMessage('The file specified in the ini file does not exist. Please select a valid configuration file in the next dialog.');
@@ -586,6 +594,7 @@ begin
       begin
         FFirebirdConfPath := OpenDialog1.FileName;
         SynEdit1.Lines.LoadFromFile(FFirebirdConfPath);
+        lbServerMode.Caption := GetOptionValue('ServerMode');
         // Optionally save the selected path back to the ini file
         IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
       end

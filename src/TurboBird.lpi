@@ -334,7 +334,7 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
+            <Filename Value="C:/daten/mustafa/entwicklung/windows/lazarus/FireBird/TurboBird_Firebird-3.0.10.33601-0_x64/TurboBird"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
