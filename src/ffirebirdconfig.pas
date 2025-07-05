@@ -643,13 +643,16 @@ begin
   lbServerVersion.Caption := IntToStr(FBVersionMajor) + '.' + IntToStr(FBVersionMinor);
   if  FBVersionMajor < 4 then
   begin
-    tsFB3Config.TabVisible := true;
-    tsFB3Config.Visible    := true;
+    PageControl1.ActivePage := tsFB3Config;
+    tsFB3Config.TabVisible  := true;
+    tsFB3Config.Visible     := true;
     InitForFB3;
   end
   else begin
+    PageControl1.ActivePage := tsFB4Config;
     tsFB4Config.TabVisible := true;
     tsFB4Config.Visible := true;
+
     if SQLQuery1.Active then SQLQuery1.Close;
     if IBConnection1.Connected then IBConnection1.Connected := False;
 

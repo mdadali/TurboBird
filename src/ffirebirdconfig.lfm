@@ -1,7 +1,7 @@
 object fmFirebirdConfig: TfmFirebirdConfig
-  Left = 426
+  Left = 411
   Height = 538
-  Top = 103
+  Top = 106
   Width = 880
   ActiveControl = Panel13
   Caption = 'Firebird Config'
@@ -204,7 +204,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         Width = 876
         Align = alBottom
         Caption = 'Fields'
-        ClientHeight = 132
+        ClientHeight = 150
         ClientWidth = 872
         TabOrder = 2
         object Label2: TLabel
