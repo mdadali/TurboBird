@@ -2,4 +2,3 @@
 bin/
 git_update.sh
 push_tb.sh
-src/..bin/x86_64-win64/debug/unitoutput/
