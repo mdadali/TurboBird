@@ -1295,7 +1295,7 @@ begin
     qCheck.SQL.Text :=
       'SELECT 1 FROM RDB$FIELDS ' +
       'WHERE RDB$FIELD_TYPE = 14 ' + // CHAR
-      'AND RDB$FIELD_LENGTH = 16 ' +
+      'AND RDB$FIELD_LENGTH = 63 ' +
       'AND RDB$CHARACTER_SET_ID = 1 ' + // 1 = OCTETS
       'ROWS 1';
     qCheck.Open;

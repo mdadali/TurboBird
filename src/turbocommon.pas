@@ -785,7 +785,7 @@ begin
     end;
   end;
 
-  if (Index = 14) and (CharacterLengt = 16) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
+  if (Index = 14) and (CharacterLengt = 63) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
       Result := 'UUID';
 end;
 //end-newlib
