@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 740
+  Left = 653
   Height = 366
-  Top = 388
+  Top = 116
   Width = 400
   ActiveControl = BitBtn1
   BorderIcons = []
@@ -12,7 +12,7 @@ object fmAbout: TfmAbout
   Color = 15792364
   OnClose = FormClose
   Position = poScreenCenter
-  LCLVersion = '1.2.4.0'
+  LCLVersion = '2.2.6.0'
   object Shape1: TShape
     Left = 9
     Height = 294
@@ -25,9 +25,9 @@ object fmAbout: TfmAbout
   end
   object Label2: TLabel
     Left = 229
-    Height = 19
+    Height = 23
     Top = 16
-    Width = 142
+    Width = 146
     Caption = 'FireBird Admin Tool'
     Font.Color = 5987170
     Font.Height = -16
@@ -36,7 +36,7 @@ object fmAbout: TfmAbout
   end
   object laVersion: TLabel
     Left = 240
-    Height = 17
+    Height = 20
     Top = 44
     Width = 120
     Caption = 'Beta Version 0.9.0'
@@ -46,7 +46,7 @@ object fmAbout: TfmAbout
   end
   object Label4: TLabel
     Left = 24
-    Height = 17
+    Height = 20
     Top = 136
     Width = 200
     Caption = 'Developed By TurboBird team'
@@ -55,9 +55,9 @@ object fmAbout: TfmAbout
   object laWebSite: TLabel
     Cursor = crHandPoint
     Left = 24
-    Height = 17
+    Height = 20
     Top = 168
-    Width = 203
+    Width = 197
     Caption = 'http://code-sd.com/turbobird'
     Font.Color = 7303023
     ParentColor = False
@@ -67,9 +67,9 @@ object fmAbout: TfmAbout
   object Label6: TLabel
     Cursor = crHandPoint
     Left = 24
-    Height = 17
+    Height = 20
     Top = 200
-    Width = 233
+    Width = 236
     Caption = 'Written using Free Pascal / Lazarus'
     Font.Color = 7303023
     ParentColor = False
@@ -78,9 +78,9 @@ object fmAbout: TfmAbout
   end
   object laVersionDate: TLabel
     Left = 240
-    Height = 17
+    Height = 20
     Top = 65
-    Width = 105
+    Width = 109
     Caption = '2010 - May 2012'
     Font.Color = 6908265
     ParentColor = False
@@ -204,9 +204,9 @@ object fmAbout: TfmAbout
   end
   object Label5: TLabel
     Left = 24
-    Height = 17
+    Height = 20
     Top = 232
-    Width = 130
+    Width = 128
     Caption = 'License: GPL / LGPL'
     Font.Color = 3487029
     ParentColor = False
@@ -226,7 +226,7 @@ object fmAbout: TfmAbout
   object laUpdate: TLabel
     Cursor = crHandPoint
     Left = 240
-    Height = 17
+    Height = 20
     Top = 88
     Width = 115
     Caption = 'Check for update'

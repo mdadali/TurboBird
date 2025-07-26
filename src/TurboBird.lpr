@@ -26,7 +26,7 @@ uses
   sysutils, Comparison, Update, topologicalsort, UnitFirebirdServices,
   turbocommon, importtable, fileimport, csvdocument, udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,  fbcommon,
-  fTestFunction, uArrayQuery, fSetFBClient, fFirebirdConfig;
+  fTestFunction, fSetFBClient, fFirebirdConfig;
 
 const
   Major = 1;

@@ -2,10 +2,10 @@
 
 LazarusResources.Add('TdmSysTables','FORMDATA',[
   'TPF0'#12'TdmSysTables'#11'dmSysTables'#14'OldCreateOrder'#8#6'Height'#3#174#0
-  +#16'HorizontalOffset'#3#198#1#14'VerticalOffset'#3#175#0#5'Width'#3'9'#1#0#9
-  +'TSQLQuery'#7'sqQuery'#9'FieldDefs'#14#0#14'AutoCalcFields'#8#6'Params'#14#0
-  +#6'Macros'#14#0#4'Left'#3#216#0#3'Top'#2' '#0#0#13'TIBConnection'#13'IBConne'
-  +'ction1'#9'Connected'#8#11'LoginPrompt'#8#14'KeepConnection'#8#22'CheckTrans'
-  +'actionParams'#8#26'UseConnectionCharSetIfNone'#8#4'Left'#2'='#3'Top'#2'6'#0
-  +#0#0
+  +#16'HorizontalOffset'#3'X'#1#14'VerticalOffset'#3#29#1#5'Width'#3'9'#1#0#9'T'
+  +'SQLQuery'#7'sqQuery'#9'FieldDefs'#14#0#14'AutoCalcFields'#8#6'Params'#14#0#6
+  +'Macros'#14#0#4'Left'#3#216#0#3'Top'#2' '#0#0#13'TIBConnection'#13'IBConnect'
+  +'ion1'#9'Connected'#8#11'LoginPrompt'#8#14'KeepConnection'#8#22'CheckTransac'
+  +'tionParams'#8#26'UseConnectionCharSetIfNone'#8#4'Left'#2'='#3'Top'#2'6'#0#0
+  +#0
 ]);

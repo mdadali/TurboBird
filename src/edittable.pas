@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, db, sqldb, IBConnection, FileUtil, LResources, Forms,
   Controls, Graphics, Dialogs, ExtCtrls, DbCtrls, DBGrids, StdCtrls, ComCtrls,
-  Buttons, main;
+  Buttons, main, usqlqueryext;
 
 type
 
@@ -21,7 +21,7 @@ type
     Label1: TLabel;
     laPos: TLabel;
     Panel1: TPanel;
-    sqEditTable: TSQLQuery;
+    sqEditTable: TSQLQueryExt;
     procedure bbSaveClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -76,7 +76,7 @@ end;
 
 procedure TfmEditTable.sqEditTableAfterScroll(DataSet: TDataSet);
 begin
-  laPos.Caption:= IntToStr(sqEditTable.RecNo) + ' of ' + IntToStr(sqEditTable.RecordCount);
+   laPos.Caption:= IntToStr(sqEditTable.RecNo) + ' of ' + IntToStr(sqEditTable.RecordCount);
 end;
 
 procedure TfmEditTable.Init(dbIndex: Integer; ATableName: string);

@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 380
+  Left = 422
   Height = 459
-  Top = 135
+  Top = 239
   Width = 942
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -2117,14 +2117,6 @@ object fmMain: TfmMain
       CDB76FF558F4C722A94F8DC993F3C910A8D8DADA761B2BFC2F902C092C
     }
   end
-  object SQLQuery1: TSQLQuery
-    FieldDefs = <>
-    AutoCalcFields = False
-    Params = <>
-    Macros = <>
-    Left = 40
-    Top = 200
-  end
   object pmDatabase: TPopupMenu
     OnPopup = pmDatabasePopup
     Left = 40
@@ -4005,5 +3997,12 @@ object fmMain: TfmMain
     MaxFontSize = 0
     Left = 504
     Top = 96
+  end
+  object SQLQuery1: TSQLQueryExt
+    FieldDefs = <>
+    Params = <>
+    Macros = <>
+    Left = 248
+    Top = 80
   end
 end

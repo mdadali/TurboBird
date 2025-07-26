@@ -10,7 +10,7 @@ uses
   DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
   dbugintf, turbocommon, variants, strutils, IniFiles,
-  uArrayQuery;
+  usqlqueryext;
 
 type
 
@@ -34,7 +34,7 @@ type
 
   TQueryThread = class(TThread)
     private
-      FSQLQuery: TSQLQuery;
+      FSQLQuery: TSQLQueryExt;
       FTrans: TSQLTransaction;
       FConnection: TIBConnection;
 
@@ -44,7 +44,7 @@ type
       fTerminated: Boolean;
       fType: TQueryActions;
       fStatement: string;
-      property Query: TSQLQuery read FSQLQuery write FSQLQuery;
+      property Query: TSQLQueryExt read FSQLQuery write FSQLQuery;
       property Trans: TSQLTransaction read FTrans write FTrans;
       property Connection: TIBConnection read FConnection write FConnection;
       property Statement: String read fStatement write fStatement;
@@ -194,8 +194,8 @@ type
     procedure EnableCommitButton;
     procedure ExecuteQuery;
     function GetNewTabNum: string;
-    // Gets TSQLQuery of current result tabsheet - only if it is a select query
-    function GetCurrentSelectQuery: TSQLQuery;
+    // Gets TSQLQueryExtExt of current result tabsheet - only if it is a select query
+    function GetCurrentSelectQuery: TSQLQueryExt;
     // Gets both querytype and whether SQL is DML or DDL
     // Investigates QueryList[LookAtIndex] to find out
     function GetQuerySQLType(QueryList: TStringList; var LookAtIndex: Integer;
@@ -221,7 +221,7 @@ type
     // Get query text from GUI/memo into
     // QueryContents
     function GetQuery(QueryContents: tstrings): boolean;
-    function CreateResultTab(QueryType: TQueryTypes; var aSqlQuery: TSQLQuery; var aSQLScript: TSQLScript;
+    function CreateResultTab(QueryType: TQueryTypes; var aSqlQuery: TSQLQueryExt; var aSQLScript: TSQLScript;
       var meResult: TMemo; AdditionalTitle: string = ''): TTabSheet;
     // Runs SQL script; returns result
     function ExecuteScript(Script: string): Boolean;
@@ -361,12 +361,12 @@ procedure TfmQueryWindow.ApplyClick(Sender: TObject);
 var
   i, x: Integer;
   TableName: string;
-  UpdateQuery: TSQLQuery;
+  UpdateQuery: TSQLQueryExt;
   PKIndexName: string;
   ConstraintName: string;
   KeyList, FieldsList: TStringList;
   WhereClause: string;
-  UserData: TSQLQuery;
+  UserData: TSQLQueryExt;
   TabIndex: Integer;
   FieldsSQL: string;
 begin
@@ -538,7 +538,7 @@ end;
 
 { GetCurrentSelectQuery: return result recordset of a page tab }
 
-function TfmQueryWindow.GetCurrentSelectQuery: TSQLQuery;
+function TfmQueryWindow.GetCurrentSelectQuery: TSQLQueryExt;
 var
   i: Integer;
   Ctl: TControl;
@@ -549,7 +549,7 @@ begin
   begin
     if (pgOutputPageCtl.ActivePage.Tag<>0) then
     begin
-      Result:= TSQLQuery(pgOutputPageCtl.ActivePage.Tag);
+      Result:= TSQLQueryExt(pgOutputPageCtl.ActivePage.Tag);
     end;
   end;
 end;
@@ -694,7 +694,7 @@ end;
 procedure TfmQueryWindow.tbCommitClick(Sender: TObject);
 var
   meResult: TMemo;
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
   SqlScript: TSQLScript;
   ATab: TTabSheet;
   QT: TQueryThread;
@@ -818,7 +818,7 @@ end;
 procedure TfmQueryWindow.tbRollbackClick(Sender: TObject);
 var
   meResult: TMemo;
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
   SqlScript: TSQLScript;
   ATab: TTabSheet;
   QT: TQueryThread;
@@ -1017,7 +1017,7 @@ end;
 { Create new result tab depending on query type }
 
 function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
-  var aSqlQuery: TSQLQuery; var aSQLScript: TSQLScript; var meResult: TMemo;
+  var aSqlQuery: TSQLQueryExt; var aSQLScript: TSQLScript; var meResult: TMemo;
   AdditionalTitle: string): TTabSheet;
 var
   ATab: TTabSheet;
@@ -1040,7 +1040,7 @@ begin
     // Clean up any existing object to avoid memory leak
     if assigned(aSQLQuery) then
       aSQLQuery.Free;
-    aSqlQuery:= TSQLQuery.Create(self);
+    aSqlQuery:= TSQLQueryExt.Create(self);
     aSqlQuery.DataBase:= FIBConnection;
     aSqlQuery.Transaction:= FSQLTrans;
     aSqlQuery.AfterPost:= @QueryAfterPost; //detect user-edited grid
@@ -1104,7 +1104,7 @@ begin
     case QueryType of
       qtExecute:
       begin
-        aSqlQuery:= TSQLQuery.Create(self);
+        aSqlQuery:= TSQLQueryExt.Create(self);
         aSqlQuery.DataBase:= FIBConnection;
         aSqlQuery.Transaction:= FSQLTrans;
       end;
@@ -1124,7 +1124,7 @@ begin
 end;
 
 (***************  Execute Query   ******************)
-procedure TfmQueryWindow.ExecuteQuery;
+{procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -1133,10 +1133,10 @@ var
   IsDDL: Boolean;
   Affected: Integer;
   fQueryType: TQueryTypes;
-  TempQuery: TSQLQuery;
+  TempQuery: TSQLQueryExt;
   SanitizedSQL: string;
   i: integer;
-  FSQLQuery: TSQLQuery;
+  FSQLQuery: TSQLQueryExt;
 begin
   try
     // Script
@@ -1168,7 +1168,7 @@ begin
       begin
         FTab:= nil;
         try
-          FSQLQuery := TSQLQuery.Create(self);
+          FSQLQuery := TSQLQueryExt.Create(self);
           FSQLQuery.DataBase:= FIBConnection;
 
           FSQLQuery.Transaction:= FSQLTrans;
@@ -1178,7 +1178,7 @@ begin
           FTab.ImageIndex:= 6;
           FTab.Hint:= FQueryPart;
           FTab.ShowHint:= True;
-          FSQLQuery.SQL.Text:= FQueryPart;
+          FSQLQuery.SQL.Text:= Trim(FQueryPart);
 
           // Work around sqldb not detecting insert/updatesql for FIRST x queries
           // Massage the SQL, assign it to a temp query and use the insertquery
@@ -1194,7 +1194,7 @@ begin
             if i > 0 then
             begin
               SanitizedSQL:= 'select ' + trim(copy(FQueryPart, i+length(SanitizedSQL), maxint));
-              TempQuery:= TSQLQuery.Create(nil);
+              TempQuery:= TSQLQueryExt.Create(nil);
               try
                 TempQuery.ParseSQL:= true;
                 FSQLQuery.InsertSQL:= TempQuery.InsertSQL;
@@ -1217,7 +1217,7 @@ begin
 
           // Wait for the thread to complete
           repeat
-            Sleep(100);
+            //Sleep(100);
             application.ProcessMessages; // This prevents display freeze
           until FQT.fTerminated;
 
@@ -1303,7 +1303,7 @@ begin
 
                 // Wait for thread completion
                 repeat
-                  application.ProcessMessages;
+                  //application.ProcessMessages;
                 until (FQT.fTerminated) or (FCanceled);
 
                 // Raise exception if an error occured during thread execution (ExecProc)
@@ -1410,8 +1410,8 @@ begin
     end;
   end;
 end;
-
-{procedure TfmQueryWindow.ExecuteQuery;
+}
+procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -1420,7 +1420,7 @@ var
   IsDDL: Boolean;
   Affected: Integer;
   fQueryType: TQueryTypes;
-  FSQLQuery: TSQLQuery;
+  FSQLQuery: TSQLQueryExt;
 begin
   try
     if (FOrigQueryType = qtScript) then
@@ -1449,7 +1449,7 @@ begin
         begin
           FTab := nil;
           try
-            FSQLQuery := TSQLQuery.Create(Self);
+            FSQLQuery := TSQLQueryExt.Create(Self);
             FSQLQuery.DataBase := FIBConnection;
             FSQLQuery.Transaction := FSQLTrans;
             if cxAutoCommit.Checked then
@@ -1598,13 +1598,13 @@ begin
       FFinished := True;
     end;
   end;
-end;}
+end;
 
 { Execute script }
 function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
 var
   StartTime: TDateTime;
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
   SqlScript: TSQLScript;
   meResult: TMemo;
   ATab: TTabSheet;
@@ -1796,7 +1796,7 @@ end;
 
 procedure TfmQueryWindow.DBGridTitleClick(column: TColumn);
 var
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
 //    indexoption : TIndexOptions;
 begin
   SQLQuery:= nil;
@@ -1938,7 +1938,7 @@ procedure TfmQueryWindow.lmCommaDelimitedClick(Sender: TObject);
 var
   i: Integer;
   F: TextFile;
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
 begin
   SaveDialog1.DefaultExt:= '.txt';
   SqlQuery:= nil;
@@ -2111,7 +2111,7 @@ begin
                FuncName + ''' and RDB$PACKAGE_NAME is null';
       end;
 
-      with TSQLQuery.Create(nil) do
+      with TSQLQueryExt.Create(nil) do
       try
         DataBase:= FIBConnection;
         SQL.Text := SQLStr;
@@ -2174,7 +2174,7 @@ procedure TfmQueryWindow.lmHTMLClick(Sender: TObject);
 var
   i: Integer;
   F: TextFile;
-  SqlQuery: TSQLQuery;
+  SqlQuery: TSQLQueryExt;
 begin
   SaveDialog1.DefaultExt:= '.htm';
   SqlQuery:= nil;
@@ -2342,8 +2342,8 @@ begin
 
   // Get DataSet's TTabsheet
   // The query object's tag should be the tab index number
-  if (Dataset is TSQLQuery) then
-    TabSheet:= pgOutputPageCtl.Pages[TSQLQuery(DataSet).Tag];
+  if (Dataset is TSQLQueryExt) then
+    TabSheet:= pgOutputPageCtl.Pages[TSQLQueryExt(DataSet).Tag];
 
   if assigned(TabSheet) then
   begin
@@ -2426,7 +2426,7 @@ end;
 
 procedure TfmQueryWindow.ThreadTerminated(Sender: TObject);
 var
-  aSQLQuery: TSQLQuery;
+  aSQLQuery: TSQLQueryExt;
 begin
   // Raise exception if an error occured during thread execution (Open)
   if FQT.Error then

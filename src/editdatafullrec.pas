@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, db, sqldb, IBConnection, FileUtil, LResources, Forms,
-  Controls, Graphics, Dialogs, DbCtrls, StdCtrls, main,
+  Controls, Graphics, Dialogs, DbCtrls, StdCtrls, main, usqlqueryext,
   Buttons;
 
 type
@@ -19,7 +19,7 @@ type
     DBNavigator1: TDBNavigator;
     Label1: TLabel;
     laPos: TLabel;
-    sqEditTable: TSQLQuery;
+    sqEditTable: TSQLQueryExt;
     procedure bbSaveClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure sqEditTableAfterScroll(DataSet: TDataSet);

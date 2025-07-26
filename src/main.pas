@@ -15,7 +15,7 @@ uses
   ExtCtrls, Buttons, StdCtrls, TableManage, dbugintf, turbocommon, importtable,
   DB, IniFiles, Types,
   fSetFBClient,
-  uArrayQuery,
+  usqlqueryext,
   fTestFunction,
   fFirebirdConfig,
   udb_udf_fetcher,
@@ -121,6 +121,7 @@ type
     lmFirebirdConfig: TMenuItem;
     mnOptions: TMenuItem;
     mnEditorFont: TMenuItem;
+    SQLQuery1: TSQLQueryExt;
     toolbarImages: TImageList;
     MainMenu1: TMainMenu;
     mdsHistory: TMemDataset;
@@ -200,7 +201,6 @@ type
     PageControl1: TPageControl;
     pmDatabase: TPopupMenu;
     Splitter1: TSplitter;
-    SQLQuery1: TSQLQuery;
     StatusBar1: TStatusBar;
     TabSheet1: TTabSheet;
     ToolBar1: TToolBar;
@@ -5762,7 +5762,9 @@ begin
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
-    QWindow.meQuery.Lines.Text:= 'select first 1000 * from "' + SelNode.Text + '"';
+    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from "' + SelNode.Text + '"';
+    QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
+
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;

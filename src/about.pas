@@ -71,6 +71,7 @@ begin
   fmUpdate:= TfmUpdate.Create(nil);
   fmUpdate.Init(fmMain.Major, fmMain.Minor, fmMain.ReleaseVersion);
   fmUpdate.Show;
+  //Application.ProcessMessages;
 end;
 
 procedure TfmAbout.FormClose(Sender: TObject; var CloseAction: TCloseAction);

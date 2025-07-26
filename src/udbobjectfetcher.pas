@@ -149,9 +149,6 @@ begin
     end;
 
   finally
-    ShowMessage(SQL);
-    Q.SQL.SaveToFile('C:\daten\mustafa\entwicklung\windows\lazarus\FireBird\Firebird-5.0.2.1613-0-windows-x64\query.txt');
-
     Q.Free;
   end;
 end;

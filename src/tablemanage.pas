@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, ComCtrls, Grids, Buttons, StdCtrls, CheckLst, LCLType, turbocommon, types,
-  uArrayQuery;
+  usqlqueryext;
 
 type
 

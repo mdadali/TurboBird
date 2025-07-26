@@ -18,7 +18,7 @@
       <AutoIncrementBuild Value="True"/>
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
-      <BuildNr Value="1122"/>
+      <BuildNr Value="1124"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="9">
@@ -334,7 +334,7 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="C:/daten/mustafa/entwicklung/windows/lazarus/FireBird/TurboBird_Firebird-3.0.10.33601-0_x64/TurboBird"/>
+            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -399,35 +399,38 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="8">
+    <RequiredPackages Count="9">
       <Item1>
-        <PackageName Value="zcomponent"/>
+        <PackageName Value="SQLDBExt"/>
       </Item1>
       <Item2>
-        <PackageName Value="LR_ZeosDB"/>
+        <PackageName Value="zcomponent"/>
       </Item2>
       <Item3>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="LR_ZeosDB"/>
       </Item3>
       <Item4>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="laz_synapse"/>
       </Item4>
       <Item5>
-        <PackageName Value="SQLDBLaz"/>
+        <PackageName Value="MemDSLaz"/>
       </Item5>
       <Item6>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item6>
       <Item7>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item7>
       <Item8>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item8>
+      <Item9>
+        <PackageName Value="LCL"/>
+      </Item9>
     </RequiredPackages>
-    <Units Count="75">
+    <Units Count="74">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -521,6 +524,7 @@
         <ComponentName Value="fmAbout"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="About"/>
       </Unit12>
       <Unit13>
         <Filename Value="createtrigger.pas"/>
@@ -552,6 +556,7 @@
         <ComponentName Value="fmEditDataFullRec"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EditDataFullRec"/>
       </Unit16>
       <Unit17>
         <Filename Value="udfinfo.pas"/>
@@ -699,6 +704,7 @@
         <ComponentName Value="fmUpdate"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Update"/>
       </Unit36>
       <Unit37>
         <Filename Value="topologicalsort.pas"/>
@@ -849,30 +855,25 @@
         <IsPartOfProject Value="True"/>
       </Unit70>
       <Unit71>
-        <Filename Value="classes/uarrayquery.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="uArrayQuery"/>
-      </Unit71>
-      <Unit72>
         <Filename Value="common/fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit72>
-      <Unit73>
+      </Unit71>
+      <Unit72>
         <Filename Value="fsetfbclient.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmSetFBClient"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-      </Unit73>
-      <Unit74>
+      </Unit72>
+      <Unit73>
         <Filename Value="ffirebirdconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmFirebirdConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
-      </Unit74>
+      </Unit73>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

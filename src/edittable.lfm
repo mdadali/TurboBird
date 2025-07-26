@@ -1,7 +1,7 @@
 object fmEditTable: TfmEditTable
-  Left = 345
+  Left = 737
   Height = 256
-  Top = 170
+  Top = 185
   Width = 612
   ActiveControl = Panel1
   Caption = 'fmEditTable'
@@ -10,7 +10,7 @@ object fmEditTable: TfmEditTable
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 32
@@ -25,7 +25,7 @@ object fmEditTable: TfmEditTable
       Left = 292
       Height = 30
       Top = 1
-      Width = 59
+      Width = 60
       Align = alLeft
       Alignment = taCenter
       BorderSpacing.Left = 50
@@ -33,10 +33,10 @@ object fmEditTable: TfmEditTable
       ParentColor = False
     end
     object laPos: TLabel
-      Left = 351
+      Left = 352
       Height = 30
       Top = 1
-      Width = 9
+      Width = 8
       Align = alLeft
       Alignment = taCenter
       Caption = '0'
@@ -95,15 +95,15 @@ object fmEditTable: TfmEditTable
   end
   object Datasource1: TDataSource
     DataSet = sqEditTable
-    left = 408
-    top = 144
+    Left = 408
+    Top = 144
   end
-  object sqEditTable: TSQLQuery
+  object sqEditTable: TSQLQueryExt
     FieldDefs = <>
-    AutoCalcFields = False
     AfterScroll = sqEditTableAfterScroll
     Params = <>
-    left = 288
-    top = 128
+    Macros = <>
+    Left = 104
+    Top = 136
   end
 end

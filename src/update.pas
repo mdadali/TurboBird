@@ -260,6 +260,7 @@ begin
           // Linux64-0
           List.LoadFromStream(http.Document);
           VerStr:= Trim(List.Text);
+          ShowMessage(List.Text);
           ServerMinor:= StrToInt(Copy(VerStr, 1, Pos('.', VerStr) - 1));
           Delete(VerStr, 1, Pos('.', VerStr));
           ServerRelease:= StrToInt(VerStr);

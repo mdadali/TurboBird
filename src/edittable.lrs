@@ -1,17 +1,17 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmEditTable','FORMDATA',[
-  'TPF0'#12'TfmEditTable'#11'fmEditTable'#4'Left'#3'Y'#1#6'Height'#3#0#1#3'Top'
-  +#3#170#0#5'Width'#3'd'#2#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#11'fmEdi'
+  'TPF0'#12'TfmEditTable'#11'fmEditTable'#4'Left'#3#225#2#6'Height'#3#0#1#3'Top'
+  +#3#185#0#5'Width'#3'd'#2#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#11'fmEdi'
   +'tTable'#12'ClientHeight'#3#0#1#11'ClientWidth'#3'd'#2#7'OnClose'#7#9'FormCl'
   +'ose'#8'OnCreate'#7#10'FormCreate'#8'Position'#7#14'poScreenCenter'#10'LCLVe'
-  +'rsion'#6#7'1.2.6.0'#0#6'TPanel'#6'Panel1'#4'Left'#2#0#6'Height'#2' '#3'Top'
+  +'rsion'#6#7'2.2.6.0'#0#6'TPanel'#6'Panel1'#4'Left'#2#0#6'Height'#2' '#3'Top'
   +#2#0#5'Width'#3'd'#2#5'Align'#7#5'alTop'#12'ClientHeight'#2' '#11'ClientWidt'
   +'h'#3'd'#2#11'ParentColor'#8#8'TabOrder'#2#0#0#6'TLabel'#6'Label1'#4'Left'#3
-  +'$'#1#6'Height'#2#30#3'Top'#2#1#5'Width'#2';'#5'Align'#7#6'alLeft'#9'Alignme'
+  +'$'#1#6'Height'#2#30#3'Top'#2#1#5'Width'#2'<'#5'Align'#7#6'alLeft'#9'Alignme'
   +'nt'#7#8'taCenter'#18'BorderSpacing.Left'#2'2'#7'Caption'#6#8'Record #'#11'P'
-  +'arentColor'#8#0#0#6'TLabel'#5'laPos'#4'Left'#3'_'#1#6'Height'#2#30#3'Top'#2
-  +#1#5'Width'#2#9#5'Align'#7#6'alLeft'#9'Alignment'#7#8'taCenter'#7'Caption'#6
+  +'arentColor'#8#0#0#6'TLabel'#5'laPos'#4'Left'#3'`'#1#6'Height'#2#30#3'Top'#2
+  +#1#5'Width'#2#8#5'Align'#7#6'alLeft'#9'Alignment'#7#8'taCenter'#7'Caption'#6
   +#1'0'#10'Font.Color'#4' +'#177#0#11'ParentColor'#8#10'ParentFont'#8#0#0#12'T'
   +'DBNavigator'#12'DBNavigator1'#4'Left'#2#1#6'Height'#2#30#3'Top'#2#1#5'Width'
   +#3#241#0#5'Align'#7#6'alLeft'#10'BevelOuter'#7#6'bvNone'#29'ChildSizing.Enla'
@@ -32,7 +32,7 @@ LazarusResources.Add('TfmEditTable','FORMDATA',[
   +'ncelOnExit'#19'dgHeaderHotTracking'#18'dgHeaderPushedLook'#17'dgAutoSizeCol'
   +'umns'#0#10'Scrollbars'#7#10'ssAutoBoth'#8'TabOrder'#2#1#10'TitleStyle'#7#8
   +'tsNative'#0#0#11'TDataSource'#11'Datasource1'#7'DataSet'#7#11'sqEditTable'#4
-  +'left'#3#152#1#3'top'#3#144#0#0#0#9'TSQLQuery'#11'sqEditTable'#9'FieldDefs'
-  +#14#0#14'AutoCalcFields'#8#11'AfterScroll'#7#22'sqEditTableAfterScroll'#6'Pa'
-  +'rams'#14#0#4'left'#3' '#1#3'top'#3#128#0#0#0#0
+  +'Left'#3#152#1#3'Top'#3#144#0#0#0#12'TSQLQueryExt'#11'sqEditTable'#9'FieldDe'
+  +'fs'#14#0#11'AfterScroll'#7#22'sqEditTableAfterScroll'#6'Params'#14#0#6'Macr'
+  +'os'#14#0#4'Left'#2'h'#3'Top'#3#136#0#0#0#0
 ]);
