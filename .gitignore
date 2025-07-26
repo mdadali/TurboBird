@@ -1,4 +1,5 @@
 # Ignoriere alle Dateien im bin-Verzeichnis
+/src/
 bin/
 git_update.sh
 push_tb.sh
