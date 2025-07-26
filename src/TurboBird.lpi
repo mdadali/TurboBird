@@ -18,7 +18,8 @@
       <AutoIncrementBuild Value="True"/>
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
-      <BuildNr Value="1124"/>
+      <RevisionNr Value="1"/>
+      <BuildNr Value="1131"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="9">
@@ -667,6 +668,7 @@
         <ComponentName Value="fmSQLHistory"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SQLHistory"/>
       </Unit31>
       <Unit32>
         <Filename Value="copytable.pas"/>

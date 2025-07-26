@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 422
+  Left = 358
   Height = 459
-  Top = 239
+  Top = 188
   Width = 942
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -570,6 +570,7 @@ object fmMain: TfmMain
     OnDblClick = tvMainDblClick
     OnDeletion = tvMainDeletion
     OnExpanded = tvMainExpanded
+    OnKeyDown = tvMainKeyDown
     OnMouseMove = tvMainMouseMove
     Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
   end
@@ -3536,7 +3537,7 @@ object fmMain: TfmMain
         DataType = ftInteger
       end>
     Left = 168
-    Top = 280
+    Top = 288
   end
   object toolbarImages: TImageList
     Height = 32
@@ -4002,7 +4003,7 @@ object fmMain: TfmMain
     FieldDefs = <>
     Params = <>
     Macros = <>
-    Left = 248
-    Top = 80
+    Left = 208
+    Top = 96
   end
 end

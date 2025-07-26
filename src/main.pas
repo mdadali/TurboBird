@@ -10,7 +10,7 @@ property of the popup menu to the right value.
 interface
 
 uses
-  Classes, SysUtils, IBConnection, sqldb, sqldblib, memds, FileUtil, LResources,
+   LCLType, Classes, SysUtils, IBConnection, sqldb, sqldblib, memds, FileUtil, LResources,
   Forms, Controls, Graphics, Dialogs, Menus, ComCtrls, Reg, QueryWindow, Grids,
   ExtCtrls, Buttons, StdCtrls, TableManage, dbugintf, turbocommon, importtable,
   DB, IniFiles, Types,
@@ -332,6 +332,7 @@ type
     procedure tvMainDeletion(Sender: TObject; Node: TTreeNode);
     procedure tvMainExpanded(Sender: TObject; Node: TTreeNode);
     procedure GlobalException(Sender: TObject; E : Exception);
+    procedure tvMainKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure tvMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer
       );
   private
@@ -2943,7 +2944,7 @@ begin
       mdsHistory.Last;
       if (SQLType <> 'SELECT') or (mdsHistory.FieldByName('SQLStatement').AsString <> SQLStatement) then
       begin
-        //mdsHistory.AppendRecord([Now, SQLType, SQLStatement, 0]);
+        mdsHistory.AppendRecord([Now, SQLType, SQLStatement, 0]);
         if SQLType = 'DDL' then
           mdsHistory.SaveToFile(FCurrentHistoryFile);
       end;
@@ -5698,7 +5699,8 @@ procedure TfmMain.mnAboutClick(Sender: TObject);
 begin
   fmAbout:= TfmAbout.Create(nil);
   fmAbout.Init;
-  fmAbout.Show;
+  fmAbout.ShowModal;
+  fmAbout.Free;
 end;
 
 (************* Edit Registration  *************)
@@ -6203,6 +6205,27 @@ end;
 procedure TfmMain.GlobalException(Sender: TObject; E : Exception);
 begin
   MessageDlg('Exception', e.Message, mtError, [mbOk], 0);
+end;
+
+procedure TfmMain.tvMainKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  P: TPoint;
+begin
+  // Kontextmenü mit Shift + F10 oder Menü-Taste (VK_APPS = $5D)
+  if ((Key = VK_F10) and (ssShift in Shift)) or (Key = VK_APPS) then
+  //if (Key = VK_F10)  and (ssShift in Shift) then
+  begin
+    // aktuelle Position des selektierten Knotens holen
+    if Assigned(tvMain.Selected) then
+    begin
+      P := tvMain.Selected.DisplayRect(True).TopLeft;
+      P := tvMain.ClientToScreen(P);
+      // Kontextmenü anzeigen
+      tvMain.PopupMenu.PopUp(P.X, P.Y);
+      Key := 0; // Taste als verarbeitet markieren
+    end;
+  end;
 end;
 
 procedure TfmMain.tvMainMouseMove(Sender: TObject; Shift: TShiftState; X,

@@ -1,7 +1,7 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 318
+  Left = 461
   Height = 449
-  Top = 119
+  Top = 128
   Width = 808
   Caption = 'SQL History'
   ClientHeight = 449
@@ -9,7 +9,7 @@ object fmSQLHistory: TfmSQLHistory
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object DBGrid1: TDBGrid
     Left = 5
     Height = 365
@@ -57,29 +57,26 @@ object fmSQLHistory: TfmSQLHistory
     Align = alRight
     Anchors = [akLeft, akRight, akBottom]
     Caption = 'Export to text file'
-    ClientHeight = 53
-    ClientWidth = 562
+    ClientHeight = 52
+    ClientWidth = 564
     TabOrder = 3
     object cxAfterDate: TCheckBox
       Left = 0
-      Height = 21
+      Height = 22
       Top = 2
-      Width = 148
+      Width = 151
       Caption = 'Only after the date'
       OnClick = cxAfterDateClick
       TabOrder = 0
     end
     object DateEdit1: TDateEdit
       Left = 152
-      Height = 24
+      Height = 30
       Top = 2
       Width = 104
       CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
-      OKCaption = 'OK'
-      CancelCaption = 'Cancel'
       DateOrder = doNone
       ButtonWidth = 23
-      CharCase = ecNormal
       NumGlyphs = 1
       MaxLength = 0
       TabOrder = 1
@@ -87,18 +84,18 @@ object fmSQLHistory: TfmSQLHistory
     end
     object Label1: TLabel
       Left = 296
-      Height = 16
+      Height = 20
       Top = 5
-      Width = 61
+      Width = 62
       Caption = 'SQL Type'
       ParentColor = False
     end
     object cbSQLType: TComboBox
       Left = 360
-      Height = 25
+      Height = 28
       Top = 2
       Width = 100
-      ItemHeight = 16
+      ItemHeight = 0
       ItemIndex = 0
       Items.Strings = (
         'All'
@@ -114,7 +111,7 @@ object fmSQLHistory: TfmSQLHistory
     object bbExport: TBitBtn
       Left = 472
       Height = 30
-      Top = -4
+      Top = 0
       Width = 75
       Caption = 'Export'
       OnClick = bbExportClick
@@ -123,21 +120,23 @@ object fmSQLHistory: TfmSQLHistory
   end
   object cxOverwrite: TCheckBox
     Left = 8
-    Height = 21
+    Height = 22
     Top = 462
-    Width = 174
+    Width = 177
     Caption = 'Overwrite existing SQL'
     TabOrder = 4
   end
   object Datasource1: TDataSource
-    left = 127
-    top = 12
+    DataSet = fmMain.mdsHistory
+    Enabled = False
+    Left = 128
+    Top = 12
   end
   object SaveDialog1: TSaveDialog
     DefaultExt = '.sql'
     Filter = 'SQL File|*.sql|All files|*.*'
     Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
-    left = 608
-    top = 144
+    Left = 608
+    Top = 144
   end
 end

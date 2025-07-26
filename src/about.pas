@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, LCLIntf;
+  ExtCtrls, StdCtrls, Buttons, LCLIntf,
+  turbocommon;
+
 
 {$i turbocommon.inc}
 
@@ -18,14 +20,25 @@ type
     BitBtn1: TBitBtn;
     Image1: TImage;
     Image2: TImage;
+    Label1: TLabel;
+    Label10: TLabel;
+    Label11: TLabel;
+    lbVersionTime: TLabel;
+    lbWidgetSet: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     Label5: TLabel;
-    laTarget: TLabel;
-    laVersion: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    lbOSInfo: TLabel;
+    lbFPCVersion: TLabel;
+    lbLazarus: TLabel;
+    lbPgmVersion: TLabel;
     Label4: TLabel;
     laWebSite: TLabel;
     Label6: TLabel;
-    laVersionDate: TLabel;
+    lbVersionDate: TLabel;
     laUpdate: TLabel;
     Shape1: TShape;
     procedure BitBtn1Click(Sender: TObject);
@@ -56,9 +69,17 @@ end;
 
 procedure TfmAbout.Init;
 begin
-  laVersion.Caption:= 'Version ' + fmMain.Version;
-  laVersionDate.Caption:= fmMain.VersionDate;
+  {lbPgmVersion.Caption:= 'Version ' + fmMain.Version;
+  lbVersionDate.Caption:= fmMain.VersionDate;
   laTarget.Caption:= 'Target : ' + Target + '-' + Arch;
+  }
+  lbPgmVersion.Caption := GetProgramVersion;
+  lbLazarus.Caption    := GetLazarusVersion;
+  lbFPCVersion.Caption := GetFPCVersion;
+  lbOSInfo.Caption     := GetOSInfo;
+  lbWidgetSet.Caption  := GetLCLWidgetSet;
+  lbVersionDate.Caption:= GetProgramBuildDate;
+  lbVersionTime.Caption:= GetProgramBuildTime;
 end;
 
 procedure TfmAbout.Label6Click(Sender: TObject);
@@ -76,7 +97,7 @@ end;
 
 procedure TfmAbout.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  CloseAction:= caFree;
+  //CloseAction:= caFree;
 end;
 
 procedure TfmAbout.BitBtn1Click(Sender: TObject);

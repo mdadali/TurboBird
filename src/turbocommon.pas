@@ -7,10 +7,18 @@ SysTables covers functionality for which a db connection is required. }
 interface
 
 uses
-  Classes, SysUtils, StrUtils, Dialogs, DB, sqldb, IBConnection,  RegExpr,
+
+  Classes, SysUtils, StrUtils, DateUtils, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  LCLType, LCLVersion, versiontypes, versionresource,
+  interfaces, LCLPlatformDef,
+  DB, sqldb, IBConnection,  RegExpr,
   fbcommon;
 
 const
+
+  CompileDate = {$I %DATE%};  // z. B. '2025/07/25'
+  CompileTime = {$I %TIME%};  // z. B. '17:42:33'
+
   // Some field types used in e.g. RDB$FIELDS
   // todo: (low priority) perhaps move to enumeration with fixed constant values
   BlobType = 261;
@@ -348,6 +356,17 @@ const
     'Packages', 'PackageFunctions', 'PackageProcedures',
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
+//Application/OS
+function GetProgramVersion: string;
+function GetLazarusVersion: string;
+function GetFPCVersion: string;
+function ReadOSReleaseFile: string;
+function ReadFileToString(const AFileName: string): string;
+function GetOSInfo: string;
+function GetLCLWidgetSet: string;
+function GetProgramBuildDate: string;
+function GetProgramBuildTime: string;
+
 procedure AssignIBConnection(Target, Source: TIBConnection);
 function StripQuotes(const S: string): string;
 function ExtractDefaultValue(const DefaultSource: string): string;
@@ -388,6 +407,181 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+function GetProgramVersion: string;
+var
+  vr: TVersionResource;
+  rs: TResourceStream;
+begin
+  Result := 'unknow';
+  vr := TVersionResource.Create;
+  try
+    rs := TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
+    try
+      vr.SetCustomRawDataStream(rs);
+      Result := Format('%d.%d.%d.%d', [vr.FixedInfo.FileVersion[0],
+                                       vr.FixedInfo.FileVersion[1],
+                                       vr.FixedInfo.FileVersion[2],
+                                       vr.FixedInfo.FileVersion[3]]);
+    finally
+      rs.Free;
+    end;
+  finally
+    vr.Free;
+  end;
+end;
+
+function GetLazarusVersion: string;
+begin
+  result := lcl_version;
+end;
+
+function GetFPCVersion: string;
+begin
+  Result := {$I %FPCVERSION%};
+end;
+
+function ReadFileToString(const AFileName: string): string;
+var
+  FileStream: TFileStream;
+  StringStream: TStringStream;
+begin
+  if not FileExists(AFileName) then
+    raise Exception.CreateFmt('File "%s" not found!', [AFileName]);
+
+  FileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    StringStream := TStringStream.Create('');
+    try
+      StringStream.CopyFrom(FileStream, FileStream.Size);
+      Result := StringStream.DataString;
+    finally
+      StringStream.Free;
+    end;
+  finally
+    FileStream.Free;
+  end;
+end;
+
+function ReadOSReleaseFile: string;
+var
+  OSReleaseFile: TextFile;
+  Line, OSVersion: string;
+begin
+  OSVersion := 'Unknown Linux Version';
+  if FileExists('/etc/os-release') then
+  begin
+    AssignFile(OSReleaseFile, '/etc/os-release');
+    try
+      Reset(OSReleaseFile);
+      while not EOF(OSReleaseFile) do
+      begin
+        ReadLn(OSReleaseFile, Line);
+        if Pos('PRETTY_NAME=', Line) = 1 then
+        begin
+          OSVersion := Copy(Line, Pos('=', Line) + 1, Length(Line));
+          OSVersion := StringReplace(OSVersion, '"', '', [rfReplaceAll]);
+          Break;
+        end;
+      end;
+    finally
+      CloseFile(OSReleaseFile);
+    end;
+  end
+  else if FileExists('/proc/version') then
+  begin
+    // Fallback: read from /proc/version, if /etc/os-release don't exists
+    OSVersion := Trim(StringReplace(ReadFileToString('/proc/version'), 'Linux version ', '', []));
+  end;
+  Result := OSVersion;
+end;
+
+function GetOSInfo: string;
+var OSName, OSType, OSVersion: string; Buffer: array[0..255] of Char;
+begin
+  // Betriebssystem bestimmen
+  {$IFDEF WINDOWS}
+  OSName := 'Windows';
+  if GetEnvironmentVariable('OS', Buffer, SizeOf(Buffer)) > 0 then
+    OSVersion := Buffer
+  else
+    OSVersion := 'unknow';
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+  OSName := 'Linux';
+  OSVersion := ReadOSReleaseFile;
+  {$ENDIF}
+
+  {$IFDEF DARWIN}
+  OSName := 'Mac OS';
+  OSVersion := GetEnvironmentVariable('OSTYPE'); // Alternativ mit `uname -r` die Mac-Version auslesen
+  {$ENDIF}
+
+  // 32-Bit or 64-Bit
+  {$IFDEF CPU32}
+  OSType := '32-bit';
+  {$ENDIF}
+  {$IFDEF CPU64}
+  OSType := '64-bit';
+  {$ENDIF}
+
+  //Result := Format('OS: %s' + sLineBreak +
+  //                 '%s' + sLineBreak +
+  //                 'Architecture: %s', [OSName, OSVersion, OSType]);
+
+  Result := Format('%s' + sLineBreak +
+                   '%s' + sLineBreak +
+                   'Architecture: %s', [OSName, OSVersion, OSType]);
+end;
+
+function GetLCLWidgetSet: string;
+begin
+  {$IFDEF LCLQT}
+  Result := 'Qt4';
+  {$ENDIF}
+
+  {$IFDEF LCLQT5}
+  Result := 'Qt5';
+  {$ENDIF}
+
+  {$IFDEF LCLQT6}
+  Result := 'Qt6';
+  {$ENDIF}
+
+  {$IFDEF LCLGTK2}
+  Result := 'GTK2';
+  {$ENDIF}
+
+  {$IFDEF LCLGTK3}
+  Result := 'GTK3';
+  {$ENDIF}
+
+  {$IFDEF LCLCOCOA}
+  Result := 'Cocoa (Mac OS)';
+  {$ENDIF}
+
+  {$IFDEF LCLCARBON}
+  Result := 'Carbon (Mac OS)';
+  {$ENDIF}
+
+  {$IFDEF MSWINDOWS}
+  Result := 'Windows';
+  {$ENDIF}
+
+  if Result = '' then
+    Result := 'unknow Widgetset';
+end;
+
+function GetProgramBuildDate: string;
+begin
+  result := CompileDate;
+end;
+
+function GetProgramBuildTime: string;
+begin
+  result := CompileTime;
+end;
 
 procedure AssignIBConnection(Target, Source: TIBConnection);
 begin
@@ -619,7 +813,7 @@ var
 begin
   if Count < 0 then
   begin
-    ShowMessage('Warnung: Negative Zahl ignoriert: ' + IntToStr(Count));
+    ShowMessage('Warning: Negative number ignored: ' + IntToStr(Count));
     Result := Text;
     Exit;
   end;

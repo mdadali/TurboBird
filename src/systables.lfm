@@ -1,8 +1,8 @@
 object dmSysTables: TdmSysTables
   OldCreateOrder = False
   Height = 174
-  HorizontalOffset = 344
-  VerticalOffset = 285
+  HorizontalOffset = 399
+  VerticalOffset = 236
   Width = 313
   object sqQuery: TSQLQuery
     FieldDefs = <>
