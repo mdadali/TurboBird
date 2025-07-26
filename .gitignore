@@ -2,5 +2,5 @@
 bin/
 git_update.sh
 push_tb.sh
-turbobird_src.zip
-src/..bin/x86_64-win64/debug/unitoutput
+
+

@@ -297,7 +297,6 @@ begin
 
     // Neue SQL setzen
     SQL.Text := 'SELECT ' + String.Join(', ', CleanFieldList.ToStringArray) + ' FROM ' + TempRelationName;
-    SQL.SaveToFile('sql.txt');
 
     // Platzhalter für Array-Felder
     for FieldName in ArrayFields do
