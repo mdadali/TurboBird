@@ -85,7 +85,7 @@ end;
 
 procedure TfmSQLHistory.cxAfterDateClick(Sender: TObject);
 begin
-  DateEdit1.Visible:= cxAfterDate.Checked;
+  DateEdit1.Enabled:= cxAfterDate.Checked;
 end;
 
 procedure TfmSQLHistory.DBGrid1DblClick(Sender: TObject);

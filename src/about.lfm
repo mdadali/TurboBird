@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 566
+  Left = 744
   Height = 440
-  Top = 125
+  Top = 145
   Width = 464
   ActiveControl = BitBtn1
   BorderIcons = []
@@ -80,8 +80,8 @@ object fmAbout: TfmAbout
     Left = 328
     Height = 20
     Top = 66
-    Width = 18
-    Caption = 'bd'
+    Width = 94
+    Caption = 'lbVersionDate'
     Font.Color = 6908265
     ParentColor = False
     ParentFont = False
@@ -214,7 +214,7 @@ object fmAbout: TfmAbout
   end
   object laUpdate: TLabel
     Cursor = crHandPoint
-    Left = 242
+    Left = 241
     Height = 20
     Top = 112
     Width = 115

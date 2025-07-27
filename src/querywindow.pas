@@ -773,7 +773,7 @@ end;
 procedure TfmQueryWindow.tbHistoryClick(Sender: TObject);
 begin
   fmSQLHistory.Init(FRegRec.Title, Self);
-  fmSQLHistory.Show;
+  fmSQLHistory.ShowModal;
 end;
 
 

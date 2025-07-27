@@ -437,7 +437,21 @@ begin
 end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
+var configFile: TIniFile;
+    configFilePath: String;
 begin
+  //create main-inifile, if not exists.
+  configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'turbobird.ini']);
+  if not FileExists(configFilePath) then
+  begin
+    try
+      configFile:= TIniFile.Create(configFilePath);
+      configFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/firebird_5/lib/libfbclient.so.5.0.2');
+    finally
+      configFile.Free;
+    end;
+  end;
+
   {$IFNDEF DEBUG}
   // Do not log to debug server if built as release instead of debug
   SetDebuggingEnabled(false);
@@ -2942,7 +2956,8 @@ begin
     if Result then
     begin
       mdsHistory.Last;
-      if (SQLType <> 'SELECT') or (mdsHistory.FieldByName('SQLStatement').AsString <> SQLStatement) then
+      //if (SQLType <> 'SELECT') or (mdsHistory.FieldByName('SQLStatement').AsString <> SQLStatement) then
+      if not mdsHistory.Locate('SQLStatement', SQLStatement, []) then
       begin
         mdsHistory.AppendRecord([Now, SQLType, SQLStatement, 0]);
         if SQLType = 'DDL' then
@@ -2953,8 +2968,6 @@ begin
     on E: Exception do
     begin
       Result:= False;
-      //newlib
-      //ShowMessage(e.Message);
     end;
   end;
 end;

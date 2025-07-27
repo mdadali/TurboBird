@@ -1,10 +1,10 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 461
-  Height = 449
-  Top = 128
+  Left = 768
+  Height = 532
+  Top = 209
   Width = 808
   Caption = 'SQL History'
-  ClientHeight = 449
+  ClientHeight = 532
   ClientWidth = 808
   OnClose = FormClose
   OnCreate = FormCreate
@@ -12,7 +12,7 @@ object fmSQLHistory: TfmSQLHistory
   LCLVersion = '2.2.6.0'
   object DBGrid1: TDBGrid
     Left = 5
-    Height = 365
+    Height = 435
     Top = 5
     Width = 798
     Align = alTop
@@ -28,9 +28,9 @@ object fmSQLHistory: TfmSQLHistory
     OnDblClick = DBGrid1DblClick
   end
   object bbInsert: TBitBtn
-    Left = 0
+    Left = 8
     Height = 30
-    Top = 392
+    Top = 475
     Width = 152
     Anchors = [akLeft, akBottom]
     Caption = 'Insert in SQL Query'
@@ -38,9 +38,9 @@ object fmSQLHistory: TfmSQLHistory
     TabOrder = 1
   end
   object bbDelete: TBitBtn
-    Left = 152
+    Left = 168
     Height = 30
-    Top = 392
+    Top = 475
     Width = 81
     Anchors = [akLeft, akBottom]
     Cancel = True
@@ -50,42 +50,42 @@ object fmSQLHistory: TfmSQLHistory
     TabOrder = 2
   end
   object GroupBox1: TGroupBox
-    Left = 240
-    Height = 74
-    Top = 375
-    Width = 568
+    Left = 256
+    Height = 87
+    Top = 445
+    Width = 552
     Align = alRight
     Anchors = [akLeft, akRight, akBottom]
     Caption = 'Export to text file'
-    ClientHeight = 52
-    ClientWidth = 564
+    ClientHeight = 65
+    ClientWidth = 548
     TabOrder = 3
     object cxAfterDate: TCheckBox
-      Left = 0
+      Left = 8
       Height = 22
-      Top = 2
+      Top = 0
       Width = 151
       Caption = 'Only after the date'
       OnClick = cxAfterDateClick
       TabOrder = 0
     end
     object DateEdit1: TDateEdit
-      Left = 152
+      Left = 168
       Height = 30
-      Top = 2
+      Top = 0
       Width = 104
       CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
       DateOrder = doNone
       ButtonWidth = 23
       NumGlyphs = 1
+      Enabled = False
       MaxLength = 0
       TabOrder = 1
-      Visible = False
     end
     object Label1: TLabel
-      Left = 296
+      Left = 280
       Height = 20
-      Top = 5
+      Top = 0
       Width = 62
       Caption = 'SQL Type'
       ParentColor = False
@@ -93,7 +93,7 @@ object fmSQLHistory: TfmSQLHistory
     object cbSQLType: TComboBox
       Left = 360
       Height = 28
-      Top = 2
+      Top = 0
       Width = 100
       ItemHeight = 0
       ItemIndex = 0
@@ -109,7 +109,7 @@ object fmSQLHistory: TfmSQLHistory
       Text = 'All'
     end
     object bbExport: TBitBtn
-      Left = 472
+      Left = 464
       Height = 30
       Top = 0
       Width = 75
@@ -121,7 +121,7 @@ object fmSQLHistory: TfmSQLHistory
   object cxOverwrite: TCheckBox
     Left = 8
     Height = 22
-    Top = 462
+    Top = 448
     Width = 177
     Caption = 'Overwrite existing SQL'
     TabOrder = 4
