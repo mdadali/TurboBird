@@ -437,21 +437,7 @@ begin
 end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
-var configFile: TIniFile;
-    configFilePath: String;
 begin
-  //create main-inifile, if not exists.
-  configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'turbobird.ini']);
-  if not FileExists(configFilePath) then
-  begin
-    try
-      configFile:= TIniFile.Create(configFilePath);
-      configFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/firebird_5/lib/libfbclient.so.5.0.2');
-    finally
-      configFile.Free;
-    end;
-  end;
-
   {$IFNDEF DEBUG}
   // Do not log to debug server if built as release instead of debug
   SetDebuggingEnabled(false);

@@ -17,7 +17,7 @@ uses
   cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Dialogs, Controls, zcomponent, memdslaz, main, CreateDb, Reg, QueryWindow,
+  Forms, Dialogs, Controls, IniFiles, zcomponent, memdslaz, main, CreateDb, Reg, QueryWindow,
   ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
   CreateTrigger, EditTable, CallProc, EditDataFullRec, UDFInfo, ViewDomain,
   NewDomain, SysTables, NewConstraint, NewEditField, Calen, Scriptdb,
@@ -55,8 +55,23 @@ var
   SLib: TSQLDBLibraryLoader;
   {$ENDIF}
 
+var configFile: TIniFile;
+    configFilePath: String;
 begin
   Application.Initialize;
+
+  //create main-inifile, if not exists.
+  configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'turbobird.ini']);
+  if not FileExists(configFilePath) then
+  begin
+    try
+      configFile:= TIniFile.Create(configFilePath);
+      configFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/firebird_5/lib/libfbclient.so.5.0.2');
+    finally
+      configFile.Free;
+    end;
+  end;
+
 
   // Load library using SQLDBLibraryLoader in Linux, OSX,...
   {$IFDEF UNIX}
