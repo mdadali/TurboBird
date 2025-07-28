@@ -453,13 +453,9 @@ begin
   try
     if Length(RegisteredDatabases) > 0 then
       fmReg.SaveRegistrations;
-
     SaveAndCloseSQLHistory;
-
     lmDisconnectAllClick(nil);
-
     ReleaseRegisteredDatabases;
-
     CloseAction := caFree; // Alles OK → freigeben
   except
     on E: Exception do
