@@ -1,7 +1,7 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 768
+  Left = 363
   Height = 532
-  Top = 209
+  Top = 112
   Width = 808
   Caption = 'SQL History'
   ClientHeight = 532
@@ -136,7 +136,7 @@ object fmSQLHistory: TfmSQLHistory
     DefaultExt = '.sql'
     Filter = 'SQL File|*.sql|All files|*.*'
     Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
-    Left = 608
-    Top = 144
+    Left = 280
+    Top = 16
   end
 end

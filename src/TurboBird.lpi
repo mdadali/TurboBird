@@ -19,7 +19,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1133"/>
+      <BuildNr Value="1181"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="9">
@@ -291,16 +291,16 @@
           </Other>
         </CompilerOptions>
       </Item7>
-      <Item8 Name="x86_64-linux64-debug">
+      <Item8 Name="x86_64-linux64-gtk2-debug">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -328,19 +328,27 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
+            <ExecuteBefore>
+              <Command Value="./build-version.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./rename-binary.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
           </Other>
         </CompilerOptions>
       </Item8>
-      <Item9 Name="x86_64-win64-debug">
+      <Item9 Name="x86_64-win64-win-debug">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -375,6 +383,10 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
+            <CompilerPath Value=""/>
+            <ExecuteAfter>
+              <Command Value="./rename-binary.sh"/>
+            </ExecuteAfter>
           </Other>
         </CompilerOptions>
       </Item9>
@@ -384,6 +396,7 @@
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
+      <OpenInFileMan Value="True"/>
     </PublishOptions>
     <RunParams>
       <local>

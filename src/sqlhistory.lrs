@@ -1,12 +1,12 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmSQLHistory','FORMDATA',[
-  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3#0#3#6'Height'#3#20#2#3'To'
-  +'p'#3#209#0#5'Width'#3'('#3#7'Caption'#6#11'SQL History'#12'ClientHeight'#3
-  +#20#2#11'ClientWidth'#3'('#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'Form'
-  +'Create'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#7'TD'
-  +'BGrid'#7'DBGrid1'#4'Left'#2#5#6'Height'#3#179#1#3'Top'#2#5#5'Width'#3#30#3#5
-  +'Align'#7#5'alTop'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0
+  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'k'#1#6'Height'#3#20#2#3'T'
+  +'op'#2'p'#5'Width'#3'('#3#7'Caption'#6#11'SQL History'#12'ClientHeight'#3#20
+  +#2#11'ClientWidth'#3'('#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCre'
+  +'ate'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#7'TDBGr'
+  +'id'#7'DBGrid1'#4'Left'#2#5#6'Height'#3#179#1#3'Top'#2#5#5'Width'#3#30#3#5'A'
+  +'lign'#7#5'alTop'#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#8'akBottom'#0
   +#20'BorderSpacing.Around'#2#5#5'Color'#7#8'clWindow'#7'Columns'#14#0#10'Data'
   +'Source'#7#11'Datasource1'#7'Options'#11#8'dgTitles'#11'dgIndicator'#14'dgCo'
   +'lumnResize'#12'dgColumnMove'#10'dgColLines'#10'dgRowLines'#6'dgTabs'#11'dgR'
@@ -40,5 +40,5 @@ LazarusResources.Add('TfmSQLHistory','FORMDATA',[
   +'e1'#7'DataSet'#7#17'fmMain.mdsHistory'#7'Enabled'#8#4'Left'#3#128#0#3'Top'#2
   +#12#0#0#11'TSaveDialog'#11'SaveDialog1'#10'DefaultExt'#6#4'.sql'#6'Filter'#6
   +#28'SQL File|*.sql|All files|*.*'#7'Options'#11#17'ofOverwritePrompt'#14'ofE'
-  +'nableSizing'#12'ofViewDetail'#0#4'Left'#3'`'#2#3'Top'#3#144#0#0#0#0
+  +'nableSizing'#12'ofViewDetail'#0#4'Left'#3#24#1#3'Top'#2#16#0#0#0
 ]);
