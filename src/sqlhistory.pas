@@ -6,24 +6,28 @@ interface
 
 uses
   Classes, SysUtils, db, FileUtil, LResources, Forms, Controls, Graphics,
-  Dialogs, DBGrids, Buttons, StdCtrls, EditBtn;
+  Dialogs, DBGrids, Buttons, StdCtrls, EditBtn, ExtCtrls, DBCtrls;
 
 type
 
   { TfmSQLHistory }
 
   TfmSQLHistory = class(TForm)
-    bbInsert: TBitBtn;
     bbDelete: TBitBtn;
     bbExport: TBitBtn;
+    bbInsert: TBitBtn;
     cbSQLType: TComboBox;
-    cxOverwrite: TCheckBox;
     cxAfterDate: TCheckBox;
+    cxOverwrite: TCheckBox;
     Datasource1: TDatasource;
     DateEdit1: TDateEdit;
     DBGrid1: TDBGrid;
+    DBNavigator1: TDBNavigator;
     GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     Label1: TLabel;
+    Panel1: TPanel;
+    Panel2: TPanel;
     SaveDialog1: TSaveDialog;
     procedure bbDeleteClick(Sender: TObject);
     procedure bbExportClick(Sender: TObject);

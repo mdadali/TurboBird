@@ -2,7 +2,7 @@
 
 CLEAN_OLD=true
 COMPRESS=true  # ⬅️ Toggle compression: true = enable, false = disable
-STRIP=true     # ⬅️ Toggle stripping: true = enable, false = disable
+STRIP=false     # ⬅️ Toggle stripping: true = enable, false = disable
 
 # 🔢 Read version from file
 FULL_VERSION=$(cat version.txt)

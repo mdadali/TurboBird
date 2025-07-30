@@ -19,279 +19,12 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1181"/>
+      <BuildNr Value="1192"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
-    <BuildModes Count="9">
-      <Item1 Name="Vorgabe" Default="True"/>
-      <Item2 Name="i386_Win32-release">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/release/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/release/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetProcessor Value="80386"/>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="win32"/>
-            <Optimizations>
-              <OptimizationLevel Value="4"/>
-            </Optimizations>
-            <SmallerCode Value="True"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-            <Options>
-              <PassLinkerOptions Value="True"/>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item2>
-      <Item3 Name="i386_Win32-debug">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetProcessor Value="80386"/>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="win32"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item3>
-      <Item4 Name="x86_64-win64-relase">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/release/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/release/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetProcessor Value="COREI"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
-            <Optimizations>
-              <OptimizationLevel Value="4"/>
-            </Optimizations>
-            <SmallerCode Value="True"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item4>
-      <Item5 Name="i386_linux32-release">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetProcessor Value="COREI"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item5>
-      <Item6 Name="i386_linux32-debug">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item6>
-      <Item7 Name="x86_64-linux64-relase">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/release/TurboBird/TurboBird"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/release/unitoutput"/>
-          </SearchPaths>
-          <Parsing>
-            <SyntaxOptions>
-              <IncludeAssertionCode Value="True"/>
-            </SyntaxOptions>
-          </Parsing>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetProcessor Value="COREI"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="4"/>
-            </Optimizations>
-            <SmallerCode Value="True"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
-        </CompilerOptions>
-      </Item7>
-      <Item8 Name="x86_64-linux64-gtk2-debug">
+    <BuildModes Count="8">
+      <Item1 Name="x86_64-linux64-gtk2-debug" Default="True"/>
+      <Item2 Name="x86_64-linux64-gtk2-relase">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -314,7 +47,57 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
+            <TargetProcessor Value="COREI"/>
             <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1"/>
+            <ExecuteBefore>
+              <Command Value="./build-version.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./rename_release_binary.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="i386_linux32-gtk-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
             <TargetOS Value="linux"/>
             <Optimizations>
               <OptimizationLevel Value="0"/>
@@ -333,13 +116,53 @@
               <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
-              <Command Value="./rename-binary.sh"/>
-              <CompileReasons Compile="False" Run="False"/>
+              <Command Value="./rename_debug_binary.sh"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="x86_64-win64-win-debug">
+      </Item3>
+      <Item4 Name="i386_linux32-gtk-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetProcessor Value="COREI"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1"/>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="x86_64-win64-win-debug">
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -389,7 +212,151 @@
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
-      </Item9>
+      </Item5>
+      <Item6 Name="x86_64-win64-win-relase">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetProcessor Value="COREI"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1"/>
+          </Other>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="i386_Win32-win-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetProcessor Value="80386"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1"/>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="i386_Win32-win-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetProcessor Value="80386"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <PassLinkerOptions Value="True"/>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1"/>
+          </Other>
+        </CompilerOptions>
+      </Item8>
       <SharedMatrixOptions Count="1">
         <Item1 ID="844124804436" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
       </SharedMatrixOptions>
@@ -894,12 +861,12 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
+      <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-      <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
+      <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
     </SearchPaths>
     <Parsing>
       <SyntaxOptions>
@@ -913,9 +880,8 @@
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
-      <TargetProcessor Value="COREI"/>
       <TargetCPU Value="x86_64"/>
-      <TargetOS Value="win64"/>
+      <TargetOS Value="linux"/>
       <Optimizations>
         <OptimizationLevel Value="0"/>
       </Optimizations>
@@ -925,14 +891,17 @@
         <DebugInfoType Value="dsDwarf2Set"/>
         <UseHeaptrc Value="True"/>
       </Debugging>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
     </Linking>
     <Other>
       <CustomOptions Value="-dDEBUG -O-1"/>
+      <ExecuteBefore>
+        <Command Value="./build-version.sh"/>
+        <CompileReasons Compile="False" Run="False"/>
+      </ExecuteBefore>
+      <ExecuteAfter>
+        <Command Value="./rename_debug_binary.sh"/>
+        <CompileReasons Compile="False" Run="False"/>
+      </ExecuteAfter>
     </Other>
   </CompilerOptions>
   <Debugging>
