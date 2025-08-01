@@ -1,0 +1,58 @@
+object frmUpdateChecker: TfrmUpdateChecker
+  Left = 352
+  Height = 240
+  Top = 146
+  Width = 631
+  Caption = 'frmUpdateChecker'
+  ClientHeight = 240
+  ClientWidth = 631
+  OnCreate = FormCreate
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 13
+    Height = 20
+    Top = 21
+    Width = 106
+    Caption = 'Current Version'
+    ParentColor = False
+  end
+  object lblCurrentVersion: TLabel
+    Left = 139
+    Height = 20
+    Top = 21
+    Width = 119
+    Caption = 'lblCurrentVersion'
+    ParentColor = False
+  end
+  object lblStatus: TLabel
+    Left = 0
+    Height = 20
+    Top = 220
+    Width = 631
+    Align = alBottom
+    Caption = 'lblStatus'
+    ParentColor = False
+  end
+  object btnCheck: TButton
+    Left = 16
+    Height = 25
+    Top = 64
+    Width = 75
+    Caption = 'Check'
+    OnClick = btnCheckClick
+    TabOrder = 0
+  end
+  object btnDownload: TButton
+    Left = 136
+    Height = 25
+    Top = 64
+    Width = 119
+    Caption = 'Download'
+    OnClick = btnDownloadClick
+    TabOrder = 1
+  end
+  object Timer1: TTimer
+    Left = 436
+    Top = 25
+  end
+end

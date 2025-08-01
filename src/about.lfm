@@ -214,7 +214,7 @@ object fmAbout: TfmAbout
   end
   object laUpdate: TLabel
     Cursor = crHandPoint
-    Left = 241
+    Left = 242
     Height = 20
     Top = 112
     Width = 115

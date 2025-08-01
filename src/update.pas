@@ -60,11 +60,11 @@ type
     { private declarations }
     procedure DownloadTerminated(Sender: TObject);
   public
-    Major, Minor, ReleaseVersion: Word;
+    Major, Minor, ReleaseVersion, BuildNr: Word;
     Started: TDateTime;
     function GetNewVersion(var AFileName, Version, ResMsg: string; var NewVersion: Boolean): Boolean;
     function DownloadNewVersion: Boolean;
-    procedure Init(aMajor, aMinor, aReleaseVersion: Word);
+    procedure Init(aMajor, aMinor, aReleaseVersion, aBuildNr: Word);
     { public declarations }
   end;
 
@@ -293,11 +293,12 @@ begin
   FDownloadThread.Resume;
 end;
 
-procedure TfmUpdate.Init(aMajor, aMinor, aReleaseVersion: Word);
+procedure TfmUpdate.Init(aMajor, aMinor, aReleaseVersion: Word, aBuildNr: Word);
 begin
   Major:= aMajor;
   Minor:= aMinor;
   ReleaseVersion:= aReleaseVersion;
+  BuildNr := aBuildNr;
 end;
 
 initialization

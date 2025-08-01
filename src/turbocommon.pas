@@ -14,6 +14,9 @@ uses
   DB, sqldb, IBConnection,  RegExpr,
   fbcommon;
 
+
+{$I version.inc}
+
 const
 
   CompileDate = {$I %DATE%};  // z. B. '2025/07/25'

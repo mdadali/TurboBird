@@ -77,7 +77,6 @@ begin
     if Pos(';', aStatement) = 0 then
       aStatement:= aStatement + ';';
     SQLStatement += aStatement;
-
   end;
 
   if cxOverwrite.Checked then

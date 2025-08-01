@@ -23,10 +23,10 @@ uses
   NewDomain, SysTables, NewConstraint, NewEditField, Calen, Scriptdb,
   UserPermissions, TableManage, BackupRestore, CreateUser, ChangePass,
   PermissionManage, SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo,
-  sysutils, Comparison, Update, topologicalsort, UnitFirebirdServices,
+  sysutils, Comparison, topologicalsort, UnitFirebirdServices,
   turbocommon, importtable, fileimport, csvdocument, udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,  fbcommon,
-  fTestFunction, fSetFBClient, fFirebirdConfig;
+  fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker;
 
 const
   Major = 1;

@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, LCLIntf,
-  turbocommon;
+  turbocommon,
+  updatechecker;
 
 
 {$i turbocommon.inc}
@@ -60,7 +61,7 @@ implementation
 
 { TfmAbout }
 
-uses Main, Update;
+uses Main;
 
 procedure TfmAbout.laWebSiteClick(Sender: TObject);
 begin
@@ -73,7 +74,8 @@ begin
   lbVersionDate.Caption:= fmMain.VersionDate;
   laTarget.Caption:= 'Target : ' + Target + '-' + Arch;
   }
-  lbPgmVersion.Caption := GetProgramVersion;
+  //lbPgmVersion.Caption := GetProgramVersion;
+  lbPgmVersion.Caption := VERSION; //from version.inc
   lbLazarus.Caption    := GetLazarusVersion;
   lbFPCVersion.Caption := GetFPCVersion;
   lbOSInfo.Caption     := GetOSInfo;
@@ -88,10 +90,15 @@ begin
 end;
 
 procedure TfmAbout.laUpdateClick(Sender: TObject);
+var frmUpdateChecker: TfrmUpdateChecker;
 begin
-  fmUpdate:= TfmUpdate.Create(nil);
-  fmUpdate.Init(fmMain.Major, fmMain.Minor, fmMain.ReleaseVersion);
-  fmUpdate.Show;
+  frmUpdateChecker := TfrmUpdateChecker.Create(self);
+  frmUpdateChecker.ShowModal;
+  frmUpdateChecker.Free;
+  //fmUpdate:= TfmUpdate.Create(nil);
+  //fmUpdate.Init(fmMain.Major, fmMain.Minor, fmMain.ReleaseVersion);
+  //fmUpdate.Init(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
+  //fmUpdate.Show;
   //Application.ProcessMessages;
 end;
 

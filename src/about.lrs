@@ -155,7 +155,7 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +'Label'#6'Label5'#4'Left'#2#16#6'Height'#2#20#3'Top'#3'`'#1#5'Width'#3#128#0
   +#7'Caption'#6#19'License: GPL / LGPL'#10'Font.Color'#4'555'#0#11'ParentColor'
   +#8#10'ParentFont'#8#0#0#6'TLabel'#8'laUpdate'#6'Cursor'#7#11'crHandPoint'#4
-  +'Left'#3#241#0#6'Height'#2#20#3'Top'#2'p'#5'Width'#2's'#7'Caption'#6#16'Chec'
+  +'Left'#3#242#0#6'Height'#2#20#3'Top'#2'p'#5'Width'#2's'#7'Caption'#6#16'Chec'
   +'k for update'#10'Font.Color'#7#7'clBlack'#11'ParentColor'#8#10'ParentFont'#8
   +#7'OnClick'#7#13'laUpdateClick'#0#0#6'TImage'#6'Image1'#4'Left'#3' '#1#6'Hei'
   +'ght'#2'N'#3'Top'#3'2'#1#5'Width'#3#166#0#12'Picture.Data'#10#195'&'#0#0#23
