@@ -1,13 +1,14 @@
-unit updatechecker;
+unit UpdateChecker;
 
-{$mode ObjFPC}{$H+}
+{$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, httpsend,
-  StrUtils, math, fpjson, jsonparser, ExtCtrls;
-
+  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs, ExtCtrls, math,
+  fphttpclient, LazFileUtils, Process, opensslsockets, jsonparser, fpjson,
+  strutils, LResources,
+  turbocommon;
 
 type
 
@@ -17,187 +18,177 @@ type
     btnCheck: TButton;
     btnDownload: TButton;
     Label1: TLabel;
+    lbCurrentVersion: TLabel;
     lblStatus: TLabel;
-    lblCurrentVersion: TLabel;
-    Timer1: TTimer;
+    procedure FormCreate(Sender: TObject);
     procedure btnCheckClick(Sender: TObject);
     procedure btnDownloadClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
   private
-    FLocalVersionStr: string;
-    FRemoteFileName: string;
-    FRemoteVersionStr: string;
-    procedure ParseVersionFromFileName(const FileName: string; out Prefix, Version: string);
-    function IsNewerVersion(const NewVersion, OldVersion: string): Boolean;
-    procedure DownloadFile(const URL, TargetPath: string);
+    FDownloadURL: string;
+    FFileName: string;
+    procedure SetStatus(const Msg: string);
+    function GetCurrentVersionInfo(out BaseName, Version: string): Boolean;
+    function CompareVersions(const CurrentVer, NewVer: string): Integer;
   public
-
   end;
 
 
 implementation
 
-{$R *.lfm}
+procedure TfrmUpdateChecker.FormCreate(Sender: TObject);
+begin
+  lbCurrentVersion.Caption := ExtractVersionFromName(Application.ExeName);
+  btnDownload.Enabled := False;
+  SetStatus('Idle');
+end;
 
-{ TfrmUpdateChecker }
+procedure TfrmUpdateChecker.SetStatus(const Msg: string);
+begin
+  lblStatus.Caption := Msg;
+  Application.ProcessMessages;
+end;
+
+function TfrmUpdateChecker.GetCurrentVersionInfo(out BaseName, Version: string): Boolean;
+var
+  FullName, NameOnly: string;
+  PosV: Integer;
+begin
+  Result := False;
+  FullName := ExtractFileName(Application.ExeName);
+  NameOnly := FullName;
+
+  // Suche nach '-v' oder '-V' case-insensitive
+  PosV := Pos('-v', LowerCase(NameOnly));
+  if PosV = 0 then Exit;
+
+  BaseName := Copy(NameOnly, 1, PosV - 1); // alles vor '-v'
+  Version := Copy(NameOnly, PosV + 2, MaxInt); // alles nach '-v'
+
+  Result := Version <> '';
+end;
+
+function TfrmUpdateChecker.CompareVersions(const CurrentVer, NewVer: string): Integer;
+var
+  CurrParts, NewParts: TStringArray;
+  I, MaxLen, C, N: Integer;
+begin
+  CurrParts := SplitString(CurrentVer, '.');
+  NewParts := SplitString(NewVer, '.');
+  MaxLen := Max(Length(CurrParts), Length(NewParts));
+
+  for I := 0 to MaxLen - 1 do
+  begin
+    if I < Length(CurrParts) then
+      C := StrToIntDef(CurrParts[I], 0)
+    else
+      C := 0;
+
+    if I < Length(NewParts) then
+      N := StrToIntDef(NewParts[I], 0)
+    else
+      N := 0;
+
+    if C > N then
+      Exit(1)  // Aktuelle Version ist größer → kein Update
+    else if C < N then
+      Exit(-1); // Neue Version ist größer → Update verfügbar
+  end;
+
+  Result := 0; // Gleich
+end;
 
 procedure TfrmUpdateChecker.btnCheckClick(Sender: TObject);
 var
-  URL, JSONText, Prefix, LocalVersion, RemoteVersion, FileName: string;
-  HTTP: THTTPSend;
-  JSON: TJSONData;
-  i: Integer;
+  Client: TFPHTTPClient;
+  Response: string;
+  Data: TJSONData;
+  Assets: TJSONArray;
+  I: Integer;
+  DownloadName, NewVer, BaseName, CurrentVer, AssetVer: string;
+  Asset: TJSONData;
 begin
-  lblStatus.Caption := 'Checking GitHub for updates...';
-  Application.ProcessMessages;
+  SetStatus('Checking for update...');
+  btnDownload.Enabled := False;
 
-  ParseVersionFromFileName(ExtractFileName(ParamStr(0)), Prefix, LocalVersion);
-  FLocalVersionStr := LocalVersion;
+  if not GetCurrentVersionInfo(BaseName, CurrentVer) then
+  begin
+    SetStatus('Could not determine current version');
+    Exit;
+  end;
 
-  HTTP := THTTPSend.Create;
+  Client := TFPHTTPClient.Create(nil);
   try
-    HTTP.HTTPMethod('GET', 'https://api.github.com/repos/mdadali/TurboBird/releases/latest');
-    if HTTP.ResultCode = 200 then
-    begin
-      SetLength(JSONText, HTTP.Document.Size);
-      HTTP.Document.Read(Pointer(JSONText)^, Length(JSONText));
-      JSON := GetJSON(JSONText);
-      try
-        for i := 0 to JSON.FindPath('assets').Count - 1 do
+    Client.AddHeader('User-Agent', 'TurboBird-Updater');
+    Client.AllowRedirect := True;
+    Client.AddHeader('Accept', 'application/vnd.github+json');
+    Response := Client.Get('https://api.github.com/repos/mdadali/TurboBird/releases/latest');
+    Data := GetJSON(Response);
+    try
+      NewVer := Data.FindPath('tag_name').AsString;
+      NewVer := StringReplace(NewVer, 'TurboBird_v', '', []);
+
+      if CompareVersions(CurrentVer, NewVer) < 0 then
+        SetStatus('Neue Version verfügbar!')
+      else begin
+        SetStatus('You have the latest version: ' + CurrentVer);
+        Exit;
+      end;
+
+      Assets := TJSONArray(Data.FindPath('assets'));
+      for I := 0 to Assets.Count - 1 do
+      begin
+        Asset := Assets[I];
+        DownloadName := Asset.FindPath('name').AsString;
+        if StartsText(BaseName, DownloadName) and EndsText('.gz', DownloadName) then
         begin
-          FileName := JSON.FindPath('assets[' + IntToStr(i) + '].name').AsString;
-          if AnsiStartsStr(Prefix, FileName) then
+          AssetVer := ExtractVersionFromName(DownloadName);
+          //if AssetVer = NewVer then
+          if NewVer > CurrentVer  then
           begin
-            ParseVersionFromFileName(FileName, Prefix, RemoteVersion);
-            if IsNewerVersion(RemoteVersion, LocalVersion) then
-            begin
-              FRemoteFileName := FileName;
-              FRemoteVersionStr := RemoteVersion;
-              lblStatus.Caption := 'New version found: ' + RemoteVersion;
-              btnDownload.Enabled := True;
-              Exit;
-            end;
+            FDownloadURL := Asset.FindPath('browser_download_url').AsString;
+            FFileName := DownloadName;
+            btnDownload.Enabled := True;
+            SetStatus('New version found: ' + NewVer);
+            Exit;
           end;
         end;
-        lblStatus.Caption := 'You have the latest version.';
-      finally
-        JSON.Free;
       end;
-    end
-    else
-      lblStatus.Caption := 'Failed to connect to GitHub.';
-  finally
-    HTTP.Free;
+      SetStatus('No matching file found in release.');
+    finally
+      Data.Free;
+    end;
+  except
+    on E: Exception do
+      SetStatus('Failed to connect to GitHub: ' + E.Message);
   end;
-end;
-
-procedure TfrmUpdateChecker.ParseVersionFromFileName(const FileName: string; out Prefix, Version: string);
-var
-  S: string;
-  p: Integer;
-begin
-  S := FileName;
-  if RightStr(S, 3) = '.gz' then
-    S := LeftStr(S, Length(S) - 3);
-  p := RPos('-v', S);
-  if p > 0 then
-  begin
-    Prefix := Copy(S, 1, p - 1);
-    Version := Copy(S, p + 2, MaxInt);
-  end
-  else
-  begin
-    Prefix := S;
-    Version := '';
-  end;
+  Client.Free;
 end;
 
 procedure TfrmUpdateChecker.btnDownloadClick(Sender: TObject);
 var
-  URL, TargetPath: string;
+  Client: TFPHTTPClient;
+  SavePath: string;
 begin
-  if FRemoteFileName = '' then Exit;
-  URL := Format('https://github.com/mdadali/TurboBird/releases/download/TurboBird_v%s/%s',
-                [FRemoteVersionStr, FRemoteFileName]);
-  TargetPath := ExtractFilePath(ParamStr(0)) + FRemoteFileName;
-  lblStatus.Caption := 'Downloading...';
-  Application.ProcessMessages;
+  if FDownloadURL = '' then Exit;
+  SetStatus('Downloading ' + FFileName + '...');
+
+  Client := TFPHTTPClient.Create(nil);
   try
-    DownloadFile(URL, TargetPath);
-    lblStatus.Caption := 'Download completed: ' + FRemoteFileName;
+    Client.AddHeader('User-Agent', 'TurboBird-Updater');
+    Client.AllowRedirect := True;
+    SavePath := AppendPathDelim(ExtractFilePath(Application.ExeName)) + FFileName;
+    Client.Get(FDownloadURL, SavePath);
+    SetStatus('Download completed: ' + FFileName);
   except
     on E: Exception do
-      lblStatus.Caption := 'Download failed: ' + E.Message;
+      SetStatus('Download failed: ' + E.Message);
   end;
+  Client.Free;
 end;
 
-procedure TfrmUpdateChecker.FormCreate(Sender: TObject);
-begin
-  Caption := 'Update Checker';
-  Width := 400;
-  Height := 180;
+initialization
 
-  lblCurrentVersion := TLabel.Create(Self);
-  lblCurrentVersion.Parent := Self;
-  lblCurrentVersion.Caption := 'Current Version: ?';
-  lblCurrentVersion.Top := 16;
-  lblCurrentVersion.Left := 16;
-
-  lblStatus := TLabel.Create(Self);
-  lblStatus.Parent := Self;
-  lblStatus.Caption := 'Status: Ready';
-  lblStatus.Top := 44;
-  lblStatus.Left := 16;
-
-  btnCheck := TButton.Create(Self);
-  btnCheck.Parent := Self;
-  btnCheck.Caption := 'Check for Update';
-  btnCheck.Top := 80;
-  btnCheck.Left := 16;
-  btnCheck.OnClick := @btnCheckClick;
-
-  btnDownload := TButton.Create(Self);
-  btnDownload.Parent := Self;
-  btnDownload.Caption := 'Download';
-  btnDownload.Top := 80;
-  btnDownload.Left := 160;
-  btnDownload.Enabled := False;
-  btnDownload.OnClick := @btnDownloadClick;
-
-  // Extract version info from exe name
-  ParseVersionFromFileName(ExtractFileName(ParamStr(0)), FLocalVersionStr, FLocalVersionStr);
-  lblCurrentVersion.Caption := 'Current Version: ' + FLocalVersionStr;
-end;
-
-function TfrmUpdateChecker.IsNewerVersion(const NewVersion, OldVersion: string): Boolean;
-var
-  n, o: TStringArray;
-  i: Integer;
-begin
-  n := NewVersion.Split('.');
-  o := OldVersion.Split('.');
-  for i := 0 to Min(High(n), High(o)) do
-  begin
-    if StrToIntDef(n[i], 0) > StrToIntDef(o[i], 0) then Exit(True)
-    else if StrToIntDef(n[i], 0) < StrToIntDef(o[i], 0) then Exit(False);
-  end;
-  Result := Length(n) > Length(o);
-end;
-
-procedure TfrmUpdateChecker.DownloadFile(const URL, TargetPath: string);
-var
-  HTTP: THTTPSend;
-begin
-  HTTP := THTTPSend.Create;
-  try
-    if HTTP.HTTPMethod('GET', URL) then
-      HTTP.Document.SaveToFile(TargetPath)
-    else
-      raise Exception.Create('HTTP Error: ' + IntToStr(HTTP.ResultCode));
-  finally
-    HTTP.Free;
-  end;
-end;
-
+{$I UpdateChecker.lrs}
 
 end.
+

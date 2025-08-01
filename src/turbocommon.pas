@@ -360,6 +360,7 @@ const
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
 //Application/OS
+function ExtractVersionFromName(const Name: string): string;
 function GetProgramVersion: string;
 function GetLazarusVersion: string;
 function GetFPCVersion: string;
@@ -410,6 +411,17 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+function ExtractVersionFromName(const Name: string): string;
+var
+  Parts: TStringArray;
+begin
+  Result := '';
+  if not AnsiContainsText(Name, '-v') then Exit;
+  Parts := SplitString(Name, '-v');
+  if Length(Parts) <> 2 then Exit;
+  Result := StringReplace(Parts[1], '.gz', '', [rfIgnoreCase]);
+end;
 
 function GetProgramVersion: string;
 var

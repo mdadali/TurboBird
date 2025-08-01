@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 744
+  Left = 328
   Height = 440
-  Top = 145
+  Top = 117
   Width = 464
   ActiveControl = BitBtn1
   BorderIcons = []
