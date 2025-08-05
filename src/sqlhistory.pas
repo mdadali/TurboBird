@@ -5,8 +5,9 @@ unit SQLHistory;
 interface
 
 uses
-  Classes, SysUtils, db, FileUtil, LResources, Forms, Controls, Graphics,
-  Dialogs, DBGrids, Buttons, StdCtrls, EditBtn, ExtCtrls, DBCtrls;
+  Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
+  LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
+  EditBtn, ExtCtrls, DBCtrls, ComCtrls, usqlqueryext;
 
 type
 
@@ -20,15 +21,30 @@ type
     cxAfterDate: TCheckBox;
     cxOverwrite: TCheckBox;
     Datasource1: TDatasource;
+    DataSource2: TDataSource;
+    DataSource3: TDataSource;
     DateEdit1: TDateEdit;
     DBGrid1: TDBGrid;
+    DBGrid2: TDBGrid;
+    DBGrid3: TDBGrid;
     DBNavigator1: TDBNavigator;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     Label1: TLabel;
+    MemDataset2: TMemDataset;
+    OpenDialog1: TOpenDialog;
+    PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
+    Panel3: TPanel;
+    Panel4: TPanel;
+    Panel5: TPanel;
     SaveDialog1: TSaveDialog;
+    SQLQueryExt1: TSQLQueryExt;
+    SynEdit1: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
+    tsQuerys: TTabSheet;
+    tsHistory: TTabSheet;
     procedure bbDeleteClick(Sender: TObject);
     procedure bbExportClick(Sender: TObject);
     procedure bbInsertClick(Sender: TObject);

@@ -68,7 +68,8 @@ end;
 
 procedure TfrmSetFBClient.lstSuggestionsClick(Sender: TObject);
 begin
-  edtClientLib.Text := lstSuggestions.Items[lstSuggestions.ItemIndex];
+  if lstSuggestions.ItemIndex > -1 then
+    edtClientLib.Text := lstSuggestions.Items[lstSuggestions.ItemIndex];
 end;
 
 procedure TfrmSetFBClient.btnBrowserClick(Sender: TObject);

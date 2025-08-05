@@ -4,64 +4,151 @@ set -e
 
 PROJECT_NAME="TurboBird"
 BUILD_MODE="x86_64-linux64-gtk2-debug"
-FULL_VERSION="1.2.1.1263"
-
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SRC="$SCRIPT_DIR/../../bin/$BUILD_MODE/${PROJECT_NAME}_$BUILD_MODE/${PROJECT_NAME}_$BUILD_MODE"
+FULL_VERSION="1.2.1.1411"
 
 STRIP=OFF
 COMPRESS=ON
+RENAME=ON
+DELETE_OLD_FILES=ON
+LOGGING=ON
+
+IS_EXE=false
+
+# --- Optional logging ---
+if [ "$LOGGING" = "ON" ]; then
+  SCRIPT_PATH="$(realpath "$0")"
+  SCRIPT_NAME="$(basename "$SCRIPT_PATH")"
+  SCRIPT_DIR="$(dirname "$SCRIPT_PATH")"
+  LOG_DIR="$SCRIPT_DIR/logs"
+  mkdir -p "$LOG_DIR"
+  LOG_FILE="$LOG_DIR/${SCRIPT_NAME%.*}.log"
+
+  echo "📄 Logging enabled → $LOG_FILE"
+  echo "🕒 Started: $(date)" > "$LOG_FILE"
+  exec > >(tee -a "$LOG_FILE") 2>&1
+  set -euxo pipefail
+fi
+
+log() {
+  echo "$@"
+  if [ "$LOGGING" = "ON" ]; then
+    echo "$@" >> "$LOG_FILE"
+  fi
+}
+
+# --- Version info only when rename is ON ---
+if [ "$RENAME" = "ON" ]; then
+  log "🚀 Starting handle script for $PROJECT_NAME [$BUILD_MODE], version $FULL_VERSION"
+else
+  log "🚀 Starting handle script for $PROJECT_NAME [$BUILD_MODE]"
+fi
+
+SRC="$SCRIPT_DIR/../../bin/$BUILD_MODE/${PROJECT_NAME}_$BUILD_MODE/${PROJECT_NAME}_$BUILD_MODE"
+
+# Automatically select the .exe file if it exists
+if [ -f "${SRC}.exe" ]; then
+  SRC="${SRC}.exe"
+  IS_EXE=true
+fi
+
+log "📌 SRC initially points to: $SRC"
 
 handle_file() {
   local src="$1"
+  DST="$src"
 
-  for i in {1..5}; do
-    if [ -f "$src" ]; then break; fi
-    echo "⏳ Waiting for file: $src (attempt $i)..."
-    sleep 0.5
-  done
+  # --- Optional RENAME and EXE handling ---
+  if [ "$RENAME" = "ON" ]; then
+    if [[ "$src" == *.exe ]]; then
+      log "🔍 Detected .exe input file"
+      local new_src="${src%.exe}"
+      mv "$src" "$new_src"
+      log "📁 Renamed: $src → $new_src"
+      src="$new_src"
+      IS_EXE=true
+    fi
 
-  if [ ! -f "$src" ]; then
-    echo "❌ File not found: $src"
-    exit 1
+    DST="${src}-v$FULL_VERSION"
+    mv "$src" "$DST"
+    log "✅ File renamed with version: $DST"
   fi
 
-  DST="${src}-v$FULL_VERSION"
-  mv "$src" "$DST"
-  echo "✅ File renamed: $DST"
-
+  # --- Optional binary stripping ---
   if [ "$STRIP" = "ON" ]; then
     if file "$DST" | grep -q -e "ELF" -e "PE32"; then
       strip "$DST"
-      echo "🔧 Binary stripped: $DST"
+      log "🔧 Binary stripped: $DST"
     else
-      echo "⚠️ Skipping strip: unsupported format"
+      log "⚠️ Skipping strip: unsupported format"
     fi
   fi
 
   chmod +x "$DST"
-  echo "🔐 Made executable: $DST"
+  log "🔐 Marked as executable: $DST"
 
+  # --- Restore .exe extension if originally present ---
+  if [ "$RENAME" = "ON" ] && [ "$IS_EXE" = true ]; then
+    local final_dst="${DST}.exe"
+    mv "$DST" "$final_dst"
+    DST="$final_dst"
+    log "📦 Final EXE name restored: $DST"
+  fi
+
+  # --- Optional compression ---
   if [ "$COMPRESS" = "ON" ]; then
+    ZIP_FILE="${DST}.zip"
+    log "📦 Compressing file, please wait..."
+    zip -j -q "$ZIP_FILE" "$DST"
+    ZIP_SIZE=$(stat -c%s "$ZIP_FILE")
     ORIG_SIZE=$(stat -c%s "$DST")
-    gzip -kf "$DST"
-    GZ_SIZE=$(stat -c%s "$DST.gz")
 
-    if (( GZ_SIZE < ORIG_SIZE )); then
-      echo "📦 Compressed: $DST.gz (from $((ORIG_SIZE / 1024 / 1024))MB → $((GZ_SIZE / 1024 / 1024))MB)"
+    if (( ZIP_SIZE < ORIG_SIZE )); then
+      log "📦 Compressed: $ZIP_FILE (from $((ORIG_SIZE / 1024 / 1024))MB → $((ZIP_SIZE / 1024 / 1024))MB)"
     else
-      echo "⚠️ gzip larger than original – deleted"
-      rm -f "$DST.gz"
+      log "⚠️ ZIP larger than original – deleting"
+      rm -f "$ZIP_FILE"
     fi
   fi
 
-  # Clean up old versions except current
-  DIRNAME=$(dirname "$DST")
-  BASENAME=$(basename "$src")
-  echo "🧹 Cleaning old versions (excluding v$FULL_VERSION)..."
-  find "$DIRNAME" -type f -name "$BASENAME-v*" ! -name "*-v$FULL_VERSION" ! -name "*-v$FULL_VERSION.gz" -exec rm -v {} \;
+# --- Cleanup old versions (optional) ---
+DST_DIR=$(dirname "$DST")
+DST_FILENAME=$(basename "$DST")
 
-  echo "✅ Done with version $FULL_VERSION."
+if [ "$RENAME" = ON ]; then
+  BASENAME_RAW="${DST_FILENAME%-v*}"
+  VERSION_TAG="-v$FULL_VERSION"
+  KEEP_BIN="${BASENAME_RAW}${VERSION_TAG}"
+
+  if [ "$IS_EXE" = true ]; then
+    KEEP_EXE="${KEEP_BIN}.exe"
+    KEEP_ZIP="${KEEP_EXE}.zip"
+  else
+    KEEP_EXE=""
+    KEEP_ZIP="${KEEP_BIN}.zip"
+  fi
+else
+  BASENAME_RAW="$DST_FILENAME"
+  KEEP_BIN="$DST_FILENAME"
+  if [ "$IS_EXE" = true ]; then
+    KEEP_ZIP="${DST_FILENAME}.zip"
+  else
+    KEEP_ZIP="${DST_FILENAME}.zip"
+  fi
+  KEEP_EXE=""
+fi
+
+if [ "$DELETE_OLD_FILES" = ON ]; then
+  log "🧹 Cleaning up old versions of: $BASENAME_RAW"
+
+  # ZIP-Dateien bereinigen
+  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*.zip" ! -name "$KEEP_ZIP" \
+    -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
+
+  # Binärdateien bereinigen (keine .zip)
+  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*" ! -name "$KEEP_BIN" ! -name "$KEEP_EXE" \
+    ! -name "$KEEP_ZIP" ! -name "*.zip" \
+    -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'
+fi
 }
 
 handle_file "$SRC"

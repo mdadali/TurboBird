@@ -5,10 +5,9 @@ unit UpdateChecker;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, StdCtrls, Dialogs, ExtCtrls, math,
+  Classes, SysUtils, Forms, Controls, StdCtrls, Graphics, Dialogs, ExtCtrls, math,
   fphttpclient, LazFileUtils, Process, opensslsockets, jsonparser, fpjson,
-  strutils, LResources,
-  turbocommon;
+  strutils, LResources, turbocommon;
 
 type
 
@@ -20,6 +19,7 @@ type
     Label1: TLabel;
     lbCurrentVersion: TLabel;
     lblStatus: TLabel;
+    pnlColor: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure btnCheckClick(Sender: TObject);
     procedure btnDownloadClick(Sender: TObject);
@@ -31,7 +31,6 @@ type
     function CompareVersions(const CurrentVer, NewVer: string): Integer;
   public
   end;
-
 
 implementation
 
@@ -89,12 +88,12 @@ begin
       N := 0;
 
     if C > N then
-      Exit(1)  // Aktuelle Version ist größer → kein Update
+      Exit(1)
     else if C < N then
-      Exit(-1); // Neue Version ist größer → Update verfügbar
+      Exit(-1);
   end;
 
-  Result := 0; // Gleich
+  Result := 0;
 end;
 
 procedure TfrmUpdateChecker.btnCheckClick(Sender: TObject);
@@ -107,7 +106,9 @@ var
   DownloadName, NewVer, BaseName, CurrentVer, AssetVer: string;
   Asset: TJSONData;
 begin
+  pnlColor.Color := clYellow;
   SetStatus('Checking for update...');
+  Application.ProcessMessages;
   btnDownload.Enabled := False;
 
   if not GetCurrentVersionInfo(BaseName, CurrentVer) then
@@ -128,9 +129,16 @@ begin
       NewVer := StringReplace(NewVer, 'TurboBird_v', '', []);
 
       if CompareVersions(CurrentVer, NewVer) < 0 then
-        SetStatus('Neue Version verfügbar!')
-      else begin
-        SetStatus('You have the latest version: ' + CurrentVer);
+      begin
+        SetStatus('New version found!');
+        pnlColor.Color := clGreen;
+        Application.ProcessMessages;
+      end
+      else
+      begin
+        SetStatus('You have the latest version: ' + sLineBreak + CurrentVer);
+        pnlColor.Color := clDefault;
+        Application.ProcessMessages;
         Exit;
       end;
 
@@ -139,27 +147,39 @@ begin
       begin
         Asset := Assets[I];
         DownloadName := Asset.FindPath('name').AsString;
-        if StartsText(BaseName, DownloadName) and EndsText('.gz', DownloadName) then
+
+        // Unterstütze jetzt .zip statt .gz, unterscheide Windows und Linux
+        if StartsText(BaseName, DownloadName) and EndsText('.zip', DownloadName) then
         begin
           AssetVer := ExtractVersionFromName(DownloadName);
-          //if AssetVer = NewVer then
-          if NewVer > CurrentVer  then
+          if CompareVersions(CurrentVer, AssetVer) < 0 then
           begin
             FDownloadURL := Asset.FindPath('browser_download_url').AsString;
             FFileName := DownloadName;
             btnDownload.Enabled := True;
-            SetStatus('New version found: ' + NewVer);
+            SetStatus('New version found:' + sLineBreak + AssetVer);
+            pnlColor.Color := clGreen;
+            Application.ProcessMessages;
+            pnlColor.Color := clGreen;
             Exit;
           end;
         end;
       end;
+
       SetStatus('No matching file found in release.');
+      pnlColor.Color := clDefault;
+      Application.ProcessMessages;
+
     finally
       Data.Free;
     end;
   except
     on E: Exception do
-      SetStatus('Failed to connect to GitHub: ' + E.Message);
+    begin
+      SetStatus('Failed to connect to GitHub: ' + sLineBreak + E.Message);
+      pnlColor.Color := clGreen;
+      Application.ProcessMessages;
+    end;
   end;
   Client.Free;
 end;
@@ -170,7 +190,9 @@ var
   SavePath: string;
 begin
   if FDownloadURL = '' then Exit;
-  SetStatus('Downloading ' + FFileName + '...');
+  SetStatus('Downloading ' + sLineBreak + FFileName + '...');
+  pnlColor.Color := clRed;
+  Application.ProcessMessages;
 
   Client := TFPHTTPClient.Create(nil);
   try
@@ -178,17 +200,17 @@ begin
     Client.AllowRedirect := True;
     SavePath := AppendPathDelim(ExtractFilePath(Application.ExeName)) + FFileName;
     Client.Get(FDownloadURL, SavePath);
-    SetStatus('Download completed: ' + FFileName);
+    SetStatus('Download completed: ' + sLineBreak + FFileName);
+    pnlColor.Color := clDefault;
   except
     on E: Exception do
-      SetStatus('Download failed: ' + E.Message);
+      SetStatus('Download failed: ' + sLineBreak + E.Message);
   end;
   Client.Free;
 end;
 
 initialization
-
-{$I UpdateChecker.lrs}
+  {$I UpdateChecker.lrs}
 
 end.
 

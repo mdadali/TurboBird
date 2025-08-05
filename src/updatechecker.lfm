@@ -1,27 +1,27 @@
 object frmUpdateChecker: TfrmUpdateChecker
-  Left = 467
+  Left = 465
   Height = 119
-  Top = 179
-  Width = 426
+  Top = 105
+  Width = 370
   BorderIcons = [biSystemMenu]
   Caption = 'frmUpdateChecker'
   ClientHeight = 119
-  ClientWidth = 426
+  ClientWidth = 370
   OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
-    Left = 13
+    Left = 20
     Height = 20
-    Top = 21
+    Top = 10
     Width = 106
     Caption = 'Current Version'
     ParentColor = False
   end
   object lbCurrentVersion: TLabel
-    Left = 139
+    Left = 200
     Height = 20
-    Top = 21
+    Top = 10
     Width = 115
     Caption = 'lbCurrentVersion'
     ParentColor = False
@@ -30,27 +30,35 @@ object frmUpdateChecker: TfrmUpdateChecker
     Left = 0
     Height = 20
     Top = 99
-    Width = 426
+    Width = 370
     Align = alBottom
     Caption = 'New Version'
     ParentColor = False
   end
   object btnCheck: TButton
-    Left = 13
+    Left = 20
     Height = 25
-    Top = 56
-    Width = 75
+    Top = 40
+    Width = 120
     Caption = 'Check'
     OnClick = btnCheckClick
     TabOrder = 0
   end
   object btnDownload: TButton
-    Left = 139
+    Left = 200
     Height = 25
-    Top = 56
-    Width = 119
+    Top = 40
+    Width = 120
     Caption = 'Download'
     OnClick = btnDownloadClick
     TabOrder = 1
+  end
+  object pnlColor: TPanel
+    Left = 152
+    Height = 25
+    Top = 40
+    Width = 26
+    BevelOuter = bvNone
+    TabOrder = 2
   end
 end

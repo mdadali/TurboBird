@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 328
+  Left = 455
   Height = 440
-  Top = 117
+  Top = 157
   Width = 464
   ActiveControl = BitBtn1
   BorderIcons = []
@@ -215,11 +215,12 @@ object fmAbout: TfmAbout
   object laUpdate: TLabel
     Cursor = crHandPoint
     Left = 242
-    Height = 20
+    Height = 19
     Top = 112
-    Width = 115
+    Width = 106
     Caption = 'Check for update'
-    Font.Color = clBlack
+    Font.Color = clBlue
+    Font.Style = [fsUnderline]
     ParentColor = False
     ParentFont = False
     OnClick = laUpdateClick

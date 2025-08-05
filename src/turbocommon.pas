@@ -415,12 +415,30 @@ implementation
 function ExtractVersionFromName(const Name: string): string;
 var
   Parts: TStringArray;
+  CleanName: string;
 begin
   Result := '';
-  if not AnsiContainsText(Name, '-v') then Exit;
-  Parts := SplitString(Name, '-v');
+  CleanName := Name;
+
+  // Entferne .zip oder .exe.zip oder .exe
+  if EndsText('.exe.zip', CleanName) then
+    Delete(CleanName, Length(CleanName) - 7 + 1, 8)
+  else if EndsText('.zip', CleanName) then
+    Delete(CleanName, Length(CleanName) - 3 + 1, 4)
+  else if EndsText('.exe', CleanName) then
+    Delete(CleanName, Length(CleanName) - 3 + 1, 4);
+
+  Parts := SplitString(CleanName, '-v');
   if Length(Parts) <> 2 then Exit;
-  Result := StringReplace(Parts[1], '.gz', '', [rfIgnoreCase]);
+
+  Result := Parts[1];
+
+  // Entferne ggf. einen Punkt am Ende
+  if EndsText('.', Result) then
+    Delete(Result, Length(Result), 1);
+
+  // Entferne ggf. noch .exe, falls es doch drin blieb
+  Result := StringReplace(Result, '.exe', '', [rfIgnoreCase]);
 end;
 
 function GetProgramVersion: string;

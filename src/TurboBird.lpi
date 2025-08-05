@@ -19,7 +19,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1291"/>
+      <BuildNr Value="1424"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="8">
@@ -28,7 +28,7 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}-v1.2.1.1250"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -79,12 +79,12 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/debug/TurboBird/TurboBird"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/debug/unitoutput"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -112,6 +112,14 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
           </Other>
         </CompilerOptions>
       </Item3>
@@ -208,9 +216,13 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
-            <CompilerPath Value=""/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
             <ExecuteAfter>
-              <Command Value="./rename-binary.sh"/>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -219,12 +231,12 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/release/TurboBird/TurboBird"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/release/unitoutput"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -260,6 +272,14 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
           </Other>
         </CompilerOptions>
       </Item6>
@@ -321,12 +341,12 @@
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
-            <Filename Value="../bin/$(TargetCPU)-$(TargetOS)/release/TurboBird/TurboBird"/>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="../Synapse/source/lib;getdeclarations;classes;deps;common"/>
-            <UnitOutputDirectory Value="../bin/$(TargetCPU)-$(TargetOS)/release/unitoutput"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
             <SyntaxOptions>
@@ -871,7 +891,7 @@
   <CompilerOptions>
     <Version Value="11"/>
     <Target>
-      <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}-v1.2.1.1250"/>
+      <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
