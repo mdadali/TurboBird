@@ -1095,13 +1095,18 @@ end;
 procedure CheckInitialIniFile;
 begin
   {$IFDEF MSWINDOWS}
-  fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\Firebird_5\fbclient.dll');
-  fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files\Firebird\Firebird_5\firebird.conf');
+    {$IFDEF WIN64}
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\fbclient.dll');
+      fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files\Firebird\firebird.conf');
+    {$ELSE} // 32-Bit
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files (x86)\Firebird\fbclient.dll');
+      fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files (x86)\Firebird\firebird.conf');
+    {$ENDIF}
   {$ENDIF}
 
   {$IFDEF LINUX}
-  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/firebird_5/lib/libfbclient.so.5.0.2');
-  fIniFile.WriteString('FireBird', 'ConfPath',  '/opt/firebird/firebird_5/firebird.conf');
+  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/lib/libfbclient.so');
+  fIniFile.WriteString('FireBird', 'ConfPath',  '/opt/firebird/firebird.conf');
   {$ENDIF}
 end;
 

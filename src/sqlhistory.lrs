@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmSQLHistory','FORMDATA',[
-  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'c'#1#6'Height'#3'&'#2#3'T'
-  +'op'#3#140#0#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2
+  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'w'#1#6'Height'#3'&'#2#3'T'
+  +'op'#3#191#0#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2
   +#11'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreat'
   +'e'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#12'TPageC'
   +'ontrol'#12'PageControl1'#4'Left'#2#0#6'Height'#3'&'#2#3'Top'#2#0#5'Width'#3

@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-release"/>
+    <BuildModes Active="i386_Win32-win-release"/>
     <Units Count="99">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -398,8 +398,8 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="1097"/>
-        <CursorPos X="3" Y="1112"/>
+        <TopLine Value="1105"/>
+        <CursorPos X="54" Y="1118"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit40>
@@ -670,7 +670,7 @@
         <UnitName Value="UpdateChecker"/>
         <EditorIndex Value="1"/>
         <CursorPos X="3" Y="11"/>
-        <UsageCount Value="85"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
       </Unit73>
       <Unit74>
@@ -844,7 +844,7 @@
         <EditorIndex Value="10"/>
         <TopLine Value="262"/>
         <CursorPos X="10" Y="275"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit96>
       <Unit97>
@@ -860,7 +860,7 @@
         <EditorIndex Value="7"/>
         <TopLine Value="160"/>
         <CursorPos X="43" Y="182"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit98>
     </Units>
