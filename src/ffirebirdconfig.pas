@@ -291,18 +291,15 @@ begin
 end;
 
 procedure TfmFirebirdConfig.bbLoadFB3ConfigClick(Sender: TObject);
-var IniF: TIniFile;
 begin
   if OpenDialog1.Execute then
   begin
-    IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
     try
       FFirebirdConfPath := OpenDialog1.FileName;
       synEdit1.Lines.LoadFromFile(FFirebirdConfPath);
       lbServerMode.Caption := GetOptionValue('ServerMode');
-      IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
+      fIniFile.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
     finally
-      IniF.Free;
     end;
   end;
 end;
@@ -577,9 +574,8 @@ end;
 
 procedure TfmFirebirdConfig.InitForFB3;
 begin
-  IniF := TIniFile.Create(ExtractFilePath(Application.ExeName) + 'turbobird.ini', []);
   try
-    FFirebirdConfPath := IniF.ReadString('FireBird', 'ConfPath', '');
+    FFirebirdConfPath := fIniFile.ReadString('FireBird', 'ConfPath', '');
     if FileExists(FFirebirdConfPath) then
     begin
       SynEdit1.Lines.LoadFromFile(FFirebirdConfPath);
@@ -596,7 +592,7 @@ begin
         SynEdit1.Lines.LoadFromFile(FFirebirdConfPath);
         lbServerMode.Caption := GetOptionValue('ServerMode');
         // Optionally save the selected path back to the ini file
-        IniF.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
+        fIniFile.WriteString('FireBird', 'ConfPath', FFirebirdConfPath);
       end
       else
       begin
@@ -604,7 +600,6 @@ begin
       end;
     end;
   finally
-    IniF.Free;
   end;
 end;
 

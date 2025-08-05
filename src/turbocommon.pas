@@ -8,7 +8,8 @@ interface
 
 uses
 
-  Classes, SysUtils, StrUtils, DateUtils, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  Forms, Classes, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
   LCLType, LCLVersion, versiontypes, versionresource,
   interfaces, LCLPlatformDef,
   DB, sqldb, IBConnection,  RegExpr,
@@ -359,7 +360,16 @@ const
     'Packages', 'PackageFunctions', 'PackageProcedures',
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
+var fLanguage: string;
+    fIniFileName: string;
+    fIniFile: TInifile;
+
+
 //Application/OS
+procedure ReadIniFile;
+procedure WriteIniFile;
+function FirstRun: boolean;
+procedure ExtractResources;
 function ExtractVersionFromName(const Name: string): string;
 function GetProgramVersion: string;
 function GetLazarusVersion: string;
@@ -411,6 +421,59 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 
 implementation
+
+procedure ReadIniFile;
+begin
+  fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
+end;
+
+
+procedure WriteIniFile;
+begin
+  fIniFile.WriteString('UserInterface', 'Language', fLanguage);
+end;
+
+
+function FirstRun: boolean;
+var DataDirectory: string;
+begin
+  {$IFDEF WINDOWS}
+  DataDirectory := ExtractFilePath(Application.ExeName) + '\data';
+  {$ELSE}
+  DataDirectory := ExtractFilePath(Application.ExeName) + '/data';
+ {$ENDIF}
+  result := not DirectoryExists(DataDirectory);
+end;
+
+procedure ExtractResources;
+var
+  DataStream: TResourceStream;
+  MemoryStream: TMemoryStream;
+  AbUnZipper: TAbUnZipper;
+begin
+  AbUnZipper := TAbUnZipper.Create(nil);
+  if FirstRun then
+  begin
+    DataStream := TResourceStream.Create(HInstance, 'DATA', RT_RCDATA);
+    MemoryStream := TMemoryStream.Create;
+    try
+      // Load the ZIP file from the resource into memory
+      MemoryStream.LoadFromStream(DataStream);
+      MemoryStream.Position := 0;
+
+      // Extract the contents of the ZIP file to the target directory.
+      AbUnZipper.Stream := MemoryStream;
+      AbUnZipper.ExtractOptions := [eoCreateDirs, eoRestorePath]; // Create directories
+      AbUnZipper.BaseDirectory := ExtractFilePath(Application.ExeName);
+      AbUnZipper.ExtractFiles('*.*');
+    finally
+      MemoryStream.Free;
+      DataStream.Free;
+      AbUnZipper.Free;
+    end;
+  end;
+end;
+
 
 function ExtractVersionFromName(const Name: string): string;
 var
@@ -1029,5 +1092,34 @@ begin
   result:= (pos('RDB$PRIMARY',uppercase(Trim(IndexName)))=1);
 end;
 
-end.
+procedure CheckInitialIniFile;
+begin
+  {$IFDEF MSWINDOWS}
+  fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\Firebird_5\fbclient.dll');
+  fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files\Firebird\Firebird_5\firebird.conf');
+  {$ENDIF}
 
+  {$IFDEF LINUX}
+  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/firebird_5/lib/libfbclient.so.5.0.2');
+  fIniFile.WriteString('FireBird', 'ConfPath',  '/opt/firebird/firebird_5/firebird.conf');
+  {$ENDIF}
+end;
+
+initialization
+  fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
+  fIniFile     := TIniFile.Create(fIniFileName);
+
+  if not FileExists(fIniFileName) then
+    CheckInitialIniFile;
+
+  if FirstRun then
+    ExtractResources;
+
+  ReadIniFile;
+
+
+finalization
+  //WriteIniFile;
+  fIniFile.Free;
+  fIniFile := nil;
+end.

@@ -12,6 +12,9 @@
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
+      <Resources Count="1">
+        <Resource_0 FileName="resources/data.zip" Type="RCDATA" ResourceName="DATA"/>
+      </Resources>
     </General>
     <VersionInfo>
       <UseVersionInfo Value="True"/>
@@ -19,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1424"/>
+      <BuildNr Value="1432"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="8">
@@ -59,11 +62,9 @@
             <Debugging>
               <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Compile="False" Run="False"/>
@@ -156,11 +157,9 @@
           <Linking>
             <Debugging>
               <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Compile="False" Run="False"/>
@@ -262,7 +261,6 @@
             <Debugging>
               <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
             </Debugging>
             <Options>
               <Win32>
@@ -271,7 +269,6 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Compile="False" Run="False"/>
@@ -372,7 +369,6 @@
           <Linking>
             <Debugging>
               <DebugInfoType Value="dsDwarf2Set"/>
-              <UseHeaptrc Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
             <Options>
@@ -382,9 +378,6 @@
               </Win32>
             </Options>
           </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG -O-1"/>
-          </Other>
         </CompilerOptions>
       </Item8>
       <SharedMatrixOptions Count="1">
@@ -410,36 +403,39 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="9">
+    <RequiredPackages Count="10">
       <Item1>
-        <PackageName Value="SQLDBExt"/>
+        <PackageName Value="Abbrevia"/>
       </Item1>
       <Item2>
-        <PackageName Value="zcomponent"/>
+        <PackageName Value="SQLDBExt"/>
       </Item2>
       <Item3>
-        <PackageName Value="LR_ZeosDB"/>
+        <PackageName Value="zcomponent"/>
       </Item3>
       <Item4>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="LR_ZeosDB"/>
       </Item4>
       <Item5>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="laz_synapse"/>
       </Item5>
       <Item6>
-        <PackageName Value="SQLDBLaz"/>
+        <PackageName Value="MemDSLaz"/>
       </Item6>
       <Item7>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item7>
       <Item8>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item8>
       <Item9>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item9>
+      <Item10>
+        <PackageName Value="LCL"/>
+      </Item10>
     </RequiredPackages>
     <Units Count="74">
       <Unit0>

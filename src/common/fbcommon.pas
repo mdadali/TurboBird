@@ -47,6 +47,8 @@ var IBaseLibraryHandle : TLibHandle;
 
 implementation
 
+uses turbocommon;
+
 function NormalizeFloatForSQL(Value: Double): string;
 begin
   Result := FloatToStrF(Value, ffGeneral, 15, 0);
@@ -56,26 +58,13 @@ end;
 
 
 function GetClientLibraryPath: string;
-var ini: TIniFile;
 begin
-  ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'turbobird.ini');
-  try
-    Result := ini.ReadString('Firebird', 'ClientLib', '');
-  finally
-    ini.Free;
-  end;
+  Result := fIniFile.ReadString('Firebird', 'ClientLib', '');
 end;
 
 procedure SaveClientLibraryPath(const path: string);
-var
-  ini: TIniFile;
 begin
-  ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'turbobird.ini');
-  try
-    ini.WriteString('Firebird', 'ClientLib', path);
-  finally
-    ini.Free;
-  end;
+  fIniFile.WriteString('Firebird', 'ClientLib', path);
 end;
 
 function SetFBClient(Sender: Word): Boolean;
@@ -84,7 +73,7 @@ var
   caption0, caption1: string;
 begin
   caption0 :=
-    'FireBird client in TurboBird.ini does not exist or is invalid.' + sLineBreak +
+    'FireBird client in ini-file does not exist or is invalid.' + sLineBreak +
     'Please select a version from the list below or' + sLineBreak +
     'use the "Browse" button to choose a valid version.' + sLineBreak +
     'Then test your selection with the "Test" button.';
