@@ -1,7 +1,7 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 375
+  Left = 464
   Height = 550
-  Top = 191
+  Top = 112
   Width = 834
   Caption = 'Querys'
   ClientHeight = 550

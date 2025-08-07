@@ -106,6 +106,7 @@ var
   I: Integer;
   DownloadName, NewVer, BaseName, CurrentVer, AssetVer: string;
   Asset: TJSONData;
+  CompareResult: integer;
 begin
   pnlColor.Color := clYellow;
   SetStatus('Checking for update...');
@@ -129,13 +130,13 @@ begin
       NewVer := Data.FindPath('tag_name').AsString;
       NewVer := StringReplace(NewVer, 'TurboBird_v', '', []);
 
-      if CompareVersions(CurrentVer, NewVer) < 0 then
+      CompareResult := CompareVersions(CurrentVer, NewVer);
+      if  CompareResult < 0 then
       begin
         SetStatus('New version found!');
         pnlColor.Color := clGreen;
         Application.ProcessMessages;
-      end
-      else
+      end else
       begin
         SetStatus('You have the latest version: ' + sLineBreak + CurrentVer);
         pnlColor.Color := clDefault;

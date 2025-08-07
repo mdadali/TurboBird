@@ -2293,8 +2293,9 @@ var
 begin
   if IsLinux then
   begin
-    ConfigDir:= GetEnvironmentVariable('HOME') + DirectorySeparator + '.turbobird' + DirectorySeparator;
-
+    //ConfigDir:= GetEnvironmentVariable('HOME') + DirectorySeparator + '.turbobird' + DirectorySeparator;
+    //ConfigDir:= ExtractFilePath(Application.ExeName) + '/data/config/';
+    ConfigDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName) + 'data' + PathDelim + 'config');
     if not DirectoryExists(ConfigDir) then
       CreateDir(ConfigDir);
     Result:= ConfigDir;
