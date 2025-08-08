@@ -4,7 +4,7 @@ set -e
 
 PROJECT_NAME="TurboBird"
 BUILD_MODE="i386_linux32-gtk-debug"
-FULL_VERSION="1.2.1.1260"
+FULL_VERSION="1.2.1.1255"
 
 STRIP=OFF
 COMPRESS=ON
@@ -140,13 +140,15 @@ fi
 if [ "$DELETE_OLD_FILES" = ON ]; then
   log "🧹 Cleaning up old versions of: $BASENAME_RAW"
 
-  # ZIP-Dateien bereinigen
-  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*.zip" ! -name "$KEEP_ZIP" \
+  # ZIP-Dateien bereinigen (INI-Dateien ausnehmen)
+  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*.zip" \
+    ! -name "$KEEP_ZIP" ! -name "*.ini" \
     -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
 
-  # Binärdateien bereinigen (keine .zip)
-  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*" ! -name "$KEEP_BIN" ! -name "$KEEP_EXE" \
-    ! -name "$KEEP_ZIP" ! -name "*.zip" \
+  # Binärdateien bereinigen (keine ZIPs und keine INIs)
+  find "$DST_DIR" -type f -name "${BASENAME_RAW}-v*" \
+    ! -name "$KEEP_BIN" ! -name "$KEEP_EXE" ! -name "$KEEP_ZIP" \
+    ! -name "*.zip" ! -name "*.ini" \
     -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'
 fi
 }

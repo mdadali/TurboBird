@@ -52,11 +52,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="773"/>
-        <CursorPos X="19" Y="777"/>
+        <TopLine Value="1588"/>
+        <CursorPos X="11" Y="1594"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="viewview.pas"/>
@@ -655,10 +657,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
         <TopLine Value="614"/>
-        <CursorPos X="28" Y="628"/>
+        <CursorPos X="48" Y="624"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -673,7 +674,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="76"/>
         <CursorPos X="39" Y="85"/>
-        <UsageCount Value="103"/>
+        <UsageCount Value="104"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit73>

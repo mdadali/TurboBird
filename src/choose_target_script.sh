@@ -67,13 +67,13 @@ else
   echo "ℹ️ No build number change"
 fi
 
-if (( new_build != current_build )); then
-  echo "🔄 Updating version.inc → $new_build"
-  sed -i "s/^\(\s*VERSION_BUILD\s*=\s*\)[0-9]*;/\1${new_build};/" "$VERSION_INC"
-
-  new_version="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}.${new_build}"
-  sed -i "s/^\(\s*VERSION\s*=\s*'\)[0-9.]*\(';\)/\1${new_version}\2/" "$VERSION_INC"
-fi
+#if (( new_build != current_build )); then
+#  echo "🔄 Updating version.inc → $new_build"
+#  sed -i "s/^\(\s*VERSION_BUILD\s*=\s*\)[0-9]*;/\1${new_build};/" "$VERSION_INC"
+#
+#  new_version="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}.${new_build}"
+#  sed -i "s/^\(\s*VERSION\s*=\s*'\)[0-9.]*\(';\)/\1${new_version}\2/" "$VERSION_INC"
+#fi
 
 filename=$(basename "$TARGET_FILE")
 build_mode="${filename#*_}"

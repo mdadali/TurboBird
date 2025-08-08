@@ -1124,7 +1124,7 @@ begin
 end;
 
 (***************  Execute Query   ******************)
-{procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
+procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -1410,8 +1410,9 @@ begin
     end;
   end;
 end;
-}
-procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
+
+
+{procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -1599,6 +1600,7 @@ begin
     end;
   end;
 end;
+}
 
 { Execute script }
 function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
