@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <BuildModes Active="i386_Win32-win-release"/>
     <Units Count="100">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -58,7 +58,6 @@
         <CursorPos X="11" Y="1594"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="viewview.pas"/>
@@ -331,7 +330,6 @@
         <CursorPos X="35" Y="96"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit31>
       <Unit32>
         <Filename Value="copytable.pas"/>
@@ -662,7 +660,6 @@
         <CursorPos X="48" Y="624"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit72>
       <Unit73>
         <Filename Value="updatechecker.pas"/>
@@ -674,7 +671,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="76"/>
         <CursorPos X="39" Y="85"/>
-        <UsageCount Value="107"/>
+        <UsageCount Value="110"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit73>
@@ -687,49 +684,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="283"/>
         <CursorPos X="44" Y="298"/>
-        <UsageCount Value="193"/>
+        <UsageCount Value="192"/>
       </Unit74>
       <Unit75>
         <Filename Value="classes\usqlqueryext.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="295"/>
         <CursorPos X="29" Y="305"/>
-        <UsageCount Value="185"/>
+        <UsageCount Value="184"/>
       </Unit75>
       <Unit76>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\radiogroup.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="498"/>
         <CursorPos Y="512"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit76>
       <Unit77>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\buttoncontrol.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos Y="50"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit77>
       <Unit78>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\radiobutton.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos Y="77"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit78>
       <Unit79>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\customcheckbox.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="50"/>
         <CursorPos Y="69"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit79>
       <Unit80>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2574"/>
         <CursorPos Y="2588"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit80>
       <Unit81>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\comctrls.pp"/>
@@ -737,14 +734,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3219"/>
         <CursorPos X="32" Y="3228"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit81>
       <Unit82>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\ibase\src\ibase60.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2744"/>
         <CursorPos X="30" Y="2737"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit82>
       <Unit83>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\fcl-db\src\sqldb\sqldb.pp"/>
@@ -752,7 +749,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="589"/>
         <CursorPos X="15" Y="598"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit83>
       <Unit84>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\fcl-db\src\base\db.pas"/>
@@ -760,21 +757,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1741"/>
         <CursorPos X="83" Y="1759"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit84>
       <Unit85>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\include\menuitem.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="74"/>
         <CursorPos Y="85"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit85>
       <Unit86>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\include\font.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="812"/>
         <CursorPos Y="824"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit86>
       <Unit87>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\dbctrls.pp"/>
@@ -782,7 +779,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1300"/>
         <CursorPos X="74" Y="1313"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit87>
       <Unit88>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\components\synedit\synedit.pp"/>
@@ -790,21 +787,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="913"/>
         <CursorPos X="14" Y="921"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit88>
       <Unit89>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="18"/>
         <CursorPos X="4" Y="27"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit89>
       <Unit90>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\rtl\inc\typshrdh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="52"/>
         <CursorPos X="3" Y="62"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit90>
       <Unit91>
         <Filename Value="..\..\..\..\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\components\lazutils\laztracer.pas"/>
@@ -812,7 +809,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="42" Y="53"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit91>
       <Unit92>
         <Filename Value="components\sqldb_ext\src\usqlqueryext.pas"/>
@@ -827,13 +824,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="276"/>
         <CursorPos Y="290"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit93>
       <Unit94>
         <Filename Value="updatechecker.lrs"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="18"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit94>
       <Unit95>
         <Filename Value="..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -841,7 +838,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos X="10" Y="37"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit95>
       <Unit96>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -849,7 +846,7 @@
         <EditorIndex Value="11"/>
         <TopLine Value="262"/>
         <CursorPos X="10" Y="275"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="43"/>
         <Loaded Value="True"/>
       </Unit96>
       <Unit97>
@@ -858,14 +855,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1119"/>
         <CursorPos X="14" Y="1128"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit97>
       <Unit98>
         <Filename Value="..\..\..\..\..\linux\lazarus\LazCAD_git\LazCAD\src\common\applicationh.pas"/>
         <EditorIndex Value="8"/>
         <TopLine Value="160"/>
         <CursorPos X="43" Y="182"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit98>
       <Unit99>
@@ -873,7 +870,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="18"/>
         <CursorPos X="2" Y="31"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit99>
     </Units>
