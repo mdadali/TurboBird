@@ -928,11 +928,11 @@
       <CustomOptions Value="-dDEBUG -O-1"/>
       <ExecuteBefore>
         <Command Value="./gen_versions_scripts.sh"/>
-        <CompileReasons Compile="False" Run="False"/>
+        <CompileReasons Run="False"/>
       </ExecuteBefore>
       <ExecuteAfter>
         <Command Value="./choose_target_script.sh $(TargetFile)"/>
-        <CompileReasons Compile="False" Run="False"/>
+        <CompileReasons Run="False"/>
       </ExecuteAfter>
     </Other>
   </CompilerOptions>

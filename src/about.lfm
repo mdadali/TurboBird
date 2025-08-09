@@ -1,13 +1,13 @@
 object fmAbout: TfmAbout
   Left = 455
-  Height = 440
+  Height = 462
   Top = 157
   Width = 464
   ActiveControl = BitBtn1
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'About TurboBird'
-  ClientHeight = 440
+  ClientHeight = 462
   ClientWidth = 464
   Color = 15792364
   OnClose = FormClose
@@ -15,7 +15,7 @@ object fmAbout: TfmAbout
   LCLVersion = '2.2.6.0'
   object Shape1: TShape
     Left = 8
-    Height = 379
+    Height = 395
     Top = 5
     Width = 447
     Brush.Color = clCream
@@ -87,9 +87,9 @@ object fmAbout: TfmAbout
     ParentFont = False
   end
   object BitBtn1: TBitBtn
-    Left = 9
+    Left = 10
     Height = 43
-    Top = 392
+    Top = 408
     Width = 75
     Caption = '&OK'
     Color = 16249563
@@ -204,10 +204,10 @@ object fmAbout: TfmAbout
   end
   object Label5: TLabel
     Left = 16
-    Height = 20
+    Height = 40
     Top = 352
-    Width = 128
-    Caption = 'License: GPL / LGPL'
+    Width = 317
+    Caption = 'License: MIT License'#10#10'Copyright (c) 2015-2025 by Motaz Abdel Azeem.'#10
     Font.Color = 3487029
     ParentColor = False
     ParentFont = False
@@ -226,9 +226,9 @@ object fmAbout: TfmAbout
     OnClick = laUpdateClick
   end
   object Image1: TImage
-    Left = 288
+    Left = 280
     Height = 78
-    Top = 306
+    Top = 288
     Width = 166
     Picture.Data = {
       1754506F727461626C654E6574776F726B47726170686963A726000089504E47
