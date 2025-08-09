@@ -3,8 +3,8 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release"/>
-    <BuildModes Active="i386_Win32-win-release"/>
+    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,i386_linux32-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release,i386_Win32-win-debug,i386_Win32-win-release"/>
+    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
     <Units Count="100">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -55,9 +55,10 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <TopLine Value="1588"/>
-        <CursorPos X="11" Y="1594"/>
+        <CursorPos X="44" Y="1594"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="viewview.pas"/>
@@ -846,7 +847,7 @@
         <EditorIndex Value="11"/>
         <TopLine Value="262"/>
         <CursorPos X="10" Y="275"/>
-        <UsageCount Value="43"/>
+        <UsageCount Value="44"/>
         <Loaded Value="True"/>
       </Unit96>
       <Unit97>
@@ -862,7 +863,7 @@
         <EditorIndex Value="8"/>
         <TopLine Value="160"/>
         <CursorPos X="43" Y="182"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="25"/>
         <Loaded Value="True"/>
       </Unit98>
       <Unit99>
@@ -870,7 +871,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="18"/>
         <CursorPos X="2" Y="31"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="15"/>
         <Loaded Value="True"/>
       </Unit99>
     </Units>

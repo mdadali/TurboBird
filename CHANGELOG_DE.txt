@@ -1,0 +1,19 @@
+TurboBird v1.2.1.1256
+Build-Datum & Zeit: 08.08.2025, 10:40:06
+
+Neuigkeiten für TurboBird
+! : geändert
++ : hinzugefügt
+* : behoben
+- : entfernt
+
+08. Aug. 2025 – 1.2.1.1256
++ Hinzugefügt: Dynamische Firebird-Datentypbehandlung – alle Firebird-Datentypen werden jetzt zur Laufzeit dynamisch geladen, was TurboBird weitgehend versionsunabhängig macht.
++ Hinzugefügt: Unterstützung zur direkten Erstellung und Bearbeitung von Firebird-Paketen in TurboBird.
++ Hinzugefügt: UDR (User Defined Routines) Unterstützung – erstellen, bearbeiten und ausführen von UDRs inklusive Parameter und Rückgabewerten.
++ Hinzugefügt: Einheitlicher Routine-Runner, der UDFs, UDRs, Stored Procedures und Funktionen in einem einzigen Tool unterstützt.
++ Hinzugefügt: „SetFireBirdClient“-Dialog zur Auswahl der Firebird-Client-Version jederzeit; erkennt installierte Versionen automatisch.
++ Hinzugefügt: Firebird-Server-Konfigurationsverwaltung – Importieren, Bearbeiten und Exportieren von Servereinstellungen direkt in TurboBird.
++ Hinzugefügt: Unterstützung für Arrays und DateTimeWithTimeZone über neue Komponente TSQLQueryExt, um nicht unterstützte Datentypen im DBGrid anzuzeigen.
+! Geändert: Verschiebung von Turbobird.reg und Query-History-Datei in src/data/config für Multi-Instanz-Konfigurationen.
+! Geändert: Konfigurationsverwaltung erlaubt nun mehrere TurboBird-Instanzen für verschiedene Firebird-Versionen gleichzeitig, was Tests und Migrationen von älteren Versionen vereinfacht.
