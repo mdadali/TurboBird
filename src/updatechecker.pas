@@ -33,11 +33,14 @@ type
   public
   end;
 
+{$I version.inc}
+
 implementation
 
 procedure TfrmUpdateChecker.FormCreate(Sender: TObject);
 begin
-  lbCurrentVersion.Caption := ExtractVersionFromName(Application.ExeName);
+  //lbCurrentVersion.Caption := ExtractVersionFromName(Application.ExeName);
+  lbCurrentVersion.Caption := VERSION; //from version.inc
   btnDownload.Enabled := False;
   SetStatus('Idle');
 end;

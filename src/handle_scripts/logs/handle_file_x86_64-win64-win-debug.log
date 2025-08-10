@@ -1,4 +1,4 @@
-🕒 Started: So 10 Aug 2025 10:25:45 CEST
+🕒 Started: So 10 Aug 2025 11:30:05 CEST
 🚀 Starting handle script for TurboBird [x86_64-win64-win-debug], version 1.2.1.1256
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug.exe
 + '[' ON = ON ']'
@@ -74,9 +74,9 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe.zip
-+ ZIP_SIZE=28046896
++ ZIP_SIZE=28046676
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe
-+ ORIG_SIZE=110157750
++ ORIG_SIZE=110156629
 + ((  ZIP_SIZE < ORIG_SIZE  ))
 + log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe.zip (from 105MB → 26MB)'
 + echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe.zip (from 105MB → 26MB)'

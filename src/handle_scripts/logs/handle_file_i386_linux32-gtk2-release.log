@@ -1,4 +1,4 @@
-🕒 Started: So 10 Aug 2025 10:25:30 CEST
+🕒 Started: So 10 Aug 2025 11:29:54 CEST
 🚀 Starting handle script for TurboBird [i386_linux32-gtk2-release], version 1.2.1.1256
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release
 + '[' ON = ON ']'
@@ -56,9 +56,9 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256.zip
-+ ZIP_SIZE=4977428
++ ZIP_SIZE=4977824
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256
-+ ORIG_SIZE=15989640
++ ORIG_SIZE=15988936
 + ((  ZIP_SIZE < ORIG_SIZE  ))
 + log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256.zip (from 15MB → 4MB)'
 + echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release/TurboBird_i386_linux32-gtk2-release-v1.2.1.1256.zip (from 15MB → 4MB)'
