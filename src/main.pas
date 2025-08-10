@@ -2288,20 +2288,14 @@ begin
 end;
 
 Function TfmMain.getConfigurationDirectory: string;
-var
-  ConfigDir: string;
+var ConfigDir: string;
 begin
-  if IsLinux then
-  begin
-    //ConfigDir:= GetEnvironmentVariable('HOME') + DirectorySeparator + '.turbobird' + DirectorySeparator;
-    //ConfigDir:= ExtractFilePath(Application.ExeName) + '/data/config/';
-    ConfigDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName) + 'data' + PathDelim + 'config');
-    if not DirectoryExists(ConfigDir) then
+  //ConfigDir:= GetEnvironmentVariable('HOME') + DirectorySeparator + '.turbobird' + DirectorySeparator;
+  //ConfigDir:= ExtractFilePath(Application.ExeName) + '/data/config/';
+  ConfigDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName) + 'data' + PathDelim + 'config');
+  if not DirectoryExists(ConfigDir) then
       CreateDir(ConfigDir);
-    Result:= ConfigDir;
-  end
-  else
-    ExtractFilePath(ParamStr(0));
+  Result:= ConfigDir;
 end;
 
 (****************  Fill and show constraints form ************************)

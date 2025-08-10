@@ -179,7 +179,7 @@ begin
     on E: Exception do
     begin
       SetStatus('Failed to connect to GitHub: ' + sLineBreak + E.Message);
-      pnlColor.Color := clGreen;
+      pnlColor.Color := clDefault;
       Application.ProcessMessages;
     end;
   end;

@@ -75,8 +75,8 @@ begin
   laTarget.Caption:= 'Target : ' + Target + '-' + Arch;
   }
   //lbPgmVersion.Caption := GetProgramVersion;
-  //lbPgmVersion.Caption := VERSION; //from version.inc
-  lbPgmVersion.Caption := ExtractVersionFromName(Application.ExeName);
+  lbPgmVersion.Caption := VERSION; //from version.inc
+  //lbPgmVersion.Caption := ExtractVersionFromName(Application.ExeName);
   lbLazarus.Caption    := GetLazarusVersion;
   lbFPCVersion.Caption := GetFPCVersion;
   lbOSInfo.Caption     := GetOSInfo;
