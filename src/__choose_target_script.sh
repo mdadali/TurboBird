@@ -83,7 +83,6 @@ handle_script="$HANDLE_SCRIPTS_DIR/handle_file_${build_mode}.sh"
 #If the path contains .exe, remove it.
 handle_script="${handle_script/.exe.sh/.sh}"
 
-
 if [ ! -f "$handle_script" ]; then
   echo "❌ Handle script not found: $handle_script"
   exit 1
