@@ -5,7 +5,9 @@ unit usqlqueryext;
 interface
 
 uses
-  Classes, SysUtils, DB, SQLDB;
+  Classes, SysUtils, DB, SQLDB,
+  Dialogs,
+  SynEdit, SynHighlighterSQL;
 
 type
   { TSQLQueryExt }
@@ -34,6 +36,52 @@ procedure Register;
 begin
   RegisterComponents('SQLdb_Ext', [TSQLQueryExt]);
 end;
+
+{TSQLDialect = (sqlStandard, sqlInterbase6, sqlMSSQL7, sqlMySQL, sqlOracle,
+  sqlSybase, sqlIngres, sqlMSSQL2K, sqlPostgres, sqlSQLite,
+  sqlFirebird25, sqlFirebird30, sqlFirebird40);
+}
+
+function ExtractFirstTableName(const ASQL: string): string;
+var
+  Syn: TSynSQLSyn;
+  Line: string;
+  Pos: Integer;
+  Token: string;
+  AfterFrom: Boolean;
+begin
+  Result := '';
+  AfterFrom := False;
+  Syn := TSynSQLSyn.Create(nil);
+  try
+    Syn.SQLDialect := sqlFirebird30; // passt für Firebird
+    Line := ASQL;
+    Pos := 1;
+    Syn.SetLine(Line, 1);
+    while not Syn.GetEol do
+    begin
+      Token := Trim(Syn.GetToken);
+      if Token <> '' then
+      begin
+        if AfterFrom then
+        begin
+          // Erstes Token nach FROM ist vermutlich Tabellenname
+          // Entferne evtl. Quotes
+          if (Token[1] = '"') and (Token[Length(Token)] = '"') then
+            Token := Copy(Token, 2, Length(Token)-2);
+          Result := Token;
+          Exit;
+        end;
+        if SameText(Token, 'FROM') then
+          AfterFrom := True;
+      end;
+      Syn.Next;
+    end;
+  finally
+    Syn.Free;
+  end;
+end;
+
 
 
 { TSQLQueryExt }
@@ -159,7 +207,7 @@ var
   CleanFieldList, ArrayFields: TStringList;
   FieldName: string[63];
   DimStr: string[63];
-  TempRelationName: string;
+  TempRelationName: string[63];
   MetaQuery, DimQuery: TSQLQuery;
   FieldType, FieldSubType: Integer;
   TZFields: TStringList;
@@ -167,7 +215,12 @@ begin
   //if not SQL.Text.Trim.ToUpper.StartsWith('SELECT * FROM ') then
     //Exit;
 
-  TempRelationName := Trim(Copy(SQL.Text, Length('SELECT * FROM ') + 1, MaxInt));
+  //TempRelationName := Trim(Copy(SQL.Text, Length('SELECT * FROM ') + 1, MaxInt));
+  ShowMessage('SQL.Text = ' + SQL.Text);
+
+  TempRelationName := ExtractFirstTableName(SQL.Text);
+
+  ShowMessage(TempRelationName);
 
   ArrayFields := TStringList.Create;
   CleanFieldList := TStringList.Create;
@@ -245,9 +298,9 @@ begin
     if CleanFieldList.Count = 0 then
       CleanFieldList.Add(' * ');
     SQL.Text := 'SELECT ' + String.Join(', ', CleanFieldList.ToStringArray) + ' FROM ' + TempRelationName;
-
+    //ShowMessage(SQL.Text);
     // (optional) Debug speichern
-    //SQL.SaveToFile('sql.txt');
+    SQL.SaveToFile('sql.txt');
 
     // 4. Virtuelle Array-Felder einbauen
     for FieldName in ArrayFields do

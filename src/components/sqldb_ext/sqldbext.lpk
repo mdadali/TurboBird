@@ -19,6 +19,9 @@
     </Files>
     <RequiredPkgs>
       <Item>
+        <PackageName Value="SynEdit"/>
+      </Item>
+      <Item>
         <PackageName Value="FCL"/>
       </Item>
     </RequiredPkgs>

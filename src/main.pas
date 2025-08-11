@@ -2495,8 +2495,10 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex,  'Select first 1000 from ' + SelNode.Text);
-    QWindow.meQuery.Lines.Text:= 'select first 1000 * from "' + SelNode.Text + '"';
+    //QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
+    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from ' + SelNode.Text;
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select * from ' + SelNode.Text);
+    QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
@@ -5753,10 +5755,10 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
-    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from "' + SelNode.Text + '"';
+    //QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
+    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from ' + SelNode.Text;
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select * from ' + SelNode.Text);
     QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
-
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;

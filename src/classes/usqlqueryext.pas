@@ -85,115 +85,17 @@ begin
   FArrayInfoList := TStringList.Create;
 end;
 
-destructor TSQLQueryExt.Destroy;
-begin
-  FArrayInfoList.Free;
-  inherited Destroy;
-end;
-
 procedure TSQLQueryExt.InternalOpen;
 begin
   FilterOutArrayFields;
   inherited InternalOpen;
 end;
 
-{procedure TSQLQueryExt.FilterOutArrayFields;
-var
-  CleanFieldList, ArrayFields: TStringList;
-  FieldName, ArrayInfo: string;
-  TempTableName: string;
-  MetaQuery, DimQuery: TSQLQuery;
-  DimStr: string;
+destructor TSQLQueryExt.Destroy;
 begin
-  if not SQL.Text.Trim.ToUpper.StartsWith('SELECT * FROM ') then
-    Exit;
-
-  TempTableName := Trim(Copy(SQL.Text, Length('SELECT * FROM ') + 1, MaxInt));
-
-  ArrayFields := TStringList.Create;
-  CleanFieldList := TStringList.Create;
-  MetaQuery := TSQLQuery.Create(nil);
-  DimQuery := TSQLQuery.Create(nil);
-  try
-    MetaQuery.DataBase := Self.DataBase;
-    MetaQuery.Transaction := Self.Transaction;
-    DimQuery.DataBase := Self.DataBase;
-    DimQuery.Transaction := Self.Transaction;
-
-    FArrayInfoList.Clear;
-
-    // 1. Array-Felder erkennen
-    MetaQuery.SQL.Text :=
-      'SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_NAME AS TYPENAME ' +
-      'FROM RDB$RELATION_FIELDS rf ' +
-      'JOIN RDB$FIELDS f ON rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
-      'WHERE rf.RDB$RELATION_NAME = :TBL ' +
-      'AND f.RDB$DIMENSIONS IS NOT NULL';
-    MetaQuery.Params.ParamByName('TBL').AsString := UpperCase(TempTableName);
-    MetaQuery.Open;
-    while not MetaQuery.EOF do
-    begin
-      FieldName := Trim(MetaQuery.FieldByName('RDB$FIELD_NAME').AsString);
-      ArrayFields.Add(FieldName);
-
-      // Dimensionen abfragen
-      DimQuery.SQL.Text :=
-        'SELECT RDB$DIMENSION, RDB$LOWER_BOUND, RDB$UPPER_BOUND ' +
-        'FROM RDB$FIELD_DIMENSIONS WHERE RDB$FIELD_NAME = :FN ORDER BY RDB$DIMENSION';
-      DimQuery.Params.ParamByName('FN').AsString :=
-        Trim(MetaQuery.FieldByName('TYPENAME').AsString);
-      DimQuery.Open;
-      DimStr := '';
-      while not DimQuery.EOF do
-      begin
-        if DimStr <> '' then DimStr += ' x ';
-        DimStr += Format('%d..%d', [
-          DimQuery.FieldByName('RDB$LOWER_BOUND').AsInteger,
-          DimQuery.FieldByName('RDB$UPPER_BOUND').AsInteger
-        ]);
-        DimQuery.Next;
-      end;
-      DimQuery.Close;
-
-      ArrayInfo := Format('%s Array [%s]', [FieldName, DimStr]);
-      //FArrayInfoList.Values['ARRAY_' + FieldName] := ArrayInfo;
-      FArrayInfoList.Values[FieldName] := ArrayInfo;
-
-      MetaQuery.Next;
-    end;
-    MetaQuery.Close;
-
-    // 2. Normale Felder ohne Arrays holen
-    MetaQuery.SQL.Text :=
-      'SELECT rf.RDB$FIELD_NAME FROM RDB$RELATION_FIELDS rf ' +
-      'WHERE rf.RDB$RELATION_NAME = :TBL';
-    MetaQuery.Params.ParamByName('TBL').AsString := UpperCase(TempTableName);
-    MetaQuery.Open;
-    while not MetaQuery.EOF do
-    begin
-      FieldName := Trim(MetaQuery.Fields[0].AsString);
-      if ArrayFields.IndexOf(FieldName) < 0 then
-        CleanFieldList.Add(FieldName);
-      MetaQuery.Next;
-    end;
-    MetaQuery.Close;
-
-    // 3. Neue SQL
-    SQL.Text := 'SELECT ' + CleanFieldList.CommaText + ' FROM ' + TempTableName;
-
-    // 4. Platzhalter-Felder erzeugen
-    for FieldName in ArrayFields do
-      //AddVirtualArrayField('ARRAY_' + FieldName);
-      AddVirtualArrayField(FieldName);
-
-  finally
-    ArrayFields.Free;
-    CleanFieldList.Free;
-    MetaQuery.Free;
-    DimQuery.Free;
-  end;
+  FArrayInfoList.Free;
+  inherited Destroy;
 end;
-}
 
 procedure TSQLQueryExt.FilterOutArrayFields;
 var
@@ -205,16 +107,19 @@ var
   FieldLength, Precision, Scale, CharLen: Integer;
   CharSetName: string;
 begin
-  if not SQL.Text.Trim.ToUpper.StartsWith('SELECT * FROM ') then
-    Exit;
+  if not SQL.Text.Trim.ToUpper.StartsWith('SELECT * FROM ') then Exit;
 
-  TempRelationName := Trim(Copy(SQL.Text, Length('SELECT * FROM ') + 1, MaxInt));
+  //TempRelationName := Trim(Copy(SQL.Text, Length('SELECT * FROM ') + 1, MaxInt));
+  TempRelationName := ExtractFirstTableNameWithSynSQLSyn(SQL.Text);
+  //ShowMessage('SQL.Text = ' + SQL.Text);
+  //ShowMessage('TempRelationName = ' + TempRelationName);
 
   ArrayFields := TStringList.Create;
   CleanFieldList := TStringList.Create;
   TZFields := TStringList.Create;
   MetaQuery := TSQLQuery.Create(nil);
   DimQuery := TSQLQuery.Create(nil);
+
   try
     MetaQuery.DataBase := Self.DataBase;
     MetaQuery.Transaction := Self.Transaction;
@@ -295,6 +200,10 @@ begin
     for FieldName in TZFields do
       CleanFieldList.Add(Format('CAST(%s AS VARCHAR(255)) AS %s', [FieldName, FieldName]));
 
+
+    // Fallback-Spalte, falls nix übrig
+    if CleanFieldList.Count = 0 then
+      CleanFieldList.Add(' * ');
     // Neue SQL setzen
     SQL.Text := 'SELECT ' + String.Join(', ', CleanFieldList.ToStringArray) + ' FROM ' + TempRelationName;
 
