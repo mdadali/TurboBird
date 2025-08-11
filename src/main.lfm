@@ -5,7 +5,7 @@ object fmMain: TfmMain
   Width = 942
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
-  ClientHeight = 433
+  ClientHeight = 459
   ClientWidth = 942
   Color = clForm
   Font.Name = 'Sans'
@@ -1204,7 +1204,7 @@ object fmMain: TfmMain
     end
     object ToolButton3: TToolButton
       Left = 121
-      Height = 40
+      Height = 8
       Top = 2
       Caption = 'ToolButton3'
       Style = tbsSeparator

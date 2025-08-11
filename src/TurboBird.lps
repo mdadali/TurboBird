@@ -3,9 +3,9 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,i386_linux32-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release,i386_Win32-win-debug,i386_Win32-win-release"/>
+    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="101">
+    <Units Count="99">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -20,9 +20,10 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="2284"/>
-        <CursorPos X="56" Y="2287"/>
+        <CursorPos X="40" Y="2288"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -51,12 +52,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="1588"/>
-        <CursorPos X="44" Y="1594"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="773"/>
+        <CursorPos X="19" Y="777"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="viewview.pas"/>
@@ -133,12 +133,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="71"/>
-        <CursorPos X="28" Y="73"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="2"/>
+        <CursorPos X="42" Y="11"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit12>
       <Unit13>
         <Filename Value="createtrigger.pas"/>
@@ -325,10 +324,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="SQLHistory"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="91"/>
         <CursorPos X="35" Y="96"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit31>
       <Unit32>
         <Filename Value="copytable.pas"/>
@@ -397,8 +398,8 @@
         <Filename Value="turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="8"/>
-        <TopLine Value="480"/>
-        <CursorPos Y="504"/>
+        <TopLine Value="1096"/>
+        <CursorPos X="22" Y="1122"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit40>
@@ -629,7 +630,7 @@
       <Unit70>
         <Filename Value="common\fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="58"/>
         <CursorPos X="31" Y="66"/>
         <UsageCount Value="200"/>
@@ -655,8 +656,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="614"/>
-        <CursorPos X="48" Y="624"/>
+        <TopLine Value="589"/>
+        <CursorPos X="54" Y="598"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit72>
@@ -667,13 +668,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UpdateChecker"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="150"/>
-        <CursorPos X="11" Y="159"/>
-        <UsageCount Value="112"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="3" Y="11"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit73>
       <Unit74>
         <Filename Value="update.pas"/>
@@ -684,49 +682,49 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="283"/>
         <CursorPos X="44" Y="298"/>
-        <UsageCount Value="192"/>
+        <UsageCount Value="195"/>
       </Unit74>
       <Unit75>
         <Filename Value="classes\usqlqueryext.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="295"/>
         <CursorPos X="29" Y="305"/>
-        <UsageCount Value="184"/>
+        <UsageCount Value="187"/>
       </Unit75>
       <Unit76>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\radiogroup.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="498"/>
         <CursorPos Y="512"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit76>
       <Unit77>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\buttoncontrol.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos Y="50"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit77>
       <Unit78>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\radiobutton.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos Y="77"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit78>
       <Unit79>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\customcheckbox.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="50"/>
         <CursorPos Y="69"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit79>
       <Unit80>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2574"/>
         <CursorPos Y="2588"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit80>
       <Unit81>
         <Filename Value="C:\Lazarus_2.2.6\lazarus\lcl\comctrls.pp"/>
@@ -734,14 +732,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3219"/>
         <CursorPos X="32" Y="3228"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit81>
       <Unit82>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\ibase\src\ibase60.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2744"/>
         <CursorPos X="30" Y="2737"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit82>
       <Unit83>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\fcl-db\src\sqldb\sqldb.pp"/>
@@ -749,7 +747,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="589"/>
         <CursorPos X="15" Y="598"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit83>
       <Unit84>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\packages\fcl-db\src\base\db.pas"/>
@@ -757,21 +755,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1741"/>
         <CursorPos X="83" Y="1759"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit84>
       <Unit85>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\include\menuitem.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="74"/>
         <CursorPos Y="85"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit85>
       <Unit86>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\include\font.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="812"/>
         <CursorPos Y="824"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="2"/>
       </Unit86>
       <Unit87>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\lcl\dbctrls.pp"/>
@@ -779,7 +777,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1300"/>
         <CursorPos X="74" Y="1313"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="6"/>
       </Unit87>
       <Unit88>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\components\synedit\synedit.pp"/>
@@ -787,21 +785,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="913"/>
         <CursorPos X="14" Y="921"/>
-        <UsageCount Value="1"/>
+        <UsageCount Value="4"/>
       </Unit88>
       <Unit89>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="18"/>
         <CursorPos X="4" Y="27"/>
-        <UsageCount Value="1"/>
+        <UsageCount Value="4"/>
       </Unit89>
       <Unit90>
         <Filename Value="C:\Programme\Lazarus_2.2.6.0_FPC_3.2.2\fpcsrc\rtl\inc\typshrdh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="52"/>
         <CursorPos X="3" Y="62"/>
-        <UsageCount Value="1"/>
+        <UsageCount Value="4"/>
       </Unit90>
       <Unit91>
         <Filename Value="..\..\..\..\Programme\Lazarus_2.2.6.0_FPC_3.2.2\lazarus\components\lazutils\laztracer.pas"/>
@@ -809,7 +807,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="42"/>
         <CursorPos X="42" Y="53"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="9"/>
       </Unit91>
       <Unit92>
         <Filename Value="components\sqldb_ext\src\usqlqueryext.pas"/>
@@ -824,13 +822,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="276"/>
         <CursorPos Y="290"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="6"/>
       </Unit93>
       <Unit94>
         <Filename Value="updatechecker.lrs"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="18"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="6"/>
       </Unit94>
       <Unit95>
         <Filename Value="..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -838,7 +836,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos X="10" Y="37"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="6"/>
       </Unit95>
       <Unit96>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
@@ -846,7 +844,7 @@
         <EditorIndex Value="10"/>
         <TopLine Value="262"/>
         <CursorPos X="10" Y="275"/>
-        <UsageCount Value="44"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit96>
       <Unit97>
@@ -855,151 +853,137 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1119"/>
         <CursorPos X="14" Y="1128"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="12"/>
       </Unit97>
       <Unit98>
         <Filename Value="..\..\..\..\..\linux\lazarus\LazCAD_git\LazCAD\src\common\applicationh.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="160"/>
         <CursorPos X="43" Y="182"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
       </Unit98>
-      <Unit99>
-        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\unix\sysunixh.inc"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="18"/>
-        <CursorPos X="2" Y="31"/>
-        <UsageCount Value="15"/>
-        <Loaded Value="True"/>
-      </Unit99>
-      <Unit100>
-        <Filename Value="version.inc"/>
-        <EditorIndex Value="4"/>
-        <CursorPos X="39" Y="6"/>
-        <UsageCount Value="10"/>
-        <Loaded Value="True"/>
-      </Unit100>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="134" TopLine="122"/>
+        <Filename Value="sqlhistory.pas"/>
+        <Caret Line="92" Column="31" TopLine="86"/>
       </Position1>
       <Position2>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="136" TopLine="122"/>
+        <Filename Value="sqlhistory.pas"/>
+        <Caret Line="93" Column="31" TopLine="87"/>
       </Position2>
       <Position3>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="97" TopLine="85"/>
+        <Filename Value="sqlhistory.pas"/>
+        <Caret Line="94" Column="31" TopLine="88"/>
       </Position3>
       <Position4>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="134" TopLine="128"/>
+        <Filename Value="sqlhistory.pas"/>
+        <Caret Line="95" Column="31" TopLine="89"/>
       </Position4>
       <Position5>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="136" TopLine="128"/>
+        <Filename Value="sqlhistory.pas"/>
+        <Caret Line="96" Column="31" TopLine="90"/>
       </Position5>
       <Position6>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="79" Column="31" TopLine="76"/>
+        <Filename Value="..\..\..\..\..\linux\lazarus\LazCAD_git\LazCAD\src\common\applicationh.pas"/>
+        <Caret Line="95" Column="25" TopLine="82"/>
       </Position6>
       <Position7>
-        <Filename Value="main.pas"/>
-        <Caret Line="350" Column="19" TopLine="350"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="1114" Column="5" TopLine="1092"/>
       </Position7>
       <Position8>
-        <Filename Value="main.pas"/>
-        <Caret Line="2067" Column="55" TopLine="2048"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="12" Column="3"/>
       </Position8>
       <Position9>
-        <Filename Value="main.pas"/>
-        <Caret Line="356" Column="58" TopLine="344"/>
+        <Filename Value="TurboBird.lpr"/>
+        <Caret Line="58" Column="83" TopLine="57"/>
       </Position9>
       <Position10>
-        <Filename Value="main.pas"/>
-        <Caret Line="6244" Column="20" TopLine="6234"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="11" Column="10"/>
       </Position10>
       <Position11>
-        <Filename Value="main.pas"/>
-        <Caret Line="415" Column="24" TopLine="404"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="363" Column="36" TopLine="349"/>
       </Position11>
       <Position12>
-        <Filename Value="main.pas"/>
-        <Caret Line="2297" TopLine="2281"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="484" Column="34" TopLine="469"/>
       </Position12>
       <Position13>
-        <Filename Value="main.pas"/>
-        <Caret Line="2299" Column="99" TopLine="2281"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="1108" Column="15" TopLine="1098"/>
       </Position13>
       <Position14>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="1114" TopLine="1104"/>
+        <Filename Value="TurboBird.lpr"/>
+        <Caret Line="60" TopLine="51"/>
       </Position14>
       <Position15>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="1115" TopLine="1104"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="60" Column="21" TopLine="48"/>
       </Position15>
       <Position16>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="1117" TopLine="1104"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="65" Column="11" TopLine="61"/>
       </Position16>
       <Position17>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="1114" TopLine="1104"/>
+        <Filename Value="ffirebirdconfig.pas"/>
+        <Caret Line="298" Column="69" TopLine="288"/>
       </Position17>
       <Position18>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="591" Column="3" TopLine="573"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="1116" Column="50" TopLine="1099"/>
       </Position18>
       <Position19>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="81" Column="22" TopLine="69"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="11" Column="25"/>
       </Position19>
       <Position20>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="300" Column="45" TopLine="288"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="9" Column="31"/>
       </Position20>
       <Position21>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="435" Column="45" TopLine="414"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="58" Column="16" TopLine="47"/>
       </Position21>
       <Position22>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="582" Column="45" TopLine="561"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="94" Column="38" TopLine="74"/>
       </Position22>
       <Position23>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="593" Column="47" TopLine="572"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="58" Column="30" TopLine="45"/>
       </Position23>
       <Position24>
         <Filename Value="turbocommon.pas"/>
-        <Caret Line="373" Column="20" TopLine="370"/>
+        <Caret Line="1108" Column="36" TopLine="1086"/>
       </Position24>
       <Position25>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="504" TopLine="365"/>
+        <Filename Value="TurboBird.lpr"/>
+        <Caret Line="73" Column="40" TopLine="62"/>
       </Position25>
       <Position26>
-        <Filename Value="main.pas"/>
-        <Caret Line="415" Column="24" TopLine="404"/>
+        <Filename Value="TurboBird.lpr"/>
+        <Caret Line="77" Column="23" TopLine="77"/>
       </Position26>
       <Position27>
-        <Filename Value="about.pas"/>
-        <Caret Line="73" Column="28" TopLine="71"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="29" Column="12" TopLine="16"/>
       </Position27>
       <Position28>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="37" TopLine="20"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="66" Column="31" TopLine="58"/>
       </Position28>
       <Position29>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="44" TopLine="30"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="351" Column="29" TopLine="350"/>
       </Position29>
       <Position30>
-        <Filename Value="updatechecker.pas"/>
-        <Caret Line="158" Column="22" TopLine="144"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="415" Column="31" TopLine="395"/>
       </Position30>
     </JumpHistory>
     <RunParams>

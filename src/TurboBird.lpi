@@ -17,11 +17,12 @@
       </Resources>
     </General>
     <VersionInfo>
+      <UseVersionInfo Value="True"/>
       <AutoIncrementBuild Value="True"/>
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1516"/>
+      <BuildNr Value="1448"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="8">
@@ -66,11 +67,11 @@
           <Other>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -114,11 +115,11 @@
             <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -161,11 +162,11 @@
           <Other>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -215,11 +216,11 @@
             <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -268,11 +269,11 @@
           <Other>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -321,11 +322,11 @@
             <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -376,11 +377,11 @@
           <Other>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -927,11 +928,11 @@
       <CustomOptions Value="-dDEBUG -O-1"/>
       <ExecuteBefore>
         <Command Value="./gen_versions_scripts.sh"/>
-        <CompileReasons Run="False"/>
+        <CompileReasons Compile="False" Run="False"/>
       </ExecuteBefore>
       <ExecuteAfter>
         <Command Value="./choose_target_script.sh $(TargetFile)"/>
-        <CompileReasons Run="False"/>
+        <CompileReasons Compile="False" Run="False"/>
       </ExecuteAfter>
     </Other>
   </CompilerOptions>

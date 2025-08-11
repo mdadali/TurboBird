@@ -478,11 +478,11 @@ end;
 function ExtractVersionFromName(const Name: string): string;
 var
   Parts: TStringArray;
-  CleanName, hRes: string;
+  CleanName: string;
 begin
   Result := '';
-  //CleanName := Name;
-  CleanName := 'TurboBird_x86_64-win64-win-debug-v1.2.1.1256.exe';
+  CleanName := Name;
+
   // Entferne .zip oder .exe.zip oder .exe
   if EndsText('.exe.zip', CleanName) then
     Delete(CleanName, Length(CleanName) - 7 + 1, 8)
@@ -501,8 +501,7 @@ begin
     Delete(Result, Length(Result), 1);
 
   // Entferne ggf. noch .exe, falls es doch drin blieb
-  hRes := StringReplace(Result, '.exe', '', [rfIgnoreCase]);
-  Result := hRes;
+  Result := StringReplace(Result, '.exe', '', [rfIgnoreCase]);
 end;
 
 function GetProgramVersion: string;

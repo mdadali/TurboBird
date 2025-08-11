@@ -630,8 +630,6 @@ begin
       Exit;
     end;
   end;
-  if Result = '' then
-    Result := 'Default';
 end;
 
 procedure TfmFirebirdConfig.Init(AdbIndex: Integer);
