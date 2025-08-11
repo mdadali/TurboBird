@@ -20,12 +20,12 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="2284"/>
-        <CursorPos X="40" Y="2288"/>
+        <CursorPos X="37" Y="2287"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="createdb.pas"/>
@@ -218,11 +218,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="SysTables"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1275"/>
         <CursorPos X="33" Y="1298"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit20>
       <Unit21>
         <Filename Value="newconstraint.pas"/>
@@ -397,7 +396,7 @@
       <Unit40>
         <Filename Value="turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="1096"/>
         <CursorPos X="22" Y="1122"/>
         <UsageCount Value="200"/>
@@ -655,11 +654,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="589"/>
         <CursorPos X="54" Y="598"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit72>
       <Unit73>
         <Filename Value="updatechecker.pas"/>
@@ -670,7 +668,7 @@
         <UnitName Value="UpdateChecker"/>
         <EditorIndex Value="1"/>
         <CursorPos X="3" Y="11"/>
-        <UsageCount Value="89"/>
+        <UsageCount Value="90"/>
         <Loaded Value="True"/>
       </Unit73>
       <Unit74>
@@ -811,9 +809,10 @@
       </Unit91>
       <Unit92>
         <Filename Value="components\sqldb_ext\src\usqlqueryext.pas"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="154"/>
-        <CursorPos X="32" Y="161"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="182"/>
+        <CursorPos Y="193"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit92>
@@ -841,11 +840,10 @@
       <Unit96>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\rtl-objpas\src\inc\strutils.pp"/>
         <UnitName Value="StrUtils"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="262"/>
         <CursorPos X="10" Y="275"/>
         <UsageCount Value="33"/>
-        <Loaded Value="True"/>
       </Unit96>
       <Unit97>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\extctrls.pp"/>
@@ -857,14 +855,13 @@
       </Unit97>
       <Unit98>
         <Filename Value="..\..\..\..\..\linux\lazarus\LazCAD_git\LazCAD\src\common\applicationh.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="160"/>
         <CursorPos X="43" Y="182"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
       </Unit98>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="sqlhistory.pas"/>
         <Caret Line="92" Column="31" TopLine="86"/>
@@ -886,105 +883,97 @@
         <Caret Line="96" Column="31" TopLine="90"/>
       </Position5>
       <Position6>
-        <Filename Value="..\..\..\..\..\linux\lazarus\LazCAD_git\LazCAD\src\common\applicationh.pas"/>
-        <Caret Line="95" Column="25" TopLine="82"/>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="1114" Column="5" TopLine="1092"/>
       </Position6>
       <Position7>
         <Filename Value="turbocommon.pas"/>
-        <Caret Line="1114" Column="5" TopLine="1092"/>
+        <Caret Line="12" Column="3"/>
       </Position7>
       <Position8>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="12" Column="3"/>
-      </Position8>
-      <Position9>
         <Filename Value="TurboBird.lpr"/>
         <Caret Line="58" Column="83" TopLine="57"/>
+      </Position8>
+      <Position9>
+        <Filename Value="turbocommon.pas"/>
+        <Caret Line="11" Column="10"/>
       </Position9>
       <Position10>
         <Filename Value="turbocommon.pas"/>
-        <Caret Line="11" Column="10"/>
+        <Caret Line="363" Column="36" TopLine="349"/>
       </Position10>
       <Position11>
         <Filename Value="turbocommon.pas"/>
-        <Caret Line="363" Column="36" TopLine="349"/>
+        <Caret Line="484" Column="34" TopLine="469"/>
       </Position11>
       <Position12>
         <Filename Value="turbocommon.pas"/>
-        <Caret Line="484" Column="34" TopLine="469"/>
+        <Caret Line="1108" Column="15" TopLine="1098"/>
       </Position12>
       <Position13>
-        <Filename Value="turbocommon.pas"/>
-        <Caret Line="1108" Column="15" TopLine="1098"/>
-      </Position13>
-      <Position14>
         <Filename Value="TurboBird.lpr"/>
         <Caret Line="60" TopLine="51"/>
+      </Position13>
+      <Position14>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="60" Column="21" TopLine="48"/>
       </Position14>
       <Position15>
         <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="60" Column="21" TopLine="48"/>
+        <Caret Line="65" Column="11" TopLine="61"/>
       </Position15>
       <Position16>
-        <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="65" Column="11" TopLine="61"/>
-      </Position16>
-      <Position17>
-        <Filename Value="ffirebirdconfig.pas"/>
-        <Caret Line="298" Column="69" TopLine="288"/>
-      </Position17>
-      <Position18>
         <Filename Value="turbocommon.pas"/>
         <Caret Line="1116" Column="50" TopLine="1099"/>
+      </Position16>
+      <Position17>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="11" Column="25"/>
+      </Position17>
+      <Position18>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="9" Column="31"/>
       </Position18>
       <Position19>
         <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="11" Column="25"/>
+        <Caret Line="58" Column="16" TopLine="47"/>
       </Position19>
       <Position20>
         <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="9" Column="31"/>
+        <Caret Line="94" Column="38" TopLine="74"/>
       </Position20>
       <Position21>
         <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="58" Column="16" TopLine="47"/>
+        <Caret Line="58" Column="30" TopLine="45"/>
       </Position21>
       <Position22>
-        <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="94" Column="38" TopLine="74"/>
-      </Position22>
-      <Position23>
-        <Filename Value="common\fbcommon.pas"/>
-        <Caret Line="58" Column="30" TopLine="45"/>
-      </Position23>
-      <Position24>
         <Filename Value="turbocommon.pas"/>
         <Caret Line="1108" Column="36" TopLine="1086"/>
-      </Position24>
-      <Position25>
+      </Position22>
+      <Position23>
         <Filename Value="TurboBird.lpr"/>
         <Caret Line="73" Column="40" TopLine="62"/>
-      </Position25>
-      <Position26>
+      </Position23>
+      <Position24>
         <Filename Value="TurboBird.lpr"/>
         <Caret Line="77" Column="23" TopLine="77"/>
-      </Position26>
-      <Position27>
+      </Position24>
+      <Position25>
         <Filename Value="common\fbcommon.pas"/>
         <Caret Line="29" Column="12" TopLine="16"/>
-      </Position27>
-      <Position28>
+      </Position25>
+      <Position26>
         <Filename Value="common\fbcommon.pas"/>
         <Caret Line="66" Column="31" TopLine="58"/>
-      </Position28>
-      <Position29>
+      </Position26>
+      <Position27>
         <Filename Value="main.pas"/>
         <Caret Line="351" Column="29" TopLine="350"/>
-      </Position29>
-      <Position30>
+      </Position27>
+      <Position28>
         <Filename Value="main.pas"/>
         <Caret Line="415" Column="31" TopLine="395"/>
-      </Position30>
+      </Position28>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

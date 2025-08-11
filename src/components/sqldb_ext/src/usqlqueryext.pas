@@ -157,10 +157,10 @@ end;
 procedure TSQLQueryExt.FilterOutArrayFields;
 var
   CleanFieldList, ArrayFields: TStringList;
-  FieldName: string;
+  FieldName: string[63];
+  DimStr: string[63];
   TempRelationName: string;
   MetaQuery, DimQuery: TSQLQuery;
-  DimStr: string;
   FieldType, FieldSubType: Integer;
   TZFields: TStringList;
 begin
@@ -182,7 +182,7 @@ begin
 
     FArrayInfoList.Clear;
 
-    // 🔍 1. TZ- und Array-Felder analysieren
+    // 1. TZ- und Array-Felder analysieren
     MetaQuery.SQL.Text :=
       'SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_NAME AS TYPENAME, ' +
       'f.RDB$FIELD_TYPE, f.RDB$FIELD_SUB_TYPE, f.RDB$DIMENSIONS ' +
@@ -197,12 +197,12 @@ begin
       FieldType := MetaQuery.FieldByName('RDB$FIELD_TYPE').AsInteger;
       FieldSubType := MetaQuery.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
 
-      // 💡 Timezone
+      // Timezone
       //if ((FieldType = 13) or (FieldType = 35)) and (FieldSubType = 3) then
       if (FieldType = 35) or (FieldType = 29) then
         TZFields.Add(FieldName)
 
-      // 💡 Arrays
+      // Arrays
       else if not MetaQuery.FieldByName('RDB$DIMENSIONS').IsNull then
       begin
         ArrayFields.Add(FieldName);
@@ -235,17 +235,21 @@ begin
     end;
     MetaQuery.Close;
 
-    // 🔁 2. CASTs für TimeZone einfügen
+    // 2. CASTs für TimeZone einfügen
     for FieldName in TZFields do
       CleanFieldList.Add(Format('CAST(%s AS VARCHAR(255)) AS %s', [FieldName, FieldName]));
 
-    // 🎯 3. Neue SQL setzen (ohne Anführungszeichen!)
+    // 3. Neue SQL setzen (ohne Anführungszeichen!)
+
+    // Fallback-Spalte, falls nix übrig
+    if CleanFieldList.Count = 0 then
+      CleanFieldList.Add(' * ');
     SQL.Text := 'SELECT ' + String.Join(', ', CleanFieldList.ToStringArray) + ' FROM ' + TempRelationName;
 
-    // 💾 (optional) Debug speichern
-    SQL.SaveToFile('sql.txt');
+    // (optional) Debug speichern
+    //SQL.SaveToFile('sql.txt');
 
-    // 🧪 4. Virtuelle Array-Felder einbauen
+    // 4. Virtuelle Array-Felder einbauen
     for FieldName in ArrayFields do
       AddVirtualArrayField(FieldName);
 
