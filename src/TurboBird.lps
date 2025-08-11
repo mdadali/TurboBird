@@ -279,7 +279,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="TableManage"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="481"/>
         <CursorPos X="32" Y="485"/>
         <UsageCount Value="200"/>
@@ -657,10 +657,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="614"/>
-        <CursorPos X="48" Y="624"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="600"/>
+        <CursorPos X="21" Y="611"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit72>
       <Unit73>
         <Filename Value="updatechecker.pas"/>
@@ -687,7 +690,6 @@
       </Unit74>
       <Unit75>
         <Filename Value="classes\usqlqueryext.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="6"/>
         <TopLine Value="196"/>
         <CursorPos X="36" Y="197"/>

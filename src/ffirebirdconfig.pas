@@ -608,7 +608,7 @@ var
   i, PosEqual: Integer;
   Line, OptionName, OptionValue: string;
 begin
-  Result := '';
+  Result := 'Default';
   for i := 0 to SynEdit1.Lines.Count - 1 do
   begin
     Line := Trim(SynEdit1.Lines[i]);
