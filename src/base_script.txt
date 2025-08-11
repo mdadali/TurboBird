@@ -1,10 +1,3 @@
-#!/bin/bash
-# Auto-generated handle script for BuildMode: i386_linux32-gtk-debug
-set -e
-
-PROJECT_NAME="TurboBird"
-BUILD_MODE="i386_linux32-gtk-debug"
-FULL_VERSION="1.2.1.1256"
 
 STRIP=OFF
 COMPRESS=ON
