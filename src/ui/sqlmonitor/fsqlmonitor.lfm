@@ -1,0 +1,31 @@
+object fmSQLMonitor: TfmSQLMonitor
+  Left = 995
+  Height = 550
+  Top = 216
+  Width = 834
+  Caption = 'SQL Monitor'
+  ClientHeight = 550
+  ClientWidth = 834
+  FormStyle = fsStayOnTop
+  OnClose = FormClose
+  OnCreate = FormCreate
+  LCLVersion = '2.2.6.0'
+  object Memo1: TMemo
+    Left = 0
+    Height = 550
+    Top = 0
+    Width = 834
+    Align = alClient
+    Lines.Strings = (
+      'Memo1'
+    )
+    TabOrder = 0
+  end
+  object IBSQLMonitor1: TIBSQLMonitor
+    OnSQL = IBSQLMonitor1SQL
+    TraceFlags = [tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc]
+    Enabled = False
+    Left = 137
+    Top = 60
+  end
+end

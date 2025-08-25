@@ -1,0 +1,106 @@
+🕒 Started: Mo 25 Aug 2025 06:52:15 CEST
+🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1257
+📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ '[' ON = ON ']'
++ log '🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1257'
++ echo '🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1257'
+🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1257
++ '[' ON = ON ']'
++ echo '🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1257'
++ SRC=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ '[' -f /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe ']'
++ SRC=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ IS_EXE=true
++ log '📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe'
++ echo '📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe'
+📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ '[' ON = ON ']'
++ echo '📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe'
++ handle_file /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ local src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
++ '[' ON = ON ']'
++ [[ /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe == *.exe ]]
++ log '🔍 Detected .exe input file'
++ echo '🔍 Detected .exe input file'
+🔍 Detected .exe input file
++ '[' ON = ON ']'
++ echo '🔍 Detected .exe input file'
+🔍 Detected .exe input file
++ local new_src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ log '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug'
++ echo '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug'
+📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ '[' ON = ON ']'
++ echo '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug'
+📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
++ IS_EXE=true
++ DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ log '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
++ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
+✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ '[' ON = ON ']'
++ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
+✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ '[' OFF = ON ']'
++ chmod +x /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ log '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
++ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
+🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ '[' ON = ON ']'
++ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257'
+🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ '[' ON = ON ']'
++ '[' true = true ']'
++ local final_dst=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257 /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ log '📦 Final EXE name restored: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe'
++ echo '📦 Final EXE name restored: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe'
+📦 Final EXE name restored: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ '[' ON = ON ']'
++ echo '📦 Final EXE name restored: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe'
+📦 Final EXE name restored: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ '[' ON = ON ']'
++ ZIP_FILE=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip
++ log '📦 Compressing file, please wait...'
++ echo '📦 Compressing file, please wait...'
+📦 Compressing file, please wait...
++ '[' ON = ON ']'
++ echo '📦 Compressing file, please wait...'
+📦 Compressing file, please wait...
++ zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
+++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip
++ ZIP_SIZE=19736987
+++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ ORIG_SIZE=77717873
++ ((  ZIP_SIZE < ORIG_SIZE  ))
++ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip (from 74MB → 18MB)'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip (from 74MB → 18MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip (from 74MB → 18MB)
++ '[' ON = ON ']'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip (from 74MB → 18MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip (from 74MB → 18MB)
+++ dirname /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ DST_DIR=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
+++ basename /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ DST_FILENAME=TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ '[' ON = ON ']'
++ BASENAME_RAW=TurboBird_i386_Win32-win-debug
++ VERSION_TAG=-v1.2.1.1257
++ KEEP_BIN=TurboBird_i386_Win32-win-debug-v1.2.1.1257
++ '[' true = true ']'
++ KEEP_EXE=TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe
++ KEEP_ZIP=TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip
++ '[' ON = ON ']'
++ log '🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug'
++ echo '🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug'
+🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug
++ '[' ON = ON ']'
++ echo '🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug'
+🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug
++ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug -type f -name 'TurboBird_i386_Win32-win-debug-v*.zip' '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
++ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug -type f -name 'TurboBird_i386_Win32-win-debug-v*' '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1257 '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1257.exe.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'

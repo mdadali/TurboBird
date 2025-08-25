@@ -1,0 +1,325 @@
+object fmEditTable: TfmEditTable
+  Left = 382
+  Height = 550
+  Top = 95
+  Width = 834
+  ClientHeight = 550
+  ClientWidth = 834
+  OnClose = FormClose
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 24
+    Top = 526
+    Width = 834
+    Panels = <    
+      item
+        Width = 300
+      end    
+      item
+        Width = 50
+      end>
+    SimplePanel = False
+  end
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 526
+    Top = 0
+    Width = 834
+    ActivePage = tsGridView
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 1
+    object tsGridView: TTabSheet
+      Caption = 'Grid View'
+      ClientHeight = 492
+      ClientWidth = 830
+      OnShow = tsGridViewShow
+      object GroupBox2: TGroupBox
+        Left = 0
+        Height = 64
+        Top = 0
+        Width = 830
+        Align = alTop
+        Caption = 'Tables/Fields Options'
+        ClientHeight = 42
+        ClientWidth = 826
+        TabOrder = 0
+        object Label3: TLabel
+          Left = 16
+          Height = 20
+          Top = 4
+          Width = 36
+          Caption = 'Table'
+          ParentColor = False
+        end
+        object cboxTables: TComboBox
+          Left = 72
+          Height = 32
+          Top = 0
+          Width = 244
+          ItemHeight = 0
+          OnChange = cboxTablesChange
+          Style = csDropDownList
+          TabOrder = 0
+        end
+        object Label1: TLabel
+          Left = 336
+          Height = 20
+          Top = 4
+          Width = 32
+          Caption = 'Field'
+          ParentColor = False
+        end
+        object cboxFields: TComboBox
+          Left = 400
+          Height = 32
+          Top = 0
+          Width = 244
+          ItemHeight = 0
+          Style = csDropDownList
+          TabOrder = 1
+        end
+      end
+      object GroupBox1: TGroupBox
+        Left = 0
+        Height = 62
+        Top = 64
+        Width = 830
+        Align = alTop
+        Caption = 'Search Options'
+        ClientHeight = 40
+        ClientWidth = 826
+        TabOrder = 1
+        object Panel1: TPanel
+          Left = 0
+          Height = 40
+          Top = 0
+          Width = 826
+          Align = alClient
+          ClientHeight = 40
+          ClientWidth = 826
+          ParentColor = False
+          TabOrder = 0
+          object edtSearch: TEdit
+            Left = 370
+            Height = 30
+            Top = 0
+            Width = 312
+            TabOrder = 0
+          end
+          object chkBoxUseFilter: TCheckBox
+            Left = 8
+            Height = 22
+            Top = 0
+            Width = 87
+            Caption = 'Use Filter'
+            OnChange = chkBoxUseFilterChange
+            ParentShowHint = False
+            ShowHint = True
+            TabOrder = 1
+          end
+          object chkBoxCasesensitive: TCheckBox
+            Left = 120
+            Height = 22
+            Top = 0
+            Width = 120
+            Caption = 'Case Sensitive'
+            OnChange = chkBoxCasesensitiveChange
+            TabOrder = 2
+          end
+          object Label2: TLabel
+            Left = 270
+            Height = 20
+            Top = 0
+            Width = 77
+            Caption = 'Search Text'
+            ParentColor = False
+          end
+          object btnSearch: TButton
+            Left = 696
+            Height = 30
+            Top = 0
+            Width = 108
+            Caption = 'Search'
+            OnClick = btnSearchClick
+            TabOrder = 3
+          end
+        end
+      end
+      object Panel2: TPanel
+        Left = 0
+        Height = 42
+        Top = 126
+        Width = 830
+        Align = alTop
+        ClientHeight = 42
+        ClientWidth = 830
+        TabOrder = 2
+        object dbnavGrid: TDBNavigator
+          Left = 1
+          Height = 40
+          Top = 1
+          Width = 828
+          Align = alClient
+          BevelOuter = bvNone
+          ChildSizing.EnlargeHorizontal = crsScaleChilds
+          ChildSizing.EnlargeVertical = crsScaleChilds
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 100
+          ClientHeight = 40
+          ClientWidth = 828
+          Color = 14539471
+          DataSource = dsGrid
+          Options = []
+          ParentColor = False
+          TabOrder = 0
+        end
+      end
+      object IBDynamicGrid2: TIBDynamicGrid
+        Left = 0
+        Height = 324
+        Top = 168
+        Width = 830
+        Align = alClient
+        Color = clWindow
+        Columns = <>
+        DataSource = dsGrid
+        PopupMenu = PopupMenu1
+        Scrollbars = ssAutoBoth
+        TabOrder = 3
+        ExpandEditorPanelBelowRow = False
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+    end
+    object tsFormView: TTabSheet
+      Caption = 'Form View'
+      ClientHeight = 492
+      ClientWidth = 830
+      OnShow = tsFormViewShow
+      object dbnavForm: TDBNavigator
+        Left = 0
+        Height = 40
+        Top = 0
+        Width = 830
+        Align = alTop
+        BevelOuter = bvNone
+        ChildSizing.EnlargeHorizontal = crsScaleChilds
+        ChildSizing.EnlargeVertical = crsScaleChilds
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 100
+        ClientHeight = 40
+        ClientWidth = 830
+        DataSource = dsForm
+        Options = []
+        TabOrder = 0
+        VisibleButtons = [nbInsert, nbDelete, nbEdit, nbPost, nbCancel]
+      end
+      object pnlRecord: TScrollBox
+        Left = 0
+        Height = 452
+        Top = 40
+        Width = 830
+        HorzScrollBar.Page = 1
+        VertScrollBar.Page = 1
+        Align = alClient
+        TabOrder = 1
+      end
+    end
+  end
+  object dsGrid: TDataSource
+    DataSet = ibtblGrid
+    Left = 528
+    Top = 264
+  end
+  object ibtransGrid: TIBTransaction
+    TransactionName = '{9161FAC1-BBBE-4CE7-8ABA-3A583D280343}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Params.Strings = (
+      'read_committed'
+      'no_rec_version'
+      'nowait'
+    )
+    Left = 408
+    Top = 264
+  end
+  object IBDatabase1: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DatabaseName = '/home/maurog/Downloads/lazopenqbuilder/lazopenqbuilder-master/employee.fdb'
+    Params.Strings = (
+      'user_name=SYSDBA'
+    )
+    ConfigOverrides.Strings = (
+      'WireCompression=true'
+    )
+    DefaultTransaction = ibtransGrid
+    IdleTimer = 0
+    TraceFlags = [tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc]
+    UseDefaultSystemCodePage = True
+    Left = 88
+    Top = 264
+  end
+  object ibtblGrid: TIBTable
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = ibtransGrid
+    AfterOpen = ibtblGridAfterOpen
+    AfterScroll = ibtblGridAfterScroll
+    BeforePost = ibtblGridBeforePost
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    DataSetCloseAction = dcDiscardChanges
+    EnableStatistics = False
+    SQLFiltered = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Left = 280
+    Top = 264
+  end
+  object dsForm: TDataSource
+    DataSet = ibtblForm
+    Left = 552
+    Top = 393
+  end
+  object ibtblForm: TIBTable
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = ibtransForm
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    DataSetCloseAction = dcDiscardChanges
+    EnableStatistics = False
+    SQLFiltered = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Left = 296
+    Top = 393
+  end
+  object ibtransForm: TIBTransaction
+    TransactionName = '{B4ABF1AB-9384-47DA-902B-4E55F32CC7B8}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Left = 424
+    Top = 392
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 128
+    Top = 352
+    object lmExport: TMenuItem
+      Caption = 'Export...'
+      OnClick = lmExportClick
+    end
+  end
+end

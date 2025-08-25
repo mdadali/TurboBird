@@ -5,9 +5,12 @@ unit fbcommon;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB, IniFiles,
+  Classes, SysUtils, IBConnection, SQLDB, FBAdmin, IniFiles,
   fSetFBClient, Controls, Dialogs,
-  ibase60dyn;
+  ibase60dyn,
+
+  //IBX
+  IBXServices;
 
 type
   TRoutineType = (
@@ -27,6 +30,7 @@ type
   end;
 
 function SetFBClient(Sender: word): boolean;
+procedure DetectFBVersion(FBClientLib: string);
 
 function NormalizeFloatForSQL(Value: Double): string;
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
@@ -44,6 +48,14 @@ function GetAllRoutinesAsQuery: string;
 
 var IBaseLibraryHandle : TLibHandle;
     IBaseLibrary: string;
+
+    FBVersionString: string;
+    FBVersionMajor: Integer = 0;
+    FBVersionMinor: Integer = 0;
+    FBVersionNumber: single = 0.0;
+
+    IBXServicesConnection1: TIBXServicesConnection;
+    IBXServerProperties1: TIBXServerProperties;
 
 implementation
 
@@ -65,6 +77,32 @@ end;
 procedure SaveClientLibraryPath(const path: string);
 begin
   fIniFile.WriteString('Firebird', 'ClientLib', path);
+end;
+
+procedure DetectFBVersion(FBClientLib: string);
+var
+  S, VersionToken: string;
+  StartPos, EndPos: Integer;
+begin
+  IBXServicesConnection1.Connected := false;
+  IBXServicesConnection1.FirebirdLibraryPathName := FBClientLib;
+  IBXServicesConnection1.Connected := true;
+  FBVersionString := IBXServerProperties1.VersionInfo.ServerVersion;
+
+  S := UpperCase(FBVersionString);
+  // Beispiel: 'LI-V6.3.11.33637 FIREBIRD 3.0'
+
+  StartPos := Pos('FIREBIRD', S);
+  if StartPos > 0 then
+  begin
+    VersionToken := Trim(Copy(S, StartPos + 8, 10)); // 8 = length('FIREBIRD ')
+    EndPos := Pos('.', VersionToken);
+    if EndPos > 0 then
+    begin
+      FBVersionMajor := StrToIntDef(Copy(VersionToken, 1, EndPos - 1), 0);
+      FBVersionMinor := StrToIntDef(Copy(VersionToken, EndPos + 1, 2), 0);
+    end;
+  end;
 end;
 
 function SetFBClient(Sender: Word): Boolean;
@@ -134,6 +172,7 @@ begin
   end;
   result := true;
   IBaseLibrary := fbclibNew;
+  DetectFBVersion(IBaseLibrary);
 end;
 
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
@@ -481,7 +520,16 @@ initialization
   IBaseLibraryHandle := 0;
   IBaseLibrary       := ' ';
 
-finalization
+  IBXServicesConnection1 := TIBXServicesConnection.Create(nil);
+  IBXServicesConnection1.LoginPrompt:=false;
+  IBXServerProperties1   := TIBXServerProperties.Create(nil);
+  IBXServerProperties1.ServicesConnection := IBXServicesConnection1;
 
+finalization
+  IBXServerProperties1.ServicesConnection := nil;
+  IBXServerProperties1.Free;
+  IBXServicesConnection1.Connected := false;
+  IBXServicesConnection1.Free;
 end.
+
 

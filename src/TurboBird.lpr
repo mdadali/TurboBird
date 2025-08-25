@@ -17,16 +17,18 @@ uses
   cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Dialogs, Controls, IniFiles, zcomponent, abbrevia, memdslaz, main,
-  CreateDb, Reg, QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen,
-  NewTable, NewGen, EnterPass, About, CreateTrigger, EditTable, CallProc,
-  EditDataFullRec, UDFInfo, ViewDomain, NewDomain, SysTables, NewConstraint,
-  NewEditField, Calen, Scriptdb, UserPermissions, TableManage, BackupRestore,
-  CreateUser, ChangePass, PermissionManage, SQLHistory, CopyTable, dynlibs,
-  ibase60dyn, dbInfo, sysutils, Comparison, topologicalsort,
-  UnitFirebirdServices, turbocommon, importtable, fileimport, csvdocument,
-  udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
-  fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker;
+  Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, zcomponent, memdslaz,
+  datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow,
+  ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
+  CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
+  SysTables, NewConstraint, NewEditField, Calen, Scriptdb, UserPermissions,
+  TableManage, BackupRestore, CreateUser, ChangePass, PermissionManage,
+  SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo, sysutils, Comparison,
+  topologicalsort, UnitFirebirdServices, turbocommon, importtable, fileimport,
+  csvdocument, lazdbexport, fpdataexporter, udb_firebird_struct_helper,
+  udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
+  fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
+  QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor;
 
 const
   Major = 1;
@@ -40,10 +42,8 @@ const
 {$ENDIF}
 {$IFDEF Windows}
   {$DEFINE extdecl:=stdcall}
-   fbclib = 'fbembed.dll'; //allows both embedded and client/server access
-   seclib = 'fbclient.dll'; //only client/server access
-   thirdlib = 'gds32.dll'; //could be Firebird, could be old Interbase library...
 {$ENDIF}
+
 
 {$R *.res}
 
@@ -51,20 +51,10 @@ const
 var
   SAbout: TfmAbout;
   ErrorMessage: string;
-  {$IFDEF UNIX}
-  SLib: TSQLDBLibraryLoader;
-  {$ENDIF}
 
 begin
+  Application.Scaled:=True;
   Application.Initialize;
-
-  // Load library using SQLDBLibraryLoader in Linux, OSX,...
-  {$IFDEF UNIX}
-  //SLib:= TSQLDBLibraryLoader.Create(nil);
-  //SLib.ConnectionType:= 'Firebird';
-  //SLib.LibraryName:= 'libfbclient.so.2'; //todo: is this correct for OSX?
-  //SLib.Enabled:= True;
-  {$ENDIF}
 
   {$IFDEF DEBUG}
   // Requires the build mode to set -dDEBUG in Project Options/Other and
@@ -77,35 +67,9 @@ begin
   SetHeapTraceOutput('heap.trc');
   {$ENDIF DEBUG}
 
-  // search for all compatible FireBird libraries in Windows
-  {$IFDEF Windows}
-  {
-  if fbcommon.IBaseLibraryHandle = NilHandle then
-    fbcommon.IBaseLibraryHandle:= LoadLibrary(seclib);
-  if fbcommon.IBaseLibraryHandle = NilHandle then
-    fbcommon.IBaseLibraryHandle:= LoadLibrary(thirdlib);
-  }
-  {$ENDIF}
 
   if not SetFBClient(0) then  exit;     //wrong inifile setting
   InitialiseIBase60(fbcommon.IBaseLibrary);
-  //InitialiseIBase60(fbcommon.IBaseLibrary);
-  {if (IBaseLibraryHandle = nilhandle) then
-  begin
-    ErrorMessage:= Format('Unable to load Firebird library: %s.' + LineEnding +
-      'Please follow the Firebird documentation to install the Firebird client on your system.',
-      [fbclib]);
-    {$IFDEF WINDOWS}
-    // More libraries and additional hint
-    ErrorMessage:= Format('Unable to load Firebird library: %s.' + LineEnding +
-      'Please follow the Firebird documentation to install the Firebird client on your system.' + LineEnding +
-      'Hint: you could copy the fbclient/fbembed.dll and associated dlls into the TurboBird directory.',
-      [fbclib+'/'+seclib+'/'+thirdlib]);
-    {$ENDIF}
-    Application.MessageBox(PChar(ErrorMessage), 'Warning', 0);
-  end;
-
-  end;}
 
   SAbout:= TfmAbout.Create(nil);
   SAbout.BorderStyle:= bsNone;
@@ -125,9 +89,8 @@ begin
   Application.CreateForm(TfmNewGen, fmNewGen);
   Application.CreateForm(TfmEnterPass, fmEnterPass);
   Application.CreateForm(TfmCreateTrigger, fmCreateTrigger);
-  Application.CreateForm(TfmEditTable, fmEditTable);
+  //Application.CreateForm(TfmEditTable, fmEditTable);
   Application.CreateForm(TfmCallProc, fmCallProc);
-  Application.CreateForm(TfmEditDataFullRec, fmEditDataFullRec);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
   Application.CreateForm(TdmSysTables, dmSysTables);
   Application.CreateForm(TfmNewConstraint, fmNewConstraint);
@@ -138,9 +101,9 @@ begin
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   Application.CreateForm(TfmCopyTable, fmCopyTable);
   SAbout.Free;
-  //Application.CreateForm(TfmFirebirdConfig, fmFirebirdConfig);
-  //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
-  //Application.CreateForm(TfrmTestFunction, frmTestFunction);
+  Application.CreateForm(TDataModuleIBX, DataModuleIBX);
+  //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
+  //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
   Application.Run;
   ReleaseIBase60;
 end.
