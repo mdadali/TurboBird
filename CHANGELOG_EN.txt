@@ -1,11 +1,26 @@
-TurboBird v1.2.1.1256
-Build date & time: 08.08.2025, 10:40:06
-
 What's New for TurboBird
 ! : changed
 + : added
 * : fixed
 - : removed
+
+
+TurboBird v1.2.1.1260
+Build date & time: 25.08.2025, 07:34:45
+
++ Data export: Data from DataSets/Grids can now be exported to 9 different formats (via right-click on the data).
+
++ OpenQueryBuilder integrated: QueryBuilder → IBX interface fixed. With OpenQueryBuilder, queries can be visually created via drag & drop, tested, and transferred into the QueryWindow. Accessible via the last ToolButton in the QueryWindow.
+! EditTableGrid → EditTableData: Migrated to IBX (with array read/write support). Renamed to EditTableData.
+! EditDataFullRec removed: Re-implemented as a TabSheet within EditTableData. Now contains 2 tabs: Grid view and Form view. Arrays can also    be edited here (1D arrays tested, 2D arrays not yet). Accessible in the main window by right-clicking on a table name in the TreeView → Edit TableData.
+
++ New “CheckDBIntegrity” dialog: Displays field CharSets (currently a placeholder – only CharSet check, but easily extendable). Accessible in the main window via the 4th ToolButton in the toolbar.
+! Source directory restructured: New structure improves overall clarity.
+! Source code revised: Application should now run more stable overall.
+
+---------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1256
+Build date & time: 08.08.2025, 10:40:06
 
 Aug 08, 2025 – 1.2.1.1256
 + Added: Dynamic Firebird data type handling – all Firebird data types are now loaded dynamically at runtime, making TurboBird largely     version-independent.

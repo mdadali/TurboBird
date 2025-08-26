@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 334
+  Left = 493
   Height = 550
-  Top = 121
+  Top = 116
   Width = 834
   ActiveControl = Panel1
   Caption = 'fmQueryWindow'

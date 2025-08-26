@@ -221,7 +221,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="66" Y="12"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit27>
       <Unit28>
         <Filename Value="ui\about\about.pas"/>
@@ -233,7 +233,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit28>
       <Unit29>
         <Filename Value="ui\newtable\newtable.pas"/>
@@ -245,7 +245,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit29>
       <Unit30>
         <Filename Value="ui\tablemanage\tablemanage.pas"/>
@@ -257,7 +257,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos X="29" Y="107"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit30>
       <Unit31>
         <Filename Value="ui\copytable\copytable.pas"/>
@@ -267,7 +267,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CopyTable"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit31>
       <Unit32>
         <Filename Value="ui\importtable\importtable.pas"/>
@@ -278,7 +278,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="161"/>
         <CursorPos X="28" Y="168"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit32>
       <Unit33>
         <Filename Value="ui\main\main.pas"/>
@@ -289,10 +289,8 @@
         <EditorIndex Value="2"/>
         <TopLine Value="6148"/>
         <CursorPos X="45" Y="6160"/>
-        <ComponentState Value="1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit33>
       <Unit34>
         <Filename Value="ui\createdb\createdb.pas"/>
@@ -304,7 +302,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit34>
       <Unit35>
         <Filename Value="ui\registerdb\reg.pas"/>
@@ -316,7 +314,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit35>
       <Unit36>
         <Filename Value="ui\querywindow\querywindow.pas"/>
@@ -325,12 +323,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="1175"/>
-        <CursorPos X="45" Y="1197"/>
-        <ComponentState Value="1"/>
-        <UsageCount Value="160"/>
+        <CursorPos X="33" Y="1178"/>
+        <UsageCount Value="161"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit36>
@@ -344,7 +340,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit37>
       <Unit38>
         <Filename Value="ui\viewtrigger\viewtrigger.pas"/>
@@ -356,7 +352,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit38>
       <Unit39>
         <Filename Value="ui\viewstoredprocedure\viewsproc.pas"/>
@@ -368,7 +364,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit39>
       <Unit40>
         <Filename Value="ui\viewgenerator\viewgen.pas"/>
@@ -380,7 +376,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit40>
       <Unit41>
         <Filename Value="ui\newgenerator\newgen.pas"/>
@@ -392,7 +388,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit41>
       <Unit42>
         <Filename Value="ui\enterpassword\enterpass.pas"/>
@@ -404,7 +400,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit42>
       <Unit43>
         <Filename Value="ui\createtrigger\createtrigger.pas"/>
@@ -416,7 +412,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit43>
       <Unit44>
         <Filename Value="ui\callprocedure\callproc.pas"/>
@@ -428,7 +424,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit44>
       <Unit45>
         <Filename Value="ui\udfinfo\udfinfo.pas"/>
@@ -438,7 +434,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UDFInfo"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit45>
       <Unit46>
         <Filename Value="ui\viewdomain\viewdomain.pas"/>
@@ -450,7 +446,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit46>
       <Unit47>
         <Filename Value="ui\newdomain\newdomain.pas"/>
@@ -462,7 +458,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit47>
       <Unit48>
         <Filename Value="common\turbocommon.pas"/>
@@ -470,7 +466,7 @@
         <EditorIndex Value="6"/>
         <TopLine Value="1083"/>
         <CursorPos X="68" Y="1103"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
         <Loaded Value="True"/>
       </Unit48>
       <Unit49>
@@ -480,7 +476,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="161"/>
       </Unit49>
       <Unit50>
         <Filename Value="ui\newconstraint\newconstraint.pas"/>
@@ -492,7 +488,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit50>
       <Unit51>
         <Filename Value="ui\neweditfield\neweditfield.pas"/>
@@ -504,7 +500,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="425"/>
         <CursorPos X="12" Y="430"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit51>
       <Unit52>
         <Filename Value="ui\calender\calen.pas"/>
@@ -516,7 +512,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit52>
       <Unit53>
         <Filename Value="ui\userpermissions\userpermissions.pas"/>
@@ -528,7 +524,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit53>
       <Unit54>
         <Filename Value="ui\permissionmanage\permissionmanage.pas"/>
@@ -540,7 +536,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit54>
       <Unit55>
         <Filename Value="ui\sqlhistory\sqlhistory.pas"/>
@@ -552,7 +548,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="21"/>
         <CursorPos X="30" Y="33"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit55>
       <Unit56>
         <Filename Value="ui\backuprestore\backuprestore.pas"/>
@@ -564,7 +560,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="201"/>
         <CursorPos X="50" Y="217"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit56>
       <Unit57>
         <Filename Value="ui\createuser\createuser.pas"/>
@@ -576,7 +572,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit57>
       <Unit58>
         <Filename Value="ui\changepassword\changepass.pas"/>
@@ -588,7 +584,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit58>
       <Unit59>
         <Filename Value="ui\dbinfo\dbinfo.pas"/>
@@ -600,7 +596,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="62"/>
         <CursorPos X="35" Y="63"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit59>
       <Unit60>
         <Filename Value="ui\comparison\comparison.pas"/>
@@ -610,7 +606,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Comparison"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit60>
       <Unit61>
         <Filename Value="utils\fileimport.pas"/>
@@ -618,7 +614,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="122"/>
         <CursorPos X="29" Y="141"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit61>
       <Unit62>
         <Filename Value="utils\scriptdb.pas"/>
@@ -627,7 +623,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit62>
       <Unit63>
         <Filename Value="utils\csvdocument.pas"/>
@@ -636,7 +632,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit63>
       <Unit64>
         <Filename Value="utils\unitfirebirdservices.pas"/>
@@ -645,7 +641,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="353"/>
         <CursorPos X="3" Y="18"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit64>
       <Unit65>
         <Filename Value="ui\setfirebirdclient\fsetfbclient.pas"/>
@@ -657,7 +653,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit65>
       <Unit66>
         <Filename Value="ui\firebirdconfig\ffirebirdconfig.pas"/>
@@ -669,7 +665,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="92"/>
         <CursorPos X="30" Y="104"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit66>
       <Unit67>
         <Filename Value="ui\updatechecker\updatechecker.pas"/>
@@ -678,8 +674,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UpdateChecker"/>
-        <EditorIndex Value="-1"/>
-        <UsageCount Value="159"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <UsageCount Value="160"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit67>
       <Unit68>
         <Filename Value="ui\executer\ftestfunction.pas"/>
@@ -689,7 +688,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="160"/>
       </Unit68>
       <Unit69>
         <Filename Value="datamodules\dmibx.pas"/>
@@ -700,7 +699,7 @@
         <EditorIndex Value="9"/>
         <TopLine Value="5"/>
         <CursorPos X="52" Y="28"/>
-        <UsageCount Value="137"/>
+        <UsageCount Value="138"/>
         <Loaded Value="True"/>
       </Unit69>
       <Unit70>
@@ -712,7 +711,7 @@
         <UnitName Value="SysTables"/>
         <EditorIndex Value="5"/>
         <CursorPos X="40" Y="9"/>
-        <UsageCount Value="137"/>
+        <UsageCount Value="138"/>
         <Loaded Value="True"/>
       </Unit70>
       <Unit71>
@@ -721,7 +720,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="5"/>
         <CursorPos X="40" Y="12"/>
-        <UsageCount Value="118"/>
+        <UsageCount Value="119"/>
       </Unit71>
       <Unit72>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
@@ -732,7 +731,7 @@
         <EditorIndex Value="8"/>
         <TopLine Value="98"/>
         <CursorPos X="45" Y="110"/>
-        <UsageCount Value="118"/>
+        <UsageCount Value="119"/>
         <Loaded Value="True"/>
       </Unit72>
       <Unit73>
@@ -742,7 +741,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="79"/>
       </Unit73>
       <Unit74>
         <Filename Value="ui\openquerybuilder\QBLnkFrm.pas"/>
@@ -753,7 +752,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="79"/>
       </Unit74>
       <Unit75>
         <Filename Value="common\checkdbintegrity.pas"/>
@@ -762,7 +761,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="49" Y="28"/>
-        <UsageCount Value="77"/>
+        <UsageCount Value="78"/>
       </Unit75>
       <Unit76>
         <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
@@ -774,7 +773,7 @@
         <EditorIndex Value="7"/>
         <TopLine Value="70"/>
         <CursorPos X="19" Y="71"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
         <Loaded Value="True"/>
       </Unit76>
       <Unit77>
@@ -784,7 +783,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="19"/>
         <CursorPos X="54" Y="22"/>
-        <UsageCount Value="62"/>
+        <UsageCount Value="63"/>
       </Unit77>
       <Unit78>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
@@ -795,7 +794,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="29"/>
         <CursorPos X="6" Y="51"/>
-        <UsageCount Value="60"/>
+        <UsageCount Value="61"/>
       </Unit78>
       <Unit79>
         <Filename Value="utils\datasetexport\fpdataexporter.pp"/>
@@ -803,7 +802,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="16"/>
         <CursorPos X="75" Y="23"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="27"/>
       </Unit79>
       <Unit80>
         <Filename Value="ui\editdatafullrec\editdatafullrec.pas"/>
@@ -1487,10 +1486,9 @@
       </Unit156>
       <Unit157>
         <Filename Value="version.inc"/>
-        <EditorIndex Value="3"/>
-        <CursorPos X="24" Y="6"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="74" Y="6"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit157>
       <Unit158>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\ibase\src\ibase60.inc"/>
@@ -1758,7 +1756,7 @@
         <EditorIndex Value="1"/>
         <TopLine Value="5"/>
         <CursorPos X="29" Y="16"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="11"/>
         <Loaded Value="True"/>
       </Unit193>
     </Units>

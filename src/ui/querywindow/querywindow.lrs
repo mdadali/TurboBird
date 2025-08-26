@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3'N'#1#6'Height'#3'&'#2#3
-  +'Top'#2'y'#5'Width'#3'B'#3#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#13'fmQ'
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#237#1#6'Height'#3'&'#2#3
+  +'Top'#2't'#5'Width'#3'B'#3#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#13'fmQ'
   +'ueryWindow'#12'ClientHeight'#3'&'#2#11'ClientWidth'#3'B'#3#5'Color'#7#6'clF'
   +'orm'#10'KeyPreview'#9#4'Menu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'On'
   +'Create'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#9'OnKeyDown'#7#11'F'

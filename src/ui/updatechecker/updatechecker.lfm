@@ -1,10 +1,10 @@
 object frmUpdateChecker: TfrmUpdateChecker
-  Left = 465
+  Left = 507
   Height = 119
-  Top = 105
+  Top = 282
   Width = 370
   BorderIcons = [biSystemMenu]
-  Caption = 'frmUpdateChecker'
+  Caption = 'Check for Update'
   ClientHeight = 119
   ClientWidth = 370
   OnCreate = FormCreate

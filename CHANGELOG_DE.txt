@@ -1,13 +1,25 @@
+Neuigkeiten für TurboBird
+! : geändert
++: hinzugefügt
+*: behoben
+-: entfernt
+
+
+TurboBird v1.2.1.1260
+Build-Datum & Zeit: 25.08.2025, 07:34:45
+
++ Datenexport: Daten aus DataSets/Grids können jetzt in 9 Formate exportiert werden (per Rechtsklick auf die Daten).
++ OpenQueryBuilder integriert: Schnittstelle QueryBuilder → IBX korrigiert. Mit dem OpenQueryBuilder lassen sich Abfragen visuell per Drag & Drop erstellen, testen und ins QueryWindow übernehmen. Abrufbar über den letzten ToolButton im QueryWindow.
+! EditTableGrid → EditTableData: Auf IBX umgestellt (mit Array-Unterstützung für Lesen/Schreiben). Umbenannt in EditTableData.
+EditDataFullRec entfernt: Als TabSheet in EditTableData neu implementiert. EditTableData enthält jetzt 2 Tabs: Grid-Ansicht und Formular-Ansicht. Hier können auch Arrays editiert werden (1D getestet, 2D noch nicht). Abrufbar im Hauptfenster per Rechtsklick im TreeView auf den Tabellennamen → Edit TableData.
++ Neue Maske „CheckDBIntegrity“: Zeigt Field-CharSets an (aktuell als Platzhalter gedacht, nur CharSet-Prüfung, aber leicht erweiterbar). Abrufbar im Hauptfenster über den 4. ToolButton in der Toolbar.
+! Quellverzeichnis restrukturiert: Neue Struktur sorgt für bessere Übersicht.
+! Quellcode überarbeitet: Anwendung sollte jetzt insgesamt stabiler laufen.
+
+------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1256
 Build-Datum & Zeit: 08.08.2025, 10:40:06
 
-Neuigkeiten für TurboBird
-! : geändert
-+ : hinzugefügt
-* : behoben
-- : entfernt
-
-08. Aug. 2025 – 1.2.1.1256
 + Hinzugefügt: Dynamische Firebird-Datentypbehandlung – alle Firebird-Datentypen werden jetzt zur Laufzeit dynamisch geladen, was TurboBird weitgehend versionsunabhängig macht.
 + Hinzugefügt: Unterstützung zur direkten Erstellung und Bearbeitung von Firebird-Paketen in TurboBird.
 + Hinzugefügt: UDR (User Defined Routines) Unterstützung – erstellen, bearbeiten und ausführen von UDRs inklusive Parameter und Rückgabewerten.
