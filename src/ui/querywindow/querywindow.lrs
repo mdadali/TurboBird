@@ -1,21 +1,21 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#237#1#6'Height'#3'&'#2#3
-  +'Top'#2't'#5'Width'#3'B'#3#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#13'fmQ'
-  +'ueryWindow'#12'ClientHeight'#3'&'#2#11'ClientWidth'#3'B'#3#5'Color'#7#6'clF'
-  +'orm'#10'KeyPreview'#9#4'Menu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'On'
-  +'Create'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#9'OnKeyDown'#7#11'F'
-  +'ormKeyDown'#6'OnShow'#7#8'FormShow'#9'PopupMenu'#7#5'pmTab'#8'Position'#7#14
-  +'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TPanel'#6'Panel1'#4'Left'#2
-  +#0#6'Height'#2'@'#3'Top'#2#0#5'Width'#3'B'#3#5'Align'#7#5'alTop'#10'BevelOut'
-  +'er'#7#6'bvNone'#12'ClientHeight'#2'@'#11'ClientWidth'#3'B'#3#5'Color'#7#6'c'
-  +'lForm'#11'ParentColor'#8#8'TabOrder'#2#1#0#8'TToolBar'#8'ToolBar1'#4'Left'#2
-  +#0#6'Height'#2'('#3'Top'#2#24#5'Width'#3'B'#3#5'Align'#7#8'alBottom'#7'Ancho'
-  +'rs'#11#5'akTop'#6'akLeft'#7'akRight'#0#11'BorderWidth'#2#2#12'ButtonHeight'
-  +#2'('#11'ButtonWidth'#2'('#7'Caption'#6#8'ToolBar1'#5'Color'#7#6'clForm'#6'I'
-  +'mages'#7#13'toolbarImages'#11'ParentColor'#8#8'TabOrder'#2#0#0#11'TToolButt'
-  +'on'#5'tbNew'#4'Left'#2#1#4'Hint'#6#25'Open New SQL Query Window'#3'Top'#2#2
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3'C'#1#6'Height'#3'&'#2#3
+  +'Top'#3#224#0#5'Width'#3'B'#3#13'ActiveControl'#7#6'Panel1'#7'Caption'#6#13
+  +'fmQueryWindow'#12'ClientHeight'#3'&'#2#11'ClientWidth'#3'B'#3#5'Color'#7#6
+  +'clForm'#10'KeyPreview'#9#4'Menu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8
+  +'OnCreate'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#9'OnKeyDown'#7#11
+  +'FormKeyDown'#6'OnShow'#7#8'FormShow'#9'PopupMenu'#7#5'pmTab'#8'Position'#7
+  +#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TPanel'#6'Panel1'#4'Left'
+  +#2#0#6'Height'#2'@'#3'Top'#2#0#5'Width'#3'B'#3#5'Align'#7#5'alTop'#10'BevelO'
+  +'uter'#7#6'bvNone'#12'ClientHeight'#2'@'#11'ClientWidth'#3'B'#3#5'Color'#7#6
+  +'clForm'#11'ParentColor'#8#8'TabOrder'#2#1#0#8'TToolBar'#8'ToolBar1'#4'Left'
+  +#2#0#6'Height'#2'('#3'Top'#2#24#5'Width'#3'B'#3#5'Align'#7#8'alBottom'#7'Anc'
+  +'hors'#11#5'akTop'#6'akLeft'#7'akRight'#0#11'BorderWidth'#2#2#12'ButtonHeigh'
+  +'t'#2'('#11'ButtonWidth'#2'('#7'Caption'#6#8'ToolBar1'#5'Color'#7#6'clForm'#6
+  +'Images'#7#13'toolbarImages'#11'ParentColor'#8#8'TabOrder'#2#0#0#11'TToolBut'
+  +'ton'#5'tbNew'#4'Left'#2#1#4'Hint'#6#25'Open New SQL Query Window'#3'Top'#2#2
   +#8'AutoSize'#9#10'ImageIndex'#2#0#7'OnClick'#7#10'tbNewClick'#14'ParentShowH'
   +'int'#8#8'ShowHint'#9#0#0#11'TToolButton'#6'tbOpen'#4'Left'#2')'#4'Hint'#6#13
   +'Open SQL file'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbOpen'#10'ImageInde'

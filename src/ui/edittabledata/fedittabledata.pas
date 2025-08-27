@@ -54,6 +54,7 @@ type
     procedure chkBoxCasesensitiveChange(Sender: TObject);
     procedure chkBoxUseFilterChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure ibtblFormAfterPost(DataSet: TDataSet);
     procedure ibtblGridAfterOpen(DataSet: TDataSet);
     procedure ibtblGridAfterScroll(DataSet: TDataSet);
     procedure ibtblGridBeforePost(DataSet: TDataSet);
@@ -71,6 +72,7 @@ type
     procedure RemoveDynamicControls;
     function  GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
     procedure  SetWindowDimensions;
+    procedure RefreshTable(ATable: TIBTable);
   public
     { public declarations }
     Rec: TDatabaseRec;
@@ -208,6 +210,36 @@ begin
   CloseAction := caFree;
 end;
 
+procedure TfmEditTable.RefreshTable(ATable: TIBTable);
+var TmpRecNo: int64;
+begin
+  TmpRecNo := ibtblGrid.RecNo;
+  ibtransGrid.Commit;
+  IBDatabase1.Connected := false;
+  ibtblGrid.Close;
+  dsGrid.Enabled := false;
+
+  IBDatabase1.Connected := true;
+  ibtransGrid.StartTransaction;
+
+  ibtblGrid.Open;
+  dsGrid.Enabled := true;
+
+  dsGrid.DataSet.Refresh;
+  IBDynamicGrid2.Refresh;
+
+  ibtblGrid.RecNo := TmpRecNo;
+end;
+
+procedure TfmEditTable.ibtblFormAfterPost(DataSet: TDataSet);
+begin
+  ibtransForm.Commit;
+  RefreshTable(ibtblGrid);
+
+  ibtransForm.StartTransaction;
+  ibtblForm.Open;
+end;
+
 procedure TfmEditTable.RemoveDynamicControls;
 var TmpRecNo, i: integer;   tmpIsOpen: boolean;
 begin
@@ -251,8 +283,10 @@ end;
 
 procedure TfmEditTable.lmExportClick(Sender: TObject);
 begin
-  if ibtblGrid.RecordCount > 0 then
-    ExportDataSet(ibtblGrid);
+  if not ibtblGrid.IsEmpty then
+    ExportDataSet(ibtblGrid)
+  else
+    ShowMessage('DataSet has no records!');
 end;
 
 procedure TfmEditTable.tsFormViewShow(Sender: TObject);
@@ -275,6 +309,7 @@ end;
 procedure TfmEditTable.tsGridViewShow(Sender: TObject);
 begin
   RemoveDynamicControls;
+  RefreshTable(ibtblGrid);
   SetWindowDimensions;
 end;
 

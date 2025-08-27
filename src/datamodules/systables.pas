@@ -649,7 +649,8 @@ begin
   SqlQuery.Close;
   SQLQuery.SQL.Text:= format(QueryTemplate, [UpperCase(ATableName)]);
   SqlQuery.Open;
-  Result:= SqlQuery.RecordCount > 0;
+  //Result:= SqlQuery.RecordCount > 0;
+  Result:= not SqlQuery.IsEmpty;
   with SqlQuery do
   if Result and Assigned(ConstraintsList) then
   begin
@@ -688,7 +689,8 @@ begin
   'and rc2.rdb$relation_name = ''' + UpperCase(ATableName) + ''' '+
   'order by rc.rdb$constraint_name, flds_fk.rdb$field_position ';
   SqlQuery.Open;
-  Result:= SqlQuery.RecordCount > 0;
+  //Result:= SqlQuery.RecordCount > 0;
+  Result:= not SqlQuery.IsEmpty;
   with SqlQuery do
   if Result and Assigned(ConstraintsList) then
   begin
@@ -720,7 +722,8 @@ begin
     '  and Refc.RDB$COnstraint_Name = Ind.RDB$Index_Name' +
     '  and Refc.RDB$COnstraint_Name = Seg.RDB$Index_Name';
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.DataSource.DataSet.IsEmpty;
   with sqQuery do
   if Result then
   begin
@@ -769,7 +772,8 @@ begin
     CompositeQuery.SQL.Text:= Format(CompositeCountSQL,[TableName]);
     CompositeQuery.Open;
     CompositeQuery.Last; //needed for accurate recordcount
-    if CompositeQuery.RecordCount=0 then
+    //if CompositeQuery.RecordCount=0 then
+    if CompositeQuery.IsEmpty then
     begin
       SetLength(ConstraintsArray,0);
     end
@@ -828,7 +832,8 @@ begin
     '  and Ind.RDB$Relation_Name = ' + QuotedStr(UpperCase(ATableName)) + ' ' +
     '  and Refc.RDB$Constraint_Name = ' + QuotedStr(ConstraintName);
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.IsEmpty;
   with sqQuery do
   if Result then
   begin
@@ -856,7 +861,8 @@ begin
   sqQuery.SQL.Text:= 'select * from RDB$EXCEPTIONS ' +
    'where RDB$EXCEPTION_NAME = ' + QuotedStr(ExceptionName);
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.IsEmpty;
   if Result then
   begin
     if CreateOrAlter then
@@ -911,7 +917,8 @@ begin
   {$ENDIF}
   sqQuery.Open;
 
-  if sqQuery.RecordCount > 0 then
+  //if sqQuery.RecordCount > 0 then
+  if not sqQuery.IsEmpty then
   begin
     DomainType:= GetFBTypeName(sqQuery.FieldByName('RDB$FIELD_TYPE').AsInteger,
       sqQuery.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
@@ -1418,7 +1425,8 @@ begin
     ' WHERE r.RDB$RELATION_NAME=''' + TableName + '''  and Trim(r.RDB$FIELD_NAME) = ''' + UpperCase(FieldName) + ''' ' +
     ' ORDER BY r.RDB$FIELD_POSITION ';
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.IsEmpty;
   if Result then
   begin
     with sqQuery do
@@ -1560,7 +1568,8 @@ begin
   sqQuery.SQL.Text:= 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + UpperCase(ATableName) +
     ''' AND RDB$FOREIGN_KEY IS NULL';
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.IsEmpty;
   with sqQuery do
   if Result then
   begin
@@ -1584,7 +1593,8 @@ begin
   sqQuery.Close;
   sqQuery.SQL.Text:= SQL;
   sqQuery.Open;
-  Result:= sqQuery.RecordCount > 0;
+  //Result:= sqQuery.RecordCount > 0;
+  Result:= not sqQuery.IsEmpty;
   List.Clear;
   if TablesList <> nil then
     TablesList.Clear;

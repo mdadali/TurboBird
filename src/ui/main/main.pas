@@ -50,10 +50,8 @@ uses
   role_deps,
   exception_deps,
   user_deps,
-  fbcommon,
+  fbcommon;
 
-  //DBAdmin
-  BackupDlgUnit;
 
 {$i turbocommon.inc}
 
@@ -3975,7 +3973,8 @@ begin
   SQLQuery1.SQL.Text := Format(QueryTemplate, [APackageName]);
   SQLQuery1.Open;
 
-  if SQLQuery1.RecordCount  > 0 then
+  //if SQLQuery1.RecordCount  > 0 then
+  if not SQLQuery1.IsEmpty then
   begin
     AStrList.Clear;
     SQLQuery1.First;
@@ -4061,7 +4060,8 @@ begin
   SQLQuery1.SQL.Text := Format(QueryTemplate, [APackageName]);
   SQLQuery1.Open;
 
-  if SQLQuery1.RecordCount  > 0 then
+  //if SQLQuery1.RecordCount  > 0 then
+  if not SQLQuery1.IsEmpty then
   begin
     AStrList.Clear;
     SQLQuery1.First;
@@ -4965,7 +4965,8 @@ begin
   AQuery.SQL.Text:= 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + UpperCase(ATableName) +
     ''' AND RDB$FOREIGN_KEY IS NULL';
   AQuery.Open;
-  Result:= AQuery.RecordCount > 0;
+  //Result:= AQuery.RecordCount > 0;
+  Result := not SQLQuery1.IsEmpty;
   if not Result then
     AQuery.Close;
 end;
@@ -6369,7 +6370,8 @@ begin
   SQLQuery1.SQL.Text:= 'select RDB$Index_name, RDB$Constraint_Name from RDB$RELATION_CONSTRAINTS ' +
     'where RDB$Relation_Name = ''' + UpperCase(ATableName) + ''' and RDB$Constraint_Type = ''PRIMARY KEY'' ';
   SQLQuery1.Open;
-  if SQLQuery1.RecordCount > 0 then
+  //if SQLQuery1.RecordCount > 0 then
+  if not SQLQuery1.IsEmpty then
   begin
     Result:= Trim(SQLQuery1.FieldByName('RDB$Index_name').AsString);
     ConstraintName:= Trim(SQLQuery1.FieldByName('RDB$Constraint_Name').AsString);

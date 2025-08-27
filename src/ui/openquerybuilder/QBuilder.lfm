@@ -1,7 +1,7 @@
 object OQBForm: TOQBForm
-  Left = 346
+  Left = 515
   Height = 550
-  Top = 140
+  Top = 133
   Width = 834
   ActiveControl = QBPanel
   Caption = 'Open QBuilder'
@@ -570,6 +570,7 @@ object OQBForm: TOQBForm
           Color = clWindow
           Columns = <>
           DataSource = ResDataSource
+          PopupMenu = mnuResult
           Scrollbars = ssAutoVertical
           TabOrder = 0
           ExpandEditorPanelBelowRow = False
@@ -826,8 +827,8 @@ object OQBForm: TOQBForm
   end
   object ResDataSource: TDataSource
     AutoEdit = False
-    Left = 128
-    Top = 432
+    Left = 144
+    Top = 440
   end
   object ToolImages: TImageList
     Height = 21
@@ -884,7 +885,15 @@ object OQBForm: TOQBForm
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlSybase
-    Left = 256
-    Top = 432
+    Left = 280
+    Top = 440
+  end
+  object mnuResult: TPopupMenu
+    Left = 592
+    Top = 64
+    object Result1: TMenuItem
+      Caption = 'Save Results'
+      OnClick = Result1Click
+    end
   end
 end

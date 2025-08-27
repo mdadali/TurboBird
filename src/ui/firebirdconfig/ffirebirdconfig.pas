@@ -100,7 +100,8 @@ end;
 
 procedure TfmFirebirdConfig.bbExportClick(Sender: TObject);
 begin
-  if BufDataset1.RecordCount > 0 then
+  //if BufDataset1.RecordCount > 0 then
+  if not BufDataSet1.IsEmpty then
     ExportDataSet(BufDataset1);
 end;
 

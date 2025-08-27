@@ -33,7 +33,8 @@ uses
   SysUtils, Classes, Graphics, Controls, Forms, Dialogs, Buttons, ExtCtrls,
   StdCtrls, ComCtrls, Menus, CheckLst, Grids, DB, DBGrids, LMessages, LCLIntf,
   LCLType, LCLProc, GraphType, SynEdit, SynHighlighterSQL, InterfaceBase,
-  LCLPlatformDef, IBDatabase, IBDynamicGrid;
+  LCLPlatformDef, IBDatabase, IBDynamicGrid,
+  turbocommon;
 
 type
   TOQBbutton = (bSelectDBDialog, bOpenDialog, bSaveDialog,
@@ -274,6 +275,8 @@ type
     btnSaveResults: TToolButton;
     btnSQL: TToolButton;
     btnTables: TToolButton;
+    Result1: TMenuItem;
+    mnuResult: TPopupMenu;
     ResDBGrid: TIBDynamicGrid;
     QBPanel: TPanel;
     Pages: TPageControl;
@@ -326,6 +329,7 @@ type
     procedure btnSaveResultsClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
+    procedure Result1Click(Sender: TObject);
   protected
     QBDialog: TOQBuilderDialog;
     QBArea: TOQBArea;
@@ -2664,7 +2668,11 @@ end;
 
 procedure TOQBForm.btnSaveResultsClick(Sender: TObject);
 begin
-  QBDialog.OQBEngine.SaveResultQueryData;
+  //QBDialog.OQBEngine.SaveResultQueryData;
+  if not ResDBGrid.DataSet.IsEmpty then
+    ExportDataSet(ResDBGrid.DataSet)
+  else
+    ShowMessage('DataSet has no records');
 end;
 
 procedure TOQBForm.btnOKClick(Sender: TObject);
@@ -2675,6 +2683,11 @@ end;
 procedure TOQBForm.btnCancelClick(Sender: TObject);
 begin
   ModalResult := mrCancel;
+end;
+
+procedure TOQBForm.Result1Click(Sender: TObject);
+begin
+  btnSaveResultsClick(nil);
 end;
 
 end.

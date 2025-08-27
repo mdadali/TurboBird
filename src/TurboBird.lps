@@ -219,9 +219,12 @@
         <ComponentName Value="fmEditTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="66" Y="12"/>
-        <UsageCount Value="161"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="274"/>
+        <CursorPos X="41" Y="289"/>
+        <UsageCount Value="174"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="ui\about\about.pas"/>
@@ -233,7 +236,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit28>
       <Unit29>
         <Filename Value="ui\newtable\newtable.pas"/>
@@ -245,7 +248,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit29>
       <Unit30>
         <Filename Value="ui\tablemanage\tablemanage.pas"/>
@@ -257,7 +260,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos X="29" Y="107"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit30>
       <Unit31>
         <Filename Value="ui\copytable\copytable.pas"/>
@@ -267,7 +270,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CopyTable"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit31>
       <Unit32>
         <Filename Value="ui\importtable\importtable.pas"/>
@@ -278,7 +281,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="161"/>
         <CursorPos X="28" Y="168"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit32>
       <Unit33>
         <Filename Value="ui\main\main.pas"/>
@@ -286,10 +289,10 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="6148"/>
-        <CursorPos X="45" Y="6160"/>
-        <UsageCount Value="161"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="44"/>
+        <CursorPos X="12" Y="53"/>
+        <UsageCount Value="174"/>
         <Loaded Value="True"/>
       </Unit33>
       <Unit34>
@@ -302,7 +305,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit34>
       <Unit35>
         <Filename Value="ui\registerdb\reg.pas"/>
@@ -314,7 +317,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit35>
       <Unit36>
         <Filename Value="ui\querywindow\querywindow.pas"/>
@@ -323,12 +326,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="1175"/>
-        <CursorPos X="33" Y="1178"/>
-        <UsageCount Value="161"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2226"/>
+        <CursorPos X="34" Y="2229"/>
+        <UsageCount Value="174"/>
       </Unit36>
       <Unit37>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -340,7 +341,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit37>
       <Unit38>
         <Filename Value="ui\viewtrigger\viewtrigger.pas"/>
@@ -352,7 +353,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit38>
       <Unit39>
         <Filename Value="ui\viewstoredprocedure\viewsproc.pas"/>
@@ -364,7 +365,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit39>
       <Unit40>
         <Filename Value="ui\viewgenerator\viewgen.pas"/>
@@ -376,7 +377,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit40>
       <Unit41>
         <Filename Value="ui\newgenerator\newgen.pas"/>
@@ -388,7 +389,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit41>
       <Unit42>
         <Filename Value="ui\enterpassword\enterpass.pas"/>
@@ -400,7 +401,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit42>
       <Unit43>
         <Filename Value="ui\createtrigger\createtrigger.pas"/>
@@ -412,7 +413,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit43>
       <Unit44>
         <Filename Value="ui\callprocedure\callproc.pas"/>
@@ -424,7 +425,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit44>
       <Unit45>
         <Filename Value="ui\udfinfo\udfinfo.pas"/>
@@ -434,7 +435,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UDFInfo"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit45>
       <Unit46>
         <Filename Value="ui\viewdomain\viewdomain.pas"/>
@@ -446,7 +447,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit46>
       <Unit47>
         <Filename Value="ui\newdomain\newdomain.pas"/>
@@ -458,15 +459,15 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit47>
       <Unit48>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="1083"/>
-        <CursorPos X="68" Y="1103"/>
-        <UsageCount Value="161"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="483"/>
+        <CursorPos X="69" Y="496"/>
+        <UsageCount Value="174"/>
         <Loaded Value="True"/>
       </Unit48>
       <Unit49>
@@ -476,7 +477,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="161"/>
+        <UsageCount Value="174"/>
       </Unit49>
       <Unit50>
         <Filename Value="ui\newconstraint\newconstraint.pas"/>
@@ -488,7 +489,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit50>
       <Unit51>
         <Filename Value="ui\neweditfield\neweditfield.pas"/>
@@ -500,7 +501,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="425"/>
         <CursorPos X="12" Y="430"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit51>
       <Unit52>
         <Filename Value="ui\calender\calen.pas"/>
@@ -512,7 +513,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit52>
       <Unit53>
         <Filename Value="ui\userpermissions\userpermissions.pas"/>
@@ -524,7 +525,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit53>
       <Unit54>
         <Filename Value="ui\permissionmanage\permissionmanage.pas"/>
@@ -536,7 +537,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit54>
       <Unit55>
         <Filename Value="ui\sqlhistory\sqlhistory.pas"/>
@@ -548,7 +549,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="21"/>
         <CursorPos X="30" Y="33"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit55>
       <Unit56>
         <Filename Value="ui\backuprestore\backuprestore.pas"/>
@@ -560,7 +561,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="201"/>
         <CursorPos X="50" Y="217"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit56>
       <Unit57>
         <Filename Value="ui\createuser\createuser.pas"/>
@@ -572,7 +573,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit57>
       <Unit58>
         <Filename Value="ui\changepassword\changepass.pas"/>
@@ -584,7 +585,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit58>
       <Unit59>
         <Filename Value="ui\dbinfo\dbinfo.pas"/>
@@ -596,7 +597,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="62"/>
         <CursorPos X="35" Y="63"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit59>
       <Unit60>
         <Filename Value="ui\comparison\comparison.pas"/>
@@ -606,7 +607,7 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Comparison"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit60>
       <Unit61>
         <Filename Value="utils\fileimport.pas"/>
@@ -614,7 +615,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="122"/>
         <CursorPos X="29" Y="141"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit61>
       <Unit62>
         <Filename Value="utils\scriptdb.pas"/>
@@ -623,7 +624,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit62>
       <Unit63>
         <Filename Value="utils\csvdocument.pas"/>
@@ -632,7 +633,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit63>
       <Unit64>
         <Filename Value="utils\unitfirebirdservices.pas"/>
@@ -641,7 +642,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="353"/>
         <CursorPos X="3" Y="18"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit64>
       <Unit65>
         <Filename Value="ui\setfirebirdclient\fsetfbclient.pas"/>
@@ -653,7 +654,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="173"/>
       </Unit65>
       <Unit66>
         <Filename Value="ui\firebirdconfig\ffirebirdconfig.pas"/>
@@ -664,8 +665,8 @@
         <UnitName Value="fFirebirdConfig"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="92"/>
-        <CursorPos X="30" Y="104"/>
-        <UsageCount Value="160"/>
+        <CursorPos X="33" Y="106"/>
+        <UsageCount Value="173"/>
       </Unit66>
       <Unit67>
         <Filename Value="ui\updatechecker\updatechecker.pas"/>
@@ -674,11 +675,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UpdateChecker"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="160"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="173"/>
       </Unit67>
       <Unit68>
         <Filename Value="ui\executer\ftestfunction.pas"/>
@@ -688,7 +686,9 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="160"/>
+        <TopLine Value="213"/>
+        <CursorPos X="16" Y="225"/>
+        <UsageCount Value="173"/>
       </Unit68>
       <Unit69>
         <Filename Value="datamodules\dmibx.pas"/>
@@ -696,11 +696,10 @@
         <ComponentName Value="DataModuleIBX"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="5"/>
-        <CursorPos X="52" Y="28"/>
-        <UsageCount Value="138"/>
-        <Loaded Value="True"/>
+        <CursorPos X="18" Y="6"/>
+        <UsageCount Value="151"/>
       </Unit69>
       <Unit70>
         <Filename Value="datamodules\systables.pas"/>
@@ -709,10 +708,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="SysTables"/>
-        <EditorIndex Value="5"/>
-        <CursorPos X="40" Y="9"/>
-        <UsageCount Value="138"/>
-        <Loaded Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1585"/>
+        <CursorPos X="23" Y="1597"/>
+        <UsageCount Value="151"/>
       </Unit70>
       <Unit71>
         <Filename Value="ui\openquerybuilder\QBEIBX.pas"/>
@@ -720,7 +719,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="5"/>
         <CursorPos X="40" Y="12"/>
-        <UsageCount Value="119"/>
+        <UsageCount Value="132"/>
       </Unit71>
       <Unit72>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
@@ -728,11 +727,13 @@
         <ComponentName Value="OQBForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="98"/>
-        <CursorPos X="45" Y="110"/>
-        <UsageCount Value="119"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="2670"/>
+        <CursorPos X="26" Y="2690"/>
+        <UsageCount Value="132"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit72>
       <Unit73>
         <Filename Value="ui\openquerybuilder\QBDirFrm.pas"/>
@@ -741,7 +742,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="79"/>
+        <UsageCount Value="92"/>
       </Unit73>
       <Unit74>
         <Filename Value="ui\openquerybuilder\QBLnkFrm.pas"/>
@@ -752,7 +753,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="79"/>
+        <UsageCount Value="92"/>
       </Unit74>
       <Unit75>
         <Filename Value="common\checkdbintegrity.pas"/>
@@ -761,7 +762,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="28"/>
         <CursorPos X="49" Y="28"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="91"/>
       </Unit75>
       <Unit76>
         <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
@@ -770,10 +771,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fCheckDBIntegrity"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="70"/>
         <CursorPos X="19" Y="71"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="89"/>
         <Loaded Value="True"/>
       </Unit76>
       <Unit77>
@@ -783,7 +784,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="19"/>
         <CursorPos X="54" Y="22"/>
-        <UsageCount Value="63"/>
+        <UsageCount Value="76"/>
       </Unit77>
       <Unit78>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
@@ -794,15 +795,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="29"/>
         <CursorPos X="6" Y="51"/>
-        <UsageCount Value="61"/>
+        <UsageCount Value="74"/>
       </Unit78>
       <Unit79>
         <Filename Value="utils\datasetexport\fpdataexporter.pp"/>
-        <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="16"/>
         <CursorPos X="75" Y="23"/>
-        <UsageCount Value="27"/>
+        <UsageCount Value="38"/>
       </Unit79>
       <Unit80>
         <Filename Value="ui\editdatafullrec\editdatafullrec.pas"/>
@@ -1559,8 +1559,8 @@
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\FB30ClientAPI.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="468"/>
-        <CursorPos Y="480"/>
-        <UsageCount Value="17"/>
+        <CursorPos X="41" Y="477"/>
+        <UsageCount Value="18"/>
       </Unit167>
       <Unit168>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBDatabase.pas"/>
@@ -1753,126 +1753,133 @@
       </Unit192>
       <Unit193>
         <Filename Value="ui\openquerybuilder\QBEZEOS.pas"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="5"/>
         <CursorPos X="29" Y="16"/>
-        <UsageCount Value="11"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="17"/>
       </Unit193>
     </Units>
-    <JumpHistory Count="28" HistoryIndex="27">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="72" Column="13" TopLine="52"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="217" Column="28" TopLine="205"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="449" Column="64" TopLine="429"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="290" TopLine="279"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="468" Column="7" TopLine="454"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="227" Column="5" TopLine="211"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="36" Column="44" TopLine="22"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="237" Column="3" TopLine="219"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="2535" Column="30" TopLine="2535"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="218" Column="66" TopLine="216"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="438" Column="15" TopLine="429"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="296" Column="12" TopLine="292"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5524" Column="28" TopLine="5504"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="448" Column="40" TopLine="446"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5534" Column="28" TopLine="5514"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="460" Column="43" TopLine="452"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5536" Column="28" TopLine="5516"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="238" TopLine="217"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5574" Column="30" TopLine="5555"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="219" Column="46" TopLine="210"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5576" Column="30" TopLine="5557"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="224" Column="20" TopLine="210"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5592" Column="28" TopLine="5572"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="230" TopLine="210"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="2231" Column="42" TopLine="2208"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="215" Column="51" TopLine="210"/>
       </Position13>
       <Position14>
-        <Filename Value="TurboBird.lpr"/>
-        <Caret Line="20" Column="39" TopLine="8"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="231" Column="4" TopLine="213"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="14" Column="79"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="224" Column="36" TopLine="213"/>
       </Position15>
       <Position16>
-        <Filename Value="datamodules\systables.pas"/>
-        <Caret Line="9" Column="42"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="420" Column="20" TopLine="408"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="14" Column="108"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="224" Column="36" TopLine="213"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="4" Column="11"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="219" Column="9" TopLine="207"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="2232" Column="30" TopLine="2229"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="214" Column="18" TopLine="207"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="198" Column="24" TopLine="188"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="219" Column="50" TopLine="212"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="376" Column="37" TopLine="363"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="217" Column="21" TopLine="209"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="547" Column="65" TopLine="534"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2674" Column="36" TopLine="2661"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1151" Column="19" TopLine="1140"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2671" Column="32" TopLine="2661"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1152" Column="28" TopLine="1141"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2672" Column="32" TopLine="2662"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1195" Column="32" TopLine="1185"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2674" Column="32" TopLine="2664"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1199" Column="45" TopLine="1177"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1198" Column="45" TopLine="1176"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="26" TopLine="2671"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1197" Column="45" TopLine="1175"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
       </Position28>
+      <Position29>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="26" TopLine="2671"/>
+      </Position29>
+      <Position30>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

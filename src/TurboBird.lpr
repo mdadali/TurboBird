@@ -25,7 +25,7 @@ uses
   TableManage, BackupRestore, CreateUser, ChangePass, PermissionManage,
   SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo, sysutils, Comparison,
   topologicalsort, UnitFirebirdServices, turbocommon, importtable, fileimport,
-  csvdocument, lazdbexport, fpdataexporter, udb_firebird_struct_helper,
+  csvdocument, lazdbexport, udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
   QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor;

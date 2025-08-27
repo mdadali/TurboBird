@@ -221,7 +221,8 @@ begin
   if IsPackageRoutine(FRoutineInfo.RoutineType) then
     FRoutineInfo.PackageName := cboxPackages.Text;
   LoadFunctions;
-  if QFuncs.RecordCount > 0 then
+  //if QFuncs.RecordCount > 0 then
+  if not QFuncs.IsEmpty then
   begin
     DBLookupComboBox1.ItemIndex := 0;
     FRoutineInfo.RoutineName := DBLookupComboBox1.Text;
