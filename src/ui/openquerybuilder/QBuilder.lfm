@@ -48,9 +48,9 @@ object OQBForm: TOQBForm
       Height = 155
       Top = 355
       Width = 834
-      ActivePage = TabResults
+      ActivePage = TabColumns
       Align = alBottom
-      TabIndex = 2
+      TabIndex = 0
       TabOrder = 0
       object TabColumns: TTabSheet
         Caption = 'Columns'
