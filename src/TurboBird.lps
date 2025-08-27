@@ -219,9 +219,10 @@
         <ComponentName Value="fmEditTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="274"/>
-        <CursorPos X="41" Y="289"/>
+        <TopLine Value="300"/>
+        <CursorPos X="25" Y="302"/>
         <UsageCount Value="175"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -727,13 +728,11 @@
         <ComponentName Value="OQBForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
         <TopLine Value="2670"/>
         <CursorPos X="26" Y="2690"/>
         <UsageCount Value="133"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit72>
       <Unit73>
         <Filename Value="ui\openquerybuilder\QBDirFrm.pas"/>
@@ -1762,123 +1761,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="217" Column="28" TopLine="205"/>
+        <Caret Line="237" Column="3" TopLine="219"/>
       </Position1>
       <Position2>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="290" TopLine="279"/>
+        <Caret Line="218" Column="66" TopLine="216"/>
       </Position2>
       <Position3>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="227" Column="5" TopLine="211"/>
+        <Caret Line="296" Column="12" TopLine="292"/>
       </Position3>
       <Position4>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="237" Column="3" TopLine="219"/>
+        <Caret Line="448" Column="40" TopLine="446"/>
       </Position4>
       <Position5>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="218" Column="66" TopLine="216"/>
+        <Caret Line="460" Column="43" TopLine="452"/>
       </Position5>
       <Position6>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="296" Column="12" TopLine="292"/>
+        <Caret Line="238" TopLine="217"/>
       </Position6>
       <Position7>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="448" Column="40" TopLine="446"/>
+        <Caret Line="219" Column="46" TopLine="210"/>
       </Position7>
       <Position8>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="460" Column="43" TopLine="452"/>
+        <Caret Line="224" Column="20" TopLine="210"/>
       </Position8>
       <Position9>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="238" TopLine="217"/>
+        <Caret Line="230" TopLine="210"/>
       </Position9>
       <Position10>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="219" Column="46" TopLine="210"/>
+        <Caret Line="215" Column="51" TopLine="210"/>
       </Position10>
       <Position11>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="224" Column="20" TopLine="210"/>
+        <Caret Line="231" Column="4" TopLine="213"/>
       </Position11>
       <Position12>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="230" TopLine="210"/>
+        <Caret Line="224" Column="36" TopLine="213"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="215" Column="51" TopLine="210"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="420" Column="20" TopLine="408"/>
       </Position13>
       <Position14>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="231" Column="4" TopLine="213"/>
+        <Caret Line="224" Column="36" TopLine="213"/>
       </Position14>
       <Position15>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="224" Column="36" TopLine="213"/>
+        <Caret Line="219" Column="9" TopLine="207"/>
       </Position15>
       <Position16>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="420" Column="20" TopLine="408"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="214" Column="18" TopLine="207"/>
       </Position16>
       <Position17>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="224" Column="36" TopLine="213"/>
+        <Caret Line="219" Column="50" TopLine="212"/>
       </Position17>
       <Position18>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="219" Column="9" TopLine="207"/>
+        <Caret Line="217" Column="21" TopLine="209"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="214" Column="18" TopLine="207"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2674" Column="36" TopLine="2661"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="219" Column="50" TopLine="212"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2671" Column="32" TopLine="2661"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
-        <Caret Line="217" Column="21" TopLine="209"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2672" Column="32" TopLine="2662"/>
       </Position21>
       <Position22>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2674" Column="36" TopLine="2661"/>
+        <Caret Line="2674" Column="32" TopLine="2664"/>
       </Position22>
       <Position23>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2671" Column="32" TopLine="2661"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
       </Position23>
       <Position24>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2672" Column="32" TopLine="2662"/>
+        <Caret Line="2691" Column="26" TopLine="2671"/>
       </Position24>
       <Position25>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2674" Column="32" TopLine="2664"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
       </Position25>
       <Position26>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2690" Column="26" TopLine="2670"/>
+        <Caret Line="2691" Column="26" TopLine="2671"/>
       </Position26>
       <Position27>
         <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2691" Column="26" TopLine="2671"/>
+        <Caret Line="2690" Column="26" TopLine="2670"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2690" Column="26" TopLine="2670"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="289" Column="41" TopLine="274"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2691" Column="26" TopLine="2671"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="291" Column="41" TopLine="276"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
-        <Caret Line="2690" Column="26" TopLine="2670"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="297" Column="40" TopLine="277"/>
       </Position30>
     </JumpHistory>
     <RunParams>

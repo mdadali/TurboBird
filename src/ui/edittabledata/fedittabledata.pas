@@ -40,6 +40,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     lmExport: TMenuItem;
+    miEdit: TMenuItem;
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
@@ -59,6 +60,8 @@ type
     procedure ibtblGridAfterScroll(DataSet: TDataSet);
     procedure ibtblGridBeforePost(DataSet: TDataSet);
     procedure lmExportClick(Sender: TObject);
+    procedure miEditClick(Sender: TObject);
+    procedure PopupMenu1Popup(Sender: TObject);
     procedure tsFormViewShow(Sender: TObject);
     procedure tsGridViewShow(Sender: TObject);
   private
@@ -287,6 +290,16 @@ begin
     ExportDataSet(ibtblGrid)
   else
     ShowMessage('DataSet has no records!');
+end;
+
+procedure TfmEditTable.miEditClick(Sender: TObject);
+begin
+  PageControl1.ActivePage := tsFormView;
+end;
+
+procedure TfmEditTable.PopupMenu1Popup(Sender: TObject);
+begin
+  miEdit.Visible := not ibtblGrid.IsEmpty;
 end;
 
 procedure TfmEditTable.tsFormViewShow(Sender: TObject);

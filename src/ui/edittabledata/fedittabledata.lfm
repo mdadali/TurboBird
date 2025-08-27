@@ -178,7 +178,7 @@ object fmEditTable: TfmEditTable
           Options = []
           ParentColor = False
           TabOrder = 0
-          VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbPost, nbRefresh]
+          VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbRefresh]
         end
       end
       object IBDynamicGrid2: TIBDynamicGrid
@@ -187,7 +187,7 @@ object fmEditTable: TfmEditTable
         Top = 168
         Width = 830
         Align = alClient
-        Color = clWindow
+        Color = clGray
         Columns = <>
         DataSource = dsGrid
         Options = [dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
@@ -320,8 +320,13 @@ object fmEditTable: TfmEditTable
     Top = 392
   end
   object PopupMenu1: TPopupMenu
+    OnPopup = PopupMenu1Popup
     Left = 128
     Top = 352
+    object miEdit: TMenuItem
+      Caption = 'Edit'
+      OnClick = miEditClick
+    end
     object lmExport: TMenuItem
       Caption = 'Export...'
       OnClick = lmExportClick
