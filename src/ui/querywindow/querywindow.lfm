@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 323
+  Left = 373
   Height = 550
-  Top = 224
+  Top = 78
   Width = 834
   ActiveControl = Panel1
   Caption = 'fmQueryWindow'
@@ -827,7 +827,6 @@ object fmQueryWindow: TfmQueryWindow
     MouseLinkColor.Foreground = clBlue
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
-    OnChange = meQueryChange
     inline TSynGutterPartList
       object TSynGutterMarks
         Width = 24
@@ -930,8 +929,8 @@ object fmQueryWindow: TfmQueryWindow
     TableNameAttri.Foreground = clNavy
     TableNameAttri.Style = [fsBold]
     SQLDialect = sqlSybase
-    Left = 728
-    Top = 312
+    Left = 736
+    Top = 336
   end
   object pmMemo: TPopupMenu
     Left = 544

@@ -521,7 +521,7 @@ initialization
   IBaseLibrary       := ' ';
 
   IBXServicesConnection1 := TIBXServicesConnection.Create(nil);
-  IBXServicesConnection1.LoginPrompt:=false;
+  IBXServicesConnection1.LoginPrompt:=true;
   IBXServerProperties1   := TIBXServerProperties.Create(nil);
   IBXServerProperties1.ServicesConnection := IBXServicesConnection1;
 

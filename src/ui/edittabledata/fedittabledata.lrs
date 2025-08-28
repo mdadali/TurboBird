@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmEditTable','FORMDATA',[
-  'TPF0'#12'TfmEditTable'#11'fmEditTable'#4'Left'#3'k'#1#6'Height'#3'&'#2#3'Top'
-  +#2'v'#5'Width'#3'B'#3#13'ActiveControl'#7#12'PageControl1'#12'ClientHeight'#3
+  'TPF0'#12'TfmEditTable'#11'fmEditTable'#4'Left'#3'R'#1#6'Height'#3'&'#2#3'Top'
+  +#2'|'#5'Width'#3'B'#3#13'ActiveControl'#7#12'PageControl1'#12'ClientHeight'#3
   +'&'#2#11'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'Position'#7#16'poMa'
   +'inFormCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#10'TStatusBar'#10'StatusBar1'#4
   +'Left'#2#0#6'Height'#2#24#3'Top'#3#14#2#5'Width'#3'B'#3#6'Panels'#14#1#5'Wid'

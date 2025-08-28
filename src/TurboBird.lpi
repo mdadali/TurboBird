@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1551"/>
+      <BuildNr Value="1552"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <BuildModes Count="8">
@@ -408,72 +408,75 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="21">
+    <RequiredPackages Count="22">
       <Item1>
-        <PackageName Value="GridPrinterPkg"/>
+        <PackageName Value="lazreport"/>
       </Item1>
       <Item2>
-        <PackageName Value="zcomponent"/>
+        <PackageName Value="GridPrinterPkg"/>
       </Item2>
       <Item3>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="zcomponent"/>
       </Item3>
       <Item4>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="lazdbexport"/>
       </Item4>
       <Item5>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item5>
       <Item6>
-        <PackageName Value="iblocalnongui"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item6>
       <Item7>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="iblocalnongui"/>
       </Item7>
       <Item8>
-        <PackageName Value="ibexpressconsolemode"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item8>
       <Item9>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="ibexpressconsolemode"/>
       </Item9>
       <Item10>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibnongui"/>
       </Item10>
       <Item11>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="dclibx"/>
       </Item11>
       <Item12>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="iblocaldb"/>
       </Item12>
       <Item13>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="ibcontrols"/>
       </Item13>
       <Item14>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="ibexpress"/>
       </Item14>
       <Item15>
-        <PackageName Value="SQLDBExt"/>
+        <PackageName Value="Abbrevia"/>
       </Item15>
       <Item16>
-        <PackageName Value="laz_synapse"/>
+        <PackageName Value="SQLDBExt"/>
       </Item16>
       <Item17>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="laz_synapse"/>
       </Item17>
       <Item18>
-        <PackageName Value="SQLDBLaz"/>
+        <PackageName Value="MemDSLaz"/>
       </Item18>
       <Item19>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="SQLDBLaz"/>
       </Item19>
       <Item20>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item20>
       <Item21>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item21>
+      <Item22>
+        <PackageName Value="LCL"/>
+      </Item22>
     </RequiredPackages>
     <Units Count="79">
       <Unit0>

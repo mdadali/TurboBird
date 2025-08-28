@@ -9,10 +9,10 @@ uses
   LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls, PairSplitter,
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
-  dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter,
+  dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
   usqlqueryext, IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB, GridPrn,
-  GridPrnPreviewDlg, QBuilder, QBEIBX;  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
-
+  GridPrnPreviewDlg, QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
+  LR_DSet;
 type
 
   TQueryTypes = (
@@ -143,7 +143,6 @@ type
     procedure lmUndoClick(Sender: TObject);
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
-    procedure meQueryChange(Sender: TObject);
     procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure pmGridPopup(Sender: TObject);
     procedure pmMemoPopup(Sender: TObject);
@@ -209,6 +208,7 @@ type
     function GetTableName(SQLText: string): string;
     procedure CommitResultClick(Sender: TObject);
     procedure RemovePreviousResultTabs;
+
   protected
     // This procedure will receive the events that are logged by the connection:
     procedure GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType; Const Msg : String);
@@ -2223,7 +2223,6 @@ begin
   meQuery.CutToClipboard;
 end;
 
-
 procedure TfmQueryWindow.lmExportDataSetClick(Sender: TObject);
 var SqlQuery: TSQLQuery;
 begin
@@ -2232,6 +2231,12 @@ begin
   if not Assigned(SqlQuery) then
   begin
     ShowMessage('Query not assigned!');
+    exit;
+  end;
+
+  if SqlQuery.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
     exit;
   end;
 
@@ -2315,11 +2320,6 @@ end;
 procedure TfmQueryWindow.lmFindAgainClick(Sender: TObject);
 begin
   meQuery.SearchReplace(FindDialog1.FindText, '', FOptions);
-end;
-
-procedure TfmQueryWindow.meQueryChange(Sender: TObject);
-begin
-
 end;
 
 

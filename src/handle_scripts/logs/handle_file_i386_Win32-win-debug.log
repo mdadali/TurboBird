@@ -1,4 +1,4 @@
-🕒 Started: Mo 25 Aug 2025 07:37:04 CEST
+🕒 Started: Do 28 Aug 2025 11:38:01 CEST
 🚀 Starting handle script for TurboBird [i386_Win32-win-debug], version 1.2.1.1260
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug.exe
 + '[' ON = ON ']'
@@ -74,16 +74,16 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip
-+ ZIP_SIZE=19737146
++ ZIP_SIZE=20667156
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe
-+ ORIG_SIZE=77718385
++ ORIG_SIZE=81422538
 + ((  ZIP_SIZE < ORIG_SIZE  ))
-+ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 74MB → 18MB)'
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 74MB → 18MB)'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 74MB → 18MB)
++ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 77MB → 19MB)'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 77MB → 19MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 77MB → 19MB)
 + '[' ON = ON ']'
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 74MB → 18MB)'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 74MB → 18MB)
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 77MB → 19MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip (from 77MB → 19MB)
 ++ dirname /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe
 + DST_DIR=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug
 ++ basename /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe
@@ -103,8 +103,4 @@
 + echo '🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug'
 🧹 Cleaning up old versions of: TurboBird_i386_Win32-win-debug
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug -type f -name 'TurboBird_i386_Win32-win-debug-v*.zip' '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
-🗑️ Deleting old ZIP: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1258.exe.zip
-'/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1258.exe.zip' wurde entfernt
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug -type f -name 'TurboBird_i386_Win32-win-debug-v*' '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1260 '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe '!' -name TurboBird_i386_Win32-win-debug-v1.2.1.1260.exe.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'
-🗑️ Deleting old binary: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1258.exe
-'/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/i386_Win32-win-debug/TurboBird_i386_Win32-win-debug/TurboBird_i386_Win32-win-debug-v1.2.1.1258.exe' wurde entfernt
