@@ -210,7 +210,7 @@
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="512"/>
+        <TopLine Value="511"/>
         <CursorPos X="35" Y="525"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>

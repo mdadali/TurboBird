@@ -5,6 +5,13 @@ What's New for TurboBird
 - : removed
 
 
+TurboBird v1.2.1.1261
+Build date & time: 28.08.2025, 11:46:54
+
++ Enabled Firebird LoginPrompt
+! Fixed several minor bugs
+
+-------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1260
 Build date & time: 25.08.2025, 07:34:45
 

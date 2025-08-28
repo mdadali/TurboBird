@@ -5,6 +5,14 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+TurboBird v1.2.1.1261
+Build date & time: 28.08.2025, 11:46:54
+
++ Firebird-LoginPrompt aktiviert
+! Mehrere kleine Fehler behoben
+
+
+-------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1260
 Build-Datum & Zeit: 25.08.2025, 07:34:45
 
