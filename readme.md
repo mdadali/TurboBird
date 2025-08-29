@@ -77,18 +77,25 @@ TurboBird - Main-Window
 
 ## 🎨 Screenshots
 
-TurboBird - Set FireBird Clientlibrary
+Set FireBird Clientlibrary
 ![TurboBird Screenshot](src/images/searchfbclient.png)
 
-TurboBird - OpenQueryBuilder
+
+Visual QueryBuilder
 ![TurboBird Screenshot](src/images/OpenQueryBuilder.png)
 
-TurboBird - Export Data
+
+Export Data
 ![TurboBird Screenshot](src/images/exportdata.png)
 
 
+Query History
+![TurboBird Screenshot](src/images/QueryHistory.png)
 
-![TurboBird Screenshot](src/images/TurboBird.png)
-![TurboBird Screenshot](src/images/TurboBird.png)
+
+Checkf for Update
+![TurboBird Screenshot](src/images/CheckForUpdate.png)
 
 
+FireBird Array Field
+![TurboBird Screenshot](src/images/array.png)
