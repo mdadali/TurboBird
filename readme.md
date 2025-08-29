@@ -10,11 +10,20 @@ TurboBird - Main-Window
 ## 🚀 Highlights
 
 ### Database Objects
-- Tables, Indexes, Foreign Keys, Primary Keys
-- Domains & Exceptions
+The following Firebird objects can be viewed, edited, and created:
+- Tables, Indexes, Foreign Keys, Primary Keys, Constraints
+- Domains
+- Exceptions
+- Generators
 - Views (view, create, edit)
 - Triggers (create, test, disable)
-- User Management  
+- UDFs
+- UDRs
+- Stored Procedures
+- Firebird Functions
+- Packages
+- User
+- Roles
 
 ### ✅ Latest Features
 - **Dynamic Firebird Data Type Handling**  
