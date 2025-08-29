@@ -37,13 +37,13 @@ It provides a user-friendly interface to easily view, create, edit, and manage d
 
 - **Array and Timezone Support**  
   Full support for complex Firebird data types.
+  
+- **Visual Query Designer**
+  Design and test queries visually
+
 
 ---
 
-## 🎨 Screenshots
-*(Insert screenshots here, e.g., `images/TurboBird.png`)*
-
----
 
 ## ✨ Detailed Features
 
@@ -71,3 +71,15 @@ It provides a user-friendly interface to easily view, create, edit, and manage d
 - Create and manage user accounts
 - Assign roles
 - Configure permissions granularly
+
+
+## 🎨 Screenshots
+
+![TurboBird Screenshot](src/images/TurboBird.png)
+![TurboBird Screenshot](src/images/OpenQueryBuilder.png)
+![TurboBird Screenshot](src/images/exportdata.png)
+![TurboBird Screenshot](src/images/TurboBird.png)
+![TurboBird Screenshot](src/images/TurboBird.png)
+![TurboBird Screenshot](src/images/TurboBird.png)
+
+
