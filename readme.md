@@ -76,6 +76,8 @@ TurboBird - Main-Window
 
 
 ## 🎨 Screenshots
+![TurboBird Screenshot](src/images/searchfbclient.png)
+TurboBird - Set FireBird Clientlibrary
 
 ![TurboBird Screenshot](src/images/OpenQueryBuilder.png)
 TurboBird - OpenQueryBuilder
@@ -83,7 +85,7 @@ TurboBird - OpenQueryBuilder
 ![TurboBird Screenshot](src/images/exportdata.png)
 TurboBird - Export Data
 
-![TurboBird Screenshot](src/images/TurboBird.png)
+
 ![TurboBird Screenshot](src/images/TurboBird.png)
 ![TurboBird Screenshot](src/images/TurboBird.png)
 
