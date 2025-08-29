@@ -4,6 +4,8 @@ TurboBird is a powerful, modern administration and development tool for **Firebi
 It provides a user-friendly interface to easily view, create, edit, and manage database objects.
 
 ![TurboBird Screenshot](src/images/TurboBird.png)
+TurboBird - Main-Window
+
 
 ## 🚀 Highlights
 
@@ -75,9 +77,12 @@ It provides a user-friendly interface to easily view, create, edit, and manage d
 
 ## 🎨 Screenshots
 
-![TurboBird Screenshot](src/images/TurboBird.png)
 ![TurboBird Screenshot](src/images/OpenQueryBuilder.png)
+TurboBird - OpenQueryBuilder
+
 ![TurboBird Screenshot](src/images/exportdata.png)
+TurboBird - Export Data
+
 ![TurboBird Screenshot](src/images/TurboBird.png)
 ![TurboBird Screenshot](src/images/TurboBird.png)
 ![TurboBird Screenshot](src/images/TurboBird.png)
