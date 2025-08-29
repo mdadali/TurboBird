@@ -84,9 +84,11 @@ Set FireBird Clientlibrary
 
 
 
+
 Visual QueryBuilder
 
 ![TurboBird Screenshot](src/images/OpenQueryBuilder.png)
+
 
 
 
@@ -96,15 +98,18 @@ Export Data
 
 
 
+
 Query History
 
 ![TurboBird Screenshot](src/images/QueryHistory.png)
 
 
 
+
 Checkf for Update
 
 ![TurboBird Screenshot](src/images/CheckForUpdate.png)
+
 
 
 
