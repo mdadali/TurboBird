@@ -1,4 +1,4 @@
-# 🐦 TurboBird – Firebird Database Tool
+# TurboBird – Firebird Database Tool
 
 TurboBird is a powerful, modern administration and development tool for **Firebird databases**.  
 It provides a user-friendly interface to easily view, create, edit, and manage database objects.
