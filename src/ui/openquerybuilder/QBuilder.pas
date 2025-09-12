@@ -34,7 +34,9 @@ uses
   StdCtrls, ComCtrls, Menus, CheckLst, Grids, DB, DBGrids, LMessages, LCLIntf,
   LCLType, LCLProc, GraphType, SynEdit, SynHighlighterSQL, InterfaceBase,
   LCLPlatformDef, IBDatabase, IBDynamicGrid,
-  turbocommon;
+
+  turbocommon,
+  fdataexportersintrf;
 
 type
   TOQBbutton = (bSelectDBDialog, bOpenDialog, bSaveDialog,
@@ -275,7 +277,11 @@ type
     btnSaveResults: TToolButton;
     btnSQL: TToolButton;
     btnTables: TToolButton;
-    Result1: TMenuItem;
+    lmExportData: TMenuItem;
+    lmExportDataAsMarkdownTable: TMenuItem;
+    lmExportDataAsHtml: TMenuItem;
+    lmExportDataStdFormats: TMenuItem;
+    Separator1: TMenuItem;
     mnuResult: TPopupMenu;
     ResDBGrid: TIBDynamicGrid;
     QBPanel: TPanel;
@@ -312,6 +318,9 @@ type
     ToolImages: TImageList;
     DlgSave: TSaveDialog;
     DlgOpen: TOpenDialog;
+    procedure lmExportDataAsHtmlClick(Sender: TObject);
+    procedure lmExportDataAsMarkdownTableClick(Sender: TObject);
+    procedure lmExportDataStdFormatsClick(Sender: TObject);
     procedure mnuFunctionClick(Sender: TObject);
     procedure mnuGroupClick(Sender: TObject);
     procedure mnuRemoveClick(Sender: TObject);
@@ -1591,7 +1600,7 @@ begin
       Link.tbl2.FLbx.Refresh;
     end;
 
-    Link.Free;
+    if Assigned(Link) then Link.Free;
   end;
 end;
 
@@ -1907,6 +1916,33 @@ begin
       QBGrid.Cells[QBGrid.CurrCol, cFunc] := sFunc[Item.Tag];
     end;
   end;
+end;
+
+procedure TOQBForm.lmExportDataAsMarkdownTableClick(Sender: TObject);
+begin
+  //QBDialog.OQBEngine.SaveResultQueryData;
+  if not ResDBGrid.DataSet.IsEmpty then
+    ExportDataMarkDownTable(ResDBGrid.DataSet)
+  else
+    ShowMessage('DataSet has no records');
+end;
+
+procedure TOQBForm.lmExportDataStdFormatsClick(Sender: TObject);
+begin
+  //QBDialog.OQBEngine.SaveResultQueryData;
+  if not ResDBGrid.DataSet.IsEmpty then
+    ExportStdFormat(ResDBGrid.DataSet)
+  else
+    ShowMessage('DataSet has no records');
+end;
+
+procedure TOQBForm.lmExportDataAsHtmlClick(Sender: TObject);
+begin
+  //QBDialog.OQBEngine.SaveResultQueryData;
+  if not ResDBGrid.DataSet.IsEmpty then
+    ExportDataMarkDownTable(ResDBGrid.DataSet)
+  else
+    ShowMessage('DataSet has no records');
 end;
 
 procedure TOQBForm.mnuGroupClick(Sender: TObject);
@@ -2670,7 +2706,7 @@ procedure TOQBForm.btnSaveResultsClick(Sender: TObject);
 begin
   //QBDialog.OQBEngine.SaveResultQueryData;
   if not ResDBGrid.DataSet.IsEmpty then
-    ExportDataSet(ResDBGrid.DataSet)
+    ExportStdFormat(ResDBGrid.DataSet)
   else
     ShowMessage('DataSet has no records');
 end;

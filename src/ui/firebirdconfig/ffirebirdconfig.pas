@@ -8,7 +8,11 @@ uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
   IniFiles, Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,
   ComCtrls, FileUtil, StrUtils, SynEdit, synhighlighterunixshellscript, SynHighlighterIni,
-  SynHighlighterJScript, SysTables, fbcommon, turbocommon;
+  SynHighlighterJScript, SysTables,
+
+  fbcommon,
+  turbocommon,
+  fdataexportersintrf;
 
 type
 
@@ -102,7 +106,7 @@ procedure TfmFirebirdConfig.bbExportClick(Sender: TObject);
 begin
   //if BufDataset1.RecordCount > 0 then
   if not BufDataSet1.IsEmpty then
-    ExportDataSet(BufDataset1);
+    ExportStdFormat(BufDataset1);
 end;
 
 procedure TfmFirebirdConfig.bbImportClick(Sender: TObject);

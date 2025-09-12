@@ -8,12 +8,14 @@ interface
 
 uses
 
-  Forms, Classes, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  Forms, Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
   AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
   LCLType, LCLVersion, versiontypes, versionresource,
   interfaces, LCLPlatformDef,
   DB, sqldb, IBConnection,  IBDatabase, RegExpr,
   fpstdexports, fpDataExporter,
+
+  Variants,
 
   fbcommon;
 
@@ -264,7 +266,6 @@ type
     otUsers,
     otIndexes,
     otConstraints,
-    //newlib
     otFBFunctions,
     otFBProcedures,
     otUDRFunctions,
@@ -284,6 +285,7 @@ type
   tvotQueryWindow,
   tvotTableRoot,
   tvotTable,
+  tvotTableField,
   tvotGeneratorRoot,
   tvotGenerator,
   tvotTriggerRoot,
@@ -334,6 +336,10 @@ type
     ObjectType: TTreeViewObjectType;
     PopupMenuTag: integer;
     ImageIndex: Integer;
+    ViewForm,
+    EditorForm,
+    NewForm,
+    ExecuteForm: TForm;
   end;
 
   TRegisteredDatabase = packed record
@@ -414,10 +420,10 @@ var fLanguage: string;
     fIniFile: TInifile;
     RegisteredDatabases: array of TDatabaseRec;
 
-    StandardExportFormats: TStandardExportFormats; //DataSet export
 
+function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
+function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
 
-procedure ExportDataSet(ADataSet: TDataSet);
 function GetServerNameFromConnString(ADBIndex: word): string;
 function GetDBNameFromConnString(ADBIndex: word): string;
 
@@ -478,30 +484,28 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 implementation
 
-procedure ExportDataSet(ADataSet: TDataSet);
-var
-  Exporter: TFPDataExporter;
-
+function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 begin
-  if not Assigned(ADataSet) then
-  begin
-    ShowMessage('Query not assigned!');
-    exit;
-  end;
+  Result := nil;
+  if ANode = nil then Exit;
 
-  Exporter := TFPDataExporter.Create(nil);
-  try
-    Exporter.Dataset := ADataSet;
-    Exporter.ShowProgress := True;
-    Exporter.ShowResult := True;
+  // Hochlaufen, bis Level erreicht oder Root
+  while (ANode.Level > ALevel) and (ANode.Parent <> nil) do
+    ANode := ANode.Parent;
 
-    if Exporter.Execute then
-      //ShowMessage('Done')
-    else;
-      //
-  finally
-    Exporter.Free;
-  end;
+  if ANode.Level = ALevel then
+    Result := ANode;
+end;
+
+function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
+var
+  Ancestor: TTreeNode;
+begin
+  Ancestor := GetAncestorAtLevel(ANode, ALevel);
+  if Assigned(Ancestor) then
+    Result := Trim(Ancestor.Text)
+  else
+    Result := '';
 end;
 
 function GetServerNameFromConnString(ADBIndex: word): string;
@@ -999,25 +1003,26 @@ end;
 
 function GetClearNodeText(const ANodeText: string): string;
 var
-  p: Integer;
   s: string;
+  pParen, pBracket, pSpace, pMin: Integer;
 begin
   s := Trim(ANodeText);
 
-  // Entferne (Zahl)
-  p := Pos('(', s);
-  if p > 0 then
-  begin
-    Result := Trim(Copy(s, 1, p - 1));
-    Exit;
-  end;
+  // Erste Position von ( oder [ oder Leerzeichen suchen
+  pParen  := Pos('(', s);
+  pBracket:= Pos('[', s);
+  pSpace  := Pos(' ', s);
 
-  // Entferne Zahl am Ende, z.B. 'Tables 11'
-  p := Length(s);
-  while (p > 0) and (s[p] in ['0'..'9', ' ']) do
-    Dec(p);
+  // kleinstes >0 nehmen
+  pMin := 0;
+  if (pParen > 0) and ((pMin = 0) or (pParen < pMin)) then pMin := pParen;
+  if (pBracket > 0) and ((pMin = 0) or (pBracket < pMin)) then pMin := pBracket;
+  if (pSpace > 0) and ((pMin = 0) or (pSpace < pMin)) then pMin := pSpace;
 
-  Result := Trim(Copy(s, 1, p));
+  if pMin > 0 then
+    Result := Trim(Copy(s, 1, pMin - 1))
+  else
+    Result := s;
 end;
 
 function FormatNodeCaptionnWithCount(const Text: string; Count: Integer): string;
@@ -1229,9 +1234,6 @@ begin
 end;
 
 initialization
-  StandardExportFormats := TStandardExportFormats.Create(nil);
-  StandardExportFormats.Active := true;
-
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);
 
@@ -1248,7 +1250,4 @@ finalization
   //WriteIniFile;
   fIniFile.Free;
   fIniFile := nil;
-
-  StandardExportFormats.Active := false;
-  StandardExportFormats.Free;
 end.

@@ -69,6 +69,7 @@ type
     procedure rgRoutineTypeClick(Sender: TObject);
   private
     FRoutineInfo: TRoutineInfo;
+    FNodeInfos: TPNodeInfos;
     procedure LoadFunctions;
     function  SetDBLookupComboBoxByDisplayText(AText: string): Boolean;
 
@@ -78,7 +79,7 @@ type
     function BuildRoutineExecuteSQL(const ARoutineInfo: TRoutineInfo; const AParamList: string): string;
   public
     constructor CreateForRoutine(AOwner: TComponent; ARoutineInfo: TRoutineInfo);
-    procedure Init(ARoutineInfo: TRoutineInfo);
+    procedure Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
     procedure SelectRoutineNode(ARoutineInfo: TRoutineInfo);
     procedure FillPackagesComboBox;
   end;
@@ -100,9 +101,11 @@ begin
   inherited Create(AOwner);
 end;
 
-procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo);
+procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
 begin
   FRoutineInfo := ARoutineInfo;
+  FNodeInfos := ANodeInfos;
+
   AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
   IBConnection1.Connected := true;
 
@@ -253,6 +256,7 @@ begin
   QParamInfo.Close;
   QFuncs.Close;
   IBConnection1.Connected := false;
+  FNodeInfos^.ExecuteForm := nil;
   CloseAction := caFree;
 end;
 

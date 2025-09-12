@@ -1,7 +1,7 @@
 object fmReg: TfmReg
-  Left = 407
+  Left = 920
   Height = 270
-  Top = 201
+  Top = 411
   Width = 500
   ActiveControl = edTitle
   BorderStyle = bsSingle

@@ -316,16 +316,24 @@ type
     procedure lmNewRoleClick(Sender: TObject);
     procedure mnRestoreClick(Sender: TObject);
     procedure PageControl1CloseTabClicked(Sender: TObject);
+    procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure PageControl1MouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
+    procedure PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
     procedure pmDatabasePopup(Sender: TObject);
     procedure tbCheckDBIntegrityClick(Sender: TObject);
     procedure tbSQLMonitorClick(Sender: TObject);
     procedure tvMainAddition(Sender: TObject; Node: TTreeNode);
+    procedure tvMainClick(Sender: TObject);
     procedure tvMainDblClick(Sender: TObject);
     procedure tvMainDeletion(Sender: TObject; Node: TTreeNode);
     procedure tvMainExpanded(Sender: TObject; Node: TTreeNode);
     procedure GlobalException(Sender: TObject; E : Exception);
+    procedure tvMainExpanding(Sender: TObject; Node: TTreeNode;
+      var AllowExpansion: Boolean);
     procedure tvMainKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure tvMainMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
   private
     FIBConnection: TIBConnection;
     FSQLTransaction: TSQLTransaction;
@@ -340,6 +348,7 @@ type
     // Set connection for SQLQuery1 to selected registered database
     procedure SetConnection(Index: Integer);
     procedure SetFocus; override; // solve a bug in Lazarus
+    procedure AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
   protected
     // This procedure will receive the events that are logged by the connection:
     procedure GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType; Const Msg : String);
@@ -410,6 +419,11 @@ type
 var
   fmMain: TfmMain;
 
+  FClickedTabIndex: Integer;
+  NoDragTab: Integer;  // -1 = no exclusion, otherwise excluded tab index
+  FExcludeTabs: array of Integer; // list of excluded tab indexes
+
+
 implementation
 
 { TfmMain }
@@ -435,7 +449,40 @@ begin
   FActivated:= False;
   LoadRegisteredDatabases;
   StatusBar1.Panels[0].Text:= 'TurboBird for ' + Target + '-' + Arch;
+  Application.OnShowHint := @AppShowHint;
+  PageControl1.ShowHint := True;
+  Application.ShowHint := True;
+  NoDragTab := 0;
+  SetLength(FExcludeTabs, 1);
+  FExcludeTabs[0] := 0;
 end;
+
+procedure TfmMain.AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
+var
+  i: Integer;
+  r: TRect;
+  p: TPoint;
+  ts: TTabSheet;
+begin
+  // Mausposition ins PageControl-Koordinatensystem
+  p := PageControl1.ScreenToClient(Mouse.CursorPos);
+
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    r := PageControl1.TabRect(i);
+    if PtInRect(r, p) then
+    begin
+      ts := PageControl1.Pages[i];
+      HintStr := ts.Hint;
+      CanShow := True;
+      Exit;
+    end;
+  end;
+
+  HintStr := '';
+  CanShow := False;
+end;
+
 
 procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
@@ -494,7 +541,7 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Data)^.dbIndex, 'Create new FBFunctions');
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Data)^.dbIndex, 'Create new FireBird Functions');
     QWindow.meQuery.Lines.Clear;
     QWindow.meQuery.Lines.Add('/*');
     QWindow.meQuery.Lines.Add('  Example Firebird SQL Functions');
@@ -523,11 +570,11 @@ begin
     QWindow.meQuery.Lines.Add('END^');
     QWindow.meQuery.Lines.Add('');
 
-    QWindow.meQuery.Lines.Add('CREATE OR ALTER FUNCTION percent_of_decimal(value DECIMAL(10,2), percent DECIMAL(5,2))');
+    QWindow.meQuery.Lines.Add('CREATE OR ALTER FUNCTION percent_of_decimal(val DECIMAL(10,2), percent DECIMAL(5,2))');
     QWindow.meQuery.Lines.Add('RETURNS DECIMAL(10,2)');
     QWindow.meQuery.Lines.Add('AS');
     QWindow.meQuery.Lines.Add('BEGIN');
-    QWindow.meQuery.Lines.Add('  RETURN (value * percent) / 100;');
+    QWindow.meQuery.Lines.Add('  RETURN (val * percent) / 100;');
     QWindow.meQuery.Lines.Add('END^');
     QWindow.meQuery.Lines.Add('');
 
@@ -2138,50 +2185,99 @@ begin
     MessageDlg('Trigger has been activated', mtInformation, [mbOk], 0);
 end;
 
-(*******************  Call stored procedure  *****************)
 procedure TfmMain.CallRoutine(ARoutineType: TRoutineType);
-var FRoutineInfo: TRoutineInfo; Rec: TDatabaseRec;
-    dbIndex: Integer; Title: string; ATab: TTabSheet;
-    frmTestFunction: TfrmTestFunction;
+var
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  FRoutineInfo: TRoutineInfo;
+  Rec: TDatabaseRec;
+  dbIndex: Integer;
+  ATab: TTabSheet;
+  frmTestFunction: TfrmTestFunction;
+  DBAlias: string;
+  ShortTitle, FullHint: string;
 begin
-    dbIndex :=  TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-    Rec := RegisteredDatabases[dbIndex];
-    FRoutineInfo.RoutineType := ARoutineType;
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
 
-    if  ARoutineType in [rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc] then
-      FRoutineInfo.PackageName := tvMain.Selected.Parent.Parent.Text
-    else
-      FRoutineInfo.PackageName := '';
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  dbIndex := NodeInfos^.dbIndex;
+  Rec := RegisteredDatabases[dbIndex];
 
-    FRoutineInfo.RoutineName := tvMain.Selected.Text;
-    FRoutineInfo.Connection  := Rec.IBConnection;
-    FRoutineInfo.dbIndex     := dbIndex;
+  // Routine-Info vorbereiten
+  FRoutineInfo.RoutineType := ARoutineType;
+  FRoutineInfo.RoutineName := GetClearNodeText(SelNode.Text);
+  FRoutineInfo.Connection  := Rec.IBConnection;
+  FRoutineInfo.dbIndex     := dbIndex;
 
-    if FRoutineInfo.PackageName <> '' then
-      Title := FRoutineInfo.PackageName + '.'  + RoutineTypeToStr(ARoutineType) +  ': ' + tvMain.Selected.Text
-    else
-      Title := RoutineTypeToStr(ARoutineType) +  ': ' + tvMain.Selected.Text;
+  if ARoutineType in [rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc, rtPackageUDF] then
+  begin
+    FRoutineInfo.PackageName := SelNode.Parent.Parent.Text;
+  end
+  else
+  begin
+    FRoutineInfo.PackageName := '';
+  end;
 
-    frmTestFunction:= FindCustomForm(Title, TfrmTestFunction) as TfrmTestFunction;
-
-    if frmTestFunction = nil then
-    begin
-      frmTestFunction := TfrmTestFunction.CreateForRoutine(Application,  FRoutineInfo);
-      ATab:= TTabSheet.Create(self);
-      ATab.Parent:= PageControl1;
-      frmTestFunction.Parent:= ATab;
-      frmTestFunction.Left:= 0;
-      frmTestFunction.Top:= 0;
-      frmTestFunction.BorderStyle:= bsNone;
-      frmTestFunction.Align:= alClient;
-      frmTestFunction.Caption:= Title;
-  end else;
+  DBAlias := GetAncestorNodeText(SelNode, 1);
+  // Prüfen, ob Editor schon existiert
+  if Assigned(NodeInfos^.EditorForm) then
+  begin
+    frmTestFunction := TfrmTestFunction(NodeInfos^.EditorForm);
     ATab:= frmTestFunction.Parent as TTabSheet;
+    //ATab := TTabSheet(frmTestFunction.Parent);
+  end
+  else
+  begin
+    frmTestFunction := TfrmTestFunction.CreateForRoutine(Application, FRoutineInfo);
 
-  PageControl1.ActivePage:= ATab;
-  ATab.Tag:= dbIndex;
-  ATab.Caption:= Title;
-  frmTestFunction.Init(FRoutineInfo);
+    ATab := TTabSheet.Create(Self);
+    ATab.PageControl := PageControl1;
+    ATab.ControlStyle := ATab.ControlStyle + [csAcceptsControls];
+
+    ATab.Tag := dbIndex;
+
+    frmTestFunction.Parent := ATab;
+    frmTestFunction.Align := alClient;
+    frmTestFunction.BorderStyle := bsNone;
+    //frmTestFunction.Show;
+
+    NodeInfos^.ExecuteForm := frmTestFunction;
+  end;
+
+  // Kurzer Tab-Titel = nur RoutineName
+  ShortTitle := FRoutineInfo.RoutineName;
+  ATab.Caption := ShortTitle;
+
+  // Mehrzeiliger Tooltip
+    if FRoutineInfo.PackageName <> '' then
+    begin
+      FullHint :=
+        'Server:   ' + GetAncestorNodeText(SelNode, 0) +   sLineBreak +
+        //'Server:   ' + GetServerName(Rec.IBConnection.DatabaseName) +   sLineBreak +
+        'DBAlias:   ' + DBAlias + sLineBreak +
+        //'DBAlias:  ' + Rec.AliasName  + sLineBreak +
+        'DBPath:   ' + Rec.IBConnection.DatabaseName + sLineBreak +
+        'Package:  ' + FRoutineInfo.PackageName + sLineBreak +
+        'Object type:   ' + RoutineTypeToStr(ARoutineType) + sLineBreak +
+        'Object name:     ' + FRoutineInfo.RoutineName;
+    end
+    else
+    begin
+      FullHint :=
+        'Server:   ' + GetAncestorNodeText(SelNode, 0) +   sLineBreak +
+        'DBAlias:  ' + DBAlias + sLineBreak +
+        'DBPath:   ' + Rec.IBConnection.DatabaseName + sLineBreak +
+        'Object type:   ' + RoutineTypeToStr(ARoutineType) + sLineBreak +
+        'Object name:     ' + FRoutineInfo.RoutineName;
+    end;
+
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Tab aktivieren + Routine initialisieren
+  PageControl1.ActivePage := ATab;
+  frmTestFunction.Init(FRoutineInfo, NodeInfos);
   frmTestFunction.Show;
 end;
 
@@ -2449,9 +2545,7 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    //QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
-    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from ' + SelNode.Text;
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select * from ' + SelNode.Text);
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, ':vw:' + SelNode.Text);
     QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
     QWindow.bbRunClick(nil);
     QWindow.Show;
@@ -3034,11 +3128,11 @@ begin
   ModuleName:= '<modulename>';
   EntryPoint:= '<entryname>';
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
-  if InputQuery('Create new UDF-Function', 'Please enter new FBFunction name', AFuncName) then
+  if InputQuery('Create new UDF-Function', 'Please enter new Function name', AFuncName) then
   if InputQuery('Create new UDF-Function', 'Please enter module name (Library)', ModuleName) then
-  if InputQuery('Create new UDF-Function', 'Please enter entry point (External FBFunction name)', EntryPoint) then
+  if InputQuery('Create new UDF-Function', 'Please enter entry point (External Function name)', EntryPoint) then
   begin
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Data)^.dbIndex, 'Create new FBFunction');
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Data)^.dbIndex, 'Create new UDF');
     QWindow.meQuery.Lines.Clear;
     QWindow.meQuery.Lines.Add('DECLARE EXTERNAL Function "' + AFuncName + '"');
     QWindow.meQuery.Lines.Add('-- (int, varchar(100))');
@@ -4436,70 +4530,109 @@ begin
 end;
 
 (***********  Get UDF Info  ***************)
-Function TfmMain.GetUDFInfo(DatabaseIndex: Integer; UDFName: string;
+function TfmMain.GetUDFInfo(DatabaseIndex: Integer; UDFName: string;
   var ModuleName, EntryPoint, Params: string): Boolean;
 var
   Rec: TDatabaseRec;
+  FieldType, SubType, FieldLength, Precision, Scale: Integer;
+  CharLen: string;
 begin
   try
-    Rec:= RegisteredDatabases[DatabaseIndex];
+    Rec := RegisteredDatabases[DatabaseIndex];
     SetConnection(DatabaseIndex);
 
+    // 1) Funktionskopf (welches Modul, welcher EntryPoint)
     SQLQuery1.Close;
-    SQLQuery1.SQL.Text:= Format('SELECT * FROM RDB$FunctionS WHERE RDB$Function_NAME = ''%s'' ',[UDFName]);
+    SQLQuery1.SQL.Text :=
+      'SELECT RDB$MODULE_NAME, RDB$ENTRYPOINT ' +
+      'FROM RDB$FUNCTIONS ' +
+      'WHERE RDB$FUNCTION_NAME = :FNAME';
+    SQLQuery1.ParamByName('FNAME').AsString := UpperCase(UDFName);
     SQLQuery1.Open;
-    ModuleName:= Trim(SQLQuery1.FieldByName('RDB$MODULE_NAME').AsString);
-    EntryPoint:= Trim(SQLQuery1.FieldByName('RDB$ENTRYPOINT').AsString);
 
-    //todo: (low priority) probably domain based datatypes should be supported for input and output params in UDF declarations
+    if SQLQuery1.EOF then
+    begin
+      Result := False;
+      Exit;
+    end;
 
-    // input Params
+    ModuleName := Trim(SQLQuery1.FieldByName('RDB$MODULE_NAME').AsString);
+    EntryPoint := Trim(SQLQuery1.FieldByName('RDB$ENTRYPOINT').AsString);
+
     SQLQuery1.Close;
-    SQLQuery1.SQL.Text:= 'SELECT * FROM RDB$Function_ARGUMENTS WHERE RDB$Function_Name = ''' +
-     UDFName + ''' and RDB$MECHANISM = 1';
+
+    // 2) Eingabeparameter
+    SQLQuery1.SQL.Text :=
+      'SELECT RDB$FIELD_TYPE, RDB$FIELD_SUB_TYPE, RDB$FIELD_LENGTH, ' +
+      '       RDB$FIELD_PRECISION, RDB$FIELD_SCALE, RDB$CHARACTER_LENGTH ' +
+      'FROM RDB$FUNCTION_ARGUMENTS ' +
+      'WHERE RDB$FUNCTION_NAME = :FNAME ' +
+      '  AND RDB$MECHANISM = 1 ' +
+      'ORDER BY RDB$ARGUMENT_POSITION';
+    SQLQuery1.ParamByName('FNAME').AsString := UpperCase(UDFName);
     SQLQuery1.Open;
-    Params:= '';
+
+    Params := '(';
     while not SQLQuery1.EOF do
     begin
-      Params:= Params + LineEnding + GetFBTypeName(SQLQuery1.FieldByName('RDB$FIELD_TYPE').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_LENGTH').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_PRECISION').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_SCALE').AsInteger);
-      if SQLQuery1.FieldByName('RDB$FIELD_TYPE').AsInteger in [CharType, CStringType, VarCharType] then
-        Params:= Params + '(' + SQLQuery1.FieldByName('RDB$Character_LENGTH').AsString + ')';
+      FieldType   := SQLQuery1.FieldByName('RDB$FIELD_TYPE').AsInteger;
+      SubType     := SQLQuery1.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
+      FieldLength := SQLQuery1.FieldByName('RDB$FIELD_LENGTH').AsInteger;
+      Precision   := SQLQuery1.FieldByName('RDB$FIELD_PRECISION').AsInteger;
+      Scale       := SQLQuery1.FieldByName('RDB$FIELD_SCALE').AsInteger;
+      CharLen     := SQLQuery1.FieldByName('RDB$CHARACTER_LENGTH').AsString;
+
+      Params := Params + GetFBTypeName(FieldType, SubType, FieldLength, Precision, Scale);
+
+      if FieldType in [CharType, CStringType, VarCharType] then
+        Params := Params + '(' + CharLen + ')';
+
       SQLQuery1.Next;
       if not SQLQuery1.EOF then
-        Params:= Params + ', ';
+        Params := Params + ', ';
     end;
     SQLQuery1.Close;
-    Params:= Params + ')' + LineEnding + LineEnding + 'Returns ';
 
-    // Result Params
-    SQLQuery1.SQL.Text:= Format('SELECT * FROM RDB$Function_ARGUMENTS '+
-      'where RDB$Function_Name = ''%s'' and RDB$MECHANISM = 0',[UDFName]);
+    Params := Params + ')' + LineEnding + 'RETURNS ';
+
+    // 3) Rückgabewerte
+    SQLQuery1.SQL.Text :=
+      'SELECT RDB$FIELD_TYPE, RDB$FIELD_SUB_TYPE, RDB$FIELD_LENGTH, ' +
+      '       RDB$FIELD_PRECISION, RDB$FIELD_SCALE, RDB$CHARACTER_LENGTH ' +
+      'FROM RDB$FUNCTION_ARGUMENTS ' +
+      'WHERE RDB$FUNCTION_NAME = :FNAME ' +
+      '  AND RDB$MECHANISM = 0 ' +
+      'ORDER BY RDB$ARGUMENT_POSITION';
+    SQLQuery1.ParamByName('FNAME').AsString := UpperCase(UDFName);
     SQLQuery1.Open;
+
     while not SQLQuery1.EOF do
     begin
-      Params:= Params + LineEnding + GetFBTypeName(SQLQuery1.FieldByName('RDB$FIELD_TYPE').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_LENGTH').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_PRECISION').AsInteger,
-        SQLQuery1.FieldByName('RDB$FIELD_SCALE').AsInteger);
-      if SQLQuery1.FieldByName('field_type_int').AsInteger in [CharType, CStringType, VarCharType] then
-        Params:= Params + '(' + SQLQuery1.FieldByName('RDB$Character_LENGTH').AsString + ')';
+      FieldType   := SQLQuery1.FieldByName('RDB$FIELD_TYPE').AsInteger;
+      SubType     := SQLQuery1.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
+      FieldLength := SQLQuery1.FieldByName('RDB$FIELD_LENGTH').AsInteger;
+      Precision   := SQLQuery1.FieldByName('RDB$FIELD_PRECISION').AsInteger;
+      Scale       := SQLQuery1.FieldByName('RDB$FIELD_SCALE').AsInteger;
+      CharLen     := SQLQuery1.FieldByName('RDB$CHARACTER_LENGTH').AsString;
+
+      Params := Params + GetFBTypeName(FieldType, SubType, FieldLength, Precision, Scale);
+
+      if FieldType in [CharType, CStringType, VarCharType] then
+        Params := Params + '(' + CharLen + ')';
+
       SQLQuery1.Next;
       if not SQLQuery1.EOF then
-        Params:= Params + ', ';
+        Params := Params + ', ';
     end;
     SQLQuery1.Close;
-    Result:= True;
+
+    Result := True;
   except
     on E: Exception do
     begin
-      ShowMessage(e.Message);
+      ShowMessage(E.Message);
       FIBConnection.Close;
-      Result:= False;
+      Result := False;
     end;
   end;
 end;
@@ -4560,6 +4693,7 @@ var
   Count, TmpCount: Integer;
   ANodeText: string;
 begin
+  //DBIndex:= TPNodeInfos(Node.Parent.Data)^.dbIndex;
   DBIndex:= TPNodeInfos(Node.Parent.Data)^.dbIndex;
   Rec:= RegisteredDatabases[DBIndex].RegRec;
   Screen.Cursor:= crSQLWait;
@@ -4644,7 +4778,7 @@ begin
       end
       else
         // Stored Procedures
-      if Node.Text = 'Stored Procedures' then
+      if (Node.Level = 2) and (Node.Text = 'Procedures') then
       begin
         StoredProcNode:= Node;
         Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otStoredProcedures, Count);
@@ -4754,21 +4888,24 @@ begin
       begin
         UserNode:= Node;
         Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUsers, Count);
-        Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
+        Node.Text:= ANodeText + ' (' + IntToStr(Count - 1) + ')'; // - Public User
         UserNode.DeleteChildren;
         for i:= 0 to Objects.Count - 1 do
         begin
-          Item:= tvMain.Items.AddChild(UserNode, Objects[i]);
-          Item.ImageIndex:= 24;
-          Item.SelectedIndex:= 24;
-          TPNodeInfos(Item.Data)^.ObjectType := tvotUser;
-          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          if Trim(LowerCase(Objects[i])) <> 'public' then   //Hide Public User.
+          begin
+            Item:= tvMain.Items.AddChild(UserNode, Objects[i]);
+            Item.ImageIndex:= 24;
+            Item.SelectedIndex:= 24;
+            TPNodeInfos(Item.Data)^.ObjectType := tvotUser;
+            TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          end;
         end;
       end
 
       else
       // FB(FBFunctions)
-    if Node.Text = 'FBFunctions' then
+    if (Node.Level = 2) and (Node.Text = 'Functions') then
     begin
       FBFunctionNode:= Node;
       //Get FBFunctions
@@ -5135,7 +5272,7 @@ var
 begin
   try
     Node := tvMain.Selected;
-    dbIndex := TPNodeInfos(Node.Parent.Parent.Data)^.dbIndex;
+    dbIndex := TPNodeInfos(Node.Data)^.dbIndex;
     Node.DeleteChildren;
 
     // Primary Keys
@@ -5172,8 +5309,8 @@ begin
             ) + ArraySuffix;
 
           FieldNode := tvMain.Items.AddChild(Node, FieldTitle);
-          //FieldNode.Data := Pointer(i); // Optional: Feldreihenfolge als Pointer speichern
-          TPNodeInfos(FieldNode.Data)^.dbIndex := i;
+          TPNodeInfos(FieldNode.Data)^.dbIndex := dbIndex;
+          TPNodeInfos(FieldNode.Data)^.ObjectType := tvotTableField;
 
           // Primärschlüssel hervorheben
           if PKFieldsList.IndexOf(AFieldName) <> -1 then
@@ -5202,7 +5339,6 @@ begin
 end;
 
 (***************  View Generator  *****************)
-
 procedure TfmMain.lmViewGenClick(Sender: TObject);
 var
   SelNode: TTreeNode;
@@ -5224,7 +5360,7 @@ begin
     SQLQuery1.Open;
 
     // Fill ViewGen form
-    Title:= 'Generator : ' + AGenName;
+    Title := SelNode.Parent.Parent.Text + ':gen:' + AGenName;
     fmViewGen:= FindCustomForm(Title, TfmViewGen) as TfmViewGen;
     if fmViewGen = nil then
     begin
@@ -5356,7 +5492,7 @@ begin
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
     ATriggerName:= SelNode.Text;
-    Title:= SelNode.Parent.Parent.Text +  ': Trigger : ' + ATriggerName;
+    Title:= SelNode.Parent.Parent.Text +  ':trg:' + ATriggerName;
     dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
     dmSysTables.GetTriggerInfo(dbIndex, ATriggerName, BeforeAfter, OnTable,
       Event, Body, TriggerEnabled, TriggerPosition);
@@ -5604,9 +5740,7 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    //QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select first 1000 from ' + SelNode.Text);
-    //QWindow.meQuery.Lines.Text:= 'select first 1000 * from ' + SelNode.Text;
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Select * from ' + SelNode.Text);
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'tbl:' + SelNode.Text);
     QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
     QWindow.bbRunClick(nil);
     QWindow.Show;
@@ -5651,8 +5785,96 @@ begin
     end;
 end;
 
-(*****************   Database Popup menu   ********************)
+function IsExcluded(Index: Integer): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := Low(FExcludeTabs) to High(FExcludeTabs) do
+    if FExcludeTabs[i] = Index then
+      Exit(True);
+end;
 
+procedure TfmMain.PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  ClickedIndex: Integer;
+begin
+  // Check on which tab the mouse was pressed
+  ClickedIndex := PageControl1.IndexOfTabAt(X, Y);
+
+  // If click is outside any tab or on excluded tab, block drag
+  if (ClickedIndex = -1) or IsExcluded(ClickedIndex) then
+  begin
+    FClickedTabIndex := -1;
+    PageControl1.Cursor := crNo;
+    Exit;
+  end;
+
+  // Remember clicked tab
+  FClickedTabIndex := ClickedIndex;
+
+  // Change cursor to drag
+  if Button = mbLeft then
+    PageControl1.Cursor := crDrag;
+end;
+
+procedure TfmMain.PageControl1MouseMove(Sender: TObject; Shift: TShiftState;
+  X, Y: Integer);
+var
+  HoverTabIndex: Integer;
+begin
+  if ssLeft in Shift then
+  begin
+    // If no draggable tab is active, always forbidden
+    if FClickedTabIndex = -1 then
+    begin
+      PageControl1.Cursor := crNo;
+      Exit;
+    end;
+
+    // Check if the mouse is over a tab
+    HoverTabIndex := PageControl1.IndexOfTabAt(X, Y);
+
+    if (HoverTabIndex > -1) and not IsExcluded(HoverTabIndex) then
+      PageControl1.Cursor := crDrag   // Allowed only on valid tabs
+    else
+      PageControl1.Cursor := crNo;    // Empty area or excluded tab → forbidden
+  end
+  else
+    PageControl1.Cursor := crDefault;
+end;
+
+procedure TfmMain.PageControl1MouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+var
+  TabIndex: Integer;
+  ActiveTab: TTabSheet;
+begin
+  // Reset cursor
+  PageControl1.Cursor := crDefault;
+
+  // If no draggable tab is active, do nothing
+  if FClickedTabIndex = -1 then Exit;
+
+  // Check on which tab the mouse was released
+  TabIndex := PageControl1.IndexOfTabAt(X, Y);
+  if (TabIndex = -1) or (TabIndex = FClickedTabIndex) or IsExcluded(TabIndex) then
+  begin
+    FClickedTabIndex := -1;
+    Exit;
+  end;
+
+  ActiveTab := PageControl1.Pages[FClickedTabIndex];
+
+  // Move tab
+  if Assigned(ActiveTab) then
+    ActiveTab.PageIndex := TabIndex;
+
+  FClickedTabIndex := -1;
+end;
+
+(*****************   Database Popup menu   ********************)
 procedure TfmMain.pmDatabasePopup(Sender: TObject);
 var
   SelNode: TTreeNode;
@@ -5696,7 +5918,7 @@ begin
     if ParentNodeText = 'Views' then // View
       Filter:= 4
     else
-    if ParentNodeText = 'Stored Procedures' then // Stored Proc
+    if ParentNodeText = 'Procedures' then // Stored Proc
       Filter:= 5
     else
     if ParentNodeText = 'UDFs' then // UDF
@@ -5723,7 +5945,7 @@ begin
     if NodeText = 'Generators' then // Generators root
       Filter:= 12
     else
-    if NodeText = 'Stored Procedures' then // Stored Proc root
+    if (SelNode.Level = 2) and (NodeText = 'Procedures') then // Stored Proc root
       Filter:= 15
     else
     if NodeText = 'UDFs' then // UDF root
@@ -5750,10 +5972,10 @@ begin
     if NodeText = 'Query Window' then // Query Window
       Filter:= 30
     else
-    if NodeText = 'FBFunctions' then //
+    if (SelNode.Level = 2) and (NodeText = 'Functions') then //
       Filter:= 31
     else
-    if ParentNodeText = 'FBFunctions' then //
+    if (SelNode.Level = 3) and (ParentNodeText = 'Functions') then //
       Filter:= 311
     else
     ////////////////////////////////////////////////////////////
@@ -5877,8 +6099,23 @@ begin
     PNodeInfos^.ObjectType := tvotNone;
     PNodeInfos^.PopupMenuTag := -1;
     PNodeInfos^.ImageIndex := -1;
+    PNodeInfos^.ViewForm := nil;
+    PNodeInfos^.EditorForm := nil;
+    PNodeInfos^.NewForm := nil;
+    PNodeInfos^.ExecuteForm := nil;
   end;
   Node.Data := PNodeInfos;
+end;
+
+procedure TfmMain.tvMainClick(Sender: TObject);
+var dbIndex: integer;
+begin
+  {if tvMain.Selected <> nil then
+    if tvMain.Selected.Level > 0 then
+    begin
+      dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+      SetConnection(dbIndex);
+    end;}
 end;
 
 procedure TfmMain.tvMainDeletion(Sender: TObject; Node: TTreeNode);
@@ -5886,13 +6123,19 @@ var Infos: TPNodeInfos;
 begin
   Infos := TPNodeInfos(Node.Data);
   if Assigned(Infos) then
+  begin
+    Infos^.ViewForm := nil;
+    Infos^.EditorForm := nil;
+    Infos^.NewForm := nil;
+    Infos^.ExecuteForm := nil;
     Dispose(Infos);
+  end;
   Node.Data := nil;
 end;
 
 (**********************            Double click        *********************************)
 
-procedure TfmMain.tvMainDblClick(Sender: TObject);
+{procedure TfmMain.tvMainDblClick(Sender: TObject);
 var
   QWindow: TfmQueryWindow;
   Rec: TRegisteredDatabase;
@@ -5914,7 +6157,7 @@ begin
       begin
         if tvMain.Selected.Text = 'Query Window' then
         begin
-          QWindow:= ShowQueryWindow(TPNodeInfos(tvMain.Selected.Parent.Data)^.dbIndex, 'Query Window');
+          QWindow:= ShowQueryWindow(TPNodeInfos(tvMain.Selected.Parent.Data)^.dbIndex, 'QW');
           QWindow.Show;
         end
         else  // Expand object
@@ -5942,7 +6185,8 @@ begin
             //ShowMessage(Node.Text);
           end;
 
-          'FBFunctions': lmTestFireBirdFunctionClick(nil);
+          'Functions': lmTestFireBirdFunctionClick(nil);
+          //'Functions': ImEditFBFunctionClick(nil);
 
           'UDRs':
           begin
@@ -5953,10 +6197,13 @@ begin
           'Triggers': lmViewTriggerClick(nil);
           'Views': lmDisplay1000VClick(nil);
           //'Stored Procedures': lmViewStoredProcedureClick(nil);
-          'Stored Procedures':   lmCallStoreProcClick(nil);
+          'Procedures':   lmCallStoreProcClick(nil);
+          //'Procedures':   lmEditProcClick(nil);
 
           //'UDFs': lmViewUDFClick(nil);
           'UDFs': lmTestUDFFunctionClick(nil);
+          //'UDFs': lmEditUDFFuctionClick(nil);
+
           'System Tables':
            begin
              lmViewFieldsClick(nil); // also works for system tables
@@ -5982,8 +6229,10 @@ begin
          begin
            if Pos('Functions',  tvMain.Selected.Parent.Text) > 0 then
              lmTestUDRFunctionClick(nil)
+             //lmEditUDRFunctionClick(nil)
            else
              lmTestUDRProcedureClick(nil)
+             //lmEditUDRProcedureClick(nil)
          end;
 
       end;
@@ -6013,11 +6262,180 @@ begin
       end;
     end;
   end;
+end;}
+
+procedure TfmMain.tvMainDblClick(Sender: TObject);
+var
+  Node: TTreeNode;
+  Info: TPNodeInfos;
+  QWindow: TfmQueryWindow;
+  DBIndex: Integer;
+begin
+  Node := tvMain.Selected;
+
+  if Node = nil then Exit;
+
+  Info := TPNodeInfos(Node.Data);
+  if Info = nil then Exit;
+
+  DBIndex := Info^.dbIndex;
+
+  if (DBIndex < 0) or (DBIndex >= Length(RegisteredDatabases)) then Exit;
+
+  if Node.Level > 0 then
+    SetConnection(DBIndex);
+
+  if Node.Level = 2 then
+  begin
+    try
+      if tvMain.Selected.Text = 'Query Window' then
+      begin
+        QWindow:= ShowQueryWindow(TPNodeInfos(tvMain.Selected.Parent.Data)^.dbIndex, 'QW');
+        QWindow.Show;
+      end else // Expand object
+      begin
+        tvMainExpanded(nil, Node);
+      end;
+      Exit;
+    except
+      on E: Exception do
+      ShowMessage(E.Message);
+    end;
+  end;
+
+
+  try
+    case Info^.ObjectType of
+
+      // ----------------------
+      // Database node
+      // ----------------------
+      tvotDB:
+        begin
+          // Do nothing on dblclick
+        end;
+
+
+      // ----------------------
+      // Table / View / Procedure / Generator / Trigger / UDF / Function / System Table / Domain / Role / Exception / User
+      // ----------------------
+      tvotTable:
+        begin
+          lmViewFieldsClick(nil);
+          lmViewFirst1000Click(nil);
+        end;
+
+      tvotTableField:
+        begin
+          lmEditFieldClick(nil);
+        end;
+
+      tvotGenerator:
+        begin
+          lmViewGenClick(nil);
+        end;
+
+      tvotTrigger:
+        begin
+          lmViewTriggerClick(nil);
+        end;
+
+      tvotView:
+        begin
+          lmDisplay1000VClick(nil);
+        end;
+
+      tvotStoredProcedure:
+        begin
+          lmCallStoreProcClick(nil);
+        end;
+
+      tvotUDFRoot, tvotUDFFunction:
+        begin
+          lmTestUDFFunctionClick(nil);
+        end;
+
+      tvotFunction:
+        begin
+          lmTestFireBirdFunctionClick(nil);
+        end;
+
+      tvotSystemTable:
+        begin
+          lmViewFieldsClick(nil);
+          lmOpenSystemTableClick(nil);
+        end;
+
+      tvotDomain:
+        begin
+          lmViewDomainClick(nil);
+        end;
+
+      tvotRole:
+        begin
+          lmPermissionsClick(nil);
+        end;
+
+      tvotException:
+        begin
+          lmScriptExceptionClick(nil);
+        end;
+
+      tvotUser:
+        begin
+          lmPermissionsClick(nil);
+        end;
+
+      // ----------------------
+      // UDRs
+      // ----------------------
+      tvotUDRFunction:
+        begin
+          lmTestUDRFunctionClick(nil);
+        end;
+
+      tvotUDRProcedure:
+        begin
+          lmTestUDRProcedureClick(nil);
+        end;
+
+      // ----------------------
+      // Packages
+      // ----------------------
+      tvotPackageFunction:
+        begin
+          lmTestPackageFunctionClick(nil);
+        end;
+
+      tvotPackageProcedure:
+        begin
+          lmTestPackageProcedureClick(nil);
+        end;
+
+      tvotPackageUDRFunction:
+        begin
+          lmTestPackageUDRFunctionClick(nil);
+        end;
+
+      tvotPackageUDRProcedure:
+        begin
+          lmTestPackageUDRProcedureClick(nil);
+        end;
+
+      else
+        begin
+          // Unknown / do nothing
+        end;
+
+    end;
+  except
+    on E: Exception do
+      ShowMessage('Error while handling node action: ' + E.Message);
+  end;
 end;
 
-
 (**************    Expanded     *****************)
-
+{
 procedure TfmMain.tvMainExpanded(Sender: TObject; Node: TTreeNode);
 var
   Rec: TRegisteredDatabase;
@@ -6047,11 +6465,82 @@ begin
     FillObjectRoot(Node);
   end;
 end;
+}
+
+// ============================================================================
+// Called when the user tries to expand a database node (Level 1).
+// Here we check the connection and optionally prevent expansion.
+// ============================================================================
+procedure TfmMain.tvMainExpanding(Sender: TObject; Node: TTreeNode; var AllowExpansion: Boolean);
+var
+  Rec: TRegisteredDatabase;
+  NodeInfo: TPNodeInfos;
+begin
+  AllowExpansion := True;
+
+  if (Node = nil) or (Node.Data = nil) then
+    Exit;
+
+  // Database nodes are always Level 1
+  if Node.Level = 1 then
+  begin
+    NodeInfo := Node.Data;
+    Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
+
+    // Only if no password is set → ask for connection
+    if Rec.Password = '' then
+    begin
+      if not ConnectToDBAs(NodeInfo^.dbIndex) then
+      begin
+        // Connection failed → do not expand
+        AllowExpansion := False;
+        Exit;
+      end;
+
+      // Connection successful → update timestamp
+      RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened := Now;
+      RegisteredDatabases[NodeInfo^.dbIndex].OrigRegRec.LastOpened := Now;
+    end;
+  end;
+end;
+
+// ============================================================================
+// Called when a child node (e.g. Tables, Procedures) is expanded.
+// Here we populate the database objects.
+// ============================================================================
+procedure TfmMain.tvMainExpanded(Sender: TObject; Node: TTreeNode);
+var
+  BracketPos: Integer;
+begin
+  if Node = nil then
+    Exit;
+
+  // Only child nodes (below the database node)
+  if (Node.Level > 1) and (not Node.Expanded) then
+  begin
+    if Node.HasChildren then
+    begin
+      Node.DeleteChildren;
+      BracketPos := Pos('(', Node.Text);
+      if BracketPos > 0 then
+        Node.Text := Trim(Copy(Node.Text, 1, BracketPos - 1));
+    end;
+
+    try
+      FillObjectRoot(Node);
+    except
+      on E: Exception do
+        ShowMessage('Error while loading objects: ' + E.Message);
+    end;
+  end;
+end;
+
 
 procedure TfmMain.GlobalException(Sender: TObject; E : Exception);
 begin
   MessageDlg('Exception', e.Message, mtError, [mbOk], 0);
 end;
+
 
 procedure TfmMain.tvMainKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
@@ -6072,12 +6561,6 @@ begin
       Key := 0; // Taste als verarbeitet markieren
     end;
   end;
-end;
-
-procedure TfmMain.tvMainMouseMove(Sender: TObject; Shift: TShiftState; X,
-  Y: Integer);
-begin
-
 end;
 
 (**********************             Load databases            *********************************)
@@ -6191,17 +6674,35 @@ begin
           TPNodeInfos(CNode.Data)^.ObjectType := tvotViewRoot;
           TPNodeInfos(CNode.Data)^.dbIndex := i;
 
-          CNode:= tvMain.Items.AddChild(MainNode, 'Stored Procedures');
-          CNode.ImageIndex:= 11;
-          CNode.SelectedIndex:= 11;
-          TPNodeInfos(CNode.Data)^.ObjectType := tvotStoredProcedureRoot;
-          TPNodeInfos(CNode.Data)^.dbIndex := i;
-
           CNode:= tvMain.Items.AddChild(MainNode, 'UDFs');
           CNode.ImageIndex:= 13;
           CNode.SelectedIndex:= 13;
           TPNodeInfos(CNode.Data)^.ObjectType := tvotUDFRoot;
           TPNodeInfos(CNode.Data)^.dbIndex := i;
+
+          if FBVersionMajor >= 3 then
+          begin
+            CNode:= tvMain.Items.AddChild(MainNode, 'Functions');
+            CNode.ImageIndex:= 52;
+            CNode.SelectedIndex:= 52;
+            TPNodeInfos(CNode.Data)^.ObjectType := tvotFunctionRoot;
+            TPNodeInfos(CNode.Data)^.dbIndex := i;
+          end;
+
+          CNode:= tvMain.Items.AddChild(MainNode, 'Procedures');
+          CNode.ImageIndex:= 11;
+          CNode.SelectedIndex:= 11;
+          TPNodeInfos(CNode.Data)^.ObjectType := tvotStoredProcedureRoot;
+          TPNodeInfos(CNode.Data)^.dbIndex := i;
+
+          if FBVersionMajor >= 3 then
+          begin
+            CNode:= tvMain.Items.AddChild(MainNode, 'UDRs');
+            CNode.ImageIndex:= 56;
+            CNode.SelectedIndex:= 56;
+            TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
+            TPNodeInfos(CNode.Data)^.dbIndex := i;
+          end;
 
           CNode:= tvMain.Items.AddChild(MainNode, 'System Tables');
           CNode.ImageIndex:= 15;
@@ -6236,22 +6737,10 @@ begin
 
           if FBVersionMajor >= 3 then
           begin
-            CNode:= tvMain.Items.AddChild(MainNode, 'FBFunctions');
-            CNode.ImageIndex:= 52;
-            CNode.SelectedIndex:= 52;
-            TPNodeInfos(CNode.Data)^.ObjectType := tvotFunctionRoot;
-            TPNodeInfos(CNode.Data)^.dbIndex := i;
-
             CNode:= tvMain.Items.AddChild(MainNode, 'Packages');
             CNode.ImageIndex:= 54;
             CNode.SelectedIndex:= 54;
             TPNodeInfos(CNode.Data)^.ObjectType := tvotPackageRoot;
-            TPNodeInfos(CNode.Data)^.dbIndex := i;
-
-            CNode:= tvMain.Items.AddChild(MainNode, 'UDRs');
-            CNode.ImageIndex:= 56;
-            CNode.SelectedIndex:= 56;
-            TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
             TPNodeInfos(CNode.Data)^.dbIndex := i;
 
               {CNode:= tvMain.Items.AddChild(CNode, 'Functions');

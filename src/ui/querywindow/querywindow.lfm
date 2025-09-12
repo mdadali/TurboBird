@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 373
+  Left = 530
   Height = 550
-  Top = 78
+  Top = 125
   Width = 834
   ActiveControl = Panel1
   Caption = 'fmQueryWindow'
@@ -988,7 +988,6 @@ object fmQueryWindow: TfmQueryWindow
     Top = 400
     object lmExport: TMenuItem
       Caption = 'Export Result as...'
-      OnClick = lmExportDataSetClick
     end
     object MenuItem5: TMenuItem
       Caption = '-'
@@ -1572,9 +1571,26 @@ object fmQueryWindow: TfmQueryWindow
       Caption = 'Copy all result'
       OnClick = lmCopyAllClick
     end
+    object Separator2: TMenuItem
+      Caption = '-'
+    end
     object lmExportDataSet: TMenuItem
       Caption = 'Export...'
-      OnClick = lmExportDataSetClick
+      object lmExportDataAsMarkDownTable: TMenuItem
+        Caption = 'Markdown Table'
+        OnClick = lmExportDataAsMarkDownTableClick
+      end
+      object lmExportDataAsHtml: TMenuItem
+        Caption = 'Html'
+        OnClick = lmExportDataAsHtmlClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object lmStdExportFormats: TMenuItem
+        Caption = 'Standart Export Formats...'
+        OnClick = lmStdExportFormatsClick
+      end
     end
   end
   object SynCompletion1: TSynCompletion

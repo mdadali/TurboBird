@@ -1,7 +1,7 @@
 object frmTestFunction: TfrmTestFunction
-  Left = 546
+  Left = 366
   Height = 608
-  Top = 100
+  Top = 264
   Width = 947
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle

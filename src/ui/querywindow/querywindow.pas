@@ -12,7 +12,10 @@ uses
   dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
   usqlqueryext, IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB, GridPrn,
   GridPrnPreviewDlg, QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
-  LR_DSet;
+  LR_DSet,
+
+  fdataexportersintrf;
+
 type
 
   TQueryTypes = (
@@ -64,6 +67,11 @@ type
     FontDialog1: TFontDialog;
     lmShowBlobField: TMenuItem;
     lmExportDataSet: TMenuItem;
+    lmExportDataAsMarkDownTable: TMenuItem;
+    lmStdExportFormats: TMenuItem;
+    lmExportDataAsHtml: TMenuItem;
+    Separator2: TMenuItem;
+    Separator1: TMenuItem;
     toolbarImages: TImageList;
     imTools: TImageList;
     imTabs: TImageList;
@@ -131,7 +139,8 @@ type
     procedure lmCopyCellClick(Sender: TObject);
     procedure lmCopyClick(Sender: TObject);
     procedure lmCutClick(Sender: TObject);
-    procedure lmExportDataSetClick(Sender: TObject);
+    procedure lmExportDataAsHtmlClick(Sender: TObject);
+    procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
     procedure lmPasteClick(Sender: TObject);
     procedure lmRedoClick(Sender: TObject);
     procedure lmRunClick(Sender: TObject);
@@ -140,6 +149,7 @@ type
     procedure lmRunSelectClick(Sender: TObject);
     procedure lmSelectAllClick(Sender: TObject);
     procedure lmShowBlobFieldClick(Sender: TObject);
+    procedure lmStdExportFormatsClick(Sender: TObject);
     procedure lmUndoClick(Sender: TObject);
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
@@ -191,7 +201,7 @@ type
     procedure EnableCommitButton;
     procedure ExecuteQuery;
     function GetNewTabNum: string;
-    // Gets TSQLQueryExtExt of current result tabsheet - only if it is a select query
+    // Gets TSQLQueryExt of current result tabsheet - only if it is a select query
     function GetCurrentSelectQuery: TSQLQueryExt;
     // Gets both querytype and whether SQL is DML or DDL
     // Investigates QueryList[LookAtIndex] to find out
@@ -792,9 +802,9 @@ begin
   // Get a free number to be assigned to the new Query window
   for i:= 1 to 1000 do
   begin
-    if fmMain.FindQueryWindow(FRegRec.Title + ': Query Window # ' + IntToStr(i)) = nil then
+    if fmMain.FindQueryWindow(FRegRec.Title + ': QW#' + IntToStr(i)) = nil then
     begin
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Query Window # ' + IntToStr(i), '');
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'QW#' + IntToStr(i), '');
       Break;
     end;
   end;
@@ -958,7 +968,11 @@ begin
   VisualQueryEngine.ShowSystemTables := False;
   meuqb.OQBEngine.DatabaseName := FDbConnection.DatabaseName;
 
-  FDbConnection.Connected := true;
+  try
+    FDbConnection.Connected := true;
+  except
+    raise;
+  end;
   FTransaction.StartTransaction;
 
   if meuqb.Execute  then
@@ -2208,22 +2222,7 @@ begin
   end;
 end;
 
-{ Copy query text into clipboard }
-
-procedure TfmQueryWindow.lmCopyClick(Sender: TObject);
-begin
-  meQuery.CopyToClipboard;
-end;
-
-
-{ Cut query text into clipboard}
-
-procedure TfmQueryWindow.lmCutClick(Sender: TObject);
-begin
-  meQuery.CutToClipboard;
-end;
-
-procedure TfmQueryWindow.lmExportDataSetClick(Sender: TObject);
+procedure TfmQueryWindow.lmStdExportFormatsClick(Sender: TObject);
 var SqlQuery: TSQLQuery;
 begin
   SqlQuery:= GetCurrentSelectQuery;
@@ -2240,9 +2239,61 @@ begin
     exit;
   end;
 
-  ExportDataSet(SqlQuery);
+  ExportStdFormat(SqlQuery);
 end;
 
+{ Copy query text into clipboard }
+
+procedure TfmQueryWindow.lmCopyClick(Sender: TObject);
+begin
+  meQuery.CopyToClipboard;
+end;
+
+
+{ Cut query text into clipboard}
+
+procedure TfmQueryWindow.lmCutClick(Sender: TObject);
+begin
+  meQuery.CutToClipboard;
+end;
+
+procedure TfmQueryWindow.lmExportDataAsHtmlClick(Sender: TObject);
+var SqlQuery: TSQLQuery;
+begin
+  SqlQuery:= GetCurrentSelectQuery;
+
+  if not Assigned(SqlQuery) then
+  begin
+    ShowMessage('Query not assigned!');
+    exit;
+  end;
+
+  if SqlQuery.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+  ExportDataHtml(SqlQuery);
+end;
+
+procedure TfmQueryWindow.lmExportDataAsMarkDownTableClick(Sender: TObject);
+var SqlQuery: TSQLQuery;
+begin
+  SqlQuery:= GetCurrentSelectQuery;
+
+  if not Assigned(SqlQuery) then
+  begin
+    ShowMessage('Query not assigned!');
+    exit;
+  end;
+
+  if SqlQuery.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+  ExportDataMarkDownTable(SqlQuery);
+end;
 
 { Paste from clipboard into SQL editor }
 

@@ -9,6 +9,8 @@ uses
   Controls, Graphics, Dialogs, ExtCtrls, DbCtrls, DBGrids, StdCtrls, ComCtrls,
   Buttons, Menus, DBDateTimePicker, IBDynamicGrid, DBControlGrid, IBQuery,
   IBDatabase, IBTable, IBArrayGrid, IBCustomDataSet, IB, turbocommon, calen,
+  fdataexportersintrf,
+
   dmibx;
 
 
@@ -40,12 +42,17 @@ type
     Label2: TLabel;
     Label3: TLabel;
     lmExport: TMenuItem;
+    lmExportDataAsMarkdownTable: TMenuItem;
+    lmExportDataAsHtml: TMenuItem;
+    lmStandardExportFormats: TMenuItem;
+    Separator1: TMenuItem;
     miEdit: TMenuItem;
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
     pnlRecord: TScrollBox;
     PopupMenu1: TPopupMenu;
+    Separator2: TMenuItem;
     StatusBar1: TStatusBar;
     tsGridView: TTabSheet;
     tsFormView: TTabSheet;
@@ -60,6 +67,9 @@ type
     procedure ibtblGridAfterScroll(DataSet: TDataSet);
     procedure ibtblGridBeforePost(DataSet: TDataSet);
     procedure lmExportClick(Sender: TObject);
+    procedure lmExportDataAsHtmlClick(Sender: TObject);
+    procedure lmExportDataAsMarkdownTableClick(Sender: TObject);
+    procedure lmStandardExportFormatsClick(Sender: TObject);
     procedure miEditClick(Sender: TObject);
     procedure PopupMenu1Popup(Sender: TObject);
     procedure tsFormViewShow(Sender: TObject);
@@ -284,14 +294,6 @@ begin
   end;
 end;
 
-procedure TfmEditTable.lmExportClick(Sender: TObject);
-begin
-  if not ibtblGrid.IsEmpty then
-    ExportDataSet(ibtblGrid)
-  else
-    ShowMessage('DataSet has no records!');
-end;
-
 procedure TfmEditTable.miEditClick(Sender: TObject);
 begin
   PageControl1.ActivePage := tsFormView;
@@ -346,6 +348,35 @@ begin
       Abort;
     end;
   end;
+end;
+
+procedure TfmEditTable.lmExportClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfmEditTable.lmExportDataAsHtmlClick(Sender: TObject);
+begin
+  if not ibtblGrid.IsEmpty then
+    ExportDataHtml(ibtblGrid)
+  else
+    ShowMessage('DataSet has no records!');
+end;
+
+procedure TfmEditTable.lmExportDataAsMarkdownTableClick(Sender: TObject);
+begin
+  if not ibtblGrid.IsEmpty then
+    ExportDataMarkDownTable(ibtblGrid)
+  else
+    ShowMessage('DataSet has no records!');
+end;
+
+procedure TfmEditTable.lmStandardExportFormatsClick(Sender: TObject);
+begin
+  if not ibtblGrid.IsEmpty then
+    ExportStdFormat(ibtblGrid)
+  else
+    ShowMessage('DataSet has no records!');
 end;
 
 procedure TfmEditTable.Init(dbIndex: Integer; ATableName: string);

@@ -1,13 +1,14 @@
 object fmMain: TfmMain
-  Left = 323
+  Left = 422
   Height = 459
-  Top = 120
+  Top = 184
   Width = 942
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 433
   ClientWidth = 942
   Color = clForm
+  DragMode = dmAutomatic
   Font.Name = 'Sans'
   Icon.Data = {
     3E42000000000100010040400000010020002842000016000000280000004000
@@ -566,11 +567,12 @@ object fmMain: TfmMain
     ShowLines = False
     TabOrder = 0
     OnAddition = tvMainAddition
+    OnClick = tvMainClick
     OnDblClick = tvMainDblClick
     OnDeletion = tvMainDeletion
     OnExpanded = tvMainExpanded
+    OnExpanding = tvMainExpanding
     OnKeyDown = tvMainKeyDown
-    OnMouseMove = tvMainMouseMove
     Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
   end
   object Splitter1: TSplitter
@@ -598,11 +600,14 @@ object fmMain: TfmMain
     TabIndex = 0
     TabOrder = 2
     OnCloseTabClicked = PageControl1CloseTabClicked
-    Options = [nboShowCloseButtons, nboHidePageListPopup]
+    OnMouseDown = PageControl1MouseDown
+    OnMouseMove = PageControl1MouseMove
+    OnMouseUp = PageControl1MouseUp
+    Options = [nboHidePageListPopup]
     object TabSheet1: TTabSheet
       BorderWidth = 1
       Caption = 'Main'
-      ClientHeight = 328
+      ClientHeight = 332
       ClientWidth = 614
       Font.Color = clNavy
       Font.Name = 'Arial'

@@ -182,6 +182,7 @@ end;
 
 function TfmReg.TestConnection(DatabaseName, UserName, Password, Charset: string): Boolean;
 begin
+  result := false;
   try
     IBConnection1.Close;
     IBConnection1.DatabaseName:= DatabaseName;
@@ -189,8 +190,11 @@ begin
     IBConnection1.Password:= Password;
     IBConnection1.CharSet:= Charset;
     IBConnection1.Open;
-    IBConnection1.Close;
-    Result:= True;
+    if IBConnection1.Connected then
+    begin
+      Result:= True;
+      IBConnection1.Close;
+    end;
   except
     on d: EIBDatabaseError do
     begin

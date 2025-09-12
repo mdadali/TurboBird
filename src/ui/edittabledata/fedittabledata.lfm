@@ -1,7 +1,7 @@
 object fmEditTable: TfmEditTable
-  Left = 338
+  Left = 449
   Height = 550
-  Top = 124
+  Top = 129
   Width = 834
   ActiveControl = PageControl1
   ClientHeight = 550
@@ -327,9 +327,27 @@ object fmEditTable: TfmEditTable
       Caption = 'Edit'
       OnClick = miEditClick
     end
+    object Separator2: TMenuItem
+      Caption = '-'
+    end
     object lmExport: TMenuItem
       Caption = 'Export...'
       OnClick = lmExportClick
+      object lmExportDataAsMarkdownTable: TMenuItem
+        Caption = 'Markdown Table'
+        OnClick = lmExportDataAsMarkdownTableClick
+      end
+      object lmExportDataAsHtml: TMenuItem
+        Caption = 'Html'
+        OnClick = lmExportDataAsHtmlClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object lmStandardExportFormats: TMenuItem
+        Caption = 'Standard Export Formats...'
+        OnClick = lmStandardExportFormatsClick
+      end
     end
   end
 end

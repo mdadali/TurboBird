@@ -1,7 +1,7 @@
 object OQBForm: TOQBForm
-  Left = 330
+  Left = 354
   Height = 550
-  Top = 114
+  Top = 268
   Width = 834
   ActiveControl = QBPanel
   Caption = 'Open QBuilder'
@@ -891,9 +891,23 @@ object OQBForm: TOQBForm
   object mnuResult: TPopupMenu
     Left = 592
     Top = 64
-    object Result1: TMenuItem
-      Caption = 'Save Results'
-      OnClick = Result1Click
+    object lmExportData: TMenuItem
+      Caption = 'Export...'
+      object lmExportDataAsMarkdownTable: TMenuItem
+        Caption = 'Markdown Table'
+        OnClick = lmExportDataAsMarkdownTableClick
+      end
+      object lmExportDataAsHtml: TMenuItem
+        Caption = 'Html'
+        OnClick = lmExportDataAsHtmlClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+      object lmExportDataStdFormats: TMenuItem
+        Caption = 'Standard Export Formats...'
+        OnClick = lmExportDataStdFormatsClick
+      end
     end
   end
 end

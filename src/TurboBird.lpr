@@ -28,7 +28,8 @@ uses
   csvdocument, lazdbexport, udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
-  QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor;
+  QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
+fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest;
 
 const
   Major = 1;
@@ -102,6 +103,7 @@ begin
   Application.CreateForm(TfmCopyTable, fmCopyTable);
   SAbout.Free;
   Application.CreateForm(TDataModuleIBX, DataModuleIBX);
+  //Application.CreateForm(TfrmArrayTest, frmArrayTest);
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
   //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
   Application.Run;

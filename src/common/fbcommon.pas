@@ -10,12 +10,13 @@ uses
   ibase60dyn,
 
   //IBX
+  IB,
   IBXServices;
 
 type
   TRoutineType = (
     rtUDF, rtFBFunc, rtFBProc, rtUDRFunc, rtUDRProc,
-    rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc,
+    rtPackageUDF, rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc,
     rtUnknown
   );
 
@@ -183,6 +184,7 @@ begin
     rtFBProc:           Result := 'FireBird Stored Procedure';
     rtUDRFunc:          Result := 'UDR Function';
     rtUDRProc:          Result := 'UDR Procedure';
+    rtPackageUDF:       Result := 'Package UDF';
     rtPackageFBFunc:    Result := 'Package-FireBird Function';
     rtPackageFBProc:    Result := 'Package-FireBird Stored Procedure';
     rtPackageUDRFunc:   Result := 'Package-UDR Function';
@@ -438,7 +440,7 @@ begin
     else if info.RoutineType in [rtUDRProc, rtPackageUDRProc] then
       Result := Result + 'AND EXISTS (SELECT 1 FROM RDB$PROCEDURES PR WHERE PR.RDB$PROCEDURE_NAME = P.RDB$PROCEDURE_NAME AND PR.RDB$ENGINE_NAME IS NOT NULL) ';
 
-    // 💡 Filter nach Parametertyp
+    //Filter nach Parametertyp
     case ParamTypeFilter of
       ptInOnly:
         Result := Result + 'AND P.RDB$PARAMETER_TYPE = 0 ';
@@ -521,6 +523,9 @@ initialization
   IBaseLibrary       := ' ';
 
   IBXServicesConnection1 := TIBXServicesConnection.Create(nil);
+  IBXServicesConnection1.ServerName := 'localhost';
+  //IBXServicesConnection1.PortNo := '3051';
+  //IBXServicesConnection1.Protocol := TCP;
   IBXServicesConnection1.LoginPrompt:=true;
   IBXServerProperties1   := TIBXServerProperties.Create(nil);
   IBXServerProperties1.ServicesConnection := IBXServicesConnection1;
