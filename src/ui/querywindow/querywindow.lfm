@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 530
+  Left = 295
   Height = 550
-  Top = 125
+  Top = 118
   Width = 834
   ActiveControl = Panel1
   Caption = 'fmQueryWindow'
@@ -1562,10 +1562,6 @@ object fmQueryWindow: TfmQueryWindow
     object lmCopyCell: TMenuItem
       Caption = 'Copy field'
       OnClick = lmCopyCellClick
-    end
-    object lmShowBlobField: TMenuItem
-      Caption = 'Show Blob Field...'
-      OnClick = lmShowBlobFieldClick
     end
     object lmCopyAll: TMenuItem
       Caption = 'Copy all result'

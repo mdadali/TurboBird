@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, IniFiles;
+  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, IniFiles,
+  turbocommon;
 
 type
 
@@ -27,8 +28,10 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { private declarations }
+    FNodeInfos: TPNodeInfos;
   public
     { public declarations }
+    procedure Init(ANodeInfos: TPNodeInfos);
   end; 
 
 var
@@ -38,8 +41,14 @@ implementation
 
 { TfmViewSProc }
 
+procedure TfmViewSProc.Init(ANodeInfos: TPNodeInfos);
+begin
+   FNodeInfos := ANodeInfos;
+end;
+
 procedure TfmViewSProc.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
 end;
 

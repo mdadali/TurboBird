@@ -1,7 +1,7 @@
 object fmViewSProc: TfmViewSProc
-  Left = 720
+  Left = 524
   Height = 320
-  Top = 164
+  Top = 103
   Width = 572
   BorderStyle = bsSingle
   Caption = 'fmViewSProc'
@@ -12,26 +12,26 @@ object fmViewSProc: TfmViewSProc
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 11
-    Height = 16
+    Height = 20
     Top = 15
-    Width = 113
+    Width = 117
     Caption = 'Stored Procedure'
     ParentColor = False
   end
   object Label2: TLabel
     Left = 11
-    Height = 16
+    Height = 20
     Top = 79
-    Width = 34
+    Width = 33
     Caption = 'Body'
     ParentColor = False
   end
   object Label3: TLabel
     Left = 11
-    Height = 16
+    Height = 20
     Top = 48
     Width = 45
     Caption = 'Owner'
@@ -569,7 +569,6 @@ object fmViewSProc: TfmViewSProc
     ReadOnly = True
     RightEdge = 120
     RightEdgeColor = 13487600
-    SelectedColor.FrameEdges = sfeAround
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
     SelectedColor.FramePriority = 50
@@ -577,30 +576,23 @@ object fmViewSProc: TfmViewSProc
     SelectedColor.ItalicPriority = 50
     SelectedColor.UnderlinePriority = 50
     SelectedColor.StrikeOutPriority = 50
-    IncrementColor.FrameEdges = sfeAround
-    HighlightAllColor.FrameEdges = sfeAround
     BracketHighlightStyle = sbhsBoth
     BracketMatchColor.Background = clNone
     BracketMatchColor.Foreground = clNone
-    BracketMatchColor.FrameEdges = sfeAround
     BracketMatchColor.Style = [fsBold]
     FoldedCodeColor.Background = clNone
     FoldedCodeColor.Foreground = clGray
     FoldedCodeColor.FrameColor = clGray
-    FoldedCodeColor.FrameEdges = sfeAround
     MouseLinkColor.Background = clNone
     MouseLinkColor.Foreground = clBlue
-    MouseLinkColor.FrameEdges = sfeAround
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
-    LineHighlightColor.FrameEdges = sfeAround
     inline TSynGutterPartList
       object TSynGutterLineNumber
         Width = 17
         MouseActions = <>
         MarkupInfo.Background = 13820657
         MarkupInfo.Foreground = clNone
-        MarkupInfo.FrameEdges = sfeAround
         DigitCount = 2
         ShowOnlyLineNumbersMultiplesOf = 1
         ZeroStart = False
@@ -686,29 +678,14 @@ object fmViewSProc: TfmViewSProc
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     CommentAttri.Foreground = clTeal
-    CommentAttri.FrameEdges = sfeAround
-    DataTypeAttri.FrameEdges = sfeAround
-    DefaultPackageAttri.FrameEdges = sfeAround
-    ExceptionAttri.FrameEdges = sfeAround
-    FunctionAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = 16718385
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = clMedGray
-    NumberAttri.FrameEdges = sfeAround
-    PLSQLAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
-    SQLPlusAttri.FrameEdges = sfeAround
     StringAttri.Foreground = 1052833
-    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = 526434
-    SymbolAttri.FrameEdges = sfeAround
     TableNameAttri.Foreground = clNavy
-    TableNameAttri.FrameEdges = sfeAround
     TableNameAttri.Style = [fsBold]
-    VariableAttri.FrameEdges = sfeAround
     SQLDialect = sqlSybase
-    left = 424
-    top = 228
+    Left = 424
+    Top = 228
   end
 end

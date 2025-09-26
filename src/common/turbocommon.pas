@@ -17,7 +17,8 @@ uses
 
   Variants,
 
-  fbcommon;
+  fbcommon,
+  fServerSession;
 
 
 {$I version.inc}
@@ -251,32 +252,6 @@ type
   // Note: the order and count must match the array below
   // Also, do not assign values to the individual enums; code depends
   // on them starting with 0 and being contiguous
-  TObjectType = (
-    otNone,
-    otTables,
-    otGenerators,
-    otTriggers,
-    otViews,
-    otStoredProcedures,
-    otUDF {User-Defined functions},
-    otSystemTables,
-    otDomains {excludes system domains},
-    otRoles,
-    otExceptions,
-    otUsers,
-    otIndexes,
-    otConstraints,
-    otFBFunctions,
-    otFBProcedures,
-    otUDRFunctions,
-    otUDRProcedures,
-    otPackages,
-    otPackageFunctions,
-    otPackageProcedures,
-    otPackageUDFFunctions,
-    otPackageUDRFunctions,
-    otPackageUDRProcedures
-    );
 
   TTreeViewObjectType = (
   tvotNone,
@@ -330,6 +305,22 @@ type
   tvotPackageUDRProcedure
   );
 
+type
+  TServerRecord = packed record
+    ServerName: string[127];
+    ServerAlias: string[127];
+    UserName: string[63];
+    Role: string[63];
+    Protocol: TProtocol;
+    Password: string[63];
+    Charset: string[31];
+    Port: string[10];
+    ClientLibraryPath: string[255];
+    ConfigFilePath: string[255];
+    Reserved: array[0..40] of Byte; // für spätere Erweiterungen
+  end;
+
+
   TPNodeInfos = ^TNodeInfos;
   TNodeInfos = record
     dbIndex: integer;
@@ -340,6 +331,8 @@ type
     EditorForm,
     NewForm,
     ExecuteForm: TForm;
+
+    ServerSession: TServerSession;
   end;
 
   TRegisteredDatabase = packed record
@@ -398,29 +391,27 @@ type
   end;
 
 
-
 const
-
-  //NumObjects = 13; //number of different objects in dbObjects array below
-  //newlib
-  NumObjects = 24;
-  //end-newlib
-  dbObjects: array [0 .. NumObjects-1] of string =
-    ('None', 'Tables', 'Generators', 'Triggers',
-    'Views', 'Stored Procedures', 'UDFs',
-    'Sys Tables', 'Domains', 'Roles',
-    'Exceptions', 'Users', 'Indices',
-    'Constraints', 'FBFunctions', 'FBProcedures',
-    'UDRFunctions', 'UDRProcedures',
-    'Packages', 'PackageFunctions', 'PackageProcedures',
-    'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
+  TmpDir = 'temp';
 
 var fLanguage: string;
     fIniFileName: string;
     fIniFile: TInifile;
+
+    RegisteredServers: array of TServerRecord;
     RegisteredDatabases: array of TDatabaseRec;
 
+    MultiVersionConnection: string;
 
+
+function  GetServerRecordFromFile(AServerName: string): TServerRecord;
+procedure SaveServerDataToFile(const Rec: TServerRecord);
+procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
+function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
+
+procedure LoadRegisteredServers(ATreeView: TTreeView);
+
+function GetServerListFromTreeView(ATreeView: TTreeView): TStringList;
 function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
 
@@ -458,6 +449,10 @@ function GetClearNodeText(const ANodeText: string): string;
 function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
 function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
 
+function FBObjectToStr(AType: TObjectType): string;
+function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
+
+
 
 // Retrieve available collations for specified Characterset into Collations
 function GetCollations(const Characterset: string; var Collations: TStringList): boolean;
@@ -484,15 +479,200 @@ procedure SetTransactionIsolation(Params: TStringList);
 
 implementation
 
+
+function GetServerRecordFromFile(AServerName: string): TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  found: Boolean;
+  fileName: string;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  found := False;
+  fileName := getConfigurationDirectory + 'servers.reg';
+
+  if not FileExists(fileName) then
+    Exit; // nichts vorhanden → leer zurück
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    while fs.Position < fs.Size do
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+      if SameText(Trim(rec.ServerName), Trim(AServerName)) then
+      begin
+        Result := rec;
+        found := True;
+        Break;
+      end;
+    end;
+  finally
+    fs.Free;
+  end;
+
+  if not found then
+    FillChar(Result, SizeOf(Result), 0); // leer zurück wenn nicht gefunden
+end;
+
+procedure SaveServerDataToFile(const Rec: TServerRecord);
+var
+  tmpList: TMemoryStream;
+  oldRec: TServerRecord;
+  found: Boolean;
+  regFile: string;
+begin
+  regFile := GetConfigurationDirectory + 'servers.reg';
+
+  tmpList := TMemoryStream.Create;
+  try
+    if FileExists(regFile) then
+      tmpList.LoadFromFile(regFile);
+
+    tmpList.Position := 0;
+    found := False;
+
+    // prüfen ob schon ein Datensatz für diesen Server existiert
+    while tmpList.Position < tmpList.Size do
+    begin
+      tmpList.ReadBuffer(oldRec, SizeOf(oldRec));
+      if Trim(oldRec.ServerName) = Trim(Rec.ServerName) then
+      begin
+        // überschreiben
+        tmpList.Position := tmpList.Position - SizeOf(oldRec);
+        tmpList.WriteBuffer(Rec, SizeOf(Rec));
+        found := True;
+        Break;
+      end;
+    end;
+
+    // falls nicht gefunden → neuen Datensatz anhängen
+    if not found then
+    begin
+      tmpList.Position := tmpList.Size;
+      tmpList.WriteBuffer(Rec, SizeOf(Rec));
+    end;
+
+    tmpList.SaveToFile(regFile);
+  finally
+    tmpList.Free;
+  end;
+end;
+
+procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
+begin
+  // nur wenn Record gültig (ServerName nicht leer)
+  if Trim(Rec.ServerName) = '' then
+    Exit;
+
+  //Session.ServerName        := Rec.ServerName;
+  Session.ServerAlias       := Rec.ServerAlias;
+  Session.UserName          := Rec.UserName;
+  Session.Password          := Rec.Password;
+  Session.Role              := Rec.Role;
+  Session.Protocol          := Rec.Protocol;
+  Session.Charset           := Rec.Charset;
+  Session.Port              := Rec.Port;
+  Session.ClientLibraryPath := Rec.ClientLibraryPath;
+  Session.ConfigFilePath    := Rec.ConfigFilePath;
+end;
+
+function BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
+var
+  Rec: TServerRecord;
+begin
+  FillChar(Rec, SizeOf(Rec), 0);
+
+  Rec.ServerName   := Session.ServerName;
+  Rec.ServerAlias  := Session.ServerAlias;
+  Rec.UserName     := Session.UserName;
+  Rec.Role         := Session.Role;
+  Rec.Protocol     := Session.Protocol;
+
+  if SavePwd then
+    Rec.Password := Session.Password
+  else
+    Rec.Password  := '';
+
+  Rec.Charset := Session.Charset;
+  Rec.Port:=     Session.Port;
+  Rec.ClientLibraryPath := Session.ClientLibraryPath;
+  Rec.ConfigFilePath    := Session.ConfigFilePath;
+
+  Result := Rec;
+end;
+
+procedure LoadRegisteredServers(ATreeView: TTreeView);
+var
+  FS: TFileStream;
+  Rec: TServerRecord;
+  ParentNode: TTreeNode;
+begin
+  ATreeView.Items.BeginUpdate;
+  try
+    ATreeView.Items.Clear;
+
+    if not FileExists(GetConfigurationDirectory + 'servers.reg') then
+      Exit;
+
+    FS := TFileStream.Create(GetConfigurationDirectory + 'servers.reg', fmOpenRead or fmShareDenyWrite);
+    try
+      while FS.Position < FS.Size do
+      begin
+        FillChar(Rec, SizeOf(Rec), 0);
+        FS.ReadBuffer(Rec, SizeOf(Rec));
+
+        // Abstandhalter hinzufügen
+        ATreeView.Items.Add(nil, '');
+
+        // Server-Node hinzufügen
+        ParentNode := ATreeView.Items.Add(nil, Trim(Rec.ServerName));
+        ParentNode.Data := nil; // optional: hier könnte man @Rec speichern, wenn gebraucht
+      end;
+    finally
+      FS.Free;
+    end;
+  finally
+    ATreeView.Items.EndUpdate;
+  end;
+end;
+
+
+function GetServerListFromTreeView(ATreeView: TTreeView): TStringList;
+var
+  i: Integer;
+  Node: TTreeNode;
+begin
+  Result := TStringList.Create;
+  for i := 0 to ATreeView.Items.Count - 1 do
+  begin
+    Node := ATreeView.Items[i];
+    if (Node.Level = 0) and (Trim(Node.Text) <> '') then
+      Result.Add(Node.Text);
+  end;
+end;
+
 function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 begin
   Result := nil;
-  if ANode = nil then Exit;
 
-  // Hochlaufen, bis Level erreicht oder Root
+  // Kein Knoten übergeben -> raus
+  if ANode = nil then
+    Exit;
+
+  // Ungültiges Level -> raus
+  if ALevel < 0 then
+    Exit;
+
+  // Wenn das gewünschte Level höher ist als der aktuelle Node.Level
+  // -> kann niemals erreicht werden
+  if ALevel > ANode.Level then
+    Exit;
+
+  // Jetzt hochlaufen, bis Level erreicht oder kein Parent mehr
   while (ANode.Level > ALevel) and (ANode.Parent <> nil) do
     ANode := ANode.Parent;
 
+  // Nur zurückgeben, wenn wirklich erreicht
   if ANode.Level = ALevel then
     Result := ANode;
 end;
@@ -547,6 +727,7 @@ end;
 procedure ReadIniFile;
 begin
   fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
+  MultiVersionConnection := fIniFile.ReadString('FireBird',  'MultiVersionConnection', 'no');
 end;
 
 
@@ -973,6 +1154,112 @@ begin
   end;
 end;
 
+function FBObjectToStr(AType: TObjectType): string;
+begin
+  case AType of
+    otNone:                  Result := 'None';
+    otTables:                Result := 'Table';
+    otGenerators:            Result := 'Generator';
+    otTriggers:              Result := 'Trigger';
+    otViews:                 Result := 'View';
+    otStoredProcedures:      Result := 'Procedure';
+    otUDF:                   Result := 'User-Defined Function';
+    otSystemTables:          Result := 'System Table';
+    otDomains:               Result := 'Domain';
+    otRoles:                 Result := 'Role';
+    otExceptions:            Result := 'Exception';
+    otUsers:                 Result := 'User';
+    otIndexes:               Result := 'Indexe';
+    otConstraints:           Result := 'Constraint';
+    otFBFunctions:           Result := 'Function';
+    otFBProcedures:          Result := 'Procedure';
+    otUDRFunctions:          Result := 'UDR Function';
+    otUDRProcedures:         Result := 'UDR Procedure';
+    otPackages:              Result := 'Package';
+    otPackageFunctions:      Result := 'Package Function';
+    otPackageProcedures:     Result := 'Package Procedure';
+    otPackageUDFFunctions:   Result := 'Package UDF Function';
+    otPackageUDRFunctions:   Result := 'Package UDR Function';
+    otPackageUDRProcedures:  Result := 'Package UDR Procedure';
+  else
+    Result := 'Unknown';
+  end;
+end;
+
+function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
+begin
+  case AType of
+    tvotNone:                  Result := 'None';
+    tvotServer:                Result := 'Server';
+    tvotDB:                    Result := 'Database';
+    tvotQueryWindow:           Result := 'Query Window';
+
+    tvotTableRoot:             Result := 'Tables';
+    tvotTable:                 Result := 'Table';
+    tvotTableField:            Result := 'Table Field';
+
+    tvotGeneratorRoot:         Result := 'Generators';
+    tvotGenerator:             Result := 'Generator';
+
+    tvotTriggerRoot:           Result := 'Triggers';
+    tvotTrigger:               Result := 'Trigger';
+
+    tvotViewRoot:              Result := 'Views';
+    tvotView:                  Result := 'View';
+
+    tvotSystemTableRoot:       Result := 'System Tables';
+    tvotSystemTable:           Result := 'System Table';
+
+    tvotDomainRoot:            Result := 'Domains';
+    tvotDomain:                Result := 'Domain';
+
+    tvotRoleRoot:              Result := 'Roles';
+    tvotRole:                  Result := 'Role';
+
+    tvotExceptionRoot:         Result := 'Exceptions';
+    tvotException:             Result := 'Exception';
+
+    tvotUserRoot:              Result := 'Users';
+    tvotUser:                  Result := 'User';
+
+    tvotIndexRoot:             Result := 'Indexes';
+    tvotIndex:                 Result := 'Index';
+
+    tvotConstraintRoot:        Result := 'Constraints';
+    tvotConstraint:            Result := 'Constraint';
+
+    tvotStoredProcedureRoot:   Result := 'Stored Procedures';
+    tvotStoredProcedure:       Result := 'Stored Procedure';
+
+    tvotFunctionRoot:          Result := 'Functions';
+    tvotFunction:              Result := 'Function';
+
+    tvotUDRoot:                Result := 'UD Objects';
+    tvotUDFRoot:               Result := 'UDFs';
+    tvotUDFFunction:           Result := 'UDF Function';
+
+    tvotUDRRoot:               Result := 'UDRs';
+    tvotUDRFunctionRoot:       Result := 'UDR Functions';
+    tvotUDRFunction:           Result := 'UDR Function';
+    tvotUDRProcedureRoot:      Result := 'UDR Procedures';
+    tvotUDRProcedure:          Result := 'UDR Procedure';
+
+    tvotPackageRoot:           Result := 'Packages';
+    tvotPackage:               Result := 'Package';
+    tvotPackageFunctionRoot:   Result := 'Package Functions';
+    tvotPackageFunction:       Result := 'Package Function';
+    tvotPackageProcedureRoot:  Result := 'Package Procedures';
+    tvotPackageProcedure:      Result := 'Package Procedure';
+    tvotPackageUDRFunctionRoot:Result := 'Package UDR Functions';
+    tvotPackageUDRFunction:    Result := 'Package UDR Function';
+    tvotPackageUDRProcedureRoot:Result := 'Package UDR Procedures';
+    tvotPackageUDRProcedure:   Result := 'Package UDR Procedure';
+
+  else
+    Result := 'Unknown';
+  end;
+end;
+
 
 function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
 begin
@@ -1219,16 +1506,16 @@ procedure CheckInitialIniFile;
 begin
   {$IFDEF MSWINDOWS}
     {$IFDEF WIN64}
-      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\fbclient.dll');
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\fbclient.dl');
       fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files\Firebird\firebird.conf');
     {$ELSE} // 32-Bit
-      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files (x86)\Firebird\fbclient.dll');
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files (x86)\Firebird\fbclient.dl');
       fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files (x86)\Firebird\firebird.conf');
     {$ENDIF}
   {$ENDIF}
 
   {$IFDEF LINUX}
-  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/lib/libfbclient.so');
+  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/lib/libfbclient.s');
   fIniFile.WriteString('FireBird', 'ConfPath',  '/opt/firebird/firebird.conf');
   {$ENDIF}
 end;
@@ -1237,8 +1524,8 @@ initialization
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);
 
-  if not FileExists(fIniFileName) then
-    CheckInitialIniFile;
+  //if not FileExists(fIniFileName) then
+    //CheckInitialIniFile;
 
   if FirstRun then
     ExtractResources;

@@ -1,7 +1,7 @@
 object fmFirebirdConfig: TfmFirebirdConfig
-  Left = 374
+  Left = 752
   Height = 538
-  Top = 119
+  Top = 191
   Width = 880
   ActiveControl = Panel13
   Caption = 'Firebird Config'

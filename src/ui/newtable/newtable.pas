@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Grids, Buttons, ExtCtrls, SynEdit, SynCompletion,
-  SynHighlighterSQL, LCLType;
+  SynHighlighterSQL, LCLType,
+  turbocommon;
 
 type
 
@@ -38,10 +39,11 @@ type
     procedure StringGrid1MouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
     function GenerateCreateSQL(var KeyField, GeneratorName: string): string;
-    procedure Init(dbIndex: Integer);
+    procedure Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
     procedure StringGrid1PickListSelect(Sender: TObject);
   private
     FDBIndex: Integer;
+    FNodeInfos: TPNodeInfos;
     function Validate: Boolean;
     // Get field count using stringgrid count
     function GetFieldsCount: Integer;
@@ -130,11 +132,12 @@ begin
   end;
 end;
 
-procedure TfmNewTable.Init(dbIndex: Integer);
+procedure TfmNewTable.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
 var
   i: Integer;
 begin
   FDBIndex:= dbIndex;
+  FNodeInfos := ANodeInfos;
   edNewTable.Clear;
   cxCreateGen.Checked:= False;
   StringGrid1.RowCount:= 3;
@@ -335,6 +338,7 @@ end;
 
 procedure TfmNewTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  FNodeInfos^.NewForm := nil;
   CloseAction:= caFree;
 end;
 

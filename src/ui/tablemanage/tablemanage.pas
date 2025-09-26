@@ -6,8 +6,10 @@ interface
 
 uses
   Classes, SysUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
-  Graphics, Dialogs, ComCtrls, Grids, Buttons, StdCtrls, CheckLst, LCLType, turbocommon, types,
-  usqlqueryext;
+  Graphics, Dialogs, ComCtrls, Grids, Buttons, StdCtrls, CheckLst, LCLType,
+  ExtCtrls, types, usqlqueryext,
+  fbcommon,
+  turbocommon;
 
 type
 
@@ -91,9 +93,10 @@ type
     FTableName: string;
     FIBConnection: TIBConnection;
     FSQLTrans: TSQLTransaction;
+    FNodeInfos: TPNodeInfos;
   public
     PKeyName, ConstraintName: string;
-    procedure Init(dbIndex: Integer; TableName: string);
+    procedure Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
     // Fill grid with constraint info
     { Todo: fillconstraints relies on a query being set correctly elsewhere; get
     rid of that - see e.g. FillPermissions }
@@ -116,6 +119,7 @@ uses NewEditField, Main, QueryWindow, SysTables, NewConstraint, PermissionManage
 procedure TfmTableManage.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  FNodeInfos^.EditorForm := nil;
   CloseAction:= caFree;
 end;
 
@@ -312,14 +316,74 @@ begin
   end;
 end;
 
-procedure TfmTableManage.bbAddUserClick(Sender: TObject);
+{procedure TfmTableManage.bbAddUserClick(Sender: TObject);
 var
   fmPermissions: TfmPermissionManage;
 begin
   fmPermissions:= TfmPermissionManage.Create(nil);
-  fmPermissions.Init(FDBIndex, FTableName, '', 1, bbRefreshPermissions.OnClick);
+  fmPermissions.Init(nil, FDBIndex, FTableName, '', 1, bbRefreshPermissions.OnClick);
+  fmPermissions.Show;
+end;}
+
+procedure TfmTableManage.bbAddUserClick(Sender: TObject);
+var
+  fmPermissions: TfmPermissionManage;
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  dbIndex: Integer;
+  ATab: TTabSheet;
+  Title, FullHint, DBAlias: string;
+  UserRole: string;
+begin
+  SelNode := fmMain.tvMain.Selected;
+  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  dbIndex := FDBIndex;  // Tabellenkontext kommt aus Form
+
+  Title := 'Add User Permission: ' + FTableName;
+
+  // Prüfen, ob ViewForm schon existiert
+  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmPermissionManage) then
+    fmPermissions := TfmPermissionManage(NodeInfos^.EditorForm)
+  else
+  begin
+    fmPermissions := TfmPermissionManage.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := SelNode.ImageIndex;
+    fmPermissions.Parent := ATab;
+    fmPermissions.Align := alClient;
+    fmPermissions.BorderStyle := bsNone;
+
+    NodeInfos^.EditorForm := fmPermissions;
+  end;
+
+  // Tab vorbereiten
+  ATab := fmPermissions.Parent as TTabSheet;
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := dbIndex;
+
+  // Tab-Titel
+  ATab.Caption := Title;
+  fmPermissions.Caption := Title;
+
+  // Detaillierte Infos als Hint
+  DBAlias := GetAncestorNodeText(SelNode, 1);
+  FullHint :=
+    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+    'DBAlias:  ' + DBAlias + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBConnection.DatabaseName + sLineBreak +
+    'Object type: Table Permissions' + sLineBreak +
+    'Table: ' + FTableName + sLineBreak +
+    'Action: Add User';
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+  UserRole := sgPermissions.Cells[0, sgPermissions.Row];
+  // Form initialisieren (UserType = 1 für User)
+  fmPermissions.Init(NodeInfos, dbIndex, FTableName, UserRole, 1, @bbRefreshPermissionsClick);
   fmPermissions.Show;
 end;
+
 
 procedure TfmTableManage.bbCloseClick(Sender: TObject);
 begin
@@ -452,7 +516,7 @@ begin
   end;
 end;
 
-procedure TfmTableManage.bbEditPermissionClick(Sender: TObject);
+{procedure TfmTableManage.bbEditPermissionClick(Sender: TObject);
 var
   fmPermissions: TfmPermissionManage;
   UserType: Integer;
@@ -464,16 +528,96 @@ begin
     else
       UserType:= 2;
     fmPermissions:= TfmPermissionManage.Create(nil);
-    fmPermissions.Init(FDBIndex, FTableName, sgPermissions.Cells[0, sgPermissions.Row], UserType, @bbRefreshPermissionsClick);
+    fmPermissions.Init(nil, FDBIndex, FTableName, sgPermissions.Cells[0, sgPermissions.Row], UserType, @bbRefreshPermissionsClick);
     fmPermissions.Show;
   end
   else
     ShowMessage('There is no selected user/role');
+end;}
+
+procedure TfmTableManage.bbEditPermissionClick(Sender: TObject);
+var
+  fmPermissions: TfmPermissionManage;
+  UserType, dbIndex: Integer;
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  ATab: TTabSheet;
+  Title, FullHint, DBAlias, UserOrRole: string;
+begin
+  if sgPermissions.Row <= 0 then
+  begin
+    ShowMessage('There is no selected user/role');
+    Exit;
+  end;
+
+  // User/Role unterscheiden
+  if sgPermissions.Cells[1, sgPermissions.Row] = 'User' then
+    UserType := 1
+  else
+    UserType := 2;
+  UserOrRole := sgPermissions.Cells[0, sgPermissions.Row];
+
+  // Aktuellen Node ermitteln
+  SelNode := fmMain.tvMain.Selected;
+  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  dbIndex := FDBIndex;  // kommt aus TfmTableManage, nicht vom Node
+
+  Title := 'Permissions:' + FTableName + ':' + UserOrRole;
+
+  // Prüfen, ob ViewForm schon existiert
+  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmPermissionManage) then
+    fmPermissions := TfmPermissionManage(NodeInfos^.EditorForm)
+  else
+  begin
+    fmPermissions := TfmPermissionManage.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := SelNode.ImageIndex;
+    fmPermissions.Parent := ATab;
+    fmPermissions.Align := alClient;
+    fmPermissions.BorderStyle := bsNone;
+
+    NodeInfos^.EditorForm := fmPermissions;
+  end;
+
+  // Tab vorbereiten
+  ATab := fmPermissions.Parent as TTabSheet;
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := dbIndex;
+
+  // Tab-Titel
+  ATab.Caption := Title;
+  fmPermissions.Caption := Title;
+
+  // Detaillierte Infos als Hint
+  DBAlias := GetAncestorNodeText(SelNode, 1);
+  FullHint :=
+    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+    'DBAlias:  ' + DBAlias + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBConnection.DatabaseName + sLineBreak +
+    'Object type: Table Permissions' + sLineBreak +
+    'Table: ' + FTableName + sLineBreak +
+    'Granted to: ' + UserOrRole + sLineBreak;
+
+  if UserType = 1 then
+    FullHint := FullHint + 'Type: User'
+  else
+    FullHint := FullHint + 'Type: Role';
+
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Form initialisieren
+  fmPermissions.Init(NodeInfos, dbIndex, FTableName, UserOrRole, UserType, @bbRefreshPermissionsClick);
+  fmPermissions.Show;
 end;
 
 
-procedure TfmTableManage.Init(dbIndex: Integer; TableName: string);
+
+procedure TfmTableManage.Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
 begin
+  FNodeInfos := ANodeInfos;
   try
     FDBIndex:= dbIndex;
     FTableName:= TableName;

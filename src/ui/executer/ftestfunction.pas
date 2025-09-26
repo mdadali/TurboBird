@@ -7,8 +7,12 @@ interface
 uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
   Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,  ComCtrls,
+
+  SysTables,
+  turbocommon,
+  fbcommon,
   udb_firebird_struct_helper,
-  SysTables, turbocommon, fbcommon;
+  udb_udf_fetcher;
 
 type
 
@@ -84,10 +88,6 @@ type
     procedure FillPackagesComboBox;
   end;
 
-
-//var
-    // frmTestFunction: TfrmTestFunction;
-
 implementation
 
 uses main;
@@ -101,10 +101,10 @@ begin
   inherited Create(AOwner);
 end;
 
-procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
+{procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
 begin
-  FRoutineInfo := ARoutineInfo;
   FNodeInfos := ANodeInfos;
+  FRoutineInfo := ARoutineInfo;
 
   AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
   IBConnection1.Connected := true;
@@ -112,6 +112,7 @@ begin
   lbDatabase.Caption := IBConnection1.DatabaseName;
 
   rgRoutineType.OnClick := nil;
+
   FillPackagesComboBox;
 
   if FRoutineInfo.PackageName <> '' then
@@ -125,11 +126,53 @@ begin
   rgRoutineType.OnClick := @rgRoutineTypeClick;
   SetDBLookupComboBoxByDisplayText(FRoutineInfo.RoutineName);
   LoadParamsForFunction;
+end;}
+
+procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
+begin
+  FNodeInfos := ANodeInfos;
+  FRoutineInfo := ARoutineInfo;
+
+  AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
+  IBConnection1.Connected := true;
+
+  lbDatabase.Caption := IBConnection1.DatabaseName;
+
+  rgRoutineType.OnClick := nil;
+
+  if FBVersionMajor >= 3 then
+  begin
+    FillPackagesComboBox;
+    if FRoutineInfo.PackageName <> '' then
+      cboxPackages.ItemIndex := cboxPackages.Items.IndexOf(FRoutineInfo.PackageName);
+    cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
+  end;
+
+  rgRoutineType.ItemIndex := ord(FRoutineInfo.RoutineType);
+
+  LoadFunctions;
+
+  rgRoutineType.OnClick := @rgRoutineTypeClick;
+  SetDBLookupComboBoxByDisplayText(FRoutineInfo.RoutineName);
+  LoadParamsForFunction;
 end;
 
 procedure TfrmTestFunction.FormCreate(Sender: TObject);
 begin
   inherited;
+
+  cboxPackages.Visible := (FBVersionMajor >= 3);
+
+  if FBVersionMajor >= 3 then
+  begin
+    rgRoutineType.Items.Add('Functions');
+    rgRoutineType.Items.Add('UDRFunc');
+    rgRoutineType.Items.Add('UDRProc');
+    rgRoutineType.Items.Add('PackageFBFunc');
+    rgRoutineType.Items.Add('PackageFBProc');
+    rgRoutineType.Items.Add('PackageUDRFunc');
+    rgRoutineType.Items.Add('PackageUDRProc');
+  end;
 end;
 
 procedure TfrmTestFunction.FormShow(Sender: TObject);
@@ -221,8 +264,14 @@ procedure TfrmTestFunction.rgRoutineTypeClick(Sender: TObject);
 var TreeViewObjectType: TTreeViewObjectType;
 begin
   FRoutineInfo.RoutineType := StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]);
-  if IsPackageRoutine(FRoutineInfo.RoutineType) then
-    FRoutineInfo.PackageName := cboxPackages.Text;
+
+  if FBVersionMajor >= 3 then
+    if IsPackageRoutine(FRoutineInfo.RoutineType) then
+    begin
+      cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
+      FRoutineInfo.PackageName := cboxPackages.Text;
+    end;
+
   LoadFunctions;
   //if QFuncs.RecordCount > 0 then
   if not QFuncs.IsEmpty then
@@ -232,19 +281,22 @@ begin
     LoadParamsForFunction;
     //TreeViewObjectType :=  RoutineTypeToTreeViewObjectType(FRoutineInfo.RoutineType);
     //fmMain.SelectTreeViewNode(FRoutineInfo);
-    SelectRoutineNode(FRoutineInfo);
+    //SelectRoutineNode(FRoutineInfo);
   end;
-  cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
+
+  //cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
 end;
 
 procedure TfrmTestFunction.LoadFunctions;
 begin
   QFuncs.Close;
   //QFuncs.SQL.Text := GetRoutineListSQL(FRoutineInfo.Connection, FRoutineInfo.RoutineType);
-    QFuncs.SQL.Text := GetRoutineListSQL(IBConnection1, FRoutineInfo.RoutineType);
+  QFuncs.SQL.Text := GetRoutineListSQL(IBConnection1, FRoutineInfo.RoutineType);
 
-  if IsPackageRoutine(FRoutineInfo.RoutineType) then
-    QFuncs.Params.ParamByName('PackageName').AsString := FRoutineInfo.PackageName;
+  if FBVersionMajor >= 3 then
+    if IsPackageRoutine(FRoutineInfo.RoutineType) then
+      QFuncs.Params.ParamByName('PackageName').AsString := FRoutineInfo.PackageName;
+
   QFuncs.Open;
 end;
 
@@ -275,9 +327,11 @@ procedure TfrmTestFunction.LoadParamsForFunction;
 var
   SQL: string;
   StrFieldType: string;
-  CharSetID: Integer;
+  CharSetID, ParamIndex: Integer;
   OutSQL: string;
+  hCharLen: integer;
 begin
+  ParamIndex := 1; // bei UDF: Position 0 = Return, Position 1..n = Input-Parameter
   QParamInfo.Close;
 
   SQL := GetParamListSQL(IBConnection1, FRoutineInfo, ptInOnly);
@@ -294,8 +348,9 @@ begin
   else
     QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-  if IsPackageRoutine(FRoutineInfo.RoutineType) then
-    QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
+  if FBVersionMajor >= 3 then
+    if IsPackageRoutine(FRoutineInfo.RoutineType) then
+      QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
   QParamInfo.Open;
 
@@ -309,21 +364,34 @@ begin
     else
       CharSetID := -1;
 
-    StrFieldType := ResolveFieldTypeAsString(
-      Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
-      QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
-      QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger,
-      CharSetID,
-      IBConnection1
-    );
+    if (FBVersionMajor < 3) then hCharLen := 0
+    else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
 
-    if IsPackageRoutine(FRoutineInfo.RoutineType) then
-      lbRoutineName.Caption := FRoutineInfo.PackageName + '.' + FRoutineInfo.RoutineName
-    else
-      lbRoutineName.Caption := FRoutineInfo.RoutineName;
+    if FRoutineInfo.RoutineType = rtUDF then
+    begin
+      // für UDFs unsere saubere Typauflösung nehmen
+      //StrFieldType := GetUDFReturnParam(IBConnection1, FRoutineInfo.RoutineName);
+      StrFieldType := GetUDFParamBeiPosition(IBConnection1, FRoutineInfo.RoutineName, 0); //0 = RETURN_PARAM
+    end else
+    begin
+      // wie bisher
+      StrFieldType := ResolveFieldTypeAsString(
+        Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
+        QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
+        hCharLen,
+        CharSetID,
+        IBConnection1);
+    end;
+
+    if FBVersionMajor >= 3 then
+      if IsPackageRoutine(FRoutineInfo.RoutineType) then
+        lbRoutineName.Caption := FRoutineInfo.PackageName + '.' + FRoutineInfo.RoutineName
+      else
+        lbRoutineName.Caption := FRoutineInfo.RoutineName;
+
     lbRoutineType.Caption := RoutineTypeToStr(FRoutineInfo.RoutineType);
 
     if IsFunctionRoutine(FRoutineInfo.RoutineType) then
@@ -346,8 +414,9 @@ begin
     else
       QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-    if IsPackageRoutine(FRoutineInfo.RoutineType) then
-      QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
+    if FBVersionMajor >= 3 then
+      if IsPackageRoutine(FRoutineInfo.RoutineType) then
+        QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
     QParamInfo.Open;
 
@@ -358,16 +427,27 @@ begin
       else
         CharSetID := -1;
 
-      StrFieldType := ResolveFieldTypeAsString(
-        Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
-        QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
-        QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
-        QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
-        QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
-        QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger,
-        CharSetID,
-        IBConnection1
-      );
+      if (FBVersionMajor < 3) then hCharLen := 0
+      else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
+
+      if FRoutineInfo.RoutineType = rtUDF then
+      begin
+        // für UDFs unsere saubere Typauflösung nehmen
+        //StrFieldType := GetUDFReturnParam(IBConnection1, FRoutineInfo.RoutineName);
+        StrFieldType := GetUDFParamBeiPosition(IBConnection1, FRoutineInfo.RoutineName, 0); //0 = RETURN_PARAM
+      end else
+      begin
+        // wie bisher
+        StrFieldType := ResolveFieldTypeAsString(
+          Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
+          QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
+          QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
+          QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
+          QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
+          hCharLen,
+          CharSetID,
+          IBConnection1);
+      end;
 
       if not IsFunctionRoutine(FRoutineInfo.RoutineType) then
       begin
@@ -390,8 +470,9 @@ begin
   else
     QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-  if IsPackageRoutine(FRoutineInfo.RoutineType) then
-    QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
+  if FBVersionMajor >= 3 then
+    if IsPackageRoutine(FRoutineInfo.RoutineType) then
+      QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
   QParamInfo.Open;
   if IsFunctionRoutine(FRoutineInfo.RoutineType) then
@@ -411,16 +492,27 @@ begin
     else
       CharSetID := -1;
 
-    StrFieldType := ResolveFieldTypeAsString(
-      Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
-      QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
-      QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
-      QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger,
-      CharSetID,
-      IBConnection1
-    );
+    if (FBVersionMajor < 3) then hCharLen := 0
+    else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
+
+    if FRoutineInfo.RoutineType = rtUDF then
+    begin
+      // für UDFs unsere saubere Typauflösung nehmen
+      StrFieldType := GetUDFParamBeiPosition(IBConnection1, FRoutineInfo.RoutineName, ParamIndex);
+      Inc(ParamIndex);
+    end else
+    begin
+      // wie bisher
+      StrFieldType := ResolveFieldTypeAsString(
+        Trim(QParamInfo.FieldByName('DATATYPE_SOURCE').AsString),
+        QParamInfo.FieldByName('RDB$FIELD_TYPE').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_PRECISION').AsInteger,
+        QParamInfo.FieldByName('RDB$FIELD_SCALE').AsInteger,
+        hCharLen,
+        CharSetID,
+        IBConnection1);
+    end;
 
     BufDataset.Append;
     BufDataset.FieldByName('NAME').AsString := Trim(QParamInfo.FieldByName('PARAM_NAME').AsString);
@@ -479,8 +571,9 @@ begin
     else
       QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-    if IsPackageRoutine(FRoutineInfo.RoutineType) then
-      QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
+    if FBVersionMajor >= 3 then
+      if IsPackageRoutine(FRoutineInfo.RoutineType) then
+        QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
     QParamInfo.Open;
     while not QParamInfo.EOF do
@@ -537,52 +630,52 @@ begin
 
   case ARoutineInfo.RoutineType of
 
-    // 🔹 Klassische UDF
+    //Klassische UDF
     rtUDF:
       Result := Format('SELECT %s%s FROM RDB$DATABASE',
         [ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Firebird native function
+    //Firebird native function
     rtFBFunc:
       Result := Format('SELECT %s%s FROM RDB$DATABASE',
         [ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Firebird stored procedure (SELECTable)
+    //Firebird stored procedure (SELECTable)
     rtFBProc:
       Result := Format('SELECT * FROM %s%s',
         [ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Externe UDR-Funktion
+    //Externe UDR-Funktion
     rtUDRFunc:
       Result := Format('SELECT %s%s FROM RDB$DATABASE',
         [ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Externe UDR-Prozedur (als SELECT)
+    //Externe UDR-Prozedur (als SELECT)
     rtUDRProc:
       Result := Format('SELECT * FROM %s%s',
         [ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Paket: native Funktion
+    //Paket: native Funktion
     rtPackageFBFunc:
       Result := Format('SELECT %s.%s%s FROM RDB$DATABASE',
         [ARoutineInfo.PackageName, ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Paket: native Prozedur
+    //Paket: native Prozedur
     rtPackageFBProc:
       Result := Format('SELECT * FROM %s.%s%s',
         [ARoutineInfo.PackageName, ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Paket: UDR-Funktion
+    //Paket: UDR-Funktion
     rtPackageUDRFunc:
       Result := Format('SELECT %s.%s%s FROM RDB$DATABASE',
         [ARoutineInfo.PackageName, ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔹 Paket: UDR-Prozedur (EXECUTE nötig)
+    //Paket: UDR-Prozedur (EXECUTE nötig)
     rtPackageUDRProc:
       Result := Format('EXECUTE PROCEDURE %s.%s%s',
         [ARoutineInfo.PackageName, ARoutineInfo.RoutineName, ParamPart]);
 
-    // 🔸 Unbekannt? Fehlermeldung
+    //Unbekannt? Fehlermeldung
     else
       raise Exception.Create('Unbekannter Routine-Typ: ' + Ord(ARoutineInfo.RoutineType).ToString);
 

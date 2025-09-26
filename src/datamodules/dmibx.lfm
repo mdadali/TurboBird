@@ -1,8 +1,8 @@
 object DataModuleIBX: TDataModuleIBX
   OldCreateOrder = False
   Height = 310
-  HorizontalOffset = 149
-  VerticalOffset = 343
+  HorizontalOffset = 372
+  VerticalOffset = 277
   Width = 400
   object IBDatabase1: TIBDatabase
     Connected = False
@@ -56,5 +56,11 @@ object DataModuleIBX: TDataModuleIBX
     MasterDetailDelay = 0
     Left = 104
     Top = 152
+  end
+  object IBXServicesConnection1: TIBXServicesConnection
+    Connected = False
+    TraceFlags = []
+    Left = 246
+    Top = 154
   end
 end

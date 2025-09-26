@@ -14,12 +14,15 @@ type
   { TfmImportTable }
 
   TfmImportTable = class(TForm)
-    bbImport: TBitBtn;
     bbClose: TBitBtn;
+    bbClose1: TSpeedButton;
+    bbImport: TBitBtn;
     btnAddMapping: TButton;
     btnDeleteMapping: TButton;
     btnPrepare: TButton;
     btnSourceFileOpen: TButton;
+    cbDestField: TComboBox;
+    cbSourceField: TComboBox;
     chkSkipFirstRow: TCheckBox;
     chkTabDelimiter: TCheckBox;
     dlgSourceOpen: TOpenDialog;
@@ -30,8 +33,9 @@ type
     Label5: TLabel;
     MappingGrid: TStringGrid;
     MappingPanel: TPanel;
-    cbSourceField: TComboBox;
-    cbDestField: TComboBox;
+    Panel2: TPanel;
+    pnlBottom: TPanel;
+    Panel3: TPanel;
     SourcePanel: TPanel;
     procedure bbImportClick(Sender: TObject);
     procedure bbCloseClick(Sender: TObject);
@@ -42,9 +46,11 @@ type
     procedure chkTabDelimiterEditingDone(Sender: TObject);
     procedure edDelimiterEditingDone(Sender: TObject);
     procedure edSourceFileEditingDone(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
     FDestinationQuery: TSQLQuery;
     FImporter: TFileImport;
     FDestDB: string; //destination database
@@ -59,11 +65,11 @@ type
     { private declarations }
   public
     { public declarations }
-    procedure Init(DestinationIndex: Integer; DestinationTableName: string);
+    procedure Init(DestinationIndex: Integer; DestinationTableName: string; ANodeInfos: TPNodeInfos);
   end; 
 
-var
-  fmImportTable: TfmImportTable;
+//var
+  //fmImportTable: TfmImportTable;
 
 implementation
 
@@ -95,6 +101,16 @@ begin
   end;
 end;
 
+procedure TfmImportTable.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+  FImporter.Free;
+  if assigned(FDestinationQuery) then
+    FreeAndNil(FDestinationQuery);
+end;
+
 procedure TfmImportTable.FormCreate(Sender: TObject);
 begin
   FImporter:=TFileImport.Create;
@@ -102,9 +118,6 @@ end;
 
 procedure TfmImportTable.FormDestroy(Sender: TObject);
 begin
-  FImporter.Free;
-  if assigned(FDestinationQuery) then
-    FreeAndNil(FDestinationQuery);
 end;
 
 procedure TfmImportTable.LoadMappingCombos;
@@ -163,7 +176,7 @@ begin
     FDestinationQuery.DataBase:=IBConnection;
     FDestinationQuery.Transaction:=SQLTrans;
     FDestinationQuery.ParseSQL; //belts and braces - generate InsertSQL
-    FDestinationQuery.SQL.Text:='select * from '+FDestTable;
+    FDestinationQuery.SQL.Text:='select * from ' + FDestTable;
     FDestinationQuery.Open;
   end;
 end;
@@ -204,6 +217,7 @@ end;
 procedure TfmImportTable.bbCloseClick(Sender: TObject);
 begin
   Close;
+  Parent.Free;
 end;
 
 procedure TfmImportTable.btnAddMappingClick(Sender: TObject);
@@ -347,11 +361,12 @@ begin
   end;
 end;
 
-procedure TfmImportTable.Init(DestinationIndex: Integer; DestinationTableName: string);
+procedure TfmImportTable.Init(DestinationIndex: Integer; DestinationTableName: string; ANodeInfos: TPNodeInfos);
 var
   i: Integer;
   Count: Integer;
 begin
+  FNodeInfos := ANodeInfos;
   FDestIndex:=DestinationIndex;
   FDestDB := RegisteredDatabases[FDestIndex].RegRec.Title;
   FDestTable:=DestinationTableName;

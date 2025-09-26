@@ -5,6 +5,54 @@ What's New for TurboBird
 - : removed
 
 
+TurboBird v1.2.1.1262
+Build date & time: 26.09.2025, 13:26:00
+
+! Query thread re-enabled
+    In Release builds queries are executed in the background
+    In Debug builds synchronously (thread disabled)
+
+! For all routines (except package routines) the double-click action was changed to "Edit".
+
+! Tabs:
+    ! Captions shortened
+    + Tabs are now movable (except Main)
+    + TabReiter.Hint shows full info about Firebird object/operation
+    + TabReiter now contains an image as visual aid
+    An open tab can be reached most easily by double-clicking
+    on the navigation tree (tab is brought to the foreground).
+
+! Routine names in the navigation tree standardized
+    FBFunctions → Functions
+    Stored Procedures → Procedures
+
+Markdown export added
+
+! HTML and Markdown exports improved
+    Array contents are now also written into the document
+
+! User PUBLIC hidden
+
+! View Stored Procedure now delivers the complete code of a SP (not only up to AS)
+
+Simple HTML help system created and integrated into the Main Tab
+    (HTML viewer currently does not support external links)
+
+! Login procedure changed
+    ! First double-click on server node opens login window to connect to the ServiceManager of the Firebird instance
+    ! Server information (e.g. version) is retrieved
+    + Server login dialog registers servers
+    + ServerRegistry dialog for subsequent editing (right-click on server node → ServerRegistry)
+
+! All masks (except simple dialogs and QueryHistory) are now embedded in tabs
+
+! RoutineTester: UDF CSTRINGS are displayed correctly
+
+Firebird version < 3: automatically creates role DUMMYROLE (without rights) and assigns it to new users
+    (avoids additional connection to security2.fdb)
+
+
+-------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1261
 Build date & time: 28.08.2025, 11:46:54
 

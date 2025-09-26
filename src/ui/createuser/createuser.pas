@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ExtCtrls, turbocommon;
+  StdCtrls, Buttons, ExtCtrls,
+  fbcommon,
+  turbocommon;
 
 type
 
@@ -50,6 +52,10 @@ var
   Count: Integer;
 begin
   cbRoles.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
+  if count > 0 then
+    cbRoles.ItemIndex := 0
+  else
+    cxGrantRole.Visible := false;
 end;
 
 initialization

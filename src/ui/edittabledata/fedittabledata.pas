@@ -10,6 +10,7 @@ uses
   Buttons, Menus, DBDateTimePicker, IBDynamicGrid, DBControlGrid, IBQuery,
   IBDatabase, IBTable, IBArrayGrid, IBCustomDataSet, IB, turbocommon, calen,
   fdataexportersintrf,
+  fbcommon,
 
   dmibx;
 
@@ -19,6 +20,7 @@ type
   { TfmEditTable }
 
   TfmEditTable = class(TForm)
+    bbClose: TSpeedButton;
     btnSearch: TButton;
     cboxFields: TComboBox;
     cboxTables: TComboBox;
@@ -34,6 +36,7 @@ type
     GroupBox3: TGroupBox;
     IBDatabase1: TIBDatabase;
     IBDynamicGrid2: TIBDynamicGrid;
+    IBQuery1: TIBQuery;
     ibtblForm: TIBTable;
     ibtblGrid: TIBTable;
     ibtransForm: TIBTransaction;
@@ -45,6 +48,8 @@ type
     lmExportDataAsMarkdownTable: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmStandardExportFormats: TMenuItem;
+    Panel3: TPanel;
+    rgSource: TRadioGroup;
     Separator1: TMenuItem;
     miEdit: TMenuItem;
     PageControl1: TPageControl;
@@ -56,6 +61,7 @@ type
     StatusBar1: TStatusBar;
     tsGridView: TTabSheet;
     tsFormView: TTabSheet;
+    procedure bbCloseClick(Sender: TObject);
     procedure CurrentDateClick(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure cboxTablesChange(Sender: TObject);
@@ -72,10 +78,12 @@ type
     procedure lmStandardExportFormatsClick(Sender: TObject);
     procedure miEditClick(Sender: TObject);
     procedure PopupMenu1Popup(Sender: TObject);
+    procedure rgSourceClick(Sender: TObject);
     procedure tsFormViewShow(Sender: TObject);
     procedure tsGridViewShow(Sender: TObject);
   private
     { private declarations }
+    FNodeInfos: TPNodeInfos;
     procedure FillTablesCombobox;
     procedure FillFieldsCombobox;
     procedure SetTableFilter;
@@ -89,7 +97,7 @@ type
   public
     { public declarations }
     Rec: TDatabaseRec;
-    procedure Init(dbIndex: Integer; ATableName: string);
+    procedure Init(dbIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);
   end;
 
 var
@@ -99,15 +107,79 @@ implementation
 
 { TfmEditTable }
 
-procedure TfmEditTable.FillTablesCombobox;
+{procedure TfmEditTable.FillTablesCombobox;
 var i: integer;
 begin
-  IBDatabase1.GetTableNames(cboxTables.Items);
+  cboxTables.Items.Clear;
+  IBDatabase1.GetTableNames(cboxTables.Items, chkBoxSysTables.Checked);
+end;}
+
+procedure TfmEditTable.FillTablesCombobox;
+var isTransActive: boolean;
+begin
+  cboxTables.Items.Clear;
+  isTransActive := ibtransGrid.InTransaction;
+  if not isTransActive then
+    ibtransGrid.StartTransaction;
+  case rgSource.ItemIndex of
+    0: // User Tables (nur eigene Tabellen, keine Systemtabellen)
+      begin
+        IBQuery1.Close;
+        IBQuery1.SQL.Text :=
+          'SELECT RDB$RELATION_NAME ' +
+          'FROM RDB$RELATIONS ' +
+          'WHERE RDB$VIEW_BLR IS NULL ' +
+          'AND (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL) ' +
+          'ORDER BY RDB$RELATION_NAME';
+        IBQuery1.Open;
+        while not IBQuery1.Eof do
+        begin
+          cboxTables.Items.Add(Trim(IBQuery1.Fields[0].AsString));
+          IBQuery1.Next;
+        end;
+      end;
+
+    1: // Views
+      begin
+        IBQuery1.Close;
+        IBQuery1.SQL.Text :=
+          'SELECT RDB$RELATION_NAME ' +
+          'FROM RDB$RELATIONS ' +
+          'WHERE RDB$VIEW_BLR IS NOT NULL ' +
+          'AND (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL) ' +
+          'ORDER BY RDB$RELATION_NAME';
+        IBQuery1.Open;
+        while not IBQuery1.Eof do
+        begin
+          cboxTables.Items.Add(Trim(IBQuery1.Fields[0].AsString));
+          IBQuery1.Next;
+        end;
+      end;
+
+    2: // System Tables
+      begin
+        IBQuery1.Close;
+        IBQuery1.SQL.Text :=
+          'SELECT RDB$RELATION_NAME ' +
+          'FROM RDB$RELATIONS ' +
+          'WHERE RDB$SYSTEM_FLAG = 1 ' +
+          'ORDER BY RDB$RELATION_NAME';
+        IBQuery1.Open;
+        while not IBQuery1.Eof do
+        begin
+          cboxTables.Items.Add(Trim(IBQuery1.Fields[0].AsString));
+          IBQuery1.Next;
+        end;
+      end;
+  end;
+  if not isTransActive then
+    ibtransGrid.Rollback;
 end;
 
 procedure TfmEditTable.FillFieldsCombobox;
 var i: integer;
 begin
+  cboxFields.Items.Clear;
   ibtblGrid.Fields.GetFieldNames(cboxFields.Items);
   if cboxFields.Items.Count > 0 then
     cboxFields.ItemIndex := 0;
@@ -217,6 +289,9 @@ end;
 
 procedure TfmEditTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.EditorForm := nil;
+
   CloseTable;
   if IBDatabase1.Connected then
     IBDatabase1.Connected := False;
@@ -228,7 +303,8 @@ var TmpRecNo: int64;
 begin
   TmpRecNo := ibtblGrid.RecNo;
   ibtransGrid.Commit;
-  IBDatabase1.Connected := false;
+  if IBDatabase1.Connected then
+    IBDatabase1.Connected := false;
   ibtblGrid.Close;
   dsGrid.Enabled := false;
 
@@ -280,6 +356,12 @@ begin
   //GenerateFormView;
 end;
 
+procedure TfmEditTable.bbCloseClick(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
+end;
+
 procedure TfmEditTable.CurrentDateClick(Sender: TObject);
 var
   FieldNum: Integer;
@@ -304,13 +386,20 @@ begin
   miEdit.Visible := not ibtblGrid.IsEmpty;
 end;
 
+procedure TfmEditTable.rgSourceClick(Sender: TObject);
+begin
+  FillTablesCombobox;
+  if cboxTables.Items.Count > 0 then
+    cboxTables.ItemIndex := 0;
+  cboxTablesChange(nil);
+end;
+
 procedure TfmEditTable.tsFormViewShow(Sender: TObject);
 begin
   //RemoveDynamicControls;
   GenerateFormView;
   SetWindowDimensions;
 end;
-
 
 procedure TfmEditTable.SetWindowDimensions;
 begin
@@ -379,8 +468,9 @@ begin
     ShowMessage('DataSet has no records!');
 end;
 
-procedure TfmEditTable.Init(dbIndex: Integer; ATableName: string);
+procedure TfmEditTable.Init(dbIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);
 begin
+  FNodeInfos := ANodeInfos;
   chkBoxUseFilter.Hint := 'When the filter is active, all matching records are shown.' + sLineBreak +
                          'When the filter is inactive, only the first matching record is selected.';
 
@@ -392,11 +482,12 @@ begin
   if IBDatabase1.Connected then
     IBDatabase1.Close;
 
+  IBDatabase1.FirebirdLibraryPathName := fbcommon.ClientLibraryName;
   IBDatabase1.DatabaseName := Rec.IBConnection.DatabaseName;
   IBDatabase1.Params.Clear;
   IBDatabase1.Params.Add('user_name=' + Rec.RegRec.UserName);
   IBDatabase1.Params.Add('password=' + Rec.RegRec.Password);
-  IBDatabase1.LoginPrompt := False;
+  IBDatabase1.LoginPrompt := false;
   IBDatabase1.Connected := True;
 
   //ibtransGrid.StartTransaction;

@@ -7,13 +7,15 @@ interface
 uses
   Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
   LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
-  EditBtn, ExtCtrls, DBCtrls, ComCtrls, usqlqueryext;
+  EditBtn, ExtCtrls, DBCtrls, ComCtrls, usqlqueryext,
+  turbocommon;
 
 type
 
   { TfmSQLHistory }
 
   TfmSQLHistory = class(TForm)
+    bbClose: TSpeedButton;
     bbDelete: TBitBtn;
     bbExport: TBitBtn;
     bbInsert: TBitBtn;
@@ -30,8 +32,10 @@ type
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
+    Panel3: TPanel;
     SaveDialog1: TSaveDialog;
     tsHistory: TTabSheet;
+    procedure bbCloseClick(Sender: TObject);
     procedure bbDeleteClick(Sender: TObject);
     procedure bbExportClick(Sender: TObject);
     procedure bbInsertClick(Sender: TObject);
@@ -40,11 +44,12 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
     FQueryForm: TForm;
     { private declarations }
   public
     { public declarations }
-    procedure Init(DatabaseTitle: string; QueryForm: TForm);
+    procedure Init(DatabaseTitle: string; QueryForm: TForm; ANodeInfos: TPNodeInfos);
   end; 
 
 var
@@ -59,6 +64,9 @@ uses Main, QueryWindow;
 procedure TfmSQLHistory.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   Datasource1.DataSet:= nil;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+  //CloseAction:= caFree;
 end;
 
 procedure TfmSQLHistory.FormCreate(Sender: TObject);
@@ -106,6 +114,12 @@ begin
       fmMain.mdsHistory.Delete;
 end;
 
+procedure TfmSQLHistory.bbCloseClick(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
+end;
+
 procedure TfmSQLHistory.bbExportClick(Sender: TObject);
 var
   CurrType: string;
@@ -146,8 +160,9 @@ begin
   end;
 end;
 
-procedure TfmSQLHistory.Init(DatabaseTitle: string; QueryForm: TForm);
+procedure TfmSQLHistory.Init(DatabaseTitle: string; QueryForm: TForm; ANodeInfos: TPNodeInfos);
 begin
+  FNodeInfos := ANodeInfos;
   FQueryForm:= QueryForm;
   Caption:= 'SQL History for: ' + DatabaseTitle;
   Datasource1.DataSet:= fmMain.mdsHistory;

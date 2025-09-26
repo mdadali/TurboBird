@@ -1,64 +1,115 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmSQLHistory','FORMDATA',[
-  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'\'#1#6'Height'#3'&'#2#3'T'
-  +'op'#3#160#0#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2
-  +#11'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreat'
-  +'e'#8'Position'#7#16'poMainFormCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#12'TPag'
-  +'eControl'#12'PageControl1'#4'Left'#2#0#6'Height'#3'&'#2#3'Top'#2#0#5'Width'
-  +#3'B'#3#10'ActivePage'#7#9'tsHistory'#5'Align'#7#8'alClient'#8'ShowTabs'#8#8
-  +'TabIndex'#2#0#8'TabOrder'#2#0#0#9'TTabSheet'#9'tsHistory'#7'Caption'#6#7'Hi'
-  +'story'#12'ClientHeight'#3'"'#2#11'ClientWidth'#3'>'#3#0#6'TPanel'#6'Panel2'
-  +#4'Left'#2#0#6'Height'#2'@'#3'Top'#2#0#5'Width'#3'>'#3#5'Align'#7#5'alTop'#12
-  +'ClientHeight'#2'@'#11'ClientWidth'#3'>'#3#8'TabOrder'#2#0#0#9'TGroupBox'#9
-  +'GroupBox2'#4'Left'#2#1#6'Height'#2'>'#3'Top'#2#1#5'Width'#3'@'#1#5'Align'#7
-  +#6'alLeft'#7'Caption'#6#12'Copy Options'#12'ClientHeight'#2'('#11'ClientWidt'
-  +'h'#3'<'#1#8'TabOrder'#2#0#0#9'TCheckBox'#11'cxOverwrite'#4'Left'#2#8#6'Heig'
-  +'ht'#2#22#3'Top'#2#8#5'Width'#3'"'#1#7'Caption'#6'%Overwrite current SQL in '
-  +'query window'#8'TabOrder'#2#0#0#0#0#9'TGroupBox'#9'GroupBox1'#4'Left'#3'A'#1
-  +#6'Height'#2'>'#3'Top'#2#1#5'Width'#3#252#1#5'Align'#7#8'alClient'#7'Caption'
-  +#6#19'Export to text file'#12'ClientHeight'#2'('#11'ClientWidth'#3#248#1#8'T'
-  +'abOrder'#2#1#0#9'TCheckBox'#11'cxAfterDate'#4'Left'#2#8#6'Height'#2#22#3'To'
-  +'p'#2#8#5'Width'#3#151#0#7'Caption'#6#19'Only after the date'#7'OnClick'#7#16
-  +'cxAfterDateClick'#8'TabOrder'#2#0#0#0#9'TDateEdit'#9'DateEdit1'#4'Left'#3
-  +#168#0#6'Height'#2#30#3'Top'#2#0#5'Width'#2'h'#23'CalendarDisplaySettings'#11
-  +#14'dsShowHeadings'#14'dsShowDayNames'#0#9'DateOrder'#7#6'doNone'#11'ButtonW'
-  +'idth'#2#23#9'NumGlyphs'#2#1#7'Enabled'#8#9'MaxLength'#2#0#8'TabOrder'#2#1#0
-  +#0#6'TLabel'#6'Label1'#4'Left'#3'('#1#6'Height'#2#20#3'Top'#2#8#5'Width'#2'>'
-  +#7'Caption'#6#8'SQL Type'#11'ParentColor'#8#0#0#9'TComboBox'#9'cbSQLType'#4
-  +'Left'#3'x'#1#6'Height'#2#28#3'Top'#2#0#5'Width'#2'h'#10'ItemHeight'#2#0#9'I'
-  +'temIndex'#2#0#13'Items.Strings'#1#6#3'All'#6#7'DDL,DML'#6#3'DDL'#6#3'DML'#6
-  +#6'Select'#0#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#2#4'Text'#6#3'All'#0
-  +#0#0#0#7'TDBGrid'#7'DBGrid1'#4'Left'#2#5#6'Height'#3#174#1#3'Top'#2'o'#5'Wid'
-  +'th'#3'4'#3#5'Align'#7#8'alClient'#20'BorderSpacing.Around'#2#5#5'Color'#7#8
-  +'clWindow'#7'Columns'#14#0#10'DataSource'#7#11'Datasource1'#7'Options'#11#8
-  +'dgTitles'#11'dgIndicator'#14'dgColumnResize'#12'dgColumnMove'#10'dgColLines'
-  +#10'dgRowLines'#6'dgTabs'#11'dgRowSelect'#21'dgAlwaysShowSelection'#15'dgCon'
-  +'firmDelete'#14'dgCancelOnExit'#13'dgMultiselect'#0#8'ReadOnly'#9#8'TabOrder'
-  +#2#1#10'TitleStyle'#7#8'tsNative'#10'OnDblClick'#7#15'DBGrid1DblClick'#0#0#6
-  +'TPanel'#6'Panel1'#4'Left'#2#0#6'Height'#2'*'#3'Top'#2'@'#5'Width'#3'>'#3#5
-  +'Align'#7#5'alTop'#12'ClientHeight'#2'*'#11'ClientWidth'#3'>'#3#8'TabOrder'#2
-  +#2#0#12'TDBNavigator'#12'DBNavigator1'#4'Left'#3#217#0#6'Height'#2'('#3'Top'
-  +#2#1#5'Width'#3'd'#2#5'Align'#7#8'alClient'#10'BevelOuter'#7#6'bvNone'#29'Ch'
-  +'ildSizing.EnlargeHorizontal'#7#14'crsScaleChilds'#27'ChildSizing.EnlargeVer'
-  +'tical'#7#14'crsScaleChilds'#28'ChildSizing.ShrinkHorizontal'#7#14'crsScaleC'
-  +'hilds'#26'ChildSizing.ShrinkVertical'#7#14'crsScaleChilds'#18'ChildSizing.L'
-  +'ayout'#7#29'cclLeftToRightThenTopToBottom'#27'ChildSizing.ControlsPerLine'#2
-  +'d'#12'ClientHeight'#2'('#11'ClientWidth'#3'd'#2#10'DataSource'#7#11'Datasou'
-  +'rce1'#7'Options'#11#0#8'TabOrder'#2#0#14'VisibleButtons'#11#7'nbFirst'#7'nb'
-  +'Prior'#6'nbNext'#6'nbLast'#8'nbDelete'#9'nbRefresh'#0#0#0#7'TBitBtn'#8'bbIn'
-  +'sert'#4'Left'#2#1#6'Height'#2'('#4'Hint'#6#28'Insert SQL into Query Window'
-  +#3'Top'#2#1#5'Width'#2'l'#5'Align'#7#6'alLeft'#7'Anchors'#11#6'akLeft'#8'akB'
-  +'ottom'#0#7'Caption'#6#10'Insert SQL'#7'OnClick'#7#13'bbInsertClick'#8'TabOr'
-  +'der'#2#1#0#0#7'TBitBtn'#8'bbExport'#4'Left'#2'm'#6'Height'#2'('#3'Top'#2#1#5
-  +'Width'#2'l'#5'Align'#7#6'alLeft'#7'Caption'#6#6'Export'#7'OnClick'#7#13'bbE'
-  +'xportClick'#8'TabOrder'#2#2#0#0#0#7'TBitBtn'#8'bbDelete'#4'Left'#3#192#1#6
-  +'Height'#2#30#3'Top'#3#188#1#5'Width'#2'Q'#7'Anchors'#11#6'akLeft'#8'akBotto'
-  +'m'#0#6'Cancel'#9#7'Caption'#6#6'Delete'#4'Kind'#7#8'bkCancel'#7'OnClick'#7
-  +#13'bbDeleteClick'#8'TabOrder'#2#3#7'Visible'#8#0#0#0#0#11'TDataSource'#11'D'
-  +'atasource1'#7'DataSet'#7#17'fmMain.mdsHistory'#7'Enabled'#8#4'Left'#2'p'#3
-  +'Top'#3#136#1#0#0#11'TSaveDialog'#11'SaveDialog1'#10'DefaultExt'#6#4'.sql'#6
-  +'Filter'#6#28'SQL File|*.sql|All files|*.*'#7'Options'#11#17'ofOverwriteProm'
-  +'pt'#14'ofEnableSizing'#12'ofViewDetail'#0#4'Left'#3#248#0#3'Top'#3#136#1#0#0
-  +#0
+  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3#152#1#6'Height'#3'&'#2#3
+  +'Top'#2'^'#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2#11
+  +'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#8
+  +'Position'#7#16'poMainFormCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#12'TPageCont'
+  +'rol'#12'PageControl1'#4'Left'#2#0#6'Height'#3#14#2#3'Top'#2#24#5'Width'#3'B'
+  +#3#10'ActivePage'#7#9'tsHistory'#5'Align'#7#8'alClient'#8'ShowTabs'#8#8'TabI'
+  +'ndex'#2#0#8'TabOrder'#2#0#0#9'TTabSheet'#9'tsHistory'#7'Caption'#6#7'Histor'
+  +'y'#12'ClientHeight'#3#10#2#11'ClientWidth'#3'>'#3#0#6'TPanel'#6'Panel2'#4'L'
+  +'eft'#2#0#6'Height'#2'@'#3'Top'#2#0#5'Width'#3'>'#3#5'Align'#7#5'alTop'#12'C'
+  +'lientHeight'#2'@'#11'ClientWidth'#3'>'#3#8'TabOrder'#2#0#0#9'TGroupBox'#9'G'
+  +'roupBox2'#4'Left'#2#1#6'Height'#2'>'#3'Top'#2#1#5'Width'#3'@'#1#5'Align'#7#6
+  +'alLeft'#7'Caption'#6#12'Copy Options'#12'ClientHeight'#2'('#11'ClientWidth'
+  +#3'<'#1#8'TabOrder'#2#0#0#9'TCheckBox'#11'cxOverwrite'#4'Left'#2#8#6'Height'
+  +#2#22#3'Top'#2#8#5'Width'#3'"'#1#7'Caption'#6'%Overwrite current SQL in quer'
+  +'y window'#8'TabOrder'#2#0#0#0#0#9'TGroupBox'#9'GroupBox1'#4'Left'#3'A'#1#6
+  +'Height'#2'>'#3'Top'#2#1#5'Width'#3#252#1#5'Align'#7#8'alClient'#7'Caption'#6
+  +#19'Export to text file'#12'ClientHeight'#2'('#11'ClientWidth'#3#248#1#8'Tab'
+  +'Order'#2#1#0#9'TCheckBox'#11'cxAfterDate'#4'Left'#2#8#6'Height'#2#22#3'Top'
+  +#2#8#5'Width'#3#151#0#7'Caption'#6#19'Only after the date'#7'OnClick'#7#16'c'
+  +'xAfterDateClick'#8'TabOrder'#2#0#0#0#9'TDateEdit'#9'DateEdit1'#4'Left'#3#168
+  +#0#6'Height'#2#30#3'Top'#2#0#5'Width'#2'h'#23'CalendarDisplaySettings'#11#14
+  +'dsShowHeadings'#14'dsShowDayNames'#0#9'DateOrder'#7#6'doNone'#11'ButtonWidt'
+  +'h'#2#23#9'NumGlyphs'#2#1#7'Enabled'#8#9'MaxLength'#2#0#8'TabOrder'#2#1#0#0#6
+  +'TLabel'#6'Label1'#4'Left'#3'('#1#6'Height'#2#20#3'Top'#2#8#5'Width'#2'>'#7
+  +'Caption'#6#8'SQL Type'#11'ParentColor'#8#0#0#9'TComboBox'#9'cbSQLType'#4'Le'
+  +'ft'#3'x'#1#6'Height'#2#28#3'Top'#2#0#5'Width'#2'h'#10'ItemHeight'#2#0#9'Ite'
+  +'mIndex'#2#0#13'Items.Strings'#1#6#3'All'#6#7'DDL,DML'#6#3'DDL'#6#3'DML'#6#6
+  +'Select'#0#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#2#4'Text'#6#3'All'#0#0
+  +#0#0#7'TDBGrid'#7'DBGrid1'#4'Left'#2#5#6'Height'#3#150#1#3'Top'#2'o'#5'Width'
+  +#3'4'#3#5'Align'#7#8'alClient'#20'BorderSpacing.Around'#2#5#5'Color'#7#8'clW'
+  +'indow'#7'Columns'#14#0#10'DataSource'#7#11'Datasource1'#7'Options'#11#8'dgT'
+  +'itles'#11'dgIndicator'#14'dgColumnResize'#12'dgColumnMove'#10'dgColLines'#10
+  +'dgRowLines'#6'dgTabs'#11'dgRowSelect'#15'dgConfirmDelete'#14'dgCancelOnExit'
+  +#13'dgMultiselect'#0#8'ReadOnly'#9#8'TabOrder'#2#1#10'TitleStyle'#7#8'tsNati'
+  +'ve'#10'OnDblClick'#7#15'DBGrid1DblClick'#0#0#6'TPanel'#6'Panel1'#4'Left'#2#0
+  +#6'Height'#2'*'#3'Top'#2'@'#5'Width'#3'>'#3#5'Align'#7#5'alTop'#12'ClientHei'
+  +'ght'#2'*'#11'ClientWidth'#3'>'#3#8'TabOrder'#2#2#0#12'TDBNavigator'#12'DBNa'
+  +'vigator1'#4'Left'#3#217#0#6'Height'#2'('#3'Top'#2#1#5'Width'#3'd'#2#5'Align'
+  +#7#8'alClient'#10'BevelOuter'#7#6'bvNone'#29'ChildSizing.EnlargeHorizontal'#7
+  +#14'crsScaleChilds'#27'ChildSizing.EnlargeVertical'#7#14'crsScaleChilds'#28
+  +'ChildSizing.ShrinkHorizontal'#7#14'crsScaleChilds'#26'ChildSizing.ShrinkVer'
+  +'tical'#7#14'crsScaleChilds'#18'ChildSizing.Layout'#7#29'cclLeftToRightThenT'
+  +'opToBottom'#27'ChildSizing.ControlsPerLine'#2'd'#12'ClientHeight'#2'('#11'C'
+  +'lientWidth'#3'd'#2#10'DataSource'#7#11'Datasource1'#7'Options'#11#0#8'TabOr'
+  +'der'#2#0#14'VisibleButtons'#11#7'nbFirst'#7'nbPrior'#6'nbNext'#6'nbLast'#8
+  +'nbDelete'#9'nbRefresh'#0#0#0#7'TBitBtn'#8'bbInsert'#4'Left'#2#1#6'Height'#2
+  +'('#4'Hint'#6#28'Insert SQL into Query Window'#3'Top'#2#1#5'Width'#2'l'#5'Al'
+  +'ign'#7#6'alLeft'#7'Anchors'#11#6'akLeft'#8'akBottom'#0#7'Caption'#6#10'Inse'
+  +'rt SQL'#7'OnClick'#7#13'bbInsertClick'#8'TabOrder'#2#1#0#0#7'TBitBtn'#8'bbE'
+  +'xport'#4'Left'#2'm'#6'Height'#2'('#3'Top'#2#1#5'Width'#2'l'#5'Align'#7#6'al'
+  +'Left'#7'Caption'#6#6'Export'#7'OnClick'#7#13'bbExportClick'#8'TabOrder'#2#2
+  +#0#0#0#7'TBitBtn'#8'bbDelete'#4'Left'#3#192#1#6'Height'#2#30#3'Top'#3#164#1#5
+  +'Width'#2'Q'#7'Anchors'#11#6'akLeft'#8'akBottom'#0#6'Cancel'#9#7'Caption'#6#6
+  +'Delete'#4'Kind'#7#8'bkCancel'#7'OnClick'#7#13'bbDeleteClick'#8'TabOrder'#2#3
+  +#7'Visible'#8#0#0#0#0#6'TPanel'#6'Panel3'#4'Left'#2#0#6'Height'#2#24#3'Top'#2
+  +#0#5'Width'#3'B'#3#5'Align'#7#5'alTop'#12'ClientHeight'#2#24#11'ClientWidth'
+  +#3'B'#3#8'TabOrder'#2#1#0#12'TSpeedButton'#7'bbClose'#4'Left'#3'&'#3#6'Heigh'
+  +'t'#2#22#3'Top'#2#1#5'Width'#2#27#5'Align'#7#7'alRight'#7'Anchors'#11#5'akTo'
+  +'p'#7'akRight'#0#5'Color'#7#6'clForm'#4'Flat'#9#10'Font.Style'#11#6'fsBold'#0
+  +#10'Glyph.Data'#10':'#4#0#0'6'#4#0#0'BM6'#4#0#0#0#0#0#0'6'#0#0#0'('#0#0#0#16
+  +#0#0#0#16#0#0#0#1#0' '#0#0#0#0#0#0#4#0#0'd'#0#0#0'd'#0#0#0#0#0#0#0#0#0#0#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  ,#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255'&'#255
+  +#255#255'Q'#255#255#255#14#255#255#255#0#255#255#255#0#255#255#255#14#255#255
+  +#255'Q'#255#255#255'&'#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255
+  +#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255'('#195#195#195'bAAA'
+  +'n'#240#240#240'V'#255#255#255#14#255#255#255#14#240#240#240'VAAAn'#195#195
+  +#195'b'#255#255#255'('#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255
+  +#0#255#255#255#0#255#255#255#22#185#185#185'f'#10#10#10#132#0#0#0#135'111w'
+  +#240#240#240'V'#240#240#240'V111w'#0#0#0#135#10#10#10#132#185#185#185'f'#255
+  +#255#255#22#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255'"'#14#14#14#160#0#0#0#158#0#0#0#145#0#0#0#145'///~///~'#0#0#0#145#0#0#0
+  +#145#0#0#0#158#14#14#14#160#255#255#255'"'#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#11#183#183#183'.'#4#4#4#171#0#0#0#167#0
+  +#0#0#155#0#0#0#155#0#0#0#155#0#0#0#155#0#0#0#167#5#5#5#170#183#183#183'.'#255
+  +#255#255#11#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#11#184#184#184'2'#29#29#29#165#0#0#0#165#0#0#0#165#0#0#0
+  +#165#0#0#0#165#30#30#30#164#187#187#187'1'#255#255#255#11#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#14#235#235#235'X&&&'#146#0#0#0#175#0#0#0#175#0#0#0#175#0#0#0#175'&&&'
+  +#146#235#235#235'X'#255#255#255#14#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#11#235#235#235'X%%%'#153#0#0#0#185#0
+  +#0#0#185#0#0#0#193#0#0#0#193#0#0#0#185#0#0#0#185'%%%'#153#235#235#235'X'#255
+  +#255#255#11#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255'"'#31#31#31#179#0#0#0#196#0#0#0#195#0#0#0#202#4#4#4#190#4#4#4#190#0#0#0
+  +#202#0#0#0#195#0#0#0#196#31#31#31#179#255#255#255'"'#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#22'999^'#0#0#0#217#0#0#0#212#3
+  +#3#3#194#175#175#175'0'#175#175#175'0'#3#3#3#194#0#0#0#212#0#0#0#217'999^'
+  +#255#255#255#22#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#24'666_'#4#4#4#194#172#172#172'1'#255#255#255#11#255
+  +#255#255#11#172#172#172'1'#4#4#4#194'666_'#255#255#255#24#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#22#255#255#255'"'#255#255#255#11#255#255#255#0#255#255#255
+  +#0#255#255#255#11#255#255#255'#'#255#255#255#22#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255
+  +#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255
+  +#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0
+  +#255#255#255#0#255#255#255#0#7'OnClick'#7#12'bbCloseClick'#10'ParentFont'#8#0
+  +#0#0#11'TDataSource'#11'Datasource1'#7'DataSet'#7#17'fmMain.mdsHistory'#7'En'
+  +'abled'#8#4'Left'#2'p'#3'Top'#3#136#1#0#0#11'TSaveDialog'#11'SaveDialog1'#10
+  +'DefaultExt'#6#4'.sql'#6'Filter'#6#28'SQL File|*.sql|All files|*.*'#7'Option'
+  +'s'#11#17'ofOverwritePrompt'#14'ofEnableSizing'#12'ofViewDetail'#0#4'Left'#3
+  +#248#0#3'Top'#3#136#1#0#0#0
 ]);

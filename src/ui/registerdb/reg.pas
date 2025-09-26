@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls,
-  turbocommon;
+  turbocommon,
+  fbcommon;
 
 type
 
@@ -61,11 +62,12 @@ implementation
 
 { TfmReg }
 
-procedure TfmReg.bbRegClick(Sender: TObject);
+{procedure TfmReg.bbRegClick(Sender: TObject);
 begin
   if Trim(edTitle.Text) = '' then
     ShowMessage('You should fill all fields')
   else
+
   if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text) then
   if NewReg then  // New registration
   begin
@@ -76,7 +78,42 @@ begin
   else // if not NewReg, edit registration
     if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text,
       cbCharset.Text, edRole.Text, cxSavePassword.Checked) then
-      MOdalResult:= mrOk;
+      ModalResult:= mrOk;
+end;}
+
+procedure TfmReg.bbRegClick(Sender: TObject);
+var
+  doProceed: Boolean;
+begin
+  if Trim(edTitle.Text) = '' then
+  begin
+    ShowMessage('You should fill all fields');
+    Exit;
+  end;
+
+  // Prüfen, ob TestConnection ausgeführt werden soll
+  if SameText(turbocommon.MultiVersionConnection, 'no') then
+    doProceed := TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text)
+  else
+    doProceed := True; // wenn 'yes', Test überspringen
+
+  if not doProceed then
+    Exit;
+
+  // Neue Registrierung
+  if NewReg then
+  begin
+    if RegisterDatabase(edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
+      edRole.Text, cxSavePassword.Checked) then
+      ModalResult := mrOK;
+  end
+  else
+  // Bearbeiten einer bestehenden Registrierung
+  begin
+    if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text,
+      cbCharset.Text, edRole.Text, cxSavePassword.Checked) then
+      ModalResult := mrOK;
+  end;
 end;
 
 procedure TfmReg.bbTestClick(Sender: TObject);

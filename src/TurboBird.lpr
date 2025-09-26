@@ -17,19 +17,20 @@ uses
   cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, zcomponent, memdslaz,
-  datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow,
-  ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
-  CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
-  SysTables, NewConstraint, NewEditField, Calen, Scriptdb, UserPermissions,
-  TableManage, BackupRestore, CreateUser, ChangePass, PermissionManage,
-  SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo, sysutils, Comparison,
-  topologicalsort, UnitFirebirdServices, turbocommon, importtable, fileimport,
-  csvdocument, lazdbexport, udb_firebird_struct_helper,
-  udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
-  fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
-  QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
-fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest;
+  Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim,
+  lazrichview, zcomponent, memdslaz, datetimectrls, runtimetypeinfocontrols,
+  main, CreateDb, Reg, QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen,
+  NewTable, NewGen, EnterPass, About, CreateTrigger, fedittabledata, CallProc,
+  UDFInfo, ViewDomain, NewDomain, SysTables, NewConstraint, NewEditField, Calen,
+  Scriptdb, UserPermissions, TableManage, BackupRestore, CreateUser, ChangePass,
+  PermissionManage, SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo,
+  sysutils, Comparison, topologicalsort, UnitFirebirdServices, turbocommon,
+  importtable, fileimport, csvdocument, fServerSession, lazdbexport,
+  udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
+  fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
+  QBuilder, QBDirFrm, QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor,
+  fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
+  uArrayFormTest, fblobedit, floginservicemanager, fserverregistry;
 
 const
   Major = 1;
@@ -70,7 +71,6 @@ begin
 
 
   if not SetFBClient(0) then  exit;     //wrong inifile setting
-  InitialiseIBase60(fbcommon.IBaseLibrary);
 
   SAbout:= TfmAbout.Create(nil);
   SAbout.BorderStyle:= bsNone;
@@ -91,21 +91,24 @@ begin
   Application.CreateForm(TfmEnterPass, fmEnterPass);
   Application.CreateForm(TfmCreateTrigger, fmCreateTrigger);
   //Application.CreateForm(TfmEditTable, fmEditTable);
-  Application.CreateForm(TfmCallProc, fmCallProc);
+  //Application.CreateForm(TfmCallProc, fmCallProc);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
   Application.CreateForm(TdmSysTables, dmSysTables);
   Application.CreateForm(TfmNewConstraint, fmNewConstraint);
   Application.CreateForm(TfmCalen, fmCalen);
-  Application.CreateForm(TfmBackupRestore, fmBackupRestore);
+  //Application.CreateForm(TfmBackupRestore, fmBackupRestore);
   Application.CreateForm(TfmCreateUser, fmCreateUser);
   Application.CreateForm(TfmChangePass, fmChangePass);
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
-  Application.CreateForm(TfmCopyTable, fmCopyTable);
+  //Application.CreateForm(TfmCopyTable, fmCopyTable);
   SAbout.Free;
   Application.CreateForm(TDataModuleIBX, DataModuleIBX);
+  //Application.CreateForm(TfrmLoginServiceManager, frmLoginServiceManager);
+  //Application.CreateForm(TfmServerRegistry, fmServerRegistry);
+  //Application.CreateForm(TfrmBlobEdit, frmBlobEdit);
   //Application.CreateForm(TfrmArrayTest, frmArrayTest);
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
   //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
   Application.Run;
-  ReleaseIBase60;
+  //ReleaseIBase60;
 end.

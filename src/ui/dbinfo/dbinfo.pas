@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Buttons, ExtCtrls, LCLType,
-
+  Buttons, ExtCtrls, LCLType, ComCtrls,
+  turbocommon,
   fbcommon;
 
 type
@@ -15,17 +15,18 @@ type
   { TfmDBInfo }
 
   TfmDBInfo = class(TForm)
-      bbClose: TSpeedButton;
+    bbClose: TSpeedButton;
     bbRefresh: TBitBtn;
-    edCreationDate: TEdit;
+    edCharset: TEdit;
     edConnections: TEdit;
-    edServerTime: TEdit;
-    edPageSize: TEdit;
+    edCreationDate: TEdit;
     edDBSize: TEdit;
     edName: TEdit;
     edODSVer: TEdit;
-    edCharset: TEdit;
+    edPageSize: TEdit;
     edServerString: TEdit;
+    edServerTime: TEdit;
+    GroupBox1: TGroupBox;
     Image1: TImage;
     Label1: TLabel;
     Label2: TLabel;
@@ -37,15 +38,28 @@ type
     Label8: TLabel;
     Label9: TLabel;
     meClients: TMemo;
+    Panel1: TPanel;
+    Panel13: TPanel;
+    Panel3: TPanel;
+    Panel4: TPanel;
+    Panel5: TPanel;
+    Panel6: TPanel;
+    Panel9: TPanel;
+    Splitter1: TSplitter;
+    TabSheet1: TTabSheet;
+    procedure bbClose1Click(Sender: TObject);
     procedure bbCloseClick(Sender: TObject);
     procedure bbRefreshClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormResize(Sender: TObject);
   private
     { private declarations }
     FDBIndex: Integer;
+    FNodeInfos: TPNodeInfos;
   public
-    procedure Init(dbIndex: Integer);
+    procedure Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
     { public declarations }
   end; 
 
@@ -60,20 +74,34 @@ implementation
 
 uses SysTables;
 
+
+procedure TfmDBInfo.bbRefreshClick(Sender: TObject);
+begin
+  Init(FDBIndex, FNodeInfos);
+end;
+
+procedure TfmDBInfo.bbClose1Click(Sender: TObject);
+begin
+  TTabSheet(Parent).Free;
+  Close;
+end;
+
 procedure TfmDBInfo.bbCloseClick(Sender: TObject);
 begin
   Close;
   Parent.Free;
 end;
 
-procedure TfmDBInfo.bbRefreshClick(Sender: TObject);
-begin
-  Init(FDBIndex);
-end;
-
 procedure TfmDBInfo.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
+end;
+
+procedure TfmDBInfo.FormCreate(Sender: TObject);
+begin
+
 end;
 
 procedure TfmDBInfo.FormKeyDown(Sender: TObject; var Key: Word;
@@ -88,7 +116,13 @@ begin
   end;
 end;
 
-procedure TfmDBInfo.Init(dbIndex: Integer);
+procedure TfmDBInfo.FormResize(Sender: TObject);
+begin
+  Image1.Top := 40;
+  Image1.Left := self.Width - Image1.Width - 10;
+end;
+
+procedure TfmDBInfo.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
 var
   dbName, CreationDate, ACharSet: string;
   MajorVer, MinorVer, Pages, PageSize: Integer;
@@ -98,6 +132,7 @@ var
   ServerTime: string;
   ErrorMsg: string;
 begin
+  FNodeInfos := ANodeInfos;
   FDBIndex:= dbIndex;
   ProcessList:= TStringList.Create;
   try

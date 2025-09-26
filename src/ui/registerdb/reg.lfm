@@ -1,12 +1,12 @@
 object fmReg: TfmReg
-  Left = 920
-  Height = 270
-  Top = 411
+  Left = 612
+  Height = 294
+  Top = 267
   Width = 500
   ActiveControl = edTitle
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'
-  ClientHeight = 270
+  ClientHeight = 294
   ClientWidth = 500
   Color = clForm
   Position = poScreenCenter
@@ -94,7 +94,7 @@ object fmReg: TfmReg
   object bbReg: TBitBtn
     Left = 392
     Height = 30
-    Top = 232
+    Top = 248
     Width = 99
     Caption = 'Register'
     Color = clForm
@@ -179,9 +179,9 @@ object fmReg: TfmReg
     TabOrder = 9
   end
   object bbCancel: TBitBtn
-    Left = 304
+    Left = 296
     Height = 30
-    Top = 232
+    Top = 248
     Width = 88
     Caption = 'Cancel'
     Color = clForm
@@ -199,7 +199,7 @@ object fmReg: TfmReg
   object bbTest: TBitBtn
     Left = 8
     Height = 32
-    Top = 232
+    Top = 248
     Width = 136
     Caption = 'Test connection'
     Color = clForm
@@ -210,7 +210,7 @@ object fmReg: TfmReg
   object cxSavePassword: TCheckBox
     Left = 320
     Height = 22
-    Top = 152
+    Top = 160
     Width = 123
     Caption = 'Save Password'
     TabOrder = 5
@@ -218,14 +218,14 @@ object fmReg: TfmReg
   object edRole: TEdit
     Left = 320
     Height = 30
-    Top = 200
+    Top = 208
     Width = 171
     TabOrder = 7
   end
   object cbCharset: TComboBox
     Left = 170
     Height = 30
-    Top = 200
+    Top = 208
     Width = 143
     ItemHeight = 0
     ItemIndex = 0
@@ -782,13 +782,13 @@ object fmReg: TfmReg
     LogEvents = []
     CheckTransactionParams = False
     UseConnectionCharSetIfNone = False
-    Left = 32
-    Top = 168
+    Left = 96
+    Top = 192
   end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.fdb'
     Filter = 'Firebird Database|*.fdb|All Files|*.*'
-    Left = 72
+    Left = 48
     Top = 168
   end
 end

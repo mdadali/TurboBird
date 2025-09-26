@@ -6,41 +6,45 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, LCLType;
+  StdCtrls, Buttons, LCLType, ExtCtrls, ComCtrls,
+  turbocommon;
 
 type
 
   { TfmUDFInfo }
 
   TfmUDFInfo = class(TForm)
-      bbClose: TSpeedButton;
-    edModule: TEdit;
+    bbClose: TSpeedButton;
     edEntry: TEdit;
+    edModule: TEdit;
     edName: TEdit;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     Label1: TLabel;
-    Label2: TLabel;
     Label3: TLabel;
     Label7: TLabel;
     meBody: TMemo;
+    Panel1: TPanel;
+    Panel3: TPanel;
     procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { private declarations }
+    FNodeInfos: TPNodeInfos;
   public
     { public declarations }
-  end; 
+    procedure Init(ANodeInfos: TPNodeInfos);
+  end;
 
-var
-  fmUDFInfo: TfmUDFInfo;
 
 implementation
 
 { TfmUDFInfo }
 
-procedure TfmUDFInfo.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TfmUDFInfo.Init(ANodeInfos: TPNodeInfos);
 begin
-  CloseAction:= caFree;
+  FNodeInfos := ANodeInfos;
 end;
 
 procedure TfmUDFInfo.FormKeyDown(Sender: TObject; var Key: Word;
@@ -60,9 +64,17 @@ end;
 
 procedure TfmUDFInfo.bbCloseClick(Sender: TObject);
 begin
+  TTabSheet(Parent).Free;
   Close;
-  Parent.Free;
 end;
+
+procedure TfmUDFInfo.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+  CloseAction := caFree;
+end;
+
 
 initialization
   {$I udfinfo.lrs}

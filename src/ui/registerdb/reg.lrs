@@ -1,9 +1,9 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmReg','FORMDATA',[
-  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3#152#3#6'Height'#3#14#1#3'Top'#3#155#1#5'W'
-  +'idth'#3#244#1#13'ActiveControl'#7#7'edTitle'#11'BorderStyle'#7#8'bsSingle'#7
-  +'Caption'#6#26'Register Firebird Database'#12'ClientHeight'#3#14#1#11'Client'
+  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3'd'#2#6'Height'#3'&'#1#3'Top'#3#11#1#5'Wid'
+  +'th'#3#244#1#13'ActiveControl'#7#7'edTitle'#11'BorderStyle'#7#8'bsSingle'#7
+  +'Caption'#6#26'Register Firebird Database'#12'ClientHeight'#3'&'#1#11'Client'
   +'Width'#3#244#1#5'Color'#7#6'clForm'#8'Position'#7#14'poScreenCenter'#10'LCL'
   +'Version'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#3#170#0#6'Height'#2#20#3
   +'Top'#2'8'#5'Width'#2't'#7'Caption'#6#17'server : database'#11'ParentColor'#8
@@ -22,7 +22,7 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#3#170#0#6'Height'#2#30#3'Top'#3#128#0#5'Width'#3#145#0#8'TabOrder'#2#3#0#0#5
   +'TEdit'#10'edPassword'#4'Left'#3'@'#1#6'Height'#2#30#3'Top'#3#128#0#5'Width'
   +#3#139#0#8'EchoMode'#7#10'emPassword'#12'PasswordChar'#6#1'-'#8'TabOrder'#2#4
-  +#0#0#7'TBitBtn'#5'bbReg'#4'Left'#3#136#1#6'Height'#2#30#3'Top'#3#232#0#5'Wid'
+  +#0#0#7'TBitBtn'#5'bbReg'#4'Left'#3#136#1#6'Height'#2#30#3'Top'#3#248#0#5'Wid'
   +'th'#2'c'#7'Caption'#6#8'Register'#5'Color'#7#6'clForm'#7'Default'#9#10'Glyp'
   +'h.Data'#10':'#9#0#0'6'#9#0#0'BM6'#9#0#0#0#0#0#0'6'#0#0#0'('#0#0#0#24#0#0#0
   +#24#0#0#0#1#0' '#0#0#0#0#0#0#9#0#0'd'#0#0#0'd'#0#0#0#0#0#0#0#0#0#0#0#255#255
@@ -131,17 +131,17 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#255#255#0#255#255#255#0#162#175#168''''#156#163#163'<'#128#128#128#6#255#255
   ,#255#0#255#255#255#0#255#255#255#0#255#255#255#0#255#255#255#0#0#0#0#2#0#0#0
   +#4#0#0#0#2#255#255#255#0#255#255#255#0#7'OnClick'#7#10'bbRegClick'#8'TabOrde'
-  +'r'#2#9#0#0#7'TBitBtn'#8'bbCancel'#4'Left'#3'0'#1#6'Height'#2#30#3'Top'#3#232
+  +'r'#2#9#0#0#7'TBitBtn'#8'bbCancel'#4'Left'#3'('#1#6'Height'#2#30#3'Top'#3#248
   +#0#5'Width'#2'X'#7'Caption'#6#6'Cancel'#5'Color'#7#6'clForm'#4'Kind'#7#8'bkC'
   +'ancel'#11'ModalResult'#2#2#8'TabOrder'#2#10#0#0#5'TEdit'#7'edTitle'#4'Left'
   +#3#170#0#6'Height'#2#30#3'Top'#2#24#5'Width'#3'A'#1#8'TabOrder'#2#0#0#0#7'TB'
-  +'itBtn'#6'bbTest'#4'Left'#2#8#6'Height'#2' '#3'Top'#3#232#0#5'Width'#3#136#0
+  +'itBtn'#6'bbTest'#4'Left'#2#8#6'Height'#2' '#3'Top'#3#248#0#5'Width'#3#136#0
   +#7'Caption'#6#15'Test connection'#5'Color'#7#6'clForm'#4'Kind'#7#5'bkAll'#7
   +'OnClick'#7#11'bbTestClick'#8'TabOrder'#2#8#0#0#9'TCheckBox'#14'cxSavePasswo'
-  +'rd'#4'Left'#3'@'#1#6'Height'#2#22#3'Top'#3#152#0#5'Width'#2'{'#7'Caption'#6
+  +'rd'#4'Left'#3'@'#1#6'Height'#2#22#3'Top'#3#160#0#5'Width'#2'{'#7'Caption'#6
   +#13'Save Password'#8'TabOrder'#2#5#0#0#5'TEdit'#6'edRole'#4'Left'#3'@'#1#6'H'
-  +'eight'#2#30#3'Top'#3#200#0#5'Width'#3#171#0#8'TabOrder'#2#7#0#0#9'TComboBox'
-  +#9'cbCharset'#4'Left'#3#170#0#6'Height'#2#30#3'Top'#3#200#0#5'Width'#3#143#0
+  +'eight'#2#30#3'Top'#3#208#0#5'Width'#3#171#0#8'TabOrder'#2#7#0#0#9'TComboBox'
+  +#9'cbCharset'#4'Left'#3#170#0#6'Height'#2#30#3'Top'#3#208#0#5'Width'#3#143#0
   +#10'ItemHeight'#2#0#9'ItemIndex'#2#0#13'Items.Strings'#1#6#4'NONE'#6#4'TRIM'
   +#6#5'ASCII'#6#5'BIG_5'#6#6'CP943C'#6#4'CYRL'#6#6'DOS437'#6#6'DOS737'#6#6'DOS'
   +'775'#6#6'DOS850'#6#6'DOS852'#6#6'DOS857'#6#6'DOS858'#6#6'DOS860'#6#6'DOS861'
@@ -797,7 +797,7 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#6#255#255#0')'#228#149'"'#146'i'#232'5'#0#0#0#0'IEND'#174'B`'#130#0#0#13'TI'
   +'BConnection'#13'IBConnection1'#9'Connected'#8#11'LoginPrompt'#8#14'KeepConn'
   +'ection'#8#9'LogEvents'#11#0#22'CheckTransactionParams'#8#26'UseConnectionCh'
-  +'arSetIfNone'#8#4'Left'#2' '#3'Top'#3#168#0#0#0#11'TOpenDialog'#11'OpenDialo'
+  +'arSetIfNone'#8#4'Left'#2'`'#3'Top'#3#192#0#0#0#11'TOpenDialog'#11'OpenDialo'
   +'g1'#10'DefaultExt'#6#4'.fdb'#6'Filter'#6'%Firebird Database|*.fdb|All Files'
-  +'|*.*'#4'Left'#2'H'#3'Top'#3#168#0#0#0#0
+  +'|*.*'#4'Left'#2'0'#3'Top'#3#168#0#0#0#0
 ]);

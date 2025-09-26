@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ComCtrls, StdCtrls, Buttons, CheckLst, turbocommon;
+  ComCtrls, StdCtrls, Buttons, CheckLst, ExtCtrls,
+  fbcommon,
+  turbocommon;
 
 type
 
@@ -64,6 +66,7 @@ type
     Label8: TLabel;
     Label9: TLabel;
     PageControl1: TPageControl;
+    Panel1: TPanel;
     tsViews: TTabSheet;
     tsRoles: TTabSheet;
     tsProcedures: TTabSheet;
@@ -90,6 +93,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
     FProcList: TStringList;
     FRoleList: TStringList;
@@ -111,13 +115,12 @@ type
     procedure UpdateRolePermissions;
     procedure ComposeTablePermissionSQL(ATableName: string; OptionName: string; Grant, WithGrant: Boolean; var List: TStringList);
   public
-    procedure Init(dbIndex: Integer; ATableName, AUserName: string; UserType: Integer;
-      OnCommitProcedure: TNotifyEvent = nil);
+    procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer; ATableName, AUserName: string; UserType: Integer; OnCommitProcedure: TNotifyEvent = nil);
     { public declarations }
   end;
 
-var
-  fmPermissionManage: TfmPermissionManage;
+//var
+  //fmPermissionManage: TfmPermissionManage;
 
 implementation
 
@@ -127,9 +130,15 @@ uses SysTables, main;
 
 procedure TfmPermissionManage.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  CloseAction:= caFree;
+  if Assigned(FNodeInfos) then
+  begin
+    FNodeInfos^.EditorForm := nil;
+  end;
   SetLength(FProcGrant, 0);
   SetLength(FOrigProcGrant, 0);
+  FProcList.Free;
+  FRoleList.Free;
+  CloseAction:= caFree;
 end;
 
 procedure TfmPermissionManage.FormCreate(Sender: TObject);
@@ -140,8 +149,6 @@ end;
 
 procedure TfmPermissionManage.FormDestroy(Sender: TObject);
 begin
-  FProcList.Free;
-  FRoleList.Free;
 end;
 
 procedure TfmPermissionManage.UpdatePermissions;
@@ -554,27 +561,32 @@ begin
     FRoleGrant[Index]:= cxRoleGrant.Checked;
 end;
 
-procedure TfmPermissionManage.Init(dbIndex: integer; ATableName, AUserName: string; UserType: Integer;
+procedure TfmPermissionManage.Init(ANodeInfos: TPNodeInfos; dbIndex: integer; ATableName, AUserName: string; UserType: Integer;
   OnCommitProcedure: TNotifyEvent = nil);
 var
   Count: integer;
 begin
+  FNodeInfos := ANodeInfos;
   FOnCommitProcedure:= OnCommitProcedure;
 
   PageControl1.ActivePageIndex:= 0;
   FDBIndex := dbIndex;
-  cbUsers.Text := AUserName;
-  cbTables.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otTables, Count);
-  cbViews.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otViews, Count);
-  cbTables.Text:= ATableName;
-  cbProcUsers.Text:= AUserName;
-  cbViewsUsers.Text:= AUserName;
+  //cbUsers.Text := AUserName;
+
 
   // For users, add roles and users
   cbUsers.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count) + ',' +
     dmSysTables.GetDBObjectNames(dbIndex, otUsers, Count);
   cbProcUsers.Items.CommaText:= cbUsers.Items.CommaText;
   cbViewsUsers.Items.CommaText:= cbUsers.Items.CommaText;
+
+  cbUsers.ItemIndex := cbUsers.Items.IndexOf(AUserName);
+  cbTables.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otTables, Count);
+  cbViews.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otViews, Count);
+  cbTables.Text:= ATableName;
+  cbProcUsers.ItemIndex := cbProcUsers.Items.IndexOf(AUserName);
+  cbViewsUsers.ItemIndex := cbViewsUsers.Items.IndexOf(AUserName);
+
 
   // Update table permissions
   UpdatePermissions;
@@ -588,10 +600,11 @@ begin
 
   if UserType = 1 then
   begin
-    cbRolesUser.Text:= AUserName;
+    cbRolesUser.ItemIndex := cbRolesUser.Items.IndexOf(AUserName);
     UpdateRolePermissions;
   end;
   cbRolesUser.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otUsers, Count);
+  cbRolesUser.ItemIndex := cbRolesUser.Items.IndexOf(AUserName);
 end;
 
 initialization

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  Grids, Buttons, StdCtrls, LCLType;
+  Grids, Buttons, StdCtrls, LCLType,
+  turbocommon;
 
 type
 
@@ -22,8 +23,10 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { private declarations }
+    FNodeInfos: TPNodeInfos;
   public
     { public declarations }
+    procedure Init(ANodeInfos: TPNodeInfos);
   end; 
 
 var
@@ -33,9 +36,15 @@ implementation
 
 { TfmUserPermissions }
 
+procedure TfmUserPermissions.Init(ANodeInfos: TPNodeInfos);
+begin
+  FNodeInfos := ANodeInfos;
+end;
+
 procedure TfmUserPermissions.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
 end;
 

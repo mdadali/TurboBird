@@ -1,8 +1,9 @@
 object dmSysTables: TdmSysTables
+  OnCreate = DataModuleCreate
   OldCreateOrder = False
   Height = 367
-  HorizontalOffset = 508
-  VerticalOffset = 113
+  HorizontalOffset = 642
+  VerticalOffset = 144
   Width = 479
   object sqQuery: TSQLQuery
     FieldDefs = <>
@@ -20,5 +21,10 @@ object dmSysTables: TdmSysTables
     UseConnectionCharSetIfNone = False
     Left = 64
     Top = 64
+  end
+  object IBXServerProperties1: TIBXServerProperties
+    TraceFlags = []
+    Left = 112
+    Top = 170
   end
 end

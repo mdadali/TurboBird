@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, LCLIntf,
+  ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls,
   turbocommon,
   updatechecker;
 
@@ -24,24 +24,27 @@ type
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
-    lbVersionTime: TLabel;
-    lbWidgetSet: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    Label4: TLabel;
     Label5: TLabel;
+    Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
-    lbOSInfo: TLabel;
+    laUpdate: TLabel;
+    laWebSite: TLabel;
     lbFPCVersion: TLabel;
     lbLazarus: TLabel;
+    lbOSInfo: TLabel;
     lbPgmVersion: TLabel;
-    Label4: TLabel;
-    laWebSite: TLabel;
-    Label6: TLabel;
     lbVersionDate: TLabel;
-    laUpdate: TLabel;
-    Shape1: TShape;
+    lbVersionTime: TLabel;
+    lbWidgetSet: TLabel;
+    PageControl1: TPageControl;
+    Panel1: TPanel;
+    TabSheet1: TTabSheet;
+    TabSheet2: TTabSheet;
     procedure BitBtn1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure Label6Click(Sender: TObject);

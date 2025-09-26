@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 874
+  Left = 366
   Height = 448
-  Top = 540
+  Top = 225
   Width = 998
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -911,6 +911,61 @@ object fmTableManage: TfmTableManage
         TabOrder = 4
       end
     end
+    object tsReferences: TTabSheet
+      Caption = 'References'
+      ClientHeight = 380
+      ClientWidth = 984
+      ImageIndex = 5
+      object sgReferences: TStringGrid
+        Left = 5
+        Height = 320
+        Top = 5
+        Width = 974
+        Align = alTop
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Around = 5
+        ColCount = 4
+        Columns = <        
+          item
+            Title.Caption = 'Constraint name'
+            Width = 200
+          end        
+          item
+            Title.Caption = 'Foreign Table'
+            Width = 200
+          end        
+          item
+            ButtonStyle = cbsPickList
+            PickList.Strings = (
+              'Asc'
+              'Desc'
+            )
+            Title.Caption = 'Foreign Field'
+            Width = 190
+          end        
+          item
+            Title.Caption = 'On key'
+            Width = 190
+          end>
+        FixedColor = 14539471
+        FixedCols = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        TabOrder = 0
+        TitleStyle = tsNative
+      end
+      object bbRefreshReferences: TBitBtn
+        Left = 880
+        Height = 40
+        Top = 333
+        Width = 99
+        Anchors = [akRight, akBottom]
+        Caption = 'Refresh'
+        Color = clForm
+        Kind = bkRetry
+        OnClick = bbRefreshReferencesClick
+        TabOrder = 1
+      end
+    end
     object tsPermissions: TTabSheet
       Caption = 'Permissions'
       ClientHeight = 380
@@ -1230,61 +1285,6 @@ object fmTableManage: TfmTableManage
         }
         OnClick = bbAddUserClick
         TabOrder = 3
-      end
-    end
-    object tsReferences: TTabSheet
-      Caption = 'References'
-      ClientHeight = 380
-      ClientWidth = 984
-      ImageIndex = 5
-      object sgReferences: TStringGrid
-        Left = 5
-        Height = 320
-        Top = 5
-        Width = 974
-        Align = alTop
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Around = 5
-        ColCount = 4
-        Columns = <        
-          item
-            Title.Caption = 'Constraint name'
-            Width = 200
-          end        
-          item
-            Title.Caption = 'Foreign Table'
-            Width = 200
-          end        
-          item
-            ButtonStyle = cbsPickList
-            PickList.Strings = (
-              'Asc'
-              'Desc'
-            )
-            Title.Caption = 'Foreign Field'
-            Width = 190
-          end        
-          item
-            Title.Caption = 'On key'
-            Width = 190
-          end>
-        FixedColor = 14539471
-        FixedCols = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        TabOrder = 0
-        TitleStyle = tsNative
-      end
-      object bbRefreshReferences: TBitBtn
-        Left = 880
-        Height = 40
-        Top = 333
-        Width = 99
-        Anchors = [akRight, akBottom]
-        Caption = 'Refresh'
-        Color = clForm
-        Kind = bkRetry
-        OnClick = bbRefreshReferencesClick
-        TabOrder = 1
       end
     end
   end

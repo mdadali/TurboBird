@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Buttons, ComCtrls, IBConnection, sqldb, QueryWindow, LCLType, turbocommon,
-  dbugintf;
-
+  Buttons, ComCtrls, IBConnection, sqldb, QueryWindow, LCLType, dbugintf,
+  fbcommon,
+  turbocommon;
 
 type
 
@@ -77,6 +77,8 @@ type
     FQueryWindow: TfmQueryWindow;
     FCanceled: Boolean;
 
+    FNodeInfos: TPNodeInfos;
+
     procedure CheckRemovedDBObjects;
     procedure DisplayStatus(AStatus: string);
 
@@ -119,7 +121,7 @@ type
     procedure ScriptRemovedDBObjects;
     procedure ScriptRemovedFields;
   public
-    procedure Init(dbIndex: Integer);
+    procedure Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
     { public declarations }
   end;
 
@@ -262,6 +264,7 @@ procedure TfmComparison.FormClose(Sender: TObject; var CloseAction: TCloseAction
 var
   i: Integer;
 begin
+  FNodeInfos^.ViewForm := nil;
   for i:= Low(FDBObjectsList) to High(FDBObjectsList) do
     FDBObjectsList[i].Free;
 
@@ -1998,11 +2001,12 @@ begin
 
 end;
 
-procedure TfmComparison.Init(dbIndex: Integer);
+procedure TfmComparison.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos);
 var
   i: Integer;
   Servername: string;
 begin
+  FNodeInfos := ANodeInfos;
   bbCancel.Enabled:= False;
   cxTables.Checked:= True;
   cxGenerators.Checked:= True;

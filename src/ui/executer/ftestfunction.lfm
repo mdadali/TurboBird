@@ -1,8 +1,9 @@
 object frmTestFunction: TfrmTestFunction
-  Left = 366
+  Left = 381
   Height = 608
-  Top = 264
+  Top = 416
   Width = 947
+  ActiveControl = Panel13
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'frmTestFunction'
@@ -80,14 +81,7 @@ object frmTestFunction: TfrmTestFunction
         ItemIndex = 0
         Items.Strings = (
           'UDF'
-          'FBFunc'
-          'FBProc'
-          'UDRFunc'
-          'UDRProc'
-          'PackageFBFunc'
-          'PackageFBProc'
-          'PackageUDRFunc'
-          'PackageUDRProc'
+          'Procedures'
         )
         OnClick = rgRoutineTypeClick
         TabOrder = 0

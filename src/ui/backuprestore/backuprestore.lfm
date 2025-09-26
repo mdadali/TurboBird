@@ -1,25 +1,27 @@
 object fmBackupRestore: TfmBackupRestore
-  Left = 827
+  Left = 452
   Height = 445
-  Top = 319
-  Width = 589
+  Top = 107
+  Width = 828
   BorderStyle = bsSingle
   Caption = 'Backup/Restore database'
   ClientHeight = 445
-  ClientWidth = 589
+  ClientWidth = 828
   Color = clForm
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnResize = FormResize
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 5
     Height = 240
-    Top = 5
-    Width = 579
+    Top = 29
+    Width = 818
     Align = alTop
     BorderSpacing.Around = 5
     ClientHeight = 236
-    ClientWidth = 575
+    ClientWidth = 814
     Color = clForm
     ParentColor = False
     TabOrder = 0
@@ -66,13 +68,13 @@ object fmBackupRestore: TfmBackupRestore
       Left = 144
       Height = 30
       Top = 120
-      Width = 300
+      Width = 523
       Anchors = [akTop, akLeft, akRight]
       OnEditingDone = edBackupEditingDone
-      TabOrder = 3
+      TabOrder = 2
     end
     object sbBroseBackupFile: TSpeedButton
-      Left = 452
+      Left = 672
       Height = 22
       Top = 120
       Width = 23
@@ -89,20 +91,20 @@ object fmBackupRestore: TfmBackupRestore
       Color = clForm
       Kind = bkAll
       OnClick = bbStartClick
-      TabOrder = 6
+      TabOrder = 5
     end
     object edTargetDatabase: TEdit
       Left = 144
       Height = 30
       Top = 80
-      Width = 300
+      Width = 520
       Anchors = [akTop, akLeft, akRight]
       ParentBidiMode = False
       OnEditingDone = edTargetDatabaseEditingDone
-      TabOrder = 2
+      TabOrder = 1
     end
     object sbBrowseTargetdb: TSpeedButton
-      Left = 452
+      Left = 672
       Height = 22
       Top = 82
       Width = 23
@@ -123,7 +125,7 @@ object fmBackupRestore: TfmBackupRestore
       Height = 30
       Top = 152
       Width = 145
-      TabOrder = 4
+      TabOrder = 3
     end
     object Label5: TLabel
       Left = 12
@@ -140,7 +142,7 @@ object fmBackupRestore: TfmBackupRestore
       Width = 145
       EchoMode = emPassword
       PasswordChar = '*'
-      TabOrder = 5
+      TabOrder = 4
     end
     object Label6: TLabel
       Left = 12
@@ -150,19 +152,10 @@ object fmBackupRestore: TfmBackupRestore
       Caption = 'Host'
       ParentColor = False
     end
-    object edHost: TEdit
-      Left = 144
-      Height = 30
-      Top = 40
-      Width = 300
-      Anchors = [akTop, akLeft, akRight]
-      ParentBidiMode = False
-      TabOrder = 1
-    end
     object Image1: TImage
-      Left = 472
+      Left = 704
       Height = 104
-      Top = 0
+      Top = 6
       Width = 99
       Picture.Data = {
         1754506F727461626C654E6574776F726B47726170686963CD21000089504E47
@@ -439,12 +432,21 @@ object fmBackupRestore: TfmBackupRestore
         0049454E44AE426082
       }
     end
+    object cmbBoxHostList: TComboBox
+      Left = 144
+      Height = 32
+      Top = 40
+      Width = 512
+      ItemHeight = 0
+      Style = csDropDownList
+      TabOrder = 6
+    end
   end
   object meLog: TMemo
     Left = 7
-    Height = 186
-    Top = 252
-    Width = 575
+    Height = 162
+    Top = 276
+    Width = 814
     Align = alClient
     BorderSpacing.Left = 2
     BorderSpacing.Top = 2
@@ -457,6 +459,65 @@ object fmBackupRestore: TfmBackupRestore
     ReadOnly = True
     ScrollBars = ssAutoBoth
     TabOrder = 1
+  end
+  object Panel3: TPanel
+    Left = 0
+    Height = 24
+    Top = 0
+    Width = 828
+    Align = alTop
+    ClientHeight = 24
+    ClientWidth = 828
+    TabOrder = 2
+    object bbClose1: TSpeedButton
+      Left = 800
+      Height = 22
+      Top = 1
+      Width = 27
+      Align = alRight
+      Anchors = [akTop, akRight]
+      Color = clForm
+      Flat = True
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF26FFFFFF51FFFFFF0EFFFFFF00FFFFFF00FFFF
+        FF0EFFFFFF51FFFFFF26FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF28C3C3C3624141416EF0F0F056FFFFFF0EFFFFFF0EF0F0
+        F0564141416EC3C3C362FFFFFF28FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF16B9B9B9660A0A0A840000008731313177F0F0F056F0F0F0563131
+        3177000000870A0A0A84B9B9B966FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF220E0E0EA00000009E00000091000000912F2F2F7E2F2F2F7E0000
+        0091000000910000009E0E0E0EA0FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0BB7B7B72E040404AB000000A70000009B0000009B0000009B0000
+        009B000000A7050505AAB7B7B72EFFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0BB8B8B8321D1D1DA5000000A5000000A5000000A50000
+        00A51E1E1EA4BBBBBB31FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0EEBEBEB5826262692000000AF000000AF000000AF0000
+        00AF26262692EBEBEB58FFFFFF0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0BEBEBEB5825252599000000B9000000B9000000C1000000C10000
+        00B9000000B925252599EBEBEB58FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF221F1F1FB3000000C4000000C3000000CA040404BE040404BE0000
+        00CA000000C3000000C41F1F1FB3FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF163939395E000000D9000000D4030303C2AFAFAF30AFAFAF300303
+        03C2000000D4000000D93939395EFFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF183636365F040404C2ACACAC31FFFFFF0BFFFFFF0BACAC
+        AC31040404C23636365FFFFFFF18FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF16FFFFFF22FFFFFF0BFFFFFF00FFFFFF00FFFF
+        FF0BFFFFFF23FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+      }
+      OnClick = bbClose1Click
+      ParentFont = False
+    end
   end
   object OpenDialog1: TOpenDialog
     Filter = '*.fbk, *.fbk.zip|*.fbk;*.fbk.zip|*|*'

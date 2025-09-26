@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ExtCtrls, Zipper, dbugintf
+  StdCtrls, Buttons, ExtCtrls, Zipper, dbugintf,
+  fbcommon, turbocommon
   {$IFDEF MSWINDOWS}
   , shlobj {for special folders}
   {$ENDIF};
@@ -16,12 +17,13 @@ type
   { TfmBackupRestore }
 
   TfmBackupRestore = class(TForm)
+    bbClose1: TSpeedButton;
     bbStart: TBitBtn;
     cbOperation: TComboBox;
+    cmbBoxHostList: TComboBox;
     edBackup: TEdit;
     edPassword: TEdit;
     edTargetDatabase: TEdit;
-    edHost: TEdit;
     edUserName: TEdit;
     GroupBox1: TGroupBox;
     Image1: TImage;
@@ -33,17 +35,22 @@ type
     Label6: TLabel;
     meLog: TMemo;
     OpenDialog1: TOpenDialog;
+    Panel3: TPanel;
     SaveDialog1: TSaveDialog;
     sbBroseBackupFile: TSpeedButton;
     sbBrowseTargetdb: TSpeedButton;
+    procedure bbClose1Click(Sender: TObject);
     procedure bbStartClick(Sender: TObject);
     procedure edBackupEditingDone(Sender: TObject);
     procedure edTargetDatabaseEditingDone(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormResize(Sender: TObject);
     procedure sbBrowseTargetdbClick(Sender: TObject);
     procedure sbBroseBackupFileClick(Sender: TObject);
   private
     { private declarations }
+    FNodeInfos: TPNodeInfos;
     FDatabase: string; //doesn't really seem to be used anywhere
     { if true, user wrote/selected the backup filename himself.
     if false, system has generated/can generate a backup filename based on db}
@@ -52,12 +59,10 @@ type
     // write a system-generated backup filename
     procedure SetBackupFileName;
   public
-    procedure Init(Title, Database, User, Password: string);
+    procedure Init(Title, Database, User, Password: string; ANodeInfos: TPNodeInfos);
     { public declarations }
   end; 
 
-var
-  fmBackupRestore: TfmBackupRestore;
 
 implementation
 
@@ -123,8 +128,9 @@ begin
   end;
 end;
 
-procedure TfmBackupRestore.Init(Title, Database, User, Password: string);
+procedure TfmBackupRestore.Init(Title, Database, User, Password: string; ANodeInfos: TPNodeInfos);
 begin
+  FNodeInfos := ANodeInfos;
   FDatabase:= Database;
   edUserName.Text:= User;
   edPassword.Text:= Password;
@@ -133,17 +139,11 @@ begin
   // Windows: servername:c:\path\test.fdb or c:\path\test.fdb
   if Pos(':', Trim(FDatabase)) > 2 then
   begin
-    edHost.Text:= Trim(Copy(FDatabase, 1, Pos(':', FDatabase) - 1));
     edTargetDatabase.Text:= Trim(Copy(FDatabase, Pos(':', FDatabase) + 1, Length(FDatabase)));
   end
   else
   begin
     // Assume local host for *nix, embedded for Windows
-    {$IFDEF MSWINDOWS}
-    edHost.Text := '';
-    {$ELSE}
-    edHost.Text := 'localhost';
-    {$ENDIF}
     edTargetDatabase.Text := FDatabase;
   end;
   SetBackupFileName;
@@ -168,7 +168,7 @@ begin
     meLog.Clear;
     with FireBirdServices do
     begin
-      HostName:= edHost.Text;
+      HostName :=  cmbBoxHostList.Items[cmbBoxHostList.ItemIndex];
       DBName:= edTargetDatabase.Text;
       UserName:= edUserName.Text;
       Password:= edPassword.Text;
@@ -278,6 +278,12 @@ begin
   end;
 end;
 
+procedure TfmBackupRestore.bbClose1Click(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
+end;
+
 procedure TfmBackupRestore.edBackupEditingDone(Sender: TObject);
 begin
   if trim(edBackup.Text)='' then
@@ -291,9 +297,23 @@ begin
   SetBackupFileName;
 end;
 
+procedure TfmBackupRestore.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+  CloseAction := caFree;
+end;
+
 procedure TfmBackupRestore.FormCreate(Sender: TObject);
 begin
   FUserSpecifiedBackupFile:= false; //System can suggest backup filenames
+end;
+
+procedure TfmBackupRestore.FormResize(Sender: TObject);
+begin
+  image1.Top := 0;
+  Image1.Left :=  edBackup.Left + edBackup.Width + 50;   //???
 end;
 
 

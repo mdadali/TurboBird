@@ -1,11 +1,12 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TdmSysTables','FORMDATA',[
-  'TPF0'#12'TdmSysTables'#11'dmSysTables'#14'OldCreateOrder'#8#6'Height'#3'o'#1
-  +#16'HorizontalOffset'#3#252#1#14'VerticalOffset'#2'q'#5'Width'#3#223#1#0#9'T'
-  +'SQLQuery'#7'sqQuery'#9'FieldDefs'#14#0#14'AutoCalcFields'#8#6'Params'#14#0#6
-  +'Macros'#14#0#4'Left'#3#216#0#3'Top'#2'P'#0#0#13'TIBConnection'#13'IBConnect'
-  +'ion1'#9'Connected'#8#11'LoginPrompt'#8#14'KeepConnection'#8#22'CheckTransac'
-  +'tionParams'#8#26'UseConnectionCharSetIfNone'#8#4'Left'#2'@'#3'Top'#2'@'#0#0
-  +#0
+  'TPF0'#12'TdmSysTables'#11'dmSysTables'#8'OnCreate'#7#16'DataModuleCreate'#14
+  +'OldCreateOrder'#8#6'Height'#3'o'#1#16'HorizontalOffset'#3#130#2#14'Vertical'
+  +'Offset'#3#144#0#5'Width'#3#223#1#0#9'TSQLQuery'#7'sqQuery'#9'FieldDefs'#14#0
+  +#14'AutoCalcFields'#8#6'Params'#14#0#6'Macros'#14#0#4'Left'#3#216#0#3'Top'#2
+  +'P'#0#0#13'TIBConnection'#13'IBConnection1'#9'Connected'#8#11'LoginPrompt'#8
+  +#14'KeepConnection'#8#22'CheckTransactionParams'#8#26'UseConnectionCharSetIf'
+  +'None'#8#4'Left'#2'@'#3'Top'#2'@'#0#0#20'TIBXServerProperties'#20'IBXServerP'
+  +'roperties1'#10'TraceFlags'#11#0#4'Left'#2'p'#3'Top'#3#170#0#0#0#0
 ]);

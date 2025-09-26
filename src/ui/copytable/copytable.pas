@@ -6,14 +6,15 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, sqldb, IniFiles,
-  turbocommon;
+  StdCtrls, Buttons, ComCtrls, ExtCtrls, SynEdit, SynHighlighterSQL, sqldb,
+  IniFiles, fbcommon, turbocommon;
 
 type
 
   { TfmCopyTable }
 
   TfmCopyTable = class(TForm)
+    bbClose1: TSpeedButton;
     bbCopy: TBitBtn;
     bbClose: TBitBtn;
     cbSourceTable: TComboBox;
@@ -27,23 +28,26 @@ type
     laDatabase: TLabel;
     laDatabase1: TLabel;
     laSourceDatabase: TLabel;
+    Panel13: TPanel;
     SynSQLSyn1: TSynSQLSyn;
     syScript: TSynEdit;
     procedure bbCopyClick(Sender: TObject);
     procedure bbCloseClick(Sender: TObject);
     procedure cbDestDatabaseChange(Sender: TObject);
     procedure cbSourceTableChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
     FSourceIndex: Integer;
     { private declarations }
   public
     { public declarations }
-    procedure Init(SourceIndex: Integer; ATableName: string);
+    procedure Init(SourceIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);
   end; 
 
-var
-  fmCopyTable: TfmCopyTable;
+//var
+  //fmCopyTable: TfmCopyTable;
 
 implementation
 
@@ -79,6 +83,13 @@ begin
   syScript.Lines.Add(' from ' + cbSourceTable.Text);
 end;
 
+procedure TfmCopyTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+  CloseAction := caFree;
+end;
+
 procedure TfmCopyTable.FormCreate(Sender: TObject);
 var
    configFile: TIniFile;
@@ -94,6 +105,7 @@ end;
 
 procedure TfmCopyTable.bbCloseClick(Sender: TObject);
 begin
+  TTabSheet(Parent).Free;
   Close;
 end;
 
@@ -185,11 +197,12 @@ begin
   dmSysTables.sqQuery.Close;
 end;
 
-procedure TfmCopyTable.Init(SourceIndex: Integer; ATableName: string);
+procedure TfmCopyTable.Init(SourceIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);
 var
   i: Integer;
   Count: Integer;
 begin
+  FNodeInfos := ANodeInfos;
   dmSysTables.sqQuery.Close; //todo: (low priority) is closing sqquery really necessary?
   FSourceIndex:= SourceIndex;
   laSourceDatabase.Caption:= RegisteredDatabases[SourceIndex].RegRec.Title;

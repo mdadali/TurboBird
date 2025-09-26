@@ -5,9 +5,9 @@ unit SysTables;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
-  DB, fpstdexports, Dialogs, dbugintf, ZConnection, ZDataset,
-  IBDatabase, IBQuery, IBDatabaseInfo, IBXServices,
+  Classes, SysUtils, StrUtils, sqldb, SQLDBLib, IBConnection, FileUtil,
+  LResources, Forms, Controls, DB, fpstdexports, Dialogs, dbugintf, ZConnection,
+  ZDataset, IBDatabase, IBQuery, IBDatabaseInfo, IBXServices,
 
   fbcommon,
   turbocommon,
@@ -27,7 +27,9 @@ type
 
   TdmSysTables = class(TDataModule)
     IBConnection1: TIBConnection;
+    IBXServerProperties1: TIBXServerProperties;
     sqQuery: TSQLQuery;
+    procedure DataModuleCreate(Sender: TObject);
   private
     { private declarations }
   public
@@ -134,6 +136,9 @@ type
     function GetConstraintsOfTable(ATableName: string; var SqlQuery: TSQLQuery;
       ConstraintsList: TStringList=nil): Boolean;
 
+    function EnsureDummyRole: Boolean;
+    function DummyRoleExists: Boolean;
+
     { public declarations }
   end; 
 
@@ -183,9 +188,7 @@ end;
 
 (*****  GetDBObjectNames, like Table names, Triggers, Generators, etc according to TVIndex  ****)
 
-function TdmSysTables.GetDBObjectNames(DatabaseIndex: integer;
-  ObjectType: TObjectType;
-  var Count: Integer): string;
+function TdmSysTables.GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer): string;
 begin
   Init(DatabaseIndex);
   sqQuery.Close;
@@ -217,14 +220,29 @@ begin
       'ORDER BY RDB$PROCEDURE_NAME'
   end
   else
-  if ObjectType = otUDF then // UDF
+  {if ObjectType = otUDF then // UDF
     if FBVersionMajor < 3 then
       sqQuery.SQL.Text:= 'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS where RDB$SYSTEM_FLAG=0 order by rdb$Function_Name'
     else
       sqQuery.SQL.Text := 'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS ' +
                           'WHERE RDB$SYSTEM_FLAG = 0 ' +
                           'AND RDB$MODULE_NAME IS NOT NULL ' +
-                          'ORDER BY RDB$FUNCTION_NAME; '
+                          'ORDER BY RDB$FUNCTION_NAME; '}
+  if ObjectType = otUDF then
+  begin
+    sqQuery.SQL.Text :=
+      'SELECT RDB$FUNCTION_NAME ' +
+      'FROM RDB$FUNCTIONS ' +
+      'WHERE RDB$SYSTEM_FLAG = 0';
+
+    if FBVersionMajor >= 3 then
+      sqQuery.SQL.Text := sqQuery.SQL.Text +
+        ' AND RDB$MODULE_NAME IS NOT NULL ' +
+        ' AND RDB$ENGINE_NAME IS NULL ' +
+        ' AND RDB$PACKAGE_NAME IS NULL';
+
+    sqQuery.SQL.Text := sqQuery.SQL.Text + ' ORDER BY RDB$FUNCTION_NAME';
+  end
 
   else
   if ObjectType = otFBFunctions then // FB-Functions
@@ -373,16 +391,42 @@ begin
         'ORDER BY RDB$PROCEDURE_NAME;'
 
   else
-  if ObjectType = otRoles then // Roles
-    sqQuery.SQL.Text:= 'select RDB$ROLE_NAME from RDB$ROLES order by rdb$Role_Name'
-  else
+
   if ObjectType = otExceptions then // Exceptions
     sqQuery.SQL.Text:= 'select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS order by rdb$Exception_Name'
   else
-  if ObjectType = otUsers then // Users
-    sqQuery.SQL.Text:= 'select distinct RDB$User from RDB$USER_PRIVILEGES where RDB$User_Type = 8 order by rdb$User';
 
-  // Save the result list as comma delimited string
+  if ObjectType = otRoles then // Roles
+    //sqQuery.SQL.Text:= 'select RDB$ROLE_NAME from RDB$ROLES order by rdb$Role_Name'
+    sqQuery.SQL.Text :=
+     'SELECT RDB$ROLE_NAME ' +
+     'FROM RDB$ROLES ' +
+     'WHERE RDB$ROLE_NAME <> ''DUMMYROLE'' ' +  // only for FireBird Version < 3.
+     'ORDER BY RDB$ROLE_NAME'
+  else
+
+  //if ObjectType = otUsers then // Users
+    //sqQuery.SQL.Text:= 'select distinct RDB$User from RDB$USER_PRIVILEGES where RDB$User_Type = 8 order by rdb$User';
+
+  if ObjectType = otUsers then
+  begin
+    // User je nach Firebird-Version
+    if FBVersionMajor < 3 then
+      // Firebird 2.5: SEC$USERS
+    sqQuery.SQL.Text :=
+      'SELECT DISTINCT RDB$USER ' +
+      'FROM RDB$USER_PRIVILEGES ' +
+      'WHERE RDB$USER_TYPE = 8 ' +
+      'ORDER BY RDB$USER'
+    else
+      // Firebird 3+: RDB$USERS
+      sqQuery.SQL.Text:=
+        'SELECT SEC$USER_NAME AS RDB$USER ' +
+        'FROM SEC$USERS ' +
+        'ORDER BY SEC$USER_NAME';
+  end;
+
+   // Save the result list as comma delimited string
   Result := '';
   Count := 0;
   sqQuery.Open;
@@ -395,6 +439,43 @@ begin
       Result:= Result + ',';
   end;
   //Count:= sqQuery.RecordCount;
+  sqQuery.Close;
+end;
+
+function TdmSysTables.EnsureDummyRole: Boolean;
+begin
+  Result := True; // Standard: alles ok
+
+  // 1. Prüfen, ob Dummy-Rolle existiert
+  sqQuery.Close;
+  sqQuery.SQL.Text := 'SELECT RDB$ROLE_NAME FROM RDB$ROLES WHERE RDB$ROLE_NAME = ''DUMMYROLE''';
+  sqQuery.Open;
+
+  if sqQuery.EOF then
+  begin
+    // 2. Dummy-Rolle existiert nicht → erstellen
+    sqQuery.Close;
+    sqQuery.SQL.Text := 'CREATE ROLE DUMMYROLE';
+    try
+      sqQuery.ExecSQL;
+    except
+      on E: Exception do
+      begin
+        Result := False;
+        ShowMessage('Fehler beim Anlegen der Dummy-Rolle: ' + E.Message);
+        Exit;
+      end;
+    end;
+  end;
+  sqQuery.Close;
+end;
+
+function TdmSysTables.DummyRoleExists: Boolean;
+begin
+  sqQuery.Close;
+  sqQuery.SQL.Text := 'SELECT RDB$ROLE_NAME FROM RDB$ROLES WHERE RDB$ROLE_NAME = ''DUMMYROLE''';
+  sqQuery.Open;
+  Result := not sqQuery.EOF;
   sqQuery.Close;
 end;
 
@@ -490,7 +571,7 @@ end;
 
 (***********  Get Trigger Info  ***************)
 
-function TdmSysTables.GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
+{function TdmSysTables.GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
   var AfterBefore, OnTable, Event, Body: string; var TriggerEnabled: Boolean; var TriggerPosition: Integer): Boolean;
 var
   Encode: string;
@@ -543,6 +624,104 @@ begin
     begin
       MessageDlg('Error: ' + e.Message, mtError, [mbOk], 0);
       Result:= False;
+    end;
+  end;
+end;
+}
+
+function TdmSysTables.GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
+  var AfterBefore, OnTable, Event, Body: string;
+  var TriggerEnabled: Boolean; var TriggerPosition: Integer): Boolean;
+var
+  TrigType: Integer;
+  Encode: string;
+begin
+  try
+    Init(DatabaseIndex);
+
+    // Trigger holen
+    sqQuery.Close;
+    sqQuery.SQL.Text :=
+      'SELECT RDB$TRIGGER_NAME AS trigger_name, ' +
+      '  RDB$RELATION_NAME AS table_name, ' +
+      '  RDB$TRIGGER_SOURCE AS trigger_body, ' +
+      '  RDB$TRIGGER_TYPE as Trigger_Type, ' +
+      '  RDB$Trigger_Sequence as TPos, ' +
+      '   CASE RDB$TRIGGER_INACTIVE ' +
+      '     WHEN 1 THEN 0 ELSE 1 ' +
+      '   END AS trigger_enabled, ' +
+      '  RDB$DESCRIPTION AS trigger_comment ' +
+      ' FROM RDB$TRIGGERS ' +
+      ' WHERE UPPER(RDB$TRIGGER_NAME)=''' + UpperCase(ATriggerName) + ''' ';
+
+    sqQuery.Open;
+    Body := Trim(sqQuery.FieldByName('Trigger_Body').AsString);
+    OnTable := Trim(sqQuery.FieldByName('Table_Name').AsString);
+    TriggerEnabled := sqQuery.FieldByName('Trigger_Enabled').AsBoolean;
+    TriggerPosition := sqQuery.FieldByName('TPos').AsInteger;
+    TrigType := sqQuery.FieldByName('Trigger_Type').AsInteger;
+
+    if FBVersionMajor <= 2 then
+    begin
+      // --- Alte Logik für Firebird 2.5 und älter ---
+      Encode := DecToBin(TrigType + 1, 7);
+      if Encode[7] = '1' then
+        AfterBefore := 'After'
+      else
+        AfterBefore := 'Before';
+
+      Delete(Encode, 7, 1);
+      Event := '';
+      while Length(Encode) > 0 do
+      begin
+        if Copy(Encode, Length(Encode) - 1, 2) = '01' then
+          Event := Event + 'Insert'
+        else if Copy(Encode, Length(Encode) - 1, 2) = '10' then
+          Event := Event + 'Update'
+        else if Copy(Encode, Length(Encode) - 1, 2) = '11' then
+          Event := Event + 'Delete';
+
+        Delete(Encode, Length(Encode) - 1, 2);
+
+        if (Encode <> '') and (Copy(Encode, Length(Encode) - 1, 2) <> '00') then
+          Event := Event + ' or ';
+      end;
+    end
+    else
+    begin
+      // --- Neue Logik für Firebird 3+ ---
+      case TrigType of
+        1: begin AfterBefore := 'Before'; Event := 'Insert'; end;
+        2: begin AfterBefore := 'After';  Event := 'Insert'; end;
+        3: begin AfterBefore := 'Before'; Event := 'Update'; end;
+        4: begin AfterBefore := 'After';  Event := 'Update'; end;
+        5: begin AfterBefore := 'Before'; Event := 'Delete'; end;
+        6: begin AfterBefore := 'After';  Event := 'Delete'; end;
+
+        17: begin AfterBefore := 'Before'; Event := 'Connect'; end;
+        18: begin AfterBefore := 'After';  Event := 'Connect'; end;
+        19: begin AfterBefore := 'Before'; Event := 'Disconnect'; end;
+        20: begin AfterBefore := 'After';  Event := 'Disconnect'; end;
+        21: begin AfterBefore := 'Before'; Event := 'Transaction Start'; end;
+        22: begin AfterBefore := 'After';  Event := 'Transaction Start'; end;
+        23: begin AfterBefore := 'Before'; Event := 'Transaction Commit'; end;
+        24: begin AfterBefore := 'After';  Event := 'Transaction Commit'; end;
+        25: begin AfterBefore := 'Before'; Event := 'Transaction Rollback'; end;
+        26: begin AfterBefore := 'After';  Event := 'Transaction Rollback'; end;
+
+      else
+        AfterBefore := 'Unknown';
+        Event := 'Unknown (' + IntToStr(TrigType) + ')';
+      end;
+    end;
+
+    sqQuery.Close;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Error: ' + e.Message, mtError, [mbOk], 0);
+      Result := False;
     end;
   end;
 end;
@@ -739,6 +918,11 @@ begin
     end;
   end;
   sqQuery.Close;
+end;
+
+procedure TdmSysTables.DataModuleCreate(Sender: TObject);
+begin
+
 end;
 
 procedure TdmSysTables.FillCompositeFKConstraints(const TableName: string;
@@ -1078,8 +1262,7 @@ begin
       'SELECT RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
       'FROM RDB$USER_PRIVILEGES ' +
       'WHERE RDB$RELATION_NAME = :ObjectName AND RDB$USER = :UserName';
-  end
-  else
+  end else
   begin
     // Firebird 3.0 oder neuer – moderne Rechte mit USER_TYPE-Filter
     sqQuery.SQL.Text :=
@@ -1119,12 +1302,15 @@ begin
 
   if FBVersionMajor < 3 then
   begin
-    sqQuery.SQL.Text :=
+    {sqQuery.SQL.Text :=
       'SELECT RDB$RELATION_NAME, RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
       'FROM RDB$USER_PRIVILEGES ' +
-      'WHERE RDB$USER = :UserName';
-  end
-  else
+      'WHERE RDB$USER = :UserName';}
+    sqQuery.SQL.Text :=
+          'SELECT RDB$RELATION_NAME, RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
+          'FROM RDB$USER_PRIVILEGES ' +
+          'WHERE RDB$RELATION_NAME <> ' + QuotedStr('DUMMYROLE') + ' AND RDB$USER = :UserName';
+  end else
   begin
     sqQuery.SQL.Text :=
       'SELECT RDB$RELATION_NAME, RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
@@ -1322,17 +1508,17 @@ begin
     ExtendedList.Free;
     CleanFirebirdTypeList(List);
 
-    if FBVersionMajor = 3 then
-      List.SaveToFile('FB3Types.txt')
+    if FBVersionMajor = 2 then
+      //List.SaveToFile('FB2Types.txt')
+    else if FBVersionMajor = 3 then
+      //List.SaveToFile('FB3Types.txt')
     else if FBVersionMajor = 4 then
-      List.SaveToFile('FB4Types.txt')
+      //List.SaveToFile('FB4Types.txt')
     else if FBVersionMajor = 5 then
-      List.SaveToFile('FB5Types.txt');
+      //List.SaveToFile('FB5Types.txt');
 
   end;
 end;
-
-//end-newlib
 
 procedure TdmSysTables.GetDomainTypes(dbIndex: Integer; List: TStrings);
 var

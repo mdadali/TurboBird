@@ -14,7 +14,8 @@ uses
   GridPrnPreviewDlg, QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
   LR_DSet,
 
-  fdataexportersintrf;
+  fdataexportersintrf,
+  fblobedit;
 
 type
 
@@ -65,7 +66,6 @@ type
     FindDialog1: TFindDialog;
     bbClose: TSpeedButton;
     FontDialog1: TFontDialog;
-    lmShowBlobField: TMenuItem;
     lmExportDataSet: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmStdExportFormats: TMenuItem;
@@ -148,7 +148,6 @@ type
     procedure lmRunScriptClick(Sender: TObject);
     procedure lmRunSelectClick(Sender: TObject);
     procedure lmSelectAllClick(Sender: TObject);
-    procedure lmShowBlobFieldClick(Sender: TObject);
     procedure lmStdExportFormatsClick(Sender: TObject);
     procedure lmUndoClick(Sender: TObject);
     procedure lmFindClick(Sender: TObject);
@@ -197,6 +196,7 @@ type
     FCounter: Integer;
     OutputTabsList: TStrings;
 
+    FNodeInfos: TPNodeInfos;
     // Makes commit button in current tabsheet visible
     procedure EnableCommitButton;
     procedure ExecuteQuery;
@@ -224,7 +224,7 @@ type
     procedure GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType; Const Msg : String);
   public
     OnCommit: TNotifyEvent;
-    procedure Init(dbIndex: Integer);
+    procedure Init(dbIndex: Integer; ANodeInfos: TPNodeInfos=nil);
     function GetQueryType(AQuery: string): TQueryTypes;
     // Get query text from GUI/memo into
     // QueryContents
@@ -252,8 +252,8 @@ type
     { public declarations }
   end; 
 
-var
-  fmQueryWindow: TfmQueryWindow;
+//var
+  //fmQueryWindow: TfmQueryWindow;
 
 implementation
 
@@ -263,6 +263,7 @@ uses main, SQLHistory;
 
 { TfmQueryWindow }
 { NewCommitButton: Create commit button for editable query result }
+
 
 procedure TfmQueryWindow.NewCommitButton(const Pan: TPanel; var ATab: TTabSheet);
 var
@@ -775,18 +776,69 @@ begin
   end;
 end;
 
-
 {HistoryClick: show SQL history form }
-
 procedure TfmQueryWindow.tbHistoryClick(Sender: TObject);
+var Node: TTreeNode;
 begin
-  fmSQLHistory.Init(FRegRec.Title, Self);
+  fmSQLHistory.Init(FRegRec.Title, Self, nil);
   fmSQLHistory.ShowModal;
 end;
 
+{procedure TfmQueryWindow.tbHistoryClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  ATab: TTabSheet;
+  frmSQLHistory: TfmSQLHistory;
+  ShortTitle, FullHint: string;
+begin
+  SelNode := fmMain.tvMain.Selected;
+  if (SelNode = nil) or (SelNode.Parent = nil) or (SelNode.Parent.Parent = nil) then Exit;
+
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  if NodeInfos = nil then Exit;
+
+  // Prüfen ob das Fenster schon existiert
+
+  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmSQLHistory) then
+    frmSQLHistory := TfmSQLHistory(NodeInfos^.ViewForm)
+  else
+  begin
+    frmSQLHistory := TfmSQLHistory.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := fmMain.PageControl1;
+    ATab.ImageIndex := -1; // optional eigenes Icon setzen
+    frmSQLHistory.Parent := ATab;
+    frmSQLHistory.Align := alClient;
+    frmSQLHistory.BorderStyle := bsNone;
+
+    // merken, damit wiederverwendet wird
+    NodeInfos^.ViewForm := frmSQLHistory;
+  end;
+
+  // Tab vorbereiten
+  ATab := frmSQLHistory.Parent as TTabSheet;
+  fmMain.PageControl1.ActivePage := ATab;
+
+  // Titel
+  ShortTitle := 'SQL History:' + TTreeNode(GetAncestorAtLevel(SelNode, 1)).Text;
+  ATab.Caption := ShortTitle;
+  frmSQLHistory.Caption := ShortTitle;
+
+  // Hint
+  FullHint :=
+    'SQL History' + sLineBreak +
+    'Database: ' + FRegRec.Title;
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Initialisieren
+  frmSQLHistory.Init(FRegRec.Title, Self, NodeInfos);
+  frmSQLHistory.Show;
+end;}
+
 
 { Display popup menu }
-
 procedure TfmQueryWindow.tbMenuClick(Sender: TObject);
 begin
   pmTab.PopUp;
@@ -802,14 +854,13 @@ begin
   // Get a free number to be assigned to the new Query window
   for i:= 1 to 1000 do
   begin
-    if fmMain.FindQueryWindow(FRegRec.Title + ': QW#' + IntToStr(i)) = nil then
+    if fmMain.FindQueryWindow('SQL # ' + IntToStr(i)) = nil then
     begin
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'QW#' + IntToStr(i), '');
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'SQL # ' + IntToStr(i), '', nil);
       Break;
     end;
   end;
 end;
-
 
 { Read SQL query from text file }
 
@@ -1051,8 +1102,9 @@ end;
 
 { Initialize query window: fill connection parameters from selected registered database }
 
-procedure TfmQueryWindow.Init(dbIndex: Integer);
+procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos=nil);
 begin
+  FNodeInfos := ANodeInfos;
   FDBIndex:= dbIndex;
   FRegRec:= RegisteredDatabases[dbIndex].RegRec;
 
@@ -1262,8 +1314,200 @@ begin
   end;
 end;
 
+
 (***************  Execute Query   ******************)
-{procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
+{$IFDEF DEBUG}
+procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
+var
+  StartTime: TDateTime;
+  SqlType: string;
+  EndLine: Integer;
+  Command: string;
+  IsDDL: Boolean;
+  Affected: Integer;
+  fQueryType: TQueryTypes;
+  FSQLQuery: TSQLQueryExt;
+begin
+  try
+    if (FOrigQueryType = qtScript) then
+    begin
+      ExecuteScript(FQuery.Text);
+      Inc(FModifyCount);
+      SqlType := GetSQLType(FQuery.Text, Command);
+      fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQuery.Text);
+      FFinished := True;
+      FQuery.Clear;
+    end
+    else
+    begin
+      Inc(FCounter);
+      if not GetSQLSegment(FQuery, FStartLine, fQueryType, EndLine, FQueryPart, IsDDL) then
+      begin
+        FFinished := True;
+        Exit;
+      end;
+
+      FStartLine := EndLine + 1;
+
+      if Trim(FQueryPart) <> '' then
+      begin
+        if fQueryType = qtSelectable then
+        begin
+          FTab := nil;
+          try
+            FSQLQuery := TSQLQueryExt.Create(Self);
+            FSQLQuery.DataBase := FIBConnection;
+            FSQLQuery.Transaction := FSQLTrans;
+            if cxAutoCommit.Checked then
+              FSQLTrans.Commit;
+            FTab := CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
+            FTab.ImageIndex := 6;
+            FTab.Hint := FQueryPart;
+            FTab.ShowHint := True;
+            FSQLQuery.SQL.Text := FQueryPart;
+
+            // Open dataset synchronously
+            FSQLQuery.Open;
+
+            FTab.Caption := 'Query Result';
+            FTab.ImageIndex := 0;
+            fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
+          except
+            on e: Exception do
+            begin
+              if Assigned(FTab) then
+                FTab.TabVisible := False;
+              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
+              pgOutputPageCtl.ActivePage := FTab;
+              FResultMemo.Text := e.Message;
+              FResultMemo.Lines.Add(FQueryPart);
+              FResultMemo.Font.Color := clRed;
+              FTab.Font.Color := clRed;
+              FTab.ImageIndex := 3;
+            end;
+          end;
+        end
+        else if fQueryType = qtExecute then
+        begin
+          FTab := nil;
+          FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
+          FTab.ImageIndex := 1;
+          SqlType := GetSQLType(FQueryPart, Command);
+          StartTime := Now;
+          Affected := 0;
+          try
+            if IsDDL then
+            begin
+              // Execute DDL synchronously
+              FSQLQuery.SQL.Text := FQueryPart;
+              FSQLQuery.ExecSQL;
+              if cxAutoCommit.Checked then
+                FSQLTrans.CommitRetaining;
+              FTab.Caption := 'DDL Executed';
+            end
+            else
+            begin
+              // Execute DML synchronously
+              FSQLQuery.SQL.Text := FQueryPart;
+              FSQLQuery.ExecSQL;
+              if cxAutoCommit.Checked then
+                FSQLTrans.CommitRetaining;
+              Affected := FSQLQuery.RowsAffected;
+              FTab.Caption := 'DML Executed';
+            end;
+            Inc(FModifyCount);
+            fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
+            FResultMemo.Visible := True;
+            FResultMemo.Clear;
+            FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
+            if IsDDL then
+              FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) + ' - DDL Executed. Duration: ' +
+                FormatDateTime('HH:nn:ss.z', Now - StartTime))
+            else
+            begin
+              FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) + ' - DML Executed. Duration: ' +
+                FormatDateTime('HH:nn:ss.z', Now - StartTime));
+              FResultMemo.Lines.Add('Rows affected: ' + IntToStr(Affected));
+            end;
+            FResultMemo.Lines.Add('----');
+            FResultMemo.Lines.Add(FQueryPart);
+          except
+            on E: Exception do
+            begin
+              if Assigned(FTab) then
+                FTab.TabVisible := False;
+              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
+              pgOutputPageCtl.ActivePage := FTab;
+              FResultMemo.Text := e.Message;
+              FResultMemo.Lines.Add(FQueryPart);
+              FResultMemo.Font.Color := clRed;
+              FTab.Font.Color := clRed;
+              FTab.ImageIndex := 3;
+            end;
+          end;
+        end
+        else
+        begin
+          try
+            if ExecuteScript(FQueryPart) then
+            begin
+              Inc(FModifyCount);
+              SqlType := GetSQLType(FQueryPart, Command);
+              fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
+            end;
+          except
+            on E: Exception do
+            begin
+              if Assigned(FTab) then
+                FTab.TabVisible := False;
+              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
+              pgOutputPageCtl.ActivePage := FTab;
+              FResultMemo.Text := e.Message;
+              FResultMemo.Lines.Add(FQueryPart);
+              FResultMemo.Lines.Add('--------');
+              FResultMemo.Font.Color := clRed;
+              FTab.Font.Color := clRed;
+              FTab.ImageIndex := 3;
+            end;
+          end;
+        end;
+
+        if (FModifyCount > 50) then
+        begin
+          if (MessageDlg('Commit', 'There are too many transactions, do you want to commit?',
+            mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+          begin
+            FSQLTrans.CommitRetaining;
+            FModifyCount := 0;
+          end
+          else
+            FModifyCount := 0;
+        end;
+      end;
+
+      if FStartLine >= FQuery.Count then
+        FFinished := True;
+    end;
+  except
+    on E: Exception do
+    begin
+      if Assigned(FTab) then
+        FTab.TabVisible := False;
+      FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
+      FTab.ImageIndex := 2;
+      pgOutputPageCtl.ActivePage := FTab;
+
+      FResultMemo.Text := E.Message;
+      FResultMemo.Lines.Add('--------');
+      FResultMemo.Lines.Add(FQueryPart);
+      FResultMemo.Font.Color := clRed;
+      FFinished := True;
+    end;
+  end;
+end;
+
+{$ELSE}
+procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -1549,195 +1793,7 @@ begin
     end;
   end;
 end;
-}
-procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
-var
-  StartTime: TDateTime;
-  SqlType: string;
-  EndLine: Integer;
-  Command: string;
-  IsDDL: Boolean;
-  Affected: Integer;
-  fQueryType: TQueryTypes;
-  FSQLQuery: TSQLQueryExt;
-begin
-  try
-    if (FOrigQueryType = qtScript) then
-    begin
-      ExecuteScript(FQuery.Text);
-      Inc(FModifyCount);
-      SqlType := GetSQLType(FQuery.Text, Command);
-      fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQuery.Text);
-      FFinished := True;
-      FQuery.Clear;
-    end
-    else
-    begin
-      Inc(FCounter);
-      if not GetSQLSegment(FQuery, FStartLine, fQueryType, EndLine, FQueryPart, IsDDL) then
-      begin
-        FFinished := True;
-        Exit;
-      end;
-
-      FStartLine := EndLine + 1;
-
-      if Trim(FQueryPart) <> '' then
-      begin
-        if fQueryType = qtSelectable then
-        begin
-          FTab := nil;
-          try
-            FSQLQuery := TSQLQueryExt.Create(Self);
-            FSQLQuery.DataBase := FIBConnection;
-            FSQLQuery.Transaction := FSQLTrans;
-            if cxAutoCommit.Checked then
-              FSQLTrans.Commit;
-            FTab := CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
-            FTab.ImageIndex := 6;
-            FTab.Hint := FQueryPart;
-            FTab.ShowHint := True;
-            FSQLQuery.SQL.Text := FQueryPart;
-
-            // Open dataset synchronously
-            FSQLQuery.Open;
-
-            FTab.Caption := 'Query Result';
-            FTab.ImageIndex := 0;
-            fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
-          except
-            on e: Exception do
-            begin
-              if Assigned(FTab) then
-                FTab.TabVisible := False;
-              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
-              pgOutputPageCtl.ActivePage := FTab;
-              FResultMemo.Text := e.Message;
-              FResultMemo.Lines.Add(FQueryPart);
-              FResultMemo.Font.Color := clRed;
-              FTab.Font.Color := clRed;
-              FTab.ImageIndex := 3;
-            end;
-          end;
-        end
-        else if fQueryType = qtExecute then
-        begin
-          FTab := nil;
-          FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
-          FTab.ImageIndex := 1;
-          SqlType := GetSQLType(FQueryPart, Command);
-          StartTime := Now;
-          Affected := 0;
-          try
-            if IsDDL then
-            begin
-              // Execute DDL synchronously
-              FSQLQuery.SQL.Text := FQueryPart;
-              FSQLQuery.ExecSQL;
-              if cxAutoCommit.Checked then
-                FSQLTrans.CommitRetaining;
-              FTab.Caption := 'DDL Executed';
-            end
-            else
-            begin
-              // Execute DML synchronously
-              FSQLQuery.SQL.Text := FQueryPart;
-              FSQLQuery.ExecSQL;
-              if cxAutoCommit.Checked then
-                FSQLTrans.CommitRetaining;
-              Affected := FSQLQuery.RowsAffected;
-              FTab.Caption := 'DML Executed';
-            end;
-            Inc(FModifyCount);
-            fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
-            FResultMemo.Visible := True;
-            FResultMemo.Clear;
-            FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
-            if IsDDL then
-              FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) + ' - DDL Executed. Duration: ' +
-                FormatDateTime('HH:nn:ss.z', Now - StartTime))
-            else
-            begin
-              FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) + ' - DML Executed. Duration: ' +
-                FormatDateTime('HH:nn:ss.z', Now - StartTime));
-              FResultMemo.Lines.Add('Rows affected: ' + IntToStr(Affected));
-            end;
-            FResultMemo.Lines.Add('----');
-            FResultMemo.Lines.Add(FQueryPart);
-          except
-            on E: Exception do
-            begin
-              if Assigned(FTab) then
-                FTab.TabVisible := False;
-              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
-              pgOutputPageCtl.ActivePage := FTab;
-              FResultMemo.Text := e.Message;
-              FResultMemo.Lines.Add(FQueryPart);
-              FResultMemo.Font.Color := clRed;
-              FTab.Font.Color := clRed;
-              FTab.ImageIndex := 3;
-            end;
-          end;
-        end
-        else
-        begin
-          try
-            if ExecuteScript(FQueryPart) then
-            begin
-              Inc(FModifyCount);
-              SqlType := GetSQLType(FQueryPart, Command);
-              fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
-            end;
-          except
-            on E: Exception do
-            begin
-              if Assigned(FTab) then
-                FTab.TabVisible := False;
-              FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
-              pgOutputPageCtl.ActivePage := FTab;
-              FResultMemo.Text := e.Message;
-              FResultMemo.Lines.Add(FQueryPart);
-              FResultMemo.Lines.Add('--------');
-              FResultMemo.Font.Color := clRed;
-              FTab.Font.Color := clRed;
-              FTab.ImageIndex := 3;
-            end;
-          end;
-        end;
-
-        if (FModifyCount > 50) then
-        begin
-          if (MessageDlg('Commit', 'There are too many transactions, do you want to commit?',
-            mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-          begin
-            FSQLTrans.CommitRetaining;
-            FModifyCount := 0;
-          end
-          else
-            FModifyCount := 0;
-        end;
-      end;
-
-      if FStartLine >= FQuery.Count then
-        FFinished := True;
-    end;
-  except
-    on E: Exception do
-    begin
-      if Assigned(FTab) then
-        FTab.TabVisible := False;
-      FTab := CreateResultTab(qtExecute, FSQLQuery, FSQLScript, FResultMemo);
-      FTab.ImageIndex := 2;
-      pgOutputPageCtl.ActivePage := FTab;
-
-      FResultMemo.Text := E.Message;
-      FResultMemo.Lines.Add('--------');
-      FResultMemo.Lines.Add(FQueryPart);
-      FResultMemo.Font.Color := clRed;
-      FFinished := True;
-    end;
-  end;
-end;
+{$ENDIF}
 
 { Execute script }
 function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
@@ -1977,6 +2033,10 @@ end;
 procedure TfmQueryWindow.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  if Assigned(FNodeInfos) then
+    if Assigned(FNodeInfos^.ViewForm) then
+      FNodeInfos^.ViewForm := nil;
+
   // Check if the transaction is active; then commit it
   if FSQLTrans.Active then
   begin
@@ -2125,7 +2185,7 @@ end;
 
 { Copy cell in clipboard }
 
-procedure TfmQueryWindow.lmCopyCellClick(Sender: TObject);
+{procedure TfmQueryWindow.lmCopyCellClick(Sender: TObject);
 var Field: TField; Grid: TDBGrid;
 begin
   Grid := TdbGrid(pmGrid.PopupComponent);
@@ -2140,86 +2200,86 @@ begin
      Clipboard.AsText := Field.AsString;
    end;
 
-  //Clipboard.AsText:= TdbGrid(pmGrid.PopupComponent).SelectedField.AsString;
+  //Clipboard.AsText := TdbGrid(pmGrid.PopupComponent).SelectedField.AsString;
+end;}
+
+procedure TfmQueryWindow.lmCopyCellClick(Sender: TObject);
+var
+  Field: TField; Grid: TDBGrid;
+  ServerNode, DBNode, SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  Rec: TDatabaseRec;
+  dbIndex: Integer;
+  ATab: TTabSheet;
+  frmBlobEdit: TfrmBlobEdit;
+  Server, DBAlias, ShortTitle, FullHint: string;
+begin
+  Grid := TdbGrid(pmGrid.PopupComponent);
+  Field := Grid.SelectedField;
+
+  if not ((Field is TMemoField) or (Field is TBlobField)) then exit;
+  SelNode := fmMain.tvMain.Selected;
+  if SelNode = nil then Exit;
+
+  ServerNode := TTreeNode(GetAncestorAtLevel(SelNode, 0));
+  DBNode     := TTreeNode(GetAncestorAtLevel(SelNode, 1));
+
+  if (ServerNode = SelNode) or (ServerNode = nil) or (DBNode = nil) or (ServerNode = DBNode) then
+    exit;
+
+  NodeInfos := TPNodeInfos(DBNode.Data);
+  dbIndex   := NodeInfos^.dbIndex;
+  Rec       := RegisteredDatabases[dbIndex];
+
+  Server    := ServerNode.Text; // Servername (Level 0)
+  DBAlias   := DBNode.Text;
+
+  // Prüfen, ob Editor schon existiert
+  if Assigned(NodeInfos^.ViewForm) then
+  begin
+    frmBlobEdit := TfrmBlobEdit(NodeInfos^.ViewForm);
+    ATab := frmBlobEdit.Parent as TTabSheet;
+  end
+  else
+  begin
+    frmBlobEdit := TfrmBlobEdit.Create(Application);
+
+    ATab := TTabSheet.Create(Self);
+    ATab.PageControl := fmMain.PageControl1;
+    ATab.Tag := dbIndex;
+
+    frmBlobEdit.Parent := ATab;
+    frmBlobEdit.Align := alClient;
+    frmBlobEdit.BorderStyle := bsNone;
+
+    NodeInfos^.ViewForm := frmBlobEdit;
+  end;
+
+  // Tab-Titel kurz halten
+  ShortTitle := 'Blob Viewer';
+  ATab.Caption := ShortTitle;
+
+  // Vollständiger Kontext im Tooltip
+  FullHint :=
+    'Server: '  + Server + sLineBreak +
+    'DBAlias: ' + DBAlias + sLineBreak +
+    'DBPath: '  + Rec.RegRec.DatabaseName + sLineBreak +
+    'Object: BLOB-Viewer';
+
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Tab aktivieren + Initialisierung
+  fmMain.PageControl1.ActivePage := ATab;
+  frmBlobEdit.Init(Field, NodeInfos);
+  frmBlobEdit.Show;
 end;
+
 procedure TfmQueryWindow.pmGridPopup(Sender: TObject);
 var Field: TField; Grid: TDBGrid;
 begin
   Grid := TdbGrid(pmGrid.PopupComponent);
   Field := Grid.SelectedField;
-  lmShowBlobField.Visible := (Field is TMemoField) or (Field is TBlobField);
-end;
-
-procedure TfmQueryWindow.lmShowBlobFieldClick(Sender: TObject);
-{var Field: TField; Grid: TDBGrid;
-begin
-  Grid := TdbGrid(pmGrid.PopupComponent);
-  Field := Grid.SelectedField;
-  ShowMessage(Field.DataSet.FieldByName(Field.FieldName).AsString);
-end;
-}
-var
-  Field: TField;
-  Grid: TDBGrid;
-  FuncSource: TStringList;
-  SQLStr: string;
-  DatabaseName, FuncName, PkgName: string;
-begin
-  Grid := TDBGrid(pmGrid.PopupComponent);
-  Field := Grid.SelectedField;
-
-  //FuncName := '';  // Initialisieren
-
-  // Ermitteln, ob das ein Package-Funktionseintrag ist:
-  //if SameText(Field.FieldName, 'RDB$FUNCTION_NAME') then
-  FuncName := Trim(Field.DataSet.FieldByName('RDB$FUNCTION_NAME').AsString);
-
-  if Field.DataSet.FindField('RDB$PACKAGE_NAME') <> nil then
-    PkgName := Trim(Field.DataSet.FieldByName('RDB$PACKAGE_NAME').AsString)
-  else
-    PkgName := '';
-
-  if FuncName <> '' then
-  begin
-    FuncSource := TStringList.Create;
-    try
-      if PkgName <> '' then
-      begin
-        // Funktion innerhalb eines Packages
-        SQLStr := 'select RDB$FUNCTION_SOURCE from RDB$FUNCTIONS where RDB$FUNCTION_NAME = ''' +
-               FuncName + ''' and RDB$PACKAGE_NAME = ''' + PkgName + '''';
-      end
-      else
-      begin
-        // Globale Funktion
-        SQLStr := 'select RDB$FUNCTION_SOURCE from RDB$FUNCTIONS where RDB$FUNCTION_NAME = ''' +
-               FuncName + ''' and RDB$PACKAGE_NAME is null';
-      end;
-
-      with TSQLQueryExt.Create(nil) do
-      try
-        DataBase:= FIBConnection;
-        SQL.Text := SQLStr;
-        Open;
-        if not Eof then
-        begin
-          FuncSource.Text := Trim(FieldByName('RDB$FUNCTION_SOURCE').AsString);
-          ShowMessage(FuncSource.Text);
-        end
-        else
-          ShowMessage('Function source not found.');
-      finally
-        Free;
-      end;
-    finally
-      FuncSource.Free;
-    end;
-  end
-  else
-  begin
-    // Fallback: zeige einfach Inhalt der Zelle wie bisher
-    ShowMessage(Field.DataSet.FieldByName(Field.FieldName).AsString);
-  end;
 end;
 
 procedure TfmQueryWindow.lmStdExportFormatsClick(Sender: TObject);

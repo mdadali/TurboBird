@@ -5,7 +5,8 @@ unit dmibx;
 interface
 
 uses
-  Classes, SysUtils, Controls, IBDatabase, IBQuery, IBTable, IBSQLMonitor;
+  Classes, SysUtils, Controls, IBDatabase, IBQuery, IBTable, IBSQLMonitor,
+  IBXServices;
 
 type
 
@@ -16,6 +17,7 @@ type
     IBQuery1: TIBQuery;
     IBTable1: TIBTable;
     IBTransaction1: TIBTransaction;
+    IBXServicesConnection1: TIBXServicesConnection;
   private
 
   public

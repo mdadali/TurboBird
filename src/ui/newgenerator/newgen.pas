@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, Buttons, turbocommon;
+  Graphics, Dialogs, StdCtrls, Buttons,
+  fbcommon,
+  turbocommon;
 
 type
 
@@ -49,6 +51,7 @@ procedure TfmNewGen.bbCreateGenClick(Sender: TObject);
 var
   List: TStringList;
   Valid: Boolean;
+  dbIndex: integer;
 begin
   if Trim(edGenName.Text) <> '' then
   begin
@@ -74,9 +77,9 @@ begin
           List.Add('END;');
           Valid:= True;
         end;
-
       end;
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Create Generator: ' + edGenName.Text, List.Text);
+      dbIndex := TPNodeInfos(fmMain.tvMain.Selected.Data)^.dbIndex;
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'New Generator#' + IntToStr(dbIndex) + ':' + edGenName.Text, List.Text);
       Close;
     finally
       List.Free;

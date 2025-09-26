@@ -77,10 +77,11 @@ type
     FdbIndex: Integer;
     FFirebirdConfPath: string;
     FFirebirdConfLines: TStringList;
+    FNodeInfos: TPNodeInfos;
   public
     constructor create(AOwner: TComponent); override;
     destructor  destroy; override;
-    procedure init(AdbIndex: integer);
+    procedure init(AdbIndex: integer; ANodeInfos: TPNodeInfos);
     procedure InitForFB3;
     function GetOptionValue(AOption: string): string;
   end;
@@ -403,9 +404,9 @@ begin
   end;
 end;
 
-procedure TfmFirebirdConfig.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TfmFirebirdConfig.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  FNodeInfos^.ViewForm := nil;
   CloseAction := caFree;
 end;
 
@@ -533,12 +534,13 @@ begin
   end;
 end;
 
-procedure TfmFirebirdConfig.Init(AdbIndex: Integer);
+procedure TfmFirebirdConfig.Init(AdbIndex: Integer; ANodeInfos: TPNodeInfos);
 var
   Rec: TDatabaseRec;
   ConfList: TStringList;
   ConfName, ConfVal, ConfSource, SecDbPath: string;
 begin
+  FNodeInfos := ANodeInfos;
   FdbIndex := AdbIndex;
   Rec := RegisteredDatabases[FdbIndex];
   AssignIBConnection(IBConnection1, Rec.IBConnection);

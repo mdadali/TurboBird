@@ -6,129 +6,229 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, SQLDB,
-  udb_firebird_struct_helper;
+  fbcommon;
 
-function GetUDFFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
-function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetUDFModuleNameAndEntryPoint(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFParams(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFInputParams(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFReturnParam(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string): string;
+
+function GetUDFParamBeiPosition(Conn: TIBConnection; const FunctionName: string; APosition: word): string;
 
 implementation
 
-function GetUDFFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetUDFModuleNameAndEntryPoint(Conn: TIBConnection; const FunctionName: string): string;
 var
-  QFunc, QArgs: TSQLQuery;
-  Args: TStringList;
-  ArgTypeStr, ArgName, RetStr, EntryPoint, ModuleName: string;
-  FieldType, SubType, Precision, Scale, Length, CharsetId: Integer;
-  FullName: string;
+  SQLQuery: TSQLQuery;
+  ModuleName, EntryPoint: string;
 begin
-  Args := TStringList.Create;
-  QFunc := TSQLQuery.Create(nil);
-  QArgs := TSQLQuery.Create(nil);
+  Result := '';
+  SQLQuery := TSQLQuery.Create(nil);
   try
-    QFunc.DataBase := Conn;
-    QArgs.DataBase := Conn;
-
-    // Funktionsname inkl. optionalem Paketnamen
-    if APackageName <> '' then
-      FullName := FunctionName //Format('%s.%s', [APackageName, FunctionName])
-    else
-      FullName := FunctionName;
-
-    // Funktion aus RDB$FUNCTIONS holen
-    QFunc.SQL.Text :=
-      'SELECT TRIM(RDB$FUNCTION_NAME), TRIM(RDB$ENTRYPOINT), TRIM(RDB$MODULE_NAME) ' +
+    SQLQuery.DataBase := Conn;
+    SQLQuery.SQL.Text :=
+      'SELECT RDB$MODULE_NAME, RDB$ENTRYPOINT ' +
       'FROM RDB$FUNCTIONS ' +
-      'WHERE UPPER(TRIM(RDB$FUNCTION_NAME)) = :NAME ';
-    if APackageName <> '' then
-      QFunc.SQL.Text := QFunc.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
-    else
-      QFunc.SQL.Text := QFunc.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL';
+      'WHERE RDB$FUNCTION_NAME = :FNAME';
+    SQLQuery.ParamByName('FNAME').AsString := UpperCase(FunctionName);
+    SQLQuery.Open;
 
-    QFunc.Params.ParamByName('NAME').AsString := UpperCase(FunctionName);
-    if APackageName <> '' then
-      QFunc.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
-    QFunc.Open;
-
-    if QFunc.EOF then
-      Exit('-- Funktion ' + FullName + ' nicht gefunden.');
-
-    EntryPoint := QFunc.Fields[1].AsString;
-    ModuleName := QFunc.Fields[2].AsString;
-
-    // Parameter lesen
-    QArgs.SQL.Text :=
-      'SELECT RDB$ARGUMENT_POSITION, RDB$ARGUMENT_NAME, RDB$FIELD_TYPE, RDB$FIELD_SUB_TYPE, ' +
-      'RDB$FIELD_LENGTH, RDB$FIELD_PRECISION, RDB$FIELD_SCALE, RDB$FIELD_SOURCE, RDB$CHARACTER_SET_ID ' +
-      'FROM RDB$FUNCTION_ARGUMENTS ' +
-      'WHERE UPPER(TRIM(RDB$FUNCTION_NAME)) = :NAME ';
-    if APackageName <> '' then
-      QArgs.SQL.Text := QArgs.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
-    else
-      QArgs.SQL.Text := QArgs.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
-    QArgs.SQL.Text := QArgs.SQL.Text + 'ORDER BY RDB$ARGUMENT_POSITION';
-
-    QArgs.Params.ParamByName('NAME').AsString := UpperCase(FunctionName);
-    if APackageName <> '' then
-      QArgs.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
-    QArgs.Open;
-
-    RetStr := 'UNKNOWN';
-    Args.Clear;
-
-    while not QArgs.EOF do
+    if not SQLQuery.EOF then
     begin
-      ArgName := Trim(QArgs.FieldByName('RDB$ARGUMENT_NAME').AsString);
-
-      FieldType  := QArgs.FieldByName('RDB$FIELD_TYPE').AsInteger;
-      SubType    := QArgs.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
-      Length     := QArgs.FieldByName('RDB$FIELD_LENGTH').AsInteger;
-      Precision  := QArgs.FieldByName('RDB$FIELD_PRECISION').AsInteger;
-      Scale      := QArgs.FieldByName('RDB$FIELD_SCALE').AsInteger;
-      CharsetId  := QArgs.FieldByName('RDB$CHARACTER_SET_ID').AsInteger;
-
-      if FieldType = 0 then
-        ArgTypeStr := FieldSourceToStr(Trim(QArgs.FieldByName('RDB$FIELD_SOURCE').AsString), Conn)
-      else
-        ArgTypeStr := FieldTypeToStr(FieldType, SubType, Precision, Scale, Length, CharsetId, Conn);
-
-      if QArgs.FieldByName('RDB$ARGUMENT_POSITION').AsInteger = 0 then
-        RetStr := ArgTypeStr
-      else
-        Args.Add(ArgTypeStr); // UDFs brauchen keine Namen
-      QArgs.Next;
+      ModuleName := Trim(SQLQuery.FieldByName('RDB$MODULE_NAME').AsString);
+      EntryPoint := Trim(SQLQuery.FieldByName('RDB$ENTRYPOINT').AsString);
+      Result := ModuleName + ',' + EntryPoint;
     end;
-
-    Result := Format(
-      'DECLARE EXTERNAL FUNCTION %s(%s)%sRETURNS %s%sENTRY_POINT ''%s''%sMODULE_NAME ''%s'';',
-      [
-        FullName,
-        LineEnding + '  ' + StringReplace(Args.Text.Trim, LineEnding, ',' + LineEnding + '  ', [rfReplaceAll]),
-        LineEnding,
-        RetStr,
-        LineEnding,
-        EntryPoint,
-        LineEnding,
-        ModuleName
-      ]);
   finally
-    Args.Free;
-    QFunc.Free;
-    QArgs.Free;
+    SQLQuery.Free;
   end;
 end;
 
-function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetUDFParams(Conn: TIBConnection; const FunctionName: string): string;
 var
-  FullName: string;
+  SQLQuery: TSQLQuery;
 begin
-  if APackageName <> '' then
-    FullName := Format('%s.%s', [APackageName, FunctionName])
-  else
-    FullName := FunctionName;
+  Result := '';
+  SQLQuery := TSQLQuery.Create(nil);
+  try
+    SQLQuery.DataBase := Conn;
+    SQLQuery.SQL.Text :=
+      'SELECT RDB$ARGUMENT_POSITION, ' +
+      '       CASE ' +
+      '           WHEN RDB$FIELD_TYPE = 7 THEN ''SMALLINT'' ' +
+      '           WHEN RDB$FIELD_TYPE = 8 THEN ''INTEGER'' ' +
+      '           WHEN RDB$FIELD_TYPE = 9 THEN ''QUAD'' ' +
+      '           WHEN RDB$FIELD_TYPE = 10 THEN ''FLOAT'' ' +
+      '           WHEN RDB$FIELD_TYPE = 11 THEN ''D_FLOAT'' ' +
+      '           WHEN RDB$FIELD_TYPE = 12 AND RDB$FIELD_SUB_TYPE = 0 THEN ''DATE'' ' +
+      '           WHEN RDB$FIELD_TYPE = 12 AND RDB$FIELD_SUB_TYPE = 1 THEN ''TIME WITH TIME ZONE'' ' +
+      '           WHEN RDB$FIELD_TYPE = 13 THEN ''TIME'' ' +
+      '           WHEN RDB$FIELD_TYPE = 14 THEN ''CHAR('' || RDB$CHARACTER_LENGTH || '')'' ' +
+      '           WHEN RDB$FIELD_TYPE = 16 AND RDB$FIELD_SUB_TYPE = 0 THEN ''BIGINT'' ' +
+      '           WHEN RDB$FIELD_TYPE = 16 AND RDB$FIELD_SUB_TYPE = 1 THEN ''NUMERIC('' || RDB$FIELD_PRECISION || '','' || (0 - RDB$FIELD_SCALE) || '')'' ' +
+      '           WHEN RDB$FIELD_TYPE = 16 AND RDB$FIELD_SUB_TYPE = 2 THEN ''DECIMAL('' || RDB$FIELD_PRECISION || '','' || (0 - RDB$FIELD_SCALE) || '')'' ' +
+      '           WHEN RDB$FIELD_TYPE = 23 THEN ''BOOLEAN'' ' +
+      '           WHEN RDB$FIELD_TYPE = 27 THEN ''DOUBLE PRECISION'' ' +
+      '           WHEN RDB$FIELD_TYPE = 35 AND RDB$FIELD_SUB_TYPE = 0 THEN ''TIMESTAMP'' ' +
+      '           WHEN RDB$FIELD_TYPE = 35 AND RDB$FIELD_SUB_TYPE = 1 THEN ''TIMESTAMP WITH TIME ZONE'' ' +
+      '           WHEN RDB$FIELD_TYPE = 37 THEN ''VARCHAR('' || RDB$CHARACTER_LENGTH || '')'' ' +
+      '           WHEN RDB$FIELD_TYPE = 40 THEN ''CSTRING('' || RDB$FIELD_LENGTH || '')'' ' +
+      '           WHEN RDB$FIELD_TYPE = 45 THEN ''BLOB_ID'' ' +
+      '           WHEN RDB$FIELD_TYPE = 261 THEN ''BLOB'' ' + // immer nur BLOB, Subtype egal
+      '           WHEN RDB$FIELD_TYPE = 32752 THEN ''SQL_ARRAY'' ' +
+      '           ELSE ''UNKNOWN_TYPE_'' || RDB$FIELD_TYPE ' +
+      '       END AS ARG_TYPE ' +
+      'FROM RDB$FUNCTION_ARGUMENTS ' +
+      'WHERE RDB$FUNCTION_NAME = :FNAME ' +
+      'ORDER BY RDB$ARGUMENT_POSITION';
 
-  Result :=
-    Format('-- DROP EXTERNAL FUNCTION %s;%s', [FullName, LineEnding]) +
-    GetUDFFunctionHeader(Conn, FunctionName, APackageName);
+    SQLQuery.ParamByName('FNAME').AsString := UpperCase(FunctionName);
+    SQLQuery.Open;
+
+    while not SQLQuery.EOF do
+    begin
+      if Result <> '' then
+        Result := Result + ', ';
+      Result := Result + Trim(SQLQuery.FieldByName('ARG_TYPE').AsString);
+      SQLQuery.Next;
+    end;
+  finally
+    SQLQuery.Free;
+  end;
+end;
+
+function GetUDFInputParams(Conn: TIBConnection; const FunctionName: string): string;
+var
+  Params: string;
+  P: SizeInt;
+begin
+  Result := '';
+  Params := GetUDFParams(Conn, FunctionName);
+
+  if Params = '' then Exit;
+
+  // Erstes Komma+Space suchen
+  P := Pos(', ', Params);
+  if P > 0 then
+    Result := Trim(Copy(Params, P + 2, MaxInt)); // +2 weil ', ' zwei Zeichen sind
+end;
+
+function GetUDFReturnParam(Conn: TIBConnection; const FunctionName: string): string;
+var
+  Params: string;
+  P: SizeInt;
+begin
+  Result := '';
+  Params := GetUDFParams(Conn, FunctionName);
+
+  if Params = '' then Exit;
+
+  // Erstes Komma+Space suchen
+  P := Pos(', ', Params);
+  if P > 0 then
+    Result := Trim(Copy(Params, 1, P - 1))
+  else
+    Result := Trim(Params);  // nur ein Parameter vorhanden
+end;
+
+function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string): string;
+var
+  ModAndEntry, ModuleName, EntryPoint: string;
+  InputParams, ReturnParam: string;
+  Params: TStringList;
+  ParamLines: string;
+  I: Integer;
+  SepPos: Integer;
+begin
+  Result := '';
+  ModAndEntry := GetUDFModuleNameAndEntryPoint(Conn, FunctionName);
+  InputParams := Trim(GetUDFInputParams(Conn, FunctionName));
+  ReturnParam := Trim(GetUDFReturnParam(Conn, FunctionName));
+
+  // ModuleName und EntryPoint aufsplitten
+  SepPos := Pos(',', ModAndEntry);
+  if SepPos > 0 then
+  begin
+    ModuleName := Trim(Copy(ModAndEntry, 1, SepPos - 1));
+    EntryPoint := Trim(Copy(ModAndEntry, SepPos + 1, MaxInt));
+  end
+  else
+  begin
+    ModuleName := '';
+    EntryPoint := '';
+  end;
+
+  // Fallbacks, damit die App nicht abstürzt
+  if ModuleName = '' then
+    ModuleName := '<UNKNOWN_MODULE>';
+  if EntryPoint = '' then
+    EntryPoint := '<UNKNOWN_ENTRYPOINT>';
+  if ReturnParam = '' then
+    ReturnParam := 'VOID';
+
+  // Parameter formatieren
+  ParamLines := '';
+  if InputParams <> '' then
+  begin
+    Params := TStringList.Create;
+    try
+      Params.StrictDelimiter := True;
+      Params.Delimiter := ',';
+      Params.DelimitedText := InputParams;
+      for I := 0 to Params.Count - 1 do
+      begin
+        if I < Params.Count - 1 then
+          ParamLines := ParamLines + '  ' + Trim(Params[I]) + ',' + LineEnding
+        else
+          ParamLines := ParamLines + '  ' + Trim(Params[I]) + LineEnding;
+      end;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  // Ausgabe bauen
+  Result := '-- DROP EXTERNAL FUNCTION ' + UpperCase(FunctionName) + ';' + LineEnding +
+            'DECLARE EXTERNAL FUNCTION ' + UpperCase(FunctionName) + LineEnding +
+            '(' + LineEnding +
+            ParamLines +
+            ')' + LineEnding +
+            'RETURNS ' + ReturnParam + LineEnding +
+            'ENTRY_POINT ''' + EntryPoint + '''' + LineEnding +
+            'MODULE_NAME ''' + ModuleName + ''';' + LineEnding;
+end;
+
+function GetUDFParamBeiPosition(Conn: TIBConnection; const FunctionName: string; APosition: word): string;
+var
+  Params: string;
+  StartPos, EndPos, CurrPos, CommaCount: SizeInt;
+begin
+  Result := '';
+  Params := GetUDFParams(Conn, FunctionName);
+  if Params = '' then Exit;
+
+  StartPos := 1;
+  CommaCount := 0; // 0 = RETURN
+
+  for CurrPos := 1 to Length(Params) do
+  begin
+    if (Params[CurrPos] = ',') and (CurrPos < Length(Params)) and (Params[CurrPos+1] = ' ') then
+    begin
+      if CommaCount = APosition then
+      begin
+        EndPos := CurrPos - 1;
+        Result := Trim(Copy(Params, StartPos, EndPos - StartPos + 1));
+        Exit;
+      end;
+      Inc(CommaCount);
+      StartPos := CurrPos + 2; // +2 wegen ", "
+    end;
+  end;
+
+  // Falls APosition größer als Anzahl der Parameter
+  if APosition >= CommaCount then
+    Result := Trim(Copy(Params, StartPos, MaxInt));
 end;
 
 end.

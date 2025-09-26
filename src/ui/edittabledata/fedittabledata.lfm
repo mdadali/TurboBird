@@ -1,11 +1,11 @@
 object fmEditTable: TfmEditTable
-  Left = 449
+  Left = 334
   Height = 550
-  Top = 129
-  Width = 834
+  Top = 137
+  Width = 966
   ActiveControl = PageControl1
   ClientHeight = 550
-  ClientWidth = 834
+  ClientWidth = 966
   OnClose = FormClose
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
@@ -13,7 +13,7 @@ object fmEditTable: TfmEditTable
     Left = 0
     Height = 24
     Top = 526
-    Width = 834
+    Width = 966
     Panels = <    
       item
         Width = 300
@@ -27,7 +27,7 @@ object fmEditTable: TfmEditTable
     Left = 0
     Height = 526
     Top = 0
-    Width = 834
+    Width = 966
     ActivePage = tsGridView
     Align = alClient
     TabIndex = 0
@@ -35,30 +35,30 @@ object fmEditTable: TfmEditTable
     object tsGridView: TTabSheet
       Caption = 'Grid View'
       ClientHeight = 492
-      ClientWidth = 830
+      ClientWidth = 962
       OnShow = tsGridViewShow
       object GroupBox2: TGroupBox
         Left = 0
-        Height = 64
-        Top = 0
-        Width = 830
+        Height = 80
+        Top = 24
+        Width = 962
         Align = alTop
         Caption = 'Tables/Fields Options'
-        ClientHeight = 42
-        ClientWidth = 826
+        ClientHeight = 58
+        ClientWidth = 958
         TabOrder = 0
         object Label3: TLabel
-          Left = 16
+          Left = 24
           Height = 20
-          Top = 4
+          Top = 16
           Width = 36
           Caption = 'Table'
           ParentColor = False
         end
         object cboxTables: TComboBox
-          Left = 72
+          Left = 80
           Height = 32
-          Top = 0
+          Top = 8
           Width = 244
           ItemHeight = 0
           OnChange = cboxTablesChange
@@ -66,41 +66,68 @@ object fmEditTable: TfmEditTable
           TabOrder = 0
         end
         object Label1: TLabel
-          Left = 336
+          Left = 368
           Height = 20
-          Top = 4
-          Width = 32
-          Caption = 'Field'
+          Top = 16
+          Width = 82
+          Caption = 'Search Field'
           ParentColor = False
         end
         object cboxFields: TComboBox
-          Left = 400
+          Left = 488
           Height = 32
-          Top = 0
+          Top = 8
           Width = 244
           ItemHeight = 0
           Style = csDropDownList
           TabOrder = 1
         end
+        object rgSource: TRadioGroup
+          Left = 776
+          Height = 49
+          Top = -1
+          Width = 336
+          AutoFill = True
+          Caption = 'Source'
+          ChildSizing.LeftRightSpacing = 6
+          ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+          ChildSizing.EnlargeVertical = crsHomogenousChildResize
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 3
+          ClientHeight = 27
+          ClientWidth = 332
+          Columns = 3
+          ItemIndex = 0
+          Items.Strings = (
+            'User Tables'
+            'Views'
+            'System Tables'
+          )
+          OnClick = rgSourceClick
+          TabOrder = 2
+          Visible = False
+        end
       end
       object GroupBox1: TGroupBox
         Left = 0
         Height = 62
-        Top = 64
-        Width = 830
+        Top = 104
+        Width = 962
         Align = alTop
         Caption = 'Search Options'
         ClientHeight = 40
-        ClientWidth = 826
+        ClientWidth = 958
         TabOrder = 1
         object Panel1: TPanel
           Left = 0
           Height = 40
           Top = 0
-          Width = 826
+          Width = 958
           Align = alClient
           ClientHeight = 40
-          ClientWidth = 826
+          ClientWidth = 958
           ParentColor = False
           TabOrder = 0
           object edtSearch: TEdit
@@ -152,17 +179,17 @@ object fmEditTable: TfmEditTable
       object Panel2: TPanel
         Left = 0
         Height = 42
-        Top = 126
-        Width = 830
+        Top = 166
+        Width = 962
         Align = alTop
         ClientHeight = 42
-        ClientWidth = 830
+        ClientWidth = 962
         TabOrder = 2
         object dbnavGrid: TDBNavigator
           Left = 1
           Height = 40
           Top = 1
-          Width = 828
+          Width = 960
           Align = alClient
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -172,7 +199,7 @@ object fmEditTable: TfmEditTable
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 40
-          ClientWidth = 828
+          ClientWidth = 960
           Color = 14539471
           DataSource = dsGrid
           Options = []
@@ -183,9 +210,9 @@ object fmEditTable: TfmEditTable
       end
       object IBDynamicGrid2: TIBDynamicGrid
         Left = 0
-        Height = 324
-        Top = 168
-        Width = 830
+        Height = 284
+        Top = 208
+        Width = 962
         Align = alClient
         Color = clGray
         Columns = <>
@@ -200,17 +227,76 @@ object fmEditTable: TfmEditTable
         EditorBorderStyle = bsSingle
         DefaultPositionAtEnd = False
       end
+      object Panel3: TPanel
+        Left = 0
+        Height = 24
+        Top = 0
+        Width = 962
+        Align = alTop
+        ClientHeight = 24
+        ClientWidth = 962
+        TabOrder = 4
+        object bbClose: TSpeedButton
+          Left = 934
+          Height = 22
+          Top = 1
+          Width = 27
+          Align = alRight
+          Anchors = [akTop, akRight]
+          Color = clForm
+          Flat = True
+          Font.Style = [fsBold]
+          Glyph.Data = {
+            36040000424D3604000000000000360000002800000010000000100000000100
+            2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF26FFFFFF51FFFFFF0EFFFFFF00FFFFFF00FFFF
+            FF0EFFFFFF51FFFFFF26FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF28C3C3C3624141416EF0F0F056FFFFFF0EFFFFFF0EF0F0
+            F0564141416EC3C3C362FFFFFF28FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF16B9B9B9660A0A0A840000008731313177F0F0F056F0F0F0563131
+            3177000000870A0A0A84B9B9B966FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF220E0E0EA00000009E00000091000000912F2F2F7E2F2F2F7E0000
+            0091000000910000009E0E0E0EA0FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF0BB7B7B72E040404AB000000A70000009B0000009B0000009B0000
+            009B000000A7050505AAB7B7B72EFFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF0BB8B8B8321D1D1DA5000000A5000000A5000000A50000
+            00A51E1E1EA4BBBBBB31FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF0EEBEBEB5826262692000000AF000000AF000000AF0000
+            00AF26262692EBEBEB58FFFFFF0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF0BEBEBEB5825252599000000B9000000B9000000C1000000C10000
+            00B9000000B925252599EBEBEB58FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF221F1F1FB3000000C4000000C3000000CA040404BE040404BE0000
+            00CA000000C3000000C41F1F1FB3FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF163939395E000000D9000000D4030303C2AFAFAF30AFAFAF300303
+            03C2000000D4000000D93939395EFFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF183636365F040404C2ACACAC31FFFFFF0BFFFFFF0BACAC
+            AC31040404C23636365FFFFFFF18FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF16FFFFFF22FFFFFF0BFFFFFF00FFFFFF00FFFF
+            FF0BFFFFFF23FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+            FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+          }
+          OnClick = bbCloseClick
+          ParentFont = False
+        end
+      end
     end
     object tsFormView: TTabSheet
       Caption = 'Form View'
       ClientHeight = 492
-      ClientWidth = 830
+      ClientWidth = 962
       OnShow = tsFormViewShow
       object dbnavForm: TDBNavigator
         Left = 0
         Height = 40
         Top = 0
-        Width = 830
+        Width = 962
         Align = alTop
         BevelOuter = bvNone
         ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -220,7 +306,7 @@ object fmEditTable: TfmEditTable
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 100
         ClientHeight = 40
-        ClientWidth = 830
+        ClientWidth = 962
         DataSource = dsForm
         Options = []
         TabOrder = 0
@@ -230,7 +316,7 @@ object fmEditTable: TfmEditTable
         Left = 0
         Height = 452
         Top = 40
-        Width = 830
+        Width = 962
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
@@ -257,6 +343,7 @@ object fmEditTable: TfmEditTable
   end
   object IBDatabase1: TIBDatabase
     Connected = False
+    LoginPrompt = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
     DatabaseName = '/home/maurog/Downloads/lazopenqbuilder/lazopenqbuilder-master/employee.fdb'
@@ -309,8 +396,8 @@ object fmEditTable: TfmEditTable
     SQLFiltered = False
     GeneratorField.ApplyOnEvent = gaeOnNewRecord
     MasterDetailDelay = 0
-    Left = 296
-    Top = 393
+    Left = 280
+    Top = 384
   end
   object ibtransForm: TIBTransaction
     TransactionName = '{B4ABF1AB-9384-47DA-902B-4E55F32CC7B8}'
@@ -349,5 +436,25 @@ object fmEditTable: TfmEditTable
         OnClick = lmStandardExportFormatsClick
       end
     end
+  end
+  object IBQuery1: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = ibtransGrid
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 712
+    Top = 328
   end
 end

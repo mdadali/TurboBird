@@ -1,12 +1,12 @@
-🕒 Started: Do 28 Aug 2025 11:48:30 CEST
-🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1261
+🕒 Started: Fr 26 Sep 2025 14:44:38 CEST
+🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1262
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release
 + '[' ON = ON ']'
-+ log '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1261'
-+ echo '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1261'
-🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1261
++ log '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1262'
++ echo '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1262'
+🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1262
 + '[' ON = ON ']'
-+ echo '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1261'
++ echo '🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1262'
 + SRC=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release
 + '[' -f /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release.exe ']'
 + log '📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release'
@@ -19,64 +19,64 @@
 + DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release
 + '[' ON = ON ']'
 + [[ /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release == *.exe ]]
-+ DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ log '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-+ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ log '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
++ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
-+ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ echo '✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+✅ File renamed with version: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
-+ file /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ file /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + grep -q -e ELF -e PE32
-+ strip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ log '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-+ echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ strip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ log '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
++ echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
-+ echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ chmod +x /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ log '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-+ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ chmod +x /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ log '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
++ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
-+ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261'
-🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262'
+🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
 + '[' false = true ']'
 + '[' ON = ON ']'
-+ ZIP_FILE=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip
++ ZIP_FILE=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip
 + log '📦 Compressing file, please wait...'
 + echo '📦 Compressing file, please wait...'
 📦 Compressing file, please wait...
 + '[' ON = ON ']'
 + echo '📦 Compressing file, please wait...'
 📦 Compressing file, please wait...
-+ zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip
-+ ZIP_SIZE=6630096
-++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ ORIG_SIZE=19806064
++ zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
+++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip
++ ZIP_SIZE=8501795
+++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ ORIG_SIZE=23339344
 + ((  ZIP_SIZE < ORIG_SIZE  ))
-+ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip (from 18MB → 6MB)'
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip (from 18MB → 6MB)'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip (from 18MB → 6MB)
++ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip (from 22MB → 8MB)'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip (from 22MB → 8MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip (from 22MB → 8MB)
 + '[' ON = ON ']'
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip (from 18MB → 6MB)'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip (from 18MB → 6MB)
-++ dirname /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip (from 22MB → 8MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip (from 22MB → 8MB)
+++ dirname /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + DST_DIR=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release
-++ basename /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
-+ DST_FILENAME=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
+++ basename /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
++ DST_FILENAME=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' ON = ON ']'
 + BASENAME_RAW=TurboBird_x86_64-linux64-gtk2-release
-+ VERSION_TAG=-v1.2.1.1261
-+ KEEP_BIN=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261
++ VERSION_TAG=-v1.2.1.1262
++ KEEP_BIN=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262
 + '[' false = true ']'
 + KEEP_EXE=
-+ KEEP_ZIP=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip
++ KEEP_ZIP=TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip
 + '[' ON = ON ']'
 + log '🧹 Cleaning up old versions of: TurboBird_x86_64-linux64-gtk2-release'
 + echo '🧹 Cleaning up old versions of: TurboBird_x86_64-linux64-gtk2-release'
@@ -84,9 +84,5 @@
 + '[' ON = ON ']'
 + echo '🧹 Cleaning up old versions of: TurboBird_x86_64-linux64-gtk2-release'
 🧹 Cleaning up old versions of: TurboBird_x86_64-linux64-gtk2-release
-+ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release -type f -name 'TurboBird_x86_64-linux64-gtk2-release-v*.zip' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
-🗑️ Deleting old ZIP: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1260.zip
-'/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1260.zip' wurde entfernt
-+ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release -type f -name 'TurboBird_x86_64-linux64-gtk2-release-v*' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261 '!' -name '' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1261.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'
-🗑️ Deleting old binary: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1260
-'/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1260' wurde entfernt
++ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release -type f -name 'TurboBird_x86_64-linux64-gtk2-release-v*.zip' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
++ find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release -type f -name 'TurboBird_x86_64-linux64-gtk2-release-v*' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262 '!' -name '' '!' -name TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1262.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'

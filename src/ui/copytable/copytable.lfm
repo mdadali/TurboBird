@@ -1,35 +1,36 @@
 object fmCopyTable: TfmCopyTable
-  Left = 356
+  Left = 283
   Height = 480
-  Top = 139
+  Top = 247
   Width = 511
   Caption = 'Copy Table'
   ClientHeight = 480
   ClientWidth = 511
+  OnClose = FormClose
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 9
-    Height = 16
+    Height = 20
     Top = 19
-    Width = 108
+    Width = 113
     Caption = 'Source Database'
     ParentColor = False
   end
   object Label2: TLabel
     Left = 9
-    Height = 16
+    Height = 20
     Top = 40
-    Width = 82
+    Width = 86
     Caption = 'Soruce Table'
     ParentColor = False
   end
   object laSourceDatabase: TLabel
     Left = 183
-    Height = 16
+    Height = 19
     Top = 16
-    Width = 114
+    Width = 111
     Caption = 'Source Database'
     Font.Style = [fsBold]
     ParentColor = False
@@ -37,54 +38,54 @@ object fmCopyTable: TfmCopyTable
   end
   object Label3: TLabel
     Left = 9
-    Height = 16
+    Height = 20
     Top = 72
-    Width = 138
+    Width = 144
     Caption = 'Destination Database'
     ParentColor = False
   end
   object Label4: TLabel
     Left = 16
-    Height = 16
+    Height = 20
     Top = 128
-    Width = 113
+    Width = 117
     Caption = 'Destination Table'
     ParentColor = False
   end
   object cbSourceTable: TComboBox
     Left = 183
-    Height = 25
+    Height = 32
     Top = 40
     Width = 217
-    ItemHeight = 16
+    ItemHeight = 0
     OnChange = cbSourceTableChange
     Style = csDropDownList
     TabOrder = 0
   end
   object cbDestDatabase: TComboBox
     Left = 183
-    Height = 25
+    Height = 32
     Top = 72
     Width = 217
-    ItemHeight = 16
+    ItemHeight = 0
     OnChange = cbDestDatabaseChange
     Style = csDropDownList
     TabOrder = 1
   end
   object cbDestTable: TComboBox
     Left = 183
-    Height = 25
+    Height = 32
     Top = 128
     Width = 217
-    ItemHeight = 16
+    ItemHeight = 0
     Style = csDropDownList
     TabOrder = 2
   end
   object laDatabase: TLabel
     Left = 188
-    Height = 12
+    Height = 16
     Top = 112
-    Width = 109
+    Width = 111
     Caption = 'Destination Database'
     Font.Height = -11
     ParentColor = False
@@ -258,9 +259,9 @@ object fmCopyTable: TfmCopyTable
   end
   object Label5: TLabel
     Left = 9
-    Height = 16
+    Height = 20
     Top = 184
-    Width = 227
+    Width = 237
     Caption = 'select statement from Source Table'
     ParentColor = False
   end
@@ -793,7 +794,6 @@ object fmCopyTable: TfmCopyTable
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
     RightEdge = 65
     ScrollBars = ssAutoBoth
-    SelectedColor.FrameEdges = sfeAround
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
     SelectedColor.FramePriority = 50
@@ -801,23 +801,17 @@ object fmCopyTable: TfmCopyTable
     SelectedColor.ItalicPriority = 50
     SelectedColor.UnderlinePriority = 50
     SelectedColor.StrikeOutPriority = 50
-    IncrementColor.FrameEdges = sfeAround
-    HighlightAllColor.FrameEdges = sfeAround
     BracketHighlightStyle = sbhsBoth
     BracketMatchColor.Background = clNone
     BracketMatchColor.Foreground = clNone
-    BracketMatchColor.FrameEdges = sfeAround
     BracketMatchColor.Style = [fsBold]
     FoldedCodeColor.Background = clNone
     FoldedCodeColor.Foreground = clGray
     FoldedCodeColor.FrameColor = clGray
-    FoldedCodeColor.FrameEdges = sfeAround
     MouseLinkColor.Background = clNone
     MouseLinkColor.Foreground = clBlue
-    MouseLinkColor.FrameEdges = sfeAround
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
-    LineHighlightColor.FrameEdges = sfeAround
     inline TSynGutterPartList
       object TSynGutterMarks
         Width = 24
@@ -828,7 +822,6 @@ object fmCopyTable: TfmCopyTable
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
-        MarkupInfo.FrameEdges = sfeAround
         DigitCount = 2
         ShowOnlyLineNumbersMultiplesOf = 1
         ZeroStart = False
@@ -845,7 +838,6 @@ object fmCopyTable: TfmCopyTable
         MouseActions = <>
         MarkupInfo.Background = clWhite
         MarkupInfo.Foreground = clGray
-        MarkupInfo.FrameEdges = sfeAround
       end
       object TSynGutterCodeFolding
         MouseActions = <        
@@ -876,7 +868,6 @@ object fmCopyTable: TfmCopyTable
           end>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
-        MarkupInfo.FrameEdges = sfeAround
         MouseActionsExpanded = <        
           item
             ClickCount = ccAny
@@ -901,33 +892,77 @@ object fmCopyTable: TfmCopyTable
       end
     end
   end
+  object Panel13: TPanel
+    Left = 0
+    Height = 24
+    Top = 0
+    Width = 511
+    Align = alTop
+    ClientHeight = 24
+    ClientWidth = 511
+    TabOrder = 6
+    object bbClose1: TSpeedButton
+      Left = 483
+      Height = 22
+      Top = 1
+      Width = 27
+      Align = alRight
+      Anchors = [akTop, akRight]
+      Color = clForm
+      Flat = True
+      Font.Style = [fsBold]
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF26FFFFFF51FFFFFF0EFFFFFF00FFFFFF00FFFF
+        FF0EFFFFFF51FFFFFF26FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF28C3C3C3624141416EF0F0F056FFFFFF0EFFFFFF0EF0F0
+        F0564141416EC3C3C362FFFFFF28FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF16B9B9B9660A0A0A840000008731313177F0F0F056F0F0F0563131
+        3177000000870A0A0A84B9B9B966FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF220E0E0EA00000009E00000091000000912F2F2F7E2F2F2F7E0000
+        0091000000910000009E0E0E0EA0FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0BB7B7B72E040404AB000000A70000009B0000009B0000009B0000
+        009B000000A7050505AAB7B7B72EFFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0BB8B8B8321D1D1DA5000000A5000000A5000000A50000
+        00A51E1E1EA4BBBBBB31FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0EEBEBEB5826262692000000AF000000AF000000AF0000
+        00AF26262692EBEBEB58FFFFFF0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0BEBEBEB5825252599000000B9000000B9000000C1000000C10000
+        00B9000000B925252599EBEBEB58FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF221F1F1FB3000000C4000000C3000000CA040404BE040404BE0000
+        00CA000000C3000000C41F1F1FB3FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF163939395E000000D9000000D4030303C2AFAFAF30AFAFAF300303
+        03C2000000D4000000D93939395EFFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF183636365F040404C2ACACAC31FFFFFF0BFFFFFF0BACAC
+        AC31040404C23636365FFFFFFF18FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF16FFFFFF22FFFFFF0BFFFFFF00FFFFFF00FFFF
+        FF0BFFFFFF23FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
+      }
+      OnClick = bbCloseClick
+      ParentFont = False
+    end
+  end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     CommentAttri.Foreground = clTeal
-    CommentAttri.FrameEdges = sfeAround
-    DataTypeAttri.FrameEdges = sfeAround
-    DefaultPackageAttri.FrameEdges = sfeAround
-    ExceptionAttri.FrameEdges = sfeAround
-    FunctionAttri.FrameEdges = sfeAround
     IdentifierAttri.Foreground = 16718385
-    IdentifierAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
     NumberAttri.Foreground = 3421238
-    NumberAttri.FrameEdges = sfeAround
-    PLSQLAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
-    SQLPlusAttri.FrameEdges = sfeAround
     StringAttri.Foreground = 1052833
-    StringAttri.FrameEdges = sfeAround
     SymbolAttri.Foreground = 526434
-    SymbolAttri.FrameEdges = sfeAround
     TableNameAttri.Foreground = clNavy
-    TableNameAttri.FrameEdges = sfeAround
     TableNameAttri.Style = [fsBold]
-    VariableAttri.FrameEdges = sfeAround
     SQLDialect = sqlSybase
-    left = 440
-    top = 264
+    Left = 440
+    Top = 264
   end
 end

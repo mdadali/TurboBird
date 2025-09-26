@@ -6,11 +6,12 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, SQLDB,
-  udb_firebird_struct_helper;
+  udb_firebird_struct_helper,
+  fbcommon;
 
-function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
 function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
-function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
 
 implementation
 
@@ -47,7 +48,7 @@ begin
   end;
 end;
 
-function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+{function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
 var
   Q: TSQLQuery;
   Args, RetArgs: TStringList;
@@ -123,9 +124,215 @@ begin
     RetArgs.Free;
     Q.Free;
   end;
+end;}
+
+{function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+var
+  Q: TSQLQuery;
+  Args, RetArgs: TStringList;
+  ArgName, SourceName, ArgStr: string;
+  IsOutput: Boolean;
+  FullName: string;
+begin
+  Args := TStringList.Create;
+  RetArgs := TStringList.Create;
+  Q := TSQLQuery.Create(nil);
+  try
+    Q.DataBase := Conn;
+
+    // FB >= 3: Package- und Engine-Unterstützung
+    if FBVersionMajor >= 3 then
+    begin
+      {Q.SQL.Text :=
+        'SELECT RDB$PARAMETER_NAME, RDB$FIELD_SOURCE, RDB$PARAMETER_TYPE ' +
+        'FROM RDB$PROCEDURE_PARAMETERS ' +
+        'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC ' +
+        'AND RDB$ENGINE_NAME IS NULL '; }
+
+      Q.SQL.Text :=
+        'SELECT P.RDB$PARAMETER_NAME, P.RDB$FIELD_SOURCE, P.RDB$PARAMETER_TYPE ' +
+        'FROM RDB$PROCEDURE_PARAMETERS P ' +
+        'JOIN RDB$PROCEDURES R ON P.RDB$PROCEDURE_NAME = R.RDB$PROCEDURE_NAME ' +
+        '  AND (P.RDB$PACKAGE_NAME = R.RDB$PACKAGE_NAME OR (P.RDB$PACKAGE_NAME IS NULL AND R.RDB$PACKAGE_NAME IS NULL)) ' +
+        'WHERE UPPER(P.RDB$PROCEDURE_NAME) = :PROC ' +
+        'AND R.RDB$ENGINE_NAME IS NULL ';
+
+
+      if APackageName <> '' then
+        Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
+      else
+        Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
+
+      Q.SQL.Text := Q.SQL.Text + 'ORDER BY RDB$PARAMETER_TYPE, RDB$PARAMETER_NUMBER';
+    end
+    else
+    begin
+      // FB < 3: Keine Packages, kein ENGINE_NAME
+      Q.SQL.Text :=
+        'SELECT RDB$PARAMETER_NAME, RDB$FIELD_SOURCE, RDB$PARAMETER_TYPE ' +
+        'FROM RDB$PROCEDURE_PARAMETERS ' +
+        'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC ' +
+        'ORDER BY RDB$PARAMETER_TYPE, RDB$PARAMETER_NUMBER';
+    end;
+
+    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if (FBVersionMajor >= 3) and (APackageName <> '') then
+      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+
+    Q.Open;
+
+    while not Q.EOF do
+    begin
+      ArgName := Trim(Q.FieldByName('RDB$PARAMETER_NAME').AsString);
+      SourceName := Trim(Q.FieldByName('RDB$FIELD_SOURCE').AsString);
+      IsOutput := Q.FieldByName('RDB$PARAMETER_TYPE').AsInteger = 1;
+
+      if ArgName = '' then
+        ArgStr := FieldSourceToStr(SourceName, Conn)
+      else
+        ArgStr := Format('%s %s', [ArgName, FieldSourceToStr(SourceName, Conn)]);
+
+      if IsOutput then
+        RetArgs.Add(ArgStr)
+      else
+        Args.Add(ArgStr);
+
+      Q.Next;
+    end;
+
+    // FullName abhängig von FB Version
+    if (FBVersionMajor >= 3) and (APackageName <> '') then
+      FullName := Format('%s.%s', [APackageName, ProcName])
+    else
+      FullName := ProcName;
+
+    if AEdit then
+      Result := Format('CREATE OR ALTER PROCEDURE %s', [FullName]) + LineEnding
+    else
+      Result := Format('PROCEDURE %s', [FullName]) + LineEnding;
+
+    if Args.Count > 0 then
+    begin
+      Result := Result + '(' + LineEnding;
+      Result := Result + FormatParamList(Args);
+      Result := Result + ')' + LineEnding;
+    end;
+
+    if RetArgs.Count > 0 then
+    begin
+      Result := Result + 'RETURNS (' + LineEnding;
+      Result := Result + FormatParamList(RetArgs);
+      Result := Result + ')' + LineEnding;
+    end;
+
+  finally
+    Args.Free;
+    RetArgs.Free;
+    Q.Free;
+  end;
+end;}
+
+function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+var
+  Q: TSQLQuery;
+  Args, RetArgs: TStringList;
+  ArgName, SourceName, ArgStr: string;
+  IsOutput: Boolean;
+  FullName: string;
+begin
+  Args := TStringList.Create;
+  RetArgs := TStringList.Create;
+  Q := TSQLQuery.Create(nil);
+  try
+    Q.DataBase := Conn;
+
+    // FB >= 3: Package- und Engine-Unterstützung
+    if FBVersionMajor >= 3 then
+    begin
+      Q.SQL.Text :=
+        'SELECT P.RDB$PARAMETER_NAME, P.RDB$FIELD_SOURCE, P.RDB$PARAMETER_TYPE ' +
+        'FROM RDB$PROCEDURE_PARAMETERS P ' +
+        'JOIN RDB$PROCEDURES R ON P.RDB$PROCEDURE_NAME = R.RDB$PROCEDURE_NAME ' +
+        '  AND (P.RDB$PACKAGE_NAME = R.RDB$PACKAGE_NAME OR (P.RDB$PACKAGE_NAME IS NULL AND R.RDB$PACKAGE_NAME IS NULL)) ' +
+        'WHERE UPPER(P.RDB$PROCEDURE_NAME) = :PROC ' +
+        'AND R.RDB$ENGINE_NAME IS NULL ';
+
+      if APackageName <> '' then
+        Q.SQL.Text := Q.SQL.Text + 'AND UPPER(P.RDB$PACKAGE_NAME) = :PKG '
+      else
+        Q.SQL.Text := Q.SQL.Text + 'AND P.RDB$PACKAGE_NAME IS NULL ';
+
+      Q.SQL.Text := Q.SQL.Text + 'ORDER BY P.RDB$PARAMETER_TYPE, P.RDB$PARAMETER_NUMBER';
+    end
+    else
+    begin
+      // FB < 3: Keine Packages, kein ENGINE_NAME
+      Q.SQL.Text :=
+        'SELECT RDB$PARAMETER_NAME, RDB$FIELD_SOURCE, RDB$PARAMETER_TYPE ' +
+        'FROM RDB$PROCEDURE_PARAMETERS ' +
+        'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC ' +
+        'ORDER BY RDB$PARAMETER_TYPE, RDB$PARAMETER_NUMBER';
+    end;
+
+    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if (FBVersionMajor >= 3) and (APackageName <> '') then
+      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+
+    Q.Open;
+
+    while not Q.EOF do
+    begin
+      ArgName := Trim(Q.FieldByName('RDB$PARAMETER_NAME').AsString);
+      SourceName := Trim(Q.FieldByName('RDB$FIELD_SOURCE').AsString);
+      IsOutput := Q.FieldByName('RDB$PARAMETER_TYPE').AsInteger = 1;
+
+      if ArgName = '' then
+        ArgStr := FieldSourceToStr(SourceName, Conn)
+      else
+        ArgStr := Format('%s %s', [ArgName, FieldSourceToStr(SourceName, Conn)]);
+
+      if IsOutput then
+        RetArgs.Add(ArgStr)
+      else
+        Args.Add(ArgStr);
+
+      Q.Next;
+    end;
+
+    // FullName abhängig von FB Version
+    if (FBVersionMajor >= 3) and (APackageName <> '') then
+      FullName := Format('%s.%s', [APackageName, ProcName])
+    else
+      FullName := ProcName;
+
+    if AEdit then
+      Result := Format('CREATE OR ALTER PROCEDURE %s', [FullName]) + LineEnding
+    else
+      Result := Format('PROCEDURE %s', [FullName]) + LineEnding;
+
+    if Args.Count > 0 then
+    begin
+      Result := Result + '(' + LineEnding;
+      Result := Result + FormatParamList(Args);
+      Result := Result + ')' + LineEnding;
+    end;
+
+    if RetArgs.Count > 0 then
+    begin
+      Result := Result + 'RETURNS (' + LineEnding;
+      Result := Result + FormatParamList(RetArgs);
+      Result := Result + ')' + LineEnding;
+    end;
+
+  finally
+    Args.Free;
+    RetArgs.Free;
+    Q.Free;
+  end;
 end;
 
-function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+
+{function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
 var
   Q: TSQLQuery;
   ProcBody: string;
@@ -156,20 +363,58 @@ begin
   finally
     Q.Free;
   end;
+end;}
+
+function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+var
+  Q: TSQLQuery;
+  ProcBody: string;
+begin
+  Q := TSQLQuery.Create(nil);
+  try
+    Q.DataBase := Conn;
+
+    if FBVersionMajor >= 3 then
+    begin
+      Q.SQL.Text :=
+        'SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES ' +
+        'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC ' +
+        'AND RDB$ENGINE_NAME IS NULL ';
+
+      if APackageName <> '' then
+        Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
+      else
+        Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
+    end
+    else
+    begin
+      Q.SQL.Text :=
+        'SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES ' +
+        'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC';
+    end;
+
+    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if (FBVersionMajor >= 3) and (APackageName <> '') then
+      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+
+    Q.Open;
+
+    ProcBody := Trim(Q.FieldByName('RDB$PROCEDURE_SOURCE').AsString);
+    if ProcBody = '' then
+      Result := 'AS' + LineEnding + 'BEGIN' + LineEnding + '  -- Original Procedure has no body!' + LineEnding + 'END'
+    else
+      Result := CleanProcedureBody(ProcBody);
+  finally
+    Q.Free;
+  end;
 end;
 
-function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
-var
-  FullName: string;
-begin
-  if APackageName = '' then
-    FullName := ProcName
-  else
-    FullName := Format('%s.%s', [APackageName, ProcName]);
 
+function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+begin
   Result := 'SET TERM ^;' + LineEnding + LineEnding;
-  Result := Result + Format('-- DROP PROCEDURE %s;%s%s', [FullName, LineEnding, LineEnding]);
-  Result := Result + GetFirebirdProcedureHeader(Conn, ProcName, APackageName) + LineEnding;
+  Result := Result + Format('-- DROP PROCEDURE %s;%s%s', [ProcName, LineEnding, LineEnding]);
+  Result := Result + GetFirebirdProcedureHeader(Conn, ProcName, APackageName, AEdit) + LineEnding;
   Result := Result + GetFirebirdProcedureBody(Conn, ProcName, APackageName) + '^' + LineEnding + LineEnding;
   Result := Result + 'SET TERM ;^' + LineEnding;
 end;

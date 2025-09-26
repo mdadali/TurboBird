@@ -1,0 +1,323 @@
+object fmServerRegistry: TfmServerRegistry
+  Left = 377
+  Height = 264
+  Top = 114
+  Width = 538
+  BorderIcons = []
+  BorderStyle = bsDialog
+  Caption = 'Server Registration'
+  ClientHeight = 264
+  ClientWidth = 538
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 218
+    Top = 0
+    Width = 538
+    Align = alClient
+    ClientHeight = 214
+    ClientWidth = 534
+    TabOrder = 0
+    object cbServerName: TComboBox
+      Left = 126
+      Height = 32
+      Top = 16
+      Width = 248
+      ItemHeight = 0
+      OnChange = cbServerNameChange
+      Style = csDropDownList
+      TabOrder = 0
+    end
+    object Label1: TLabel
+      Left = 24
+      Height = 20
+      Top = 16
+      Width = 43
+      Caption = 'Server'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 26
+      Height = 20
+      Top = 256
+      Width = 32
+      Caption = 'Alias'
+      ParentColor = False
+      Visible = False
+    end
+    object edtServerAlias: TEdit
+      Left = 126
+      Height = 30
+      Top = 256
+      Width = 248
+      TabOrder = 1
+      Text = 'ServerAlias'
+      Visible = False
+    end
+    object Label3: TLabel
+      Left = 26
+      Height = 20
+      Top = 136
+      Width = 69
+      Caption = 'Username'
+      ParentColor = False
+    end
+    object edtUserName: TEdit
+      Left = 126
+      Height = 30
+      Top = 136
+      Width = 248
+      TabOrder = 2
+      Text = 'SYSDBA'
+    end
+    object edtRole: TEdit
+      Left = 126
+      Height = 30
+      Top = 216
+      Width = 248
+      TabOrder = 3
+      Visible = False
+    end
+    object Label4: TLabel
+      Left = 26
+      Height = 20
+      Top = 176
+      Width = 64
+      Caption = 'Password'
+      ParentColor = False
+    end
+    object cbProtocol: TComboBox
+      Left = 126
+      Height = 28
+      Top = 56
+      Width = 248
+      ItemHeight = 0
+      ItemIndex = 0
+      Items.Strings = (
+        'Local'
+        'TCP/IP'
+        'XNET'
+      )
+      OnChange = cbProtocolChange
+      Style = csDropDownList
+      TabOrder = 4
+      Text = 'Local'
+    end
+    object Label5: TLabel
+      Left = 24
+      Height = 20
+      Top = 216
+      Width = 29
+      Caption = 'Role'
+      ParentColor = False
+      Visible = False
+    end
+    object edtPassword: TEdit
+      Left = 126
+      Height = 30
+      Top = 176
+      Width = 248
+      EchoMode = emPassword
+      PasswordChar = '*'
+      TabOrder = 5
+      Text = 'Password'
+    end
+    object Label6: TLabel
+      Left = 24
+      Height = 20
+      Top = 56
+      Width = 54
+      Caption = 'Protocol'
+      ParentColor = False
+    end
+    object cbCharset: TComboBox
+      Left = 126
+      Height = 32
+      Top = 296
+      Width = 252
+      ItemHeight = 0
+      Style = csDropDownList
+      TabOrder = 6
+      Visible = False
+    end
+    object edtClientLibraryPath: TEdit
+      Left = 126
+      Height = 30
+      Top = 336
+      Width = 482
+      Enabled = False
+      TabStop = False
+      TabOrder = 7
+      Visible = False
+    end
+    object Label7: TLabel
+      Left = 24
+      Height = 20
+      Top = 296
+      Width = 52
+      Caption = 'Charset'
+      ParentColor = False
+      Visible = False
+    end
+    object Label8: TLabel
+      Left = 26
+      Height = 20
+      Top = 336
+      Width = 83
+      Caption = 'Clientlibrary'
+      ParentColor = False
+      Visible = False
+    end
+    object chkSavePassword: TCheckBox
+      Left = 384
+      Height = 22
+      Top = 176
+      Width = 123
+      Caption = 'Save Password'
+      TabOrder = 8
+    end
+    object btnClientLib: TButton
+      Left = 616
+      Height = 24
+      Top = 336
+      Width = 32
+      Caption = '...'
+      OnClick = btnClientLibClick
+      TabOrder = 9
+      Visible = False
+    end
+    object edtPort: TEdit
+      Left = 126
+      Height = 30
+      Top = 96
+      Width = 80
+      TabOrder = 10
+      Text = '3050'
+    end
+    object Label9: TLabel
+      Left = 24
+      Height = 20
+      Top = 96
+      Width = 27
+      Caption = 'Port'
+      ParentColor = False
+    end
+    object Label10: TLabel
+      Left = 26
+      Height = 20
+      Top = 376
+      Width = 70
+      Caption = 'Config File'
+      ParentColor = False
+      Visible = False
+    end
+    object edtConfigFilePath: TEdit
+      Left = 126
+      Height = 30
+      Top = 376
+      Width = 482
+      Enabled = False
+      TabOrder = 11
+      Visible = False
+    end
+    object btnfirebirdconffile: TButton
+      Left = 616
+      Height = 25
+      Top = 376
+      Width = 32
+      Caption = '...'
+      OnClick = btnfirebirdconffileClick
+      TabOrder = 12
+      Visible = False
+    end
+    object btnAddServer: TButton
+      Left = 384
+      Height = 25
+      Hint = 'Add new Server'
+      Top = 16
+      Width = 24
+      Caption = '+'
+      OnClick = btnAddServerClick
+      TabOrder = 13
+      Visible = False
+    end
+    object btnDeleteServer: TButton
+      Left = 416
+      Height = 25
+      Hint = 'Delete Selected Server'
+      Top = 16
+      Width = 23
+      Caption = '-'
+      OnClick = btnDeleteServerClick
+      TabOrder = 14
+      Visible = False
+    end
+    object Image1: TImage
+      Left = 456
+      Height = 50
+      Top = 16
+      Width = 63
+      Picture.Data = {
+        1754506F727461626C654E6574776F726B47726170686963CC01000089504E47
+        0D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001
+        9349444154789C8DD14B4B02511806607F48CBFE487F22DABA69E5CA9DA0A0B8
+        51C2BB0879191A9B88212AF356E66DBC4559E265D14637623A4EA659A6649BB7
+        3382102972162FE7FA3DF09DA300A0F89F482C3AAF542A98CE661004017D4982
+        90CFFFACBBBBB22127438A4AA512BEA653B8DDEE0550BC2B811A48A492C8178B
+        F89C4C60F678204A7DB22ED003D1EB38845C0EE38F0F385DCE05405AA0072EC3
+        57C89236DEC763D86C36887D11725BD4C0D9C53952990C86A3111C0E077A0490
+        D7D4C029CF23914CE26D3884DD6E474F1471737B4B0F1C0559A4D269BC0E068B
+        16BABD1E22B1183DE00DF8912B142091EFB35AAD78E976711E0AD1033E86413A
+        9B5DFCBFC96482DFEF47F084A3073CDE43842311743A1D588C460408C872C7F4
+        80D96AF90E85C368B65A2892C7ACD66AB0BB5D736A601986619E542A956FD39D
+        B59B4AA5728B648F65D967B55A1D97E71CC76D6F041A8D86B1D96CD6E4D4EBF5
+        9787F2230AF75594CB65C8F376BB2D2DCF09B6BF0268B5DA5DBD5E6F22E38146
+        A349190C06FC0DCFF339F95C8E4EA7DB59D6FD02278D001D0A3E417000000000
+        49454E44AE426082
+      }
+      Stretch = True
+      Transparent = True
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 46
+    Top = 218
+    Width = 538
+    Align = alBottom
+    ClientHeight = 46
+    ClientWidth = 538
+    TabOrder = 1
+    object btnCancel: TButton
+      Left = 336
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'Cancel'
+      ModalResult = 2
+      TabOrder = 0
+    end
+    object btnOK: TButton
+      Left = 434
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'OK'
+      ModalResult = 1
+      OnClick = btnOKClick
+      TabOrder = 1
+    end
+    object btnTestConnection: TButton
+      Left = 128
+      Height = 25
+      Top = 8
+      Width = 131
+      Caption = 'Test Connection'
+      OnClick = btnTestConnectionClick
+      TabOrder = 2
+    end
+  end
+end
