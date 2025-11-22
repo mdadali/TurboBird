@@ -9,8 +9,9 @@ object fmCallProc: TfmCallProc
   ClientWidth = 400
   OnActivate = FormActivate
   OnClose = FormClose
+  OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object StringGrid1: TStringGrid
     Left = 0
     Height = 280

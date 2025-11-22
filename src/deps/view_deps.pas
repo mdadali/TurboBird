@@ -5,15 +5,19 @@ unit view_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetViewDeps(const AConn: TIBConnection; const AViewName: string): string;
+
+function GetViewDeps(const AConn: TIBDatabase; const AViewName: string): string;
 
 implementation
 
-function GetViewDeps(const AConn: TIBConnection; const AViewName: string): string;
+function GetViewDeps(const AConn: TIBDatabase; const AViewName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   ViewNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -25,7 +29,9 @@ begin
   if AViewName = '' then Exit;
 
   ViewNameUpper := UpperCase(Trim(AViewName));
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

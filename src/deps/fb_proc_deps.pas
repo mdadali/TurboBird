@@ -5,15 +5,19 @@ unit fb_proc_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetFBProcedureDeps(const AConn: TIBConnection; const AProcName, APackageName: string): string;
+
+function GetFBProcedureDeps(const AConn: TIBDatabase; const AProcName, APackageName: string): string;
 
 implementation
 
-function GetFBProcedureDeps(const AConn: TIBConnection; const AProcName, APackageName: string): string;
+function GetFBProcedureDeps(const AConn: TIBDatabase; const AProcName, APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   ProcNameFull, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -30,7 +34,9 @@ begin
   else
     ProcNameFull := UpperCase(Trim(AProcName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

@@ -1,12 +1,11 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 295
+  Left = 357
   Height = 550
-  Top = 118
-  Width = 834
-  ActiveControl = Panel1
+  Top = 116
+  Width = 954
   Caption = 'fmQueryWindow'
-  ClientHeight = 550
-  ClientWidth = 834
+  ClientHeight = 544
+  ClientWidth = 954
   Color = clForm
   KeyPreview = True
   Menu = MainMenu1
@@ -18,260 +17,30 @@ object fmQueryWindow: TfmQueryWindow
   PopupMenu = pmTab
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
-  object Panel1: TPanel
-    Left = 0
-    Height = 64
-    Top = 0
-    Width = 834
-    Align = alTop
-    BevelOuter = bvNone
-    ClientHeight = 64
-    ClientWidth = 834
-    Color = clForm
-    ParentColor = False
-    TabOrder = 1
-    object ToolBar1: TToolBar
-      Left = 0
-      Height = 40
-      Top = 24
-      Width = 834
-      Align = alBottom
-      Anchors = [akTop, akLeft, akRight]
-      BorderWidth = 2
-      ButtonHeight = 40
-      ButtonWidth = 40
-      Caption = 'ToolBar1'
-      Color = clForm
-      Images = toolbarImages
-      ParentColor = False
-      TabOrder = 0
-      object tbNew: TToolButton
-        Left = 1
-        Hint = 'Open New SQL Query Window'
-        Top = 2
-        AutoSize = True
-        ImageIndex = 0
-        OnClick = tbNewClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbOpen: TToolButton
-        Left = 41
-        Hint = 'Open SQL file'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbOpen'
-        ImageIndex = 1
-        OnClick = tbOpenClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbSave: TToolButton
-        Left = 81
-        Hint = 'Save SQL to file'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbSave'
-        ImageIndex = 2
-        OnClick = tbSaveClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbRun: TToolButton
-        Left = 121
-        Hint = 'Run Query (F5)'
-        Top = 2
-        AutoSize = True
-        ImageIndex = 5
-        OnClick = tbRunClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbCommit: TToolButton
-        Left = 206
-        Hint = 'Commit Transaction'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbCommit'
-        ImageIndex = 4
-        OnClick = tbCommitClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbRollback: TToolButton
-        Left = 286
-        Hint = 'Rollback Transaction'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbRollback'
-        ImageIndex = 7
-        OnClick = tbRollbackClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object ToolButton2: TToolButton
-        Left = 326
-        Height = 40
-        Top = 2
-        Caption = 'ToolButton2'
-        Style = tbsSeparator
-      end
-      object ToolButton3: TToolButton
-        Left = 374
-        Height = 40
-        Top = 2
-        Caption = 'ToolButton3'
-        Style = tbsSeparator
-      end
-      object tbHistory: TToolButton
-        Left = 334
-        Hint = 'SQL History'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbHistory'
-        ImageIndex = 8
-        OnClick = tbHistoryClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object ToolButton5: TToolButton
-        Left = 201
-        Height = 40
-        Top = 2
-        Caption = 'ToolButton5'
-        Style = tbsDivider
-      end
-      object tbMenu: TToolButton
-        Left = 382
-        Hint = 'Menu'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbMenu'
-        ImageIndex = 9
-        OnClick = tbMenuClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbCommitRetaining: TToolButton
-        Left = 161
-        Hint = 'Commit Retaining'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbCommitRetaining'
-        ImageIndex = 6
-        OnClick = tbCommitRetainingClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object tbRollbackRetaining: TToolButton
-        Left = 246
-        Hint = 'Rollback Retaining'
-        Top = 2
-        AutoSize = True
-        Caption = 'tbRollbackRetaining'
-        ImageIndex = 3
-        OnClick = tbRollbackRetainingClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-      object ToolButton1: TToolButton
-        Left = 462
-        Height = 40
-        Top = 2
-        Caption = 'ToolButton1'
-        Style = tbsSeparator
-      end
-      object cxAutoCommit: TCheckBox
-        Left = 470
-        Height = 22
-        Top = 2
-        Width = 111
-        Caption = 'Auto Commit'
-        Checked = True
-        State = cbChecked
-        TabOrder = 0
-      end
-      object tbQueryDesign: TToolButton
-        Left = 422
-        Hint = 'Query Designer'
-        Top = 2
-        Caption = 'tbQueryDesign'
-        ImageIndex = 11
-        OnClick = tbQueryDesignClick
-        ParentShowHint = False
-        ShowHint = True
-      end
-    end
-    object bbClose: TSpeedButton
-      Left = 811
-      Height = 24
-      Top = 0
-      Width = 23
-      Align = alRight
-      Flat = True
-      Glyph.Data = {
-        36040000424D3604000000000000360000002800000010000000100000000100
-        2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF26FFFFFF51FFFFFF0EFFFFFF00FFFFFF00FFFF
-        FF0EFFFFFF51FFFFFF26FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF28C3C3C3624141416EF0F0F056FFFFFF0EFFFFFF0EF0F0
-        F0564141416EC3C3C362FFFFFF28FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF16B9B9B9660A0A0A840000008731313177F0F0F056F0F0F0563131
-        3177000000870A0A0A84B9B9B966FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF220E0E0EA00000009E00000091000000912F2F2F7E2F2F2F7E0000
-        0091000000910000009E0E0E0EA0FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF0BB7B7B72E040404AB000000A70000009B0000009B0000009B0000
-        009B000000A7050505AAB7B7B72EFFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF0BB8B8B8321D1D1DA5000000A5000000A5000000A50000
-        00A51E1E1EA4BBBBBB31FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF0EEBEBEB5826262692000000AF000000AF000000AF0000
-        00AF26262692EBEBEB58FFFFFF0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF0BEBEBEB5825252599000000B9000000B9000000C1000000C10000
-        00B9000000B925252599EBEBEB58FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF221F1F1FB3000000C4000000C3000000CA040404BE040404BE0000
-        00CA000000C3000000C41F1F1FB3FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF163939395E000000D9000000D4030303C2AFAFAF30AFAFAF300303
-        03C2000000D4000000D93939395EFFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF183636365F040404C2ACACAC31FFFFFF0BFFFFFF0BACAC
-        AC31040404C23636365FFFFFFF18FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF16FFFFFF22FFFFFF0BFFFFFF00FFFFFF00FFFF
-        FF0BFFFFFF23FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
-      }
-      OnClick = tbCloseClick
-    end
-  end
   object Splitter1: TSplitter
     Cursor = crVSplit
     Left = 0
     Height = 12
-    Top = 326
-    Width = 834
+    Top = 296
+    Width = 954
     Align = alTop
     ResizeAnchor = akTop
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 212
-    Top = 338
-    Width = 834
+    Height = 236
+    Top = 308
+    Width = 954
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 212
-    ClientWidth = 834
-    TabOrder = 3
+    ClientHeight = 236
+    ClientWidth = 954
+    TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 212
+      Height = 236
       Top = 0
-      Width = 834
+      Width = 954
       Align = alClient
       Images = imTabs
       TabOrder = 0
@@ -280,19 +49,22 @@ object fmQueryWindow: TfmQueryWindow
   inline meQuery: TSynEdit
     Left = 0
     Height = 262
-    Top = 64
-    Width = 834
+    Top = 34
+    Width = 954
     Align = alTop
     BlockIndent = 3
+    Color = clCream
     Font.Height = -16
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
     Font.Quality = fqAntialiased
     ParentColor = False
     ParentFont = False
+    ParentShowHint = False
     PopupMenu = pmMemo
     TabOrder = 0
     OnKeyDown = meQueryKeyDown
+    OnMouseEnter = meQueryMouseEnter
     Gutter.Color = 16183798
     Gutter.Width = 61
     Gutter.MouseActions = <    
@@ -809,6 +581,7 @@ object fmQueryWindow: TfmQueryWindow
       end>
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
     RightEdge = 120
+    ScrollBars = ssAutoBoth
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
     SelectedColor.FramePriority = 50
@@ -907,6 +680,223 @@ object fmQueryWindow: TfmQueryWindow
       end
     end
   end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 34
+    Top = 0
+    Width = 954
+    BorderWidth = 2
+    ButtonHeight = 32
+    ButtonWidth = 32
+    Caption = 'ToolBar1'
+    Color = clForm
+    Images = toolbarImages
+    ParentColor = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+    OnMouseEnter = ToolBar1MouseEnter
+    OnMouseLeave = ToolBar1MouseLeave
+    object tbNew: TToolButton
+      Left = 1
+      Hint = 'Open New SQL Query Window'
+      Top = 2
+      AutoSize = True
+      ImageIndex = 0
+      OnClick = tbNewClick
+      OnMouseEnter = tbNewMouseEnter
+      OnMouseLeave = tbNewMouseLeave
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbOpen: TToolButton
+      Left = 37
+      Hint = 'Open SQL file'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbOpen'
+      ImageIndex = 1
+      OnClick = tbOpenClick
+      OnMouseEnter = tbOpenMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbSave: TToolButton
+      Left = 73
+      Hint = 'Save SQL to file'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbSave'
+      ImageIndex = 2
+      OnClick = tbSaveClick
+      OnMouseEnter = tbSaveMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRun: TToolButton
+      Left = 109
+      Hint = 'Run Query (F5)'
+      Top = 2
+      AutoSize = True
+      ImageIndex = 5
+      OnClick = tbRunClick
+      OnMouseEnter = tbRunMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbCommit: TToolButton
+      Left = 186
+      Hint = 'Commit Transaction'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbCommit'
+      ImageIndex = 4
+      OnClick = tbCommitClick
+      OnMouseEnter = tbCommitMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRollback: TToolButton
+      Left = 258
+      Hint = 'Rollback Transaction'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbRollback'
+      ImageIndex = 7
+      OnClick = tbRollbackClick
+      OnMouseEnter = tbRollbackMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton2: TToolButton
+      Left = 294
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton2'
+      Style = tbsSeparator
+    end
+    object ToolButton3: TToolButton
+      Left = 338
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsSeparator
+    end
+    object tbHistory: TToolButton
+      Left = 302
+      Hint = 'SQL History'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbHistory'
+      ImageIndex = 8
+      OnClick = tbHistoryClick
+      OnMouseEnter = tbHistoryMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton5: TToolButton
+      Left = 181
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton5'
+      Style = tbsDivider
+    end
+    object tbMenu: TToolButton
+      Left = 346
+      Hint = 'Menu'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbMenu'
+      ImageIndex = 9
+      OnClick = tbMenuClick
+      OnMouseEnter = tbMenuMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbCommitRetaining: TToolButton
+      Left = 145
+      Hint = 'Commit Retaining'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbCommitRetaining'
+      ImageIndex = 6
+      OnClick = tbCommitRetainingClick
+      OnMouseEnter = tbCommitRetainingMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRollbackRetaining: TToolButton
+      Left = 222
+      Hint = 'Rollback Retaining'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbRollbackRetaining'
+      ImageIndex = 3
+      OnClick = tbRollbackRetainingClick
+      OnMouseEnter = tbRollbackRetainingMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton1: TToolButton
+      Left = 418
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton1'
+      Style = tbsSeparator
+    end
+    object cxAutoCommit: TCheckBox
+      Left = 426
+      Height = 21
+      Hint = 'Auto Commit ON/OFF'
+      Top = 2
+      Width = 105
+      Caption = 'Auto Commit'
+      Checked = True
+      OnMouseEnter = cxAutoCommitMouseEnter
+      OnMouseLeave = cxAutoCommitMouseLeave
+      State = cbChecked
+      TabOrder = 0
+    end
+    object tbQueryDesign: TToolButton
+      Left = 382
+      Hint = 'Query Designer'
+      Top = 2
+      Caption = 'tbQueryDesign'
+      ImageIndex = 11
+      OnClick = tbQueryDesignClick
+      OnMouseEnter = tbQueryDesignMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object rgScreenModes: TRadioGroup
+      Left = 632
+      Height = 32
+      Hint = 'Screen Modes'
+      Top = 0
+      Width = 185
+      Align = alRight
+      AutoFill = True
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 3
+      ClientHeight = 30
+      ClientWidth = 183
+      Columns = 3
+      ItemIndex = 0
+      Items.Strings = (
+        'NFS'
+        'CFS'
+        'RFC'
+      )
+      OnClick = rgScreenModesClick
+      OnMouseEnter = rgScreenModesMouseEnter
+      TabOrder = 1
+    end
+  end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.sql'
     Filter = 'SQL Files|*.sql|All Files|*.*'
@@ -930,11 +920,11 @@ object fmQueryWindow: TfmQueryWindow
     TableNameAttri.Style = [fsBold]
     SQLDialect = sqlSybase
     Left = 736
-    Top = 336
+    Top = 337
   end
   object pmMemo: TPopupMenu
     Left = 544
-    Top = 408
+    Top = 400
     object lmUndo: TMenuItem
       Caption = 'Undo'
       OnClick = lmUndoClick
@@ -1019,7 +1009,7 @@ object fmQueryWindow: TfmQueryWindow
   end
   object MainMenu1: TMainMenu
     Left = 240
-    Top = 408
+    Top = 400
     object MenuItem3: TMenuItem
       Caption = 'Run'
       ShortCut = 116
@@ -2178,5 +2168,22 @@ object fmQueryWindow: TfmQueryWindow
     MaxFontSize = 0
     Left = 88
     Top = 168
+  end
+  object FIBConnection: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 629
+    Top = 216
+  end
+  object FSQLTrans: TIBTransaction
+    TransactionName = '{16B319E3-F966-444D-9E9D-270E8A795ED9}'
+    Active = False
+    DefaultDatabase = FIBConnection
+    Left = 518
+    Top = 216
   end
 end

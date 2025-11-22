@@ -7,9 +7,16 @@ interface
 uses
   Classes, SysUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, ComCtrls, Grids, Buttons, StdCtrls, CheckLst, LCLType,
-  ExtCtrls, types, usqlqueryext,
+  ExtCtrls, types,
+  IB,
+  IBDatabase,
+  IBQuery,
+
   fbcommon,
-  turbocommon;
+  turbocommon,
+  fmetaquerys,
+
+  uthemeselector;
 
 type
 
@@ -23,7 +30,7 @@ type
     bbEdit: TBitBtn;
     bbNew: TBitBtn;
     bbNewConstraint: TBitBtn;
-    bbRefresh: TBitBtn;
+    bbRefreshFields: TBitBtn;
     bbRefreshConstraint: TBitBtn;
     bbRefreshReferences: TBitBtn;
     bbRefreshIndices: TBitBtn;
@@ -41,6 +48,10 @@ type
     edDrop: TBitBtn;
     edIndexName: TEdit;
     GroupBox2: TGroupBox;
+    CurrentIBDatabase: TIBDatabase;
+    CurrentIBTransaction: TIBTransaction;
+    SQLQuery1: TIBQuery;
+    SQLQuery2: TIBQuery;
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
@@ -50,8 +61,6 @@ type
     sgReferences: TStringGrid;
     sgTriggers: TStringGrid;
     sgPermissions: TStringGrid;
-    SQLQuery1: TSQLQuery;
-    SQLQuery2: TSQLQuery;
     sgFields: TStringGrid;
     sgIndices: TStringGrid;
     sgConstraints: TStringGrid;
@@ -72,7 +81,7 @@ type
     procedure bbNewClick(Sender: TObject);
     procedure bbNewConstraintClick(Sender: TObject);
     procedure bbNewTriggerClick(Sender: TObject);
-    procedure bbRefreshClick(Sender: TObject);
+    procedure bbRefreshFieldsClick(Sender: TObject);
     procedure bbRefreshConstraintClick(Sender: TObject);
     procedure bbRefreshIndicesClick(Sender: TObject);
     procedure bbRefreshPermissionsClick(Sender: TObject);
@@ -83,28 +92,37 @@ type
     procedure bbEditPermissionClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
     procedure sgPermissionsDblClick(Sender: TObject);
     procedure sgTriggersDblClick(Sender: TObject);
+    procedure tsConstraintsShow(Sender: TObject);
     procedure tsFieldsContextPopup(Sender: TObject; MousePos: TPoint;
         var Handled: Boolean);
+    procedure tsFieldsShow(Sender: TObject);
+    procedure tsIndicesShow(Sender: TObject);
+    procedure tsPermissionsShow(Sender: TObject);
+    procedure tsReferencesShow(Sender: TObject);
+    procedure tsTriggersShow(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
     FTableName: string;
-    FIBConnection: TIBConnection;
-    FSQLTrans: TSQLTransaction;
-    FNodeInfos: TPNodeInfos;
   public
-    PKeyName, ConstraintName: string;
+    PKeyName,
+    ConstraintName: string;
     procedure Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
     // Fill grid with constraint info
     { Todo: fillconstraints relies on a query being set correctly elsewhere; get
     rid of that - see e.g. FillPermissions }
-    procedure FillConstraints(dbIndex: Integer);
+    procedure FillConstraints;
+    procedure FillIndices;
+    procedure FillFields;
     // Get info on permissions and fill grid with it
     procedure FillPermissions;
     // Get info on triggers and fill grid with it
     procedure FillTriggers;
+    procedure FillReferences;
   end;
 
 var
@@ -116,10 +134,23 @@ implementation
 
 uses NewEditField, Main, QueryWindow, SysTables, NewConstraint, PermissionManage;
 
-procedure TfmTableManage.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TfmTableManage.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  FNodeInfos^.EditorForm := nil;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.EditorForm := nil;
+
+  if SQLQuery1.Active then
+    SQLQuery1.Close;
+
+  if SQLQuery2.Active then
+    SQLQuery2.Close;
+
+  if CurrentIBTransaction.InTransaction then
+    CurrentIBTransaction.Commit;
+
+  if CurrentIBDatabase.Connected then
+    CurrentIBDatabase.Connected := false;
+
   CloseAction:= caFree;
 end;
 
@@ -136,6 +167,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmTableManage.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmTableManage.sgFieldsDblClick(Sender: TObject);
@@ -161,7 +197,6 @@ procedure TfmTableManage.tsFieldsContextPopup(Sender: TObject;
 begin
 
 end;
-
 
 procedure TfmTableManage.bbEditClick(Sender: TObject);
 var
@@ -196,7 +231,7 @@ begin
     fmNewEditField.Init(FDBIndex, FTableName, foEdit,
       FieldName, FieldType, Characterset, Collation,
       DefaultValue, Description,
-      FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull, bbRefresh);
+      FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull, bbRefreshFields);
 
     Caption:= 'Edit field: ' + OldFieldName;
 
@@ -372,7 +407,7 @@ begin
   FullHint :=
     'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
     'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBConnection.DatabaseName + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
     'Object type: Table Permissions' + sLineBreak +
     'Table: ' + FTableName + sLineBreak +
     'Action: Add User';
@@ -400,7 +435,7 @@ begin
   begin
     Init(FDBIndex, FTableName, foNew,
       '', '', '', '', '', '',
-      0, 0, 0, 0, True, bbRefresh);
+      0, 0, 0, 0, True, bbRefreshFields);
     Caption:= 'Add new field to Table: ' + FTableName;
     Show;
   end;
@@ -410,17 +445,18 @@ procedure TfmTableManage.bbNewConstraintClick(Sender: TObject);
 var
   Count: Integer;
   FieldsList: TStringList;
+  Iso: TIsolatedQuery;
 begin
   // Get current fields
   FieldsList:= TStringList.Create;
   try
-    fmMain.GetFields(FDBIndex, FTableName, FieldsList);
+    Iso := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName, FieldsList);
     fmNewConstraint.clxOnFields.Clear;
     fmNewConstraint.clxOnFields.Items.AddStrings(FieldsList);
   finally
     FieldsList.Free;
+    Iso.Free;
   end;
-  fmMain.SQLQuery1.Close;
   fmNewConstraint.edNewName.Text:= 'FK_' + FTableName + '_' + IntToStr(sgConstraints.RowCount);
 
   // Foreign tables
@@ -440,46 +476,9 @@ begin
   fmMain.CreateNewTrigger(FDBIndex, FTableName, bbRefreshTriggers.OnClick);
 end;
 
-procedure TfmTableManage.bbRefreshClick(Sender: TObject);
+procedure TfmTableManage.FillReferences;
 begin
-  fmMain.ViewTableFields(FTableName, FDBIndex, sgFields);
-  Parent.Show;
-  Show;
-end;
-
-procedure TfmTableManage.bbRefreshConstraintClick(Sender: TObject);
-begin
-  FSQLTrans.Commit;
-  fmMain.FillAndShowConstraintsForm(Self, FTableName, FDBIndex);
-  Parent.Show;
-  Show;
-end;
-
-procedure TfmTableManage.bbRefreshIndicesClick(Sender: TObject);
-begin
-  fmMain.ShowIndicesManagement(Self, FDBIndex, FTableName);
-  Parent.Show;
-  Show;
-end;
-
-procedure TfmTableManage.bbRefreshPermissionsClick(Sender: TObject);
-begin
-  FillPermissions;
-  Parent.Show;
-  Show;
-end;
-
-procedure TfmTableManage.bbRefreshTriggersClick(Sender: TObject);
-begin
-  FSQLTrans.Commit;
-  FillTriggers;
-  Parent.Show;
-  Show;
-end;
-
-procedure TfmTableManage.bbRefreshReferencesClick(Sender: TObject);
-begin
-  FSQLTrans.Commit;
+  CurrentIBTransaction.Commit;
   dmSysTables.Init(FDBIndex);
   dmSysTables.GetConstraintsOfTable(FTableName, SQLQuery1);
   sgReferences.RowCount:= 1;
@@ -512,7 +511,7 @@ begin
     ' with its data', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
     fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop field', 'ALTER TABLE ' + FTableName + ' DROP ' +
-      sgFields.Cells[1, sgFields.Row], @bbRefreshClick);
+      sgFields.Cells[1, sgFields.Row], @bbRefreshFieldsClick);
   end;
 end;
 
@@ -595,7 +594,7 @@ begin
   FullHint :=
     'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
     'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBConnection.DatabaseName + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
     'Object type: Table Permissions' + sLineBreak +
     'Table: ' + FTableName + sLineBreak +
     'Granted to: ' + UserOrRole + sLineBreak;
@@ -613,25 +612,38 @@ begin
   fmPermissions.Show;
 end;
 
-
-
 procedure TfmTableManage.Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
 begin
   FNodeInfos := ANodeInfos;
+  FDBIndex:= dbIndex;
+  FTableName:= TableName;
+
   try
-    FDBIndex:= dbIndex;
-    FTableName:= TableName;
-    with fmMain do
-    begin
-      FIBConnection:= RegisteredDatabases[dbIndex].IBConnection;
-      FIBConnection.Close;
-      FSQLTrans:= RegisteredDatabases[dbIndex].SQLTrans;
-      FIBConnection.Transaction:= FSQLTrans;
-    end;
-    SQLQuery1.Close;
-    SQLQuery1.DataBase:= FIBConnection;
-    SQLQuery2.Close;
-    SQLQuery2.DataBase:= FIBConnection;
+    if SQLQuery1.Active then
+      SQLQuery1.Close;
+
+    if SQLQuery2.Active then
+      SQLQuery2.Close;
+
+    if CurrentIBTransaction.InTransaction then
+       CurrentIBTransaction.Commit;
+
+    if CurrentIBDatabase.Connected then
+      CurrentIBDatabase.Connected := false;
+
+    if AreSameDB(CurrentIBDatabase, RegisteredDatabases[dbIndex].IBDatabase) then
+      exit;
+
+    AssignIBDatabase(RegisteredDatabases[dbIndex].IBDatabase, CurrentIBDatabase);
+    CurrentIBDatabase.DefaultTransaction := CurrentIBTransaction;
+
+    SQLQuery1.DataBase:= CurrentIBDatabase;
+    SQLQuery1.Transaction := CurrentIBTransaction;
+    SQLQuery2.DataBase:= CurrentIBDatabase;
+    SQLQuery2.Transaction := CurrentIBTransaction;
+
+    //CurrentIBDatabase.Connected := true;
+
   except
     on E: Exception do
     begin
@@ -640,34 +652,237 @@ begin
   end;
 end;
 
-procedure TfmTableManage.FillConstraints(dbIndex: Integer);
+{procedure TfmTableManage.FillConstraints;
+var
+  IsoConstraints: TIsolatedQuery;
 begin
-  SQLQuery1.First;
-  FDBIndex:= dbIndex;
-  sgConstraints.RowCount:= 1;
-  with sgConstraints do
-  // SQLQuery1 should have been filled by GetTableConstraints
-  while not SQLQuery1.EOF do
-  begin
-    RowCount:= RowCount + 1;
-    Cells[0, RowCount - 1]:= SQLQuery1.FieldByName('ConstName').AsString;
-    Cells[1, RowCount - 1]:= SQLQuery1.FieldByName('KeyName').AsString;
-    Cells[2, RowCount - 1]:= SQLQuery1.FieldByName('OtherFieldName').AsString;
-    Cells[3, RowCount - 1]:= SQLQuery1.FieldByName('CurrentTableName').AsString;
-    Cells[4, RowCount - 1]:= dmSysTables.GetConstraintForeignKeyFields(SQLQuery1.FieldByName('CurrentFieldName').AsString, SQLQuery2);
+  sgConstraints.RowCount := 1;
+  IsoConstraints := GetTableConstraintsIsolated(
+    RegisteredDatabases[FDBIndex].IBConnection,
+    FTableName, nil
+  );
 
-    Cells[5, RowCount - 1]:= SQLQuery1.FieldByName('UpdateRule').AsString;
-    Cells[6, RowCount - 1]:= SQLQuery1.FieldByName('DeleteRule').AsString;
-    SQLQuery1.Next;
+  try
+    with sgConstraints do
+    while not IsoConstraints.Query.EOF do
+    begin
+      RowCount := RowCount + 1;
+      Cells[0, RowCount - 1] := IsoConstraints.Query.FieldByName('ConstName').AsString;
+      Cells[1, RowCount - 1] := IsoConstraints.Query.FieldByName('KeyName').AsString;
+      Cells[2, RowCount - 1] := IsoConstraints.Query.FieldByName('OtherFieldName').AsString;
+      Cells[3, RowCount - 1] := IsoConstraints.Query.FieldByName('CurrentTableName').AsString;
+      // Neuer isolierter Aufruf statt alter Funktion
+      Cells[4, RowCount - 1] := GetConstraintForeignKeyFieldsIsolated(
+        RegisteredDatabases[FDBIndex].IBConnection,
+        IsoConstraints.Query.FieldByName('CurrentFieldName').AsString
+      );
+      Cells[5, RowCount - 1] := IsoConstraints.Query.FieldByName('UpdateRule').AsString;
+      Cells[6, RowCount - 1] := IsoConstraints.Query.FieldByName('DeleteRule').AsString;
+      IsoConstraints.Query.Next;
+    end;
+  finally
+    IsoConstraints.Free;
   end;
-  SQLQuery1.Close;
+end;}
+
+procedure TfmTableManage.FillConstraints;
+var
+  IsoConstraints: TIsolatedQuery;
+begin
+  sgConstraints.RowCount := 1;
+  IsoConstraints := GetTableConstraintsIsolated( RegisteredDatabases[FDBIndex].IBDatabase, FTableName, nil);
+
+  try
+    with sgConstraints do
+    while not IsoConstraints.Query.EOF do
+    begin
+      RowCount := RowCount + 1;
+      Cells[0, RowCount - 1] := IsoConstraints.Query.FieldByName('ConstName').AsString;
+      Cells[1, RowCount - 1] := IsoConstraints.Query.FieldByName('KeyName').AsString;
+      Cells[2, RowCount - 1] := IsoConstraints.Query.FieldByName('OtherFieldName').AsString;
+      Cells[3, RowCount - 1] := IsoConstraints.Query.FieldByName('CurrentTableName').AsString;
+      // ✨ alle FK-Felder zusammenfassen
+      Cells[4, RowCount - 1] := GetConstraintForeignKeyFieldsIsolated(
+        RegisteredDatabases[FDBIndex].IBDatabase,
+        IsoConstraints.Query.FieldByName('CurrentFieldName').AsString
+      );
+      Cells[5, RowCount - 1] := IsoConstraints.Query.FieldByName('UpdateRule').AsString;
+      Cells[6, RowCount - 1] := IsoConstraints.Query.FieldByName('DeleteRule').AsString;
+
+      IsoConstraints.Query.Next;
+    end;
+  finally
+    IsoConstraints.Free;
+  end;
 end;
+
+//OnTab.Show
+procedure TfmTableManage.tsFieldsShow(Sender: TObject);
+begin
+  FillFields;
+end;
+
+procedure TfmTableManage.tsIndicesShow(Sender: TObject);
+begin
+  FillIndices;
+end;
+
+procedure TfmTableManage.tsConstraintsShow(Sender: TObject);
+begin
+  FillConstraints;
+end;
+
+procedure TfmTableManage.tsTriggersShow(Sender: TObject);
+begin
+  FillTriggers;
+end;
+
+procedure TfmTableManage.tsReferencesShow(Sender: TObject);
+begin
+  FillReferences;
+end;
+
+procedure TfmTableManage.tsPermissionsShow(Sender: TObject);
+begin
+  FillPermissions;
+end;
+
+//On RefreshButton.Click
+procedure TfmTableManage.bbRefreshFieldsClick(Sender: TObject);
+begin
+  FillFields;
+end;
+
+procedure TfmTableManage.bbRefreshIndicesClick(Sender: TObject);
+begin
+  FillIndices;
+end;
+
+procedure TfmTableManage.bbRefreshConstraintClick(Sender: TObject);
+begin
+  FillConstraints;
+end;
+
+procedure TfmTableManage.bbRefreshTriggersClick(Sender: TObject);
+begin
+  FillTriggers;
+end;
+
+procedure TfmTableManage.bbRefreshReferencesClick(Sender: TObject);
+begin
+  FillReferences;
+end;
+
+procedure TfmTableManage.bbRefreshPermissionsClick(Sender: TObject);
+begin
+  FillPermissions;
+end;
+
+procedure TfmTableManage.FillIndices;
+var
+  i: Integer;
+  IndexFields: string;
+  CurrentRow: Integer;
+  FieldsList: TStringList;
+  TmpConstraintName: ansistring;
+  IsoIndices, IsoFields, IsoIndexFields: TIsolatedQuery;
+begin
+  if Assigned(RegisteredDatabases[FDBIndex].IBTransaction) then
+    if RegisteredDatabases[FDBIndex].IBTransaction.InTransaction then
+      RegisteredDatabases[FDBIndex].IBTransaction.CommitRetaining;
+  try
+    sgIndices.RowCount:= 1;
+
+    // Get primary key index name
+    PKeyName := GetPrimaryKeyIndexNameIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName, TmpConstraintName);
+
+    ConstraintName:= TmpConstraintName;
+
+    // Index names
+    IsoIndices := GetIndicesIsolated(RegisteredDatabases[FDBIndex].IBDatabase,  FTableName);
+    if IsoIndices.Query.RecordCount > 0 then
+    while not IsoIndices.Query.EOF do
+    begin
+      if Trim(IsoIndices.Query.FieldByName('RDB$Index_name').AsString) = PKeyName then
+      begin
+        sgIndices.InsertColRow(False, 1);
+        CurrentRow:= 1;
+      end
+      else
+      begin
+        sgIndices.RowCount:= sgIndices.RowCount + 1;
+        CurrentRow:= sgIndices.RowCount - 1;
+      end;
+      sgIndices.Cells[0, CurrentRow]:= Trim(IsoIndices.Query.FieldByName('RDB$Index_Name').AsString);
+      if IsoIndices.Query.FieldByName('RDB$Unique_Flag').AsString = '1' then
+        sgIndices.Cells[1, CurrentRow]:= '1'
+      else
+        sgIndices.Cells[1, CurrentRow]:= '0';
+
+      if IsoIndices.Query.FieldByName('RDB$Index_Type').AsString = '1' then
+        sgIndices.Cells[2, CurrentRow]:= 'Desc'
+      else
+        sgIndices.Cells[2, CurrentRow]:= 'Asc';
+
+      if Trim(IsoIndices.Query.FieldByName('RDB$Index_Name').AsString) = PKeyName then
+        sgIndices.Cells[4, CurrentRow]:= '1'
+      else
+        sgIndices.Cells[4, CurrentRow]:= '0';
+      IsoIndices.Query.Next;
+    end;
+
+    FieldsList:= TStringList.Create;
+    try
+      // Index fields
+      for i:= 1 to sgIndices.RowCount - 1 do
+      begin
+        IndexFields:= '';
+        IsoIndexFields := GetIndexFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, sgIndices.Cells[0, i], FTableName, FieldsList);
+        if IsoIndexFields.Query.RecordCount > 0 then
+         begin
+          IndexFields:= FieldsList.CommaText;
+          sgIndices.Cells[3, i]:= IndexFields;
+        end;
+        IsoIndexFields.Free;
+      end;
+    finally
+      FieldsList.Free;
+    end;
+
+    edIndexName.Text:= 'IX_' + FTableName + '_' + IntToStr(sgIndices.RowCount);
+
+    IsoFields := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
+    with IsoFields.Query do
+    begin
+      clbFields.Clear;
+      while not EOF do
+      begin
+        // Allow creating indexes on any field except blobs
+        if (FieldByName('field_type_int').AsInteger <> BlobType) then
+          clbFields.Items.Add(FieldByName('Field_Name').AsString);
+        Next;
+      end;
+    end;
+  finally
+    IsoFields.Free;
+    IsoIndices.Free;
+  end;
+
+  if sgIndices.RowCount > 1 then
+    sgIndices.Row:= 1;
+end;
+
+
 
 procedure TfmTableManage.FillTriggers;
 begin
   SQLQuery1.Close;
   SQLQuery1.SQL.Text:= Format('SELECT RDB$Trigger_Name, RDB$Trigger_Inactive FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 ' +
     'and RDB$Relation_Name = ''%s'' ',[FTableName]);
+  if not SQLQuery1.Database.Connected then
+    SQLQuery1.Database.Connected := true;
+  if not SQLQuery1.Transaction.InTransaction then
+    SQLQuery1.Transaction.StartTransaction;
   SQLQuery1.Open;
   sgTriggers.RowCount:= 1;
   with sgTriggers, SQLQuery1 do
@@ -695,7 +910,8 @@ begin
   {todo: analyse transaction behaviour. Why do we have an explicit commit here? Also,
   get rid of the implicit rollbacks and use a separate read only transaction for extracting
   DDL and other read only info}
-  FSQLTrans.Commit;
+  if CurrentIBTransaction.InTransaction then
+    CurrentIBTransaction.Commit;
   UsersList:= TStringList.Create;
   try
     UsersList.CommaText:= dmSysTables.GetDBUsers(FDBIndex, FTableName);
@@ -770,6 +986,111 @@ begin
     UsersList.Free;
   end;
 end;
+
+procedure TfmTableManage.FillFields;
+var
+  FieldSize: integer;
+  FieldType: ansistring;
+  CleanTypeName: string;
+  i: Integer;
+  PKFieldsList: TStringList;
+  DefaultValue: string;
+  PKIndexName: string;
+  TmpConstraintName: ansistring;
+  TmpInt: integer;
+  IsUUID: boolean;
+  Iso: TIsolatedQuery;
+begin
+  try
+    sgFields.RowCount:= 1;
+    Iso := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
+    with sgFields, Iso.Query do
+    while not EOF do
+    begin
+      RowCount:= RowCount + 1;
+
+      // Field Name
+      Cells[1, RowCount - 1]:= Trim(FieldByName('Field_Name').AsString);
+
+      // Field Type
+      GetFieldType(Iso.Query, FieldType, FieldSize);
+      Cells[2, RowCount - 1]:= FieldType;
+
+      CleanTypeName := GetNameFromSizedTypeName(FieldType);
+
+      IsUUID := (CleanTypeName = 'CHAR') and  (FieldByName('Field_Length').AsInteger = 16)
+        and (Trim(UpperCase(FieldByName('Field_Charset').AsString)) = 'OCTETS');
+
+      If isUUID then
+      begin
+        FieldType := 'UUID';
+        Cells[7, RowCount - 1] := '';  //collation   ignore...
+      end;
+
+        // Computed fields (Calculated)
+      if Iso.Query.FieldByName('computed_source').AsString <> '' then
+        Cells[2, RowCount - 1]:= Iso.Query.FieldByName('computed_source').AsString;
+
+      // Field Size
+      if Iso.Query.FieldByName('field_type_int').AsInteger in [CharType,CStringType,VarCharType] then
+        Cells[3, RowCount - 1]:= Iso.Query.FieldByName('CharacterLength').AsString
+      else // why show byte size for numerical fields like integer fields?
+        Cells[3, RowCount - 1]:= Iso.Query.FieldByName('Field_Length').AsString;
+
+      if (CleanTypeName = 'DECIMAL') or (CleanTypeName = 'NUMERIC') then
+      begin
+        Cells[4, RowCount - 1]:= Iso.Query.FieldByName('field_precision').AsString;
+        TmpInt := Abs(Iso.Query.FieldByName('field_scale').AsInteger);
+        Cells[5, RowCount - 1]:= IntToStr(TmpInt);
+      end;
+
+      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR') or (CleanTypeName = 'UUID'))  then
+      begin
+        Cells[6, RowCount - 1]:= Iso.Query.FieldByName('field_charset').AsString;
+      end;
+
+      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR')) and (not IsUUID) then
+        Cells[7, RowCount - 1]:= Iso.Query.FieldByName('field_collation').AsString;
+
+      // Null/Not null
+      if Iso.Query.FieldByName('field_not_null_constraint').AsString = '1' then
+        Cells[8, RowCount - 1]:= '0'
+      else
+        Cells[8, RowCount - 1]:= '1';
+
+      // Default Value
+      DefaultValue := Iso.Query.FieldByName('Field_Default_Source').AsString;
+      Cells[9, RowCount - 1] := ExtractDefaultValue(DefaultValue);
+
+      Cells[10, RowCount - 1]:= Iso.Query.FieldByName('Field_Description').AsString;
+      Next;
+    end;
+    Iso.Free;
+    // Primary Keys
+    PKFieldsList:= TStringList.Create;
+    try
+      PKIndexName := GetPrimaryKeyIndexNameIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName, TmpConstraintName);
+      ConstraintName := TmpConstraintName;
+
+      if PKIndexName <> '' then
+        fmMain.GetConstraintFields(FTableName, PKIndexName, PKFieldsList);
+
+      with sgFields do
+      for i:= 1 to RowCount - 1 do
+        if PKFieldsList.IndexOf(Cells[1, i]) <> -1 then
+          Cells[0, i]:= '1'
+        else
+          Cells[0, i]:= '0';
+    finally
+      PKFieldsList.Free;
+    end;
+  except
+    on E: Exception do
+      MessageDlg('Error while reading table fields: ' + e.Message, mtError, [mbOk], 0);
+  end;
+end;
+
+
 
 initialization
   {$I tablemanage.lrs}

@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls, turbocommon;
+  Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls,
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -30,6 +32,7 @@ type
     procedure bbCreateClick(Sender: TObject);
     procedure btBrowseClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -60,6 +63,11 @@ begin
   // Perhaps this can be done through the Services API but not high priority
   CbCharSet.Items.AddStrings(FBCharacterSets);
   CbCharSet.ItemIndex:=DefaultFBCharacterSet;
+end;
+
+procedure TfmCreateDB.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCreateDB.bbCreateClick(Sender: TObject);

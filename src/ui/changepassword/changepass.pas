@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons;
+  StdCtrls, Buttons,
+  uthemeselector;
 
 type
 
@@ -21,6 +22,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     procedure bbCreateClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -43,6 +45,11 @@ begin
     ShowMessage('Passwords do not match')
   else
     ModalResult:= mrOK;
+end;
+
+procedure TfmChangePass.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 initialization

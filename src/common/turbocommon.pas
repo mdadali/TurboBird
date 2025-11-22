@@ -8,17 +8,29 @@ interface
 
 uses
 
-  Forms, Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  Forms,Graphics,  Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  Controls,
   AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
   LCLType, LCLVersion, versiontypes, versionresource,
   interfaces, LCLPlatformDef,
-  DB, sqldb, IBConnection,  IBDatabase, RegExpr,
-  fpstdexports, fpDataExporter,
+  DB, sqldb, IBConnection,  RegExpr,
+
+  fpstdexports,
+  fpDataExporter,
+
+  IB,
+  IBDatabase,
+  IBDatabaseInfo,
+  IBQuery,
 
   Variants,
 
   fbcommon,
-  fServerSession;
+  fSetFBClient,
+  fServerSession,
+
+  SysTables,
+  EnterPass;
 
 
 {$I version.inc}
@@ -248,6 +260,9 @@ const
     );
 
 type
+
+  TCommitKind = (tctCommit, tctCommitRetaining);
+
   // Types of objects in database
   // Note: the order and count must match the array below
   // Also, do not assign values to the individual enums; code depends
@@ -255,7 +270,11 @@ type
 
   TTreeViewObjectType = (
   tvotNone,
+  tvotServerAlias,
+  tvotServerInfo,
+  tvotServerDatabases,
   tvotServer,
+  tvotEmbeddedServer,
   tvotDB,
   tvotQueryWindow,
   tvotTableRoot,
@@ -309,17 +328,100 @@ type
   TServerRecord = packed record
     ServerName: string[127];
     ServerAlias: string[127];
+
+    VersionMajor: word;
+    VersionString: string[50];
+    VersionMinor: word;
+
     UserName: string[63];
+    Password: string[63];
     Role: string[63];
     Protocol: TProtocol;
-    Password: string[63];
-    Charset: string[31];
     Port: string[10];
+    Charset: string[31];
     ClientLibraryPath: string[255];
     ConfigFilePath: string[255];
-    Reserved: array[0..40] of Byte; // für spätere Erweiterungen
+    LoadRegisteredClientLib: boolean;
+    IsEmbedded: Boolean;
+
+    // Neue Felder:
+    ConnectTimeoutMS: LongInt;   // Timeout beim Verbindungsaufbau (Millisekunden)
+    RetryCount: SmallInt;        // Anzahl Wiederholversuche
+    QueryTimeoutMS: LongInt;     // Timeout für lange Operationen (optional)
+
+    Reserved: array[0..30] of Byte; // (etwas verkleinert)
   end;
 
+
+  TTransactionConfigRecord = packed record
+    TxIsolation: Byte;           // 0=ReadCommitted,1=ReadCommittedRecVer,2=RepeatableRead,3=Serializable
+    TxAccessMode: Boolean;       // True=ReadWrite, False=ReadOnly
+    TxWaitMode: Boolean;         // True=Wait, False=NoWait
+    TxAutoCommit: Boolean;
+    TxTimeout: LongInt;          // ms
+    StatementTimeout: LongInt;   // ms
+    LockTimeout: LongInt;        // ms
+    ReadConsistency: Boolean;
+    CommitRetaining: Boolean;
+    ForceAutoCommitOnDDL: Boolean;
+    TxName: string[50];          // optional Label / Alias
+  end;
+
+  TRegisteredDatabase = packed record
+    Title: string[30];
+    DatabaseName: string[200];
+    UserName: string[100];
+    Password: string[100];
+    Role: string[100];
+    Charset: string[40];
+    SQLDialect: string[1];
+
+    {
+    ODSMinor: word;
+    ODSMajor: word;
+    ConnectString: string[255];
+    DBOwner: string[100];
+    DateDBCreated: DateTime;
+    PageSize: integer;
+    //PageAllocated,
+    //PageUsed,
+    //PageAvailable,
+    NumberOfBuffers: bigInt;
+    //CurrentMemory: Bigint;
+    MaxMemory: BigInt;
+    LingerDelay: bigint; //seconds
+    SweepIntervall: bigint; //transactions
+    ReadOnly: boolean;
+    Online: boolean;
+    SynchronousDiskWrites: boolean;
+    ShadowDatabase: boolean;
+    SpaceReservedForBackupRecords: boolean;}
+
+    Deleted: Boolean;
+    SavePassword: Boolean;
+    LastOpened: TDateTime;
+    ServerName: string[255];
+    FireBirdClientLibPath: string[255];
+    OverwriteLoadedClientLib: boolean;
+    Port: string[10];
+    ConnectOnApplicationStart: boolean;
+
+    ServerVersionMajor: word;
+    ServerVersionString: string[50];  //LI-V6.3.3.1683 Firebird 5.0
+    ServerVersionMinor: word;
+
+    Reserved: array [0 .. 40] of Byte;
+  end;
+
+  TDatabaseRec = record
+    Index: Integer;    // for sort
+    RegRec: TRegisteredDatabase;
+    OrigRegRec: TRegisteredDatabase;
+    IBDatabase: TIBDatabase;
+    IBTransaction: TIBTransaction;
+    IBQuery: TIBQuery;
+    TxConfig: TTransactionConfigRecord; // NEU: alle Transaction-Parameter
+  end;
 
   TPNodeInfos = ^TNodeInfos;
   TNodeInfos = record
@@ -333,27 +435,6 @@ type
     ExecuteForm: TForm;
 
     ServerSession: TServerSession;
-  end;
-
-  TRegisteredDatabase = packed record
-    Title: string[30];
-    DatabaseName: string[200];
-    UserName: string[100];
-    Password: string[100];
-    Charset: string[40];
-    Deleted: Boolean;
-    SavePassword: Boolean;
-    Role: string[100];
-    LastOpened: TDateTime;
-    Reserved: array [0 .. 40] of Byte;
-  end;
-
-  TDatabaseRec = record
-    Index: Integer;
-    RegRec: TRegisteredDatabase;
-    OrigRegRec: TRegisteredDatabase;
-    IBConnection: TIBConnection;
-    SQLTrans: TSQLTransaction;
   end;
 
   //search
@@ -374,7 +455,6 @@ type
      Rec: TRegisteredDatabase;
    end;
 
-type
   TDBCheckResult = record
     Title: string;
     DBName: string;
@@ -392,9 +472,18 @@ type
 
 
 const
+  InitialServiceUser = 'service_user';
+  InitialServiceUserPwd = 'service_pwd';
+
+  DatabasesRegFile = 'databases.reg';
+  ServersRegFile   = 'servers.reg';
+  ThemesIniFile    = 'theme.ini';
   TmpDir = 'temp';
 
-var fLanguage: string;
+var
+    MainTreeView: TTreeView;
+
+    fLanguage: string;
     fIniFileName: string;
     fIniFile: TInifile;
 
@@ -403,15 +492,60 @@ var fLanguage: string;
 
     MultiVersionConnection: string;
 
+    InitialFBClientLibPath: string;
+    InitialFBClient: IFirebirdLibrary;
 
-function  GetServerRecordFromFile(AServerName: string): TServerRecord;
+    FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
+
+
+function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
+function GetSeverImplemetationVersionFromDBIndex(dbIndex: word): string;
+function GetServerMajorVersionFromDBIndex(dbIndex: Word): Word;
+function GetServerMinorVersionFromDBIndex(dbIndex: Word): Word;
+function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
+function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
+
+function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
+
+function LoadClientLibIBX(ALib: string): boolean;
+function SetInitialClientLib: boolean;
+
+function TestEmbeddedConnection(AServerRec: TServerRecord; out ODSMajor: Integer; out ODSMinor: integer; out ServerVersion: string): boolean;
+
+function  CloseDB(dbIndex: integer): boolean;
+
+function DeleteDBRegistrationFromFile(const ATitle: string): Boolean;
+//Remove from RegisteredDatabases array!
+procedure UnregisterDatabaseByTitle(const ATitle: string);
+
+
+procedure MarkAllServerDatabasesDeleted(const ServerName: string);
+procedure MarkAllDatabasesDeleted;
+procedure RemoveDeletedDBRegistrationsFromFile;
+
+function IsValidPortNr(AStr: string): boolean;
+function ServerNameContainPortNr(AServerName: string): boolean;
+function GetPortNrFromServerName(AServerName: string): string;
+function GetHostFromServerName(AServerName: string): string;
+
+procedure AssignIBDatabase(const Source, Target: TIBDatabase);
+function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
+
+function GetServerName(DBName: string): string;
+
+function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
+function GetFirstServerRecordFromFile: TServerRecord;
+function GetServerRecordFromFileByIndex(AIdx: Integer): TServerRecord;
+
 procedure SaveServerDataToFile(const Rec: TServerRecord);
 procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
 function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
 
-procedure LoadRegisteredServers(ATreeView: TTreeView);
+//procedure LoadRegisteredServers(ATreeView: TTreeView);
 
-function GetServerListFromTreeView(ATreeView: TTreeView): TStringList;
+function GetServerListFromTreeView: TStringList;
+function GetServerAndPortListFromTreeView: TStringList;
+
 function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
 
@@ -459,7 +593,7 @@ function GetCollations(const Characterset: string; var Collations: TStringList):
 
 // Given field retrieval query in FieldQuery, return field type and size.
 // Includes support for field types that are domains and arrays
-procedure GetFieldType(FieldQuery: TSQLQuery; var FieldType: string; var FieldSize: integer);
+procedure GetFieldType(FieldQuery: TIBQuery; var FieldType: string; var FieldSize: integer);
 
 // Returns field type DDL given a RDB$FIELD_TYPE value as well
 // as subtype/length/scale (use -1 for empty/unknown values)
@@ -474,13 +608,576 @@ function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
 function IsPrimaryIndexSystemGenerated(IndexName: string): boolean;
 
 // Given TIBConnection parameters, sets transaction isolation level
-procedure SetTransactionIsolation(Params: TStringList);
+procedure SetTransactionIsolation(Params: TStrings);
 
+
+function AdjustColorByBrightness(AColor: TColor): TColor;    function ColorRValue(AColor: TColor): Byte;
+function ColorGValue(AColor: TColor): Byte;
+function ColorBValue(AColor: TColor): Byte;
 
 implementation
 
+uses Reg;
 
-function GetServerRecordFromFile(AServerName: string): TServerRecord;
+
+function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
+begin
+  result := ADB.FirebirdAPI.GetImplementationVersion;
+end;
+
+function GetSeverImplemetationVersionFromDBIndex(dbIndex: word): string;
+begin
+  result := GetSeverImplemetationVersionFromIBDB (RegisteredDatabases[dbIndex].IBDatabase);
+end;
+
+function GetServerMajorVersionFromDBIndex(dbIndex: Word): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromDBIndex(dbIndex);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, 1, P - 1), 0);
+end;
+
+function GetServerMinorVersionFromDBIndex(dbIndex: Word): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromDBIndex(dbIndex);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, P + 1, MaxInt), 0);
+end;
+
+function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromIBDB(ADB);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, 1, P - 1), 0);
+end;
+
+function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromIBDB(ADB);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, P + 1, MaxInt), 0);
+end;
+
+function TestEmbeddedConnection(AServerRec: TServerRecord; out ODSMajor: Integer; out ODSMinor: integer; out ServerVersion: string): boolean;
+var tmpDB: TIBDatabase;
+    tmpDbInfo: TIBDatabaseInfo;
+    dbFile: string;
+begin
+  result := false;
+  dbFile := ExtractFilePath(Application.ExeName) + TmpDir + '/embedded_test.fdb';
+
+  tmpDB := TIBDatabase.Create(nil);
+  try
+    tmpDB.FirebirdLibraryPathName := AServerRec.ClientLibraryPath;
+    tmpDB.Params.Values['User_Name'] := AServerRec.UserName;
+    tmpDB.Params.Values['Password'] :=  AServerRec.Password;
+    tmpDB.LoginPrompt := false;
+    try
+      if tmpDB.Connected then
+        tmpDB.Connected := false;
+
+      if FileExists(dbFile) then
+
+        DeleteFile(PChar(dbFile));
+
+      //tmpDB.CreateIfNotExists := true;
+      tmpDB.DatabaseName :=  dbFile;
+      tmpDB.CreateDatabase;
+      tmpDB.Open;
+
+      tmpDbInfo := TIBDatabaseInfo.Create(nil);
+      tmpDbInfo.Database := tmpDB;
+
+      ServerVersion := tmpDbInfo.FirebirdVersion;
+      ODSMajor := tmpDbInfo.ODSMajorVersion;
+      ODSMinor := tmpDbInfo.ODSMinorVersion;
+
+      tmpDB.Close;
+      //ReadODSFromFile(tmpDB.DatabaseName, ODSMajor, ODSMinor);
+      result := true;
+    except
+      on E: Exception do
+      begin
+        ODSMajor := 0;
+        ODSMinor := 0;
+        ShowMessage('Embedded Connection failed:' + sLineBreak + E.Message);
+      end;
+    end;
+
+  finally
+    tmpDbInfo.Free;
+    tmpDB.Free;
+  end;
+end;
+
+function CloseDB(dbIndex: Integer): Boolean;
+begin
+  Result := False;
+
+  // Sicherheits-Checks
+  if (dbIndex < Low(RegisteredDatabases)) or (dbIndex > High(RegisteredDatabases)) then
+    Exit;
+
+  with RegisteredDatabases[dbIndex] do
+  begin
+    try
+      // Query schließen
+      if Assigned(IBQuery) and IBQuery.Active then
+      begin
+        try
+          IBQuery.Close;
+        except
+          // silent
+        end;
+      end;
+
+      // Transaktion: Commit → Rollback bei Fehler
+      if Assigned(IBTransaction) and IBTransaction.InTransaction then
+      begin
+        try
+          IBTransaction.Commit;
+        except
+          try
+            IBTransaction.Rollback;
+          except
+            // silent – wenn Rollback auch fehlschlägt
+          end;
+        end;
+      end;
+
+      // Datenbankverbindung schließen
+      if Assigned(IBDatabase) and IBDatabase.Connected then
+      begin
+        try
+          IBDatabase.Connected := False;
+        except
+          // silent
+        end;
+      end;
+
+      Result := True;
+    except
+      // silent: nichts anzeigen, kein raise
+      Result := False;
+    end;
+  end;
+end;
+
+function DeleteDBRegistrationFromFile(const ATitle: string): Boolean;
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  Found: Boolean;
+  i: Integer;
+begin
+  Result := False;
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  // Datei prüfen
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 2; // read/write
+    Reset(F);
+
+    Found := False;
+    i := 0;
+
+    // Durchsuchen aller Datensätze
+    while not Eof(F) do
+    begin
+      Seek(F, i);
+      Read(F, Rec);
+
+      // Vergleich: gleiche Bezeichnung und nicht bereits gelöscht
+      if (not Rec.Deleted) and SameText(Trim(Rec.Title), Trim(ATitle)) then
+      begin
+        Rec.Deleted := True;
+        Seek(F, i);
+        Write(F, Rec);
+        Found := True;
+        Break;
+      end;
+
+      Inc(i);
+    end;
+
+    Result := Found;
+  finally
+    try
+      CloseFile(F);
+    except
+      // Fehler beim Schließen ignorieren oder loggen
+    end;
+  end;
+end;
+
+procedure UnregisterDatabaseByTitle(const ATitle: string);
+var
+  i, foundIndex: Integer;
+begin
+  foundIndex := -1;
+
+  // 1. Array nach Title durchsuchen
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if SameText(RegisteredDatabases[i].RegRec.Title, ATitle) then
+    begin
+      foundIndex := i;
+      Break;
+    end;
+  end;
+
+  if foundIndex = -1 then Exit; // nicht gefunden
+
+  // 2. Aus Datei löschen
+  DeleteDBRegistrationFromFile(ATitle);
+
+  // 3. Aus Array entfernen
+  for i := foundIndex to High(RegisteredDatabases) - 1 do
+    RegisteredDatabases[i] := RegisteredDatabases[i + 1];
+  SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
+end;
+
+
+procedure MarkAllServerDatabasesDeleted(const ServerName: string);
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  i: Integer;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  // Datei vorhanden?
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 2; // read/write
+    Reset(F);
+
+    try
+      for i := 0 to FileSize(F) - 1 do
+      begin
+        try
+          Seek(F, i);
+          Read(F, Rec);
+
+          if (not Rec.Deleted) and SameText(Trim(Rec.ServerName), Trim(ServerName)) then
+          begin
+            Rec.Deleted := True;
+            Seek(F, i);
+            Write(F, Rec);
+          end;
+        except
+          // silent – ignoriert fehlerhafte Datensätze
+        end;
+      end;
+    finally
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+    end;
+  except
+    // silent – kein raise, kein Dialog
+  end;
+end;
+
+procedure MarkAllDatabasesDeleted;
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  i: Integer;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 2; // read/write
+    Reset(F);
+
+    try
+      for i := 0 to FileSize(F) - 1 do
+      begin
+        try
+          Seek(F, i);
+          Read(F, Rec);
+
+          if not Rec.Deleted then
+          begin
+            Rec.Deleted := True;
+            Seek(F, i);
+            Write(F, Rec);
+          end;
+        except
+          // silent – fehlerhafte Records überspringen
+        end;
+      end;
+    finally
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+    end;
+  except
+    // silent – keine Meldungen, keine Exceptions
+  end;
+end;
+
+procedure RemoveDeletedDBRegistrationsFromFile;
+var
+  F, TempF: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName, TempName: string;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+  TempName := GetConfigurationDirectory + 'turbobird.tmp';
+
+  // Falls Datei nicht existiert → nichts tun
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 0; // read-only
+    Reset(F);
+
+    AssignFile(TempF, TempName);
+    Rewrite(TempF);
+
+    try
+      while not Eof(F) do
+      begin
+        try
+          Read(F, Rec);
+          if not Rec.Deleted then
+            Write(TempF, Rec);  // Nur gültige Datensätze behalten
+        except
+          // silent – überspringt fehlerhafte Einträge
+        end;
+      end;
+    finally
+      // Dateien schließen, egal was passiert
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+      try
+        CloseFile(TempF);
+      except
+        // silent
+      end;
+    end;
+
+    // Alte Datei ersetzen
+    try
+      DeleteFile(PChar(FileName));
+      RenameFile(TempName, PChar(FileName));
+    except
+      // silent – z. B. falls Datei gesperrt oder Berechtigung fehlt
+    end;
+  except
+    // silent – keine Exceptions oder Dialoge
+  end;
+end;
+
+procedure SetupTransaction(DBRec: TDatabaseRec; TRRec: TTransactionConfigRecord);
+begin
+  with DBRec do
+  begin
+{    // Transaktion erstellen, falls noch nil
+    if SQLTrans = nil then
+      SQLTrans := TIBTransaction.Create(nil);
+
+    // Verbindung koppeln
+    if IBConnection <> nil then
+      IBConnection.DefaultTransaction := SQLTrans;
+
+    // Isolation-Level
+    case TRRec.TxIsolation of
+      0: SQLTrans.Isolation := xiReadCommitted;
+      1: SQLTrans.Isolation := xiReadCommittedRecVersion;
+      2: SQLTrans.Isolation := xiRepeatableRead;
+      3: SQLTrans.Isolation := xiSerializable;
+    end;
+
+    SQLTrans.ReadOnly := not TRRec.TxAccessMode;
+
+    if TRRec.TxWaitMode then
+      SQLTrans.Options := SQLTrans.Options + [toWait]
+    else
+      SQLTrans.Options := SQLTrans.Options - [toWait];
+    }
+  end;
+end;
+
+
+function IsValidPortNr(AStr: string): boolean;
+var
+  PortNum: Integer;
+begin
+  Result := False;
+  if TryStrToInt(Trim(AStr), PortNum) then
+    Result := (PortNum >= 1) and (PortNum <= 65535);
+end;
+
+function ServerNameContainPortNr(AServerName: string): boolean;
+var
+  SlashPos: Integer;
+  PortStr: string;
+begin
+  Result := False;
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+  begin
+    PortStr := Copy(AServerName, SlashPos+1, MaxInt);
+    Result := IsValidPortNr(PortStr);
+  end;
+end;
+
+function GetPortNrFromServerName(AServerName: string): string;
+var
+  SlashPos: Integer;
+  PortStr: string;
+begin
+  Result := '';
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+  begin
+    PortStr := Copy(AServerName, SlashPos+1, MaxInt);
+    if IsValidPortNr(PortStr) then
+      Result := Trim(PortStr);
+  end;
+end;
+
+function GetHostFromServerName(AServerName: string): string;
+var
+  SlashPos: Integer;
+begin
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+    Result := Trim(Copy(AServerName, 1, SlashPos-1))
+  else
+    Result := Trim(AServerName);
+end;
+
+
+(*  Get server name from database string  *)
+Function GetServerName(DBName: string): string;
+begin
+  if Pos(':', DBName) > 2 then
+    Result:= Copy(DBName, 1, Pos(':', DBName) - 1)
+  else
+    Result:= 'localhost';
+end;
+
+procedure AssignIBDatabase(const Source, Target: TIBDatabase);
+begin
+  if not Assigned(Source) or not Assigned(Target) then
+    Exit;
+
+  // Wichtig: erst schließen
+  if Target.Connected then
+    Target.Close;
+
+  // Basis-Einstellungen
+  Target.DatabaseName   := Source.DatabaseName;
+  Target.FirebirdLibraryPathName := Source.FirebirdLibraryPathName;
+  Target.Params.Assign(Source.Params);
+  Target.LoginPrompt    := Source.LoginPrompt;
+  Target.SQLDialect     := Source.SQLDialect;
+  //Target.DefaultTransaction := Source.DefaultTransaction; // Achtung: nur Referenz, keine Kopie!
+
+  // Provider-Flags und Misc
+  Target.TraceFlags     := Source.TraceFlags;
+  //Target.SQLRoleName    := Source.SQLRoleName;
+
+  // In IBX gibt es "IdleTimer", "AllowStreamedConnected" usw. -> falls vorhanden:
+  Target.IdleTimer      := Source.IdleTimer;
+  Target.AllowStreamedConnected := Source.AllowStreamedConnected;
+
+  // Events nicht übernehmen (da meist fenster-/threadabhängig)
+  {Target.BeforeConnect  := Source.BeforeConnect;
+  Target.AfterConnect   := Source.AfterConnect;
+  Target.BeforeDisconnect := Source.BeforeDisconnect;
+  Target.AfterDisconnect  := Source.AfterDisconnect;
+  Target.OnLogin        := Source.OnLogin;}
+end;
+
+function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
+begin
+  Result := False;
+
+  if (not Assigned(DB1)) or (not Assigned(DB2)) then
+    Exit;
+
+  // Direkt identisch? -> sofort true
+  if DB1 = DB2 then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // Vergleich wichtiger Properties
+  Result :=
+    (DB1.DatabaseName      = DB2.DatabaseName) and
+    (DB1.LoginPrompt       = DB2.LoginPrompt) and
+    (DB1.SQLDialect        = DB2.SQLDialect) and
+    (DB1.Params.Text       = DB2.Params.Text) and
+    (DB1.FirebirdLibraryPathName = DB2.FirebirdLibraryPathName);
+
+  // Optional: DefaultTransaction prüfen
+  {if Result then
+  begin
+    if Assigned(DB1.DefaultTransaction) and Assigned(DB2.DefaultTransaction) then
+      Result := DB1.DefaultTransaction.Params.Text = DB2.DefaultTransaction.Params.Text
+    else if Assigned(DB1.DefaultTransaction) xor Assigned(DB2.DefaultTransaction) then
+      Result := False;
+  end;}
+end;
+
+function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
 var
   fs: TFileStream;
   rec: TServerRecord;
@@ -489,7 +1186,7 @@ var
 begin
   FillChar(Result, SizeOf(Result), 0);
   found := False;
-  fileName := getConfigurationDirectory + 'servers.reg';
+  fileName := getConfigurationDirectory + ServersRegFile;
 
   if not FileExists(fileName) then
     Exit; // nichts vorhanden → leer zurück
@@ -514,6 +1211,63 @@ begin
     FillChar(Result, SizeOf(Result), 0); // leer zurück wenn nicht gefunden
 end;
 
+function GetFirstServerRecordFromFile: TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  fileName := getConfigurationDirectory + ServersRegFile;
+
+  if not FileExists(fileName) then
+    Exit; // keine Datei vorhanden → leer zurück
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    if fs.Size >= SizeOf(TServerRecord) then
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+      Result := rec;
+    end
+    else
+      FillChar(Result, SizeOf(Result), 0); // Datei leer oder defekt
+  finally
+    fs.Free;
+  end;
+end;
+
+function GetServerRecordFromFileByIndex(AIdx: Integer): TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+  offset: Int64;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  fileName := getConfigurationDirectory + ServersRegFile;
+
+  if (AIdx < 0) or (not FileExists(fileName)) then
+    Exit; // ungültiger Index oder Datei nicht vorhanden
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    // Prüfen, ob der Index in der Datei liegt
+    if fs.Size < (AIdx + 1) * SizeOf(TServerRecord) then
+      Exit; // Index außerhalb des gültigen Bereichs
+
+    // Direkt an die Position springen
+    offset := AIdx * SizeOf(TServerRecord);
+    fs.Position := offset;
+
+    // Record lesen
+    fs.ReadBuffer(rec, SizeOf(TServerRecord));
+    Result := rec;
+  finally
+    fs.Free;
+  end;
+end;
+
 procedure SaveServerDataToFile(const Rec: TServerRecord);
 var
   tmpList: TMemoryStream;
@@ -521,7 +1275,7 @@ var
   found: Boolean;
   regFile: string;
 begin
-  regFile := GetConfigurationDirectory + 'servers.reg';
+  regFile := GetConfigurationDirectory + ServersRegFile;
 
   tmpList := TMemoryStream.Create;
   try
@@ -564,90 +1318,101 @@ begin
   if Trim(Rec.ServerName) = '' then
     Exit;
 
-  //Session.ServerName        := Rec.ServerName;
-  Session.ServerAlias       := Rec.ServerAlias;
-  Session.UserName          := Rec.UserName;
-  Session.Password          := Rec.Password;
-  Session.Role              := Rec.Role;
-  Session.Protocol          := Rec.Protocol;
-  Session.Charset           := Rec.Charset;
-  Session.Port              := Rec.Port;
-  Session.ClientLibraryPath := Rec.ClientLibraryPath;
-  Session.ConfigFilePath    := Rec.ConfigFilePath;
+  //Session.ServerName          := Rec.ServerName;
+  Session.ServerAlias         := Rec.ServerAlias;
+
+  {Session.FBVersionString     := Rec.VersionString;
+  Session.FBVersionMajor      := Rec.VersionMajor;
+  Session.FBVersionMinor      := Rec.VersionMinor;}
+
+  Session.UserName            := Rec.UserName;
+  Session.Password            := Rec.Password;
+  Session.Role                := Rec.Role;
+  Session.Protocol            := Rec.Protocol;
+  Session.Charset             := Rec.Charset;
+  Session.Port                := Rec.Port;
+  Session.ClientLibraryPath   := Rec.ClientLibraryPath;
+  Session.ConfigFilePath      := Rec.ConfigFilePath;
+  Session.LoadRegisteredClientLib := Rec.LoadRegisteredClientLib;
+  Session.IsEmbedded              := Rec.IsEmbedded;
+
+  Session.ConnectTimeout    := Rec.ConnectTimeoutMS;
+  Session.RetryConnectCount := Rec.RetryCount;
+  Session.QueryTimeout      := Rec.QueryTimeoutMS;
 end;
 
 function BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
-var
-  Rec: TServerRecord;
+var Rec: TServerRecord;
 begin
   FillChar(Rec, SizeOf(Rec), 0);
 
   Rec.ServerName   := Session.ServerName;
   Rec.ServerAlias  := Session.ServerAlias;
-  Rec.UserName     := Session.UserName;
-  Rec.Role         := Session.Role;
-  Rec.Protocol     := Session.Protocol;
 
+  Rec.VersionString := Session.FBVersionString;
+  Rec.VersionMajor  := Session.FBVersionMajor;
+  Rec.VersionMinor  := Session.FBVersionMinor;
+
+  Rec.UserName     := Session.UserName;
   if SavePwd then
     Rec.Password := Session.Password
   else
-    Rec.Password  := '';
-
+   Rec.Password := '';
+  Rec.Role         := Session.Role;
+  Rec.Protocol     := Session.Protocol;
   Rec.Charset := Session.Charset;
-  Rec.Port:=     Session.Port;
-  Rec.ClientLibraryPath := Session.ClientLibraryPath;
-  Rec.ConfigFilePath    := Session.ConfigFilePath;
+  Rec.Port :=     Session.Port;
+  Rec.IsEmbedded := (Rec.Protocol = local);
+  Rec.ClientLibraryPath   := Session.ClientLibraryPath;
+  Rec.ConfigFilePath      := Session.ConfigFilePath;
+  Rec.LoadRegisteredClientLib := Session.LoadRegisteredClientLib;
+  Rec.IsEmbedded              := Session.IsEmbedded;
+
+  Rec.ConnectTimeoutMS := Session.ConnectTimeout;
+  Rec.RetryCount       := Session.RetryConnectCount;
+  Rec.QueryTimeoutMS   := Session.QueryTimeout;
 
   Result := Rec;
 end;
 
-procedure LoadRegisteredServers(ATreeView: TTreeView);
-var
-  FS: TFileStream;
-  Rec: TServerRecord;
-  ParentNode: TTreeNode;
-begin
-  ATreeView.Items.BeginUpdate;
-  try
-    ATreeView.Items.Clear;
-
-    if not FileExists(GetConfigurationDirectory + 'servers.reg') then
-      Exit;
-
-    FS := TFileStream.Create(GetConfigurationDirectory + 'servers.reg', fmOpenRead or fmShareDenyWrite);
-    try
-      while FS.Position < FS.Size do
-      begin
-        FillChar(Rec, SizeOf(Rec), 0);
-        FS.ReadBuffer(Rec, SizeOf(Rec));
-
-        // Abstandhalter hinzufügen
-        ATreeView.Items.Add(nil, '');
-
-        // Server-Node hinzufügen
-        ParentNode := ATreeView.Items.Add(nil, Trim(Rec.ServerName));
-        ParentNode.Data := nil; // optional: hier könnte man @Rec speichern, wenn gebraucht
-      end;
-    finally
-      FS.Free;
-    end;
-  finally
-    ATreeView.Items.EndUpdate;
-  end;
-end;
-
-
-function GetServerListFromTreeView(ATreeView: TTreeView): TStringList;
+function GetServerListFromTreeView: TStringList;
 var
   i: Integer;
   Node: TTreeNode;
 begin
+  result := nil;
+  if MainTreeView.Items.Count = 0 then
+    exit;
   Result := TStringList.Create;
-  for i := 0 to ATreeView.Items.Count - 1 do
+  for i := 0 to MainTreeView.Items.Count - 1 do
   begin
-    Node := ATreeView.Items[i];
+    Node := MainTreeView.Items[i];
     if (Node.Level = 0) and (Trim(Node.Text) <> '') then
       Result.Add(Node.Text);
+  end;
+end;
+
+function GetServerAndPortListFromTreeView: TStringList;
+var
+  i: Integer;
+  Node: TTreeNode;
+  Port: string;
+  hstr: string;
+begin
+  result := nil;
+  if MainTreeView.Items.Count = 0 then
+    exit;
+  Result := TStringList.Create;
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    Node := MainTreeView.Items[i];
+    if (Node.Level = 0) and (Trim(Node.Text) <> '') then
+    begin
+      hStr := Node.Text;
+      if not TPNodeInfos(Node.Data)^.ServerSession.IsEmbedded   then
+        hStr := hStr + '/' + TPNodeInfos(Node.Data)^.ServerSession.Port;
+      Result.Add(hStr);
+    end;
   end;
 end;
 
@@ -727,7 +1492,7 @@ end;
 procedure ReadIniFile;
 begin
   fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
-  MultiVersionConnection := fIniFile.ReadString('FireBird',  'MultiVersionConnection', 'no');
+  InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
 end;
 
 
@@ -1365,15 +2130,16 @@ begin
   result:= true;
 end;
 
-procedure SetTransactionIsolation(Params: TStringList);
+procedure SetTransactionIsolation(Params: TStrings);
 begin
   Params.Clear;
-  Params.Add('isc_tpb_read_commited');
-  Params.Add('isc_tpb_concurrency');
-  Params.Add('isc_tpb_nowait');
+  // typische Firebird-Transaktionseinstellungen:
+  Params.Add('read_committed');
+  Params.Add('rec_version');
+  Params.Add('nowait');
 end;
 
-procedure GetFieldType(FieldQuery: TSQLQuery; var FieldType: string; var FieldSize: integer);
+procedure GetFieldType(FieldQuery: TIBQuery; var FieldType: string; var FieldSize: integer);
 // Requires FieldQuery to be the correct field retrieval query.
 // todo: migrate field retrieval query to systables if not already done
 begin
@@ -1520,18 +2286,160 @@ begin
   {$ENDIF}
 end;
 
+
+function ColorRValue(AColor: TColor): Byte;
+begin
+  Result := Red(ColorToRGB(AColor));
+end;
+
+function ColorGValue(AColor: TColor): Byte;
+begin
+  Result := Green(ColorToRGB(AColor));
+end;
+
+function ColorBValue(AColor: TColor): Byte;
+begin
+  Result := Blue(ColorToRGB(AColor));
+end;
+
+function AdjustColorByBrightness(AColor: TColor): TColor;
+var
+  R, G, B: Byte;
+  Brightness: Double;
+  RGBColor: TColor;
+begin
+  // Stelle sicher, dass Systemfarben in echte RGB-Werte umgewandelt werden
+  RGBColor := ColorToRGB(AColor);
+
+  // RGB-Komponenten extrahieren
+  R := ColorRValue(RGBColor);
+  G := ColorGValue(RGBColor);
+  B := ColorBValue(RGBColor);
+
+  // Helligkeit berechnen (mit Gewichtung für menschliches Auge)
+  Brightness := 0.299 * R + 0.587 * G + 0.114 * B;
+
+  // Rückgabe: bei heller Farbe → Schwarz, sonst → Weiß
+  if Brightness > 180 then
+    Result := clBlack
+  else
+    Result := clWhite;
+end;
+
+function SetInitialClientLib: boolean;
+var  frmSetFBClient: TfrmSetFBClient;
+begin
+  frmSetFBClient := TfrmSetFBClient.Create(nil);
+    try
+      if frmSetFBClient.ShowModal = mrOK then
+      begin
+        // Benutzer hat neuen Pfad ausgewählt → erneut versuchen
+        if FileExists(InitialFBClientLibPath) then
+        begin
+          InitialFBClient := LoadFBLibrary(InitialFBClientLibPath);
+
+          try
+            InitialFBClient.GetFirebirdAPI;     // ← Testen
+            fIniFile.WriteString('FireBird', 'InitialFBClientLib', InitialFBClientLibPath);
+            Result := True;
+          except
+            on E: Exception do
+            begin
+              MessageDlg('Fehler beim Laden der ausgewählten Client Library:' + LineEnding +
+                         InitialFBClientLibPath + LineEnding + LineEnding +
+                         E.Message, mtError, [mbOK], 0);
+            end;
+          end;
+
+        end else
+        begin
+          MessageDlg('Die ausgewählte Datei existiert nicht:' + LineEnding +
+                      InitialFBClientLibPath, mtError, [mbOK], 0);
+        end;
+      end;
+    finally
+      frmSetFBClient.Free;
+    end;
+
+end;
+
+function LoadClientLibIBX(ALib: string): boolean;
+var frmSetFBClient: TfrmSetFBClient;
+begin
+  Result := False;
+  if FileExists(ALib) then
+  begin
+    InitialFBClient := LoadFBLibrary(ALib);
+
+    try
+      InitialFBClient.GetFirebirdAPI;  // ← HIER Fehler falls Library nicht geladen werden konnte
+      Result := True;           // Erfolg!
+      Exit;
+    except
+      on E: Exception do
+      begin
+        MessageDlg('Fehler beim Laden der Firebird Client Library:' + LineEnding +
+                   ALib + LineEnding + LineEnding +
+                   E.Message, mtError, [mbOK], 0);
+      end;
+    end;
+  end;
+end;
+
+Function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
+var
+  Rec: TRegisteredDatabase;
+  Count: Integer;
+begin
+  Result:= False;
+  Rec:= RegisteredDatabases[dbIndex].RegRec;
+  fmEnterPass.laDatabase.Caption:= Rec.Title;
+  fmEnterPass.edUser.Text:= Rec.UserName;
+  fmEnterPass.edPassword.Clear;
+  fmEnterPass.cbRole.Clear;
+  // Use may have saved an empty password, which is valid for embedded dbs
+  // So check SavePassword instead of Password itself.
+  if (ForceConnectDialog=false) and Rec.SavePassword then
+  try
+    fmEnterPass.cbRole.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
+    fmEnterPass.cbRole.ItemIndex:= -1;
+    fmEnterPass.cbRole.Text:= '';
+    Result:= True; //this works, no need to go through a retry attempt below
+  except
+    // We don't particularly care which error occurred; we're trying again below.
+    Result:= False;
+  end;
+  // Only show form if connection failed before
+  if (ForceConnectDialog or (Result=false)) and
+    (fmEnterPass.ShowModal = mrOk) then
+  begin
+    if fmReg.TestConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+      Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
+    begin
+      RegisteredDatabases[dbIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
+      RegisteredDatabases[dbIndex].RegRec.Password:= fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].RegRec.Role:= fmEnterPass.cbRole.Text;
+
+      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['user_name'] := fmEnterPass.edUser.Text;
+      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['password']  := fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := false;
+      Result:= True;
+    end;
+  end;
+end;
+
 initialization
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);
-
-  //if not FileExists(fIniFileName) then
-    //CheckInitialIniFile;
 
   if FirstRun then
     ExtractResources;
 
   ReadIniFile;
 
+
+  //if not LoadClientLibIBX(InitialFBClientLibPath) then
+    //SetInitialClientLib;
 
 finalization
   //WriteIniFile;

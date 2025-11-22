@@ -304,7 +304,7 @@ begin
   inherited Destroy;
 end;
 
-function TFirebirdServices.AttachService: Boolean;
+{function TFirebirdServices.AttachService: Boolean;
 var
   S: String;
   ServiceName, Buff: array [0..255] of Char;
@@ -345,7 +345,57 @@ begin
 
   if not Result then
     RaiseServiceErr;
+end;}
+
+function TFirebirdServices.AttachService: Boolean;
+var
+  ServiceName: AnsiString;
+  SPB: AnsiString;
+  B: Byte;
+begin
+  if ServiceAttached then
+    raise EFBServiceError.Create('Service already attached!!!');
+
+  // ---- 1) Service Manager Name --------------------------------------------------
+  if (Trim(FHostName) <> '') and (UTF8UpperCase(Trim(FHostName)) <> 'LOCALHOST') then
+    ServiceName := AnsiString(FHostName + ':service_mgr')
+  else
+    ServiceName := 'service_mgr';
+
+
+  // ---- 2) SPB (Service Parameter Block) bauen ----------------------------------
+  SPB := '';
+
+  // SPB version markers
+  SPB := SPB + AnsiChar(isc_spb_version);
+  SPB := SPB + AnsiChar(isc_spb_current_version);
+
+  // Username
+  SPB := SPB + AnsiChar(isc_spb_user_name);
+  SPB := SPB + AnsiChar(Length(FUserName));
+  SPB := SPB + AnsiString(FUserName);
+
+  // Password
+  SPB := SPB + AnsiChar(isc_spb_password);
+  SPB := SPB + AnsiChar(Length(FPassword));
+  SPB := SPB + AnsiString(FPassword);
+
+
+  // ---- 3) Service Attach --------------------------------------------------------
+  Result :=
+    isc_service_attach(
+      @FArrIStatus,
+      Length(ServiceName),
+      PAnsiChar(ServiceName),
+      @FPServiceHandle,
+      Length(SPB),
+      PAnsiChar(SPB)
+    ) = 0;
+
+  if not Result then
+    RaiseServiceErr;
 end;
+
 
 function TFirebirdServices.DetachService: Boolean;
 begin
@@ -375,4 +425,5 @@ initialization
 finalization
 
 end.
+
 

@@ -5,7 +5,8 @@ unit floginservicemanager;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  uthemeselector;
 
 type
 
@@ -21,6 +22,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     lbSever: TLabel;
+    procedure FormShow(Sender: TObject);
   private
 
   public
@@ -33,6 +35,13 @@ type
 implementation
 
 {$R *.lfm}
+
+{ TfrmLoginServiceManager }
+
+procedure TfrmLoginServiceManager.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
 
 end.
 

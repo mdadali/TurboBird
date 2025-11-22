@@ -5,7 +5,8 @@ unit fsqlmonitor;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, IBSQLMonitor;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, IBSQLMonitor,
+  uthemeselector;
 
 type
 
@@ -16,6 +17,7 @@ type
     Memo1: TMemo;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure IBSQLMonitor1SQL(EventText: String; EventTime: TDateTime);
   private
 
@@ -50,6 +52,11 @@ end;
 procedure TfmSQLMonitor.FormCreate(Sender: TObject);
 begin
   IBSQLMonitor1.Enabled := true;
+end;
+
+procedure TfmSQLMonitor.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 end.

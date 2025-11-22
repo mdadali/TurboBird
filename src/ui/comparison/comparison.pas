@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   Buttons, ComCtrls, IBConnection, sqldb, QueryWindow, LCLType, dbugintf,
   fbcommon,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -48,6 +49,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
     procedure laScriptClick(Sender: TObject);
   private
     FDBIndex: Integer;
@@ -152,7 +154,7 @@ begin
   begin
     Connected:= True;
     if (RegisteredDatabases[ComparedDBIndex].RegRec.Password = '') then
-      Connected:= fmMain.ConnectToDBAs(ComparedDBIndex);
+      Connected:= ConnectToDBAs(ComparedDBIndex);
 
     if not Connected then
     begin
@@ -333,6 +335,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmComparison.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmComparison.laScriptClick(Sender: TObject);
@@ -2028,7 +2035,7 @@ begin
   cbComparedDatabase.Items.Clear;
   for i:= 0 to High(RegisteredDatabases) do
   begin
-    Servername:= fmMain.GetServerName(RegisteredDatabases[i].RegRec.DatabaseName);
+    Servername:= GetServerName(RegisteredDatabases[i].RegRec.DatabaseName);
     cbComparedDatabase.Items.Add(ServerName + '-' + RegisteredDatabases[i].RegRec.Title);
   end;
 

@@ -5,15 +5,18 @@ unit fb_func_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetFBFunctionDeps(const AConn: TIBConnection; const AFuncName, APackageName: string): string;
+function GetFBFunctionDeps(const AConn: TIBDatabase; const AFuncName, APackageName: string): string;
 
 implementation
 
-function GetFBFunctionDeps(const AConn: TIBConnection; const AFuncName, APackageName: string): string;
+function GetFBFunctionDeps(const AConn: TIBDatabase; const AFuncName, APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   FuncNameFull, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -30,7 +33,9 @@ begin
   else
     FuncNameFull := UpperCase(Trim(AFuncName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

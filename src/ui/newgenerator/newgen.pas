@@ -8,7 +8,9 @@ uses
   Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons,
   fbcommon,
-  turbocommon;
+  turbocommon,
+  uthemeselector,
+  fmetaquerys;
 
 type
 
@@ -28,6 +30,7 @@ type
     procedure bbCreateGenClick(Sender: TObject);
     procedure cbTablesChange(Sender: TObject);
     procedure cxTriggerChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
     FDBIndex: Integer;
@@ -90,34 +93,42 @@ begin
 end;
 
 procedure TfmNewGen.cbTablesChange(Sender: TObject);
-var
-  FType: string;
+var FType: string;
+    Iso: TIsolatedQuery;
 begin
   if cbTables.ItemIndex <> -1 then
   begin
-    fmMain.GetFields(FDBIndex, cbTables.Text, nil);
     cbFields.Clear;
-    while not fmMain.SQLQuery1.EOF do
+    //fmMain.GetFields(FDBIndex, cbTables.Text, nil);
+    //while not fmMain.SQLQuery1.EOF do
+    Iso := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, cbTables.Text);
+    while not Iso.Query.EOF do
     begin
-      FType:= GetFBTypeName(fmMain.SQLQuery1.FieldByName('field_type_int').AsInteger,
-        fmMain.SQLQuery1.FieldByName('field_sub_type').AsInteger,
-        fmMain.SQLQuery1.FieldByName('field_length').AsInteger,
-        fmMain.SQLQuery1.FieldByName('field_precision').AsInteger,
-        fmMain.SQLQuery1.FieldByName('field_scale').AsInteger);
+      FType:= GetFBTypeName(Iso.Query.FieldByName('field_type_int').AsInteger,
+        Iso.Query.FieldByName('field_sub_type').AsInteger,
+        Iso.Query.FieldByName('field_length').AsInteger,
+        Iso.Query.FieldByName('field_precision').AsInteger,
+        Iso.Query.FieldByName('field_scale').AsInteger);
 
       // Only show field name if they are numeric/suitable for generators
       // In practice, integer type fields are probably always used
       if (FType = 'INTEGER') or (FType = 'BIGINT') or (FType = 'SMALLINT') then
-        cbFields.Items.Add(Trim(fmMain.SQLQuery1.FieldByName('Field_Name').AsString));
-      fmMain.SQLQuery1.Next;
+        cbFields.Items.Add(Trim(Iso.Query.FieldByName('Field_Name').AsString));
+      Iso.Query.Next;
     end;
-    fmMain.SQLQuery1.Close;
+    //fmMain.SQLQuery1.Close;
+    Iso.Free;
   end;
 end;
 
 procedure TfmNewGen.cxTriggerChange(Sender: TObject);
 begin
   gbTrigger.Enabled:= cxTrigger.Checked;
+end;
+
+procedure TfmNewGen.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmNewGen.Init(dbIndex: Integer);

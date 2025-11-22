@@ -6,34 +6,39 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, IniFiles,
-  turbocommon;
+  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, ExtCtrls, IniFiles,
+  turbocommon,
+  uthemeselector;
 
 type
 
   { TfmViewTrigger }
 
   TfmViewTrigger = class(TForm)
-      bbClose: TSpeedButton;
-    edName: TEdit;
-    edOnTable: TEdit;
-    Label1: TLabel;
-    Label2: TLabel;
+    bbClose: TButton;
+      edName: TEdit;
+      edOnTable: TEdit;
+      GroupBox1: TGroupBox;
+      Label1: TLabel;
+      Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
-    laPos: TLabel;
-    laEvent: TLabel;
-    laType: TLabel;
     laEnabled: TLabel;
+    laEvent: TLabel;
+    laPos: TLabel;
+    laType: TLabel;
+    Panel1: TPanel;
+    Panel2: TPanel;
     seScript: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
     FNodeInfos: TPNodeInfos;
@@ -86,6 +91,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmViewTrigger.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmViewTrigger.bbCloseClick(Sender: TObject);

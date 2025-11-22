@@ -5,9 +5,14 @@ unit fbcommon;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB, FBAdmin, IniFiles,
+  Forms, Classes, SysUtils, FBAdmin, IniFiles,
   fSetFBClient, Controls, Dialogs,
-  ibase60dyn, IB, SQLDBLib;
+  IBConnection, SQLDB,  SQLDBLib,
+  ibase60dyn,
+  IB,
+  IBDatabase,
+  IBQuery,
+  IBXServices;
 
 
 type
@@ -52,8 +57,45 @@ TObjectType = (
     RoutineType: TRoutineType;
     RoutineName: string;
     PackageName: string; // leer wenn kein Package
-    Connection: TIBConnection;
+    Connection: TIBDatabase;
   end;
+
+type
+  TFBPage = packed record
+    pag_type: ShortInt;
+    pag_flags: Byte;
+    pag_checksum: Word;
+    pag_generation: Cardinal;
+    pag_scn: Cardinal;
+    reserved: Cardinal;
+  end;
+
+  TFBHeaderPage = packed record
+    hdr_header: TFBPage;
+    hdr_page_size: Word;
+    hdr_ods_version: Word;
+    hdr_PAGES: LongInt;
+    hdr_next_page: Cardinal;
+    hdr_oldest_transaction: LongInt;
+    hdr_oldest_active: LongInt;
+    hdr_next_transaction: LongInt;
+    hdr_sequence: Word;
+    hdr_flags: Word;
+    hdr_creation_date: array[0..1] of LongInt;
+    hdr_attachment_id: LongInt;
+    hdr_shadow_count: LongInt;
+    hdr_implementation: SmallInt;
+    hdr_ods_minor: Word;
+    hdr_ods_minor_original: Word;
+    hdr_end: Word;
+    hdr_page_buffers: Cardinal;
+    hdr_bumped_transaction: LongInt;
+    hdr_oldest_snapshot: LongInt;
+    hdr_backup_pages: LongInt;
+    hdr_misc: array[0..2] of LongInt;
+    hdr_data: array[0..0] of Byte; // flexible array member
+  end;
+
 
 const
 
@@ -72,14 +114,23 @@ const
     'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
 
 
+function ConnectFirebirdService(
+    const AServer: string;
+    APort: Integer;
+    const AUser,
+    APassword: string;
+    AProtocol: TProtocol;
+    AServiceConn: TIBXServicesConnection;
+    out FBVersionMajor,
+    FBVersionMinor: Word;
+    out FBVersionString,
+    ErrMessage: string
+  ): Boolean;
+
 function ReadODSFromFile(const ADatabaseFile: string; out ODSMajor, ODSMinor: Integer): Boolean;
 function ODSVersionToFBVersion(ODSMajor, ODSMinor: Integer): string;
 function GetClientLibForODS(ODSMajor, ODSMinor: Integer): string;
 function GetFBConffilePathFromFBClientlibPath(const ALibPath: string): string;
-
-function EnsureCorrectClientLib(const DatabasePath: string): Boolean;
-
-function SetFBClient(Sender: word): boolean;
 
 function NormalizeFloatForSQL(Value: Double): string;
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
@@ -87,31 +138,140 @@ function StrToRoutineType(const AStr: string): TRoutineType;
 function IsFunctionRoutine(RT: TRoutineType): Boolean;
 function IsPackageRoutine(RT: TRoutineType): Boolean;
 function IsCharType(FieldType: Integer): Boolean;
-function GetRoutineListSQL(AConnection: TIBConnection; RT: TRoutineType): string;
-function GetParamListSQL(AConnection: TIBConnection; const Info: TRoutineInfo; ParamTypeFilter: TParamTypeFilter = ptAll): string;
+function GetRoutineListSQL(AConnection: TIBDatabase; RT: TRoutineType): string;
+function GetParamListSQL(AConnection: TIBDatabase; const Info: TRoutineInfo; ParamTypeFilter: TParamTypeFilter = ptAll): string;
 
-function GetAllRoutinesAsList(AConnection: TIBConnection; AFormat: boolean): TStringList;
+function GetAllRoutinesAsList(AConnection: TIBDatabase; AFormat: boolean): TStringList;
 function GetAllFunctionsAsQuery: string;
 function GetAllProceduresAsQuery: string;
 function GetAllRoutinesAsQuery: string;
-function GetObjectOwner(AConnection: TIBConnection; const ObjectName: string; ObjType: TObjectType): string;
+function GetObjectOwner(AConnection: TIBDatabase; const ObjectName: string; ObjType: TObjectType): string;
 
 var
-    SQLDBLibraryLoader1: TSQLDBLibraryLoader;
     ClientLibraryName: string;
     Port: string;
 
-    FBVersionString: string;
-    FBVersionMajor: Integer = 0;
-    FBVersionMinor: Integer = 0;
-    FBVersionNumber: single = 0.0;
+    //FBVersionString: string;
+    //FBVersionMajor: Integer = 0;
+    //FBVersionMinor: Integer = 0;
+    //FBVersionNumber: single = 0.0;
 
 
 implementation
 
 uses turbocommon;
 
+
+
+function ConnectFirebirdService(
+  const AServer: string;
+  APort: Integer;
+  const AUser,
+  APassword: string;
+  AProtocol: TProtocol;
+  AServiceConn: TIBXServicesConnection;
+  out FBVersionMajor,
+  FBVersionMinor: Word;
+  out FBVersionString,
+  ErrMessage: string
+): Boolean;
+begin
+  Result := False;
+  FBVersionMajor := 0;
+  FBVersionMinor := 0;
+  FBVersionString := '';
+  ErrMessage := '';
+
+  if not Assigned(AServiceConn) then
+  begin
+    ErrMessage := 'Service connection object is nil.';
+    Exit;
+  end;
+
+  try
+
+    // Verbinden
+    AServiceConn.Connected := True;
+    Result := AServiceConn.Connected;
+
+    if Result then
+    begin
+      // Firebird-Version ermitteln
+      with TIBXServerProperties.Create(nil) do
+      try
+        ServicesConnection := AServiceConn;
+        FBVersionString := VersionInfo.ServerVersion;
+
+        // Grobe Extraktion der Versionsnummern
+        FBVersionMajor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 1, 1), 0);
+        FBVersionMinor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 3, 1), 0);
+
+        ErrMessage := 'Connection successful!' + sLineBreak +
+                      'Server version: ' + FBVersionString;
+      finally
+        Free;
+      end;
+    end;
+  except
+    on E: Exception do
+    begin
+      ErrMessage := E.Message;
+      Result := False;
+    end;
+  end;
+end;
+
 function ReadODSFromFile(const ADatabaseFile: string; out ODSMajor, ODSMinor: Integer): Boolean;
+var
+  Stream: TFileStream;
+  Header: TFBHeaderPage;
+  FileName: string;
+  p: Integer;
+  RawODS: Word;
+begin
+  Result := False;
+  ODSMajor := 0;
+  ODSMinor := 0;
+
+  // 1) Entferne Serverangabe (z. B. "server:/pfad/datei.fdb")
+  FileName := ADatabaseFile;
+  p := LastDelimiter(':', FileName);
+  if (p > 0) and (p < Length(FileName)) then
+    FileName := Copy(FileName, p + 1, MaxInt);
+
+  // 2) Prüfe, ob Datei existiert
+  if not FileExists(FileName) then
+    Exit;
+
+  // 3) Header lesen
+  Stream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyNone);
+  try
+    Stream.Read(Header, SizeOf(Header));
+    //if Stream.Read(Header, SizeOf(Header)) < SizeOf(Header.hdr_header) + 22 then
+      //Exit; // zu klein oder beschädigt
+
+    // 4) ODS Major bestimmen
+    //RawODS := Header.hdr_ods_version;
+
+    ODSMajor := (Header.hdr_ods_version xor $8000);
+    //ODSMajor := ODSMajor * 10;
+
+
+    // Ab Firebird 3 ist Bit 15 (0x8000) gesetzt → entfernen
+    if (RawODS and $8000) <> 0 then
+      RawODS := RawODS xor $8000;
+
+    //ODSMajor := RawODS;
+    ODSMinor := Header.hdr_ods_minor;
+
+    Result := True;
+  finally
+    Stream.Free;
+  end;
+end;
+
+
+{function ReadODSFromFile(const ADatabaseFile: string; out ODSMajor, ODSMinor: Integer): Boolean;
 var
   fs: TFileStream;
   buf: array[0..63] of Byte;  // etwas mehr Puffer
@@ -158,7 +318,7 @@ begin
   finally
     fs.Free;
   end;
-end;
+end;}
 
 function ODSVersionToFBVersion(ODSMajor, ODSMinor: Integer): string;
 begin
@@ -180,7 +340,7 @@ begin
         end;
       end;
   else
-    Result := Format('Unbekannte Firebird-Version (ODS %d.%d)', [ODSMajor, ODSMinor]);
+    Result := Format('Unkonown Firebird-Version (ODS %d.%d)', [ODSMajor, ODSMinor]);
   end;
 end;
 
@@ -222,50 +382,6 @@ begin
   if FBDir <> '' then
     //Result := RootDir + FBDir;
     Result := FBDir;
-end;
-
-function EnsureCorrectClientLib(const DatabasePath: string): Boolean;
-var
-  ODSMajor, ODSMinor: Integer;
-  TargetLibPath: string;
-
-begin
-  Result := False;
-  try
-    // 1) ODS aus DB-File lesen
-    if not ReadODSFromFile(DatabasePath, ODSMajor, ODSMinor) then
-      Exit;
-
-    // 2) Richtige ClientLib anhand ODS ermitteln
-    TargetLibPath := GetClientLibForODS(ODSMajor, ODSMinor);
-    if TargetLibPath = '' then
-      raise Exception.CreateFmt('No client library found for ODS %d.%d', [ODSMajor, ODSMinor]);
-
-    // 3) Prüfen ob bereits die richtige Lib geladen ist
-    if SQLDBLibraryLoader1.Enabled and SameFileName(SQLDBLibraryLoader1.LibraryName, TargetLibPath) then
-    begin
-      Result := True;
-      Exit;
-    end;
-
-    // 4) Bibliothek wechseln
-    if SQLDBLibraryLoader1.Enabled then
-      SQLDBLibraryLoader1.UnloadLibrary;
-
-    SQLDBLibraryLoader1.LibraryName := TargetLibPath;
-    SQLDBLibraryLoader1.LoadLibrary;
-    SQLDBLibraryLoader1.Enabled := True;
-
-    Result := True;
-  except
-    on E: Exception do
-    begin
-      // Im Fehlerfall entladen
-      if SQLDBLibraryLoader1.Enabled then
-        SQLDBLibraryLoader1.UnloadLibrary;
-      raise;
-    end;
-  end;
 end;
 
 function NormalizeFloatForSQL(Value: Double): string;
@@ -340,96 +456,6 @@ begin
   Port := fIniFile.ReadString('Firebird', 'Port', '');
   Result := ClientLibraryName;
 end;
-
-function SetFBClient(Sender: Word): Boolean;
-var
-  fbclibOld, fbclibNew: string;
-  caption0, caption1: string;
-begin
-  Result := False;
-
-  caption0 :=
-    'FireBird client in ini-file does not exist or is invalid.' + sLineBreak +
-    'Please select a version from the list below or' + sLineBreak +
-    'use the "Browse" button to choose a valid version.' + sLineBreak +
-    'Then test your selection with the "Test" button.';
-  caption1 := 'Select a Firebird client library from the list below.';
-
-  // Laufzeitwechsel: alte DLL entladen
-  if Sender = 1 then
-  begin
-    if SQLDBLibraryLoader1.Enabled then
-    begin
-      SQLDBLibraryLoader1.UnloadLibrary;
-      SQLDBLibraryLoader1.Enabled := false;
-    end;
-    fbclibOld := '';
-  end
-  else
-  begin
-    fbclibOld := GetClientLibraryPath;
-  end;
-
-  fbclibNew := fbclibOld;
-
-  // Versuch, vorhandene DLL zu laden
-  if fbclibOld <> '' then
-  begin
-    SQLDBLibraryLoader1.LibraryName := fbclibOld;
-    try
-      SQLDBLibraryLoader1.LoadLibrary;
-    except
-      //SQLDBLibraryLoader1.UnloadLibrary;
-      SQLDBLibraryLoader1.Enabled := false;
-    end;
-  end;
-
-  // Falls Laden fehlschlägt → Dialog öffnen
-  if not SQLDBLibraryLoader1.Enabled then
-  begin
-    frmSetFBClient := TfrmSetFBClient.Create(nil);
-    try
-      if Sender = 0 then
-        frmSetFBClient.lblInfo.Caption := caption0
-      else
-        frmSetFBClient.lblInfo.Caption := caption1;
-
-      if frmSetFBClient.ShowModal = mrOk then
-      begin
-        fbclibNew := frmSetFBClient.FBClientLibPath;
-        SQLDBLibraryLoader1.LibraryName := fbclibNew;
-
-        try
-          SQLDBLibraryLoader1.LoadLibrary;
-        except
-          on E: Exception do
-          begin
-            ShowMessage('Error while loading the selected Firebird client library:' +
-                        sLineBreak + fbclibNew + sLineBreak + E.Message);
-            Exit;
-          end;
-        end;
-
-        // Pfad speichern, falls neu
-        if fbclibNew <> fbclibOld then
-        begin
-          SaveClientLibraryPath(fbclibNew);
-          SetFBConfFilePathFromClientLibPath(fbclibNew);
-        end;
-
-      end
-      else
-      begin
-        ShowMessage('Firebird client library was not set. The application will now close.');
-        Exit;
-      end;
-    finally
-      frmSetFBClient.Free;
-    end;
-  end;
-  Result := True;
-end;
-
 
 function RoutineTypeToStr(ARoutineType: TRoutineType): string;
 begin
@@ -513,8 +539,11 @@ begin
   Result := FieldType in [14, 37, 40]; // CHAR, VARCHAR, CSTRING
 end;
 
-function GetRoutineListSQL(AConnection: TIBConnection; RT: TRoutineType): string;
+function GetRoutineListSQL(AConnection: TIBDatabase; RT: TRoutineType): string;
+var ServerVersionMajor: word;
 begin
+  ServerVersionMajor := GetServerMajorVersionFromIBDB(AConnection);
+
   case RT of
     rtUDF: begin
 
@@ -525,7 +554,7 @@ begin
         'FROM RDB$FUNCTIONS ' +
         'WHERE RDB$MODULE_NAME IS NOT NULL ';
 
-        if FBVersionMajor >= 3 then
+        if ServerVersionMajor >= 3 then
         begin
           Result := Result +
             'AND RDB$ENGINE_NAME IS NULL ' +
@@ -547,7 +576,7 @@ begin
 
     rtFBProc:
      begin
-       if FBVersionMajor >= 3 then
+       if ServerVersionMajor >= 3 then
          Result :=
           'SELECT RDB$PROCEDURE_NAME AS NAME ' +
           'FROM RDB$PROCEDURES ' +
@@ -623,13 +652,19 @@ begin
   end;
 end;
 
-function GetParamListSQL(AConnection: TIBConnection; const info: TRoutineInfo; ParamTypeFilter: TParamTypeFilter = ptAll): string;
+function GetParamListSQL(AConnection: TIBDatabase; const info: TRoutineInfo; ParamTypeFilter: TParamTypeFilter = ptAll): string;
 var
   IsFunction: Boolean;
   IsUDR: Boolean;
   IsPackage: Boolean;
+
+  DBRec: TRegisteredDatabase;
+  ServerRec: TServerRecord;
+  ServerVersionMajor: word;
 begin
-  if FBVersionMajor >= 3 then
+  ServerVersionMajor := GetServerMajorVersionFromIBDB(AConnection);
+
+  if  ServerVersionMajor >= 3 then
   begin
     IsFunction := info.RoutineType in [rtUDF, rtFBFunc, rtUDRFunc, rtPackageFBFunc, rtPackageUDRFunc];
     IsUDR := info.RoutineType in [rtUDRFunc, rtPackageUDRFunc, rtUDRProc, rtPackageUDRProc];
@@ -643,7 +678,7 @@ begin
   // --- Sonderfall UDF ---
   if info.RoutineType = rtUDF then
   begin
-    if FBVersionMajor >= 3 then
+    if ServerVersionMajor >= 3 then
     begin
       // Firebird 3+: volle Query mit FIELD_SOURCE und CHARACTER_LENGTH
       Result :=
@@ -738,7 +773,7 @@ begin
       'LEFT JOIN RDB$FIELDS F ON F.RDB$FIELD_NAME = P.RDB$FIELD_SOURCE ' +
       'WHERE P.RDB$PROCEDURE_NAME = :PROCNAME ';
 
-    if FBVersionMajor >= 3 then
+    if ServerVersionMajor >= 3 then
     begin
       if IsPackage then
         Result := Result + 'AND P.RDB$PACKAGE_NAME = :PACKAGENAME '
@@ -753,13 +788,13 @@ begin
     }
 
     if info.RoutineType in [rtFBProc, rtPackageFBProc] then
-      if FBVersionMajor >= 3 then
+      if ServerVersionMajor >= 3 then
         Result := Result + 'AND EXISTS (SELECT 1 FROM RDB$PROCEDURES PR WHERE PR.RDB$PROCEDURE_NAME = P.RDB$PROCEDURE_NAME AND PR.RDB$ENGINE_NAME IS NULL) '
       else
         Result := Result + 'AND EXISTS (SELECT 1 FROM RDB$PROCEDURES PR WHERE PR.RDB$PROCEDURE_NAME = P.RDB$PROCEDURE_NAME) '
     else
       if info.RoutineType in [rtUDRProc, rtPackageUDRProc] then
-        if FBVersionMajor >= 3 then
+        if ServerVersionMajor >= 3 then
           Result := Result + 'AND EXISTS (SELECT 1 FROM RDB$PROCEDURES PR WHERE PR.RDB$PROCEDURE_NAME = P.RDB$PROCEDURE_NAME AND PR.RDB$ENGINE_NAME IS NOT NULL) '
         else
           Result := Result + 'AND EXISTS (SELECT 1 FROM RDB$PROCEDURES PR WHERE PR.RDB$PROCEDURE_NAME = P.RDB$PROCEDURE_NAME) ';
@@ -776,15 +811,15 @@ begin
   end;
 end;
 
-function GetAllRoutinesAsList(AConnection: TIBConnection; AFormat: boolean): TStringList;
+function GetAllRoutinesAsList(AConnection: TIBDatabase; AFormat: boolean): TStringList;
 var
   RoutineList: TStringList;
-  Query: TSQLQuery;
+  Query: TIBQuery;
   RT: TRoutineType;
   SQL: string;
 begin
   RoutineList := TStringList.Create;
-  Query := TSQLQuery.Create(nil);
+  Query := TIBQuery.Create(nil);
   try
     Query.DataBase := AConnection;
 
@@ -842,13 +877,13 @@ begin
     'ORDER BY NAME';
 end;
 
-function GetObjectOwner(AConnection: TIBConnection; const ObjectName: string; ObjType: TObjectType): string;
+function GetObjectOwner(AConnection: TIBDatabase; const ObjectName: string; ObjType: TObjectType): string;
 var
-  qry: TSQLQuery;
+  qry: TIBQuery;
   SQLText, ParamName: string;
 begin
   Result := '';
-  qry := TSQLQuery.Create(nil);
+  qry := TIBQuery.Create(nil);
   try
     qry.DataBase := AConnection;
 
@@ -912,8 +947,10 @@ begin
         Exit; // Für Objekte ohne Owner
     end;
 
+    if not qry.Transaction.InTransaction then
+      qry.Transaction.StartTransaction;
     qry.SQL.Text := SQLText;
-    qry.Params[0].AsString := UpperCase(ObjectName);
+     qry.ParamByName('NAME').AsString := UpperCase(ObjectName);
     qry.Open;
     if not qry.EOF then
       Result := Trim(qry.Fields[0].AsString);
@@ -922,15 +959,11 @@ begin
   end;
 end;
 
+
 initialization
-  SQLDBLibraryLoader1 := TSQLDBLibraryLoader.Create(nil);
-  SQLDBLibraryLoader1.ConnectionType := 'Firebird';
+
 
 finalization
-  if SQLDBLibraryLoader1.Enabled then
-    SQLDBLibraryLoader1.UnloadLibrary;
-  SQLDBLibraryLoader1.Free;
-  SQLDBLibraryLoader1 := nil;
 
 end.
 

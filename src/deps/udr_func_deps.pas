@@ -5,15 +5,19 @@ unit udr_func_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetUDRFunctionDeps(const AConn: TIBConnection; const AUDRFuncName, APackageName: string): string;
+
+function GetUDRFunctionDeps(const AConn: TIBDatabase; const AUDRFuncName, APackageName: string): string;
 
 implementation
 
-function GetUDRFunctionDeps(const AConn: TIBConnection; const AUDRFuncName, APackageName: string): string;
+function GetUDRFunctionDeps(const AConn: TIBDatabase; const AUDRFuncName, APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   FuncNameFull, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -29,10 +33,15 @@ begin
   else
     FuncNameFull := UpperCase(Trim(AUDRFuncName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;
+
+    if not AConn.DefaultTransaction.InTransaction then
+      AConn.DefaultTransaction.StartTransaction;
 
     SetLength(ObjectTypes, 8);
 

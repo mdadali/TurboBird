@@ -36,7 +36,8 @@ uses
   LCLPlatformDef, IBDatabase, IBDynamicGrid,
 
   turbocommon,
-  fdataexportersintrf;
+  fdataexportersintrf,
+  uthemeselector;
 
 type
   TOQBbutton = (bSelectDBDialog, bOpenDialog, bSaveDialog,
@@ -318,6 +319,7 @@ type
     ToolImages: TImageList;
     DlgSave: TSaveDialog;
     DlgOpen: TOpenDialog;
+    procedure FormShow(Sender: TObject);
     procedure lmExportDataAsHtmlClick(Sender: TObject);
     procedure lmExportDataAsMarkdownTableClick(Sender: TObject);
     procedure lmExportDataStdFormatsClick(Sender: TObject);
@@ -1943,6 +1945,11 @@ begin
     ExportDataMarkDownTable(ResDBGrid.DataSet)
   else
     ShowMessage('DataSet has no records');
+end;
+
+procedure TOQBForm.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TOQBForm.mnuGroupClick(Sender: TObject);

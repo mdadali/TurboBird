@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, DB, SQLDB,
   SynEditHighlighter, SynHighlighterSQL,
-  turbocommon,
+
   Dialogs;
 
 type
@@ -32,7 +32,7 @@ type
 
 
 implementation
-
+uses turbocommon;
 
 { TSQLQueryExt }
 

@@ -5,13 +5,17 @@ unit udb_firebird_proc_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB,
+  Classes, SysUtils,
   udb_firebird_struct_helper,
-  fbcommon;
+  fbcommon,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
-function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
-function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+
+function GetFirebirdProcedureHeader(Conn: TIBDatabase; const ProcName: string; APackageName: string; AEdit: boolean): string;
+function GetFirebirdProcedureBody(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
+function GetFirebirdProcedureDeclaration(Conn: TIBDatabase; const ProcName: string; APackageName: string; AEdit: boolean): string;
 
 implementation
 
@@ -232,22 +236,29 @@ begin
   end;
 end;}
 
-function GetFirebirdProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+function GetFirebirdProcedureHeader(Conn: TIBDatabase; const ProcName: string; APackageName: string; AEdit: boolean): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   Args, RetArgs: TStringList;
   ArgName, SourceName, ArgStr: string;
   IsOutput: Boolean;
   FullName: string;
+
+  ImplementationVersion: string;
+  ServerVersion: word;
 begin
+  ImplementationVersion := Conn.FirebirdAPI.GetImplementationVersion;
+  ServerVersion := StrToIntDef(ImplementationVersion[1], 0);
+
   Args := TStringList.Create;
   RetArgs := TStringList.Create;
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;
   try
     Q.DataBase := Conn;
 
     // FB >= 3: Package- und Engine-Unterstützung
-    if FBVersionMajor >= 3 then
+    if ServerVersion >= 3 then
     begin
       Q.SQL.Text :=
         'SELECT P.RDB$PARAMETER_NAME, P.RDB$FIELD_SOURCE, P.RDB$PARAMETER_TYPE ' +
@@ -274,10 +285,13 @@ begin
         'ORDER BY RDB$PARAMETER_TYPE, RDB$PARAMETER_NUMBER';
     end;
 
-    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
-    if (FBVersionMajor >= 3) and (APackageName <> '') then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
 
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    Q.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if (ServerVersion >= 3) and (APackageName <> '') then
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
     Q.Open;
 
     while not Q.EOF do
@@ -300,7 +314,7 @@ begin
     end;
 
     // FullName abhängig von FB Version
-    if (FBVersionMajor >= 3) and (APackageName <> '') then
+    if (ServerVersion >= 3) and (APackageName <> '') then
       FullName := Format('%s.%s', [APackageName, ProcName])
     else
       FullName := ProcName;
@@ -365,16 +379,22 @@ begin
   end;
 end;}
 
-function GetFirebirdProcedureBody(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetFirebirdProcedureBody(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   ProcBody: string;
+  ImplementationVersion: string;
+  ServerVersion: word;
 begin
-  Q := TSQLQuery.Create(nil);
+  ImplementationVersion := Conn.FirebirdAPI.GetImplementationVersion;
+  ServerVersion := StrToIntDef(ImplementationVersion[1], 0);
+
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;
   try
     Q.DataBase := Conn;
 
-    if FBVersionMajor >= 3 then
+    if ServerVersion >= 3 then
     begin
       Q.SQL.Text :=
         'SELECT RDB$PROCEDURE_SOURCE FROM RDB$PROCEDURES ' +
@@ -393,9 +413,12 @@ begin
         'WHERE UPPER(RDB$PROCEDURE_NAME) = :PROC';
     end;
 
-    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
-    if (FBVersionMajor >= 3) and (APackageName <> '') then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    Q.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if (ServerVersion >= 3) and (APackageName <> '') then
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
 
     Q.Open;
 
@@ -410,7 +433,7 @@ begin
 end;
 
 
-function GetFirebirdProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string; AEdit: boolean): string;
+function GetFirebirdProcedureDeclaration(Conn: TIBDatabase; const ProcName: string; APackageName: string; AEdit: boolean): string;
 begin
   Result := 'SET TERM ^;' + LineEnding + LineEnding;
   Result := Result + Format('-- DROP PROCEDURE %s;%s%s', [ProcName, LineEnding, LineEnding]);

@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons;
+  StdCtrls, Buttons,
+  uthemeselector;
 
 type
 
@@ -23,6 +24,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
     laDatabase: TLabel;
+    procedure BitBtn1Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
@@ -44,9 +46,15 @@ begin
     edPassword.SetFocus;
 end;
 
+procedure TfmEnterPass.BitBtn1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TfmEnterPass.FormShow(Sender: TObject);
 begin
   cbRole.ItemIndex:= -1;
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 

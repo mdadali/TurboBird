@@ -6,13 +6,16 @@ interface
 
 uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,  ComCtrls,
+  Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons, ComCtrls,
+  IBDatabase, IBQuery,
 
   SysTables,
   turbocommon,
   fbcommon,
   udb_firebird_struct_helper,
-  udb_udf_fetcher;
+  udb_udf_fetcher,
+
+  uthemeselector;
 
 type
 
@@ -29,7 +32,10 @@ type
     DSParams: TDataSource;
     DSFuncs: TDataSource;
     GroupBox1: TGroupBox;
-    IBConnection1: TIBConnection;
+    IBConnection1: TIBDatabase;
+    QFuncs: TIBQuery;
+    QParamInfo: TIBQuery;
+    SQLTransaction1: TIBTransaction;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -55,12 +61,9 @@ type
     Panel7: TPanel;
     Panel8: TPanel;
     Panel9: TPanel;
-    QFuncs: TSQLQuery;
-    QParamInfo: TSQLQuery;
     QParams: TSQLQuery;
     rgRoutineType: TRadioGroup;
     Splitter1: TSplitter;
-    SQLTransaction1: TSQLTransaction;
 
     procedure bbCloseClick(Sender: TObject);
     procedure bbExecuteClick(Sender: TObject);
@@ -74,6 +77,7 @@ type
   private
     FRoutineInfo: TRoutineInfo;
     FNodeInfos: TPNodeInfos;
+    FServerVersion: word;
     procedure LoadFunctions;
     function  SetDBLookupComboBoxByDisplayText(AText: string): Boolean;
 
@@ -133,14 +137,16 @@ begin
   FNodeInfos := ANodeInfos;
   FRoutineInfo := ARoutineInfo;
 
-  AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
+  //AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
+
+  IBConnection1 := FRoutineInfo.Connection;
   IBConnection1.Connected := true;
 
   lbDatabase.Caption := IBConnection1.DatabaseName;
 
   rgRoutineType.OnClick := nil;
 
-  if FBVersionMajor >= 3 then
+  if FServerVersion >= 3 then
   begin
     FillPackagesComboBox;
     if FRoutineInfo.PackageName <> '' then
@@ -158,12 +164,18 @@ begin
 end;
 
 procedure TfrmTestFunction.FormCreate(Sender: TObject);
+var DBRec: TRegisteredDatabase;
+    ServerRec: TServerRecord;
 begin
   inherited;
 
-  cboxPackages.Visible := (FBVersionMajor >= 3);
+  DBRec := RegisteredDatabases[FRoutineInfo.dbIndex].RegRec;
+  ServerRec := GetServerRecordFromFileByName(DBRec.ServerName);
+  FServerVersion := ServerRec.VersionMajor;
 
-  if FBVersionMajor >= 3 then
+  cboxPackages.Visible := (FServerVersion >= 3);
+
+  if FServerVersion >= 3 then
   begin
     rgRoutineType.Items.Add('Functions');
     rgRoutineType.Items.Add('UDRFunc');
@@ -177,6 +189,7 @@ end;
 
 procedure TfrmTestFunction.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
   DBGridParams.Columns[0].Width := 100;
   DBGridParams.Columns[1].Width := 100;
 end;
@@ -265,7 +278,7 @@ var TreeViewObjectType: TTreeViewObjectType;
 begin
   FRoutineInfo.RoutineType := StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]);
 
-  if FBVersionMajor >= 3 then
+  if FServerVersion >= 3 then
     if IsPackageRoutine(FRoutineInfo.RoutineType) then
     begin
       cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
@@ -290,12 +303,21 @@ end;
 procedure TfrmTestFunction.LoadFunctions;
 begin
   QFuncs.Close;
-  //QFuncs.SQL.Text := GetRoutineListSQL(FRoutineInfo.Connection, FRoutineInfo.RoutineType);
+
+  QFuncs.Database := IBConnection1;
+  if not QFuncs.Database.Connected then
+    QFuncs.Database.Connected := true;
+
+  QFuncs.Transaction := IBConnection1.DefaultTransaction;
+  if not QFuncs.Transaction.InTransaction then
+    QFuncs.Transaction.StartTransaction;
+
+  QFuncs.ParamCheck := true;
   QFuncs.SQL.Text := GetRoutineListSQL(IBConnection1, FRoutineInfo.RoutineType);
 
-  if FBVersionMajor >= 3 then
+  if FServerVersion >= 3 then
     if IsPackageRoutine(FRoutineInfo.RoutineType) then
-      QFuncs.Params.ParamByName('PackageName').AsString := FRoutineInfo.PackageName;
+      QFuncs.ParamByName('PackageName').AsString := FRoutineInfo.PackageName;
 
   QFuncs.Open;
 end;
@@ -334,6 +356,14 @@ begin
   ParamIndex := 1; // bei UDF: Position 0 = Return, Position 1..n = Input-Parameter
   QParamInfo.Close;
 
+  QParamInfo.Database := IBConnection1;
+  if not IBConnection1.Connected then
+    IBConnection1.Connected := true;
+
+  QParamInfo.Transaction := IBConnection1.DefaultTransaction;
+  if not IBConnection1.DefaultTransaction.InTransaction then
+    IBConnection1.DefaultTransaction.StartTransaction;
+
   SQL := GetParamListSQL(IBConnection1, FRoutineInfo, ptInOnly);
   if SQL = '' then
   begin
@@ -348,7 +378,7 @@ begin
   else
     QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-  if FBVersionMajor >= 3 then
+  if FServerVersion >= 3 then
     if IsPackageRoutine(FRoutineInfo.RoutineType) then
       QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
@@ -364,7 +394,7 @@ begin
     else
       CharSetID := -1;
 
-    if (FBVersionMajor < 3) then hCharLen := 0
+    if (FServerVersion < 3) then hCharLen := 0
     else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
 
     if FRoutineInfo.RoutineType = rtUDF then
@@ -386,7 +416,7 @@ begin
         IBConnection1);
     end;
 
-    if FBVersionMajor >= 3 then
+    if FServerVersion >= 3 then
       if IsPackageRoutine(FRoutineInfo.RoutineType) then
         lbRoutineName.Caption := FRoutineInfo.PackageName + '.' + FRoutineInfo.RoutineName
       else
@@ -414,7 +444,7 @@ begin
     else
       QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-    if FBVersionMajor >= 3 then
+    if FServerVersion >= 3 then
       if IsPackageRoutine(FRoutineInfo.RoutineType) then
         QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
@@ -427,7 +457,7 @@ begin
       else
         CharSetID := -1;
 
-      if (FBVersionMajor < 3) then hCharLen := 0
+      if (FServerVersion < 3) then hCharLen := 0
       else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
 
       if FRoutineInfo.RoutineType = rtUDF then
@@ -470,7 +500,7 @@ begin
   else
     QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-  if FBVersionMajor >= 3 then
+  if FServerVersion >= 3 then
     if IsPackageRoutine(FRoutineInfo.RoutineType) then
       QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 
@@ -492,7 +522,7 @@ begin
     else
       CharSetID := -1;
 
-    if (FBVersionMajor < 3) then hCharLen := 0
+    if (FServerVersion < 3) then hCharLen := 0
     else  hCharLen := QParamInfo.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
 
     if FRoutineInfo.RoutineType = rtUDF then
@@ -571,7 +601,7 @@ begin
     else
       QParamInfo.ParamByName('PROCNAME').AsString := FRoutineInfo.RoutineName;
 
-    if FBVersionMajor >= 3 then
+    if FServerVersion >= 3 then
       if IsPackageRoutine(FRoutineInfo.RoutineType) then
         QParamInfo.ParamByName('PACKAGENAME').AsString := FRoutineInfo.PackageName;
 

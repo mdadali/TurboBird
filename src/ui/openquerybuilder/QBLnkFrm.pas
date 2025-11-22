@@ -32,9 +32,13 @@ interface
 
 uses
   Forms,
-  StdCtrls, ExtCtrls;
+  StdCtrls, ExtCtrls, Classes,
+  uthemeselector;
 
 type
+
+  { TOQBLinkForm }
+
   TOQBLinkForm = class(TForm)
     RadioOpt: TRadioGroup;
     RadioType: TRadioGroup;
@@ -48,10 +52,18 @@ type
     txtCol1: TStaticText;
     Label4: TLabel;
     txtCol2: TStaticText;
+    procedure FormShow(Sender: TObject);
   end;
 
 implementation
 
   {$R *.lfm}
 
-end.
+{ TOQBLinkForm }
+
+procedure TOQBLinkForm.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
+end.

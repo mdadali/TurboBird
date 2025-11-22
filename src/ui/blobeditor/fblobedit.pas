@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Buttons,
   ComCtrls, StdCtrls, Menus, Grids, Math, SynEdit, ATBinHex, HtmlView, GifAnim,
   RichView, PtblRV, AbZBrows, IBDynamicGrid, DB, IBDatabase, IBQuery, IBTable,
-  CADSys4, turbocommon, DBGrids, DBCtrls, LCLIntf; // LCLIntf für OpenDocument
+  CADSys4, turbocommon, DBGrids, DBCtrls, LCLIntf,
+  uthemeselector; // LCLIntf für OpenDocument
 
 type
 
@@ -51,6 +52,7 @@ type
     procedure btnSaveToFileClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure tsGIFResize(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
@@ -96,6 +98,11 @@ implementation
 procedure TfrmBlobEdit.FormCreate(Sender: TObject);
 begin
   MemoryStream := TMemoryStream.Create;
+end;
+
+procedure TfrmBlobEdit.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmBlobEdit.Init(ABlobField: TField; ANodeInfos: TPNodeInfos);

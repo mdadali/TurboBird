@@ -7,6 +7,7 @@ object frmArrayTest: TfrmArrayTest
   ClientHeight = 240
   ClientWidth = 320
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object StringGrid1: TStringGrid
     Left = 24

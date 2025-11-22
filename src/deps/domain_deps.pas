@@ -5,15 +5,19 @@ unit domain_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetDomainDeps(const AConn: TIBConnection; const ADomainName: string): string;
+
+function GetDomainDeps(const AConn: TIBDatabase; const ADomainName: string): string;
 
 implementation
 
-function GetDomainDeps(const AConn: TIBConnection; const ADomainName: string): string;
+function GetDomainDeps(const AConn: TIBDatabase; const ADomainName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   DomainNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -26,7 +30,9 @@ begin
 
   DomainNameUpper := UpperCase(Trim(ADomainName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

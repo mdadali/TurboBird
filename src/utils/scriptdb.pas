@@ -8,7 +8,8 @@ interface
 uses
   Classes, SysUtils, dialogs,
   fbcommon,
-  turbocommon;
+  turbocommon,
+  fmetaquerys;
 
 
 // Scripts all roles; changes List to contain the CREATE ROLE SQL statements
@@ -260,15 +261,18 @@ var
   ConstraintName: string;
   CalculatedList: TStringList; // for calculated fields
   DefaultValue: string;
+  Iso: TIsolatedQuery;
 begin
-  fmMain.GetFields(dbIndex, ATableName, nil);
   ScriptList.Clear;
   ScriptList.Add('create table ' + ATableName + ' (');
   CalculatedList:= TStringList.Create;
 
   try
     // Fields
-    with fmMain.SQLQuery1 do
+    //fmMain.GetFields(dbIndex, ATableName, nil);
+    //with fmMain.SQLQuery1 do
+    Iso := GetFieldsIsolated(RegisteredDatabases[dbIndex].IBDatabase, ATableName);
+    with Iso.Query do
     while not EOF do
     begin
       Skipped:= False;
@@ -347,12 +351,14 @@ begin
       ScriptList[ScriptList.Count - 1]:= Copy(ScriptList[ScriptList.Count - 1], 1,
         Length(ScriptList[ScriptList.Count - 1]) - 1);
 
-    fmMain.SQLQuery1.Close;
+    //fmMain.SQLQuery1.Close;
+    Iso.Free;
 
     // Primary Keys
     PKFieldsList:= TStringList.Create;
     try
-      PKeyIndexName:= fmMain.GetPrimaryKeyIndexName(dbIndex, ATableName, ConstraintName);
+      PKeyIndexName := GetPrimaryKeyIndexNameIsolated(RegisteredDatabases[dbIndex].IBDatabase, ATableName, ConstraintName);
+
       if PKeyIndexName <> '' then
       begin
         fmMain.GetConstraintFields(ATableName, PKeyIndexName, PKFieldsList);
@@ -518,6 +524,7 @@ var
   FieldsList: TStringList;
   Line: string;
   ConstraintName: string;
+  IsoIndices, IsoIndexFields: TIsolatedQuery;
 begin
   TablesList:= TStringList.Create;
   FieldsList:= TStringList.Create;
@@ -526,30 +533,35 @@ begin
     List.Clear;
     for i:= 0 to TablesList.Count - 1 do
     begin
-      PKName:= fmMain.GetPrimaryKeyIndexName(dbIndex, TablesList[i], ConstraintName);
+      PKName := GetPrimaryKeyIndexNameIsolated(RegisteredDatabases[dbIndex].IBDatabase, TablesList[i], ConstraintName);
 
-      if fmMain.GetIndices(TablesList[i], dmSysTables.sqQuery) then
-      with dmSysTables.sqQuery do
+      IsoIndices := GetIndicesIsolated(RegisteredDatabases[dbIndex].IBDatabase, TablesList[i]);
+
+      //if fmMain.GetIndices(TablesList[i], dmSysTables.sqQuery) then
+      if IsoIndices.Query.RecordCount > 0 then
+      with IsoIndices.Query do
       while not EOF do
       begin
-        if PKName <> Trim(FieldByName('RDB$Index_name').AsString) then
+        if PKName <> Trim(IsoIndices.Query.FieldByName('RDB$Index_name').AsString) then
         begin
           Line:= 'create ';
-          if FieldByName('RDB$Unique_Flag').AsString = '1' then
+          if IsoIndices.Query.FieldByName('RDB$Unique_Flag').AsString = '1' then
             Line:= Line + 'Unique ';
-          if FieldByName('RDB$Index_Type').AsString = '1' then
+          if IsoIndices.Query.FieldByName('RDB$Index_Type').AsString = '1' then
             Line:= Line + 'Descending ';
 
-          Line:= Line + 'index ' + Trim(FieldByName('RDB$Index_name').AsString) + ' on ' + TablesList[i];
+          Line:= Line + 'index ' + Trim(IsoIndices.Query.FieldByName('RDB$Index_name').AsString) + ' on ' + TablesList[i];
 
-          fmMain.GetIndexFields(TablesList[i], Trim(FieldByName('RDB$Index_Name').AsString), fmMain.SQLQuery1, FieldsList);
+          IsoIndexFields := GetIndexFieldsIsolated(RegisteredDatabases[dbIndex].IBDatabase, Trim(IsoIndices.Query.FieldByName('RDB$Index_Name').AsString), TablesList[i], FieldsList);
           Line:= Line + ' (' + FieldsList.CommaText + ') ;';
           List.Add(Line);
+          IsoIndexFields.Free;
         end;
         Next;
       end;
+      IsoIndices.Free;
     end;
-    dmSysTables.sqQuery.Close;
+    //dmSysTables.sqQuery.Close;
     Result:= List.Count > 0;
   finally
     TablesList.Free;

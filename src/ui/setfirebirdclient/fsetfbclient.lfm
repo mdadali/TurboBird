@@ -1,19 +1,22 @@
 object frmSetFBClient: TfrmSetFBClient
-  Left = 414
+  Left = 402
   Height = 398
-  Top = 212
+  Top = 116
   Width = 573
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'frmSetFBClient'
   ClientHeight = 398
   ClientWidth = 573
+  FormStyle = fsStayOnTop
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object edtClientLib: TEdit
     Left = 0
-    Height = 30
+    Height = 31
     Top = 84
     Width = 573
     Align = alTop
@@ -23,7 +26,7 @@ object frmSetFBClient: TfrmSetFBClient
   object lstSuggestions: TListBox
     Left = 0
     Height = 214
-    Top = 114
+    Top = 115
     Width = 573
     Align = alTop
     ItemHeight = 0
@@ -40,17 +43,6 @@ object frmSetFBClient: TfrmSetFBClient
     ClientHeight = 84
     ClientWidth = 573
     TabOrder = 2
-    object Panel2: TPanel
-      Left = 1
-      Height = 82
-      Top = 1
-      Width = 31
-      Align = alLeft
-      Color = clWhite
-      ParentColor = False
-      TabOrder = 0
-      Visible = False
-    end
     object Panel3: TPanel
       Left = 472
       Height = 82
@@ -59,7 +51,7 @@ object frmSetFBClient: TfrmSetFBClient
       Align = alRight
       ClientHeight = 82
       ClientWidth = 100
-      TabOrder = 1
+      TabOrder = 0
       object Image1: TImage
         Left = 1
         Height = 80
@@ -665,21 +657,20 @@ object frmSetFBClient: TfrmSetFBClient
       end
     end
     object Panel4: TPanel
-      Left = 32
+      Left = 1
       Height = 82
       Top = 1
-      Width = 440
+      Width = 471
       Align = alClient
       ClientHeight = 82
-      ClientWidth = 440
-      TabOrder = 2
+      ClientWidth = 471
+      TabOrder = 1
       object lblInfo: TLabel
         Left = 1
         Height = 80
         Top = 1
-        Width = 438
+        Width = 469
         Align = alClient
-        Caption = 'info'
         ParentColor = False
       end
     end
@@ -687,14 +678,14 @@ object frmSetFBClient: TfrmSetFBClient
   object Panel5: TPanel
     Left = 0
     Height = 46
-    Top = 328
+    Top = 329
     Width = 573
     Align = alTop
     ClientHeight = 46
     ClientWidth = 573
     TabOrder = 3
     object btnBrowser: TButton
-      Left = 112
+      Left = 113
       Height = 30
       Top = 8
       Width = 100
@@ -708,6 +699,7 @@ object frmSetFBClient: TfrmSetFBClient
       Top = 8
       Width = 100
       Caption = 'Test'
+      Enabled = False
       OnClick = btnTestClick
       TabOrder = 1
     end
@@ -755,7 +747,7 @@ object frmSetFBClient: TfrmSetFBClient
     TabOrder = 4
   end
   object OpenDialog1: TOpenDialog
-    InitialDir = '/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/bin/x86_64-linux/debug/TurboBird/'
+    Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
     Left = 352
     Top = 192
   end

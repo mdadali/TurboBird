@@ -5,15 +5,19 @@ unit udr_proc_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetUDRProcedureDeps(const AConn: TIBConnection; const AUDRProcName, APackageName: string): string;
+
+function GetUDRProcedureDeps(const AConn: TIBDatabase; const AUDRProcName, APackageName: string): string;
 
 implementation
 
-function GetUDRProcedureDeps(const AConn: TIBConnection; const AUDRProcName, APackageName: string): string;
+function GetUDRProcedureDeps(const AConn: TIBDatabase; const AUDRProcName, APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   ProcNameFull, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -29,10 +33,15 @@ begin
   else
     ProcNameFull := UpperCase(Trim(AUDRProcName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;
+
+    if not AConn.DefaultTransaction.InTransaction then
+      AConn.DefaultTransaction.StartTransaction;
 
     SetLength(ObjectTypes, 8);
 

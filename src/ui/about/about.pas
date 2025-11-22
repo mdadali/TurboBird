@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls,
   turbocommon,
-  updatechecker;
+  updatechecker,
+  uthemeselector;
 
 
 {$i turbocommon.inc}
@@ -47,6 +48,7 @@ type
     TabSheet2: TTabSheet;
     procedure BitBtn1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
     procedure Label6Click(Sender: TObject);
     procedure laUpdateClick(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
@@ -109,6 +111,12 @@ end;
 procedure TfmAbout.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   //CloseAction:= caFree;
+end;
+
+procedure TfmAbout.FormShow(Sender: TObject);
+begin
+  if Assigned(frmThemeSelector) then
+    frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmAbout.BitBtn1Click(Sender: TObject);

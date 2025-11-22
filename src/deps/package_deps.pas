@@ -5,15 +5,19 @@ unit package_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetPackageDependencies(const AConn: TIBConnection; const APackageName: string): string;
+
+function GetPackageDependencies(const AConn: TIBDatabase; const APackageName: string): string;
 
 implementation
 
-function GetPackageDependencies(const AConn: TIBConnection; const APackageName: string): string;
+function GetPackageDependencies(const AConn: TIBDatabase; const APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   PkgNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -25,10 +29,15 @@ begin
   if APackageName = '' then Exit;
 
   PkgNameUpper := UpperCase(Trim(APackageName));
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;
+
+    if not AConn.DefaultTransaction.InTransaction then
+      AConn.DefaultTransaction.StartTransaction;
 
     // Objektarten definieren
     SetLength(ObjectTypes, 6);

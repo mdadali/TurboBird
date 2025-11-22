@@ -1,13 +1,14 @@
 object fmFirebirdConfig: TfmFirebirdConfig
-  Left = 752
+  Left = 436
   Height = 538
-  Top = 191
+  Top = 127
   Width = 880
   ActiveControl = Panel13
   Caption = 'Firebird Config'
   ClientHeight = 538
   ClientWidth = 880
   OnClose = FormClose
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object Panel13: TPanel
     Left = 0
@@ -69,33 +70,33 @@ object fmFirebirdConfig: TfmFirebirdConfig
     end
     object lbServer: TLabel
       Left = 8
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 158
+      Width = 147
       Caption = 'FireBird Server Version:'
       ParentColor = False
     end
     object lbServerVersion: TLabel
       Left = 184
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 97
+      Width = 92
       Caption = 'Server Version'
       ParentColor = False
     end
     object Label1: TLabel
       Left = 312
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 89
+      Width = 85
       Caption = 'Server Mode:'
       ParentColor = False
     end
     object lbServerMode: TLabel
       Left = 416
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 80
+      Width = 77
       Caption = 'servermode'
       ParentColor = False
     end
@@ -111,14 +112,14 @@ object fmFirebirdConfig: TfmFirebirdConfig
     TabOrder = 1
     object tsFB4Config: TTabSheet
       Caption = 'FireBird Configuration'
-      ClientHeight = 480
-      ClientWidth = 876
+      ClientHeight = 483
+      ClientWidth = 870
       TabVisible = False
       object DBGrid1: TDBGrid
         Left = 0
-        Height = 286
+        Height = 289
         Top = 0
-        Width = 876
+        Width = 870
         Align = alClient
         Color = clWindow
         Columns = <>
@@ -128,18 +129,18 @@ object fmFirebirdConfig: TfmFirebirdConfig
       object Panel2: TPanel
         Left = 0
         Height = 40
-        Top = 440
-        Width = 876
+        Top = 443
+        Width = 870
         Align = alBottom
         Caption = 'Panel2'
         ClientHeight = 40
-        ClientWidth = 876
+        ClientWidth = 870
         TabOrder = 1
         object DBNavigator1: TDBNavigator
           Left = 1
           Height = 38
           Top = 1
-          Width = 491
+          Width = 485
           Align = alClient
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -149,7 +150,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 38
-          ClientWidth = 491
+          ClientWidth = 485
           DataSource = DataSource1
           OnClick = DBNavigator1Click
           Options = []
@@ -157,7 +158,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbEdit, nbPost, nbCancel, nbRefresh]
         end
         object bbSave: TBitBtn
-          Left = 492
+          Left = 486
           Height = 38
           Top = 1
           Width = 87
@@ -167,7 +168,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 1
         end
         object bbExport: TButton
-          Left = 660
+          Left = 654
           Height = 38
           Top = 1
           Width = 87
@@ -177,7 +178,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 2
         end
         object bbImport: TBitBtn
-          Left = 579
+          Left = 573
           Height = 38
           Top = 1
           Width = 81
@@ -187,7 +188,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 3
         end
         object bbRestoreDefaults: TBitBtn
-          Left = 747
+          Left = 741
           Height = 38
           Top = 1
           Width = 128
@@ -200,40 +201,40 @@ object fmFirebirdConfig: TfmFirebirdConfig
       object GroupBox1: TGroupBox
         Left = 0
         Height = 154
-        Top = 286
-        Width = 876
+        Top = 289
+        Width = 870
         Align = alBottom
         Caption = 'Fields'
-        ClientHeight = 132
-        ClientWidth = 872
+        ClientHeight = 134
+        ClientWidth = 868
         TabOrder = 2
         object Label2: TLabel
           Left = 21
-          Height = 20
+          Height = 19
           Top = 8
-          Width = 77
+          Width = 72
           Caption = 'ActiveValue'
           ParentColor = False
         end
         object Label3: TLabel
           Left = 21
-          Height = 20
+          Height = 19
           Top = 88
-          Width = 46
+          Width = 42
           Caption = 'Source'
           ParentColor = False
         end
         object Label4: TLabel
           Left = 21
-          Height = 20
+          Height = 19
           Top = 48
-          Width = 60
+          Width = 55
           Caption = 'FileValue'
           ParentColor = False
         end
         object dbedtActiveValue: TDBEdit
           Left = 120
-          Height = 30
+          Height = 31
           Top = 8
           Width = 720
           DataSource = DataSource1
@@ -243,7 +244,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         end
         object dbedtSource: TDBEdit
           Left = 120
-          Height = 30
+          Height = 31
           Top = 88
           Width = 720
           DataSource = DataSource1
@@ -253,7 +254,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
         end
         object dbedtFileValue: TDBEdit
           Left = 120
-          Height = 30
+          Height = 31
           Top = 48
           Width = 720
           DataSource = DataSource1
@@ -264,14 +265,14 @@ object fmFirebirdConfig: TfmFirebirdConfig
     end
     object tsFB3Config: TTabSheet
       Caption = 'FireBird Configuration'
-      ClientHeight = 480
-      ClientWidth = 876
+      ClientHeight = 483
+      ClientWidth = 870
       TabVisible = False
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 440
+        Height = 443
         Top = 0
-        Width = 876
+        Width = 870
         Align = alClient
         Font.Height = 13
         Font.Name = 'DejaVu Sans Mono'
@@ -768,11 +769,11 @@ object fmFirebirdConfig: TfmFirebirdConfig
       object Panel3: TPanel
         Left = 0
         Height = 40
-        Top = 440
-        Width = 876
+        Top = 443
+        Width = 870
         Align = alBottom
         ClientHeight = 40
-        ClientWidth = 876
+        ClientWidth = 870
         TabOrder = 1
         object DBNavigator2: TDBNavigator
           Left = 1
@@ -797,7 +798,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbEdit, nbPost, nbCancel, nbRefresh]
         end
         object bbSaveFB3Config: TBitBtn
-          Left = 579
+          Left = 573
           Height = 38
           Top = 1
           Width = 87
@@ -808,7 +809,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 1
         end
         object bbLoadFB3Config: TBitBtn
-          Left = 666
+          Left = 660
           Height = 38
           Top = 1
           Width = 81
@@ -818,7 +819,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 2
         end
         object bbRestoreFB3Defaults: TBitBtn
-          Left = 747
+          Left = 741
           Height = 38
           Top = 1
           Width = 128
@@ -829,7 +830,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           TabOrder = 3
         end
         object edtsearch: TEdit
-          Left = 296
+          Left = 290
           Height = 38
           Top = 1
           Width = 200
@@ -839,7 +840,7 @@ object fmFirebirdConfig: TfmFirebirdConfig
           Text = 'Search string'
         end
         object bbSearch: TBitBtn
-          Left = 496
+          Left = 490
           Height = 38
           Top = 1
           Width = 83
@@ -850,31 +851,6 @@ object fmFirebirdConfig: TfmFirebirdConfig
         end
       end
     end
-  end
-  object SQLQuery1: TSQLQuery
-    FieldDefs = <>
-    Database = IBConnection1
-    Transaction = SQLTransaction1
-    Params = <>
-    Macros = <>
-    Left = 344
-    Top = 104
-  end
-  object IBConnection1: TIBConnection
-    Connected = False
-    LoginPrompt = False
-    KeepConnection = False
-    Transaction = SQLTransaction1
-    CheckTransactionParams = False
-    UseConnectionCharSetIfNone = False
-    Left = 232
-    Top = 104
-  end
-  object SQLTransaction1: TSQLTransaction
-    Active = False
-    Database = IBConnection1
-    Left = 472
-    Top = 104
   end
   object DataSource1: TDataSource
     DataSet = BufDataset1
@@ -937,5 +913,42 @@ object fmFirebirdConfig: TfmFirebirdConfig
     Enabled = False
     Left = 248
     Top = 192
+  end
+  object IBConnection1: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = SQLTransaction1
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 592
+    Top = 203
+  end
+  object SQLQuery1: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBConnection1
+    Transaction = SQLTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 306
+    Top = 118
+  end
+  object SQLTransaction1: TIBTransaction
+    TransactionName = '{02E1CD19-C191-4F30-8706-5A55F9534C02}'
+    Active = False
+    Left = 764
+    Top = 221
   end
 end

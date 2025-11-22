@@ -1,7 +1,7 @@
 object fmSQLMonitor: TfmSQLMonitor
-  Left = 995
+  Left = 446
   Height = 550
-  Top = 216
+  Top = 220
   Width = 834
   Caption = 'SQL Monitor'
   ClientHeight = 550
@@ -9,6 +9,7 @@ object fmSQLMonitor: TfmSQLMonitor
   FormStyle = fsStayOnTop
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object Memo1: TMemo
     Left = 0

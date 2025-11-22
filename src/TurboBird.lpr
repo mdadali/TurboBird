@@ -18,19 +18,38 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim,
-  lazrichview, zcomponent, memdslaz, datetimectrls, runtimetypeinfocontrols,
-  main, CreateDb, Reg, QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen,
-  NewTable, NewGen, EnterPass, About, CreateTrigger, fedittabledata, CallProc,
-  UDFInfo, ViewDomain, NewDomain, SysTables, NewConstraint, NewEditField, Calen,
-  Scriptdb, UserPermissions, TableManage, BackupRestore, CreateUser, ChangePass,
-  PermissionManage, SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo,
-  sysutils, Comparison, topologicalsort, UnitFirebirdServices, turbocommon,
-  importtable, fileimport, csvdocument, fServerSession, lazdbexport,
+  lazrichview, indylaz, zcomponent, memdslaz, datetimectrls,
+  runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
+  ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
+  CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
+  SysTables, NewConstraint, NewEditField, Calen, Scriptdb, UserPermissions,
+  TableManage, BackupRestore, CreateUser, ChangePass, PermissionManage,
+  SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo, sysutils, Comparison,
+  topologicalsort, UnitFirebirdServices, turbocommon, importtable, fileimport,
+  csvdocument, fServerSession, uthemeselector, lazdbexport,
   udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
   fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
   QBuilder, QBDirFrm, QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor,
   fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
-  uArrayFormTest, fblobedit, floginservicemanager, fserverregistry;
+  uArrayFormTest, fblobedit, floginservicemanager, fserverregistry,
+  ftransactionconfig, tb_netutils,
+
+  //DBAdmin
+  MainFormUnit,
+  DataModule,
+  DBLoginDlgUnit,
+  ShutdownDatabaseDlgUnit,
+  ShutdownRegDlgUnit,
+  BackupDlgUnit,
+  RestoreDlgUnit,
+  AddSecondaryFileDlgUnit,
+  AddShadowFileDlgUnit,
+  AddShadowSetDlgUnit,
+  NewUserDlgUnit,
+  ChgPasswordDlgUnit,
+  ExecuteSQLScriptDlgUnit;
+  //End-DBAdmin
+
 
 const
   Major = 1;
@@ -70,26 +89,32 @@ begin
   {$ENDIF DEBUG}
 
 
-  if not SetFBClient(0) then  exit;     //wrong inifile setting
+  if not LoadClientLibIBX(InitialFBClientLibPath) then
+    SetInitialClientLib;
+
+
+  Application.CreateForm(TfmMain, fmMain);
+  frmThemeSelector := TfrmThemeSelector.Create(fmMain);
 
   SAbout:= TfmAbout.Create(nil);
-  SAbout.BorderStyle:= bsNone;
   SAbout.BitBtn1.Visible:= False;
   SAbout.Show;
   Application.ProcessMessages;
   SAbout.Update;
-  Application.CreateForm(TfmMain, fmMain);
+
   fmMain.Version:= Format('%d.%d.%d', [Major, Minor, Release]);
   fmMain.StatusBar1.Panels[1].Text:= 'Version: ' + fmMain.Version;
   fmMain.VersionDate:= VersionDate;
   fmMain.Major:= Major;
   fmMain.Minor:= Minor;
   fmMain.ReleaseVersion:= Release;
+
   Application.CreateForm(TfmCreateDB, fmCreateDB);
   Application.CreateForm(TfmReg, fmReg);
   Application.CreateForm(TfmNewGen, fmNewGen);
   Application.CreateForm(TfmEnterPass, fmEnterPass);
   Application.CreateForm(TfmCreateTrigger, fmCreateTrigger);
+  //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
   //Application.CreateForm(TfmEditTable, fmEditTable);
   //Application.CreateForm(TfmCallProc, fmCallProc);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
@@ -101,14 +126,32 @@ begin
   Application.CreateForm(TfmChangePass, fmChangePass);
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   //Application.CreateForm(TfmCopyTable, fmCopyTable);
-  SAbout.Free;
+
   Application.CreateForm(TDataModuleIBX, DataModuleIBX);
+  Application.CreateForm(TfmTransactionConfig, fmTransactionConfig);
   //Application.CreateForm(TfrmLoginServiceManager, frmLoginServiceManager);
   //Application.CreateForm(TfmServerRegistry, fmServerRegistry);
   //Application.CreateForm(TfrmBlobEdit, frmBlobEdit);
   //Application.CreateForm(TfrmArrayTest, frmArrayTest);
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
   //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
+  SAbout.Free;
+
+  //DBAdmin
+  Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TDBDataModule, DBDataModule);
+  Application.CreateForm(TDBLoginDlg, DBLoginDlg);
+  Application.CreateForm(TShutdownDatabaseDlg, ShutdownDatabaseDlg);
+  Application.CreateForm(TShutdownReqDlg, ShutdownReqDlg);
+  Application.CreateForm(TBackupDlg, BackupDlg);
+  Application.CreateForm(TRestoreDlg, RestoreDlg);
+  Application.CreateForm(TAddSecondaryFileDlg, AddSecondaryFileDlg);
+  Application.CreateForm(TAddShadowFileDlg, AddShadowFileDlg);
+  Application.CreateForm(TAddShadowSetDlg, AddShadowSetDlg);
+  Application.CreateForm(TNewUserDlg, NewUserDlg);
+  Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
+  Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
+
   Application.Run;
   //ReleaseIBase60;
 end.

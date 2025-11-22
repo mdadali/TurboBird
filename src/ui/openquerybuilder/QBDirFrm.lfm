@@ -12,8 +12,9 @@ object OQBDirForm: TOQBDirForm
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
+  OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.0.6.0'
+  LCLVersion = '2.2.6.0'
   object Bevel: TBevel
     Left = 1
     Height = 180
@@ -55,15 +56,16 @@ object OQBDirForm: TOQBDirForm
     Mask = '*.db;*.dbf;*.txt'
     ParentFont = False
     TabOrder = 2
+    TopIndex = -1
   end
   object DirLbx: TDirectoryEdit
     Left = 8
-    Height = 21
+    Height = 28
     Top = 8
     Width = 261
     ShowHidden = False
     ButtonWidth = 23
-    NumGlyphs = 0
+    NumGlyphs = 1
     MaxLength = 0
     TabOrder = 3
   end

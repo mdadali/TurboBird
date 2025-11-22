@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons, ExtCtrls,
   fbcommon,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -26,6 +27,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     procedure cxGrantRoleChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -45,6 +47,11 @@ uses SysTables;
 procedure TfmCreateUser.cxGrantRoleChange(Sender: TObject);
 begin
   cbRoles.Visible:= cxGrantRole.Checked;
+end;
+
+procedure TfmCreateUser.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCreateUser.Init(dbIndex: Integer);

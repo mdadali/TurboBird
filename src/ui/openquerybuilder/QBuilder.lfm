@@ -1,7 +1,7 @@
 object OQBForm: TOQBForm
   Left = 354
   Height = 550
-  Top = 268
+  Top = 189
   Width = 834
   ActiveControl = QBPanel
   Caption = 'Open QBuilder'
@@ -10,6 +10,7 @@ object OQBForm: TOQBForm
   Color = clBtnFace
   Font.Color = clWindowText
   Font.Name = 'Tahoma'
+  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object QBPanel: TPanel
@@ -57,13 +58,13 @@ object OQBForm: TOQBForm
       end
       object TabSQL: TTabSheet
         Caption = 'SQL'
-        ClientHeight = 122
-        ClientWidth = 830
+        ClientHeight = 124
+        ClientWidth = 824
         inline SynSQL: TSynEdit
           Left = 0
-          Height = 122
+          Height = 124
           Top = 0
-          Width = 830
+          Width = 824
           Align = alClient
           Font.Height = 13
           Font.Name = 'DejaVu Sans Mono'
@@ -559,13 +560,13 @@ object OQBForm: TOQBForm
       end
       object TabResults: TTabSheet
         Caption = 'Results'
-        ClientHeight = 122
-        ClientWidth = 830
+        ClientHeight = 124
+        ClientWidth = 824
         object ResDBGrid: TIBDynamicGrid
           Left = 0
-          Height = 122
+          Height = 124
           Top = 0
-          Width = 830
+          Width = 824
           Align = alClient
           Color = clWindow
           Columns = <>

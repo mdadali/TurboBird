@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ComCtrls, StdCtrls, Buttons, CheckLst, ExtCtrls,
   fbcommon,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -92,6 +93,7 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
@@ -149,6 +151,11 @@ end;
 
 procedure TfmPermissionManage.FormDestroy(Sender: TObject);
 begin
+end;
+
+procedure TfmPermissionManage.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmPermissionManage.UpdatePermissions;

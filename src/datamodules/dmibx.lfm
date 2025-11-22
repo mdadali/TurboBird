@@ -1,9 +1,9 @@
 object DataModuleIBX: TDataModuleIBX
   OldCreateOrder = False
-  Height = 310
-  HorizontalOffset = 372
-  VerticalOffset = 277
-  Width = 400
+  Height = 432
+  HorizontalOffset = 385
+  VerticalOffset = 222
+  Width = 771
   object IBDatabase1: TIBDatabase
     Connected = False
     CreateIfNotExists = False
@@ -12,11 +12,11 @@ object DataModuleIBX: TDataModuleIBX
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 48
-    Top = 47
+    Left = 72
+    Top = 48
   end
   object IBQuery1: TIBQuery
-    AllowAutoActivateTransaction = False
+    AllowAutoActivateTransaction = True
     Database = IBDatabase1
     Transaction = IBTransaction1
     BufferChunks = 1000
@@ -32,14 +32,14 @@ object DataModuleIBX: TDataModuleIBX
     DataSetCloseAction = dcDiscardChanges
     TZTextOption = tzOffset
     DefaultTZDate = 43831
-    Left = 269
-    Top = 47
+    Left = 408
+    Top = 48
   end
   object IBTransaction1: TIBTransaction
     TransactionName = '{8A300410-A4DB-485B-B874-A355E7717209}'
     Active = False
     DefaultDatabase = IBDatabase1
-    Left = 153
+    Left = 224
     Top = 47
   end
   object IBTable1: TIBTable
@@ -54,13 +54,13 @@ object DataModuleIBX: TDataModuleIBX
     SQLFiltered = False
     GeneratorField.ApplyOnEvent = gaeOnNewRecord
     MasterDetailDelay = 0
-    Left = 104
-    Top = 152
+    Left = 608
+    Top = 112
   end
   object IBXServicesConnection1: TIBXServicesConnection
     Connected = False
     TraceFlags = []
-    Left = 246
-    Top = 154
+    Left = 600
+    Top = 256
   end
 end

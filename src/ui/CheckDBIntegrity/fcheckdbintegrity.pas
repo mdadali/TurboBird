@@ -7,7 +7,8 @@ interface
 uses
   Forms, Classes, SysUtils, Controls, Graphics, Dialogs, ExtCtrls, StdCtrls,
   Buttons, CheckLst, ComCtrls, TypInfo, DB, IBDatabase, IBQuery, turbocommon,
-  CheckDBIntegrity;
+  CheckDBIntegrity,
+  uthemeselector;
 
 type
 
@@ -41,6 +42,7 @@ type
     procedure cmBoxDatabaseChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FIBDatabase: TIBDatabase;
     FIBTransaction: TIBTransaction;
@@ -97,6 +99,11 @@ begin
   FIBQuery := TIBQuery.Create(nil);
   FIBDatabase.DefaultTransaction := FIBTransaction;
   FIBQuery.Transaction := FIBTransaction;
+end;
+
+procedure TfmCheckDBIntegrity.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCheckDBIntegrity.Init(ADBTitle: string);

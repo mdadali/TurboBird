@@ -7,7 +7,9 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons, ExtCtrls, Grids, SynEdit, SynHighlighterSQL, sqldb,
-  turbocommon, fileimport;
+  turbocommon, fileimport,
+  IB, IBDatabase, IBQuery,
+  uthemeselector;
 
 type
 
@@ -49,9 +51,10 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
-    FDestinationQuery: TSQLQuery;
+    FDestinationQuery: TIBQuery;
     FImporter: TFileImport;
     FDestDB: string; //destination database
     FDestTable: string; //destination table
@@ -120,6 +123,11 @@ procedure TfmImportTable.FormDestroy(Sender: TObject);
 begin
 end;
 
+procedure TfmImportTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfmImportTable.LoadMappingCombos;
 var
   i: integer;
@@ -145,18 +153,21 @@ begin
     cbDestField.ItemIndex := 0;
 end;
 
-procedure TfmImportTable.OpenDestinationTable;
+{procedure TfmImportTable.OpenDestinationTable;
 var
   i: Integer;
   Statement: string;
   Num: Integer;
+  ServerName: string;
 begin
   // Enter password if it is not saved
   with RegisteredDatabases[FDestIndex] do
   begin
     // If client/server password is empty, get it from user:
-    if (IBConnection.HostName<>'') and
-      (IBConnection.Password = '') then
+    //if (IBConnection.HostName <>'') and
+      //(IBConnection.Password = '') then
+    ServerName := GetServerName(RegRec.DatabaseName);
+    if  ((ServerName <> '') and (ServerName <> 'localhost')) and  (RegRec.Password = '') then
     begin
       if fmEnterPass.ShowModal = mrOk then
       begin
@@ -171,12 +182,54 @@ begin
       end;
     end;
     if not(assigned(FDestinationQuery)) then
-      FDestinationQuery:=TSQLQuery.Create(nil);
+      FDestinationQuery:=TIBQuery.Create(nil);
     FDestinationQuery.Close;
     FDestinationQuery.DataBase:=IBConnection;
     FDestinationQuery.Transaction:=SQLTrans;
     FDestinationQuery.ParseSQL; //belts and braces - generate InsertSQL
     FDestinationQuery.SQL.Text:='select * from ' + FDestTable;
+    FDestinationQuery.Open;
+  end;
+end;}
+
+procedure TfmImportTable.OpenDestinationTable;
+var
+  ServerName: string;
+begin
+  // Enter password if it is not saved
+  with RegisteredDatabases[FDestIndex] do
+  begin
+    // Prüfen, ob Passwort für Client/Server leer ist
+    ServerName := GetServerName(RegRec.DatabaseName);
+    if ((ServerName <> '') and (ServerName <> 'localhost')) and (RegRec.Password = '') then
+    begin
+      if fmEnterPass.ShowModal = mrOk then
+      begin
+        if fmReg.TestConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+          RegRec.Charset, RegRec.FireBirdClientLibPath, RegRec.SQLDialect, RegRec.Port, RegRec.ServerName, RegRec.OverwriteLoadedClientLib) then
+        begin
+          RegisteredDatabases[FDestIndex].RegRec.UserName := fmEnterPass.edUser.Text;
+          RegisteredDatabases[FDestIndex].RegRec.Password := fmEnterPass.edPassword.Text;
+          RegisteredDatabases[FDestIndex].RegRec.Role := fmEnterPass.cbRole.Text;
+        end
+        else
+          Exit;
+      end;
+    end;
+
+    // IBQuery anlegen, falls noch nicht vorhanden
+    if not Assigned(FDestinationQuery) then
+      FDestinationQuery := TIBQuery.Create(nil);
+
+    // Verbindung und Transaktion zuweisen
+    FDestinationQuery.Close;
+    FDestinationQuery.Database := IBDatabase;
+    FDestinationQuery.Transaction := IBTransaction;
+
+    // SQL vorbereiten
+    FDestinationQuery.SQL.Text := 'SELECT * FROM ' + FDestTable;
+
+    // Tabelle öffnen
     FDestinationQuery.Open;
   end;
 end;
@@ -286,6 +339,7 @@ var
   DestColumn: string;
   i: Integer;
   Num: Integer;
+  ServerName: string;
 begin
   if not(assigned(FDestinationQuery)) and (FDestinationQuery.Active=false) then
     exit; //no destination fields
@@ -305,12 +359,14 @@ begin
     // database
     with RegisteredDatabases[FDestIndex] do
     begin
-      if (IBConnection.HostName<>'') and (IBConnection.Password = '') then
+      //if (IBConnection.HostName<>'') and (IBConnection.Password = '') then
+      ServerName := GetServerName(RegRec.DatabaseName);
+      if  ((ServerName <> '') and (ServerName <> 'localhost')) and  (RegRec.Password = '') then
       begin
         if fmEnterPass.ShowModal = mrOk then
         begin
           if fmReg.TestConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
-            RegRec.Charset) then
+            RegRec.Charset, RegRec.FireBirdClientLibPath, RegRec.SQLDialect, RegRec.Port, RegRec.ServerName, RegRec.OverwriteLoadedClientLib) then
           begin
               RegisteredDatabases[FDestIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
               RegisteredDatabases[FDestIndex].RegRec.Password:= fmEnterPass.edPassword.Text;
@@ -321,9 +377,10 @@ begin
       end;
 
       // Start import
-      if SQLTrans.Active then
-        SQLTrans.RollBack;
-      SQLTrans.StartTransaction;
+      if IBTransaction.InTransaction then
+        IBTransaction.RollBack;
+
+      IBTransaction.StartTransaction;
       FDestinationQuery.Open;
       Num:=0;
       try
@@ -342,7 +399,7 @@ begin
         FDestinationQuery.ApplyUpdates;
         // could be also done after e.g. every 1000 records for
         // higher performance
-        SQLTrans.Commit;
+        IBTransaction.Commit;
         FDestinationQuery.Close;
         Screen.Cursor:=crDefault; // for message
         ShowMessage(IntToStr(Num) + ' record(s) have been imported');
@@ -350,7 +407,7 @@ begin
         on E: Exception do
         begin
           MessageDlg('Error while importing: ' + e.Message, mtError, [mbOk], 0);
-          SQLTrans.Rollback;
+          IBTransaction.Rollback;
         end;
       end;
     end;

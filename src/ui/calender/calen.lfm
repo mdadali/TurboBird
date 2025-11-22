@@ -10,8 +10,9 @@ object fmCalen: TfmCalen
   ClientWidth = 336
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object Calendar1: TCalendar
     Left = 5
     Height = 190
@@ -56,7 +57,7 @@ object fmCalen: TfmCalen
     ClientWidth = 336
     TabOrder = 3
     object edTime: TEdit
-      Left = 33
+      Left = 30
       Height = 32
       Top = 0
       Width = 191
@@ -67,7 +68,7 @@ object fmCalen: TfmCalen
       Left = 0
       Height = 32
       Top = 0
-      Width = 33
+      Width = 30
       Align = alLeft
       Alignment = taCenter
       Caption = 'Time'

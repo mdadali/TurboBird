@@ -12,7 +12,9 @@ uses
   fdataexportersintrf,
   fbcommon,
 
-  dmibx;
+  dmibx,
+
+  uthemeselector;
 
 
 type
@@ -68,6 +70,7 @@ type
     procedure chkBoxCasesensitiveChange(Sender: TObject);
     procedure chkBoxUseFilterChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
     procedure ibtblFormAfterPost(DataSet: TDataSet);
     procedure ibtblGridAfterOpen(DataSet: TDataSet);
     procedure ibtblGridAfterScroll(DataSet: TDataSet);
@@ -298,6 +301,11 @@ begin
   CloseAction := caFree;
 end;
 
+procedure TfmEditTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfmEditTable.RefreshTable(ATable: TIBTable);
 var TmpRecNo: int64;
 begin
@@ -308,8 +316,10 @@ begin
   ibtblGrid.Close;
   dsGrid.Enabled := false;
 
-  IBDatabase1.Connected := true;
-  ibtransGrid.StartTransaction;
+  if not IBDatabase1.Connected then
+    IBDatabase1.Connected := true;
+  if not ibtransGrid.InTransaction then
+    ibtransGrid.StartTransaction;
 
   ibtblGrid.Open;
   dsGrid.Enabled := true;
@@ -322,10 +332,12 @@ end;
 
 procedure TfmEditTable.ibtblFormAfterPost(DataSet: TDataSet);
 begin
-  ibtransForm.Commit;
+  if ibtransForm.InTransaction then
+    ibtransForm.Commit;
   RefreshTable(ibtblGrid);
 
-  ibtransForm.StartTransaction;
+  if not ibtransForm.InTransaction then
+    ibtransForm.StartTransaction;
   ibtblForm.Open;
 end;
 
@@ -483,7 +495,7 @@ begin
     IBDatabase1.Close;
 
   IBDatabase1.FirebirdLibraryPathName := fbcommon.ClientLibraryName;
-  IBDatabase1.DatabaseName := Rec.IBConnection.DatabaseName;
+  IBDatabase1.DatabaseName := Rec.IBDatabase.DatabaseName;
   IBDatabase1.Params.Clear;
   IBDatabase1.Params.Add('user_name=' + Rec.RegRec.UserName);
   IBDatabase1.Params.Add('password=' + Rec.RegRec.Password);
@@ -650,6 +662,7 @@ begin
           AArrayGrid.RowCount := 1;
           AArrayGrid.ColCount := ArrayBounds[0].UpperBound - ArrayBounds[0].LowerBound + 1;
           AArrayGrid.DefaultColWidth := Max(50, Min(80, 400 div AArrayGrid.ColCount));
+          AArrayGrid.DefaultRowHeight := AArrayGrid.DefaultRowHeight + 20;
           AArrayGrid.Width := AArrayGrid.DefaultColWidth * AArrayGrid.ColCount;
           AArrayGrid.Height := AArrayGrid.DefaultRowHeight + 8;
         end

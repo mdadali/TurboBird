@@ -32,7 +32,8 @@ interface
 
 uses
   Forms,
-  StdCtrls, ExtCtrls, FileCtrl, EditBtn;
+  StdCtrls, ExtCtrls, FileCtrl, EditBtn, Classes,
+  uthemeselector;
 
 type
 
@@ -45,6 +46,7 @@ type
     DirLbx: TDirectoryEdit;
     FileLbx: TFileListBox;
     procedure DirLbxChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     procedure SetDir(aDir: string);
     function GetDir: string;
@@ -72,4 +74,9 @@ begin
   FileLbx.Directory := DirLbx.Directory;
 end;
 
-end.
+procedure TOQBDirForm.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
+end.

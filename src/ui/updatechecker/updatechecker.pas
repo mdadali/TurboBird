@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, Forms, Controls, StdCtrls, Graphics, Dialogs, ExtCtrls, math,
   fphttpclient, LazFileUtils, Process, opensslsockets, jsonparser, fpjson,
   strutils, LResources,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -24,6 +25,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btnCheckClick(Sender: TObject);
     procedure btnDownloadClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FDownloadURL: string;
     FFileName: string;
@@ -212,6 +214,11 @@ begin
       SetStatus('Download failed: ' + sLineBreak + E.Message);
   end;
   Client.Free;
+end;
+
+procedure TfrmUpdateChecker.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 initialization

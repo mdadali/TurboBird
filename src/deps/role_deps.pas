@@ -5,15 +5,19 @@ unit role_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetRoleDeps(const AConn: TIBConnection; const ARoleName: string): string;
+
+function GetRoleDeps(const AConn: TIBDatabase; const ARoleName: string): string;
 
 implementation
 
-function GetRoleDeps(const AConn: TIBConnection; const ARoleName: string): string;
+function GetRoleDeps(const AConn: TIBDatabase; const ARoleName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   RoleNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -26,7 +30,9 @@ begin
 
   RoleNameUpper := UpperCase(Trim(ARoleName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

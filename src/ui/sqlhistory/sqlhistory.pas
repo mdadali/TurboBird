@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
   LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
   EditBtn, ExtCtrls, DBCtrls, ComCtrls, usqlqueryext,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -43,6 +44,7 @@ type
     procedure DBGrid1DblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FQueryForm: TForm;
@@ -72,6 +74,11 @@ end;
 procedure TfmSQLHistory.FormCreate(Sender: TObject);
 begin
   DateEdit1.Date:= Now - 7;
+end;
+
+procedure TfmSQLHistory.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmSQLHistory.bbInsertClick(Sender: TObject);

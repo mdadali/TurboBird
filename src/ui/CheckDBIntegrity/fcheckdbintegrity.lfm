@@ -1,13 +1,14 @@
 object fmCheckDBIntegrity: TfmCheckDBIntegrity
-  Left = 336
+  Left = 213
   Height = 534
-  Top = 133
+  Top = 229
   Width = 916
   Caption = 'Check DB Integrity'
   ClientHeight = 534
   ClientWidth = 916
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
@@ -41,9 +42,9 @@ object fmCheckDBIntegrity: TfmCheckDBIntegrity
       TabOrder = 1
       object Label1: TLabel
         Left = 16
-        Height = 20
+        Height = 19
         Top = 14
-        Width = 71
+        Width = 65
         Caption = 'Database: '
         ParentColor = False
       end
@@ -87,7 +88,7 @@ object fmCheckDBIntegrity: TfmCheckDBIntegrity
         'Views'
         'Trigers'
       )
-      ItemHeight = 26
+      ItemHeight = 23
       OnClick = chklboxChecksClick
       OnClickCheck = chklboxChecksClickCheck
       TabOrder = 1
@@ -124,13 +125,13 @@ object fmCheckDBIntegrity: TfmCheckDBIntegrity
     TabOrder = 4
     object tsStart: TTabSheet
       Caption = 'Start'
-      ClientHeight = 370
-      ClientWidth = 654
+      ClientHeight = 373
+      ClientWidth = 648
       object MemoResults: TMemo
         Left = 0
-        Height = 370
+        Height = 373
         Top = 0
-        Width = 654
+        Width = 648
         Align = alClient
         Color = clSilver
         ReadOnly = True

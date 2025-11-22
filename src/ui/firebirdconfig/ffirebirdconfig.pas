@@ -7,12 +7,14 @@ interface
 uses
   Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
   IniFiles, Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,
-  ComCtrls, FileUtil, StrUtils, SynEdit, synhighlighterunixshellscript, SynHighlighterIni,
-  SynHighlighterJScript, SysTables,
+  ComCtrls, IBDatabase, IBQuery, FileUtil, StrUtils, SynEdit,
+  synhighlighterunixshellscript, SynHighlighterIni, SynHighlighterJScript,
+  SysTables,
 
   fbcommon,
   turbocommon,
-  fdataexportersintrf;
+  fdataexportersintrf,
+  uthemeselector;
 
 type
 
@@ -38,7 +40,9 @@ type
     DBNavigator2: TDBNavigator;
     edtsearch: TEdit;
     GroupBox1: TGroupBox;
-    IBConnection1: TIBConnection;
+    IBConnection1: TIBDatabase;
+    SQLTransaction1: TIBTransaction;
+    SQLQuery1: TIBQuery;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -52,8 +56,6 @@ type
     Panel2: TPanel;
     Panel3: TPanel;
     SaveDialog1: TSaveDialog;
-    SQLQuery1: TSQLQuery;
-    SQLTransaction1: TSQLTransaction;
     SynEdit1: TSynEdit;
     SynIniSyn1: TSynIniSyn;
     SynUNIXShellScriptSyn1: TSynUNIXShellScriptSyn;
@@ -72,6 +74,7 @@ type
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure edtsearchKeyPress(Sender: TObject; var Key: char);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
   private
     FdbIndex: Integer;
@@ -410,6 +413,11 @@ begin
   CloseAction := caFree;
 end;
 
+procedure TfmFirebirdConfig.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfmFirebirdConfig.SynEdit1Change(Sender: TObject);
 begin
   bbSaveFB3Config.Enabled := true;
@@ -539,15 +547,24 @@ var
   Rec: TDatabaseRec;
   ConfList: TStringList;
   ConfName, ConfVal, ConfSource, SecDbPath: string;
+  ServerImplementationVersion: string;
+  ServerVersionMajor: word;
 begin
   FNodeInfos := ANodeInfos;
   FdbIndex := AdbIndex;
   Rec := RegisteredDatabases[FdbIndex];
-  AssignIBConnection(IBConnection1, Rec.IBConnection);
+  //AssignIBConnection(IBConnection1, Rec.IBConnection);
+
+  IBConnection1 := Rec.IBDatabase;
+
   IBConnection1.Connected := True;
 
-  lbServerVersion.Caption := IntToStr(FBVersionMajor) + '.' + IntToStr(FBVersionMinor);
-  if  FBVersionMajor < 4 then
+  ServerImplementationVersion := GetSeverImplemetationVersionFromIBDB(IBConnection1);
+  lbServerVersion.Caption := ServerImplementationVersion;
+
+  ServerVersionMajor := GetServerMajorVersionFromIBDB(IBConnection1);
+
+  if  ServerVersionMajor < 4 then
   begin
     PageControl1.ActivePage := tsFB3Config;
     tsFB3Config.TabVisible  := true;

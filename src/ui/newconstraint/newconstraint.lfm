@@ -8,21 +8,22 @@ object fmNewConstraint: TfmNewConstraint
   Caption = 'fmNewConstraint'
   ClientHeight = 536
   ClientWidth = 445
+  OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.2.6.0'
+  LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 8
-    Height = 16
+    Height = 19
     Top = 15
-    Width = 156
+    Width = 146
     Caption = 'New Constraint on table'
     ParentColor = False
   end
   object laTable: TLabel
     Left = 184
-    Height = 16
+    Height = 19
     Top = 15
-    Width = 50
+    Width = 47
     Caption = 'laTable'
     Font.Style = [fsBold]
     ParentColor = False
@@ -30,17 +31,17 @@ object fmNewConstraint: TfmNewConstraint
   end
   object Label6: TLabel
     Left = 8
-    Height = 16
+    Height = 19
     Top = 432
-    Width = 90
+    Width = 86
     Caption = 'Update action'
     ParentColor = False
   end
   object Label7: TLabel
     Left = 12
-    Height = 16
+    Height = 19
     Top = 472
-    Width = 86
+    Width = 82
     Caption = 'Delete action'
     ParentColor = False
   end
@@ -51,28 +52,28 @@ object fmNewConstraint: TfmNewConstraint
     Width = 441
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Current table'
-    ClientHeight = 149
-    ClientWidth = 435
+    ClientHeight = 150
+    ClientWidth = 439
     TabOrder = 0
     object Label2: TLabel
       Left = 8
-      Height = 16
+      Height = 19
       Top = 8
-      Width = 137
+      Width = 129
       Caption = 'New constraint name'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 10
-      Height = 16
+      Height = 19
       Top = 39
-      Width = 59
+      Width = 54
       Caption = 'On fields'
       ParentColor = False
     end
     object edNewName: TEdit
       Left = 150
-      Height = 24
+      Height = 31
       Top = 8
       Width = 226
       TabOrder = 0
@@ -85,6 +86,7 @@ object fmNewConstraint: TfmNewConstraint
       Width = 282
       ItemHeight = 0
       TabOrder = 1
+      TopIndex = -1
     end
   end
   object GroupBox2: TGroupBox
@@ -94,31 +96,31 @@ object fmNewConstraint: TfmNewConstraint
     Width = 441
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Foreign Table'
-    ClientHeight = 179
-    ClientWidth = 435
+    ClientHeight = 180
+    ClientWidth = 439
     TabOrder = 1
     object Label4: TLabel
       Left = 11
-      Height = 16
+      Height = 19
       Top = 12
-      Width = 74
+      Width = 70
       Caption = 'Table name'
       ParentColor = False
     end
     object Label5: TLabel
       Left = 11
-      Height = 16
+      Height = 19
       Top = 52
-      Width = 59
+      Width = 54
       Caption = 'On fields'
       ParentColor = False
     end
     object cbTables: TComboBox
       Left = 108
-      Height = 25
+      Height = 35
       Top = 7
       Width = 268
-      ItemHeight = 16
+      ItemHeight = 0
       OnChange = cbTablesChange
       Style = csDropDownList
       TabOrder = 0
@@ -130,14 +132,15 @@ object fmNewConstraint: TfmNewConstraint
       Width = 324
       ItemHeight = 0
       TabOrder = 1
+      TopIndex = -1
     end
   end
   object cbUpdateAction: TComboBox
     Left = 113
-    Height = 25
+    Height = 31
     Top = 432
     Width = 263
-    ItemHeight = 16
+    ItemHeight = 0
     ItemIndex = 0
     Items.Strings = (
       'Restrict'
@@ -199,10 +202,10 @@ object fmNewConstraint: TfmNewConstraint
   end
   object cbDeleteAction: TComboBox
     Left = 113
-    Height = 25
+    Height = 31
     Top = 472
     Width = 265
-    ItemHeight = 16
+    ItemHeight = 0
     ItemIndex = 0
     Items.Strings = (
       'Restrict'

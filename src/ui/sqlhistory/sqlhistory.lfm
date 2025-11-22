@@ -8,6 +8,7 @@ object fmSQLHistory: TfmSQLHistory
   ClientWidth = 834
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
@@ -23,15 +24,15 @@ object fmSQLHistory: TfmSQLHistory
     object tsHistory: TTabSheet
       Caption = 'History'
       ClientHeight = 522
-      ClientWidth = 830
+      ClientWidth = 824
       object Panel2: TPanel
         Left = 0
         Height = 64
         Top = 0
-        Width = 830
+        Width = 824
         Align = alTop
         ClientHeight = 64
-        ClientWidth = 830
+        ClientWidth = 824
         TabOrder = 0
         object GroupBox2: TGroupBox
           Left = 1
@@ -40,14 +41,14 @@ object fmSQLHistory: TfmSQLHistory
           Width = 320
           Align = alLeft
           Caption = 'Copy Options'
-          ClientHeight = 40
-          ClientWidth = 316
+          ClientHeight = 42
+          ClientWidth = 318
           TabOrder = 0
           object cxOverwrite: TCheckBox
             Left = 8
-            Height = 22
+            Height = 21
             Top = 8
-            Width = 290
+            Width = 267
             Caption = 'Overwrite current SQL in query window'
             TabOrder = 0
           end
@@ -56,24 +57,24 @@ object fmSQLHistory: TfmSQLHistory
           Left = 321
           Height = 62
           Top = 1
-          Width = 508
+          Width = 502
           Align = alClient
           Caption = 'Export to text file'
-          ClientHeight = 40
-          ClientWidth = 504
+          ClientHeight = 42
+          ClientWidth = 500
           TabOrder = 1
           object cxAfterDate: TCheckBox
             Left = 8
-            Height = 22
+            Height = 21
             Top = 8
-            Width = 151
+            Width = 141
             Caption = 'Only after the date'
             OnClick = cxAfterDateClick
             TabOrder = 0
           end
           object DateEdit1: TDateEdit
             Left = 168
-            Height = 30
+            Height = 31
             Top = 0
             Width = 104
             CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
@@ -86,15 +87,15 @@ object fmSQLHistory: TfmSQLHistory
           end
           object Label1: TLabel
             Left = 296
-            Height = 20
+            Height = 19
             Top = 8
-            Width = 62
+            Width = 57
             Caption = 'SQL Type'
             ParentColor = False
           end
           object cbSQLType: TComboBox
             Left = 376
-            Height = 28
+            Height = 31
             Top = 0
             Width = 104
             ItemHeight = 0
@@ -116,7 +117,7 @@ object fmSQLHistory: TfmSQLHistory
         Left = 5
         Height = 406
         Top = 111
-        Width = 820
+        Width = 814
         Align = alClient
         BorderSpacing.Around = 5
         Color = clWindow
@@ -132,16 +133,16 @@ object fmSQLHistory: TfmSQLHistory
         Left = 0
         Height = 42
         Top = 64
-        Width = 830
+        Width = 824
         Align = alTop
         ClientHeight = 42
-        ClientWidth = 830
+        ClientWidth = 824
         TabOrder = 2
         object DBNavigator1: TDBNavigator
           Left = 217
           Height = 40
           Top = 1
-          Width = 612
+          Width = 606
           Align = alClient
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -151,7 +152,7 @@ object fmSQLHistory: TfmSQLHistory
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 40
-          ClientWidth = 612
+          ClientWidth = 606
           DataSource = Datasource1
           Options = []
           TabOrder = 0

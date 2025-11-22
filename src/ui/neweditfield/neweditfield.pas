@@ -6,7 +6,10 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Spin, Buttons, turbocommon, fbcommon;
+  StdCtrls, Spin, Buttons,
+  turbocommon,
+  fbcommon,
+  uthemeselector;
 
 type
   TFormMode = (foNew, foEdit);
@@ -20,9 +23,10 @@ type
     cbCollation: TComboBox;
     cbType: TComboBox;
     cxAllowNull: TCheckBox;
+    edDefault: TEdit;
     edDescription: TEdit;
     edFieldName: TEdit;
-    edDefault: TEdit;
+    GroupBox1: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -33,10 +37,10 @@ type
     Label8: TLabel;
     lblCharset: TLabel;
     lblCollation: TLabel;
-    sePrecision: TSpinEdit;
-    seSize: TSpinEdit;
     seOrder: TSpinEdit;
+    sePrecision: TSpinEdit;
     seScale: TSpinEdit;
+    seSize: TSpinEdit;
     procedure bbAddClick(Sender: TObject);
     procedure bbGenUUIDClick(Sender: TObject);
     procedure cbCharsetEditingDone(Sender: TObject);
@@ -398,6 +402,7 @@ end;
 
 procedure TfmNewEditField.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
   EnableDisableControls;
 end;
 

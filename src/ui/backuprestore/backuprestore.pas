@@ -160,7 +160,9 @@ var
   FBKZippedFile: string; //name of fbk file when zip compressing
   Zipper: TZipper;
 begin
-  TempDir:= GetTempDir(false);
+  //TempDir:= GetTempDir(false);
+  TempDir:= ExtractFilePath(Application.ExeName) + TmpDir;
+
   FireBirdServices:= TFirebirdServices.Create;
   try
     Screen.Cursor := crHourglass; // inform user of long-running operation

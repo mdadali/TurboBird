@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons, LCLType,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -15,13 +16,15 @@ type
 
   TfmViewGen = class(TForm)
       bbClose: TSpeedButton;
-    edGenName: TEdit;
-    edValue: TEdit;
-    Label1: TLabel;
-    Label3: TLabel;
+      edGenName: TEdit;
+      edValue: TEdit;
+      GroupBox1: TGroupBox;
+      Label1: TLabel;
+      Label3: TLabel;
     procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
     FNodeInfos: TPNodeInfos;
@@ -62,6 +65,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmViewGen.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmViewGen.bbCloseClick(Sender: TObject);

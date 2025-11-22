@@ -1,7 +1,7 @@
 object frmTestFunction: TfrmTestFunction
-  Left = 381
+  Left = 328
   Height = 608
-  Top = 416
+  Top = 176
   Width = 947
   ActiveControl = Panel13
   BorderIcons = [biSystemMenu]
@@ -35,19 +35,19 @@ object frmTestFunction: TfrmTestFunction
       TabOrder = 0
       object cboxPackages: TComboBox
         Left = 8
-        Height = 32
+        Height = 35
         Top = 24
         Width = 152
         ItemHeight = 0
         OnChange = cboxPackagesChange
-        Style = csDropDownList
+        Style = csOwnerDrawFixed
         TabOrder = 0
       end
       object Label5: TLabel
         Left = 8
-        Height = 20
+        Height = 19
         Top = 8
-        Width = 55
+        Width = 51
         Caption = 'Package'
         ParentColor = False
       end
@@ -76,8 +76,8 @@ object frmTestFunction: TfrmTestFunction
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 303
-        ClientWidth = 177
+        ClientHeight = 305
+        ClientWidth = 179
         ItemIndex = 0
         Items.Strings = (
           'UDF'
@@ -130,31 +130,31 @@ object frmTestFunction: TfrmTestFunction
           Width = 767
           Align = alTop
           Caption = 'Routine'
-          ClientHeight = 113
-          ClientWidth = 763
+          ClientHeight = 115
+          ClientWidth = 765
           TabOrder = 0
           OnClick = rgRoutineTypeClick
           object Label1: TLabel
             Left = 8
-            Height = 20
+            Height = 19
             Top = 56
-            Width = 46
+            Width = 43
             Caption = 'Return'
             ParentColor = False
           end
           object lbReturn: TLabel
             Left = 112
-            Height = 20
+            Height = 19
             Top = 56
-            Width = 71
+            Width = 65
             Caption = 'lbReturn/s'
             ParentColor = False
           end
           object DBLookupComboBox1: TDBLookupComboBox
             Left = 0
-            Height = 32
+            Height = 35
             Top = 0
-            Width = 763
+            Width = 765
             Align = alTop
             KeyField = 'NAME'
             ListField = 'NAME'
@@ -162,38 +162,38 @@ object frmTestFunction: TfrmTestFunction
             ListSource = DSFuncs
             LookupCache = False
             OnChange = DBLookupComboBox1Change
-            Style = csDropDownList
+            Style = csOwnerDrawFixed
             TabOrder = 0
           end
           object lbRoutineNm: TLabel
             Left = 8
-            Height = 20
+            Height = 19
             Top = 30
-            Width = 96
+            Width = 88
             Caption = 'Routine Name'
             ParentColor = False
           end
           object lbRoutineName: TLabel
             Left = 112
-            Height = 20
+            Height = 19
             Top = 30
-            Width = 105
+            Width = 96
             Caption = 'lbRoutineName'
             ParentColor = False
           end
           object Label4: TLabel
             Left = 8
-            Height = 20
+            Height = 19
             Top = 80
-            Width = 88
+            Width = 81
             Caption = 'Routine Type'
             ParentColor = False
           end
           object lbRoutineType: TLabel
             Left = 112
-            Height = 20
+            Height = 19
             Top = 80
-            Width = 97
+            Width = 89
             Caption = 'lbRoutineType'
             ParentColor = False
           end
@@ -210,9 +210,9 @@ object frmTestFunction: TfrmTestFunction
         TabOrder = 1
         object Label2: TLabel
           Left = 8
-          Height = 20
+          Height = 19
           Top = 0
-          Width = 122
+          Width = 113
           Caption = 'Input Parameters:'
           ParentColor = False
         end
@@ -293,9 +293,9 @@ object frmTestFunction: TfrmTestFunction
         TabOrder = 2
         object Label3: TLabel
           Left = 8
-          Height = 20
+          Height = 19
           Top = 8
-          Width = 46
+          Width = 42
           Caption = 'Result:'
           ParentColor = False
         end
@@ -371,17 +371,17 @@ object frmTestFunction: TfrmTestFunction
     end
     object Label6: TLabel
       Left = 8
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 71
+      Width = 65
       Caption = 'Database: '
       ParentColor = False
     end
     object lbDatabase: TLabel
       Left = 80
-      Height = 20
+      Height = 19
       Top = 4
-      Width = 76
+      Width = 69
       Caption = 'lbDatabase'
       ParentColor = False
     end
@@ -393,42 +393,8 @@ object frmTestFunction: TfrmTestFunction
   end
   object DSParams: TDataSource
     DataSet = QParamInfo
-    Left = 104
-    Top = 264
-  end
-  object IBConnection1: TIBConnection
-    Connected = False
-    LoginPrompt = False
-    KeepConnection = False
-    Transaction = SQLTransaction1
-    CheckTransactionParams = False
-    UseConnectionCharSetIfNone = False
-    Left = 400
-    Top = 264
-  end
-  object QFuncs: TSQLQuery
-    FieldDefs = <>
-    Database = IBConnection1
-    Transaction = SQLTransaction1
-    Params = <>
-    Macros = <>
-    Left = 176
-    Top = 200
-  end
-  object QParamInfo: TSQLQuery
-    FieldDefs = <>
-    Database = IBConnection1
-    Transaction = SQLTransaction1
-    Params = <>
-    Macros = <>
-    Left = 104
-    Top = 200
-  end
-  object SQLTransaction1: TSQLTransaction
-    Active = False
-    Database = IBConnection1
-    Left = 400
-    Top = 200
+    Left = 94
+    Top = 272
   end
   object BufDataSource: TDataSource
     DataSet = BufDataset
@@ -440,5 +406,63 @@ object frmTestFunction: TfrmTestFunction
     FieldDefs = <>
     Left = 272
     Top = 200
+  end
+  object IBConnection1: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = SQLTransaction1
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 384
+    Top = 208
+  end
+  object SQLTransaction1: TIBTransaction
+    TransactionName = '{96F973E5-13D6-4477-9599-EE13EDDAD521}'
+    Active = False
+    DefaultDatabase = IBConnection1
+    Left = 546
+    Top = 212
+  end
+  object QParamInfo: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBConnection1
+    Transaction = SQLTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 94
+    Top = 208
+  end
+  object QFuncs: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBConnection1
+    Transaction = SQLTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 176
+    Top = 208
   end
 end

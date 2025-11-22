@@ -1,12 +1,12 @@
 object fmMain: TfmMain
-  Left = 878
-  Height = 459
-  Top = 183
-  Width = 942
+  Left = 415
+  Height = 531
+  Top = 208
+  Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
-  ClientHeight = 433
-  ClientWidth = 942
+  ClientHeight = 502
+  ClientWidth = 904
   Color = clForm
   DragMode = dmAutomatic
   Font.Name = 'Sans'
@@ -547,22 +547,26 @@ object fmMain: TfmMain
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poScreenCenter
   ShowHint = True
   LCLVersion = '2.2.6.0'
   WindowState = wsMaximized
   object tvMain: TTreeView
-    Left = 0
-    Height = 369
-    Top = 40
-    Width = 304
+    Left = 27
+    Height = 428
+    Top = 34
+    Width = 300
     Align = alLeft
     BackgroundColor = clCream
     Color = clCream
     ExpandSignColor = clMaroon
+    ExpandSignType = tvestPlusMinus
+    Font.Name = 'Sans'
     HideSelection = False
     Images = ImageList1
     Indent = 25
+    ParentFont = False
     ReadOnly = True
     RightClickSelect = True
     ShowLines = False
@@ -577,17 +581,107 @@ object fmMain: TfmMain
     Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
   end
   object Splitter1: TSplitter
-    Left = 304
-    Height = 369
-    Top = 40
+    Left = 327
+    Height = 428
+    Top = 34
     Width = 14
     Beveled = True
   end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 21
+    Top = 481
+    Width = 904
+    Panels = <    
+      item
+        Width = 250
+      end    
+      item
+        Width = 200
+      end>
+    SimplePanel = False
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 34
+    Top = 0
+    Width = 904
+    ButtonHeight = 32
+    ButtonWidth = 32
+    Caption = 'ToolBar1'
+    Images = toolbarImages
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+    object tbtnCreateNewDB: TToolButton
+      Left = 1
+      Hint = 'New Database'
+      Top = 2
+      Caption = 'New   '
+      ImageIndex = 8
+      OnClick = mnCreateDBClick
+    end
+    object tbtnRegDatabase: TToolButton
+      Left = 37
+      Hint = 'Register Database'
+      Top = 2
+      Caption = 'Register  '
+      ImageIndex = 0
+      OnClick = mnRegDBClick
+    end
+    object tbtnRestoreDatabase: TToolButton
+      Left = 73
+      Hint = 'Restore Database'
+      Top = 2
+      Caption = 'Restore'
+      ImageIndex = 2
+      OnClick = mnRestoreClick
+    end
+    object ToolButton3: TToolButton
+      Left = 145
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsSeparator
+    end
+    object tbtnEditorFont: TToolButton
+      Left = 153
+      Hint = 'Change Editor Font'
+      Top = 2
+      Caption = 'tbtnEditorFont'
+      ImageIndex = 10
+      OnClick = mnEditorFontClick
+    end
+    object tbtnAbout: TToolButton
+      Left = 189
+      Hint = 'About TurboBird'
+      Top = 2
+      Caption = 'tbtnAbout'
+      ImageIndex = 11
+      OnClick = mnAboutClick
+    end
+    object tbCheckDBIntegrity: TToolButton
+      Left = 109
+      Hint = 'Check DB-Integrity'
+      Top = 2
+      Caption = 'tbCheckDBIntegrity'
+      Enabled = False
+      ImageIndex = 1
+      OnClick = tbCheckDBIntegrityClick
+    end
+    object tbSQLMonitor: TToolButton
+      Left = 225
+      Top = 2
+      Caption = 'tbSQLMonitor'
+      OnClick = tbSQLMonitorClick
+      Visible = False
+    end
+  end
   object PageControl1: TPageControl
-    Left = 321
-    Height = 362
-    Top = 43
-    Width = 618
+    Left = 344
+    Height = 421
+    Top = 37
+    Width = 557
     ActivePage = tsMain
     Align = alClient
     BorderSpacing.Left = 1
@@ -599,18 +693,20 @@ object fmMain: TfmMain
     Font.Name = 'Sans'
     Images = ImageList1
     ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
     TabIndex = 0
-    TabOrder = 2
+    TabOrder = 4
     OnCloseTabClicked = PageControl1CloseTabClicked
     OnMouseDown = PageControl1MouseDown
     OnMouseMove = PageControl1MouseMove
     OnMouseUp = PageControl1MouseUp
-    Options = [nboHidePageListPopup]
+    Options = [nboShowCloseButtons, nboHidePageListPopup]
     object tsMain: TTabSheet
       BorderWidth = 1
-      Caption = 'Main'
-      ClientHeight = 332
-      ClientWidth = 614
+      Caption = 'Home'
+      ClientHeight = 381
+      ClientWidth = 547
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
@@ -618,7 +714,7 @@ object fmMain: TfmMain
         Left = 704
         Height = 82
         Top = 64
-        Width = 0
+        Width = 221
         Anchors = [akTop, akLeft, akRight]
         Picture.Data = {
           0A544A706567496D6167655F420000FFD8FFE000104A46494600010101006000
@@ -1155,14 +1251,12 @@ object fmMain: TfmMain
           9A93B4E4B6FB4FB2F3F25F71FFD9
         }
       end
-      object HtmlViewer1: TFrameViewer
+      object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 332
+        Height = 381
         Top = 0
-        Width = 614
-        CharSet = DEFAULT_CHARSET
-        CodePage = 0
-        HistoryIndex = 0
+        Width = 547
+        BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
         PrintMarginBottom = 2
@@ -1172,106 +1266,49 @@ object fmMain: TfmMain
         PrintScale = 1
         OnLink = HtmlViewer1Link
         Align = alClient
+        ShowHint = True
         TabOrder = 0
       end
     end
   end
-  object StatusBar1: TStatusBar
+  object Panel1: TPanel
     Left = 0
-    Height = 24
-    Top = 409
-    Width = 942
-    Panels = <    
-      item
-        Width = 250
-      end    
-      item
-        Width = 200
-      end>
-    SimplePanel = False
-  end
-  object ToolBar1: TToolBar
-    Left = 0
-    Height = 40
-    Top = 0
-    Width = 942
-    ButtonHeight = 40
-    ButtonWidth = 40
-    Caption = 'ToolBar1'
-    Images = toolbarImages
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 4
-    object tbtnCreateNewDB: TToolButton
+    Height = 19
+    Top = 462
+    Width = 904
+    Align = alBottom
+    ClientHeight = 19
+    ClientWidth = 904
+    TabOrder = 5
+    object Memo1: TMemo
       Left = 1
-      Hint = 'New Database'
-      Top = 2
-      Caption = 'New   '
-      ImageIndex = 8
-      OnClick = mnCreateDBClick
-    end
-    object tbtnRegDatabase: TToolButton
-      Left = 41
-      Hint = 'Register Database'
-      Top = 2
-      Caption = 'Register  '
-      ImageIndex = 0
-      OnClick = mnRegDBClick
-    end
-    object tbtnRestoreDatabase: TToolButton
-      Left = 81
-      Hint = 'Restore Database'
-      Top = 2
-      Caption = 'Restore'
-      ImageIndex = 2
-      OnClick = mnRestoreClick
-    end
-    object ToolButton3: TToolButton
-      Left = 161
       Height = 40
-      Top = 2
-      Caption = 'ToolButton3'
-      Style = tbsSeparator
+      Top = 1
+      Width = 902
+      Align = alClient
+      TabOrder = 0
     end
-    object tbtnEditorFont: TToolButton
-      Left = 169
-      Hint = 'Change Editor Font'
-      Top = 2
-      Caption = 'tbtnEditorFont'
-      ImageIndex = 10
-      OnClick = mnEditorFontClick
-    end
-    object tbtnAbout: TToolButton
-      Left = 209
-      Hint = 'About TurboBird'
-      Top = 2
-      Caption = 'tbtnAbout'
-      ImageIndex = 11
-      OnClick = mnAboutClick
-    end
-    object tbCheckDBIntegrity: TToolButton
-      Left = 121
-      Hint = 'Check DB-Integrity'
-      Top = 2
-      Caption = 'tbCheckDBIntegrity'
-      Enabled = False
-      ImageIndex = 1
-      OnClick = tbCheckDBIntegrityClick
-    end
-    object tbSQLMonitor: TToolButton
-      Left = 249
-      Top = 2
-      Caption = 'tbSQLMonitor'
-      OnClick = tbSQLMonitorClick
-      Visible = False
-    end
+  end
+  object Button1: TButton
+    Left = 0
+    Height = 428
+    Top = 34
+    Width = 27
+    Align = alLeft
+    Caption = '<>'
+    OnClick = Button1Click
+    TabOrder = 6
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
-    Left = 32
-    Top = 128
+    Left = 56
+    Top = 248
     object mnFile: TMenuItem
       Caption = '&File'
+      object mnServerRegistry: TMenuItem
+        Caption = 'Server Registry'
+        OnClick = mnServerRegistryClick
+      end
       object mnCreateDB: TMenuItem
         Caption = 'New Database'
         ImageIndex = 41
@@ -1295,6 +1332,10 @@ object fmMain: TfmMain
     end
     object mnOptions: TMenuItem
       Caption = 'Options'
+      object mnTheme: TMenuItem
+        Caption = 'Theme'
+        OnClick = mnThemeClick
+      end
       object mnEditorFont: TMenuItem
         Caption = 'Editor Font'
         ImageIndex = 114
@@ -2215,8 +2256,8 @@ object fmMain: TfmMain
   end
   object pmDatabase: TPopupMenu
     OnPopup = pmDatabasePopup
-    Left = 40
-    Top = 280
+    Left = 56
+    Top = 337
     object lmServerRegistry: TMenuItem
       Tag = -2
       Caption = 'Server Registry'
@@ -2762,6 +2803,10 @@ object fmMain: TfmMain
       }
       OnClick = lmDBInfoClick
     end
+    object lmDBAdmin: TMenuItem
+      Caption = 'DBAdmin'
+      OnClick = lmDBAdminClick
+    end
     object lmFirebirdConfig: TMenuItem
       Caption = 'Server Configuration'
       OnClick = lmFirebirdConfigClick
@@ -2769,8 +2814,8 @@ object fmMain: TfmMain
     object lmSeparator2: TMenuItem
       Caption = '-'
     end
-    object lmEditReg: TMenuItem
-      Caption = 'Edit Registration'
+    object lmEditDBReg: TMenuItem
+      Caption = 'Edit DB Registration'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         20000000000000040000640000006400000000000000000000000000000B9C9F
@@ -2807,7 +2852,7 @@ object fmMain: TfmMain
         B070C8CAC9BCCACCCBBACACCCCBACACCCCBACACCCCBACACCCCBACACCCCBAC9CC
         CBBAC9CBCABAC9CBCBBAC9CBCBBAC8CAC9BCAFB2B17000000001
       }
-      OnClick = lmEditRegClick
+      OnClick = lmEditDBRegClick
     end
     object lmUnregisterDatabase: TMenuItem
       Caption = 'Unregister Database'
@@ -3608,14 +3653,14 @@ object fmMain: TfmMain
         Name = 'Reserved'
         DataType = ftInteger
       end>
-    Left = 168
-    Top = 288
+    Left = 184
+    Top = 337
   end
   object toolbarImages: TImageList
     Height = 32
     Width = 32
-    Left = 168
-    Top = 200
+    Left = 184
+    Top = 248
     Bitmap = {
       4C7A0D0000002000000020000000AE3D00000000000078DAEDBD055855D9F73E
       7EB1759CCFE898638C8E313AB618638FDD858ADD89DDDD8EDD410888A2889474
@@ -4122,13 +4167,6 @@ object fmMain: TfmMain
     Left = 504
     Top = 96
   end
-  object SQLQuery1: TSQLQueryExt
-    FieldDefs = <>
-    Params = <>
-    Macros = <>
-    Left = 208
-    Top = 96
-  end
   object ImageList2: TImageList
     DrawingStyle = dsFocus
     Left = 376
@@ -4256,11 +4294,44 @@ object fmMain: TfmMain
       69965B776ED773BA5DF55C1ED7FFF938F92722702651
     }
   end
-  object ODBCConnection1: TODBCConnection
+  object SQLQuery1: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = CurrentIBConnection
+    Transaction = CurrentIBTransaction
+    AutoCommit = acCommitRetaining
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 192
+    Top = 120
+  end
+  object CurrentIBConnection: TIBDatabase
     Connected = False
     LoginPrompt = False
-    KeepConnection = False
-    Left = 112
-    Top = 56
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = CurrentIBTransaction
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 80
+    Top = 67
+  end
+  object CurrentIBTransaction: TIBTransaction
+    TransactionName = '{E7A93331-169C-407D-B805-831FABAB8845}'
+    Active = False
+    DefaultDatabase = CurrentIBConnection
+    Left = 79
+    Top = 152
   end
 end

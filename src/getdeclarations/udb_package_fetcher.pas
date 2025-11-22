@@ -60,6 +60,10 @@ begin
       'AND ' +
       'RDB$MODULE_NAME IS NULL '  +
       'ORDER BY RDB$FUNCTION_NAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     Params.ParamByName('PKG').AsString := UpperCase(APackageName);
     Open;
     while not EOF do
@@ -85,6 +89,10 @@ begin
     'AND ' +
     'RDB$ENGINE_NAME IS NULL ' +
     'ORDER BY RDB$PROCEDURE_NAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     Params.ParamByName('PKG').AsString := UpperCase(APackageName);
     Open;
     while not EOF do
@@ -107,6 +115,10 @@ begin
       'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS ' +
       'WHERE RDB$ENGINE_NAME IS NOT NULL AND UPPER(RDB$PACKAGE_NAME) = :PKG ' +
       'ORDER BY RDB$FUNCTION_NAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     Params.ParamByName('PKG').AsString := UpperCase(APackageName);
     Open;
     while not EOF do
@@ -129,6 +141,10 @@ begin
       'SELECT RDB$PROCEDURE_NAME FROM RDB$PROCEDURES ' +
        'WHERE RDB$ENGINE_NAME IS NOT NULL AND UPPER(RDB$PACKAGE_NAME) = :PKG ' +
       'ORDER BY RDB$PROCEDURE_NAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     Params.ParamByName('PKG').AsString := UpperCase(APackageName);
     Open;
     while not EOF do
@@ -151,6 +167,10 @@ begin
       'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS ' +
       'WHERE RDB$MODULE_NAME IS NOT NULL AND UPPER(RDB$PACKAGE_NAME) = :PKG ' +
       'ORDER BY RDB$FUNCTION_NAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     Params.ParamByName('PKG').AsString := UpperCase(APackageName);
     Open;
     while not EOF do

@@ -8,8 +8,9 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Spin, Buttons,
   //newlib
-  SysTables;
-  //end-newlib
+  SysTables,
+  uthemeselector;
+
 
 type
 
@@ -50,6 +51,8 @@ begin
   dmSysTables.GetBasicTypes(cbType.Items);
   if cbType.Items.Count > 0 then
     cbType.ItemIndex:= 0;
+
+  frmThemeSelector.btnApplyClick(self);
 end;
 //end-newlib
 

@@ -6,9 +6,12 @@ interface
 
 uses
   Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls,
+  Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls, IBDatabase, IBDatabaseInfo,
+  IB, ibase60dyn,
+
   turbocommon,
-  fbcommon;
+  fbcommon,
+  uthemeselector;
 
 type
 
@@ -16,43 +19,68 @@ type
 
   TfmReg = class(TForm)
     bbCancel: TBitBtn;
-    bbTest: TBitBtn;
     bbReg: TBitBtn;
-    btBrowse: TButton;
+    bbTest: TBitBtn;
+    btBrowseDB: TButton;
+    btnBrowseClient: TButton;
     cbCharset: TComboBox;
+    cboxSQLDialect: TComboBox;
+    cboxServers: TComboBox;
+    chkBoxConnectDBOnStart: TCheckBox;
+    chkboxOverwriteServerClientLib: TCheckBox;
     cxSavePassword: TCheckBox;
-    edRole: TEdit;
     edDatabaseName: TEdit;
-    edTitle: TEdit;
     edPassword: TEdit;
+    edRole: TEdit;
+    edtFBClient: TEdit;
+    edTitle: TEdit;
+    edtPort: TEdit;
     edUserName: TEdit;
-    IBConnection1: TIBConnection;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
+    IBConnection1: TIBDatabase;
+    IBDatabaseInfo1: TIBDatabaseInfo;
     Image1: TImage;
     Label1: TLabel;
+    Label10: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     OpenDialog1: TOpenDialog;
+    OpenDialogClient: TOpenDialog;
+    Panel1: TPanel;
     procedure bbRegClick(Sender: TObject);
     procedure bbTestClick(Sender: TObject);
-    procedure btBrowseClick(Sender: TObject);
+    procedure btBrowseDBClick(Sender: TObject);
+    procedure btnBrowseClientClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
 
   private
     { private declarations }
     function EditRegisteration(Index: Integer; Title, DatabaseName, UserName, Password, Charset, Role: string;
-      SavePassword: Boolean): Boolean;
+      SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+      OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
   public
     { public declarations }
     NewReg: Boolean;
     RecPos: Integer;
     function RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string;
-      SavePassword: Boolean): Boolean;
-    function TestConnection(DatabaseName, UserName, Password, Charset: string): Boolean;
+      SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+      OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
+
+    function TestConnection(DatabaseName, UserName, Password, Charset: string;
+                FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+                OverwriteLoadedClientLib: boolean): Boolean;
     function GetEmptyRec: Integer;
     function SaveRegistrations: Boolean;
     procedure Sort;
+
+    procedure RefreshServerCombobox;
   end;
 
 var
@@ -61,25 +89,6 @@ var
 implementation
 
 { TfmReg }
-
-{procedure TfmReg.bbRegClick(Sender: TObject);
-begin
-  if Trim(edTitle.Text) = '' then
-    ShowMessage('You should fill all fields')
-  else
-
-  if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text) then
-  if NewReg then  // New registration
-  begin
-    if RegisterDatabase(edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
-      edRole.Text, cxSavePassword.Checked) then
-       ModalResult:= mrOK;
-  end
-  else // if not NewReg, edit registration
-    if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text,
-      cbCharset.Text, edRole.Text, cxSavePassword.Checked) then
-      ModalResult:= mrOk;
-end;}
 
 procedure TfmReg.bbRegClick(Sender: TObject);
 var
@@ -93,7 +102,9 @@ begin
 
   // Prüfen, ob TestConnection ausgeführt werden soll
   if SameText(turbocommon.MultiVersionConnection, 'no') then
-    doProceed := TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text)
+    doProceed := TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
+                   edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
+                   chkboxOverwriteServerClientLib.Checked)
   else
     doProceed := True; // wenn 'yes', Test überspringen
 
@@ -104,39 +115,101 @@ begin
   if NewReg then
   begin
     if RegisterDatabase(edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
-      edRole.Text, cxSavePassword.Checked) then
+      edRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
+      cboxServers.Text, chkboxOverwriteServerClientLib.Checked, chkBoxConnectDBOnStart.Checked) then
       ModalResult := mrOK;
   end
   else
   // Bearbeiten einer bestehenden Registrierung
   begin
     if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text,
-      cbCharset.Text, edRole.Text, cxSavePassword.Checked) then
+           cbCharset.Text, edRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
+           cboxServers.Text, chkboxOverwriteServerClientLib.Checked, chkBoxConnectDBOnStart.Checked) then
       ModalResult := mrOK;
   end;
 end;
 
 procedure TfmReg.bbTestClick(Sender: TObject);
 begin
-  if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text) then
+  if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text, edtFBClient.Text,
+                     cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
+                     chkboxOverwriteServerClientLib.Checked) then
     ShowMessage('Connected successfully');
 end;
 
-procedure TfmReg.btBrowseClick(Sender: TObject);
+procedure TfmReg.btBrowseDBClick(Sender: TObject);
+var Rec: TServerRecord;
 begin
   if OpenDialog1.Execute then
-    edDatabaseName.Text:= OpenDialog1.FileName;
+  begin
+    Rec := GetServerRecordFromFileByName(cboxServers.Text);
+    edDatabaseName.Text:=  OpenDialog1.FileName;
+    if not Rec.IsEmbedded then
+    begin
+      edDatabaseName.Text := cboxServers.Text + '/'  + Rec.Port + ':' + edDatabaseName.Text;
+    end;
+  end;
 end;
 
-function TfmReg.RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string; SavePassword: Boolean): Boolean;
+procedure TfmReg.btnBrowseClientClick(Sender: TObject);
+begin
+  if OpenDialogClient.Execute then
+    edtFBClient.Text := OpenDialogClient.FileName;
+end;
+
+procedure TfmReg.FormCreate(Sender: TObject);
+begin
+  chkboxOverwriteServerClientLib.Hint :=
+  'Use a custom Firebird client library.' + sLineBreak +
+  sLineBreak +
+  'If not checked,' + sLineBreak +
+  'the library is inherited from the owning server''s registry settings.';
+end;
+
+procedure TfmReg.RefreshServerCombobox;
+var ServerList: TStringList;
+    i: integer;
+    tmpIdxTxt: string;
+begin
+  tmpIdxTxt := cboxServers.Text;
+
+  ServerList := GetServerListFromTreeView;
+
+  try
+    cboxServers.Items.Clear;
+
+    for i := 0 to ServerList.Count - 1 do
+      cboxServers.Items.Add(ServerList[i]);
+  finally
+    ServerList.Free;
+  end;
+
+  if cboxServers.Items.IndexOf(tmpIdxTxt) > -1 then
+    cboxServers.ItemIndex := cboxServers.Items.IndexOf(tmpIdxTxt)
+  else if cboxServers.Items.Count > 0 then
+    cboxServers.ItemIndex := 0
+  else
+    cboxServers.ItemIndex := -1;
+end;
+
+procedure TfmReg.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
+function TfmReg.RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string; SavePassword: Boolean;
+             FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+             OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
 var
   Rec: TRegisteredDatabase;
   F: file of TRegisteredDatabase;
   EmptyIndex: Integer;
   FileName: string;
+  ServerRec: TServerRecord;
 begin
   try
-    FileName:= GetConfigurationDirectory + 'turbobird.reg';
+    ServerRec := GetServerRecordFromFileByName(cboxServers.Items[cboxServers.ItemIndex]);
+    FileName:= GetConfigurationDirectory + DatabasesRegFile;
 
     AssignFile(F, FileName);
     if FileExists(FileName) then
@@ -165,6 +238,16 @@ begin
     Rec.SavePassword:= SavePassword;
     Rec.Deleted:= False;
     Rec.LastOpened:= Now;
+    Rec.FireBirdClientLibPath := FBClient;
+    Rec.SQLDialect :=  SQLDialect;
+    Rec.Port := Port;
+    Rec.ServerName := ServerName;
+    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
+    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
+
+    Rec.ServerVersionString := ServerRec.VersionString;
+    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
+    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
 
     Write(F, Rec);
     CloseFile(F);
@@ -179,14 +262,18 @@ begin
 end;
 
 function TfmReg.EditRegisteration(Index: Integer; Title, DatabaseName, UserName, Password, Charset, Role: string;
-   SavePassword: Boolean): Boolean;
+   SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+   OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
 var
   Rec: TRegisteredDatabase;
   F: file of TRegisteredDatabase;
   FileName: string;
+
+  ServerRec: TServerRecord;
 begin
   try
-    FileName:= GetConfigurationDirectory + 'turbobird.reg';
+    ServerRec := GetServerRecordFromFileByName(cboxServers.Items[cboxServers.ItemIndex]);
+    FileName:= GetConfigurationDirectory + DatabasesRegFile;
 
     AssignFile(F, FileName);
     FileMode:= 2;
@@ -204,6 +291,16 @@ begin
     Rec.Role:= Role;
     Rec.SavePassword:= SavePassword;
     Rec.Deleted:= False;
+    Rec.FireBirdClientLibPath := FBClient;
+    Rec.SQLDialect :=  SQLDialect;
+    Rec.Port := Port;
+    Rec.ServerName := ServerName;
+    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
+    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
+
+    Rec.ServerVersionString := ServerRec.VersionString;
+    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
+    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
 
     Write(F, Rec);
     CloseFile(F);
@@ -217,15 +314,30 @@ begin
   end;
 end;
 
-function TfmReg.TestConnection(DatabaseName, UserName, Password, Charset: string): Boolean;
+function TfmReg.TestConnection(DatabaseName, UserName, Password, Charset: string; FBClient: string;
+                                 SQLDialect: string; Port: string; ServerName: string;
+                                 OverwriteLoadedClientLib: boolean): Boolean;
 begin
   result := false;
   try
     IBConnection1.Close;
     IBConnection1.DatabaseName:= DatabaseName;
-    IBConnection1.UserName:= UserName;
-    IBConnection1.Password:= Password;
-    IBConnection1.CharSet:= Charset;
+
+    //IBConnection1.FirebirdLibraryPathName := FBClient;
+
+    IBConnection1.LoginPrompt := false;
+
+    IBConnection1.FirebirdLibraryPathName := FBClient;
+    //ReleaseIBase60;
+    with IBConnection1.Params do
+    begin
+      Clear;
+      Add('user_name=' + UserName);
+      Add('password='  + Password);
+      Add('lc_ctype='  + Charset);
+      Add('sql_dialect='  + SQLDialect);
+    end;
+
     IBConnection1.Open;
     if IBConnection1.Connected then
     begin
@@ -255,7 +367,7 @@ var
 begin
   Result:= -1;
 
-  FileName:= GetConfigurationDirectory + 'turbobird.reg';
+  FileName:= GetConfigurationDirectory + DatabasesRegFile;
 
   AssignFile(F, FileName);
   if FileExists(FileName) then
@@ -282,7 +394,7 @@ var
 begin
   try
     Sort;
-    FileName:= GetConfigurationDirectory + 'turbobird.reg';
+    FileName:= GetConfigurationDirectory + DatabasesRegFile;
 
     AssignFile(F, FileName);
     FileMode:= 2;

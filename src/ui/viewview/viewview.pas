@@ -6,23 +6,28 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, IniFiles;
+  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, ExtCtrls, IniFiles,
+  uthemeselector;
 
 type
 
   { TfmViewView }
 
   TfmViewView = class(TForm)
-      bbClose: TSpeedButton;
+    bbClose: TSpeedButton;
     edName: TEdit;
-    Label1: TLabel;
-    Label2: TLabel;
+      GroupBox1: TGroupBox;
+      Label1: TLabel;
+      Label2: TLabel;
+    Panel1: TPanel;
+    Panel2: TPanel;
     seScript: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -67,6 +72,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmViewView.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmViewView.bbCloseClick(Sender: TObject);

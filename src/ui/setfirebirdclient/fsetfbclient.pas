@@ -11,7 +11,8 @@ uses
   {$IFDEF UNIX} Unix, {$ENDIF}
   {$IFDEF DARWIN} MacOSAll, {$ENDIF}
   StrUtils,
-  dynlibs, ibase60dyn;
+  dynlibs, ibase60dyn,
+  uthemeselector;
 
 
 type
@@ -30,7 +31,6 @@ type
     lstSuggestions: TListBox;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
-    Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
     Panel5: TPanel;
@@ -40,10 +40,12 @@ type
     procedure btnBrowserClick(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure btnTestClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure lstSuggestionsClick(Sender: TObject);
   private
-     function IsValidLibrary(const Path: string): Boolean;
+     function  IsValidLibrary(const Path: string): Boolean;
      procedure DoFirebirdClientSearch;
   public
      FBClientLibPath: string;
@@ -55,6 +57,7 @@ var
 
 implementation
 
+uses turbocommon;
 
 procedure TfrmSetFBClient.FormCreate(Sender: TObject);
 begin
@@ -62,27 +65,66 @@ begin
   btnOK.Enabled := False;
 end;
 
+procedure TfrmSetFBClient.FormShow(Sender: TObject);
+begin
+  //if Assigned(frmThemeSelector) then
+    //frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfrmSetFBClient.lstSuggestionsClick(Sender: TObject);
 begin
   if lstSuggestions.ItemIndex > -1 then
+  begin
     edtClientLib.Text := lstSuggestions.Items[lstSuggestions.ItemIndex];
+    btnTest.Enabled := true;
+  end;
 end;
 
 procedure TfrmSetFBClient.btnBrowserClick(Sender: TObject);
 begin
   OpenDialog1.Filter := 'Firebird Client Library|*.so*;*.dll';
   if OpenDialog1.Execute then
+  begin
     edtClientLib.Text := OpenDialog1.FileName;
+    FBClientLibPath   := OpenDialog1.FileName;
+    btnTest.Enabled := true;
+  end else
+  begin
+    btnTest.Enabled := false;
+  end;
+end;
+
+procedure TfrmSetFBClient.btnTestClick(Sender: TObject);
+begin
+  if  turbocommon.LoadClientLibIBX(edtClientLib.Text) then
+  begin
+    ShowMessage('Client library loaded successfully.');
+    btnOK.Enabled := True;
+    FBClientLibPath := edtClientLib.Text;
+  end else
+  begin
+    ShowMessage('Loading the library failed');
+    btnOK.Enabled := False;
+    FBClientLibPath := '';
+  end;
 end;
 
 procedure TfrmSetFBClient.btnOKClick(Sender: TObject);
 begin
   FBClientLibPath := edtClientLib.Text;
+  turbocommon.InitialFBClientLibPath := FBClientLibPath;
   ModalResult := mrOk;
 end;
 
 procedure TfrmSetFBClient.btnCancelClick(Sender: TObject);
 begin
+  MessageDlg(
+    'You have not selected a default Firebird client library.' + LineEnding +
+    'Please open the application menu → File → Server Registry' + LineEnding +
+    'and choose a valid client library for the corresponding server.',
+    mtWarning, [mbOK], 0
+  );
+
   ModalResult := mrCancel;
 end;
 
@@ -90,9 +132,10 @@ procedure TfrmSetFBClient.btnSearchClick(Sender: TObject);
 var
   WaitForm: TForm;
   InfoLabel: TLabel;
+  i: integer;
 begin
   // Dynamisches modales Infofenster erzeugen
-  WaitForm := TForm.Create(nil);
+  WaitForm := TForm.Create(Application);
   try
     WaitForm.BorderStyle := bsNone;
     WaitForm.Position := poScreenCenter;
@@ -101,7 +144,7 @@ begin
     WaitForm.Height := 100;
     WaitForm.Color := clWhite;
     WaitForm.Caption := '';
-    WaitForm.Enabled := False; // verhindert Interaktion
+    //WaitForm.Enabled := False; // verhindert Interaktion
 
     // Label für Textanzeige
     InfoLabel := TLabel.Create(WaitForm);
@@ -113,19 +156,24 @@ begin
     InfoLabel.Font.Size := 12;
 
     // Fenster anzeigen und sichtbar machen
-    frmSetFBClient.Enabled := false;
+    self.Visible := false;
+
+    WaitForm.FormStyle := fsSystemStayOnTop;
+    WaitForm.Enabled := true;
     WaitForm.Show;
     Application.ProcessMessages;
 
     // Jetzt Firebird-Clients suchen
     DoFirebirdClientSearch;
-
+    Application.ProcessMessages;
+    WaitForm.ModalResult := mrOK;
     // Fenster schließen
     WaitForm.Close;
-    frmSetFBClient.Enabled := true;
     Application.ProcessMessages;
   finally
     WaitForm.Free;
+    self.Visible := true;
+    Application.ProcessMessages;
   end;
 end;
 
@@ -210,21 +258,11 @@ begin
   end;
 end;
 
-procedure TfrmSetFBClient.btnTestClick(Sender: TObject);
+procedure TfrmSetFBClient.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
 begin
 
-  if IsValidLibrary(edtClientLib.Text) then
-  begin
-    ShowMessage('Client library loaded successfully.');
-    btnOK.Enabled := True;
-  end
-  else
-  begin
-    ShowMessage('Loading the library failed');
-    btnOK.Enabled := False;
-  end;
 end;
-
 
 {function TfrmSetFBClient.IsValidLibrary(const Path: string): Boolean;
 var

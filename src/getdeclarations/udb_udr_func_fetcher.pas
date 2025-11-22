@@ -5,29 +5,36 @@ unit udb_udr_func_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB,
-  udb_firebird_struct_helper;
+  Classes, SysUtils,
+  udb_firebird_struct_helper,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetUDRFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
-function GetUDRFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+
+function GetUDRFunctionHeader(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
+function GetUDRFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 
 implementation
 
-function GetUDRFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetUDRFunctionHeader(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   Args: TStringList;
   ArgName, SourceName, ArgStr, RetStr: string;
   FullName: string;
 begin
   Args := TStringList.Create;
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text :=
       'SELECT RDB$ARGUMENT_NAME, RDB$FIELD_SOURCE, RDB$ARGUMENT_POSITION ' +
       'FROM RDB$FUNCTION_ARGUMENTS ' +
       'WHERE UPPER(RDB$FUNCTION_NAME) = :FUNC ';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
 
     if APackageName <> '' then
       Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
@@ -36,9 +43,9 @@ begin
 
     Q.SQL.Text := Q.SQL.Text + 'ORDER BY RDB$ARGUMENT_POSITION NULLS FIRST';
 
-    Q.Params.ParamByName('FUNC').AsString := UpperCase(FunctionName);
+    Q.ParamByName('FUNC').AsString := UpperCase(FunctionName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
     Q.Open;
 
     RetStr := 'UNKNOWN';
@@ -82,11 +89,11 @@ begin
   end;
 end;
 
-function GetEntryPoint(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetEntryPoint(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
 begin
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text := 'SELECT RDB$ENTRYPOINT FROM RDB$FUNCTIONS WHERE UPPER(RDB$FUNCTION_NAME) = :FUNC ';
@@ -96,9 +103,12 @@ begin
     else
       Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
 
-    Q.Params.ParamByName('FUNC').AsString := UpperCase(FunctionName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    Q.ParamByName('FUNC').AsString := UpperCase(FunctionName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
 
     Q.Open;
     Result := Trim(Q.FieldByName('RDB$ENTRYPOINT').AsString);
@@ -107,7 +117,7 @@ begin
   end;
 end;
 
-function GetUDRFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetUDRFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
   FullName: string;
 begin

@@ -8,13 +8,18 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids,
   Variants,
   IBDatabase, IBCustomDataSet, IBQuery, IB, IBTable, IBSQL,
+  uthemeselector,
 
   IBArrayHelper;
 
 type
+
+  { TfrmArrayTest }
+
   TfrmArrayTest = class(TForm)
     StringGrid1: TStringGrid;
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     procedure LoadArrayData;
   public
@@ -43,6 +48,11 @@ begin
   StringGrid1.Cells[6,0] := 'AsString';
 
   LoadArrayData;
+end;
+
+procedure TfrmArrayTest.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmArrayTest.LoadArrayData;

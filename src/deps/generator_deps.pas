@@ -5,15 +5,18 @@ unit generator_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetGeneratorDeps(const AConn: TIBConnection; const AGeneratorName: string): string;
+function GetGeneratorDeps(const AConn: TIBDatabase; const AGeneratorName: string): string;
 
 implementation
 
-function GetGeneratorDeps(const AConn: TIBConnection; const AGeneratorName: string): string;
+function GetGeneratorDeps(const AConn: TIBDatabase; const AGeneratorName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   GenNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -25,7 +28,9 @@ begin
   if AGeneratorName = '' then Exit;
 
   GenNameUpper := UpperCase(Trim(AGeneratorName));
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);  
+  Q.AllowAutoActivateTransaction := true;
+
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

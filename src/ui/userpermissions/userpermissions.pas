@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   Grids, Buttons, StdCtrls, LCLType,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -21,6 +22,7 @@ type
     procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
     FNodeInfos: TPNodeInfos;
@@ -44,7 +46,8 @@ end;
 procedure TfmUserPermissions.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
-  FNodeInfos^.ViewForm := nil;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
 end;
 
@@ -61,6 +64,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmUserPermissions.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmUserPermissions.bbCloseClick(Sender: TObject);

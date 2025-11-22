@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons;
+  StdCtrls, Buttons,
+  uthemeselector;
 
 type
 
@@ -25,6 +26,7 @@ type
     rbAfter: TRadioButton;
     rbBefor: TRadioButton;
     procedure BitBtn1Click(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -44,6 +46,11 @@ begin
     MessageDlg('Incorrect configuration', mtError, [mbOk], 0)
   else
     ModalResult:= mrOK;
+end;
+
+procedure TfmCreateTrigger.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 initialization

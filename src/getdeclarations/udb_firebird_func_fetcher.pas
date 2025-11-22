@@ -5,41 +5,51 @@ unit udb_firebird_func_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB, udb_firebird_struct_helper;
+  Classes, SysUtils, IBConnection, udb_firebird_struct_helper,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetFirebirdFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
-function GetFirebirdFunctionBody(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
-function GetFirebirdFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionHeader(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionBody(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 
 implementation
 
-function GetFirebirdFunctionHeader(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionHeader(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   Args: TStringList;
   ArgName, SourceName, ArgStr, RetStr: string;
   PosIndex: Integer;
 begin
   Args := TStringList.Create;
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;
   try
-    Q.DataBase := Conn;
+    Q.Params.Clear;
+    Q.ParamCheck := True;
+    Q.Database := Conn;
 
     Q.SQL.Text :=
       'SELECT RDB$ARGUMENT_NAME, RDB$FIELD_SOURCE, RDB$ARGUMENT_POSITION ' +
       'FROM RDB$FUNCTION_ARGUMENTS ' +
-      'WHERE UPPER(RDB$FUNCTION_NAME) = :FUNC ';
+      'WHERE UPPER(RDB$FUNCTION_NAME) = :FUNCNAME ';
 
     if APackageName <> '' then
-      Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
+      Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKGNAME '
     else
       Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
 
     Q.SQL.Text := Q.SQL.Text + 'ORDER BY RDB$ARGUMENT_POSITION NULLS FIRST';
 
-    Q.Params.ParamByName('FUNC').AsString := UpperCase(FunctionName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    // Parameter setzen
+    Q.ParamByName('FUNCNAME').AsString := UpperCase(FunctionName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKGNAME').AsString := UpperCase(APackageName);
 
     Q.Open;
 
@@ -47,7 +57,7 @@ begin
 
     while not Q.EOF do
     begin
-      ArgName := Trim(Q.FieldByName('RDB$ARGUMENT_NAME').AsString);
+      ArgName   := Trim(Q.FieldByName('RDB$ARGUMENT_NAME').AsString);
       SourceName := Trim(Q.FieldByName('RDB$FIELD_SOURCE').AsString);
       PosIndex := Q.FieldByName('RDB$ARGUMENT_POSITION').AsInteger;
 
@@ -66,24 +76,20 @@ begin
       Q.Next;
     end;
 
-    // CREATE FUNCTION or CREATE FUNCTION <package>.<func>
     if APackageName = '' then
-      Result := Format('CREATE OR ALTER FUNCTION %s(%s)%sRETURNS %s',
+      Result := Format(
+        'CREATE OR ALTER FUNCTION %s(%s)%sRETURNS %s',
         [FunctionName,
          LineEnding + '  ' + StringReplace(Trim(Args.Text), LineEnding, ',' + LineEnding + '  ', [rfReplaceAll]),
          LineEnding,
          RetStr])
     else
-      {Result := Format('CREATE OR ALTER FUNCTION %s.%s(%s)%sRETURNS %s',
+      Result := Format(
+        'CREATE OR ALTER FUNCTION %s.%s(%s)%sRETURNS %s',
         [APackageName, FunctionName,
          LineEnding + '  ' + StringReplace(Trim(Args.Text), LineEnding, ',' + LineEnding + '  ', [rfReplaceAll]),
          LineEnding,
-         RetStr]);}  //Package.functionname
-      Result := Format('CREATE OR ALTER FUNCTION %s(%s)%sRETURNS %s',
-        [FunctionName,
-        LineEnding + '  ' + StringReplace(Trim(Args.Text), LineEnding, ',' + LineEnding + '  ', [rfReplaceAll]),
-        LineEnding,
-        RetStr]);
+         RetStr]);
 
   finally
     Args.Free;
@@ -91,34 +97,43 @@ begin
   end;
 end;
 
-function GetFirebirdFunctionBody(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionBody(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   BodyText: string;
 begin
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
-    Q.DataBase := Conn;
+    Q.Params.Clear;
+    Q.ParamCheck := True;
+    Q.Database := Conn;
 
     Q.SQL.Text :=
       'SELECT RDB$FUNCTION_SOURCE FROM RDB$FUNCTIONS ' +
-      'WHERE RDB$MODULE_NAME IS NULL AND RDB$ENGINE_NAME IS NULL AND UPPER(RDB$FUNCTION_NAME) = :FUNC ';
+      'WHERE RDB$MODULE_NAME IS NULL AND RDB$ENGINE_NAME IS NULL ' +
+      'AND UPPER(RDB$FUNCTION_NAME) = :FUNCNAME ';
 
     if APackageName <> '' then
-      Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKG '
+      Q.SQL.Text := Q.SQL.Text + 'AND UPPER(RDB$PACKAGE_NAME) = :PKGNAME '
     else
       Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
 
-    Q.Params.ParamByName('FUNC').AsString := UpperCase(FunctionName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    // Parameter setzen
+    Q.ParamByName('FUNCNAME').AsString := UpperCase(FunctionName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKGNAME').AsString := UpperCase(APackageName);
 
     Q.Open;
 
     BodyText := Trim(Q.FieldByName('RDB$FUNCTION_SOURCE').AsString);
 
     if BodyText = '' then
-      BodyText := 'BEGIN' + LineEnding + '  -- Original function has no body!' + LineEnding + 'END'
+      BodyText := 'BEGIN' + LineEnding +
+                  '  -- Original function has no body!' + LineEnding +
+                  'END'
     else
       BodyText := CleanupBodyText(BodyText);
 
@@ -128,7 +143,7 @@ begin
   end;
 end;
 
-function GetFirebirdFunctionDeclaration(Conn: TIBConnection; const FunctionName: string; APackageName: string): string;
+function GetFirebirdFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string; APackageName: string): string;
 var
   FullName: string;
 begin

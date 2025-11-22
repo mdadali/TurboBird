@@ -5,17 +5,20 @@ unit udb_udr_proc_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB,
-  udb_firebird_struct_helper;
+  Classes, SysUtils,
+  udb_firebird_struct_helper,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetUDRProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
-function GetUDRProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetUDRProcedureHeader(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
+function GetUDRProcedureDeclaration(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
 
 implementation
 
-function GetUDRProcedureHeader(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetUDRProcedureHeader(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   Args, RetArgs: TStringList;
   ArgName, SourceName, ParamLine: string;
   IsReturning: Boolean;
@@ -24,7 +27,7 @@ var
 begin
   Args := TStringList.Create;
   RetArgs := TStringList.Create;
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text :=
@@ -39,9 +42,12 @@ begin
 
     Q.SQL.Text := Q.SQL.Text + 'ORDER BY RDB$PARAMETER_TYPE, RDB$PARAMETER_NUMBER';
 
-    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    Q.ParamByName('PROC').AsString := UpperCase(ProcName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
 
     Q.Open;
 
@@ -98,11 +104,11 @@ begin
   end;
 end;
 
-function GetEntryPoint(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetEntryPoint(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
 begin
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text :=
@@ -114,9 +120,12 @@ begin
     else
       Q.SQL.Text := Q.SQL.Text + 'AND RDB$PACKAGE_NAME IS NULL ';
 
-    Q.Params.ParamByName('PROC').AsString := UpperCase(ProcName);
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
+    Q.ParamByName('PROC').AsString := UpperCase(ProcName);
     if APackageName <> '' then
-      Q.Params.ParamByName('PKG').AsString := UpperCase(APackageName);
+      Q.ParamByName('PKG').AsString := UpperCase(APackageName);
 
     Q.Open;
     Result := Trim(Q.FieldByName('RDB$ENTRYPOINT').AsString);
@@ -125,7 +134,7 @@ begin
   end;
 end;
 
-function GetUDRProcedureDeclaration(Conn: TIBConnection; const ProcName: string; APackageName: string): string;
+function GetUDRProcedureDeclaration(Conn: TIBDatabase; const ProcName: string; APackageName: string): string;
 var
   FullName: string;
 begin

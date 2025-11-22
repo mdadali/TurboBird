@@ -7,7 +7,17 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons, ComCtrls, ExtCtrls, SynEdit, SynHighlighterSQL, sqldb,
-  IniFiles, fbcommon, turbocommon;
+  IniFiles,
+
+  //ibase60dyn,
+  IB,
+  IBDatabase,
+  IBQuery,
+
+  fbcommon,
+  turbocommon,
+  fmetaquerys,
+  uthemeselector;
 
 type
 
@@ -37,6 +47,7 @@ type
     procedure cbSourceTableChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FSourceIndex: Integer;
@@ -71,13 +82,16 @@ procedure TfmCopyTable.cbSourceTableChange(Sender: TObject);
 var
   List: TStringList;
   Line: string;
+  Iso: TIsolatedQuery;
 begin
   List:= TStringList.Create;
   try
-    fmMain.GetFields(FSourceIndex, cbSourceTable.Text, List);
+    //fmMain.GetFields(FSourceIndex, cbSourceTable.Text, List);
+    Iso := GetFieldsIsolated(RegisteredDatabases[FSourceIndex].IBDatabase, cbSourceTable.Text, List);
     Line:= List.CommaText;
   finally
     List.Free;
+    Iso.Free;
   end;
   syScript.Lines.Text:= 'select ' + Line;
   syScript.Lines.Add(' from ' + cbSourceTable.Text);
@@ -103,6 +117,11 @@ begin
     configFile.Free;
 end;
 
+procedure TfmCopyTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfmCopyTable.bbCloseClick(Sender: TObject);
 begin
   TTabSheet(Parent).Free;
@@ -114,7 +133,7 @@ var
   i: Integer;
   Statement: string;
   Values: string;
-  SQLTarget: TSQLQuery;
+  SQLTarget: TIBQuery;
   Num: Integer;
 begin
   Statement:= 'insert into ' + cbDestTable.Text + ' (';
@@ -139,12 +158,13 @@ begin
   // Enter password if it is not saved
   with RegisteredDatabases[cbDestDatabase.ItemIndex] do
   begin
-    if IBConnection.Password = '' then
+    if RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.Password = '' then
+    //if IBConnection.Password = '' then
     begin
       if fmEnterPass.ShowModal = mrOk then
       begin
         if fmReg.TestConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
-          RegRec.Charset) then
+          RegRec.Charset, RegRec.FireBirdClientLibPath, RegRec.SQLDialect, RegRec.Port, Regrec.ServerName, RegRec.OverwriteLoadedClientLib) then
           with fmMain do
           begin
             RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
@@ -158,10 +178,10 @@ begin
       end
     end;
 
-    SQLTarget:= TSQLQuery.Create(nil);
+    SQLTarget:= TIBQuery.Create(nil);
     try
-      SQLTarget.DataBase:= IBConnection;
-      SQLTarget.Transaction:= SQLTrans;
+      SQLTarget.DataBase:= IBDatabase;
+      SQLTarget.Transaction:= IBTransaction;
       SQLTarget.SQL.Text:= Statement;
 
       // Start copy
@@ -177,7 +197,7 @@ begin
           Inc(Num);
           Next;
         end;
-        SQLTrans.Commit;
+        IBTransaction.Commit;
         ShowMessage(IntToStr(Num) + ' record(s) has been copied' + LineEnding + 'Don''t forget to set the Generator to the new value, ' +
           'if it exists');
         dmSysTables.sqQuery.Close;
@@ -186,7 +206,7 @@ begin
         on E: Exception do
         begin
           MessageDlg('Error while copy: ' + e.Message, mtError, [mbOk], 0);
-          SQLTrans.Rollback;
+          IBTransaction.Rollback;
         end;
       end;
     finally

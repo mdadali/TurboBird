@@ -8,7 +8,8 @@ uses
   Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Grids, Buttons, ExtCtrls, SynEdit, SynCompletion,
   SynHighlighterSQL, LCLType,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -34,6 +35,7 @@ type
     procedure edNewTableKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
     procedure StringGrid1KeyUp(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure StringGrid1MouseUp(Sender: TObject; Button: TMouseButton;
@@ -355,6 +357,11 @@ begin
       Parent.Free;
     end;
   end;
+end;
+
+procedure TfmNewTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 

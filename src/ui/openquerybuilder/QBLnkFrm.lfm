@@ -13,13 +13,14 @@ object OQBLinkForm: TOQBLinkForm
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
+  OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.0.6.0'
+  LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 2
-    Height = 14
+    Height = 16
     Top = 7
-    Width = 37
+    Width = 36
     Caption = 'Table 1'
     Font.Color = clWindowText
     Font.Height = -11
@@ -29,9 +30,9 @@ object OQBLinkForm: TOQBLinkForm
   end
   object Label2: TLabel
     Left = 2
-    Height = 14
+    Height = 16
     Top = 46
-    Width = 37
+    Width = 36
     Caption = 'Table 2'
     Font.Color = clWindowText
     Font.Height = -11
@@ -41,9 +42,9 @@ object OQBLinkForm: TOQBLinkForm
   end
   object Label3: TLabel
     Left = 3
-    Height = 14
+    Height = 16
     Top = 24
-    Width = 45
+    Width = 50
     Caption = 'Column 1'
     Font.Color = clWindowText
     Font.Height = -11
@@ -53,9 +54,9 @@ object OQBLinkForm: TOQBLinkForm
   end
   object Label4: TLabel
     Left = 2
-    Height = 14
+    Height = 16
     Top = 62
-    Width = 45
+    Width = 50
     Caption = 'Column 2'
     Font.Color = clWindowText
     Font.Height = -11
@@ -78,8 +79,8 @@ object OQBLinkForm: TOQBLinkForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 132
-    ClientWidth = 94
+    ClientHeight = 133
+    ClientWidth = 96
     ItemIndex = 0
     Items.Strings = (
       '='
@@ -106,8 +107,8 @@ object OQBLinkForm: TOQBLinkForm
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 132
-    ClientWidth = 100
+    ClientHeight = 133
+    ClientWidth = 102
     ItemIndex = 0
     Items.Strings = (
       'Inner'

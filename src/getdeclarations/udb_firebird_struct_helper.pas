@@ -5,14 +5,17 @@ unit udb_firebird_struct_helper;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB, DB;
+  Classes, SysUtils, IBConnection, DB,
+  IB,
+  IBDatabase,
+  IBQuery;
 
 function CleanupBodyText(const S: string): string;
-function CharsetIdToStr(CharsetId: Integer; Conn: TIBConnection): string;
-function FieldTypeToStr(FieldType, SubType, Precision, Scale, Length, CharsetId: Integer; Conn: TIBConnection): string;
-function FieldSourceToStr(SourceName: string; Conn: TIBConnection): string;
-function ResolveFieldTypeAsString(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBConnection): string;
-function ResolveFieldTypeAsPascalFieldType(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBConnection): TFieldType;
+function CharsetIdToStr(CharsetId: Integer; Conn: TIBDatabase): string;
+function FieldTypeToStr(FieldType, SubType, Precision, Scale, Length, CharsetId: Integer; Conn: TIBDatabase): string;
+function FieldSourceToStr(SourceName: string; Conn: TIBDatabase): string;
+function ResolveFieldTypeAsString(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBDatabase): string;
+function ResolveFieldTypeAsPascalFieldType(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBDatabase): TFieldType;
 function GetValidInputChars(const FirebirdType: string): TFieldChars;
 
 implementation
@@ -28,19 +31,19 @@ begin
   Result := Cleaned;
 end;
 
-function CharsetIdToStr(CharsetId: Integer; Conn: TIBConnection): string;
+function CharsetIdToStr(CharsetId: Integer; Conn: TIBDatabase): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
 begin
   Result := 'UNKNOWN';
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text :=
       'SELECT RDB$CHARACTER_SET_NAME ' +
       'FROM RDB$CHARACTER_SETS ' +
       'WHERE RDB$CHARACTER_SET_ID = :ID';
-    Q.Params.ParamByName('ID').AsInteger := CharsetId;
+    Q.ParamByName('ID').AsInteger := CharsetId;
     Q.Open;
     if not Q.EOF then
       Result := Trim(Q.FieldByName('RDB$CHARACTER_SET_NAME').AsString);
@@ -49,7 +52,7 @@ begin
   end;
 end;
 
-function FieldTypeToStr(FieldType, SubType, Precision, Scale, Length, CharsetId: Integer; Conn: TIBConnection): string;
+function FieldTypeToStr(FieldType, SubType, Precision, Scale, Length, CharsetId: Integer; Conn: TIBDatabase): string;
 var
   CharSetName: string;
 begin
@@ -82,12 +85,12 @@ begin
     Result := 'UNKNOWN';
   end;
 end;
-function FieldSourceToStr(SourceName: string; Conn: TIBConnection): string;
+function FieldSourceToStr(SourceName: string; Conn: TIBDatabase): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
 begin
   Result := 'UNKNOWN';
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
   try
     Q.DataBase := Conn;
     Q.SQL.Text :=
@@ -95,7 +98,7 @@ begin
       'RDB$FIELD_SCALE, RDB$CHARACTER_LENGTH, RDB$CHARACTER_SET_ID ' +
       'FROM RDB$FIELDS ' +
       'WHERE RDB$FIELD_NAME = :SRC';
-    Q.Params.ParamByName('SRC').AsString := SourceName;
+    Q.ParamByName('SRC').AsString := SourceName;
     Q.Open;
     if not Q.EOF then
     begin
@@ -114,7 +117,7 @@ begin
   end;
 end;
 
-function ResolveFieldTypeAsString(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBConnection): string;
+function ResolveFieldTypeAsString(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBDatabase): string;
 begin
   if Trim(SourceName) <> '' then
     Result := FieldSourceToStr(SourceName, Conn)
@@ -122,7 +125,7 @@ begin
     Result := FieldTypeToStr(FieldType, SubType, Precision, Scale, CharLen, CharsetId, Conn);
 end;
 
-function ResolveFieldTypeAsPascalFieldType(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBConnection): TFieldType;
+function ResolveFieldTypeAsPascalFieldType(SourceName: string; FieldType, SubType, Precision, Scale, CharLen, CharsetId: Integer; Conn: TIBDatabase): TFieldType;
 var
   FBTypeStr: string;
 begin

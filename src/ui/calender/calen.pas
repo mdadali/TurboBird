@@ -6,7 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Calendar, Buttons, ExtCtrls;
+  StdCtrls, Calendar, Buttons, ExtCtrls,
+  uthemeselector;
 
 type
 
@@ -24,6 +25,7 @@ type
     procedure BitBtn1Click(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -53,6 +55,11 @@ end;
 procedure TfmCalen.FormCreate(Sender: TObject);
 begin
 
+end;
+
+procedure TfmCalen.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCalen.bbOkClick(Sender: TObject);

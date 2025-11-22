@@ -5,32 +5,40 @@ unit udb_udf_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB,
-  fbcommon;
+  Classes, SysUtils,
+  fbcommon,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetUDFModuleNameAndEntryPoint(Conn: TIBConnection; const FunctionName: string): string;
-function GetUDFParams(Conn: TIBConnection; const FunctionName: string): string;
-function GetUDFInputParams(Conn: TIBConnection; const FunctionName: string): string;
-function GetUDFReturnParam(Conn: TIBConnection; const FunctionName: string): string;
-function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string): string;
 
-function GetUDFParamBeiPosition(Conn: TIBConnection; const FunctionName: string; APosition: word): string;
+function GetUDFModuleNameAndEntryPoint(Conn: TIBDatabase; const FunctionName: string): string;
+function GetUDFParams(Conn: TIBDatabase; const FunctionName: string): string;
+function GetUDFInputParams(Conn: TIBDatabase; const FunctionName: string): string;
+function GetUDFReturnParam(Conn: TIBDatabase; const FunctionName: string): string;
+function GetUDFFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string): string;
+
+function GetUDFParamBeiPosition(Conn: TIBDatabase; const FunctionName: string; APosition: word): string;
 
 implementation
 
-function GetUDFModuleNameAndEntryPoint(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFModuleNameAndEntryPoint(Conn: TIBDatabase; const FunctionName: string): string;
 var
-  SQLQuery: TSQLQuery;
+  SQLQuery: TIBQuery;
   ModuleName, EntryPoint: string;
 begin
   Result := '';
-  SQLQuery := TSQLQuery.Create(nil);
+  SQLQuery := TIBQuery.Create(nil);
   try
     SQLQuery.DataBase := Conn;
     SQLQuery.SQL.Text :=
       'SELECT RDB$MODULE_NAME, RDB$ENTRYPOINT ' +
       'FROM RDB$FUNCTIONS ' +
       'WHERE RDB$FUNCTION_NAME = :FNAME';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     SQLQuery.ParamByName('FNAME').AsString := UpperCase(FunctionName);
     SQLQuery.Open;
 
@@ -45,12 +53,12 @@ begin
   end;
 end;
 
-function GetUDFParams(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFParams(Conn: TIBDatabase; const FunctionName: string): string;
 var
-  SQLQuery: TSQLQuery;
+  SQLQuery: TIBQuery;
 begin
   Result := '';
-  SQLQuery := TSQLQuery.Create(nil);
+  SQLQuery := TIBQuery.Create(nil);
   try
     SQLQuery.DataBase := Conn;
     SQLQuery.SQL.Text :=
@@ -83,6 +91,8 @@ begin
       'WHERE RDB$FUNCTION_NAME = :FNAME ' +
       'ORDER BY RDB$ARGUMENT_POSITION';
 
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
     SQLQuery.ParamByName('FNAME').AsString := UpperCase(FunctionName);
     SQLQuery.Open;
 
@@ -98,7 +108,7 @@ begin
   end;
 end;
 
-function GetUDFInputParams(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFInputParams(Conn: TIBDatabase; const FunctionName: string): string;
 var
   Params: string;
   P: SizeInt;
@@ -114,7 +124,7 @@ begin
     Result := Trim(Copy(Params, P + 2, MaxInt)); // +2 weil ', ' zwei Zeichen sind
 end;
 
-function GetUDFReturnParam(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFReturnParam(Conn: TIBDatabase; const FunctionName: string): string;
 var
   Params: string;
   P: SizeInt;
@@ -132,7 +142,7 @@ begin
     Result := Trim(Params);  // nur ein Parameter vorhanden
 end;
 
-function GetUDFFunctionDeclaration(Conn: TIBConnection; const FunctionName: string): string;
+function GetUDFFunctionDeclaration(Conn: TIBDatabase; const FunctionName: string): string;
 var
   ModAndEntry, ModuleName, EntryPoint: string;
   InputParams, ReturnParam: string;
@@ -199,7 +209,7 @@ begin
             'MODULE_NAME ''' + ModuleName + ''';' + LineEnding;
 end;
 
-function GetUDFParamBeiPosition(Conn: TIBConnection; const FunctionName: string; APosition: word): string;
+function GetUDFParamBeiPosition(Conn: TIBDatabase; const FunctionName: string; APosition: word): string;
 var
   Params: string;
   StartPos, EndPos, CurrPos, CommaCount: SizeInt;

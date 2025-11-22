@@ -5,15 +5,18 @@ unit exception_deps;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetExceptionDeps(const AConn: TIBConnection; const AExceptionName: string): string;
+function GetExceptionDeps(const AConn: TIBDatabase; const AExceptionName: string): string;
 
 implementation
 
-function GetExceptionDeps(const AConn: TIBConnection; const AExceptionName: string): string;
+function GetExceptionDeps(const AConn: TIBDatabase; const AExceptionName: string): string;
 var
-  Q: TSQLQuery;
+  Q: TIBQuery;
   ExceptionNameUpper, ObjectName: string;
   ResultLines: TStringList;
   ObjectTypes: array of record
@@ -26,7 +29,9 @@ begin
 
   ExceptionNameUpper := UpperCase(Trim(AExceptionName));
 
-  Q := TSQLQuery.Create(nil);
+  Q := TIBQuery.Create(nil);
+  Q.AllowAutoActivateTransaction := true;  
+  
   ResultLines := TStringList.Create;
   try
     Q.DataBase := AConn;

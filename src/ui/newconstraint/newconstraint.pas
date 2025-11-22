@@ -6,7 +6,10 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, CheckLst, QueryWindow;
+  StdCtrls, Buttons, CheckLst, QueryWindow,
+  turbocommon,
+  fmetaquerys,
+  uthemeselector;
 
 type
 
@@ -32,6 +35,7 @@ type
     laTable: TLabel;
     procedure bbScriptClick(Sender: TObject);
     procedure cbTablesChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -50,19 +54,24 @@ uses main;
 { TfmNewConstraint }
 
 procedure TfmNewConstraint.cbTablesChange(Sender: TObject);
-var
-  FieldsList: TStringList;
+var FieldsList: TStringList;
+    Iso: TIsolatedQuery;
 begin
   // Get foreign table fields
   FieldsList:= TStringList.Create;
   try
-    fmMain.GetFields(DatabaseIndex, cbTables.Text, FieldsList);
+    Iso := GetFieldsIsolated(RegisteredDatabases[DatabaseIndex].IBDatabase, cbTables.Text, FieldsList);
     clxForFields.Clear;
     clxForFields.Items.AddStrings(FieldsList);
   finally
     FieldsList.Free;
+    Iso.Free;
   end;
-  fmMain.SQLQuery1.Close;
+end;
+
+procedure TfmNewConstraint.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmNewConstraint.bbScriptClick(Sender: TObject);

@@ -8,6 +8,7 @@ object frmBlobEdit: TfrmBlobEdit
   ClientWidth = 906
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object Panel13: TPanel
     Left = 0
@@ -100,14 +101,14 @@ object frmBlobEdit: TfrmBlobEdit
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 24
-    Top = 510
+    Height = 21
+    Top = 513
     Width = 906
     Panels = <>
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 428
+    Height = 431
     Top = 82
     Width = 906
     ActivePage = tsText
@@ -116,14 +117,14 @@ object frmBlobEdit: TfrmBlobEdit
     TabOrder = 3
     object tsText: TTabSheet
       Caption = 'Text'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -618,15 +619,15 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsBinHex: TTabSheet
       Caption = 'Bin/Hex'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       object ATBinHex1: TATBinHex
         Cursor = crIBeam
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         Align = alClient
         BorderStyle = bsSingle
         Color = clWindow
@@ -645,14 +646,14 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsHTML: TTabSheet
       Caption = 'HTML'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
@@ -667,14 +668,14 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsImage: TTabSheet
       Caption = 'Image'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       object Image1: TImage
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         Align = alClient
       end
     end
@@ -684,8 +685,8 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsGIF: TTabSheet
       Caption = 'GIF'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       OnResize = tsGIFResize
       TabVisible = False
       object GifAnim1: TGifAnim
@@ -699,14 +700,14 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsRTF: TTabSheet
       Caption = 'RTF'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       object RichView1: TRichView
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         TabStop = True
         TabOrder = 0
         Align = alClient
@@ -730,14 +731,14 @@ object frmBlobEdit: TfrmBlobEdit
     end
     object tsCAD: TTabSheet
       Caption = 'CAD'
-      ClientHeight = 394
-      ClientWidth = 902
+      ClientHeight = 400
+      ClientWidth = 896
       TabVisible = False
       object CADViewport2D1: TCADViewport2D
         Left = 0
-        Height = 394
+        Height = 400
         Top = 0
-        Width = 902
+        Width = 896
         Align = alClient
         ControlPointsColor = clBlack
         CADCmp2D = CADCmp2D1

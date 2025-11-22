@@ -10,12 +10,16 @@ uses
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
   dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
-  usqlqueryext, IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB, GridPrn,
+  usqlqueryext,  GridPrn,
   GridPrnPreviewDlg, QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
   LR_DSet,
 
+  IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB,
+  ibxscript,
+
   fdataexportersintrf,
-  fblobedit;
+  fblobedit,
+  uthemeselector;
 
 type
 
@@ -39,9 +43,9 @@ type
 
   TQueryThread = class(TThread)
     private
-      FSQLQuery: TSQLQueryExt;
-      FTrans: TSQLTransaction;
-      FConnection: TIBConnection;
+      FSQLQuery: TIBQuery;
+      FTrans: TIBTransaction;
+      FConnection: TIBDatabase;
 
     public
       Error: Boolean;
@@ -49,9 +53,9 @@ type
       fTerminated: Boolean;
       fType: TQueryActions;
       fStatement: string;
-      property Query: TSQLQueryExt read FSQLQuery write FSQLQuery;
-      property Trans: TSQLTransaction read FTrans write FTrans;
-      property Connection: TIBConnection read FConnection write FConnection;
+      property Query: TIBQuery read FSQLQuery write FSQLQuery;
+      property Trans: TIBTransaction read FTrans write FTrans;
+      property Connection: TIBDatabase read FConnection write FConnection;
       property Statement: String read fStatement write fStatement;
       procedure DoJob;
       procedure Execute; override;
@@ -64,14 +68,28 @@ type
   TfmQueryWindow = class(TForm)
     cxAutoCommit: TCheckBox;
     FindDialog1: TFindDialog;
-    bbClose: TSpeedButton;
     FontDialog1: TFontDialog;
+    FIBConnection: TIBDatabase;
+    FSQLTrans: TIBTransaction;
     lmExportDataSet: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmStdExportFormats: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
+    rgScreenModes: TRadioGroup;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
+    tbCommit: TToolButton;
+    tbCommitRetaining: TToolButton;
+    tbHistory: TToolButton;
+    tbMenu: TToolButton;
+    tbNew: TToolButton;
+    tbOpen: TToolButton;
+    tbQueryDesign: TToolButton;
+    tbRollback: TToolButton;
+    tbRollbackRetaining: TToolButton;
+    tbRun: TToolButton;
+    tbSave: TToolButton;
+    ToolBar1: TToolBar;
     toolbarImages: TImageList;
     imTools: TImageList;
     imTabs: TImageList;
@@ -99,7 +117,6 @@ type
     lmRunScript: TMenuItem;
     OpenDialog1: TOpenDialog;
     pgOutputPageCtl: TPageControl;
-    Panel1: TPanel;
     pnlOutputPanel: TPanel;
     pmTab: TPopupMenu;
     pmMemo: TPopupMenu;
@@ -109,25 +126,14 @@ type
     meQuery: TSynEdit;
     SynCompletion1: TSynCompletion;
     SynSQLSyn1: TSynSQLSyn;
-    ToolBar1: TToolBar;
-    tbNew: TToolButton;
-    tbOpen: TToolButton;
-    tbSave: TToolButton;
-    tbRun: TToolButton;
-    tbCommit: TToolButton;
-    tbRollback: TToolButton;
-    tbCommitRetaining: TToolButton;
-    tbRollbackRetaining: TToolButton;
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
-    tbHistory: TToolButton;
-    tbQueryDesign: TToolButton;
     ToolButton5: TToolButton;
-    tbMenu: TToolButton;
     procedure bbRunClick(Sender: TObject);
+    procedure cxAutoCommitMouseEnter(Sender: TObject);
+    procedure cxAutoCommitMouseLeave(Sender: TObject);
     procedure DBGrid1DblClick(Sender: TObject);
-    procedure DBGridTitleClick(column: TColumn);
     procedure FindDialog1Find(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -153,8 +159,13 @@ type
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
     procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure meQueryMouseEnter(Sender: TObject);
+    procedure Panel1MouseEnter(Sender: TObject);
+    procedure Panel1MouseLeave(Sender: TObject);
     procedure pmGridPopup(Sender: TObject);
     procedure pmMemoPopup(Sender: TObject);
+    procedure rgScreenModesClick(Sender: TObject);
+    procedure rgScreenModesMouseEnter(Sender: TObject);
 
     procedure SQLScript1Exception(Sender: TObject; Statement: TStrings;
       TheException: Exception; var Continue: boolean);
@@ -163,23 +174,35 @@ type
       KeyChar: TUTF8Char; Shift: TShiftState);
     procedure tbCloseClick(Sender: TObject);
     procedure tbCommitClick(Sender: TObject);
+    procedure tbCommitMouseEnter(Sender: TObject);
     procedure tbCommitRetainingClick(Sender: TObject);
+    procedure tbCommitRetainingMouseEnter(Sender: TObject);
     procedure tbHistoryClick(Sender: TObject);
+    procedure tbHistoryMouseEnter(Sender: TObject);
     procedure tbMenuClick(Sender: TObject);
+    procedure tbMenuMouseEnter(Sender: TObject);
     procedure tbNewClick(Sender: TObject);
+    procedure tbNewMouseEnter(Sender: TObject);
+    procedure tbNewMouseLeave(Sender: TObject);
     procedure tbOpenClick(Sender: TObject);
+    procedure tbOpenMouseEnter(Sender: TObject);
+    procedure tbQueryDesignMouseEnter(Sender: TObject);
     procedure tbRollbackClick(Sender: TObject);
+    procedure tbRollbackMouseEnter(Sender: TObject);
     procedure tbRollbackRetainingClick(Sender: TObject);
+    procedure tbRollbackRetainingMouseEnter(Sender: TObject);
     procedure tbRunClick(Sender: TObject);
+    procedure tbRunMouseEnter(Sender: TObject);
     procedure tbSaveClick(Sender: TObject);
     procedure tbQueryDesignClick(Sender: TObject);
+    procedure tbSaveMouseEnter(Sender: TObject);
+    procedure ToolBar1MouseEnter(Sender: TObject);
+    procedure ToolBar1MouseLeave(Sender: TObject);
   private
     { private declarations }
     FDBIndex: Integer; // Index of selected registered database
     FRegRec: TRegisteredDatabase;
     FOptions: set of TSynSearchOption;
-    FIBConnection: TIBConnection;
-    FSQLTrans: TSQLTransaction;
     FCanceled: Boolean;
     FStartLine: Integer;
     FQuery: TStringList; //query text
@@ -189,7 +212,7 @@ type
     FQueryPart: string;
     FTab: TTabSheet;
     FResultMemo: TMemo;
-    FSQLScript: TSQLScript;
+    FSQLScript: TIBXScript;
     // Text for caption
     FAText: string;
     FModifyCount: Integer;
@@ -201,8 +224,8 @@ type
     procedure EnableCommitButton;
     procedure ExecuteQuery;
     function GetNewTabNum: string;
-    // Gets TSQLQueryExt of current result tabsheet - only if it is a select query
-    function GetCurrentSelectQuery: TSQLQueryExt;
+    // Gets TIBQuery of current result tabsheet - only if it is a select query
+    function GetCurrentSelectQuery: TIBQuery;
     // Gets both querytype and whether SQL is DML or DDL
     // Investigates QueryList[LookAtIndex] to find out
     function GetQuerySQLType(QueryList: TStringList; var LookAtIndex: Integer;
@@ -229,7 +252,7 @@ type
     // Get query text from GUI/memo into
     // QueryContents
     function GetQuery(QueryContents: tstrings): boolean;
-    function CreateResultTab(QueryType: TQueryTypes; var aSqlQuery: TSQLQueryExt; var aSQLScript: TSQLScript;
+    function CreateResultTab(QueryType: TQueryTypes; var aSqlQuery: TIBQuery; var aSQLScript: TIBXScript;
       var meResult: TMemo; AdditionalTitle: string = ''): TTabSheet;
     // Runs SQL script; returns result
     function ExecuteScript(Script: string): Boolean;
@@ -370,12 +393,12 @@ procedure TfmQueryWindow.ApplyClick(Sender: TObject);
 var
   i, x: Integer;
   TableName: string;
-  UpdateQuery: TSQLQueryExt;
+  UpdateQuery: TIBQuery;
   PKIndexName: string;
   ConstraintName: string;
   KeyList, FieldsList: TStringList;
   WhereClause: string;
-  UserData: TSQLQueryExt;
+  UserData: TIBQuery;
   TabIndex: Integer;
   FieldsSQL: string;
 begin
@@ -515,17 +538,6 @@ begin
   (Sender as TBitBtn).Visible:= False;
 end;
 
-procedure TfmQueryWindow.RemovePreviousResultTabs;
-var
-  i: Integer;
-begin
-  for i:= OutputTabsList.Count - 1 downto 0 do
-  begin
-    OutputTabsList.Objects[i].Free;
-    OutputTabsList.Delete(i);
-  end;
-end;
-
 procedure TfmQueryWindow.GetLogEvent(Sender: TSQLConnection;
   EventType: TDBEventType; const Msg: String);
 // Used to log everything sent through the connection
@@ -547,7 +559,7 @@ end;
 
 { GetCurrentSelectQuery: return result recordset of a page tab }
 
-function TfmQueryWindow.GetCurrentSelectQuery: TSQLQueryExt;
+function TfmQueryWindow.GetCurrentSelectQuery: TIBQuery;
 var
   i: Integer;
   Ctl: TControl;
@@ -558,7 +570,7 @@ begin
   begin
     if (pgOutputPageCtl.ActivePage.Tag<>0) then
     begin
-      Result:= TSQLQueryExt(pgOutputPageCtl.ActivePage.Tag);
+      Result:= TIBQuery(pgOutputPageCtl.ActivePage.Tag);
     end;
   end;
 end;
@@ -615,7 +627,10 @@ begin
       FSQLQuery.ExecSQL
     else
     if fType = qaDDL then
-      FConnection.ExecuteDirect(fStatement)
+    begin
+      FSQLQuery.SQL.Text := Trim(AnsiString(fStatement));
+      FSQLQuery.ExecSQL;
+    end
     else
     if fType = qaCommit then
       FTrans.Commit
@@ -693,8 +708,6 @@ end;
 
 procedure TfmQueryWindow.tbCloseClick(Sender: TObject);
 begin
-  Close;
-  Parent.Free;
 end;
 
 
@@ -703,8 +716,8 @@ end;
 procedure TfmQueryWindow.tbCommitClick(Sender: TObject);
 var
   meResult: TMemo;
-  SqlQuery: TSQLQueryExt;
-  SqlScript: TSQLScript;
+  SqlQuery: TIBQuery;
+  SqlScript: TIBXScript;
   ATab: TTabSheet;
   QT: TQueryThread;
 begin
@@ -744,6 +757,11 @@ begin
 
 end;
 
+procedure TfmQueryWindow.tbCommitMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 
 { Commit retaining for current transaction }
 
@@ -776,12 +794,22 @@ begin
   end;
 end;
 
+procedure TfmQueryWindow.tbCommitRetainingMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 {HistoryClick: show SQL history form }
 procedure TfmQueryWindow.tbHistoryClick(Sender: TObject);
 var Node: TTreeNode;
 begin
   fmSQLHistory.Init(FRegRec.Title, Self, nil);
   fmSQLHistory.ShowModal;
+end;
+
+procedure TfmQueryWindow.tbHistoryMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
 end;
 
 {procedure TfmQueryWindow.tbHistoryClick(Sender: TObject);
@@ -844,6 +872,11 @@ begin
   pmTab.PopUp;
 end;
 
+procedure TfmQueryWindow.tbMenuMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 
 { display New SQL Window tab }
 
@@ -862,6 +895,16 @@ begin
   end;
 end;
 
+procedure TfmQueryWindow.tbNewMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.tbNewMouseLeave(Sender: TObject);
+begin
+
+end;
+
 { Read SQL query from text file }
 
 procedure TfmQueryWindow.tbOpenClick(Sender: TObject);
@@ -871,14 +914,24 @@ begin
     meQuery.Lines.LoadFromFile(OpenDialog1.FileName);
 end;
 
+procedure TfmQueryWindow.tbOpenMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.tbQueryDesignMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 
 { RollBack current transaction }
 
 procedure TfmQueryWindow.tbRollbackClick(Sender: TObject);
 var
   meResult: TMemo;
-  SqlQuery: TSQLQueryExt;
-  SqlScript: TSQLScript;
+  SqlQuery: TIBQuery;
+  SqlScript: TIBXScript;
   ATab: TTabSheet;
   QT: TQueryThread;
 begin
@@ -914,6 +967,11 @@ begin
   end;
 end;
 
+procedure TfmQueryWindow.tbRollbackMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 
 { Rollback retaning for current transaction }
 
@@ -936,11 +994,21 @@ begin
   end;
 end;
 
+procedure TfmQueryWindow.tbRollbackRetainingMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
 
 { Run current SQL, auto-detect type }
 procedure TfmQueryWindow.tbRunClick(Sender: TObject);
 begin
   CallExecuteQuery(qtUnknown);
+end;
+
+procedure TfmQueryWindow.tbRunMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
 end;
 
 
@@ -1020,11 +1088,13 @@ begin
   meuqb.OQBEngine.DatabaseName := FDbConnection.DatabaseName;
 
   try
-    FDbConnection.Connected := true;
+    if not FDbConnection.Connected then
+      FDbConnection.Connected := true;
   except
     raise;
   end;
-  FTransaction.StartTransaction;
+  if not FTransaction.InTransaction then
+    FTransaction.StartTransaction;
 
   if meuqb.Execute  then
   begin
@@ -1039,6 +1109,21 @@ begin
   if FDbConnection.Connected then
     FDbConnection.Connected := false;
   FDbConnection.Free;
+end;
+
+procedure TfmQueryWindow.tbSaveMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.ToolBar1MouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.ToolBar1MouseLeave(Sender: TObject);
+begin
+  Application.OnShowHint := @fmMain.AppShowHint;
 end;
 
 //SQLDb Query Designer
@@ -1115,19 +1200,42 @@ begin
     OutputTabsList:= TStringList.Create;
 
   // Set instances of FIBConnection and SQLTransaction for the current Query Window
-  SetTransactionIsolation(FSQLTrans.Params);
-  FSQLTrans.DataBase:= FIBConnection;
+
+  if (FIBConnection <> RegisteredDatabases[dbIndex].IBDatabase) then
+  begin
+  FIBConnection := RegisteredDatabases[dbIndex].IBDatabase;
+  FSQLTrans.DefaultDatabase := FIBConnection;
+  FIBConnection.DefaultTransaction := FSQLTrans;
+  //SetTransactionIsolation(FSQLTrans.Params);
 
   // Set connection parameters to FIBConnection
   with RegisteredDatabases[dbIndex] do
   begin
-    Self.FIBConnection.DatabaseName:= RegRec.DatabaseName;
-    Self.FIBConnection.UserName:= RegRec.UserName;
-    Self.FIBConnection.Password:= RegRec.Password;
-    Self.FIBConnection.CharSet:= RegRec.Charset;
-    Self.FIBConnection.Role:= RegRec.Role;
+    if not FIBConnection.Connected then
+    begin
+      Self.FIBConnection.DatabaseName:= FRegRec.DatabaseName;
+      with Self.FIBConnection.Params do
+      begin
+        Clear;
+        Add('user_name='     + RegRec.UserName);
+        Add('password='      + RegRec.Password);
+        Add('lc_ctype='      + RegRec.Charset);
+        Add('sql_role_name=' + RegRec.Role);
+
+      end;
+      Self.FIBConnection.LoginPrompt := (FRegRec.Password = '');
+      FIBConnection.Connected := true;
+    end;
   end;
 
+  end;
+  //if not FSQLTrans.DefaultDatabase.Connected then
+    //FSQLTrans.DefaultDatabase.Connected := true;
+  if not FIBConnection.Connected then
+    FIBConnection.Connected := true;
+
+  //if not FSQLTrans.InTransaction then
+    //FSQLTrans.StartTransaction;
   // Get current database tables to be highlighted in SQL query editor
   SynSQLSyn1.TableNames.CommaText:= fmMain.GetTableNames(dbIndex);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
@@ -1135,55 +1243,404 @@ begin
 end;
 
 (************* Is Selectable (Check statement type Select, Update, Alter, etc) *******************)
-
-function TfmQueryWindow.GetQueryType(AQuery: string): TQueryTypes;
+{function TfmQueryWindow.GetQueryType(AQuery: string): TQueryTypes;
 var
-  List: TStringList;
+  S, Line: string;
   i: Integer;
-  Line: string;
-  StartPos, EndPos: Integer;
-begin
-  List:= TStringList.Create;
-  try
-    List.Text:= AQuery;
+  List: TStringList;
+  Clean: string;
+  InBlock: Boolean;
 
-    Result:= qtExecute; // Default Execute
+  function StripComments(const SL: TStringList): string;
+  var
+    i: Integer;
+    L, Tmp: string;
+    P1, P2: Integer;
+    Block: Boolean;
+  begin
+    Block := False;
+    Result := '';
 
-    for i:= 0 to List.Count - 1 do
+    for i := 0 to SL.Count - 1 do
     begin
-      Line:= List[i];
-      // Remove comments
-      if Pos('--', Line) > 0 then
-        Line:= Copy(Line, 1, Pos('--', Line) - 1);
-      if (Pos('/*', Line) > 0) and (Pos('*/', Line) > 0) then
+      L := SL[i];
+
+      // --- Already in block comment?
+      if Block then
       begin
-        StartPos:= (Pos('/*', Line));
-        EndPos:= (Pos('*/', Line));
-        Delete(Line, StartPos, EndPos - StartPos + 1);
+        P2 := Pos('*/', L);
+        if P2 > 0 then
+        begin
+          Delete(L, 1, P2 + 1);
+          Block := False;
+        end
+        else
+          Continue; // skip until */
       end;
 
-      if (Pos('select', LowerCase(Trim(Line))) = 1) then
+      // --- Single-line comment --
+      P1 := Pos('--', L);
+      if P1 > 0 then
+        L := Copy(L, 1, P1 - 1);
+
+      // --- Start of block comment
+      P1 := Pos('/*', L);
+      while P1 > 0 do
       begin
-        Result:= qtSelectable; // Selectable
-        Break;
-      end
-      else
-      if Pos('set term', LowerCase(Trim(Line))) = 1 then
-      begin
-        Result:= qtScript;
-        Break;
+        P2 := Pos('*/', L);
+
+        if (P2 > 0) and (P2 > P1) then
+        begin
+          Delete(L, P1, P2 - P1 + 2);
+          P1 := Pos('/*', L);
+        end
+        else
+        begin
+          // Comment extends to next lines
+          Block := True;
+          L := Copy(L, 1, P1 - 1);
+          Break;
+        end;
       end;
 
-      if Trim(Line) <> '' then
-      begin
-        Result:= qtExecute; // Executable
-        Break;
-      end;
+      // Normalize whitespace
+      Tmp := Trim(L);
+      if Tmp <> '' then
+        Result := Result + Tmp + ' ';
     end;
+  end;
+
+  function FirstWord(const S: string): string;
+  var
+    i: Integer;
+  begin
+    Result := '';
+    for i := 1 to Length(S) do
+      if not (S[i] in [' ', #9, #13, #10, '(', ')']) then
+        Result := Result + S[i]
+      else if Result <> '' then
+        Exit;
+  end;
+
+begin
+  List := TStringList.Create;
+  try
+    List.Text := AQuery;
+
+    // Remove all comment content → gives a clean normalized SQL
+    Clean := LowerCase(StripComments(List));
+
+    Clean := Trim(Clean);
+
+    if Clean = '' then
+      Exit(qtExecute);
+
+    // --- Detect scripts (Firebird-specific)
+    if (Pos('set term', Clean) = 1) or
+       (Pos('execute block', Clean) = 1) or
+       (Pos('create trigger', Clean) = 1) or
+       (Pos('create package', Clean) = 1) or
+       (Pos('create procedure', Clean) = 1) or
+       (Pos('create function', Clean) = 1)
+    then
+      Exit(qtScript);
+
+    // Extract leading word
+    S := FirstWord(Clean);
+
+    if S = 'select' then
+      Exit(qtSelectable);
+
+    // Default for any other statement
+    Result := qtExecute;
   finally
     List.Free;
   end;
+end; }
+
+(************* Is Selectable (Check statement type Select, Update, Alter, etc) *******************)
+function TfmQueryWindow.GetQueryType(AQuery: string): TQueryTypes;
+var
+  Clean: string;
+  token: string;
+  lower: string;
+
+  function StripCommentsAndNormalize(const ASQL: string): string;
+  var
+    i, L: Integer;
+    InSingleQuote, InDoubleQuote, InBlockComment: Boolean;
+    B: TStringBuilder;
+    ch, nextch: Char;
+  begin
+    B := TStringBuilder.Create;
+    try
+      InSingleQuote := False;
+      InDoubleQuote := False;
+      InBlockComment := False;
+      L := Length(ASQL);
+      i := 1;
+      while i <= L do
+      begin
+        ch := ASQL[i];
+        nextch := #0;
+        if i < L then
+          nextch := ASQL[i+1];
+
+        // handle block comments /* ... */
+        if not InSingleQuote and not InDoubleQuote then
+        begin
+          if InBlockComment then
+          begin
+            if (ch = '*') and (nextch = '/') then
+            begin
+              InBlockComment := False;
+              Inc(i, 2);
+              Continue;
+            end
+            else
+            begin
+              Inc(i);
+              Continue;
+            end;
+          end
+          else if (ch = '/') and (nextch = '*') then
+          begin
+            InBlockComment := True;
+            Inc(i, 2);
+            Continue;
+          end;
+        end;
+
+        // handle single-line comment -- to end of line (only outside quotes and block comments)
+        if not InSingleQuote and not InDoubleQuote and not InBlockComment then
+        begin
+          if (ch = '-') and (nextch = '-') then
+          begin
+            // skip until newline or end
+            Inc(i, 2);
+            while (i <= L) and not (ASQL[i] in [#10, #13]) do
+              Inc(i);
+            Continue;
+          end;
+        end;
+
+        // handle quotes (strings) - keep them as-is
+        if not InBlockComment then
+        begin
+          if (ch = '''') and (not InDoubleQuote) then
+          begin
+            // toggle single quote, handle doubled quote as escape
+            if InSingleQuote and (i < L) and (ASQL[i+1] = '''') then
+            begin
+              // doubled quote inside single-quoted string -> copy both and advance
+              B.Append(ch);
+              B.Append(ASQL[i+1]);
+              Inc(i, 2);
+              Continue;
+            end
+            else
+            begin
+              InSingleQuote := not InSingleQuote;
+              B.Append(ch);
+              Inc(i);
+              Continue;
+            end;
+          end
+          else if (ch = '"') and (not InSingleQuote) then
+          begin
+            // double-quoted identifier or string - toggle
+            if InDoubleQuote and (i < L) and (ASQL[i+1] = '"') then
+            begin
+              // doubled double-quote inside double-quote -> escape
+              B.Append(ch);
+              B.Append(ASQL[i+1]);
+              Inc(i, 2);
+              Continue;
+            end
+            else
+            begin
+              InDoubleQuote := not InDoubleQuote;
+              B.Append(ch);
+              Inc(i);
+              Continue;
+            end;
+          end;
+        end;
+
+        // normal character (unless we are inside block comment)
+        if not InBlockComment then
+        begin
+          // normalize whitespace: convert control chars to single space
+          if (ch = #9) or (ch = #10) or (ch = #13) or (ch = ' ') then
+          begin
+            // only append a single space if last char is not space
+            if (B.Length = 0) or (B.Chars[B.Length - 1] <> ' ') then
+              B.Append(' ');
+          end
+          else
+            B.Append(ch);
+        end;
+
+        Inc(i);
+      end;
+
+      // final trim and lowercase for simpler checks (we keep original case for potential further use)
+      Result := Trim(B.ToString);
+    finally
+      B.Free;
+    end;
+  end;
+
+  function FirstToken(const S: string): string;
+  var
+    i: Integer;
+  begin
+    Result := '';
+    i := 1;
+    while (i <= Length(S)) and (CharInSet(S[i], [#9, #10, #13, ' ' , '(', ')'])) do
+      Inc(i);
+    while (i <= Length(S)) and not CharInSet(S[i], [#9, #10, #13, ' ', '(', ')']) do
+    begin
+      Inc(i);
+    end;
+    begin
+      Result := Result + S[i];
+      Inc(i);
+    end;
+    Result := LowerCase(Result);
+  end;
+
+  // Count semicolons at top level (not inside single quotes, not inside parentheses)
+  function HasMultipleTopLevelStatements(const S: string): Boolean;
+  var
+    i, L, parenDepth: Integer;
+    ch: Char;
+    InSingleQuote, InDoubleQuote: Boolean;
+    countSemi: Integer;
+  begin
+    InSingleQuote := False;
+    InDoubleQuote := False;
+    parenDepth := 0;
+    countSemi := 0;
+    L := Length(S);
+    i := 1;
+    while i <= L do
+    begin
+      ch := S[i];
+      // handle quotes ('' and "")
+      if (ch = '''') and not InDoubleQuote then
+      begin
+        // if doubled quote inside single, skip escaped
+        if InSingleQuote and (i < L) and (S[i+1] = '''') then
+        begin
+          Inc(i, 2);
+          Continue;
+        end;
+        InSingleQuote := not InSingleQuote;
+        Inc(i);
+        Continue;
+      end;
+      if (ch = '"') and not InSingleQuote then
+      begin
+        if InDoubleQuote and (i < L) and (S[i+1] = '"') then
+        begin
+          Inc(i, 2);
+          Continue;
+        end;
+        InDoubleQuote := not InDoubleQuote;
+        Inc(i);
+        Continue;
+      end;
+
+      if InSingleQuote or InDoubleQuote then
+      begin
+        Inc(i);
+        Continue;
+      end;
+
+      // adjust paren depth
+      if ch = '(' then
+        Inc(parenDepth)
+      else if ch = ')' then
+        Dec(parenDepth);
+
+      // semicolon at top level (parenDepth = 0)
+      if (ch = ';') and (parenDepth = 0) then
+        Inc(countSemi);
+
+      Inc(i);
+    end;
+
+    // If more than 1 semicolon or exactly 1 semicolon but extra content after it -> multiple statements
+    Result := (countSemi > 1) or (countSemi = 1) and (Pos(';', S) < Length(S));
+  end;
+
+
+begin
+  // Step 1: strip comments and normalize whitespace
+  Clean := StripCommentsAndNormalize(AQuery);
+  Clean := Trim(Clean);
+
+  if Clean = '' then
+  begin
+    Result := qtExecute; // empty -> nothing to run
+    Exit;
+  end;
+
+  // Step 2: Detect script-like statements (SET, EXECUTE BLOCK, DDL, transaction control)
+  token := FirstToken(Clean);
+  lower := LowerCase(Trim(Clean));
+
+  // IBXScript and Firebird ISQL script commands
+  if
+      // SET commands (all)
+      (lower.StartsWith('set ')) or
+
+      // Execute Block
+      (lower.StartsWith('execute block')) or
+
+      // Statement type tokens matching DDL and script control
+      (token = 'create') or
+      (token = 'alter')  or
+      (token = 'drop')   or
+      (token = 'grant')  or
+      (token = 'revoke') or
+
+      // Transaction control commands
+      (token = 'commit') or
+      (token = 'rollback') or
+
+      // Connection control commands
+      (token = 'connect') or
+      (token = 'disconnect') or
+      (token = 'create') and (Pos('database', lower) > 0) or
+      (token = 'drop')   and (Pos('database', lower) > 0)
+  then
+  begin
+    Result := qtScript;
+    Exit;
+  end;
+
+  // If multiple top-level statements -> treat as script
+  if HasMultipleTopLevelStatements(Clean) then
+  begin
+    Result := qtScript;
+    Exit;
+  end;
+
+  // Accept SELECT or WITH (CTE) as selectable
+  token := FirstToken(Clean);
+  if (token = 'select') or (token = 'with') then
+  begin
+    Result := qtSelectable;
+    Exit;
+  end;
+
+  // Also accept "(" followed by select - first token function already skips leading '('
+  // Default: executable (INSERT, UPDATE, DELETE, DDL, etc.)
+  Result := qtExecute;
 end;
+
 
 
 { GetQuery: get query text from editor }
@@ -1208,7 +1665,7 @@ end;
 { Create new result tab depending on query type }
 
 function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
-  var aSqlQuery: TSQLQueryExt; var aSQLScript: TSQLScript; var meResult: TMemo;
+  var aSqlQuery: TIBQuery; var aSQLScript: TIBXScript; var meResult: TMemo;
   AdditionalTitle: string): TTabSheet;
 var
   ATab: TTabSheet;
@@ -1229,11 +1686,11 @@ begin
   begin
     // Query
     // Clean up any existing object to avoid memory leak
-    if assigned(aSQLQuery) then
-      aSQLQuery.Free;
-    aSqlQuery:= TSQLQueryExt.Create(self);
-    aSqlQuery.DataBase:= FIBConnection;
-    aSqlQuery.Transaction:= FSQLTrans;
+    //if assigned(aSQLQuery) then
+      //aSQLQuery.Free;
+    //aSqlQuery:= TIBQuery.Create(self);
+    //aSqlQuery.DataBase:= FIBConnection;
+    //aSqlQuery.Transaction:= FSQLTrans;
     aSqlQuery.AfterPost:= @QueryAfterPost; //detect user-edited grid
     aSqlQuery.AfterScroll:= @QueryAfterScroll;
     aSqlQuery.Tag:= ATab.TabIndex; //Query points to tabsheet number
@@ -1271,8 +1728,6 @@ begin
     DBGrid.TitleStyle:= tsNative;
     DBGrid.Options:= DBGrid.Options + [dgAutoSizeColumns, dgHeaderHotTracking, dgHeaderPushedLook, dgAnyButtonCanSelect];
 
-    DBGrid.OnTitleClick:= @DBGridTitleClick;
-
     // Navigator
     Nav:= TDBNavigator.Create(self);
     Nav.Parent:= Pan;
@@ -1295,28 +1750,31 @@ begin
     case QueryType of
       qtExecute:
       begin
-        aSqlQuery:= TSQLQueryExt.Create(self);
+        aSqlQuery:= TIBQuery.Create(self);
         aSqlQuery.DataBase:= FIBConnection;
         aSqlQuery.Transaction:= FSQLTrans;
+        aSqlQuery.AllowAutoActivateTransaction := true;
       end;
       qtScript: // Script
       begin
         // Clean up to avoid memory leak
         if assigned(aSQLScript) then
           aSQLScript.Free;
-        aSQLScript:= TSQLScript.Create(self);
+        aSQLScript:= TIBXScript.Create(self);
         aSQLScript.DataBase:= FIBConnection;
         aSQLScript.Transaction:= FSQLTrans;
-        aSQLScript.CommentsInSQL:= true;
-        aSQLScript.UseSetTerm:= true; //needed if set term is used, e.g. for stored procedures
+        //aSQLScript.CommentsInSQL:= true;
+        //aSQLScript.UseSetTerm:= true; //needed if set term is used, e.g. for stored procedures
       end;
     end;
   end;
+  if Assigned(ATab) then
+    frmThemeSelector.btnApplyClick(ATab);
 end;
 
 
 (***************  Execute Query   ******************)
-{$IFDEF DEBUG}
+{$IFDEF ___DEBUG}
 procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
 var
   StartTime: TDateTime;
@@ -1326,8 +1784,16 @@ var
   IsDDL: Boolean;
   Affected: Integer;
   fQueryType: TQueryTypes;
-  FSQLQuery: TSQLQueryExt;
+  FSQLQuery: TIBQuery;
+  FSQLTrans_Local: TIBTransaction;
+  dbIndex: word;
 begin
+  if not FIBConnection.Connected then
+    FIBConnection.Connected := true;
+
+  //if not  FSQLTrans.InTransaction then
+    //FSQLTrans.StartTransaction;
+
   try
     if (FOrigQueryType = qtScript) then
     begin
@@ -1355,11 +1821,18 @@ begin
         begin
           FTab := nil;
           try
-            FSQLQuery := TSQLQueryExt.Create(Self);
+            FSQLQuery := TIBQuery.Create(Self);
+            FSQLTrans_Local := TIBTransaction.Create(nil);
+            FSQLTrans_Local.DefaultDatabase := FIBConnection;
+            FSQLTrans_Local.StartTransaction;
+
             FSQLQuery.DataBase := FIBConnection;
-            FSQLQuery.Transaction := FSQLTrans;
+            FSQLQuery.Transaction := FSQLTrans_Local;
+
+
             if cxAutoCommit.Checked then
-              FSQLTrans.Commit;
+              if FSQLTrans.InTransaction then
+                FSQLTrans.CommitRetaining;
             FTab := CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
             FTab.ImageIndex := 6;
             FTab.Hint := FQueryPart;
@@ -1367,6 +1840,9 @@ begin
             FSQLQuery.SQL.Text := FQueryPart;
 
             // Open dataset synchronously
+            if not FSQLTrans_Local.InTransaction then
+              FSQLTrans_Local.StartTransaction;
+            FSQLQuery.Transaction := FSQLTrans_Local;
             FSQLQuery.Open;
 
             FTab.Caption := 'Query Result';
@@ -1507,6 +1983,7 @@ begin
 end;
 
 {$ELSE}
+
 procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
 var
   StartTime: TDateTime;
@@ -1516,11 +1993,22 @@ var
   IsDDL: Boolean;
   Affected: Integer;
   fQueryType: TQueryTypes;
-  TempQuery: TSQLQueryExt;
+  TempQuery: TIBQuery;
   SanitizedSQL: string;
   i: integer;
-  FSQLQuery: TSQLQueryExt;
+  FSQLQuery: TIBQuery;
 begin
+  if not FIBConnection.Connected then
+    FIBConnection.Connected := true;
+
+  if not  FSQLTrans.InTransaction then
+    FSQLTrans.StartTransaction;
+
+  FSQLQuery := TIBQuery.Create(self);
+  FSQLQuery.DataBase:= FIBConnection;
+  FSQLQuery.Transaction:= FSQLTrans;
+  FSQLQuery.AllowAutoActivateTransaction := true;
+
   try
     // Script
     if (FOrigQueryType = qtScript) then
@@ -1551,23 +2039,19 @@ begin
       begin
         FTab:= nil;
         try
-          FSQLQuery := TSQLQueryExt.Create(self);
-          FSQLQuery.DataBase:= FIBConnection;
-
-          FSQLQuery.Transaction:= FSQLTrans;
           if cxAutoCommit.Checked then
-            FSQLTrans.Commit;
+          begin
+            if FSQLTrans.InTransaction then
+              FSQLTrans.CommitRetaining;
+            if not FSQLTrans.InTransaction then
+              FSQLTrans.StartTransaction;
+          end;
+
           FTab:= CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
           FTab.ImageIndex:= 6;
           FTab.Hint:= FQueryPart;
           FTab.ShowHint:= True;
           FSQLQuery.SQL.Text:= Trim(FQueryPart);
-
-          // Work around sqldb not detecting insert/updatesql for FIRST x queries
-          // Massage the SQL, assign it to a temp query and use the insertquery
-          // etc generated by sqldb.
-          // Support for ROWS x TO y at the end of the statement could be
-          // added perhaps
 
           if (pos('select first ',lowercase(FQueryPart))=1) then
           begin
@@ -1575,32 +2059,21 @@ begin
             // the third word
             SanitizedSQL:= ExtractWordPos(3, FQueryPart, StdWordDelims, i);
             if i > 0 then
-            begin
               SanitizedSQL:= 'select ' + trim(copy(FQueryPart, i+length(SanitizedSQL), maxint));
-              TempQuery:= TSQLQueryExt.Create(nil);
-              try
-                TempQuery.ParseSQL:= true;
-                FSQLQuery.InsertSQL:= TempQuery.InsertSQL;
-                FSQLQuery.UpdateSQL:= TempQuery.UpdateSQL;
-                FSQLQuery.DeleteSQL:= TempQuery.DeleteSQL;
-              finally
-                TempQuery.Free;
-              end;
-            end;
           end;
 
           // Create thread to open dataset
           FQT:= TQueryThread.Create(qaOpen);
           FQT.Query:= FSQLQuery;
           FQT.Trans:= FSQLTrans;
-          // FQT.OnTerminate:= @ThreadTerminated;
+          //FQT.OnTerminate:= @ThreadTerminated;
           FAText:= FTab.Caption;
           FTab.Caption:= 'Running..';
           FQT.Resume;
 
           // Wait for the thread to complete
           repeat
-            //Sleep(100);
+            Sleep(100);
             application.ProcessMessages; // This prevents display freeze
           until FQT.fTerminated;
 
@@ -1643,6 +2116,7 @@ begin
             begin
               // Execute the statement in thread
               FQT:= TQueryThread.Create(qaDDL);
+              FQT.Query:= FSQLQuery;
               FQT.Connection:= FIBConnection;
               FQT.Trans:= FSQLTrans;
               FQT.Statement:= FQueryPart;
@@ -1765,7 +2239,8 @@ begin
           if (MessageDlg('Commit', 'There are too many transactions, do you want to commit',
             mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
           begin
-            FSQLTrans.CommitRetaining;
+            //FSQLTrans.CommitRetaining;
+            FSQLTrans.Commit;
             FModifyCount:= 0;
           end
           else
@@ -1776,6 +2251,7 @@ begin
       if FStartLine >= FQuery.Count then
         FFinished:= True;
     end;
+
   except
     on E: Exception do
     begin
@@ -1790,6 +2266,7 @@ begin
       FResultMemo.Lines.Add(FQueryPart);
       FResultMemo.Font.Color:= clRed;
       FFinished:= True;
+      FSQLTrans.Rollback;
     end;
   end;
 end;
@@ -1799,24 +2276,26 @@ end;
 function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
 var
   StartTime: TDateTime;
-  SqlQuery: TSQLQueryExt;
-  SqlScript: TSQLScript;
+  SqlQuery: TIBQuery;
+  SqlScript: TIBXScript;
   meResult: TMemo;
   ATab: TTabSheet;
 begin
   StartTime:= Now;
   ATab:= nil;
-  SQLScript:= nil;
+  //SQLScript:= nil;
+
   try
     // CreateResultTab creates the SQLScript object for us.
     ATab:= CreateResultTab(qtScript, SqlQuery, SQLScript, meResult);
     try
       ATab.ImageIndex:= 2;
-      SQLScript.Script.Text:= Script;
+      //SQLScript.Script.Text:= Script;
       {$IFDEF DEBUG}
-      SendDebug('going to run script: '+SQLScript.Script.Text);
+      SendDebug('going to run script: ' + Script);
       {$Endif}
-      SQLScript.ExecuteScript;
+      Script := Trim(Script);
+      SQLScript.ExecSQLScript(Script);
 
       // Auto commit
       if cxAutoCommit.Checked then
@@ -1850,8 +2329,6 @@ begin
     end;
   end;
 end;
-
-
 
 { Display new Save/Apply button for current query result been edited }
 
@@ -1969,12 +2446,21 @@ begin
 end;
 
 
-
 { Run query, 0 for auto-detect query type }
 
 procedure TfmQueryWindow.bbRunClick(Sender: TObject);
 begin
   CallExecuteQuery(qtUnknown);
+end;
+
+procedure TfmQueryWindow.cxAutoCommitMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.cxAutoCommitMouseLeave(Sender: TObject);
+begin
+  Application.OnShowHint := @fmMain.AppShowHint;
 end;
 
 
@@ -1984,25 +2470,6 @@ procedure TfmQueryWindow.DBGrid1DblClick(Sender: TObject);
 begin
   ShowMessage('Field contents: ' + LineEnding +
     (Sender as TDBGrid).SelectedField.AsString)
-end;
-
-
-{ Sort by columns }
-
-procedure TfmQueryWindow.DBGridTitleClick(column: TColumn);
-var
-  SqlQuery: TSQLQueryExt;
-//    indexoption : TIndexOptions;
-begin
-  SQLQuery:= nil;
-  SqlQuery:= GetCurrentSelectQuery;
-  if (assigned(SqlQuery)) and
-    (SqlQuery.IndexFieldNames = Column.Field.FieldName) then
-    SqlQuery.IndexFieldNames := Column.Field.FieldName //+ 'DESC'
-    //   indexoption :=[ixDescending];
-    //   SqlQuery.AddIndex('',Column.Field.FieldName,indexoption,'');
-  else
-    SqlQuery.IndexFieldNames := Column.Field.FieldName
 end;
 
 
@@ -2030,7 +2497,7 @@ end;
 
 { QueryWindow onClose event, commit active transaction, remove controls }
 
-procedure TfmQueryWindow.FormClose(Sender: TObject;
+{procedure TfmQueryWindow.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
   if Assigned(FNodeInfos) then
@@ -2040,18 +2507,74 @@ begin
   // Check if the transaction is active; then commit it
   if FSQLTrans.Active then
   begin
-    FSQLTrans.Commit;
+    FSQLTrans.CommitRetaining;
     if OnCommit <> nil then
       OnCommit(self);
     OnCommit:= nil;
   end;
-  FIBConnection.Close;
+  //FIBConnection.Close;   //IBX!!!!
   //   OutputTabsList.Free;  causes exception, still used in RemovePreviousResultTabs
   RemovePreviousResultTabs;
   OutputTabsList.Free;
   CloseAction:= caFree;
+end;}
+
+procedure TfmQueryWindow.RemovePreviousResultTabs;
+var
+  i: Integer;
+begin
+  for i:= OutputTabsList.Count - 1 downto 0 do
+  begin
+    OutputTabsList.Objects[i].Free;
+    OutputTabsList.Delete(i);
+  end;
 end;
 
+procedure TfmQueryWindow.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  i: Integer;
+begin
+  if Assigned(FNodeInfos) then
+    if Assigned(FNodeInfos^.ViewForm) then
+      FNodeInfos^.ViewForm := nil;
+
+  // Alle TIBQuery-Komponenten freigeben
+  for i := ComponentCount - 1 downto 0 do
+  begin
+    if Components[i] is TIBQuery then
+    begin
+      if TIBQuery(Components[i]).Active then
+        TIBQuery(Components[i]).Close;
+      Components[i].Free;
+    end;
+  end;
+
+  // Aktive globale Transaktion sauber beenden
+  {if FSQLTrans.InTransaction then
+  begin
+    FSQLTrans.Commit;
+    if OnCommit <> nil then
+      OnCommit(Self);
+    OnCommit := nil;
+  end;}
+
+  //locale transactionen freigeben
+  for i := ComponentCount - 1 downto 0 do
+  begin
+    if Components[i] is TIBTransaction then
+    begin
+      if TIBTransaction(Components[i]).InTransaction then
+        TIBTransaction(Components[i]).Commit;
+      Components[i].Free;
+    end;
+  end;
+
+  // Tabs schließen
+  RemovePreviousResultTabs;
+  OutputTabsList.Free;
+
+  CloseAction := caFree;
+end;
 
 { Initialize auto-completion text in QueryWindow OnCreate event }
 
@@ -2060,6 +2583,12 @@ var
    configFile: TIniFile;
    configFilePath: String;
 begin
+  rgScreenModes.Hint :=
+    'Screen Modes' + LineEnding +
+    'NFS = Normal Screen' + LineEnding +
+    'CFS = Code Window FullScreen' + LineEnding +
+    'RFS = Result Window FullScreen';
+
   OutputTabsList:= nil;
   {$IFNDEF DEBUG}
   // Do not log to debug server if built as release instead of debug
@@ -2067,12 +2596,9 @@ begin
   {$ENDIF}
   FQuery:= TStringList.Create;
   // Initialize new instance of FIBConnection and SQLTransaction
-  FIBConnection:= TIBConnection.Create(nil);
-  {$IFDEF DEBUG}
-  FIBConnection.OnLog:=@GetLogEvent;
-  FIBConnection.LogEvents:=[detCustom,detExecute,detCommit,detRollBack];
-  {$ENDIF DEBUG}
-  FSQLTrans:= TSQLTransaction.Create(nil);
+  //FIBConnection:= TIBDatabase.Create(nil);
+  //FSQLTrans:= TIBTransaction.Create(nil);
+  //FIBConnection.DefaultTransaction := FSQLTrans;
   SynCompletion1.ItemList.CommaText:= 'create,table,Select,From,INTEGER,FLOAT';
   SortSynCompletion;
 
@@ -2087,8 +2613,6 @@ end;
 procedure TfmQueryWindow.FormDestroy(Sender: TObject);
 begin
   // Clean up resources to avoid memory leaks
-  FSQLTrans.Free;
-  FIBConnection.Free;
   FQuery.Free;
 end;
 
@@ -2114,9 +2638,9 @@ end;
 
 procedure TfmQueryWindow.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
   meQuery.SetFocus;
 end;
-
 
 { Close current Query window }
 
@@ -2283,7 +2807,7 @@ begin
 end;
 
 procedure TfmQueryWindow.lmStdExportFormatsClick(Sender: TObject);
-var SqlQuery: TSQLQuery;
+var SqlQuery: TIBQuery;
 begin
   SqlQuery:= GetCurrentSelectQuery;
 
@@ -2318,7 +2842,7 @@ begin
 end;
 
 procedure TfmQueryWindow.lmExportDataAsHtmlClick(Sender: TObject);
-var SqlQuery: TSQLQuery;
+var SqlQuery: TIBQuery;
 begin
   SqlQuery:= GetCurrentSelectQuery;
 
@@ -2337,7 +2861,7 @@ begin
 end;
 
 procedure TfmQueryWindow.lmExportDataAsMarkDownTableClick(Sender: TObject);
-var SqlQuery: TSQLQuery;
+var SqlQuery: TIBQuery;
 begin
   SqlQuery:= GetCurrentSelectQuery;
 
@@ -2447,9 +2971,56 @@ begin
   end;
 end;
 
+procedure TfmQueryWindow.meQueryMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := @fmMain.AppShowHint;
+end;
+
+procedure TfmQueryWindow.Panel1MouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
+end;
+
+procedure TfmQueryWindow.Panel1MouseLeave(Sender: TObject);
+begin
+  Application.OnShowHint := @fmMain.AppShowHint;
+end;
+
 procedure TfmQueryWindow.pmMemoPopup(Sender: TObject);
 begin
 
+end;
+
+procedure TfmQueryWindow.rgScreenModesClick(Sender: TObject);
+begin
+  case rgScreenModes.ItemIndex of
+  0:begin
+      //fmMain.tvMain.Visible  := true;
+      //fmMain.ToolBar1.Visible := true;
+      meQuery.Align := alTop;
+      meQuery.Visible := true;
+      pnlOutputPanel.Visible := true;
+    end;
+  1:begin
+      //fmMain.tvMain.Visible  := true;
+      //fmMain.ToolBar1.Visible := false;
+      pnlOutputPanel.Visible := false;
+      meQuery.Align := alClient;
+      meQuery.Visible := true;
+    end;
+  2:begin
+      //fmMain.tvMain.Visible  := true;
+      //fmMain.ToolBar1.Visible := false;
+      meQuery.Visible := false;
+      meQuery.Align := alTop;
+      pnlOutputPanel.Visible := true;
+    end;
+  end;
+end;
+
+procedure TfmQueryWindow.rgScreenModesMouseEnter(Sender: TObject);
+begin
+  Application.OnShowHint := nil;
 end;
 
 
@@ -2465,8 +3036,8 @@ begin
 
   // Get DataSet's TTabsheet
   // The query object's tag should be the tab index number
-  if (Dataset is TSQLQueryExt) then
-    TabSheet:= pgOutputPageCtl.Pages[TSQLQueryExt(DataSet).Tag];
+  if (Dataset is TIBQuery) then
+    TabSheet:= pgOutputPageCtl.Pages[TIBQuery(DataSet).Tag];
 
   if assigned(TabSheet) then
   begin
@@ -2496,6 +3067,7 @@ begin
     ShowMessage('Could not get valid query');
     exit;
   end;
+
   FStartLine:= 0;
   RemovePreviousResultTabs;
 
@@ -2517,6 +3089,7 @@ begin
   // Call execute query for each part until finished
   FCounter:= 0;
   FFinished:= False;
+
   repeat
     ExecuteQuery;
   until FFinished;
@@ -2549,7 +3122,7 @@ end;
 
 procedure TfmQueryWindow.ThreadTerminated(Sender: TObject);
 var
-  aSQLQuery: TSQLQueryExt;
+  aSQLQuery: TIBQuery;
 begin
   // Raise exception if an error occured during thread execution (Open)
   if FQT.Error then

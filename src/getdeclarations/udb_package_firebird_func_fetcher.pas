@@ -5,20 +5,26 @@ unit udb_package_firebird_func_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, SQLDB;
+  Classes, SysUtils,
+  IB,
+  IBDatabase,
+  IBQuery;
 
-function GetPackageFirebirdFunctionHeader(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
-function GetPackageFirebirdFunctionBody(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
-function GetPackageFirebirdFunctionDeclaration(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
+
+function GetPackageFirebirdFunctionHeader(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
+function GetPackageFirebirdFunctionBody(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
+function GetPackageFirebirdFunctionDeclaration(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
 
 implementation
 
-function IsNativeFirebirdFunction(Conn: TIBConnection; const FuncName, PackageName: string): Boolean;
+function IsNativeFirebirdFunction(Conn: TIBDatabase; const FuncName, PackageName: string): Boolean;
 var
-  qry: TSQLQuery;
+  qry: TIBQuery;
 begin
   Result := False;
-  qry := TSQLQuery.Create(nil);
+  qry := TIBQuery.Create(nil);
+  qry.AllowAutoActivateTransaction := true;
+
   try
     qry.DataBase := Conn;
     qry.SQL.Text :=
@@ -36,9 +42,9 @@ begin
   end;
 end;
 
-function GetPackageFirebirdFunctionHeader(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
+function GetPackageFirebirdFunctionHeader(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
 var
-  qry: TSQLQuery;
+  qry: TIBQuery;
   src, uFuncName, uLine: string;
   lines: TStringList;
   i: Integer;
@@ -50,13 +56,19 @@ begin
     Exit;
   end;
 
-  qry := TSQLQuery.Create(nil);
+  qry := TIBQuery.Create(nil);
+  qry.AllowAutoActivateTransaction := true;
+
   lines := TStringList.Create;
   try
     qry.DataBase := Conn;
     qry.SQL.Text :=
       'SELECT RDB$PACKAGE_HEADER_SOURCE FROM RDB$PACKAGES ' +
       'WHERE RDB$PACKAGE_NAME = :PN';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     qry.ParamByName('PN').AsString := UpperCase(APackageName);
     qry.Open;
     if not qry.EOF and not qry.Fields[0].IsNull then
@@ -98,9 +110,9 @@ begin
   end;
 end;
 
-function GetPackageFirebirdFunctionBody(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
+function GetPackageFirebirdFunctionBody(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
 var
-  qry: TSQLQuery;
+  qry: TIBQuery;
   src, uFuncName, line, block: string;
   lines: TStringList;
   i, beginCount, endCount: Integer;
@@ -113,13 +125,17 @@ begin
     Exit;
   end;
 
-  qry := TSQLQuery.Create(nil);
+  qry := TIBQuery.Create(nil);
   lines := TStringList.Create;
   try
     qry.DataBase := Conn;
     qry.SQL.Text :=
       'SELECT RDB$PACKAGE_BODY_SOURCE FROM RDB$PACKAGES ' +
       'WHERE RDB$PACKAGE_NAME = :PN';
+
+    if not Conn.DefaultTransaction.InTransaction then
+      Conn.DefaultTransaction.StartTransaction;
+
     qry.ParamByName('PN').AsString := UpperCase(APackageName);
     qry.Open;
     if not qry.EOF and not qry.Fields[0].IsNull then
@@ -181,7 +197,7 @@ begin
   end;
 end;
 
-function GetPackageFirebirdFunctionDeclaration(Conn: TIBConnection; const FuncName: string; APackageName: string): string;
+function GetPackageFirebirdFunctionDeclaration(Conn: TIBDatabase; const FuncName: string; APackageName: string): string;
 var
   Header, Body, ParamAndReturn, FullName: string;
   P: Integer;
