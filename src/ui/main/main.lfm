@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 415
+  Left = 735
   Height = 531
-  Top = 208
+  Top = 307
   Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -572,6 +572,7 @@ object fmMain: TfmMain
     ShowLines = False
     TabOrder = 0
     OnAddition = tvMainAddition
+    OnChange = tvMainChange
     OnClick = tvMainClick
     OnDblClick = tvMainDblClick
     OnDeletion = tvMainDeletion

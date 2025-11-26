@@ -46,7 +46,7 @@ TObjectType = (
 
   TRoutineType = (
     rtUDF,  rtFBProc, rtFBFunc,rtUDRFunc, rtUDRProc,
-    rtPackageUDF, rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc,
+    rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc,
     rtUnknown
   );
 
@@ -465,7 +465,7 @@ begin
     rtFBProc:           Result := 'FireBird Stored Procedure';
     rtUDRFunc:          Result := 'UDR Function';
     rtUDRProc:          Result := 'UDR Procedure';
-    rtPackageUDF:       Result := 'Package UDF';
+    //rtPackageUDF:       Result := 'Package UDF';
     rtPackageFBFunc:    Result := 'Package-FireBird Function';
     rtPackageFBProc:    Result := 'Package-FireBird Stored Procedure';
     rtPackageUDRFunc:   Result := 'Package-UDR Function';

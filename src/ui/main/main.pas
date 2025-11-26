@@ -362,6 +362,7 @@ type
     procedure tbCheckDBIntegrityClick(Sender: TObject);
     procedure tbSQLMonitorClick(Sender: TObject);
     procedure tvMainAddition(Sender: TObject; Node: TTreeNode);
+    procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure tvMainClick(Sender: TObject);
     procedure tvMainDblClick(Sender: TObject);
     procedure tvMainDeletion(Sender: TObject; Node: TTreeNode);
@@ -3126,7 +3127,7 @@ begin
   FRoutineInfo.Connection  := Rec.IBDatabase;
   FRoutineInfo.dbIndex     := dbIndex;
 
-  if ARoutineType in [rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc, rtPackageUDF] then
+  if ARoutineType in [rtPackageFBFunc, rtPackageFBProc, rtPackageUDRFunc, rtPackageUDRProc] then
   begin
     FRoutineInfo.PackageName := SelNode.Parent.Parent.Text;
   end else
@@ -3193,11 +3194,6 @@ begin
   PageControl1.ActivePage := ATab;
   frmTestFunction.Init(FRoutineInfo, NodeInfos);
   frmTestFunction.Show;
-end;
-
-procedure TfmMain.lmCallStoreProcClick(Sender: TObject);
-begin
-  CallRoutine(rtFBProc);
 end;
 
 (****************  Connect As  *****************)
@@ -4913,6 +4909,11 @@ begin
   CallRoutine(rtFBFunc);
 end;
 
+procedure TfmMain.lmCallStoreProcClick(Sender: TObject);
+begin
+  CallRoutine(rtFBProc);
+end;
+
 procedure TfmMain.lmTestPackageFunctionClick(Sender: TObject);
 begin
   CallRoutine(rtPackageFBFunc);
@@ -4921,11 +4922,6 @@ end;
 procedure TfmMain.lmTestPackageProcedureClick(Sender: TObject);
 begin
   CallRoutine(rtPackageFBProc);
-end;
-
-procedure TfmMain.lmTestPackageUDRProcedureClick(Sender: TObject);
-begin
-  CallRoutine(rtPackageUDRProc);
 end;
 
 procedure TfmMain.lmTestUDFFunctionClick(Sender: TObject);
@@ -4938,14 +4934,19 @@ begin
   CallRoutine(rtUDRFunc);
 end;
 
+procedure TfmMain.lmTestUDRProcedureClick(Sender: TObject);
+begin
+  CallRoutine(rtUDRProc);
+end;
+
 procedure TfmMain.lmTestPackageUDRFunctionClick(Sender: TObject);
 begin
   CallRoutine(rtPackageUDRFunc);
 end;
 
-procedure TfmMain.lmTestUDRProcedureClick(Sender: TObject);
+procedure TfmMain.lmTestPackageUDRProcedureClick(Sender: TObject);
 begin
-  CallRoutine(rtUDRProc);
+  CallRoutine(rtPackageUDRProc);
 end;
 
 procedure TfmMain.lmUserPermManagementClick(Sender: TObject);
@@ -7075,7 +7076,8 @@ begin
 
   if SelNode <> nil then
   begin
-    //ShowMessage(IntToStr(Ord(TPNodeInfos(SelNode.Data)^.ObjectType)));
+    //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
+
     NodeText:= SelNode.Text;
     if Pos('(', NodeText) > 0 then
       NodeText:= Trim(Copy(NodeText, 1, Pos('(', NodeText) - 1));
@@ -7105,7 +7107,8 @@ begin
     if ParentNodeText = 'Views' then // View
       Filter:= 4
     else
-    if ParentNodeText = 'Procedures' then // Stored Proc
+    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotStoredProcedure then
+    //if ParentNodeText = 'Procedures' then // Stored Proc
       Filter:= 5
     else
     if ParentNodeText = 'UDFs' then // UDF
@@ -7218,6 +7221,7 @@ begin
    else
       Filter:= -1;
 
+
     // Table Fields
     if (SelNode.Level = 4) then
     begin
@@ -7231,6 +7235,8 @@ begin
   end
   else
     Filter:= -1;
+
+  //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
 
   // Show menu for specific filter
   for i:= 0 to pmDatabase.Items.Count - 1 do
@@ -7328,7 +7334,7 @@ begin
   Node.Data := PNodeInfos;
 end;
 
-procedure TfmMain.tvMainClick(Sender: TObject);
+procedure TfmMain.tvMainChange(Sender: TObject; Node: TTreeNode);
 var dbIndex: integer;
 begin
   if tvMain.Selected = nil then
@@ -7336,9 +7342,23 @@ begin
 
   if tvMain.Selected.Level > 0 then
   begin
-    dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+    //dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+    dbIndex:= TPNodeInfos(Node.Data)^.dbIndex;
     SetConnection(dbIndex);
   end;
+end;
+
+procedure TfmMain.tvMainClick(Sender: TObject);
+var dbIndex: integer;
+begin
+  {if tvMain.Selected = nil then
+    exit;
+
+  if tvMain.Selected.Level > 0 then
+  begin
+    dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+    SetConnection(dbIndex);
+  end;}
 end;
 
 procedure TfmMain.tvMainDeletion(Sender: TObject; Node: TTreeNode);

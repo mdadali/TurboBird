@@ -180,8 +180,8 @@ begin
 
   // Nur wenn eine andere Datenbank oder andere Parameter notwendig sind,
   // die Verbindung neu aufbauen – sonst nichts anfassen.
-  if (IBDb <> Conn) then
-  begin
+  //if (IBDb <> Conn) then
+  //begin
     // alte Verbindung lösen
     IBDb := Conn;
     FSQLTransaction := RegisteredDatabases[dbIndex].IBTransaction;
@@ -204,7 +204,7 @@ begin
 
     if not RegisteredDatabases[dbIndex].IBTransaction.InTransaction then
       RegisteredDatabases[dbIndex].IBTransaction.StartTransaction;
-  end;
+  //end;
 
   // Prüfen, ob DB überhaupt verbunden ist
   if not Conn.Connected then

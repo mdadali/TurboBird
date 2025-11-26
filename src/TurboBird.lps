@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <BuildModes Active="x86_64-win64-win-release"/>
     <Units Count="182">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -144,11 +144,10 @@
       <Unit17>
         <Filename Value="deps\package_deps.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="26"/>
         <CursorPos Y="37"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="deps\fb_func_deps.pas"/>
@@ -216,9 +215,9 @@
       <Unit26>
         <Filename Value="common\fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="626"/>
-        <CursorPos X="54" Y="635"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="453"/>
+        <CursorPos X="7" Y="468"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit26>
@@ -297,9 +296,10 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1424"/>
-        <CursorPos X="3" Y="1440"/>
+        <TopLine Value="3180"/>
+        <CursorPos Y="3195"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -309,9 +309,9 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="3">
-          <Item0 Y="6879" ID="1"/>
-          <Item1 X="12" Y="8271" ID="3"/>
-          <Item2 Y="1873" ID="2"/>
+          <Item0 Y="6880" ID="1"/>
+          <Item1 X="12" Y="8291" ID="3"/>
+          <Item2 Y="1874" ID="2"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -346,7 +346,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="1353"/>
         <CursorPos X="30" Y="1382"/>
         <UsageCount Value="200"/>
@@ -479,15 +479,16 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewDomain"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="33"/>
-        <CursorPos X="41" Y="55"/>
+        <TopLine Value="39"/>
+        <CursorPos X="3" Y="55"/>
         <UsageCount Value="200"/>
       </Unit47>
       <Unit48>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
-        <CursorPos X="58" Y="14"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="303"/>
+        <CursorPos X="3" Y="318"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 X="5" Y="802" ID="4"/>
@@ -578,13 +579,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="BackupRestore"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="198"/>
-        <CursorPos X="26" Y="168"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="169"/>
+        <CursorPos X="65" Y="177"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit56>
       <Unit57>
         <Filename Value="ui\createuser\createuser.pas"/>
@@ -617,11 +615,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="dbInfo"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="271"/>
         <CursorPos X="44" Y="296"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit59>
       <Unit60>
         <Filename Value="ui\comparison\comparison.pas"/>
@@ -664,11 +661,10 @@
         <Filename Value="utils\unitfirebirdservices.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="UnitFirebirdServices"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="347"/>
         <CursorPos X="31" Y="378"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit64>
       <Unit65>
         <Filename Value="ui\setfirebirdclient\fsetfbclient.pas"/>
@@ -712,10 +708,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="302"/>
-        <CursorPos X="36" Y="323"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="144"/>
+        <CursorPos X="53" Y="157"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
       </Unit68>
       <Unit69>
         <Filename Value="datamodules\dmibx.pas"/>
@@ -734,15 +731,16 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="SysTables"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="137"/>
-        <CursorPos X="25" Y="153"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="304"/>
+        <CursorPos Y="332"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
           <CursorPos X="42" Y="4"/>
         </ExtraEditor1>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
       </Unit70>
       <Unit71>
         <Filename Value="ui\openquerybuilder\QBEIBX.pas"/>
@@ -880,9 +878,9 @@
       <Unit85>
         <Filename Value="utils\fServerSession.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="839"/>
-        <CursorPos X="46" Y="849"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="518"/>
+        <CursorPos Y="524"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit85>
@@ -919,7 +917,7 @@
         <ComponentName Value="fmServerRegistry"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="402"/>
         <CursorPos X="66" Y="407"/>
         <UsageCount Value="200"/>
@@ -966,7 +964,7 @@
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="471"/>
         <CursorPos X="51" Y="488"/>
         <UsageCount Value="205"/>
@@ -1689,124 +1687,124 @@
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="184" TopLine="172"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="136" TopLine="120"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="215" TopLine="212"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="137" TopLine="120"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="220" TopLine="212"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="138" TopLine="120"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="222" Column="16" TopLine="212"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="142" TopLine="132"/>
       </Position4>
       <Position5>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="42" Column="21" TopLine="27"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="143" TopLine="132"/>
       </Position5>
       <Position6>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="318" TopLine="310"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="145" TopLine="132"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="166" Column="22" TopLine="160"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="147" TopLine="132"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\backuprestore\backuprestore.pas"/>
-        <Caret Line="168" Column="26" TopLine="213"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="149" TopLine="132"/>
       </Position8>
       <Position9>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="42" Column="21" TopLine="27"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="151" TopLine="132"/>
       </Position9>
       <Position10>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="308" Column="27" TopLine="303"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="200" TopLine="185"/>
       </Position10>
       <Position11>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="319" TopLine="303"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="201" TopLine="185"/>
       </Position11>
       <Position12>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="320" TopLine="303"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="202" TopLine="185"/>
       </Position12>
       <Position13>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="316" Column="25" TopLine="313"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="203" TopLine="185"/>
       </Position13>
       <Position14>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="325" TopLine="313"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="204" TopLine="185"/>
       </Position14>
       <Position15>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="330" Column="22" TopLine="325"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="205" TopLine="185"/>
       </Position15>
       <Position16>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="328" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="206" TopLine="185"/>
       </Position16>
       <Position17>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="329" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="207" TopLine="185"/>
       </Position17>
       <Position18>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="330" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="206" TopLine="185"/>
       </Position18>
       <Position19>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="331" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="208" TopLine="185"/>
       </Position19>
       <Position20>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="332" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="210" TopLine="185"/>
       </Position20>
       <Position21>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="333" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="211" TopLine="186"/>
       </Position21>
       <Position22>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="334" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="213" TopLine="188"/>
       </Position22>
       <Position23>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="336" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="152" TopLine="138"/>
       </Position23>
       <Position24>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="337" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="162" Column="72" TopLine="138"/>
       </Position24>
       <Position25>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="338" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="154" TopLine="138"/>
       </Position25>
       <Position26>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="339" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="152" Column="51" TopLine="138"/>
       </Position26>
       <Position27>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="340" TopLine="322"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="157" Column="53" TopLine="144"/>
       </Position27>
       <Position28>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="342" TopLine="322"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="49" Column="32" TopLine="36"/>
       </Position28>
       <Position29>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="344" TopLine="331"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="3132" Column="89" TopLine="3116"/>
       </Position29>
       <Position30>
-        <Filename Value="utils\unitfirebirdservices.pas"/>
-        <Caret Line="318" TopLine="332"/>
+        <Filename Value="common\fbcommon.pas"/>
+        <Caret Line="468" Column="7" TopLine="453"/>
       </Position30>
     </JumpHistory>
     <RunParams>
