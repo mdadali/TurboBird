@@ -117,6 +117,9 @@ begin
   Caption := 'Theme Selector';
   FThemeIniPath := ExtractFilePath(ParamStr(0)) + 'data/config/' + ThemesIniFile;
 
+  if not FileExists(FThemeIniPath) then
+    exit;
+
   FThemeIni :=  TIniFile.Create(FThemeIniPath, []);
   LoadThemesFromIni(FThemeIniPath);
 

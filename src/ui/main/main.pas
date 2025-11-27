@@ -63,7 +63,9 @@ uses
   fmetaquerys,
   uthemeselector,
 
-  MainFormUnit //DBAdmin
+  DataModule, MainFormUnit, //DBAdmin
+  BackupDlgUnit,
+  RestoreDlgUnit
   ;
 
 
@@ -82,6 +84,9 @@ type
     Image1: TImage;
     Memo1: TMemo;
     lmDBAdmin: TMenuItem;
+    lmMaintenance: TMenuItem;
+    lmBackupNew: TMenuItem;
+    lmRestoreNew: TMenuItem;
     mnTheme: TMenuItem;
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
@@ -244,6 +249,7 @@ type
     procedure ImEditFBFunctionClick(Sender: TObject);
     procedure lmAddUserClick(Sender: TObject);
     procedure lmBackupClick(Sender: TObject);
+    procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
     procedure lmChangePasswordClick(Sender: TObject);
     procedure lmCompareClick(Sender: TObject);
@@ -308,6 +314,7 @@ type
     procedure lmRefreshClick(Sender: TObject);
     procedure lmRegdbClick(Sender: TObject);
     procedure lmRestoreClick(Sender: TObject);
+    procedure lmRestoreNewClick(Sender: TObject);
     procedure lmRolePerManagementClick(Sender: TObject);
     procedure lmRolePermissionsClick(Sender: TObject);
     procedure lmScriptDatabaseClick(Sender: TObject);
@@ -1423,6 +1430,7 @@ begin
   fmBackupRestore.Show;}
 end;
 
+
 (***********  Backup / Restore database ************)
 {procedure TfmMain.lmBackupClick(Sender: TObject);
 var
@@ -1526,6 +1534,80 @@ begin
   end;
   fmBackupRestore.Show;
 end;
+
+procedure TfmMain.lmBackupNewClick(Sender: TObject);
+var ServerRec: TServerRecord;
+    DBRec: TDatabaseRec;
+    dbIndex: word;
+begin
+  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+
+  DBRec := RegisteredDatabases[dbIndex];
+
+  ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
+
+  MainForm.Init(dbIndex, nil);
+  if DBDataModule.IBXServicesConnection1.Connected then
+    DBDataModule.IBXServicesConnection1.Connected := false;
+  DBDataModule.IBXServicesConnection1.ServerName := ServerRec.ServerName;
+  DBDataModule.IBXServicesConnection1.PortNo := ServerRec.Port;
+  DBDataModule.IBXServicesConnection1.Protocol := ServerRec.Protocol;
+
+  DBDataModule.IBXServicesConnection1.Params.Clear;
+  DBDataModule.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
+  DBDataModule.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+  DBDataModule.IBXServicesConnection1.LoginPrompt := false;
+  DBDataModule.IBXServicesConnection1.Connected := true;
+
+  BackupDlgUnit.BackupDlg.IBXClientSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
+
+  DBDataModule.BackupDatabase;
+  //BackupDlgUnit.BackupDlg.FormShow(self);
+end;
+
+procedure TfmMain.lmRestoreNewClick(Sender: TObject);
+var ServerRec: TServerRecord;
+    DBRec: TDatabaseRec;
+    dbIndex: word;
+
+    DefaultPageSize: integer;
+    DefaultNumBuffers: integer;
+begin
+  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+
+  DefaultPageSize := 8192;
+  DefaultNumBuffers := 2048;
+
+
+  DBRec := RegisteredDatabases[dbIndex];
+  if DBRec.IBDatabase.Connected then
+    DBRec.IBDatabase.Connected := false;
+
+  ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
+
+  MainForm.Init(dbIndex, nil);
+  if DBDataModule.IBXServicesConnection1.Connected then
+    DBDataModule.IBXServicesConnection1.Connected := false;
+  DBDataModule.IBXServicesConnection1.ServerName := ServerRec.ServerName;
+  DBDataModule.IBXServicesConnection1.PortNo := ServerRec.Port;
+  DBDataModule.IBXServicesConnection1.Protocol := ServerRec.Protocol;
+
+  DBDataModule.IBXServicesConnection1.Params.Clear;
+  DBDataModule.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
+  DBDataModule.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+  DBDataModule.IBXServicesConnection1.LoginPrompt := false;
+  DBDataModule.IBXServicesConnection1.Connected := true;
+
+
+  //DefaultPageSize := DatabaseQuery.FieldByName('MON$PAGE_SIZE').AsInteger;
+  //DefaultNumBuffers := DatabaseQuery.FieldByName('MON$PAGE_BUFFERS').AsInteger;
+
+  RestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Clear;
+  RestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Add(GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName));
+  RestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
+  //DBDataModule.RestoreDatabase;
+end;
+
 
 procedure TfmMain.lmBlobEditorClick(Sender: TObject);
 var
@@ -7344,7 +7426,7 @@ begin
   begin
     //dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
     dbIndex:= TPNodeInfos(Node.Data)^.dbIndex;
-    SetConnection(dbIndex);
+    //SetConnection(dbIndex);
   end;
 end;
 

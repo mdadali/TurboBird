@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 978
+  Left = 792
   Height = 448
-  Top = 455
+  Top = 100
   Width = 440
   Caption = 'Restore Database'
   ClientHeight = 448
@@ -9,7 +9,7 @@ object RestoreDlg: TRestoreDlg
   OnClose = FormClose
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.3'
+  LCLVersion = '2.2.6.0'
   object Button1: TButton
     Left = 128
     Height = 25
@@ -44,19 +44,19 @@ object RestoreDlg: TRestoreDlg
     TabOrder = 2
     object SelectTab: TTabSheet
       Caption = 'SelectTab'
-      ClientHeight = 392
-      ClientWidth = 417
+      ClientHeight = 394
+      ClientWidth = 413
       object Label2: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 7
-        Width = 39
+        Width = 42
         Caption = 'Server'
         ParentColor = False
       end
       object ServerName: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 24
         Width = 180
         ReadOnly = True
@@ -64,31 +64,30 @@ object RestoreDlg: TRestoreDlg
       end
       object Label1: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 56
-        Width = 95
+        Width = 98
         Caption = 'Database Name'
         ParentColor = False
       end
       object DBName: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 72
         Width = 396
-        ReadOnly = True
         TabOrder = 1
       end
       object ServerSideBtn: TRadioButton
         Left = 12
-        Height = 22
+        Height = 21
         Top = 112
-        Width = 93
+        Width = 95
         Caption = 'Server Side'
         TabOrder = 2
       end
       object ClientSideBtn: TRadioButton
         Left = 134
-        Height = 22
+        Height = 21
         Top = 112
         Width = 88
         Caption = 'Client Side'
@@ -98,15 +97,15 @@ object RestoreDlg: TRestoreDlg
       end
       object Label3: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 192
-        Width = 68
+        Width = 69
         Caption = 'Backup File'
         ParentColor = False
       end
       object SourceArchive: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 208
         Width = 364
         TabOrder = 6
@@ -156,105 +155,103 @@ object RestoreDlg: TRestoreDlg
       end
       object Label4: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 144
-        Width = 56
+        Width = 58
         Caption = 'Page Size'
         ParentColor = False
       end
       object PageSize: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 160
         Width = 104
         NumbersOnly = True
         TabOrder = 4
-        Text = 'PageSize'
       end
       object Label5: TLabel
         Left = 120
-        Height = 14
+        Height = 19
         Top = 165
-        Width = 33
+        Width = 34
         Caption = 'bytes'
         ParentColor = False
       end
       object DeActivateIndexes: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 241
-        Width = 139
+        Width = 142
         Caption = 'Deactivate Indexes'
         TabOrder = 7
       end
       object NoShadow: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 264
-        Width = 286
+        Width = 291
         Caption = 'Do not recreate shadow files during restore'
         TabOrder = 8
       end
       object NoValidityCheck: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 288
-        Width = 316
+        Width = 321
         Caption = 'Do not enforce validity conditions during restore'
         TabOrder = 9
       end
       object OneRelationAtATime: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 312
-        Width = 303
+        Width = 308
         Caption = 'Commit after completing restore of each table'
         TabOrder = 10
       end
       object RestoreMetaDataOnly: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 336
-        Width = 160
+        Width = 167
         Caption = 'Restore MetaData Only'
         TabOrder = 11
       end
       object UseAllSpace: TCheckBox
         Left = 17
-        Height = 22
+        Height = 21
         Top = 360
-        Width = 397
+        Width = 404
         Caption = 'Do not reserve 20% of each data page for future rec. versions'
         TabOrder = 12
       end
       object Label6: TLabel
         Left = 197
-        Height = 14
+        Height = 19
         Top = 144
-        Width = 122
+        Width = 127
         Caption = 'No. of Cache Buffers'
         ParentColor = False
       end
       object PageBuffers: TEdit
         Left = 197
-        Height = 24
+        Height = 31
         Top = 160
         Width = 107
         NumbersOnly = True
         TabOrder = 5
-        Text = 'PageBuffers'
       end
     end
     object ReportTab: TTabSheet
       Caption = 'ReportTab'
-      ClientHeight = 392
-      ClientWidth = 417
+      ClientHeight = 394
+      ClientWidth = 413
       OnShow = ReportTabShow
       object Report: TMemo
         Left = 0
-        Height = 372
+        Height = 374
         Top = 0
-        Width = 417
+        Width = 413
         Align = alClient
         Lines.Strings = (
           'Report'
@@ -265,8 +262,8 @@ object RestoreDlg: TRestoreDlg
       object ProgressBar1: TProgressBar
         Left = 0
         Height = 20
-        Top = 372
-        Width = 417
+        Top = 374
+        Width = 413
         Align = alBottom
         Style = pbstMarquee
         TabOrder = 1
@@ -278,8 +275,8 @@ object RestoreDlg: TRestoreDlg
     DefaultExt = '.gbk'
     Filter = 'Backup Files|*.gbk|All Files|*.*'
     Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 368
-    top = 24
+    Left = 368
+    Top = 24
   end
   object IBXClientSideRestoreService1: TIBXClientSideRestoreService
     ServicesConnection = DBDataModule.IBXServicesConnection1
@@ -290,8 +287,8 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    left = 224
-    top = 208
+    Left = 232
+    Top = 192
   end
   object IBXServerSideRestoreService1: TIBXServerSideRestoreService
     ServicesConnection = DBDataModule.IBXServicesConnection1
@@ -302,7 +299,7 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    left = 232
-    top = 32
+    Left = 232
+    Top = 32
   end
 end

@@ -498,6 +498,8 @@ var
     FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
 
 
+function GetDBFileNameFromConnectionString(AConnStr: string): string;
+
 function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
 function GetSeverImplemetationVersionFromDBIndex(dbIndex: word): string;
 function GetServerMajorVersionFromDBIndex(dbIndex: Word): Word;
@@ -618,6 +620,40 @@ function ColorBValue(AColor: TColor): Byte;
 implementation
 
 uses Reg;
+
+
+function GetDBFileNameFromConnectionString(AConnStr: string): string;
+var
+  p: Integer;
+  s: string;
+begin
+  s := Trim(AConnStr);
+
+  // Windows-Pfad hat "C:\", das darf NICHT getrennt werden.
+  // Also: Wenn an Position 2 ein ':' steht, ist es ein lokaler Windows-Pfad.
+  if (Length(s) >= 2) and (s[2] = ':') and
+     ((s[1] in ['A'..'Z']) or (s[1] in ['a'..'z'])) then
+  begin
+    Exit(s);  // reiner Windows-Pfad
+  end;
+
+  // Embedded / absolute Linux path
+  // z.B. "/opt/firebird/data/test.fdb"
+  if (Length(s) > 0) and (s[1] = '/') then
+  begin
+    Exit(s);
+  end;
+
+  // Ansonsten: Firebird-typische ConnStrings
+  // host[:port]:<filename>
+  // Wir suchen die LETZTE ':' – danach kommt der Pfad
+  p := LastDelimiter(':', s);
+
+  if p > 0 then
+    Result := Copy(s, p + 1, Length(s))
+  else
+    Result := s; // Falls kein ':' vorhanden ist (selten)
+end;
 
 
 function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;

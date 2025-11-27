@@ -1,4 +1,4 @@
-🕒 Started: Fr 21 Nov 2025 17:27:57 CET
+🕒 Started: Mi 26 Nov 2025 12:02:02 CET
 🚀 Starting handle script for TurboBird [x86_64-win64-win-debug], version 1.2.1.1262
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug.exe
 🔍 Detected .exe input file
@@ -74,9 +74,9 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip
-+ ZIP_SIZE=50121342
++ ZIP_SIZE=50123143
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe
-+ ORIG_SIZE=192748798
++ ORIG_SIZE=192762258
 + ((  ZIP_SIZE < ORIG_SIZE  ))
 + log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip (from 183MB → 47MB)'
 + echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip (from 183MB → 47MB)'
@@ -100,7 +100,7 @@
 + echo '🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-debug'
 🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-debug
 + '[' ON = ON ']'
-🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-debug
 + echo '🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-debug'
+🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-debug
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug -type f -name 'TurboBird_x86_64-win64-win-debug-v*.zip' '!' -name TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug -type f -name 'TurboBird_x86_64-win64-win-debug-v*' '!' -name TurboBird_x86_64-win64-win-debug-v1.2.1.1262 '!' -name TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe '!' -name TurboBird_x86_64-win64-win-debug-v1.2.1.1262.exe.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'

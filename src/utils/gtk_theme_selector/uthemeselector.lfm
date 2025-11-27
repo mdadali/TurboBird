@@ -1,5 +1,5 @@
 object frmThemeSelector: TfrmThemeSelector
-  Left = 635
+  Left = 247
   Height = 590
   Top = 149
   Width = 731
