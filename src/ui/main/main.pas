@@ -21,6 +21,7 @@ uses
   IB,
   IBDatabase,
   IBQuery,
+  IBDatabaseInfo,
 
   usqlqueryext,
   udb_udf_fetcher,
@@ -384,7 +385,6 @@ type
     Function FindCustomForm(ATitle: string; AClass: TClass): TComponent;
     // Show new generator form
     procedure InitNewGen(DatabaseIndex: Integer);
-    Function GetServerNameNode(ServerName: string): TTreeNode;
 
     procedure ReleaseRegisteredDatabase(dbIndex: Integer);
     procedure ReleaseRegisteredDatabases;
@@ -1371,6 +1371,9 @@ var
   ATab: TTabSheet;
   Title, FullHint: string;
 begin
+  lmRestoreNewClick(nil);
+  exit;
+
   // Neue Form + Tab erzeugen
   fmBackupRestore := TfmBackupRestore.Create(Application);
   ATab := TTabSheet.Create(Self);
@@ -1536,78 +1539,153 @@ begin
 end;
 
 procedure TfmMain.lmBackupNewClick(Sender: TObject);
-var ServerRec: TServerRecord;
-    DBRec: TDatabaseRec;
-    dbIndex: word;
+var
+  TmpBackupDlg: TBackupDlg;
+  ServerRec: TServerRecord;
+  DBRec: TDatabaseRec;
+  dbIndex: Word;
+  isDbConnected: Boolean;
+  TmpIniFile: TIniFile;
+  ServerErrStr: string;
 begin
+  if tvMain.Items.Count = 0 then exit;
+  if tvMain.Selected = nil then exit;
+  if tvMain.Selected.Level <> 1 then exit;
+
+  if not IsServerReachable(tvMain.Selected.Parent.Text, ServerErrStr) then
+  begin
+    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    Exit;
+  end;
+
   dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
 
-  DBRec := RegisteredDatabases[dbIndex];
+  isDbConnected := RegisteredDatabases[dbIndex].IBDatabase.Connected;
 
+  DBRec := RegisteredDatabases[dbIndex];
   ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
 
-  MainForm.Init(dbIndex, nil);
-  if DBDataModule.IBXServicesConnection1.Connected then
-    DBDataModule.IBXServicesConnection1.Connected := false;
-  DBDataModule.IBXServicesConnection1.ServerName := ServerRec.ServerName;
-  DBDataModule.IBXServicesConnection1.PortNo := ServerRec.Port;
-  DBDataModule.IBXServicesConnection1.Protocol := ServerRec.Protocol;
+  try
+    TmpIniFile :=  TIniFile.Create(fIniFileName, []);
+    CloseDBBeforeBackup :=  TmpIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
 
-  DBDataModule.IBXServicesConnection1.Params.Clear;
-  DBDataModule.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
-  DBDataModule.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
-  DBDataModule.IBXServicesConnection1.LoginPrompt := false;
-  DBDataModule.IBXServicesConnection1.Connected := true;
+    if  CloseDBBeforeBackup then
+      if isDbConnected then
+        CloseDB(dbIndex);
 
-  BackupDlgUnit.BackupDlg.IBXClientSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
+    TmpBackupDlg := TBackupDlg.Create(Self);
 
-  DBDataModule.BackupDatabase;
-  //BackupDlgUnit.BackupDlg.FormShow(self);
+    try
+      if TmpBackupDlg.IBXServicesConnection1.Connected then
+        TmpBackupDlg.IBXServicesConnection1.Connected := False;
+
+      TmpBackupDlg.IBXServicesConnection1.ServerName := ServerRec.ServerName;
+      TmpBackupDlg.IBXServicesConnection1.PortNo := ServerRec.Port;
+      TmpBackupDlg.IBXServicesConnection1.Protocol := ServerRec.Protocol;
+
+      TmpBackupDlg.IBXServicesConnection1.Params.Clear;
+      TmpBackupDlg.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
+      TmpBackupDlg.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+      TmpBackupDlg.IBXServicesConnection1.LoginPrompt := False;
+
+      TmpBackupDlg.IBXServicesConnection1.Connected := True;
+      TmpBackupDlg.IBXClientSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
+      TmpBackupDlg.IBXServerSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
+
+      TmpBackupDlg.ShowModal;
+    except
+      on E: Exception do
+        ShowMessage('Backup-Error: ' + E.Message);
+    end;
+
+  finally
+    TmpIniFile.Free;
+    TmpBackupDlg.Free;
+
+    if isDbConnected and (not RegisteredDatabases[dbIndex].IBDatabase.Connected) then
+      RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
+  end;
 end;
 
 procedure TfmMain.lmRestoreNewClick(Sender: TObject);
-var ServerRec: TServerRecord;
-    DBRec: TDatabaseRec;
-    dbIndex: word;
-
-    DefaultPageSize: integer;
-    DefaultNumBuffers: integer;
+var
+  ServerRec: TServerRecord;
+  DBRec: TDatabaseRec;
+  dbIndex: Word;
+  TmpRestoreDlg: TRestoreDlg;
+  DefaultPageSize: Integer;
+  DefaultNumBuffers: Integer;
+  isDbConnected: Boolean;
+  DBNode: TTreeNode;
+  ServerVersionMajor: word;
 begin
+  if tvMain.Items.Count = 0 then
+    exit;
+
   dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-
-  DefaultPageSize := 8192;
-  DefaultNumBuffers := 2048;
-
-
   DBRec := RegisteredDatabases[dbIndex];
+  isDbConnected := DBRec.IBDatabase.Connected;
+
+  if not isDbConnected then
+    if not ConnectToDBAs(dbIndex) then
+      Exit;
+
+  if not DBRec.IBDatabaseInfo.Database.Connected then
+    DBRec.IBDatabaseInfo.Database.Connected := true;  //???
+  DefaultPageSize   := DBRec.IBDatabaseInfo.PageSize;
+  DefaultNumBuffers := DBRec.IBDatabaseInfo.NumBuffers;
+
   if DBRec.IBDatabase.Connected then
-    DBRec.IBDatabase.Connected := false;
+    DBRec.IBDatabase.Connected := False;
 
   ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
+  ServerVersionMajor :=  ServerRec.VersionMajor;
 
-  MainForm.Init(dbIndex, nil);
-  if DBDataModule.IBXServicesConnection1.Connected then
-    DBDataModule.IBXServicesConnection1.Connected := false;
-  DBDataModule.IBXServicesConnection1.ServerName := ServerRec.ServerName;
-  DBDataModule.IBXServicesConnection1.PortNo := ServerRec.Port;
-  DBDataModule.IBXServicesConnection1.Protocol := ServerRec.Protocol;
+  CloseDB(dbIndex);
 
-  DBDataModule.IBXServicesConnection1.Params.Clear;
-  DBDataModule.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
-  DBDataModule.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
-  DBDataModule.IBXServicesConnection1.LoginPrompt := false;
-  DBDataModule.IBXServicesConnection1.Connected := true;
+  try
+    TmpRestoreDlg := TRestoreDlg.Create(Self);
+    try
+      if TmpRestoreDlg.IBXServicesConnection1.Connected then
+        TmpRestoreDlg.IBXServicesConnection1.Connected := False;
 
+      TmpRestoreDlg.IBXServicesConnection1.ServerName := ServerRec.ServerName;
+      TmpRestoreDlg.IBXServicesConnection1.PortNo := ServerRec.Port;
+      TmpRestoreDlg.IBXServicesConnection1.Protocol := ServerRec.Protocol;
 
-  //DefaultPageSize := DatabaseQuery.FieldByName('MON$PAGE_SIZE').AsInteger;
-  //DefaultNumBuffers := DatabaseQuery.FieldByName('MON$PAGE_BUFFERS').AsInteger;
+      TmpRestoreDlg.IBXServicesConnection1.Params.Clear;
+      TmpRestoreDlg.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
+      TmpRestoreDlg.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+      TmpRestoreDlg.IBXServicesConnection1.LoginPrompt := False;
+      TmpRestoreDlg.IBXServicesConnection1.Connected := True;
 
-  RestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Clear;
-  RestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Add(GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName));
-  RestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
-  //DBDataModule.RestoreDatabase;
+      TmpRestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Clear;
+      TmpRestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Add(
+        GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName)
+      );
+
+      TmpRestoreDlg.IBXServerSideRestoreService1.DatabaseFiles.Clear;
+      TmpRestoreDlg.IBXServerSideRestoreService1.DatabaseFiles.Add(
+        GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName)
+      );
+
+      TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
+
+    except
+      on E: Exception do
+        ShowMessage('Restore-Error: ' + E.Message);
+    end;
+
+  finally
+    TmpRestoreDlg.Free;
+
+    DBNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
+    DBNode.DeleteChildren;
+    AddRootObjects(DBNode, ServerVersionMajor);
+    if isDbConnected then
+      RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
+  end;
 end;
-
 
 procedure TfmMain.lmBlobEditorClick(Sender: TObject);
 var
@@ -1847,9 +1925,47 @@ end;
 
 
 procedure TfmMain.lmCreateDBClick(Sender: TObject);
+var cboxItems: TStringList;
+    SelectedServerNode: TTreeNode;
+    ServerName: string;
+    ServerErrStr: string;
 begin
-  fmCreateDB.edNewDatabase.Text:= tvMain.Selected.Text + ':';
-  mnCreateDBClick(nil);
+  if tvMain.Items.Count = 0 then
+    exit;
+
+  try
+    cboxItems := GetServerListFromTreeView;
+
+    if tvMain.Selected = nil then
+      tvMain.Selected := tvMain.Items[0];
+
+    SelectedServerNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 0);
+
+    if not IsServerReachable(SelectedServerNode.Text, ServerErrStr) then
+    begin
+      MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+      Exit;
+    end;
+
+    ServerName := SelectedServerNode.Text;
+
+    fmCreateDB.cmbBoxServers.Items.Assign(cboxItems);
+
+    fmCreateDB.cmbBoxServers.ItemIndex := fmCreateDB.cmbBoxServers.Items.IndexOf(SelectedServerNode.Text);
+
+    fmCreateDB.edNewDatabase.Text:= '';
+    fmCreateDB.Init;
+    if fmCreateDB.ShowModal = mrOK then
+    begin
+      LoadRegisteredDatabases;
+      SelectedServerNode := GetServerNodeByServerName(ServerName);
+      if SelectedServerNode <> nil then
+        SelectedServerNode.Expand(false);
+    end;
+
+  finally
+    cboxItems.Free;
+  end;
 end;
 
 procedure TfmMain.lmDBAdminClick(Sender: TObject);
@@ -1943,6 +2059,7 @@ begin
   with RegisteredDatabases[dbIndex] do
   begin
     CloseDB(dbIndex, True);
+    FreeAndNil(IBDatabaseInfo);
     FreeAndNil(IBQuery);
     FreeAndNil(IBTransaction);
     FreeAndNil(IBDatabase);
@@ -3717,48 +3834,6 @@ begin
   end;
 end;
 
-
-(* Search and get server node in tree view *)
-Function TfmMain.GetServerNameNode(ServerName: string): TTreeNode;
-var
-  Node: TTreeNode;
-begin
-  Node:= nil;
-  ServerName:= LowerCase(ServerName);
-  if tvMain.Items.Count > 0 then
-    Node:= tvMain.Items[0];
-  Result:= nil;
-  while Node <> nil do
-  begin
-    if (Node.Text <> '') and (LowerCase(Node.Text) = ServerName) then
-    begin
-      Result:= Node;
-      Break;
-    end;
-    Node:= Node.GetNextSibling;
-  end;
-end;
-
-{procedure TfmMain.SetConnection(Index: Integer);
-begin
-  if CurrentIBConnection <> RegisteredDatabases[Index].IBDatabase then
-  begin
-    CurrentIBConnection:= RegisteredDatabases[Index].IBDatabase;
-    if not CurrentIBConnection.Connected then
-      CurrentIBConnection.Connected := true;
-
-    if not RegisteredDatabases[Index].IBTransaction.InTransaction then
-      RegisteredDatabases[Index].IBTransaction.StartTransaction;
-
-    CurrentIBTransaction := RegisteredDatabases[Index].IBTransaction;
-
-    if SQLQuery1.Active then
-      SQLQuery1.Close;
-    SQLQuery1.Database := CurrentIBConnection;
-    SQLQuery1.Transaction := CurrentIBConnection.DefaultTransaction;
-  end;
-end;}
-
 procedure TfmMain.SetConnection(Index: Integer);
 var ServerNode: TTreeNode;
     Rec: TRegisteredDatabase;
@@ -3770,7 +3845,8 @@ begin
   CurrentIBTransaction := RegisteredDatabases[Index].IBTransaction;
   SQLQuery1 := RegisteredDatabases[Index].IBQuery;
 
-  if not CurrentIBConnection.Connected then
+
+  {if not CurrentIBConnection.Connected then
   begin
     Rec := RegisteredDatabases[Index].RegRec;
     if Rec.Password = '' then
@@ -3783,6 +3859,7 @@ begin
     CurrentIBConnection.Params.Values['password']  := Rec.Password;
     CurrentIBConnection.LoginPrompt := false;
   end;
+  }
 end;
 
 procedure TfmMain.SetFocus;
@@ -6855,8 +6932,7 @@ end;
 (********  Create new database  ********)
 procedure TfmMain.mnCreateDBClick(Sender: TObject);
 begin
-  if fmCreateDB.ShowModal = mrOk then
-    LoadRegisteredDatabases;
+  lmCreateDBClick(nil);
 end;
 
 procedure TfmMain.lmRegdbClick(Sender: TObject);
@@ -6869,7 +6945,11 @@ end;
 procedure TfmMain.mnRegDBClick(Sender: TObject);
 var ServerComboBoxIdx: integer;
     ServerRec: TserverRecord;
+    ServerNode: TTreeNode;
 begin
+  if tvMain.Items.Count = 0 then
+    exit;
+
   fmReg.NewReg:= True;
   fmReg.bbReg.Caption:= 'Register Database';
 
@@ -6885,9 +6965,9 @@ begin
   fmReg.edRole.Text := ServerRec.Role;
   fmReg.cboxSQLDialect.ItemIndex := 2;  //SQLDialect = 3
   fmReg.cbCharset.ItemIndex :=  fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
-  fmReg.edUserName.Text := 'SYSDBA'; //ServerRec.UserName;
-  fmReg.edPassword.Text := ''; //ServerRec.Password;
-  fmReg.cxSavePassword.Checked := true;
+  fmReg.edUserName.Text := ServerRec.UserName;
+  fmReg.edPassword.Text := ServerRec.Password;
+  fmReg.cxSavePassword.Checked := (ServerRec.Password <> '');
   fmReg.chkboxOverwriteServerClientLib.Checked := false;
   fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
   fmReg.edtPort.Text := ServerRec.Port;
@@ -6899,6 +6979,9 @@ begin
     LoadRegisteredDatabases;
     fmReg.SaveRegistrations;
     LoadRegisteredDatabases;
+    ServerNode := GetServerNodeByServerName(ServerRec.ServerName);
+    if ServerNode <> nil then
+      ServerNode.Expand(false);
   end;
 end;
 
@@ -6907,11 +6990,17 @@ procedure TfmMain.lmEditDBRegClick(Sender: TObject);
 var
   Rec: TRegisteredDatabase;
   SelNode: TTreeNode;
+  ServerName: string;
 begin
+  if tvMain.Items.Count = 0 then exit;
+  if tvMain.Selected = nil then exit;
+  if tvMain.Selected.Level <> 1 then exit;
 
   fmReg.RefreshServerCombobox;
 
-  SelNode:= tvMain.Selected;
+  SelNode := tvMain.Selected;
+  ServerName := SelNode.Parent.Text;
+
   if SelNode <> nil then
   begin
     fmReg.NewReg:= False;
@@ -6940,6 +7029,9 @@ begin
       LoadRegisteredDatabases;
       fmReg.SaveRegistrations;
       LoadRegisteredDatabases;
+      SelNode := GetServerNodeByServerName(ServerName);
+      if SelNode <> nil then
+        SelNode.Expand(false);
     end;
   end;
 end;
@@ -6955,18 +7047,30 @@ end;
 
 (****************  Unregister database *************)
 procedure TfmMain.lmUnregisterDatabaseClick(Sender: TObject);
-var DBNode: TTreeNode;
+var DBNode, SerVerNode: TTreeNode;
     Rec: TDatabaseRec;
     Title: string;
+    ServerName: string;
 begin
+  if tvMain.Items.Count = 0 then exit;
+  if tvMain.Selected = nil then exit;
+  if tvMain.Selected.Level <> 1 then exit;
+
   DBNode := GetAncestorAtLevel(tvMain.Selected, 1);
   if (DBNode <> nil) then
   begin
-    if MessageDlg('Are you sure you want to Unregister this database', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    if MessageDlg('Are you sure you want to Unregister this database ?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
+      ServerNode := DBNode.Parent;
+      ServerName := ServerNode.Text;
+      If RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].IBDatabase.Connected then
+        CloseDB(TPNodeInfos(DBNode.Data)^.dbIndex);
       Title := RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.Title;
       DeleteDBRegistrationFromFile(Title);
       LoadRegisteredDatabases;
+      ServerNode := GetServerNodeByServerName(ServerName);
+      if ServerNode <> nil then
+        ServerNode.Expand(false);
     end;
   end;
 end;
@@ -7426,7 +7530,7 @@ begin
   begin
     //dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
     dbIndex:= TPNodeInfos(Node.Data)^.dbIndex;
-    //SetConnection(dbIndex);
+    SetConnection(dbIndex);
   end;
 end;
 
@@ -7778,8 +7882,9 @@ var
   ServerSession: TServerSession;
   ServerRec: TServerRecord;
   SavePwd: boolean;
+  ServerErrStr: string;
 begin
-  //tvMain.se
+
   AllowExpansion := True;
 
   if (Node = nil) or (Node.Data = nil) then
@@ -7790,6 +7895,13 @@ begin
   // Database nodes are always Level 1
   if Node.Level = 1 then
   begin
+
+    if not IsServerReachable(Node.Parent.Text, ServerErrStr) then
+    begin
+      AllowExpansion := false;
+      MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+      Exit;
+    end;
 
     Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
@@ -8444,6 +8556,9 @@ begin
             IBDatabase.DefaultTransaction := IBTransaction;
             IBDatabase.LoginPrompt := (Rec.Password = '');
 
+            IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
+            IBDatabaseInfo.Database := IBDatabase;
+
             //IBDatabase.Connected := True;
             //IBTransaction.StartTransaction;
           end;
@@ -8451,7 +8566,7 @@ begin
           // Server node
           //AServerName:= GetServerName(Rec.DatabaseName);
           AServerName := Rec.ServerName;
-          ServerNode:= GetServerNameNode(AServerName);
+          ServerNode:= GetServerNodeByServerName(AServerName);
 
           {if ServerNode = nil then // Add new Server node
           begin

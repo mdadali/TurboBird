@@ -127,7 +127,7 @@ begin
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   //Application.CreateForm(TfmCopyTable, fmCopyTable);
 
-  Application.CreateForm(TDataModuleIBX, DataModuleIBX);
+  //Application.CreateForm(TDataModuleIBX, DataModuleIBX);
   Application.CreateForm(TfmTransactionConfig, fmTransactionConfig);
   //Application.CreateForm(TfrmLoginServiceManager, frmLoginServiceManager);
   //Application.CreateForm(TfmServerRegistry, fmServerRegistry);

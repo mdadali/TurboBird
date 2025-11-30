@@ -420,6 +420,7 @@ type
     IBDatabase: TIBDatabase;
     IBTransaction: TIBTransaction;
     IBQuery: TIBQuery;
+    IBDatabaseInfo: TIBDatabaseInfo;
     TxConfig: TTransactionConfigRecord; // NEU: alle Transaction-Parameter
   end;
 
@@ -497,6 +498,10 @@ var
 
     FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
 
+    CloseDBBeforeBackup: boolean;
+
+
+function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
 
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
 
@@ -543,10 +548,10 @@ procedure SaveServerDataToFile(const Rec: TServerRecord);
 procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
 function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
 
-//procedure LoadRegisteredServers(ATreeView: TTreeView);
-
+function GetServerNodeByServerName(const AServerName: string): TTreeNode;
 function GetServerListFromTreeView: TStringList;
 function GetServerAndPortListFromTreeView: TStringList;
+
 
 function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
@@ -621,6 +626,37 @@ implementation
 
 uses Reg;
 
+
+function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
+var
+  ServerRecord: TServerRecord;
+  ServerSession: TServerSession;
+begin
+  Result := False;
+  ErrorStr := '';
+
+  try
+    ServerRecord := GetServerRecordFromFileByName(AServerName);
+    ServerSession := TServerSession.Create(
+      AServerName, '', '', '', '', TCP, '', '', '', '', 0, 0, False, False, 0, 0, 0
+    );
+
+    ApplyServerRecordToSession(ServerRecord, ServerSession);
+
+    if not ServerSession.Connected then
+      if not ServerSession.IBXConnect then
+      begin
+        ErrorStr := ServerSession.ErrorStr;
+        Exit;
+      end;
+
+    Result := True;
+
+  finally
+    ServerSession.Disconnect;
+    ServerSession.Free;
+  end;
+end;
 
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
 var
@@ -1411,6 +1447,26 @@ begin
   Result := Rec;
 end;
 
+function GetServerNodeByServerName(const AServerName: string): TTreeNode;
+var
+  Node: TTreeNode;
+begin
+  Result := nil;
+
+  Node := MainTreeView.Items.GetFirstNode;
+
+  while Node <> nil do
+  begin
+    if SameText(Node.Text, AServerName) then
+    begin
+      Result := Node;
+      Exit;
+    end;
+
+    Node := Node.GetNextSibling;  // nur Level 0 durchsuchen
+  end;
+end;
+
 function GetServerListFromTreeView: TStringList;
 var
   i: Integer;
@@ -1529,6 +1585,7 @@ procedure ReadIniFile;
 begin
   fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
   InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
+  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
 end;
 
 

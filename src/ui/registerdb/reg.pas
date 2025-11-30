@@ -11,6 +11,7 @@ uses
 
   turbocommon,
   fbcommon,
+  fServerSession,
   uthemeselector;
 
 type
@@ -91,25 +92,13 @@ implementation
 { TfmReg }
 
 procedure TfmReg.bbRegClick(Sender: TObject);
-var
-  doProceed: Boolean;
 begin
   if Trim(edTitle.Text) = '' then
   begin
     ShowMessage('You should fill all fields');
+    edTitle.SetFocus;
     Exit;
   end;
-
-  // Prüfen, ob TestConnection ausgeführt werden soll
-  if SameText(turbocommon.MultiVersionConnection, 'no') then
-    doProceed := TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
-                   edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
-                   chkboxOverwriteServerClientLib.Checked)
-  else
-    doProceed := True; // wenn 'yes', Test überspringen
-
-  if not doProceed then
-    Exit;
 
   // Neue Registrierung
   if NewReg then
@@ -271,6 +260,7 @@ var
 
   ServerRec: TServerRecord;
 begin
+  result := false;
   try
     ServerRec := GetServerRecordFromFileByName(cboxServers.Items[cboxServers.ItemIndex]);
     FileName:= GetConfigurationDirectory + DatabasesRegFile;
@@ -280,7 +270,7 @@ begin
     Reset(F);
     Seek(F, Index);
 
-    Rec.Title:= Title;
+    Rec.Title := Title;
     Rec.DatabaseName:= DatabaseName;
     Rec.UserName:= UserName;
     if SavePassword then
@@ -317,18 +307,24 @@ end;
 function TfmReg.TestConnection(DatabaseName, UserName, Password, Charset: string; FBClient: string;
                                  SQLDialect: string; Port: string; ServerName: string;
                                  OverwriteLoadedClientLib: boolean): Boolean;
+
+var ServerErrStr: string;
 begin
   result := false;
+
+  if not IsServerReachable(ServerName, ServerErrStr) then
+  begin
+    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    Exit;
+  end;
+
   try
     IBConnection1.Close;
     IBConnection1.DatabaseName:= DatabaseName;
 
-    //IBConnection1.FirebirdLibraryPathName := FBClient;
-
     IBConnection1.LoginPrompt := false;
 
     IBConnection1.FirebirdLibraryPathName := FBClient;
-    //ReleaseIBase60;
     with IBConnection1.Params do
     begin
       Clear;
@@ -348,13 +344,16 @@ begin
     on d: EIBDatabaseError do
     begin
       Result:= False;
-      ShowMessage('Unable to connect: '+ d.Message + LineEnding +
-        'Details: GDS error code: '+inttostr(d.GDSErrorCode));
+      MessageDlg(
+        'Unable to connect: ' + d.Message + LineEnding +
+        'Details: GDS error code: ' + IntToStr(d.GDSErrorCode),
+        mtError, [mbOK], 0
+      );
     end;
     on E: Exception do
     begin
       Result:= False;
-      ShowMessage('Unable to connect: ' + e.Message);
+      MessageDlg('Unable to connect: ' + e.Message, mtError, [mbOK], 0);
     end;
   end;
 end;

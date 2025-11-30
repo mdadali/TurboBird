@@ -35,6 +35,7 @@ type
     DeActivateIndexes: TCheckBox;
     IBXClientSideRestoreService1: TIBXClientSideRestoreService;
     IBXServerSideRestoreService1: TIBXServerSideRestoreService;
+    IBXServicesConnection1: TIBXServicesConnection;
     PageBuffers: TEdit;
     Label6: TLabel;
     NoShadow: TCheckBox;
@@ -176,7 +177,7 @@ begin
   Report.Lines.Clear;
 end;
 
-procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+{procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if ModalResult <> mrOK then Exit;
 
@@ -192,7 +193,33 @@ begin
     PageControl1.ActivePage := ReportTab;
   end;
 
+end;}
+
+procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  if ModalResult <> mrOK then Exit;
+
+  if PageControl1.ActivePage = SelectTab then
+  begin
+    CloseAction := caNone;
+    if SourceArchive.Text = '' then
+      raise Exception.Create('A Backup File Name must be given');
+      if ServerSideBtn.Checked then
+      begin
+        IBXServerSideRestoreService1.DatabaseFiles.Clear;
+        IBXServerSideRestoreService1.DatabaseFiles.Add(DBName.Text);
+        Application.QueueAsyncCall(@DoServerRestore,0)
+      end else
+      begin
+        IBXClientSideRestoreService1.DatabaseFiles.Clear;
+        IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
+        Application.QueueAsyncCall(@DoClientRestore,0);
+      end;
+    PageControl1.ActivePage := ReportTab;
+  end;
+
 end;
+
 
 end.
 

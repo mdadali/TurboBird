@@ -34,6 +34,7 @@ type
     Button2: TButton;
     IBXClientSideBackupService1: TIBXClientSideBackupService;
     IBXServerSideBackupService1: TIBXServerSideBackupService;
+    IBXServicesConnection1: TIBXServicesConnection;
     NoDBTriggers: TCheckBox;
     NoGarbageCollection: TCheckBox;
     MetadataOnly: TCheckBox;
@@ -141,6 +142,7 @@ begin
   ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;
   DBName.Text := IBXClientSideBackupService1.DatabaseName;
   BackupFileName.Text := '';
+  Caption := 'Backup Database: ' + IBXClientSideBackupService1.DatabaseName;
 end;
 
 procedure TBackupDlg.IBXClientSideBackupService1GetNextLine(Sender: TObject;

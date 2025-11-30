@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 538
+  Left = 596
   Height = 370
-  Top = 459
+  Top = 116
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370
@@ -9,7 +9,7 @@ object BackupDlg: TBackupDlg
   OnClose = FormClose
   OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.3'
+  LCLVersion = '2.2.6.0'
   object Button1: TButton
     Left = 96
     Height = 25
@@ -44,19 +44,19 @@ object BackupDlg: TBackupDlg
     TabOrder = 2
     object SelectTab: TTabSheet
       Caption = 'SelectTab'
-      ClientHeight = 314
-      ClientWidth = 351
+      ClientHeight = 316
+      ClientWidth = 347
       object Label2: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 7
-        Width = 39
+        Width = 42
         Caption = 'Server'
         ParentColor = False
       end
       object ServerName: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 24
         Width = 180
         ReadOnly = True
@@ -64,15 +64,15 @@ object BackupDlg: TBackupDlg
       end
       object Label1: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 56
-        Width = 95
+        Width = 98
         Caption = 'Database Name'
         ParentColor = False
       end
       object DBName: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 72
         Width = 296
         ReadOnly = True
@@ -80,15 +80,15 @@ object BackupDlg: TBackupDlg
       end
       object ServerSideBtn: TRadioButton
         Left = 12
-        Height = 22
+        Height = 21
         Top = 112
-        Width = 93
+        Width = 95
         Caption = 'Server Side'
         TabOrder = 2
       end
       object ClientSideBtn: TRadioButton
         Left = 134
-        Height = 22
+        Height = 21
         Top = 112
         Width = 88
         Caption = 'Client Side'
@@ -98,15 +98,15 @@ object BackupDlg: TBackupDlg
       end
       object Label3: TLabel
         Left = 12
-        Height = 14
+        Height = 19
         Top = 144
-        Width = 68
+        Width = 69
         Caption = 'Backup File'
         ParentColor = False
       end
       object BackupFileName: TEdit
         Left = 12
-        Height = 24
+        Height = 31
         Top = 160
         Width = 288
         TabOrder = 4
@@ -156,55 +156,55 @@ object BackupDlg: TBackupDlg
       end
       object IgnoreChecksums: TCheckBox
         Left = 16
-        Height = 22
+        Height = 21
         Top = 192
-        Width = 136
+        Width = 138
         Caption = 'Ignore Checksums'
         TabOrder = 5
       end
       object IgnoreLimboTransactions: TCheckBox
         Left = 16
-        Height = 22
+        Height = 21
         Top = 216
-        Width = 182
+        Width = 186
         Caption = 'Ignore Limbo Transactions'
         TabOrder = 6
       end
       object MetadataOnly: TCheckBox
         Left = 16
-        Height = 22
+        Height = 21
         Top = 240
-        Width = 111
+        Width = 114
         Caption = 'Metadata Only'
         TabOrder = 7
       end
       object NoGarbageCollection: TCheckBox
         Left = 16
-        Height = 22
+        Height = 21
         Top = 264
-        Width = 157
+        Width = 162
         Caption = 'No Garbage Collection'
         TabOrder = 8
       end
       object NoDBTriggers: TCheckBox
         Left = 16
-        Height = 22
+        Height = 21
         Top = 288
-        Width = 151
+        Width = 158
         Caption = 'No Database Triggers'
         TabOrder = 9
       end
     end
     object ReportTab: TTabSheet
       Caption = 'ReportTab'
-      ClientHeight = 314
-      ClientWidth = 351
+      ClientHeight = 316
+      ClientWidth = 347
       OnShow = ReportTabShow
       object Report: TMemo
         Left = 0
-        Height = 294
+        Height = 296
         Top = 0
-        Width = 351
+        Width = 347
         Align = alClient
         Lines.Strings = (
           'Report'
@@ -215,8 +215,8 @@ object BackupDlg: TBackupDlg
       object ProgressBar1: TProgressBar
         Left = 0
         Height = 20
-        Top = 294
-        Width = 351
+        Top = 296
+        Width = 347
         Align = alBottom
         Style = pbstMarquee
         TabOrder = 1
@@ -227,27 +227,33 @@ object BackupDlg: TBackupDlg
     DefaultExt = '.gbk'
     Filter = 'Backup Files|*.gbk|All Files|*.*'
     Options = [ofOverwritePrompt, ofPathMustExist, ofEnableSizing, ofViewDetail]
-    left = 309
-    top = 120
+    Left = 309
+    Top = 120
   end
   object IBXClientSideBackupService1: TIBXClientSideBackupService
-    ServicesConnection = DBDataModule.IBXServicesConnection1
+    ServicesConnection = IBXServicesConnection1
     TraceFlags = []
     OnGetNextLine = IBXClientSideBackupService1GetNextLine
     BlockingFactor = 0
     Options = []
-    left = 262
-    top = 216
+    Left = 262
+    Top = 216
   end
   object IBXServerSideBackupService1: TIBXServerSideBackupService
-    ServicesConnection = DBDataModule.IBXServicesConnection1
+    ServicesConnection = IBXServicesConnection1
     TraceFlags = []
     OnGetNextLine = IBXClientSideBackupService1GetNextLine
     BlockingFactor = 0
     Options = []
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    left = 257
-    top = 279
+    Left = 257
+    Top = 279
+  end
+  object IBXServicesConnection1: TIBXServicesConnection
+    Connected = False
+    TraceFlags = []
+    Left = 224
+    Top = 39
   end
 end

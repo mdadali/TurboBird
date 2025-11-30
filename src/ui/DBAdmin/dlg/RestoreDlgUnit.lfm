@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 792
+  Left = 420
   Height = 448
-  Top = 100
+  Top = 116
   Width = 440
   Caption = 'Restore Database'
   ClientHeight = 448
@@ -279,7 +279,7 @@ object RestoreDlg: TRestoreDlg
     Top = 24
   end
   object IBXClientSideRestoreService1: TIBXClientSideRestoreService
-    ServicesConnection = DBDataModule.IBXServicesConnection1
+    ServicesConnection = IBXServicesConnection1
     TraceFlags = []
     OnGetNextLine = IBXClientSideRestoreService1GetNextLine
     PageSize = 0
@@ -287,11 +287,11 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 232
-    Top = 192
+    Left = 312
+    Top = 88
   end
   object IBXServerSideRestoreService1: TIBXServerSideRestoreService
-    ServicesConnection = DBDataModule.IBXServicesConnection1
+    ServicesConnection = IBXServicesConnection1
     TraceFlags = []
     OnGetNextLine = IBXClientSideRestoreService1GetNextLine
     PageSize = 0
@@ -299,7 +299,13 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 232
-    Top = 32
+    Left = 104
+    Top = 88
+  end
+  object IBXServicesConnection1: TIBXServicesConnection
+    Connected = False
+    TraceFlags = []
+    Left = 192
+    Top = 204
   end
 end
