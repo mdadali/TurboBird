@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <BuildModes Active="x86_64-win64-win-debug"/>
     <Units Count="189">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -1484,7 +1484,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="74"/>
         <CursorPos X="4" Y="89"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit151>
       <Unit152>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\firebird\FirebirdOOAPI.pas"/>
@@ -1553,7 +1553,7 @@
         <Filename Value="deps\generator_deps.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="52" Y="10"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit161>
       <Unit162>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBClientAPI.pas"/>
@@ -1644,13 +1644,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="91"/>
         <CursorPos X="20" Y="101"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit174>
       <Unit175>
         <Filename Value="ui\DBAdmin\dlg\ExecuteSQLScriptDlgUnit.lfm"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="14" Y="13"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit175>
       <Unit176>
