@@ -1,5 +1,5 @@
 object RestoreDlg: TRestoreDlg
-  Left = 420
+  Left = 561
   Height = 448
   Top = 116
   Width = 440
@@ -54,14 +54,6 @@ object RestoreDlg: TRestoreDlg
         Caption = 'Server'
         ParentColor = False
       end
-      object ServerName: TEdit
-        Left = 12
-        Height = 31
-        Top = 24
-        Width = 180
-        ReadOnly = True
-        TabOrder = 0
-      end
       object Label1: TLabel
         Left = 12
         Height = 19
@@ -75,7 +67,7 @@ object RestoreDlg: TRestoreDlg
         Height = 31
         Top = 72
         Width = 396
-        TabOrder = 1
+        TabOrder = 0
       end
       object ServerSideBtn: TRadioButton
         Left = 12
@@ -83,7 +75,7 @@ object RestoreDlg: TRestoreDlg
         Top = 112
         Width = 95
         Caption = 'Server Side'
-        TabOrder = 2
+        TabOrder = 1
       end
       object ClientSideBtn: TRadioButton
         Left = 134
@@ -92,7 +84,7 @@ object RestoreDlg: TRestoreDlg
         Width = 88
         Caption = 'Client Side'
         Checked = True
-        TabOrder = 3
+        TabOrder = 2
         TabStop = True
       end
       object Label3: TLabel
@@ -108,7 +100,7 @@ object RestoreDlg: TRestoreDlg
         Height = 31
         Top = 208
         Width = 364
-        TabOrder = 6
+        TabOrder = 5
       end
       object SpeedButton1: TSpeedButton
         Left = 384
@@ -167,7 +159,7 @@ object RestoreDlg: TRestoreDlg
         Top = 160
         Width = 104
         NumbersOnly = True
-        TabOrder = 4
+        TabOrder = 3
       end
       object Label5: TLabel
         Left = 120
@@ -183,7 +175,7 @@ object RestoreDlg: TRestoreDlg
         Top = 241
         Width = 142
         Caption = 'Deactivate Indexes'
-        TabOrder = 7
+        TabOrder = 6
       end
       object NoShadow: TCheckBox
         Left = 17
@@ -191,7 +183,7 @@ object RestoreDlg: TRestoreDlg
         Top = 264
         Width = 291
         Caption = 'Do not recreate shadow files during restore'
-        TabOrder = 8
+        TabOrder = 7
       end
       object NoValidityCheck: TCheckBox
         Left = 17
@@ -199,7 +191,7 @@ object RestoreDlg: TRestoreDlg
         Top = 288
         Width = 321
         Caption = 'Do not enforce validity conditions during restore'
-        TabOrder = 9
+        TabOrder = 8
       end
       object OneRelationAtATime: TCheckBox
         Left = 17
@@ -207,7 +199,7 @@ object RestoreDlg: TRestoreDlg
         Top = 312
         Width = 308
         Caption = 'Commit after completing restore of each table'
-        TabOrder = 10
+        TabOrder = 9
       end
       object RestoreMetaDataOnly: TCheckBox
         Left = 17
@@ -215,7 +207,7 @@ object RestoreDlg: TRestoreDlg
         Top = 336
         Width = 167
         Caption = 'Restore MetaData Only'
-        TabOrder = 11
+        TabOrder = 10
       end
       object UseAllSpace: TCheckBox
         Left = 17
@@ -223,7 +215,7 @@ object RestoreDlg: TRestoreDlg
         Top = 360
         Width = 404
         Caption = 'Do not reserve 20% of each data page for future rec. versions'
-        TabOrder = 12
+        TabOrder = 11
       end
       object Label6: TLabel
         Left = 197
@@ -239,7 +231,16 @@ object RestoreDlg: TRestoreDlg
         Top = 160
         Width = 107
         NumbersOnly = True
-        TabOrder = 5
+        TabOrder = 4
+      end
+      object cmbBoxServers: TComboBox
+        Left = 12
+        Height = 35
+        Top = 24
+        Width = 380
+        ItemHeight = 0
+        Style = csDropDownList
+        TabOrder = 12
       end
     end
     object ReportTab: TTabSheet

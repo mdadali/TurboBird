@@ -1365,53 +1365,6 @@ begin
   fmBackupRestore.Show;
 end;}
 
-procedure TfmMain.mnRestoreClick(Sender: TObject);
-var
-  fmBackupRestore: TfmBackupRestore;
-  ATab: TTabSheet;
-  Title, FullHint: string;
-begin
-  lmRestoreNewClick(nil);
-  exit;
-
-  // Neue Form + Tab erzeugen
-  fmBackupRestore := TfmBackupRestore.Create(Application);
-  ATab := TTabSheet.Create(Self);
-  ATab.Parent := PageControl1;
-  ATab.ImageIndex := -1; // kein Node, daher ggf. Standard-Icon oder -1
-  fmBackupRestore.Parent := ATab;
-  fmBackupRestore.Align := alClient;
-  fmBackupRestore.BorderStyle := bsNone;
-
-  // Tab vorbereiten
-  Title := 'Database Restore';
-  ATab.Caption := Title;
-  ATab.ImageIndex := 3; //tvMain.Selected.ImageIndex;
-  fmBackupRestore.Caption := Title;
-  PageControl1.ActivePage := ATab;
-
-  // Detaillierte Infos als Hint
-  FullHint :=
-    'Object type: Database' + sLineBreak +
-    'Operation: Restore' + sLineBreak +
-    'This tab is not linked to a specific database node.';
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Restore-Modus aktivieren
-  fmBackupRestore.Init('', '', '', '', nil);
-
-  fmBackupRestore.cmbBoxHostList.Items := GetServerListFromTreeView;
-  if fmBackupRestore.cmbBoxHostList.Items.Count = 0 then
-    fmBackupRestore.cmbBoxHostList.Items.Add('localhost');
-  fmBackupRestore.cmbBoxHostList.ItemIndex := 0;
-
-  fmBackupRestore.cbOperation.ItemIndex := 1;   // Restore
-  fmBackupRestore.cbOperation.Enabled := False;
-  fmBackupRestore.meLog.Clear;
-
-  fmBackupRestore.Show;
-end;
 
 procedure TfmMain.mnServerRegistryClick(Sender: TObject);
 begin
@@ -1607,9 +1560,65 @@ begin
   end;
 end;
 
+procedure TfmMain.mnRestoreClick(Sender: TObject);
+var TmpRestoreDlg: TRestoreDlg;
+    ServerName, DatabaseName: string;
+    DefaultPageSize, DefaultNumBuffers: Integer;
+    SelNode, ServerNode, DBNode: TTreeNode;
+    dbIndex: integer;
+    ServerErrStr: string;
+begin
+  if tvMain.Items.Count = 0 then
+    exit;
+
+  DBNode := nil;
+
+  SelNode := tvMain.Selected;
+
+  if SelNode = nil then
+  begin
+    ShowMessage('Please select a server first before starting the restore operation');
+    exit;
+  end;
+
+  ServerNode := turbocommon.GetAncestorAtLevel(SelNode, 0);
+
+  ServerName := ServerNode.Text;
+
+  if not IsServerReachable(ServerName, ServerErrStr) then
+  begin
+    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  if SelNode.Level > 0 then
+    DBNode := turbocommon.GetAncestorAtLevel(SelNode, 1);
+
+  if DBNode <> nil then
+  begin
+    dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
+    DatabaseName := GetDBFileNameFromConnectionString(RegisteredDatabases[dbIndex].IBDatabase.DatabaseName);
+    CloseDB(dbIndex);
+  end else
+    DatabaseName := 'restoreddb.fdb';
+
+  DefaultPageSize   := 8196;
+  DefaultNumBuffers := 2048;
+
+  TmpRestoreDlg := TRestoreDlg.Create(self);
+  TmpRestoreDlg.Init(ServerName, DatabaseName, DefaultPageSize, DefaultNumBuffers);
+  if TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers) = mrOK then
+  begin
+
+    ShowMessage('Now register db!');
+  end;
+
+end;
+
 procedure TfmMain.lmRestoreNewClick(Sender: TObject);
 var
   ServerRec: TServerRecord;
+  ServerSession: TServersession;
   DBRec: TDatabaseRec;
   dbIndex: Word;
   TmpRestoreDlg: TRestoreDlg;
@@ -1617,10 +1626,35 @@ var
   DefaultNumBuffers: Integer;
   isDbConnected: Boolean;
   DBNode: TTreeNode;
+  SelNode: TTreeNode;
   ServerVersionMajor: word;
+  ServerErrStr: string;
 begin
+
+  mnRestoreClick(nil);
+  exit;
+
   if tvMain.Items.Count = 0 then
     exit;
+
+  DefaultPageSize   := 8196;
+  DefaultNumBuffers := 2048;
+
+  if tvMain.Selected = nil then
+  begin
+    ShowMessage('Bitte wählen zuerst einen Server für Restore Vorgang');
+    exit;
+  end;
+
+  SelNode := tvMain.Selected;
+
+  ServerSession := TPNodeInfos(SelNode.Data)^.ServerSession;
+
+  if not IsServerReachable(ServerSession.ServerName, ServerErrStr) then
+  begin
+    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    Exit;
+  end;
 
   dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
   DBRec := RegisteredDatabases[dbIndex];
@@ -1630,14 +1664,6 @@ begin
     if not ConnectToDBAs(dbIndex) then
       Exit;
 
-  if not DBRec.IBDatabaseInfo.Database.Connected then
-    DBRec.IBDatabaseInfo.Database.Connected := true;  //???
-  DefaultPageSize   := DBRec.IBDatabaseInfo.PageSize;
-  DefaultNumBuffers := DBRec.IBDatabaseInfo.NumBuffers;
-
-  if DBRec.IBDatabase.Connected then
-    DBRec.IBDatabase.Connected := False;
-
   ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
   ServerVersionMajor :=  ServerRec.VersionMajor;
 
@@ -1645,6 +1671,7 @@ begin
 
   try
     TmpRestoreDlg := TRestoreDlg.Create(Self);
+    //TmpRestoreDlg.Init;
     try
       if TmpRestoreDlg.IBXServicesConnection1.Connected then
         TmpRestoreDlg.IBXServicesConnection1.Connected := False;

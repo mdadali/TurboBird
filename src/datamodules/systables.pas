@@ -178,8 +178,6 @@ begin
   Conn := RegisteredDatabases[dbIndex].IBDatabase;
   IBDb := fmMain.CurrentIBConnection;
 
-  // Nur wenn eine andere Datenbank oder andere Parameter notwendig sind,
-  // die Verbindung neu aufbauen – sonst nichts anfassen.
   //if (IBDb <> Conn) then
   //begin
     // alte Verbindung lösen
@@ -223,106 +221,6 @@ begin
     Conn.Open;
   end;
 end;
-
-{procedure TdmSysTables.Init(dbIndex: Integer);
-begin
-  // todo: first step: do not close, reopen connection if we're using the correct
-  // connection/transaction already
-
-  with RegisteredDatabases[dbIndex] do
-  begin
-    if IBConnection.Connected then
-      IBConnection.Close;
-    sqQuery.Close;
-    IBConnection.Params.Clear;
-    IBConnection.DatabaseName := RegRec.DatabaseName;
-    IBConnection.Params.Add('user_name=' + RegRec.UserName);
-    IBConnection.Params.Add('password=' + RegRec.Password);
-    IBConnection.Params.Add('sql_role_name=' + RegRec.Role);
-    IBConnection.Params.Add('lc_ctype=' + RegRec.Charset);
-    ibcDatabase:= IBConnection;
-    stTrans:= SQLTrans;
-    sqQuery.DataBase:= ibcDatabase;
-    sqQuery.Transaction:= stTrans;
-  end;
-end;}
-
-{procedure TdmSysTables.Init(dbIndex: Integer);
-begin
-  // todo: first step: do not close, reopen connection if we're using the correct
-  // connection/transaction already
-  with RegisteredDatabases[dbIndex] do
-  begin
-    if sqQuery.Active then
-      sqQuery.Close;
-
-
-    if RegisteredDatabases[dbIndex].IBConnection.Connected then
-      RegisteredDatabases[dbIndex].IBConnection.Close(true);
-
-    RegisteredDatabases[dbIndex].IBConnection.Params.Clear;
-    RegisteredDatabases[dbIndex].IBConnection.DatabaseName := RegRec.DatabaseName;
-    RegisteredDatabases[dbIndex].IBConnection.Params.Add('user_name=' + RegRec.UserName);
-    RegisteredDatabases[dbIndex].IBConnection.Params.Add('password=' + RegRec.Password);
-    RegisteredDatabases[dbIndex].IBConnection.Params.Add('sql_role_name=' + RegRec.Role);
-    RegisteredDatabases[dbIndex].IBConnection.Params.Add('lc_ctype=' + RegRec.Charset);
-    ibcDatabase:= RegisteredDatabases[dbIndex].IBConnection;
-    stTrans:= RegisteredDatabases[dbIndex].SQLTrans;
-    sqQuery.DataBase:= ibcDatabase;
-    sqQuery.Transaction:= stTrans;
-    //IBConnection.FirebirdLibraryPathName := RegRec.FireBirdClientLibPath;
-    RegisteredDatabases[dbIndex].IBConnection.Connected := true;
-    RegisteredDatabases[dbIndex].SQLTrans.StartTransaction;
-  end;
-end;}
-
-
-{procedure TdmSysTables.Init(dbIndex: Integer);
-begin
-  // todo: first step: do not close, reopen connection if we're using the correct
-  // connection/transaction already
-  with fmMain.RegisteredDatabases[dbIndex] do
-  begin
-    if IBConnection.Connected then
-      IBConnection.Close;
-    sqQuery.Close;
-    IBConnection.DatabaseName:= RegRec.DatabaseName;
-    IBConnection.UserName:= RegRec.UserName;
-    IBConnection.Password:= RegRec.Password;
-    IBConnection.Role:= RegRec.Role;
-    IBConnection.CharSet:= RegRec.Charset;
-    ibcDatabase:= IBConnection;
-    stTrans:= SQLTrans;
-    sqQuery.DataBase:= ibcDatabase;
-    sqQuery.Transaction:= stTrans;
-  end;
-end; }
-
-
-{procedure TdmSysTables.Init(dbIndex: Integer);
-begin
-  // todo: first step: do not close, reopen connection if we're using the correct
-  // connection/transaction already
-  with RegisteredDatabases[dbIndex] do
-  begin
-    if IBConnection.Connected then
-      IBConnection.Close;
-    sqQuery.Close;
-    IBConnection.DatabaseName:= RegRec.DatabaseName;
-    IBConnection.Params.Clear;
-    IBConnection.Params.Add('user_name=' + RegRec.UserName);
-    IBConnection.Params.Add('password=' + RegRec.Password);
-    IBConnection.Params.Add('sql_role_name=' + RegRec.Role);
-    IBConnection.Params.Add('lc_ctype=' + RegRec.Charset);
-    IBConnection.LoginPrompt := (RegRec.Password = '');
-    ibcDatabase:= IBConnection;
-    stTrans:= SQLTrans;
-    sqQuery.DataBase:= ibcDatabase;
-    sqQuery.Transaction:= stTrans;
-    IBConnection.Connected := true;
-  end;
-end;}
-
 
 (*****  GetDBObjectNames, like Table names, Triggers, Generators, etc according to TVIndex  ****)
 

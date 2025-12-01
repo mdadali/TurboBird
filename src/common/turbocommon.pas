@@ -312,6 +312,8 @@ type
   tvotUDRFunction,
   tvotUDRProcedureRoot,
   tvotUDRProcedure,
+  tvotUDRTriggerRoot,
+  tvotUDRTrigger,
   tvotPackageRoot,
   tvotPackage,
   tvotPackageFunctionRoot,
@@ -321,7 +323,9 @@ type
   tvotPackageUDRFunctionRoot,
   tvotPackageUDRFunction,
   tvotPackageUDRProcedureRoot,
-  tvotPackageUDRProcedure
+  tvotPackageUDRProcedure,
+  tvotPackageUDRTriggerRoot,
+  tvotPackageUDRTrigger
   );
 
 type

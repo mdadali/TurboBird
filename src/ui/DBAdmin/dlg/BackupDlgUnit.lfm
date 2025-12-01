@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 596
+  Left = 411
   Height = 370
-  Top = 116
+  Top = 131
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370
@@ -87,7 +87,7 @@ object BackupDlg: TBackupDlg
         TabOrder = 2
       end
       object ClientSideBtn: TRadioButton
-        Left = 134
+        Left = 136
         Height = 21
         Top = 112
         Width = 88
@@ -228,7 +228,7 @@ object BackupDlg: TBackupDlg
     Filter = 'Backup Files|*.gbk|All Files|*.*'
     Options = [ofOverwritePrompt, ofPathMustExist, ofEnableSizing, ofViewDetail]
     Left = 309
-    Top = 120
+    Top = 112
   end
   object IBXClientSideBackupService1: TIBXClientSideBackupService
     ServicesConnection = IBXServicesConnection1

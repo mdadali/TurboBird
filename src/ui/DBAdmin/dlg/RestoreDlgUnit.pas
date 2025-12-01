@@ -23,7 +23,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, Buttons, ComCtrls, IBXServices;
+  StdCtrls, Buttons, ComCtrls, IBXServices,
+  turbocommon;
 
 type
 
@@ -32,6 +33,7 @@ type
   TRestoreDlg = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    cmbBoxServers: TComboBox;
     DeActivateIndexes: TCheckBox;
     IBXClientSideRestoreService1: TIBXClientSideRestoreService;
     IBXServerSideRestoreService1: TIBXServerSideRestoreService;
@@ -44,7 +46,6 @@ type
     ProgressBar1: TProgressBar;
     RestoreMetaDataOnly: TCheckBox;
     UseAllSpace: TCheckBox;
-    ServerName: TEdit;
     DBName: TEdit;
     SourceArchive: TEdit;
     PageSize: TEdit;
@@ -69,11 +70,16 @@ type
     procedure SpeedButton1Click(Sender: TObject);
   private
     { private declarations }
+    FServerName,
+    FDatabaseName: string;
+    FDefaultPageSize,
+    FDefaultNumBuffers: Integer;
     procedure DoClientRestore(Data: PtrInt);
     procedure DoServerRestore(Data: PtrInt);
   public
     { public declarations }
-     function ShowModal(DefaultPageSize, DefaultNumBuffers: integer): TModalResult;
+    procedure Init(AServerName, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
+    function ShowModal(DefaultPageSize, DefaultNumBuffers: integer): TModalResult;
  end;
 
 var
@@ -89,6 +95,44 @@ procedure TRestoreDlg.SpeedButton1Click(Sender: TObject);
 begin
   if OpenDialog1.Execute then
     SourceArchive.Text := OpenDialog1.Filename;
+end;
+
+procedure TRestoreDlg.Init(AServerName, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
+var ServerList: TStringList;
+    ServerRec: TServerRecord;
+begin
+  FServerName        := AServerName;
+  FDatabaseName      := ADatabaseName;
+  FDefaultPageSize   := ADefaultPageSize;
+  FDefaultNumBuffers := ADefaultNumBuffers;
+
+  ServerList := GetServerListFromTreeView;
+  cmbBoxServers.Items.Assign(ServerList);
+
+  if cmbBoxServers.Items.Count > 0 then
+    cmbBoxServers.ItemIndex := cmbBoxServers.Items.IndexOf(FServerName);
+
+  DBName.Text      := FDatabaseName;
+  PageSize.Text    := IntToStr(FDefaultPageSize);
+  PageBuffers.Text := IntToStr(FDefaultNumBuffers);
+
+
+  ServerRec := GetServerRecordFromFileByName(FServerName);
+
+  if IBXServicesConnection1.Connected then
+    IBXServicesConnection1.Connected := False;
+
+  IBXServicesConnection1.ServerName := ServerRec.ServerName;
+  IBXServicesConnection1.PortNo := ServerRec.Port;
+  IBXServicesConnection1.Protocol := ServerRec.Protocol;
+
+  IBXServicesConnection1.Params.Clear;
+  IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
+  IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+  IBXServicesConnection1.LoginPrompt := False;
+  IBXServicesConnection1.Connected := True;
+
+  ServerList.Free;
 end;
 
 procedure TRestoreDlg.DoClientRestore(Data: PtrInt);
@@ -160,8 +204,8 @@ end;
 procedure TRestoreDlg.FormShow(Sender: TObject);
 begin
   PageControl1.ActivePage := SelectTab;
-  ServerName.Text := IBXClientSideRestoreService1.ServicesConnection.ServerName;
-  DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];
+  //ServerName.Text := IBXClientSideRestoreService1.ServicesConnection.ServerName;
+  //DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];
   SourceArchive.SetFocus;
 end;
 
