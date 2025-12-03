@@ -239,6 +239,7 @@ object RestoreDlg: TRestoreDlg
         Height = 35
         Top = 24
         Width = 440
+        Enabled = False
         ItemHeight = 0
         Style = csDropDownList
         TabOrder = 12
