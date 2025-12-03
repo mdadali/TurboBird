@@ -1551,11 +1551,13 @@ var TmpRestoreDlg: TRestoreDlg;
     ServerRec: TServerRecord;
     TmpModalResult: TModalResult;
     cboxItems: TStringList;
+    isDbConnected: boolean;
 begin
   if tvMain.Items.Count = 0 then
     exit;
 
   DBNode := nil;
+  isDbConnected := false;
 
   SelNode := tvMain.Selected;
 
@@ -1582,6 +1584,7 @@ begin
   begin
     dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
     DatabaseName := GetDBFileNameFromConnectionString(RegisteredDatabases[dbIndex].IBDatabase.DatabaseName);
+    isDbConnected := RegisteredDatabases[dbIndex].IBDatabase.Connected;
     CloseDB(dbIndex);
   end else
     DatabaseName := 'RestoredDB.fdb';
@@ -1626,108 +1629,21 @@ begin
         if ServerNode <> nil then
           ServerNode.Expand(false);
       end;
+    end else
+    begin
+      DBNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
+      DBNode.DeleteChildren;
+      AddRootObjects(DBNode, ServerRec.VersionMajor);
+      //if isDbConnected then
+        //RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
     end;
   end;
   TmpRestoreDlg.Free;
 end;
 
 procedure TfmMain.lmRestoreNewClick(Sender: TObject);
-var
-  ServerRec: TServerRecord;
-  ServerSession: TServersession;
-  DBRec: TDatabaseRec;
-  dbIndex: Word;
-  TmpRestoreDlg: TRestoreDlg;
-  DefaultPageSize: Integer;
-  DefaultNumBuffers: Integer;
-  isDbConnected: Boolean;
-  DBNode: TTreeNode;
-  SelNode: TTreeNode;
-  ServerVersionMajor: word;
-  ServerErrStr: string;
 begin
-
   mnRestoreClick(nil);
-  exit;
-
-  if tvMain.Items.Count = 0 then
-    exit;
-
-  DefaultPageSize   := 8196;
-  DefaultNumBuffers := 2048;
-
-  if tvMain.Selected = nil then
-  begin
-    ShowMessage('Bitte wählen zuerst einen Server für Restore Vorgang');
-    exit;
-  end;
-
-  SelNode := tvMain.Selected;
-
-  ServerSession := TPNodeInfos(SelNode.Data)^.ServerSession;
-
-  if not IsServerReachable(ServerSession.ServerName, ServerErrStr) then
-  begin
-    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
-    Exit;
-  end;
-
-  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-  DBRec := RegisteredDatabases[dbIndex];
-  isDbConnected := DBRec.IBDatabase.Connected;
-
-  if not isDbConnected then
-    if not ConnectToDBAs(dbIndex) then
-      Exit;
-
-  ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
-  ServerVersionMajor :=  ServerRec.VersionMajor;
-
-  CloseDB(dbIndex);
-
-  try
-    TmpRestoreDlg := TRestoreDlg.Create(Self);
-    //TmpRestoreDlg.Init;
-    try
-      if TmpRestoreDlg.IBXServicesConnection1.Connected then
-        TmpRestoreDlg.IBXServicesConnection1.Connected := False;
-
-      TmpRestoreDlg.IBXServicesConnection1.ServerName := ServerRec.ServerName;
-      TmpRestoreDlg.IBXServicesConnection1.PortNo := ServerRec.Port;
-      TmpRestoreDlg.IBXServicesConnection1.Protocol := ServerRec.Protocol;
-
-      TmpRestoreDlg.IBXServicesConnection1.Params.Clear;
-      TmpRestoreDlg.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
-      TmpRestoreDlg.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
-      TmpRestoreDlg.IBXServicesConnection1.LoginPrompt := False;
-      TmpRestoreDlg.IBXServicesConnection1.Connected := True;
-
-      TmpRestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Clear;
-      TmpRestoreDlg.IBXClientSideRestoreService1.DatabaseFiles.Add(
-        GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName)
-      );
-
-      TmpRestoreDlg.IBXServerSideRestoreService1.DatabaseFiles.Clear;
-      TmpRestoreDlg.IBXServerSideRestoreService1.DatabaseFiles.Add(
-        GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName)
-      );
-
-      TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
-
-    except
-      on E: Exception do
-        ShowMessage('Restore-Error: ' + E.Message);
-    end;
-
-  finally
-    TmpRestoreDlg.Free;
-
-    DBNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
-    DBNode.DeleteChildren;
-    AddRootObjects(DBNode, ServerVersionMajor);
-    if isDbConnected then
-      RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
-  end;
 end;
 
 procedure TfmMain.lmBlobEditorClick(Sender: TObject);

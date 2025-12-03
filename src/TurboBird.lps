@@ -297,8 +297,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1619"/>
-        <CursorPos X="16" Y="1633"/>
+        <TopLine Value="1624"/>
+        <CursorPos X="11" Y="1638"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -308,9 +308,9 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="3">
-          <Item0 X="12" Y="8528" ID="3"/>
-          <Item1 X="3" Y="1677" ID="1"/>
-          <Item2 X="3" Y="3884" ID="2"/>
+          <Item0 X="12" Y="8444" ID="3"/>
+          <Item1 Y="1647" ID="1"/>
+          <Item2 X="3" Y="3800" ID="2"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -336,8 +336,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="331"/>
-        <CursorPos X="31" Y="307"/>
+        <TopLine Value="121"/>
+        <CursorPos X="37" Y="127"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1005,7 +1005,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="138"/>
         <CursorPos X="3" Y="83"/>
-        <UsageCount Value="123"/>
+        <UsageCount Value="124"/>
         <Loaded Value="True"/>
       </Unit97>
       <Unit98>
@@ -1017,7 +1017,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="102"/>
         <CursorPos X="41" Y="107"/>
-        <UsageCount Value="123"/>
+        <UsageCount Value="124"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit98>
@@ -1659,7 +1659,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="708"/>
         <CursorPos X="14" Y="722"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="10"/>
       </Unit176>
       <Unit177>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\packages\fcl-db\src\base\db.pas"/>
@@ -1759,31 +1759,31 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="110" Column="2" TopLine="98"/>
+        <Caret Line="122" TopLine="110"/>
       </Position1>
       <Position2>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="108" Column="36" TopLine="100"/>
+        <Caret Line="116" Column="67" TopLine="112"/>
       </Position2>
       <Position3>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="122" TopLine="110"/>
+        <Caret Line="296" Column="40" TopLine="117"/>
       </Position3>
       <Position4>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="116" Column="67" TopLine="112"/>
+        <Caret Line="129" Column="33" TopLine="117"/>
       </Position4>
       <Position5>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="296" Column="40" TopLine="117"/>
+        <Caret Line="294" Column="54" TopLine="279"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="129" Column="33" TopLine="117"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1605" Column="39" TopLine="1589"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="294" Column="54" TopLine="279"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1606" Column="39" TopLine="1590"/>
       </Position7>
       <Position8>
         <Filename Value="ui\main\main.pas"/>
@@ -1791,91 +1791,91 @@
       </Position8>
       <Position9>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1606" Column="39" TopLine="1590"/>
+        <Caret Line="1658" Column="31" TopLine="1622"/>
       </Position9>
       <Position10>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1605" Column="39" TopLine="1589"/>
+        <Caret Line="1634" TopLine="1616"/>
       </Position10>
       <Position11>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1658" Column="31" TopLine="1622"/>
+        <Caret Line="1628" Column="20" TopLine="1622"/>
       </Position11>
       <Position12>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1634" TopLine="1616"/>
+        <Caret Line="1574" TopLine="1557"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1628" Column="20" TopLine="1622"/>
-      </Position13>
-      <Position14>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1574" TopLine="1557"/>
-      </Position14>
-      <Position15>
         <Filename Value="common\turbocommon.pas"/>
         <Caret Line="2534" Column="9" TopLine="2517"/>
+      </Position13>
+      <Position14>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="2525" Column="13" TopLine="2518"/>
+      </Position14>
+      <Position15>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1608" Column="22" TopLine="1584"/>
       </Position15>
       <Position16>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="2525" Column="13" TopLine="2518"/>
+        <Caret Line="2544" Column="34" TopLine="2528"/>
       </Position16>
       <Position17>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1608" Column="22" TopLine="1584"/>
+        <Caret Line="1600" Column="24" TopLine="1597"/>
       </Position17>
       <Position18>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="2544" Column="34" TopLine="2528"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1592" Column="17" TopLine="1588"/>
       </Position18>
       <Position19>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1600" Column="24" TopLine="1597"/>
+        <Caret Line="1609" Column="64" TopLine="1590"/>
       </Position19>
       <Position20>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1592" Column="17" TopLine="1588"/>
+        <Caret Line="1602" Column="42" TopLine="1593"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1609" Column="64" TopLine="1590"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="323" Column="50" TopLine="304"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1602" Column="42" TopLine="1593"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="123" Column="16" TopLine="121"/>
       </Position22>
       <Position23>
         <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="323" Column="50" TopLine="304"/>
+        <Caret Line="77" Column="23" TopLine="64"/>
       </Position23>
       <Position24>
         <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="123" Column="16" TopLine="121"/>
+        <Caret Line="123" Column="20" TopLine="108"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="77" Column="23" TopLine="64"/>
-      </Position25>
-      <Position26>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="123" Column="20" TopLine="108"/>
-      </Position26>
-      <Position27>
         <Filename Value="ui\main\main.pas"/>
         <Caret Line="1607" Column="98" TopLine="1597"/>
+      </Position25>
+      <Position26>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1610" Column="47" TopLine="1597"/>
+      </Position26>
+      <Position27>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="209" Column="54" TopLine="262"/>
       </Position27>
       <Position28>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1610" Column="47" TopLine="1597"/>
+        <Caret Line="1609" Column="23" TopLine="1607"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="209" Column="54" TopLine="262"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1633" Column="56" TopLine="1616"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1609" Column="23" TopLine="1607"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="307" Column="31" TopLine="331"/>
       </Position30>
     </JumpHistory>
     <RunParams>
