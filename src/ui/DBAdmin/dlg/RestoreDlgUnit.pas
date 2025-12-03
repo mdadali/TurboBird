@@ -103,7 +103,11 @@ procedure TRestoreDlg.sbBackupFileClick(Sender: TObject);
 begin
   OpenDialog1.Filter := 'Backup Files|*.gbk|All Files|*.*';
   if OpenDialog1.Execute then
+  begin
     SourceArchive.Text := OpenDialog1.Filename;
+    if Trim(DBName.Text) = 'RestoredDB.fdb' then
+      DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
+  end;
 end;
 
 procedure TRestoreDlg.sbPrimDBFileNameClick(Sender: TObject);
@@ -255,24 +259,6 @@ begin
   Report.Lines.Clear;
 end;
 
-{procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  if ModalResult <> mrOK then Exit;
-
-  if PageControl1.ActivePage = SelectTab then
-  begin
-    CloseAction := caNone;
-    if SourceArchive.Text = '' then
-      raise Exception.Create('A Backup File Name must be given');
-      if ServerSideBtn.Checked then
-        Application.QueueAsyncCall(@DoServerRestore,0)
-      else
-        Application.QueueAsyncCall(@DoClientRestore,0);
-    PageControl1.ActivePage := ReportTab;
-  end;
-
-end;}
-
 procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var i: integer;
 begin
@@ -292,8 +278,8 @@ begin
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
         IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
-        for i := 0 to StringGrid1.ColCount - 1 do
-          IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+        //for i := 0 to StringGrid1.ColCount - 1 do
+          //IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
         Application.QueueAsyncCall(@DoClientRestore,0);
       end;
     PageControl1.ActivePage := ReportTab;

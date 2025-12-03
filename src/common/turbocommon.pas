@@ -502,7 +502,13 @@ var
 
     FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
 
+    //Backup options
     CloseDBBeforeBackup: boolean;
+
+    //Restore options
+    DefaultPageSize,
+    DefaultNumBuffers: integer;
+    RegisterDBAfterRestore: boolean;
 
 
 function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
@@ -1589,9 +1595,15 @@ procedure ReadIniFile;
 begin
   fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
   InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
-  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
-end;
 
+  //Backup
+  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
+
+  //Restore
+  DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
+  DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
+  RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
+end;
 
 procedure WriteIniFile;
 begin

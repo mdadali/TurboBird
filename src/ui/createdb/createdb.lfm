@@ -1,7 +1,7 @@
 object fmCreateDB: TfmCreateDB
-  Left = 397
+  Left = 448
   Height = 278
-  Top = 141
+  Top = 216
   Width = 700
   ActiveControl = btBrowse
   BorderStyle = bsSingle
@@ -685,7 +685,7 @@ object fmCreateDB: TfmCreateDB
     Filter = 'Firebird database|*.fdb|All files|*.*'
     Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
     Left = 192
-    Top = 232
+    Top = 216
   end
   object IBDatabase1: TIBDatabase
     Connected = False
@@ -695,6 +695,6 @@ object fmCreateDB: TfmCreateDB
     TraceFlags = []
     UseDefaultSystemCodePage = False
     Left = 72
-    Top = 240
+    Top = 216
   end
 end

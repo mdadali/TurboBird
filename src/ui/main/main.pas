@@ -1381,20 +1381,6 @@ begin
   mnRestoreClick(nil);
 end;
 
-
-(***********  Backup / Restore database ************)
-{procedure TfmMain.lmBackupClick(Sender: TObject);
-var
-  fmBackupRestore: TfmBackupRestore;
-  SelNode: TTreeNode;
-begin
-  SelNode:= tvMain.Selected;
-  with RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex ].RegRec do
-    fmBackupRestore.Init(SelNode.Text, DatabaseName, UserName, Password, TPNodeInfos(SelNode.Data));
-  fmBackupRestore.cbOperation.Enabled:= True;
-  fmBackupRestore.Show;
-end;}
-
 procedure TfmMain.lmBackupClick(Sender: TObject);
 var
   fmBackupRestore: TfmBackupRestore;
@@ -1558,10 +1544,13 @@ end;
 procedure TfmMain.mnRestoreClick(Sender: TObject);
 var TmpRestoreDlg: TRestoreDlg;
     ServerName, DatabaseName: string;
-    DefaultPageSize, DefaultNumBuffers: Integer;
     SelNode, ServerNode, DBNode: TTreeNode;
     dbIndex: integer;
     ServerErrStr: string;
+
+    ServerRec: TServerRecord;
+    TmpModalResult: TModalResult;
+    cboxItems: TStringList;
 begin
   if tvMain.Items.Count = 0 then
     exit;
@@ -1595,19 +1584,51 @@ begin
     DatabaseName := GetDBFileNameFromConnectionString(RegisteredDatabases[dbIndex].IBDatabase.DatabaseName);
     CloseDB(dbIndex);
   end else
-    DatabaseName := 'restoreddb.fdb';
-
-  DefaultPageSize   := 8196;
-  DefaultNumBuffers := 2048;
+    DatabaseName := 'RestoredDB.fdb';
 
   TmpRestoreDlg := TRestoreDlg.Create(self);
   TmpRestoreDlg.Init(ServerName, DatabaseName, DefaultPageSize, DefaultNumBuffers);
-  if TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers) = mrOK then
+
+  TmpModalResult := TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
+
+  if not RegisterDBAfterRestore then exit;
+
+  if  TmpModalResult = mrOK then
   begin
+    if DBNode = nil then
+    begin
+      try
+        cboxItems := GetServerListFromTreeView;
+        fmReg.cboxServers.Items.Assign(cboxItems);
 
-    ShowMessage('Now register db!');
+        fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(ServerName);
+        fmReg.edDatabaseName.Text := TmpRestoreDlg.DBName.Text;
+        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.DBName.Text), '');
+
+        ServerRec := GetServerRecordFromFileByName(ServerName);
+
+        fmReg.edtPort.Text := ServerRec.Port;
+        fmReg.cboxSQLDialect.ItemIndex := 2;
+        fmReg.cbCharset.ItemIndex := fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
+        fmReg.edUserName.Text := ServerRec.UserName;
+        fmReg.edPassword.Text := ServerRec.Password;
+        fmReg.edRole.Text := ServerRec.Role;
+
+        fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
+        fmReg.edtPort.Text := ServerRec.Port;
+
+        fmReg.NewReg:= True;
+        ModalResult := fmReg.ShowModal;
+      finally
+        cboxItems.Free;
+        LoadRegisteredDatabases;
+        ServerNode := GetServerNodeByServerName(ServerName);
+        if ServerNode <> nil then
+          ServerNode.Expand(false);
+      end;
+    end;
   end;
-
+  TmpRestoreDlg.Free;
 end;
 
 procedure TfmMain.lmRestoreNewClick(Sender: TObject);

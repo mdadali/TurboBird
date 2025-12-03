@@ -1,7 +1,7 @@
 object fmReg: TfmReg
-  Left = 563
+  Left = 296
   Height = 695
-  Top = 33
+  Top = 301
   Width = 683
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'
