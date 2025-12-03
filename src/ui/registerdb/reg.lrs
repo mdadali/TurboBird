@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmReg','FORMDATA',[
-  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3#8#2#6'Height'#3#183#2#3'Top'#2't'#5'Width'
+  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3'K'#2#6'Height'#3#183#2#3'Top'#2#0#5'Width'
   +#3#171#2#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#26'Register Firebird Dat'
   +'abase'#12'ClientHeight'#3#183#2#11'ClientWidth'#3#171#2#5'Color'#7#6'clForm'
   +#8'OnCreate'#7#10'FormCreate'#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScr'

@@ -100,6 +100,9 @@ begin
     Exit;
   end;
 
+  if Trim(edPassword.Text) = '' then
+    cxSavePassword.Checked := false;
+
   // Neue Registrierung
   if NewReg then
   begin
