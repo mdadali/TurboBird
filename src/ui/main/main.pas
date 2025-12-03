@@ -1378,12 +1378,7 @@ end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
 begin
-  lmBackupClick(lmRestore);
-  {fmBackupRestore.Init('', tvMain.Selected.Text +  ':', '', '');
-  fmBackupRestore.cbOperation.ItemIndex:= 1;
-  fmBackupRestore.cbOperation.Enabled:= False;
-  fmBackupRestore.meLog.Clear;
-  fmBackupRestore.Show;}
+  mnRestoreClick(nil);
 end;
 
 

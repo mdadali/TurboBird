@@ -23,7 +23,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
-  StdCtrls, Buttons, ComCtrls, IBXServices,
+  StdCtrls, Buttons, ComCtrls, Grids, IBXServices,
   turbocommon;
 
 type
@@ -38,6 +38,7 @@ type
     IBXClientSideRestoreService1: TIBXClientSideRestoreService;
     IBXServerSideRestoreService1: TIBXServerSideRestoreService;
     IBXServicesConnection1: TIBXServicesConnection;
+    Label7: TLabel;
     PageBuffers: TEdit;
     Label6: TLabel;
     NoShadow: TCheckBox;
@@ -45,6 +46,9 @@ type
     OneRelationAtATime: TCheckBox;
     ProgressBar1: TProgressBar;
     RestoreMetaDataOnly: TCheckBox;
+    sbPrimDBFileName: TSpeedButton;
+    sbSegments: TSpeedButton;
+    StringGrid1: TStringGrid;
     UseAllSpace: TCheckBox;
     DBName: TEdit;
     SourceArchive: TEdit;
@@ -59,15 +63,19 @@ type
     PageControl1: TPageControl;
     ServerSideBtn: TRadioButton;
     ClientSideBtn: TRadioButton;
-    SpeedButton1: TSpeedButton;
+    sbBackupFile: TSpeedButton;
     SelectTab: TTabSheet;
     ReportTab: TTabSheet;
+    procedure Button1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure IBXClientSideRestoreService1GetNextLine(Sender: TObject;
       var Line: string);
     procedure ReportTabShow(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
+    procedure sbBackupFileClick(Sender: TObject);
+    procedure sbPrimDBFileNameClick(Sender: TObject);
+    procedure sbSegmentsChangeBounds(Sender: TObject);
+    procedure sbSegmentsClick(Sender: TObject);
   private
     { private declarations }
     FServerName,
@@ -91,10 +99,36 @@ implementation
 
 { TRestoreDlg }
 
-procedure TRestoreDlg.SpeedButton1Click(Sender: TObject);
+procedure TRestoreDlg.sbBackupFileClick(Sender: TObject);
 begin
+  OpenDialog1.Filter := 'Backup Files|*.gbk|All Files|*.*';
   if OpenDialog1.Execute then
     SourceArchive.Text := OpenDialog1.Filename;
+end;
+
+procedure TRestoreDlg.sbPrimDBFileNameClick(Sender: TObject);
+begin
+  OpenDialog1.Filter := 'Database Files|*.fdb|All Files|*.*';
+  if OpenDialog1.Execute then
+  begin
+    DBName.Text := OpenDialog1.Filename;
+    StringGrid1.RowCount := StringGrid1.RowCount + 1;
+    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := DBName.Text;
+  end;
+end;
+
+procedure TRestoreDlg.sbSegmentsChangeBounds(Sender: TObject);
+begin
+end;
+
+procedure TRestoreDlg.sbSegmentsClick(Sender: TObject);
+begin
+  OpenDialog1.Filter := 'Database Files|*.fdb|All Files|*.*';
+  if OpenDialog1.Execute then
+  begin
+    StringGrid1.RowCount := StringGrid1.RowCount + 1;
+    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
+  end;
 end;
 
 procedure TRestoreDlg.Init(AServerName, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
@@ -240,6 +274,7 @@ begin
 end;}
 
 procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var i: integer;
 begin
   if ModalResult <> mrOK then Exit;
 
@@ -257,10 +292,17 @@ begin
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
         IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
+        for i := 0 to StringGrid1.ColCount - 1 do
+          IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
         Application.QueueAsyncCall(@DoClientRestore,0);
       end;
     PageControl1.ActivePage := ReportTab;
   end;
+
+end;
+
+procedure TRestoreDlg.Button1Click(Sender: TObject);
+begin
 
 end;
 

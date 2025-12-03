@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 411
+  Left = 413
   Height = 370
-  Top = 131
+  Top = 139
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370
@@ -114,7 +114,7 @@ object BackupDlg: TBackupDlg
       object SpeedButton1: TSpeedButton
         Left = 310
         Height = 25
-        Top = 159
+        Top = 160
         Width = 25
         Glyph.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100

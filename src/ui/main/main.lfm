@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 462
+  Left = 398
   Height = 531
-  Top = 208
+  Top = 162
   Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -1303,7 +1303,7 @@ object fmMain: TfmMain
   object MainMenu1: TMainMenu
     Images = ImageList1
     Left = 56
-    Top = 248
+    Top = 251
     object mnFile: TMenuItem
       Caption = '&File'
       object mnServerRegistry: TMenuItem
