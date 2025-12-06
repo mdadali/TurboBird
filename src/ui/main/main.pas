@@ -1599,7 +1599,7 @@ begin
     if isDbConnected then
       CloseDB(dbIndex);
   end else
-    DatabaseName := 'RestoredDB.fdb';
+    DatabaseName := 'RestoredDB_at_' + FormatDateTime('yyyy_mm_dd_hh_nn_ss', Now) + '.fdb';
 
   TmpRestoreDlg := TRestoreDlg.Create(self);
   TmpRestoreDlg.Init(ServerName, DatabaseName, DefaultPageSize, DefaultNumBuffers);
@@ -1610,11 +1610,10 @@ begin
 
   if  TmpModalResult = mrOK then
   begin
+    ServerRec := GetServerRecordFromFileByName(ServerName);
     if DBNode = nil then
     begin
       try
-        ServerRec := GetServerRecordFromFileByName(ServerName);
-
         cboxItems := GetServerListFromTreeView;
         fmReg.cboxServers.Items.Assign(cboxItems);
 

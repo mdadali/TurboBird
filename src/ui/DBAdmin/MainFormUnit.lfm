@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 507
+  Left = 933
   Height = 739
-  Top = 560
+  Top = 403
   Width = 1163
   Caption = 'DBAdmin'
   ClientHeight = 710

@@ -105,7 +105,7 @@ begin
   if OpenDialog1.Execute then
   begin
     SourceArchive.Text := OpenDialog1.Filename;
-    if Trim(DBName.Text) = 'RestoredDB.fdb' then
+    if Pos('RestoredDB_at_', DBName.Text) > 0 then
       DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
   end;
 end;
