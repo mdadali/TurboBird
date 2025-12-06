@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 971
+  Left = 587
   Height = 706
-  Top = 191
+  Top = 33
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog

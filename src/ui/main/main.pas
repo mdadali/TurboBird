@@ -1943,12 +1943,13 @@ end;
 
 procedure TfmMain.lmDBAdminClick(Sender: TObject);
 var
-  SelNode: TTreeNode;
+  SelNode, ServerNode: TTreeNode;
   NodeInfos: TPNodeInfos;
   dbIndex: Integer;
   ATab: TTabSheet;
   //MainForm: TMainForm;  //DBAdmin
   ShortTitle, FullHint, DBAlias: string;
+  ServerErrStr: string;
 begin
   SelNode := tvMain.Selected;
   if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
@@ -1957,7 +1958,14 @@ begin
   if NodeInfos = nil then Exit;
   dbIndex := NodeInfos^.dbIndex;
 
-  // Formular initialisieren  }
+  ServerNode := turbocommon.GetAncestorAtLevel(SelNode, 0);
+
+  if not IsServerReachable(ServerNode.Text, ServerErrStr) then
+  begin
+    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    Exit;
+  end;
+
   //CloseDB(dbIndex);
   MainForm.Init(dbIndex, NodeInfos);
   MainForm.ShowModal;
