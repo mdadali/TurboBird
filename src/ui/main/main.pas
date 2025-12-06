@@ -1585,7 +1585,8 @@ begin
     dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
     DatabaseName := GetDBFileNameFromConnectionString(RegisteredDatabases[dbIndex].IBDatabase.DatabaseName);
     isDbConnected := RegisteredDatabases[dbIndex].IBDatabase.Connected;
-    CloseDB(dbIndex);
+    if isDbConnected then
+      CloseDB(dbIndex);
   end else
     DatabaseName := 'RestoredDB.fdb';
 
@@ -1601,14 +1602,19 @@ begin
     if DBNode = nil then
     begin
       try
+        ServerRec := GetServerRecordFromFileByName(ServerName);
+
         cboxItems := GetServerListFromTreeView;
         fmReg.cboxServers.Items.Assign(cboxItems);
 
         fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(ServerName);
-        fmReg.edDatabaseName.Text := TmpRestoreDlg.DBName.Text;
-        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.DBName.Text), '');
 
-        ServerRec := GetServerRecordFromFileByName(ServerName);
+        if ServerRec.IsEmbedded then
+          fmReg.edDatabaseName.Text := TmpRestoreDlg.DBName.Text
+        else
+          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.DBName.Text);
+
+        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.DBName.Text), '');
 
         fmReg.edtPort.Text := ServerRec.Port;
         fmReg.cboxSQLDialect.ItemIndex := 2;

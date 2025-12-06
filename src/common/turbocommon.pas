@@ -510,6 +510,7 @@ var
     DefaultNumBuffers: integer;
     RegisterDBAfterRestore: boolean;
 
+function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 
 function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
 
@@ -636,6 +637,18 @@ implementation
 
 uses Reg;
 
+function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
+begin
+  // Falls kein Port angegeben ist, nimm Standardport 3050
+  if Trim(APort) = '' then
+    APort := '3050';
+
+  // Wenn Servername leer → lokale Verbindung
+  if Trim(AServerName) = '' then
+    Result := ADBFileName
+  else
+    Result := AServerName + '/' + APort + ':' + ADBFileName;
+end;
 
 function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
 var

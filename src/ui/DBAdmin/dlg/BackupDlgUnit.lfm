@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 413
+  Left = 510
   Height = 370
-  Top = 139
+  Top = 133
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370

@@ -1,0 +1,1199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units Count="153">
+      <Unit0>
+        <Filename Value="DBAdmin.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="17"/>
+        <CursorPos X="16" Y="51"/>
+        <UsageCount Value="171"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="MainFormUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="266"/>
+        <CursorPos X="12" Y="269"/>
+        <UsageCount Value="171"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="DataModule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBDataModule"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="21" Y="28"/>
+        <UsageCount Value="171"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="dlg/DBLoginDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBLoginDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="70" Y="37"/>
+        <UsageCount Value="171"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="dlg/ShutdownDatabaseDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ShutdownDatabaseDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="127"/>
+        <CursorPos Y="180"/>
+        <UsageCount Value="169"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="dlg/ShutdownRegDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ShutdownReqDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="39"/>
+        <CursorPos X="48" Y="42"/>
+        <UsageCount Value="169"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="dlg/BackupDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="BackupDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="3" Y="72"/>
+        <UsageCount Value="167"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="dlg/RestoreDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RestoreDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="151"/>
+        <CursorPos X="61" Y="170"/>
+        <UsageCount Value="167"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="dlg/AddSecondaryFileDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AddSecondaryFileDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="60" Y="12"/>
+        <UsageCount Value="166"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="dlg/AddShadowSetDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AddShadowSetDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="5" Y="49"/>
+        <UsageCount Value="165"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="dlg/AddShadowFileDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="AddShadowFileDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="52" Y="56"/>
+        <UsageCount Value="165"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="dlg/NewUserDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="NewUserDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27"/>
+        <CursorPos X="77" Y="46"/>
+        <UsageCount Value="155"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="dlg/ChgPasswordDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ChgPasswordDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="73" Y="19"/>
+        <UsageCount Value="155"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="dlg/ExecuteSQLScriptDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ExecuteSQLScriptDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="105"/>
+        <CursorPos X="38" Y="87"/>
+        <UsageCount Value="44"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="SelectSQLResultsUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SelectSQLResults"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="60"/>
+        <CursorPos X="19" Y="81"/>
+        <UsageCount Value="43"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="dlg/ServicesLoginDlgUnit.pas"/>
+        <ComponentName Value="SvcLoginDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="49" Y="34"/>
+        <UsageCount Value="35"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="MainFormUnit.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1889"/>
+        <CursorPos X="39" Y="1921"/>
+        <UsageCount Value="7"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../../../fbintf/IBUtils.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1041"/>
+        <CursorPos X="3" Y="1049"/>
+        <UsageCount Value="26"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../../../fbintf/client/FBClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="181"/>
+        <CursorPos X="64" Y="197"/>
+        <UsageCount Value="25"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="../../runtime/IBServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="29"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="../../../fbintf/IB.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="266"/>
+        <CursorPos X="14" Y="283"/>
+        <UsageCount Value="33"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="../../runtime/IBDatabaseInfo.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="274"/>
+        <CursorPos Y="296"/>
+        <UsageCount Value="6"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/thread.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="352"/>
+        <CursorPos Y="372"/>
+        <UsageCount Value="10"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="../../runtime/IBDatabase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="881"/>
+        <CursorPos X="24" Y="900"/>
+        <UsageCount Value="19"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="../../../../lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1470"/>
+        <CursorPos X="15" Y="1488"/>
+        <UsageCount Value="10"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/filutilh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="128"/>
+        <CursorPos X="24" Y="143"/>
+        <UsageCount Value="10"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/db.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1946"/>
+        <CursorPos X="15" Y="1966"/>
+        <UsageCount Value="18"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="../../../../../fpcsrc/3.0.4/packages/fcl-db/src/base/database.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="515"/>
+        <CursorPos Y="526"/>
+        <UsageCount Value="3"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/astrings.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="160"/>
+        <CursorPos Y="189"/>
+        <UsageCount Value="9"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="../../../../lcl/interfaces/gtk2/gtk2proc.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4155"/>
+        <CursorPos Y="4174"/>
+        <UsageCount Value="3"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1590"/>
+        <CursorPos X="22" Y="1601"/>
+        <UsageCount Value="13"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysutilh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="216"/>
+        <CursorPos X="14" Y="235"/>
+        <UsageCount Value="3"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysutils.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="586"/>
+        <CursorPos X="3" Y="589"/>
+        <UsageCount Value="3"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="../../runtime/IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="910"/>
+        <CursorPos X="24" Y="930"/>
+        <UsageCount Value="13"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="../../runtime/IBSQL.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="685"/>
+        <CursorPos Y="705"/>
+        <UsageCount Value="6"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="../../../fbintf/client/3.0/FB30Statement.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1039"/>
+        <CursorPos Y="1058"/>
+        <UsageCount Value="10"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="../../../fbintf/client/3.0/FB30Attachment.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="384"/>
+        <CursorPos X="17" Y="408"/>
+        <UsageCount Value="9"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="../../../fbintf/client/FBAttachment.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="247"/>
+        <CursorPos X="53" Y="282"/>
+        <UsageCount Value="10"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/unix/tthread.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="111"/>
+        <CursorPos X="42" Y="122"/>
+        <UsageCount Value="1"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="../../../fbintf/client/3.0/FB30Services.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="83"/>
+        <CursorPos X="3" Y="107"/>
+        <UsageCount Value="9"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="../../../../lcl/include/customcombobox.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="238"/>
+        <CursorPos Y="258"/>
+        <UsageCount Value="1"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="../../../../lcl/lclmessageglue.pas"/>
+        <UnitName Value="LCLMessageGlue"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1126"/>
+        <CursorPos Y="1148"/>
+        <UsageCount Value="1"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="../../../../lcl/interfaces/gtk2/gtk2wsstdctrls.pp"/>
+        <UnitName Value="Gtk2WSStdCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1557"/>
+        <CursorPos Y="1578"/>
+        <UsageCount Value="1"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="../../../../lcl/interfaces/gtk2/gtk2widgetset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2328"/>
+        <CursorPos Y="2347"/>
+        <UsageCount Value="1"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/x86_64/x86_64.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="148"/>
+        <CursorPos Y="167"/>
+        <UsageCount Value="1"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="../../runtime/IBUpdate.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="464"/>
+        <CursorPos Y="489"/>
+        <UsageCount Value="10"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/objpas/classes/stringl.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1201"/>
+        <CursorPos Y="1221"/>
+        <UsageCount Value="2"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="../../../../../fpcsrc/3.0.4/packages/fcl-db/src/base/dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1071"/>
+        <CursorPos X="30" Y="1078"/>
+        <UsageCount Value="10"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="../../../fbintf/client/3.0/FB30ClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="226"/>
+        <CursorPos X="45" Y="231"/>
+        <UsageCount Value="11"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="../../../fbintf/client/FBServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="119"/>
+        <CursorPos X="3" Y="135"/>
+        <UsageCount Value="10"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="../../../fbintf/client/2.5/FB25ClientAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="327"/>
+        <CursorPos X="45" Y="336"/>
+        <UsageCount Value="11"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="DataModule.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="230"/>
+        <CursorPos X="55" Y="268"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="dlg/BackupDlgUnit.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="188"/>
+        <CursorPos Y="220"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="dlg/RestoreDlgUnit.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="237"/>
+        <CursorPos Y="269"/>
+        <UsageCount Value="2"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="../../design/IBSQLEditFrame.pas"/>
+        <ComponentName Value="IBSQLEditFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="18" Y="14"/>
+        <UsageCount Value="3"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/fields.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="590"/>
+        <CursorPos X="3" Y="593"/>
+        <UsageCount Value="2"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/classes/classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1930"/>
+        <CursorPos X="34" Y="1930"/>
+        <UsageCount Value="10"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="../../ibcontrols/IBDynamicGrid.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1116"/>
+        <CursorPos X="34" Y="1131"/>
+        <UsageCount Value="10"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/generic.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="806"/>
+        <CursorPos Y="830"/>
+        <UsageCount Value="6"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="../../../fbintf/include/consts_pub.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="459"/>
+        <CursorPos X="3" Y="479"/>
+        <UsageCount Value="15"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="../../../fbintf/IBErrorCodes.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="33"/>
+        <CursorPos X="15" Y="65"/>
+        <UsageCount Value="13"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/system.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1066"/>
+        <CursorPos Y="1085"/>
+        <UsageCount Value="9"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="../../ibcontrols/IBTreeView.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="67"/>
+        <CursorPos X="48" Y="91"/>
+        <UsageCount Value="10"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="../../changelog"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="107" Y="6"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="../../../../lcl/comctrls.pp"/>
+        <UnitName Value="ComCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3431"/>
+        <CursorPos X="22" Y="3443"/>
+        <UsageCount Value="6"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="../../../../lcl/include/treeview.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="5208"/>
+        <CursorPos X="3" Y="5208"/>
+        <UsageCount Value="7"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="../../design/IBDBReg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="460"/>
+        <CursorPos X="111" Y="485"/>
+        <UsageCount Value="9"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/variant.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="431"/>
+        <CursorPos Y="452"/>
+        <UsageCount Value="5"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="../../runtime/IBExtract.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="474"/>
+        <CursorPos X="59" Y="515"/>
+        <UsageCount Value="8"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/datasource.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="647"/>
+        <CursorPos X="28" Y="679"/>
+        <UsageCount Value="7"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="../../../../lcl/include/control.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2271"/>
+        <CursorPos Y="2291"/>
+        <UsageCount Value="7"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="/usr/share/fpcsrc/packages/rtl-objpas/src/inc/variants.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4170"/>
+        <CursorPos Y="4190"/>
+        <UsageCount Value="9"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="../../../fbintf/client/3.0/FB30Array.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="268"/>
+        <CursorPos X="1024" Y="306"/>
+        <UsageCount Value="12"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="../../ibcontrols/DBControlGrid.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="../../ibcontrols/IBArrayGrid.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="296"/>
+        <CursorPos X="29" Y="296"/>
+        <UsageCount Value="10"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="../../iblocaldb/IBXCreateDatabaseFromSQLDlgUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="5"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="../../../fbintf/client/FBOutputBlock.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1192"/>
+        <CursorPos Y="1210"/>
+        <UsageCount Value="9"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="../../../fbintf/include/inf_pub.inc"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="8"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="../../../fbintf/include/configkeys.inc"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="6"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="../../../fbintf/client/FBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="264"/>
+        <CursorPos X="21" Y="287"/>
+        <UsageCount Value="11"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/classes/stringl.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="219"/>
+        <CursorPos X="3" Y="224"/>
+        <UsageCount Value="9"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="../../runtime/IBXServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="1015"/>
+        <CursorPos X="19" Y="1048"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <TopLine Value="887"/>
+          <CursorPos X="5" Y="890"/>
+        </ExtraEditor1>
+        <UsageCount Value="8"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="../../../fbintf/client/2.5/FB25Services.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="143"/>
+        <CursorPos X="15" Y="162"/>
+        <UsageCount Value="7"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="../../../../lcl/include/application.inc"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="../../../fbintf/changelog"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="4" Y="10"/>
+        <UsageCount Value="9"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="../../runtime/legacy/IBServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1382"/>
+        <CursorPos X="3" Y="1384"/>
+        <UsageCount Value="10"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="../../runtime/IBTypes.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="17"/>
+        <CursorPos X="48" Y="18"/>
+        <UsageCount Value="7"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="../../runtime/IBSQLMonitor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <CursorPos X="18" Y="40"/>
+        <UsageCount Value="7"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="../../ibexpress.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="12" Y="11"/>
+        <UsageCount Value="7"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="../../iblocaldb/IBLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <UsageCount Value="7"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="../../iblocaldb/IBCMLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="30"/>
+        <UsageCount Value="7"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="../../iblocaldb/nongui/IBXCustomIBLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="256"/>
+        <CursorPos X="21" Y="282"/>
+        <UsageCount Value="9"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="../../iblocaldb/nongui/IBCMLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="62"/>
+        <CursorPos X="83" Y="82"/>
+        <UsageCount Value="7"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="../../iblocaldb/gui/IBLocalDBSupport.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="22" Y="33"/>
+        <UsageCount Value="7"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="../../runtime/nongui/IBUpdate.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="190"/>
+        <CursorPos Y="210"/>
+        <UsageCount Value="9"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="../../runtime/nongui/IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4327"/>
+        <CursorPos Y="4346"/>
+        <UsageCount Value="15"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="../../runtime/nongui/IBXServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2018"/>
+        <CursorPos X="61" Y="2025"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <TopLine Value="16"/>
+          <CursorPos X="6" Y="42"/>
+        </ExtraEditor1>
+        <UsageCount Value="19"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="../../iblocaldb/gui/IBXSaveDatabaseDlg.pas"/>
+        <ComponentName Value="SaveDatabaseDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="104"/>
+        <CursorPos X="26" Y="129"/>
+        <UsageCount Value="7"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="../../runtime/nongui/ibmemds.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="8"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="../../../../components/memds/frmselectdataset.pp"/>
+        <UnitName Value="frmSelectDataset"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="97"/>
+        <UsageCount Value="8"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/memds/memds.pp"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="14" Y="19"/>
+        <UsageCount Value="14"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="../../runtime/nongui/IBDatabase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1051"/>
+        <CursorPos X="32" Y="1056"/>
+        <UsageCount Value="12"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="../../runtime/nongui/IBSQLMonitor.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="557"/>
+        <CursorPos X="17" Y="577"/>
+        <UsageCount Value="9"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-db/src/base/database.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="537"/>
+        <CursorPos Y="557"/>
+        <UsageCount Value="10"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="../../../../lcl/include/statusbar.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <CursorPos Y="37"/>
+        <UsageCount Value="9"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="../../../../lcl/include/pagecontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="28"/>
+        <UsageCount Value="9"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="../../../../lcl/include/customnotebook.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="494"/>
+        <CursorPos Y="516"/>
+        <UsageCount Value="9"/>
+      </Unit106>
+      <Unit107>
+        <Filename Value="../../runtime/nongui/IBQuery.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="172"/>
+        <CursorPos Y="188"/>
+        <UsageCount Value="10"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="../../runtime/nongui/IBDatabaseInfo.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="83"/>
+        <CursorPos X="71" Y="92"/>
+        <UsageCount Value="14"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/objpas/classes/streams.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="647"/>
+        <CursorPos Y="667"/>
+        <UsageCount Value="10"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="../../runtime/nongui/IBExtract.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1084"/>
+        <CursorPos X="30" Y="1112"/>
+        <UsageCount Value="10"/>
+      </Unit110>
+      <Unit111>
+        <Filename Value="../../../fbintf/client/3.0/firebird/Firebird.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6170"/>
+        <CursorPos Y="6190"/>
+        <UsageCount Value="9"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="../../../fbintf/client/FBEvents.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="230"/>
+        <CursorPos X="17" Y="250"/>
+        <UsageCount Value="9"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="../../runtime/nongui/IBTable.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="167"/>
+        <CursorPos X="32" Y="1540"/>
+        <UsageCount Value="9"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstrh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="59"/>
+        <CursorPos X="10" Y="86"/>
+        <UsageCount Value="9"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysstr.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="480"/>
+        <CursorPos X="5" Y="482"/>
+        <UsageCount Value="9"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="../../runtime/nongui/ibxscript.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="270"/>
+        <CursorPos X="22" Y="306"/>
+        <UsageCount Value="10"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="../scriptengine/unit1.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Unit1"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="164"/>
+        <CursorPos Y="168"/>
+        <UsageCount Value="9"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="../../../../lcl/stdctrls.pp"/>
+        <UnitName Value="StdCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="841"/>
+        <CursorPos X="35" Y="847"/>
+        <UsageCount Value="9"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="../../../ibxframework/examples/FirebirdDBA/DatabaseView/SQLTerminal/SQLResultsFormUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27"/>
+        <CursorPos X="37" Y="44"/>
+        <UsageCount Value="9"/>
+      </Unit119>
+      <Unit120>
+        <Filename Value="../../runtime/nongui/IBBlob.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="78"/>
+        <CursorPos X="15" Y="88"/>
+        <UsageCount Value="10"/>
+      </Unit120>
+      <Unit121>
+        <Filename Value="../../runtime/nongui/IBDataOutput.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="48"/>
+        <CursorPos X="59" Y="56"/>
+        <UsageCount Value="9"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="../../../../lcl/extctrls.pp"/>
+        <UnitName Value="ExtCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="174"/>
+        <CursorPos X="25" Y="192"/>
+        <UsageCount Value="9"/>
+      </Unit122>
+      <Unit123>
+        <Filename Value="../../../../lcl/customtimer.pas"/>
+        <UnitName Value="CustomTimer"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="115"/>
+        <CursorPos X="3" Y="124"/>
+        <UsageCount Value="9"/>
+      </Unit123>
+      <Unit124>
+        <Filename Value="../../runtime/nongui/IBTypes.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos Y="48"/>
+        <UsageCount Value="9"/>
+      </Unit124>
+      <Unit125>
+        <Filename Value="../../runtime/gui/IBDialogs.pas"/>
+        <ComponentName Value="IBXLoginDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="96"/>
+        <CursorPos X="31" Y="120"/>
+        <UsageCount Value="9"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="/usr/share/fpcsrc/packages/fcl-base/src/fptimer.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="62"/>
+        <CursorPos X="15" Y="81"/>
+        <UsageCount Value="9"/>
+      </Unit126>
+      <Unit127>
+        <Filename Value="../../runtime/nongui/IBSQLParser.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="202"/>
+        <CursorPos Y="212"/>
+        <UsageCount Value="9"/>
+      </Unit127>
+      <Unit128>
+        <Filename Value="../../../../lcl/dbgrids.pas"/>
+        <UnitName Value="DBGrids"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1055"/>
+        <CursorPos Y="1074"/>
+        <UsageCount Value="9"/>
+      </Unit128>
+      <Unit129>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/linux/x86_64/sighnd.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="21"/>
+        <CursorPos Y="40"/>
+        <UsageCount Value="9"/>
+      </Unit129>
+      <Unit130>
+        <Filename Value="../../../fbintf/client/2.5/FB25Attachment.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="339"/>
+        <CursorPos X="17" Y="370"/>
+        <UsageCount Value="9"/>
+      </Unit130>
+      <Unit131>
+        <Filename Value="../../../ibxframework/examples/FirebirdDBA/MainFormUnit.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="80" Y="11"/>
+        <UsageCount Value="9"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="../../runtime/nongui/IBEvents.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="134"/>
+        <CursorPos X="3" Y="137"/>
+        <UsageCount Value="9"/>
+      </Unit132>
+      <Unit133>
+        <Filename Value="../../../ibx.trunk/examples/DBAdmin/DataModule.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="668"/>
+        <CursorPos X="19" Y="695"/>
+        <UsageCount Value="9"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/objpas.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="653"/>
+        <CursorPos X="33" Y="676"/>
+        <UsageCount Value="9"/>
+      </Unit134>
+      <Unit135>
+        <Filename Value="/usr/share/fpcsrc/rtl/inc/heaptrc.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="519"/>
+        <CursorPos Y="538"/>
+        <UsageCount Value="9"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/heap.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="258"/>
+        <CursorPos Y="277"/>
+        <UsageCount Value="9"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/inc/dynarr.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="111"/>
+        <CursorPos Y="155"/>
+        <UsageCount Value="9"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="../../../../../fpcsrc/3.0.4/rtl/linux/x86_64/syscall.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="62"/>
+        <CursorPos Y="81"/>
+        <UsageCount Value="9"/>
+      </Unit138>
+      <Unit139>
+        <Filename Value="/usr/share/fpcsrc/rtl/objpas/sysutils/sysinth.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="44"/>
+        <CursorPos X="24" Y="57"/>
+        <UsageCount Value="9"/>
+      </Unit139>
+      <Unit140>
+        <Filename Value="../../../../lcl/interfacebase.pp"/>
+        <UnitName Value="InterfaceBase"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="119"/>
+        <CursorPos X="15" Y="136"/>
+        <UsageCount Value="10"/>
+      </Unit140>
+      <Unit141>
+        <Filename Value="../../../fbintf/client/include/uloadlibrary.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="24" Y="47"/>
+        <UsageCount Value="11"/>
+      </Unit141>
+      <Unit142>
+        <Filename Value="../../../../../fpcsrc/3.2.0/packages/fcl-db/src/base/dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="988"/>
+        <CursorPos Y="1005"/>
+        <UsageCount Value="11"/>
+      </Unit142>
+      <Unit143>
+        <Filename Value="../../../../../fpcsrc/3.2.0/packages/fcl-db/src/base/datasource.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="608"/>
+        <CursorPos Y="635"/>
+        <UsageCount Value="11"/>
+      </Unit143>
+      <Unit144>
+        <Filename Value="../../runtime/nongui/IBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="476"/>
+        <CursorPos Y="503"/>
+        <UsageCount Value="10"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="../../../fbintf/client/IB.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="680"/>
+        <CursorPos X="3" Y="684"/>
+        <UsageCount Value="10"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="../../../../../../fpcsrc/3.2.2/packages/fcl-db/src/base/dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="394"/>
+        <CursorPos Y="410"/>
+        <UsageCount Value="10"/>
+      </Unit146>
+      <Unit147>
+        <Filename Value="../../runtime/nongui/IBSQL.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="988"/>
+        <CursorPos Y="1004"/>
+        <UsageCount Value="10"/>
+      </Unit147>
+      <Unit148>
+        <Filename Value="../../runtime/include/IBDynamicInterfaces.inc"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="69" Y="7"/>
+        <UsageCount Value="10"/>
+      </Unit148>
+      <Unit149>
+        <Filename Value="dlg/AddShadowSetDlgUnit.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="31" Y="17"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit149>
+      <Unit150>
+        <Filename Value="../../runtime/include/IBDynamicInterfacesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="115"/>
+        <CursorPos X="29" Y="142"/>
+        <UsageCount Value="10"/>
+      </Unit150>
+      <Unit151>
+        <Filename Value="../../ibcontrols/DBTreeView.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="93"/>
+        <CursorPos X="98" Y="95"/>
+        <UsageCount Value="10"/>
+      </Unit151>
+      <Unit152>
+        <Filename Value="../../ibcontrols/IBLookupComboEditBox.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="188"/>
+        <CursorPos X="52" Y="212"/>
+        <UsageCount Value="10"/>
+      </Unit152>
+    </Units>
+    <JumpHistory Count="6" HistoryIndex="5">
+      <Position1>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="1044" Column="14" TopLine="1028"/>
+      </Position1>
+      <Position2>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="389" Column="15" TopLine="389"/>
+      </Position2>
+      <Position3>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="1218" Column="27" TopLine="1210"/>
+      </Position3>
+      <Position4>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="350" Column="15" TopLine="335"/>
+      </Position4>
+      <Position5>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="408" Column="3" TopLine="405"/>
+      </Position5>
+      <Position6>
+        <Filename Value="MainFormUnit.pas"/>
+        <Caret Line="619" Column="11" TopLine="604"/>
+      </Position6>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+    <HistoryLists Count="1">
+      <List0 Name="LaunchingApplication" Type="File" Count="1">
+        <Item1 Value="/usr/bin/xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+      </List0>
+    </HistoryLists>
+  </ProjectSession>
+  <Debugging>
+    <Watches>
+      <Item>
+        <Expression Value="Name"/>
+      </Item>
+    </Watches>
+  </Debugging>
+</CONFIG>

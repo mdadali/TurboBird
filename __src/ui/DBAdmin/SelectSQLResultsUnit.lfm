@@ -1,0 +1,63 @@
+object SelectSQLResults: TSelectSQLResults
+  Left = 429
+  Height = 436
+  Top = 275
+  Width = 693
+  Anchors = []
+  Caption = 'Select SQL Results'
+  ClientHeight = 436
+  ClientWidth = 693
+  DefaultMonitor = dmPrimary
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poDefault
+  LCLVersion = '1.8.3.0'
+  object IBDynamicGrid1: TIBDynamicGrid
+    Left = 0
+    Height = 436
+    Top = 0
+    Width = 693
+    Align = alClient
+    Color = clWindow
+    Columns = <>
+    DataSource = DataSource1
+    Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgAutoSizeColumns]
+    Scrollbars = ssAutoBoth
+    TabOrder = 0
+    ExpandEditorPanelBelowRow = False
+    Descending = False
+    EditorBorderStyle = bsSingle
+    DefaultPositionAtEnd = False
+  end
+  object SelectQuery: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = DBDataModule.IBDatabase1
+    Transaction = IBTransaction1
+    AfterOpen = SelectQueryAfterOpen
+    BufferChunks = 1000
+    CachedUpdates = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    DataSetCloseAction = dcDiscardChanges
+    left = 591
+    top = 61
+  end
+  object IBTransaction1: TIBTransaction
+    Active = False
+    DefaultDatabase = DBDataModule.IBDatabase1
+    Params.Strings = (
+      'concurrency'
+      'nowait'
+    )
+    left = 591
+    top = 110
+  end
+  object DataSource1: TDataSource
+    DataSet = SelectQuery
+    left = 537
+    top = 64
+  end
+end
