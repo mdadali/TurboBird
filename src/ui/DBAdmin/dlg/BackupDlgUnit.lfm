@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 510
+  Left = 530
   Height = 370
-  Top = 133
+  Top = 116
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370
@@ -253,7 +253,7 @@ object BackupDlg: TBackupDlg
   object IBXServicesConnection1: TIBXServicesConnection
     Connected = False
     TraceFlags = []
-    Left = 224
-    Top = 39
+    Left = 256
+    Top = 32
   end
 end

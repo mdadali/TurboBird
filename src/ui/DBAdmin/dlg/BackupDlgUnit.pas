@@ -141,7 +141,7 @@ begin
   PageControl1.ActivePage := SelectTab;
   ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;
   DBName.Text := IBXClientSideBackupService1.DatabaseName;
-  BackupFileName.Text := '';
+  //BackupFileName.Text := '';
   Caption := 'Backup Database: ' + IBXClientSideBackupService1.DatabaseName;
 end;
 

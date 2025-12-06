@@ -1481,6 +1481,7 @@ var
   isDbConnected: Boolean;
   TmpIniFile: TIniFile;
   ServerErrStr: string;
+  BackupFileName: string;
 begin
   if tvMain.Items.Count = 0 then exit;
   if tvMain.Selected = nil then exit;
@@ -1525,6 +1526,13 @@ begin
       TmpBackupDlg.IBXServicesConnection1.Connected := True;
       TmpBackupDlg.IBXClientSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
       TmpBackupDlg.IBXServerSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
+
+      BackupFileName := GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName);
+      BackupFileName := ChangeFileExt(BackupFileName, '');
+      BackupFileName := BackupFileName + DateTimeToStr(now);
+      BackupFileName := ChangeFileExt(BackupFileName, '.gbk');
+      TmpBackupDlg.BackupFileName.Text := BackupFileName;
+
 
       TmpBackupDlg.ShowModal;
     except
