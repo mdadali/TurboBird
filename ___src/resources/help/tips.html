@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TurboBird — Tips & Tricks</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 10px; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 18px; margin-top: 20px; }
+  p { margin: 5px 0; }
+  code { background: #f5f5f5; padding: 2px 4px; border-radius: 3px; }
+  pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+  a { color: #0645AD; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  table { border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+  th { background: #eee; }
+  ul.toc { margin: 10px 0; padding: 0; list-style: none; }
+  ul.toc li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<a id="top"></a>
+<h1>Tips & Tricks</h1>
+
+<h2>Table of Contents</h2>
+<ul class="toc">
+  <li><a href="#favorites">Save connections as favorites</a></li>
+  <li><a href="#longquery">Testing long-running queries</a></li>
+  <li><a href="#monstate">Understanding MON$STATE in MON$STATEMENTS</a></li>
+</ul>
+
+<h2 id="favorites">Save connections as favorites</h2>
+<p>Save frequently used connections as favorites. Click on a database in your recent list to connect quickly.</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Back to top</a></p>
+
+<h2 id="longquery">Testing long-running queries</h2>
+<p>If you want to test how TurboBird handles cancelling or killing active statements, you can run a heavy query that produces millions of rows:</p>
+<pre><code>SELECT A.RDB$FIELD_NAME, B.RDB$FIELD_NAME
+FROM RDB$FIELDS A
+CROSS JOIN RDB$FIELDS B
+CROSS JOIN RDB$FIELDS C;
+</code></pre>
+<p>This can generate several million rows, depending on the size of <code>RDB$FIELDS</code>.  
+Use it to test the <em>Cancel</em> button or monitoring via <code>MON$STATEMENTS</code>.</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Back to top</a></p>
+
+<h2 id="monstate">Understanding MON$STATE in MON$STATEMENTS</h2>
+<p>The monitoring table <code>MON$STATEMENTS</code> shows the state of each active SQL statement. The field <code>MON$STATE</code> can have the following values:</p>
+<table>
+  <tr><th>Value</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Idle / finished</td></tr>
+  <tr><td>1</td><td>Active (executing)</td></tr>
+  <tr><td>2</td><td>Fetching (cursor is open, rows being retrieved)</td></tr>
+  <tr><td>3</td><td>Compiling / preparing statement</td></tr>
+</table>
+<p>For long running queries you will typically see <strong>1</strong> or <strong>2</strong>.  
+There is no <code>-1</code> state in Firebird; some old tools used this for "unknown".</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Back to top</a></p>
+
+<hr>
+<p><a href="index.html">Back to Home</a></p>
+</body>
+</html>

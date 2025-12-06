@@ -1,0 +1,42 @@
+object dmSysTables: TdmSysTables
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  Height = 367
+  HorizontalOffset = 373
+  VerticalOffset = 199
+  Width = 479
+  object sqQuery: TIBQuery
+    AllowAutoActivateTransaction = True
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 192
+    Top = 32
+  end
+  object ibcDatabase: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 88
+    Top = 32
+  end
+  object stTrans: TIBTransaction
+    TransactionName = '{6BAA211A-EF6A-40FE-AA49-76CA671ED2E9}'
+    Active = False
+    Left = 88
+    Top = 120
+  end
+end

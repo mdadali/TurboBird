@@ -867,13 +867,21 @@ procedure TDBDataModule.DatabaseRepair(Options: TValidateOptions; ReportLines: T
 begin
   ReportLines.Add(Format('Validation of %s started',[IBValidationService1.DatabaseName]));
   ReportOptions;
-  IBDatabase1.Connected := false;
+  if IBDatabase1.Connected then
+  begin
+    if IBDatabase1.DefaultTransaction.InTransaction then
+      IBDatabase1.DefaultTransaction.Rollback;
+    Application.ProcessMessages;
+    IBDatabase1.Connected := false;
+  end;
   with IBValidationService1 do
   try
     Execute(ReportLines);
     ReportLines.Add('Operation Completed');
     MessageDlg('Operation Completed',mtInformation,[mbOK],0);
   finally
+    IBDatabase1.Params.Values['user_name'] := FDBUserName;
+    IBDatabase1.Params.Values['password'] := FDBPassword;
     IBDatabase1.Connected := true;
   end;
 end;

@@ -1,0 +1,974 @@
+object fmDBInfo: TfmDBInfo
+  Left = 483
+  Height = 550
+  Top = 116
+  Width = 820
+  Align = alClient
+  Caption = 'fmDBInfo'
+  ClientHeight = 550
+  ClientWidth = 820
+  KeyPreview = True
+  OnActivate = FormActivate
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 550
+    Top = 0
+    Width = 820
+    ActivePage = tsInfos
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object tsInfos: TTabSheet
+      Caption = 'Infos'
+      ClientHeight = 519
+      ClientWidth = 810
+      object Panel1: TPanel
+        Left = 0
+        Height = 514
+        Top = 5
+        Width = 810
+        Align = alClient
+        ClientHeight = 514
+        ClientWidth = 810
+        TabOrder = 0
+        object GroupBox1: TGroupBox
+          Left = 1
+          Height = 512
+          Top = 1
+          Width = 808
+          Align = alClient
+          Caption = 'Database informations'
+          ClientHeight = 492
+          ClientWidth = 806
+          TabOrder = 0
+          object Label1: TLabel
+            Left = 16
+            Height = 19
+            Top = 72
+            Width = 58
+            Caption = 'Database'
+            ParentColor = False
+          end
+          object edtDBName: TEdit
+            Left = 145
+            Height = 22
+            Top = 72
+            Width = 294
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 0
+            Text = 'N/A'
+          end
+          object Label2: TLabel
+            Left = 16
+            Height = 19
+            Top = 102
+            Width = 77
+            Caption = 'ODS Version'
+            ParentColor = False
+          end
+          object edtODSVer: TEdit
+            Left = 145
+            Height = 25
+            Top = 98
+            Width = 87
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 1
+            Text = 'N/A'
+          end
+          object Label3: TLabel
+            Left = 16
+            Height = 19
+            Top = 133
+            Width = 49
+            Caption = 'CharSet'
+            ParentColor = False
+          end
+          object edtCharset: TEdit
+            Left = 145
+            Height = 25
+            Top = 129
+            Width = 88
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 2
+            Text = 'N/A'
+          end
+          object Label4: TLabel
+            Left = 16
+            Height = 19
+            Top = 165
+            Width = 85
+            Caption = 'Creation Date'
+            ParentColor = False
+          end
+          object edtCreationDate: TEdit
+            Left = 145
+            Height = 25
+            Top = 161
+            Width = 208
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 3
+            Text = 'N/A'
+          end
+          object bbRefresh: TBitBtn
+            Left = 625
+            Height = 34
+            Top = -8
+            Width = 120
+            Caption = 'Refresh'
+            Glyph.Data = {
+              36040000424D3604000000000000360000002800000010000000100000000100
+              2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00004D001F004D007F004D00BA014F03ED014E02EE004D
+              00C0004D0085004D001DFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+              FF00004D0001004D006D085F0DF40C8116FD1AA931FF16CF29FF10E21EFF12C6
+              21FF078F0DFE05590AF4004D007A004D0006FFFFFF00FFFFFF00FFFFFF00004D
+              0001004D00B80E701BF8149B26FF17A62BFF19B330FF12C723FF0ED31BFF0FD1
+              1CFF14C326FF1EAA3AFC0F731CEE004E00B2004D0001FFFFFF00FFFFFF00004D
+              00740A6513FA06920BFF0B9916FF12A123FF18A82FFF1AB131FF17B92CFF17B8
+              2CFF1BAE33FF17A62CD9159F25AE065E0ADC004D0040FFFFFF00004D00290555
+              09F7057609FF018E03FF07930DFF0D9A18FF179E2BFF148B26FE158B29FE19A3
+              32FA15A428DC119F20AF0B991686098C116704650820FFFFFF00004E007A074C
+              0CFE006B00FF008200FF028F05FF07861AFE065C0AF4004E01A9014F01AA0453
+              07F40C7016BD0A97126C05920B4C018D033206640B1A00600000025404C40446
+              08FF005900FF006E00FF047807FF045809F7004D0027FFFFFF00FFFFFF00004D
+              0022014E02B9047B062C007E0219046C080D075C0D05FFFFFF00055B0AFA0850
+              08FF085408FF035B03FF045608FF015002B9FFFFFF00FFFFFF00FFFFFF00004D
+              0008004D0017034D0518024E0515014F0312004E000DFFFFFF00075F0DF5276E
+              27FF2B752BFF156115FF044907FF025003B0FFFFFF00FFFFFF0008560C450A64
+              12FF10A012FF159718FF158818FF08710BFF06660AFF035706B6055808C52C71
+              2FFF3A843AFF2C752CFF024C04FF07560EF5004D0024FFFFFF00004D00310752
+              0DF6048F05FF1CAE1CFF37B237FF3BA63BFF2C8F2CFF065F0CFE004E01842C74
+              30FE4C944CFF4C944CFF1F681FFF05520AFE07560EF8025004B4024F03B10751
+              0DF8036206FE067D06FF44A744FF4CA64CFF4DA04DFF06610BFF004D00271065
+              15F7579C57FF5DA45DFF5AA05AFF286F28FF024E03FF074B0AFF105113FF034F
+              05FF166A16FF4C9D4CFF5DAB5DFF5DAA5DFF60A960FF056008FFFFFFFF00004F
+              01742D7C32FA70B470FF6DB36DFF6EB36EFF5BA05BFF408740FF418641FF64A3
+              64FF6DB36DFF6DB36DFF6FB46FFF6FB26FFF71B571FF035F06FFFFFFFF00004D
+              0002015402C1398C3BFA7CBD7CFF7EC37EFF7EC37EFF7EC37EFF7EC37EFF7EC3
+              7EFF7EC37EFF7BBD7BFF3F8F41FA0F7212FB72B673FF025F04FFFFFFFF00FFFF
+              FF00004D0002004E0073137013F75EA55EFF79BA79FF92CE92FF95D095FF86C1
+              86FF63A863FF126E12F7004F007A004D00450E680FF2075908EAFFFFFF00FFFF
+              FF00FFFFFF00FFFFFF00004D0023004F007E035B03C0247624F1378237F31668
+              16C900500085004D0024FFFFFF00FFFFFF00004D001C004D0020
+            }
+            OnClick = bbRefreshClick
+            TabOrder = 4
+          end
+          object Label8: TLabel
+            Left = 16
+            Height = 19
+            Top = 232
+            Width = 73
+            Caption = 'Server time'
+            ParentColor = False
+          end
+          object edServerTime: TEdit
+            Left = 145
+            Height = 22
+            Top = 236
+            Width = 208
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 5
+            Text = 'N/A'
+          end
+          object Label9: TLabel
+            Left = 17
+            Height = 19
+            Hint = ' Firebird version string'
+            Top = 8
+            Width = 92
+            Caption = 'Server Version'
+            ParentColor = False
+          end
+          object edtServerString: TEdit
+            Left = 144
+            Height = 25
+            Hint = ' Firebird version string'
+            Top = 8
+            Width = 208
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 6
+            Text = 'N/A'
+          end
+          object Label12: TLabel
+            Left = 17
+            Height = 19
+            Hint = 'Database site name'
+            Top = 39
+            Width = 63
+            Caption = 'Site Name'
+            ParentColor = False
+          end
+          object edtDBSiteName: TEdit
+            Left = 144
+            Height = 22
+            Hint = 'Database site name'
+            Top = 39
+            Width = 295
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 7
+            Text = 'N/A'
+          end
+          object Label15: TLabel
+            Left = 264
+            Height = 19
+            Top = 129
+            Width = 66
+            Caption = 'SQLDialect'
+            ParentColor = False
+          end
+          object edtSQLDialect: TEdit
+            Left = 352
+            Height = 25
+            Top = 129
+            Width = 72
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 8
+            Text = 'N/A'
+          end
+          object Label16: TLabel
+            Left = 17
+            Height = 19
+            Hint = 'Database Version (level) number'
+            Top = 270
+            Width = 65
+            Caption = 'Base Level'
+            ParentColor = False
+          end
+          object Label17: TLabel
+            Left = 17
+            Height = 19
+            Hint = 'Database Implementation Number'
+            Top = 304
+            Width = 137
+            Caption = 'DBImplementationNo'
+            ParentColor = False
+          end
+          object Label18: TLabel
+            Left = 16
+            Height = 19
+            Hint = 'Database implementation version no'
+            Top = 197
+            Width = 47
+            Caption = 'Version'
+            ParentColor = False
+          end
+          object Label19: TLabel
+            Left = 471
+            Height = 19
+            Hint = 'Amount of server memory (in bytes) currently in use'
+            Top = 110
+            Width = 104
+            Caption = 'Current Memory'
+            ParentColor = False
+          end
+          object Label20: TLabel
+            Left = 473
+            Height = 19
+            Hint = 'Number specifying the mode in which database writes are'#10'performed (0 for asynchronous, 1 for synchronous)'
+            Top = 182
+            Width = 85
+            Caption = 'Forced Writes'
+            ParentColor = False
+          end
+          object Label21: TLabel
+            Left = 471
+            Height = 19
+            Hint = 'Maximum amount of memory (in bytes) used at one time since'#10'the first process attached to the database'
+            Top = 146
+            Width = 82
+            Caption = 'Max Memory'
+            ParentColor = False
+          end
+          object Label22: TLabel
+            Left = 473
+            Height = 19
+            Hint = 'Number of memory buffers currently allocated'
+            Top = 220
+            Width = 79
+            Caption = 'Num Buffers'
+            ParentColor = False
+          end
+          object Label23: TLabel
+            Left = 471
+            Height = 19
+            Hint = 'Number of transactions that are committed between “sweeps” to'#10'remove database record versions that are no longer needed'
+            Top = 258
+            Width = 93
+            Caption = 'Sweep Interval'
+            ParentColor = False
+          end
+          object chkBoxEncrypted: TCheckBox
+            Left = 471
+            Height = 21
+            Top = 8
+            Width = 87
+            Caption = 'Encrypted'
+            Enabled = False
+            TabOrder = 9
+          end
+          object Label24: TLabel
+            Left = 473
+            Height = 19
+            Top = 39
+            Width = 125
+            Caption = 'EncryptionKeyName'
+            ParentColor = False
+          end
+          object Label25: TLabel
+            Left = 473
+            Height = 19
+            Hint = 'Number of active transactions.'
+            Top = 300
+            Width = 107
+            Caption = 'TransactionCount'
+            ParentColor = False
+          end
+          object edtBaseLevel: TEdit
+            Left = 144
+            Height = 25
+            Top = 270
+            Width = 88
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 10
+            Text = 'N/A'
+          end
+          object edImplNo: TEdit
+            Left = 176
+            Height = 25
+            Top = 304
+            Width = 88
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 11
+            Text = 'N/A'
+          end
+          object edImplNo1: TEdit
+            Left = 144
+            Height = 25
+            Top = 197
+            Width = 88
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 12
+            Text = 'N/A'
+          end
+          object Label38: TLabel
+            Left = 16
+            Height = 19
+            Top = 338
+            Width = 143
+            Caption = 'Connected UserNames'
+            ParentColor = False
+          end
+          object memoUserNames: TMemo
+            Left = 176
+            Height = 128
+            Top = 338
+            Width = 206
+            Lines.Strings = (
+              'N/A'
+            )
+            ReadOnly = True
+            ScrollBars = ssAutoBoth
+            TabOrder = 13
+          end
+          object edtCurrentMemory: TEdit
+            Left = 599
+            Height = 27
+            Top = 110
+            Width = 152
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 14
+            Text = 'N/A'
+          end
+          object edtMaxMemory: TEdit
+            Left = 599
+            Height = 27
+            Top = 146
+            Width = 152
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 15
+            Text = 'N/A'
+          end
+          object edtForcedWrites: TEdit
+            Left = 599
+            Height = 27
+            Top = 182
+            Width = 152
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 16
+            Text = 'N/A'
+          end
+          object edtNumBuffers: TEdit
+            Left = 599
+            Height = 27
+            Top = 218
+            Width = 152
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 17
+            Text = 'N/A'
+          end
+          object edtSweepIntervall: TEdit
+            Left = 599
+            Height = 27
+            Top = 258
+            Width = 152
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 18
+            Text = 'N/A'
+          end
+          object edtEncKeyName: TEdit
+            Left = 615
+            Height = 27
+            Top = 41
+            Width = 136
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 19
+            Text = 'N/A'
+          end
+          object edtTransCount: TEdit
+            Left = 600
+            Height = 27
+            Top = 296
+            Width = 72
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 20
+            Text = 'N/A'
+          end
+          object edDBSize: TEdit
+            Left = 600
+            Height = 25
+            Top = 72
+            Width = 151
+            AutoSize = False
+            AutoSelect = False
+            Font.Color = clBlack
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 21
+            Text = 'N/A'
+          end
+          object Label6: TLabel
+            Left = 471
+            Height = 19
+            Top = 72
+            Width = 85
+            Caption = 'Database Size'
+            ParentColor = False
+          end
+        end
+      end
+      object Splitter1: TSplitter
+        Cursor = crVSplit
+        Left = 0
+        Height = 5
+        Top = 0
+        Width = 810
+        Align = alTop
+        ResizeAnchor = akTop
+      end
+    end
+    object tsAttachments: TTabSheet
+      Caption = 'Attachments'
+      ClientHeight = 519
+      ClientWidth = 810
+      OnExit = tsAttachmentsExit
+      OnShow = tsAttachmentsShow
+      object DBNavigator1: TDBNavigator
+        Left = 0
+        Height = 48
+        Top = 0
+        Width = 810
+        Align = alTop
+        BevelOuter = bvNone
+        ChildSizing.EnlargeHorizontal = crsScaleChilds
+        ChildSizing.EnlargeVertical = crsScaleChilds
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 100
+        ClientHeight = 48
+        ClientWidth = 810
+        DataSource = DataSource1
+        Options = []
+        TabOrder = 0
+        VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbCancel, nbRefresh]
+      end
+      object DBGrid1: TDBGrid
+        Left = 0
+        Height = 471
+        Top = 48
+        Width = 810
+        Align = alClient
+        Color = clWindow
+        Columns = <>
+        DataSource = DataSource1
+        TabOrder = 1
+      end
+    end
+    object tsPages: TTabSheet
+      Caption = 'Pages'
+      ClientHeight = 519
+      ClientWidth = 810
+      OnShow = tsPagesShow
+      object Panel2: TPanel
+        Left = 0
+        Height = 144
+        Top = 0
+        Width = 810
+        Align = alTop
+        ClientHeight = 144
+        ClientWidth = 810
+        TabOrder = 0
+        object Label5: TLabel
+          Left = 24
+          Height = 19
+          Top = 22
+          Width = 58
+          Caption = 'Page Size'
+          ParentColor = False
+        end
+        object edtPageSize: TEdit
+          Left = 104
+          Height = 25
+          Top = 22
+          Width = 88
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 0
+          Text = 'N/A'
+        end
+        object Label10: TLabel
+          Left = 416
+          Height = 19
+          Top = 22
+          Width = 72
+          Caption = 'Used Pages'
+          ParentColor = False
+        end
+        object edtUsedPages: TEdit
+          Left = 520
+          Height = 25
+          Top = 22
+          Width = 88
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 1
+          Text = 'N/A'
+        end
+        object Label11: TLabel
+          Left = 24
+          Height = 19
+          Top = 64
+          Width = 68
+          Caption = 'Free Pages'
+          ParentColor = False
+        end
+        object edtFreePages: TEdit
+          Left = 104
+          Height = 25
+          Top = 64
+          Width = 88
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 2
+          Text = 'N/A'
+        end
+        object Label13: TLabel
+          Left = 223
+          Height = 19
+          Hint = 'Number of database pages allocated'
+          Top = 22
+          Width = 60
+          Caption = 'Allocation'
+          ParentColor = False
+        end
+        object edtAllocation: TEdit
+          Left = 304
+          Height = 25
+          Hint = 'Number of database pages allocated'
+          Top = 22
+          Width = 88
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 3
+          Text = 'N/A'
+        end
+        object Label26: TLabel
+          Left = 223
+          Height = 19
+          Hint = 'Number of reads from the memory buffer cache'
+          Top = 64
+          Width = 48
+          Caption = 'Fetches'
+          ParentColor = False
+        end
+        object Label27: TLabel
+          Left = 416
+          Height = 19
+          Hint = 'Number of writes to the memory buffer cache'
+          Top = 64
+          Width = 38
+          Caption = 'Marks'
+          ParentColor = False
+        end
+        object Label28: TLabel
+          Left = 24
+          Height = 19
+          Hint = 'Number of page reads'
+          Top = 104
+          Width = 37
+          Caption = 'Reads'
+          ParentColor = False
+        end
+        object Label29: TLabel
+          Left = 223
+          Height = 19
+          Hint = 'Number of page writes'
+          Top = 104
+          Width = 40
+          Caption = 'Writes'
+          ParentColor = False
+        end
+        object edtFetches: TEdit
+          Left = 304
+          Height = 27
+          Top = 62
+          Width = 72
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 4
+          Text = 'N/A'
+        end
+        object edtMarks: TEdit
+          Left = 520
+          Height = 27
+          Top = 62
+          Width = 88
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 5
+          Text = 'N/A'
+        end
+        object edtReads: TEdit
+          Left = 104
+          Height = 27
+          Top = 104
+          Width = 72
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 6
+          Text = 'N/A'
+        end
+        object edtWrites: TEdit
+          Left = 304
+          Height = 27
+          Top = 104
+          Width = 72
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          ReadOnly = True
+          TabOrder = 7
+          Text = 'N/A'
+        end
+      end
+      object Panel7: TPanel
+        Left = 0
+        Height = 50
+        Top = 144
+        Width = 810
+        Align = alTop
+        ClientHeight = 50
+        ClientWidth = 810
+        TabOrder = 1
+        object btnFirst: TButton
+          Left = 16
+          Height = 25
+          Top = 10
+          Width = 75
+          Caption = 'First'
+          OnClick = btnFirstClick
+          TabOrder = 0
+        end
+        object btnPrev: TButton
+          Left = 112
+          Height = 25
+          Top = 10
+          Width = 75
+          Caption = 'Prev'
+          OnClick = btnPrevClick
+          TabOrder = 1
+        end
+        object btnNext: TButton
+          Left = 208
+          Height = 25
+          Top = 10
+          Width = 75
+          Caption = 'Next'
+          OnClick = btnNextClick
+          TabOrder = 2
+        end
+        object btnLast: TButton
+          Left = 304
+          Height = 25
+          Top = 10
+          Width = 75
+          Caption = 'Last'
+          OnClick = btnLastClick
+          TabOrder = 3
+        end
+        object Label14: TLabel
+          Left = 416
+          Height = 19
+          Top = 10
+          Width = 117
+          Caption = 'Current PageIndex'
+          ParentColor = False
+        end
+        object edtCurrentPage: TEdit
+          Left = 552
+          Height = 25
+          Top = 10
+          Width = 61
+          AutoSize = False
+          AutoSelect = False
+          Font.Color = clBlack
+          ParentFont = False
+          TabOrder = 4
+          Text = '0'
+        end
+        object btnGoToPage: TButton
+          Left = 632
+          Height = 25
+          Top = 10
+          Width = 104
+          Caption = 'Go to Page'
+          OnClick = btnGoToPageClick
+          TabOrder = 5
+        end
+      end
+      object ATBinHex1: TATBinHex
+        Cursor = crIBeam
+        Left = 0
+        Height = 325
+        Top = 194
+        Width = 810
+        Align = alClient
+        BorderStyle = bsSingle
+        Color = clWindow
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Courier New'
+        ParentColor = False
+        TabOrder = 2
+        FontFooter.Color = clBlack
+        FontFooter.Height = -12
+        FontFooter.Name = 'Arial'
+        FontGutter.Color = clBlack
+        FontGutter.Height = -12
+        FontGutter.Name = 'Courier New'
+        Mode = vbmodeHex
+        TextWrap = True
+      end
+    end
+    object tsConfig: TTabSheet
+      Caption = 'Config'
+    end
+  end
+  object DataSource1: TDataSource
+    AutoEdit = False
+    DataSet = IBQry
+    Left = 504
+    Top = 344
+  end
+  object IBQry: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDB
+    Transaction = IBTrans
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT'
+      '    m.MON$ATTACHMENT_ID        AS ATT_ID,'
+      '    m.MON$USER                 AS USERNAME,'
+      '    m.MON$REMOTE_ADDRESS       AS ADDRESS,'
+      '    m.MON$REMOTE_PROCESS       AS PROCESS,'
+      '    m.MON$ATTACHMENT_NAME        AS DB_NAME,'
+      '    m.MON$TIMESTAMP            AS CONNECTED_SINCE,'
+      ''
+      '    -- Transactions'
+      '    m.MON$STATE                AS ATT_STATE,'
+      '    --m.MON$IDLE_TIME            AS IDLE_SECONDS,'
+      '    m.MON$SERVER_PID           AS SERVER_PID,'
+      ''
+      '    t.MON$TRANSACTION_ID       AS TR_ID,'
+      '    t.MON$STATE                AS TR_STATE,'
+      '    t.MON$LOCK_TIMEOUT         AS LOCK_TIMEOUT,'
+      '    t.MON$READ_ONLY            AS TR_READ_ONLY,'
+      ''
+      '    -- Memory'
+      '    --m.MON$MEMORY_USED          AS MEM_USED,'
+      '    --m.MON$MEMORY_ALLOCATED     AS MEM_ALLOC,'
+      '    --m.MON$MEMORY_IN_USE        AS MEM_IN_USE,'
+      ''
+      '    -- I/O statistics'
+      '    s.MON$RECORD_SEQ_READS     AS SEQ_READS,'
+      '    s.MON$RECORD_IDX_READS     AS IDX_READS,'
+      '    s.MON$RECORD_INSERTS       AS INSERTS,'
+      '    s.MON$RECORD_UPDATES       AS UPDATES,'
+      '    s.MON$RECORD_DELETES       AS DELETES,'
+      ''
+      '    -- Current SQL'
+      '    st.MON$SQL_TEXT            AS SQL_TEXT'
+      ''
+      'FROM MON$ATTACHMENTS m'
+      'LEFT JOIN MON$TRANSACTIONS t'
+      '       ON t.MON$ATTACHMENT_ID = m.MON$ATTACHMENT_ID'
+      'LEFT JOIN MON$STATEMENTS st'
+      '       ON st.MON$ATTACHMENT_ID = m.MON$ATTACHMENT_ID'
+      'LEFT JOIN MON$RECORD_STATS s'
+      '       ON s.MON$STAT_ID = m.MON$STAT_ID'
+      ''
+      'WHERE m.MON$SYSTEM_FLAG = 0'
+      'ORDER BY m.MON$ATTACHMENT_ID, t.MON$TRANSACTION_ID;'
+      ''
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 554
+    Top = 436
+  end
+  object IBDB: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTrans
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 440
+    Top = 432
+  end
+  object IBTrans: TIBTransaction
+    TransactionName = '{40FE9A5A-F5C5-45D7-AC43-F9E0CC45B859}'
+    Active = False
+    DefaultDatabase = IBDB
+    DefaultAction = TARollback
+    Left = 664
+    Top = 436
+  end
+  object IBDBInfo: TIBDatabaseInfo
+    Database = IBDB
+    Left = 608
+    Top = 400
+  end
+end

@@ -1482,6 +1482,7 @@ var
   TmpIniFile: TIniFile;
   ServerErrStr: string;
   BackupFileName: string;
+  TS: string;
 begin
   if tvMain.Items.Count = 0 then exit;
   if tvMain.Selected = nil then exit;
@@ -1529,7 +1530,9 @@ begin
 
       BackupFileName := GetDBFileNameFromConnectionString(DBRec.RegRec.DatabaseName);
       BackupFileName := ChangeFileExt(BackupFileName, '');
-      BackupFileName := BackupFileName + DateTimeToStr(now);
+      TS := FormatDateTime('yyyy_mm_dd_hh_nn_ss', Now);
+      BackupFileName := BackupFileName + '_' + TS;
+
       BackupFileName := ChangeFileExt(BackupFileName, '.gbk');
       TmpBackupDlg.BackupFileName.Text := BackupFileName;
 

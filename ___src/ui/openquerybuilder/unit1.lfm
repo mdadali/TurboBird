@@ -1,0 +1,37 @@
+object Form1: TForm1
+  Left = 420
+  Height = 368
+  Top = 205
+  Width = 489
+  Caption = 'Form1'
+  ClientHeight = 368
+  ClientWidth = 489
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '2.2.6.0'
+  object Button1: TButton
+    Left = 16
+    Height = 25
+    Top = 20
+    Width = 105
+    Caption = 'Query Builder'
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 0
+    Height = 304
+    Top = 64
+    Width = 489
+    Align = alBottom
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Font.Pitch = fpFixed
+    Font.Quality = fqDraft
+    ParentFont = False
+    ScrollBars = ssAutoBoth
+    TabOrder = 1
+    WordWrap = False
+  end
+end
