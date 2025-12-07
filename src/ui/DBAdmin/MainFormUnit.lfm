@@ -1,7 +1,7 @@
 object MainForm: TMainForm
-  Left = 163
+  Left = 605
   Height = 739
-  Top = 693
+  Top = 515
   Width = 1163
   Caption = 'DBAdmin'
   ClientHeight = 710
@@ -2570,7 +2570,7 @@ object MainForm: TMainForm
         TabOrder = 2
         object ValidateOptionsTab: TTabSheet
           Caption = 'ValidateOptionsTab'
-          ClientHeight = 104
+          ClientHeight = 74
           ClientWidth = 312
           object Label33: TLabel
             Left = 5
@@ -2609,7 +2609,7 @@ object MainForm: TMainForm
         end
         object RepairOptionsTab: TTabSheet
           Caption = 'RepairOptionsTab'
-          ClientHeight = 104
+          ClientHeight = 74
           ClientWidth = 312
           object Label34: TLabel
             Left = 10
