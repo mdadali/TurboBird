@@ -1,0 +1,88 @@
+Neuigkeiten für TurboBird
+! : geändert
++: hinzugefügt
+*: behoben
+-: entfernt
+
+
+TurboBird v1.2.1.1262
+Build date & time: 26.09.2025, 13:26:00
+
+! Query-Thread wieder eingeschaltet
+    In Release Builds werden die Querys im Hintergrund ausgeführt
+    In Debug Builds synchron (Thread ausgeschaltet)
+
+! Bei allen Routinen (außer Package-Routinen) wurde die Doppelklick-Aktion auf "Edit" geändert.
+
+! Tabs:
+  !Beschriftungen gekürzt
+  +Tabs sind jetzt verschiebbar (außer Main)
+  +TabReiter.Hint zeigt volle Infos über FireBird Objekt/Operation
+  +TabReiter enthält jetzt Image als visuelle Hilfe
+  Eine offene Tab erreicht man am einfachsten über Doppelklick 
+  auf den Navigationsbaum (Tab wird nach vordergrund geholt).
+
+! Routinen-Namen im Navigationsbaum einheitlich
+    FBFunctions → Functions
+    Stored Procedures → Procedures
+
++ Markdown Export hinzugefügt
+
+! HTML- und Markdown-Exporte verbessert
+    Array-Inhalte werden jetzt auch ins Dokument geschrieben
+
+! User Public ausgeblendet
+
+! View Stored Procedure liefert nun vollständigen Code einer SP (nicht nur bis AS)
+
++ Einfaches HTML-Hilfesystem erstellt und in Main Tab integriert
+    (HTML-Viewer unterstützt derzeit externe Links noch nicht)
+
+! Login-Verfahren geändert
+    !Erstes Doppelklick auf Serverknoten öffnet Login-Fenster zur Verbindung mit ServiceManager der Firebird-Instanz
+    !Serverinformationen (z. B. Version) werden geholt.
+    +Server-Logindialog registriert Server
+    +ServerRegistry-Dialog zum nachträglichen Bearbeiten (Rechtsklick auf Serverknoten → ServerRegistry)
+
+! Alle Masken (außer einfache Dialoge und QueryHistory) sind jetzt in Tabs eingebettet
+
+! RoutinenTester: UDF-CSTRINGS werden richtig angezeigt
+
++ FireBird Version < 3: automatisch Role DUMMYROLE (ohne Rechte) angelegt und neuen Usern zugewiesen
+    (Vermeidet zusätzliche Verbindung zu security2.fdb)
+
+
+----------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1261
+Build date & time: 28.08.2025, 11:46:54
+
++ Firebird-LoginPrompt aktiviert
+! Mehrere kleine Fehler behoben
+
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1260
+Build-Datum & Zeit: 25.08.2025, 07:34:45
+
++ Datenexport: Daten aus DataSets/Grids können jetzt in 9 Formate exportiert werden (per Rechtsklick auf die Daten).
++ OpenQueryBuilder integriert: Schnittstelle QueryBuilder → IBX korrigiert. Mit dem OpenQueryBuilder lassen sich Abfragen visuell per Drag & Drop erstellen, testen und ins QueryWindow übernehmen. Abrufbar über den letzten ToolButton im QueryWindow.
+! EditTableGrid → EditTableData: Auf IBX umgestellt (mit Array-Unterstützung für Lesen/Schreiben). Umbenannt in EditTableData.
+EditDataFullRec entfernt: Als TabSheet in EditTableData neu implementiert. EditTableData enthält jetzt 2 Tabs: Grid-Ansicht und Formular-Ansicht. Hier können auch Arrays editiert werden (1D getestet, 2D noch nicht). Abrufbar im Hauptfenster per Rechtsklick im TreeView auf den Tabellennamen → Edit TableData.
++ Neue Maske „CheckDBIntegrity“: Zeigt Field-CharSets an (aktuell als Platzhalter gedacht, nur CharSet-Prüfung, aber leicht erweiterbar). Abrufbar im Hauptfenster über den 4. ToolButton in der Toolbar.
+! Quellverzeichnis restrukturiert: Neue Struktur sorgt für bessere Übersicht.
+! Quellcode überarbeitet: Anwendung sollte jetzt insgesamt stabiler laufen.
+
+------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1256
+Build-Datum & Zeit: 08.08.2025, 10:40:06
+
++ Hinzugefügt: Dynamische Firebird-Datentypbehandlung – alle Firebird-Datentypen werden jetzt zur Laufzeit dynamisch geladen, was TurboBird weitgehend versionsunabhängig macht.
++ Hinzugefügt: Unterstützung zur direkten Erstellung und Bearbeitung von Firebird-Paketen in TurboBird.
++ Hinzugefügt: UDR (User Defined Routines) Unterstützung – erstellen, bearbeiten und ausführen von UDRs inklusive Parameter und Rückgabewerten.
++ Hinzugefügt: Einheitlicher Routine-Runner, der UDFs, UDRs, Stored Procedures und Funktionen in einem einzigen Tool unterstützt.
++ Hinzugefügt: „SetFireBirdClient“-Dialog zur Auswahl der Firebird-Client-Version jederzeit; erkennt installierte Versionen automatisch.
++ Hinzugefügt: Firebird-Server-Konfigurationsverwaltung – Importieren, Bearbeiten und Exportieren von Servereinstellungen direkt in TurboBird.
++ Hinzugefügt: Unterstützung für Arrays und DateTimeWithTimeZone über neue Komponente TSQLQueryExt, um nicht unterstützte Datentypen im DBGrid anzuzeigen.
+! Geändert: Verschiebung von Turbobird.reg und Query-History-Datei in src/data/config für Multi-Instanz-Konfigurationen.
+! Geändert: Konfigurationsverwaltung erlaubt nun mehrere TurboBird-Instanzen für verschiedene Firebird-Versionen gleichzeitig, was Tests und Migrationen von älteren Versionen vereinfacht.

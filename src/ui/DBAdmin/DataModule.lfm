@@ -1,0 +1,1513 @@
+object DBDataModule: TDBDataModule
+  OldCreateOrder = False
+  Height = 552
+  HorizontalOffset = 256
+  VerticalOffset = 201
+  Width = 730
+  object IBDatabase1: TIBDatabase
+    Connected = False
+    AfterConnect = IBDatabase1AfterConnect
+    AfterDisconnect = IBDatabase1AfterDisconnect
+    BeforeConnect = IBDatabase1BeforeConnect
+    BeforeDisconnect = IBDatabase1BeforeDisconnect
+    OnLogin = IBDatabase1Login
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    Params.Strings = (
+      'lc_ctype=UTF8'
+      'user_name=SYSDBA'
+      'sql_role_name=RDB$ADMIN'
+    )
+    DefaultTransaction = CurrentTransaction
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 40
+    Top = 24
+  end
+  object CurrentTransaction: TIBTransaction
+    TransactionName = '{11114B40-D7B3-4054-9908-09B8FED3D0D8}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
+    AfterTransactionEnd = CurrentTransactionAfterTransactionEnd
+    Left = 168
+    Top = 24
+  end
+  object ExecDDL: TIBSQL
+    Database = IBDatabase1
+    CaseSensitiveParameterNames = False
+    GenerateParamNames = False
+    UniqueParamNames = False
+    ParamCheck = True
+    SQL.Strings = (
+      ''
+    )
+    Scrollable = False
+    Transaction = CurrentTransaction
+    Left = 152
+    Top = 208
+  end
+  object DatabaseQuery: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AfterOpen = DatabaseQueryAfterOpen
+    BeforeClose = DatabaseQueryBeforeClose
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT * FROM RDB$DATABASE, MON$DATABASE'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcSaveChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 288
+    Top = 24
+  end
+  object DBCharSet: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AfterClose = DBCharSetAfterClose
+    BeforeOpen = DBCharSetBeforeOpen
+    AutoCommit = acCommitRetaining
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(A.RDB$CHARACTER_SET_NAME)   as RDB$CHARACTER_SET_NAME'
+      ' From RDB$DATABASE A'
+    )
+    Params = <>
+    UpdateObject = UpdateCharSet
+    SQLFiltered = False
+    DataSetCloseAction = dcSaveChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 424
+    Top = 32
+  end
+  object ShadowFiles: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    OnCalcFields = ShadowFilesCalcFields
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select * From RDB$Files Where RDB$Shadow_Number <> 0 '
+      'Order by RDB$Shadow_Number, RDB$FILE_SEQUENCE'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 32
+    Top = 208
+    object ShadowFilesRDBFILE_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$FILE_NAME'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 253
+    end
+    object ShadowFilesRDBFILE_SEQUENCE: TSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$FILE_SEQUENCE'
+      Index = 1
+      LookupCache = False
+      Origin = 'RDB$FILES.RDB$FILE_SEQUENCE'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ShadowFilesRDBFILE_START: TIntegerField
+      FieldKind = fkData
+      FieldName = 'RDB$FILE_START'
+      Index = 2
+      LookupCache = False
+      Origin = 'RDB$FILES.RDB$FILE_START'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ShadowFilesRDBFILE_LENGTH: TIntegerField
+      FieldKind = fkData
+      FieldName = 'RDB$FILE_LENGTH'
+      Index = 3
+      LookupCache = False
+      Origin = 'RDB$FILES.RDB$FILE_LENGTH'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ShadowFilesRDBFILE_FLAGS: TSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$FILE_FLAGS'
+      Index = 4
+      LookupCache = False
+      Origin = 'RDB$FILES.RDB$FILE_FLAGS'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ShadowFilesRDBSHADOW_NUMBER: TSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$SHADOW_NUMBER'
+      Index = 5
+      LookupCache = False
+      Origin = 'RDB$FILES.RDB$SHADOW_NUMBER'
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object ShadowFilesFileMode: TStringField
+      FieldKind = fkCalculated
+      FieldName = 'FileMode'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+  end
+  object SecGlobalAuth: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select count(*) as Mappings'
+      'From SEC$GLOBAL_AUTH_MAPPING A'
+      'Where SEC$MAP_NAME = ''AutoAdminImplementationMapping'''
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 288
+    Top = 112
+  end
+  object CharSetLookup: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select trim(A.RDB$CHARACTER_SET_NAME) as RDB$CHARACTER_SET_NAME'
+      ' From'
+      'RDB$CHARACTER_SETS A order by 1'
+      ''
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 160
+    Top = 104
+  end
+  object DBSecFiles: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select * From RDB$Files Where RDB$Shadow_Number is null or RDB$Shadow_Number = 0 '
+      'Order by RDB$FILE_SEQUENCE'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 32
+    Top = 104
+  end
+  object UpdateCharSet: TIBUpdate
+    RefreshSQL.Strings = (
+      'Select Trim(A.RDB$CHARACTER_SET_NAME)   as RDB$CHARACTER_SET_NAME'
+      ' From RDB$DATABASE A'
+    )
+    OnApplyUpdates = UpdateCharSetApplyUpdates
+    Left = 424
+    Top = 104
+  end
+  object IBDatabaseInfo: TIBDatabaseInfo
+    Database = IBDatabase1
+    Left = 280
+    Top = 200
+  end
+  object AttmtQuery: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select * from MON$ATTACHMENTS'
+      'Where MON$ATTACHMENT_ID = CURRENT_CONNECTION'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 544
+    Top = 112
+  end
+  object TableNameLookup: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT r.RDB$RELATION_ID,'
+      '    trim(r.RDB$RELATION_NAME) as RDB$RELATION_NAME'
+      'FROM RDB$RELATIONS r'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 288
+    Top = 283
+  end
+  object UserList: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AfterInsert = UserListAfterInsert
+    AfterOpen = UserListAfterOpen
+    AfterPost = UserListAfterPost
+    AfterScroll = UserListAfterScroll
+    BeforeClose = UserListBeforeClose
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select A.SEC$DESCRIPTION, A.SEC$PLUGIN, A.SEC$ADMIN,'
+      'A.SEC$ACTIVE, Trim(A.SEC$USER_NAME) as SEC$USER_NAME, A.SEC$MIDDLE_NAME,'
+      'A.SEC$FIRST_NAME, A.SEC$LAST_NAME,'
+      'cast(NULL as VarChar(32)) as SEC$PASSWORD, CURRENT_CONNECTION,'
+      'case when Count(B.MON$ATTACHMENT_ID) > 0 then true else false end as LoggedIn,'
+      'case When C.SEC$USER is not null then true else false end as DBCreator'
+      'From SEC$USERS A'
+      'Left Outer Join MON$ATTACHMENTS B'
+      'On A.SEC$USER_NAME = B.MON$USER'
+      'Left Outer Join SEC$DB_CREATORS  C on C.SEC$USER = A.SEC$USER_NAME'
+      'Group By A.SEC$DESCRIPTION, A.SEC$PLUGIN, A.SEC$ADMIN,'
+      'A.SEC$ACTIVE, A.SEC$USER_NAME, A.SEC$MIDDLE_NAME,'
+      'A.SEC$FIRST_NAME, A.SEC$LAST_NAME, C.SEC$USER'
+    )
+    Params = <>
+    UpdateObject = UpdateUsers
+    SQLFiltered = False
+    DataSetCloseAction = dcSaveChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 416
+    Top = 352
+    object UserListSECPLUGIN: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$PLUGIN'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = True
+      Required = False
+      Size = 31
+    end
+    object UserListSECADMIN: TBooleanField
+      FieldKind = fkData
+      FieldName = 'SEC$ADMIN'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      DisplayValues = 'True;False'
+    end
+    object UserListSECACTIVE: TBooleanField
+      FieldKind = fkData
+      FieldName = 'SEC$ACTIVE'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      DisplayValues = 'True;False'
+    end
+    object UserListSECMIDDLE_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$MIDDLE_NAME'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 32
+    end
+    object UserListSECFIRST_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$FIRST_NAME'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 32
+    end
+    object UserListSECLAST_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$LAST_NAME'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 32
+    end
+    object UserListLOGGEDIN: TBooleanField
+      FieldKind = fkData
+      FieldName = 'LOGGEDIN'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      DisplayValues = 'True;False'
+    end
+    object UserListCURRENT_CONNECTION: TIBLargeIntField
+      FieldKind = fkData
+      FieldName = 'CURRENT_CONNECTION'
+      Index = 7
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+    end
+    object UserListDBCREATOR: TBooleanField
+      FieldKind = fkData
+      FieldName = 'DBCREATOR'
+      Index = 8
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      DisplayValues = 'True;False'
+    end
+    object UserListUSERID: TLongintField
+      FieldKind = fkCalculated
+      FieldName = 'USERID'
+      Index = 9
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object UserListGROUPID: TLongintField
+      FieldKind = fkCalculated
+      FieldName = 'GROUPID'
+      Index = 10
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object UserListSECPASSWORD: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$PASSWORD'
+      Index = 11
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 32
+    end
+    object UserListSECUSER_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SEC$USER_NAME'
+      Index = 12
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+  end
+  object UpdateUsers: TIBUpdate
+    RefreshSQL.Strings = (
+      'Select A.SEC$DESCRIPTION, A.SEC$PLUGIN, A.SEC$ADMIN,'
+      'A.SEC$ACTIVE, A.SEC$USER_NAME, A.SEC$MIDDLE_NAME,'
+      'A.SEC$FIRST_NAME, A.SEC$LAST_NAME,'
+      'cast(NULL as VarChar(32)) as SEC$PASSWORD, CURRENT_CONNECTION,'
+      'case when B.MON$ATTACHMENT_ID is not null then true else false end as LoggedIn,'
+      'case When C.SEC$USER is not null then true else false end as DBCreator'
+      'From SEC$USERS A'
+      'Left Outer Join MON$ATTACHMENTS B'
+      'On A.SEC$USER_NAME = B.MON$USER'
+      'Left Outer Join SEC$DB_CREATORS  C on C.SEC$USER = A.SEC$USER_NAME'
+      'Where  A.SEC$USER_NAME = :SEC$USER_NAME'
+    )
+    OnApplyUpdates = UpdateUsersApplyUpdates
+    Left = 544
+    Top = 360
+  end
+  object RoleNameList: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AutoCommit = acCommitRetaining
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserListSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT r.RDB$ROLE_NAME, r.RDB$OWNER_NAME, r.RDB$DESCRIPTION, r.RDB$SYSTEM_FLAG, '
+      'P.RDB$USER,RDB$PRIVILEGE,   cast(:SEC$USER_NAME as VARCHAR(32)) as SEC$USER_NAME,'
+      'Case When RDB$PRIVILEGE is null then 0 else 1 End as GRANTED'
+      'FROM RDB$ROLES r'
+      'Left Outer JOIN ('
+      'Select RDB$RELATION_NAME, RDB$PRIVILEGE, RDB$USER  From RDB$USER_PRIVILEGES '
+      'Where RDB$USER = :SEC$USER_NAME and RDB$PRIVILEGE = ''M'''
+      ') P  On P.RDB$RELATION_NAME = r.RDB$ROLE_NAME '
+      ''
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'SEC$USER_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = UpdateUserRoles
+    SQLFiltered = False
+    DataSetCloseAction = dcSaveChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 424
+    Top = 280
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'SEC$USER_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object UpdateUserRoles: TIBUpdate
+    RefreshSQL.Strings = (
+      'SELECT r.RDB$ROLE_NAME, r.RDB$OWNER_NAME, r.RDB$DESCRIPTION, r.RDB$SYSTEM_FLAG,'
+      'P.RDB$USER,RDB$PRIVILEGE,   cast(:SEC$USER_NAME as VARCHAR(32)) as SEC$USER_NAME,'
+      'Case When RDB$PRIVILEGE is null then 0 else 1 End as GRANTED'
+      'FROM RDB$ROLES r'
+      'Left Outer JOIN ('
+      'Select RDB$RELATION_NAME, RDB$PRIVILEGE, RDB$USER  From RDB$USER_PRIVILEGES'
+      'Where RDB$USER = :SEC$USER_NAME and RDB$PRIVILEGE = ''M'''
+      ') P  On P.RDB$RELATION_NAME = r.RDB$ROLE_NAME'
+      'Where  r.RDB$ROLE_NAME = :RDB$ROLE_NAME'
+    )
+    OnApplyUpdates = UpdateUserRolesApplyUpdates
+    Left = 544
+    Top = 288
+  end
+  object ApplicationProperties1: TApplicationProperties
+    OnException = ApplicationProperties1Exception
+    Left = 536
+    Top = 24
+  end
+  object UserTags: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AfterInsert = UserTagsAfterInsert
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserListSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select a.SEC$USER_NAME, A.SEC$KEY, A.SEC$VALUE'
+      'From'
+      'SEC$USER_ATTRIBUTES  A'
+      'Where SEC$USER_NAME = :SEC$USER_NAME'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'SEC$USER_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = TagsUpdate
+    SQLFiltered = False
+    DataSetCloseAction = dcSaveChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 424
+    Top = 192
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'SEC$USER_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object TagsUpdate: TIBUpdate
+    RefreshSQL.Strings = (
+      'Select A.SEC$USER_NAME, A.SEC$KEY, A.SEC$VALUE From '
+      'SEC$USER_ATTRIBUTES A'
+      'Where SEC$USER_NAME = :SEC$USER_NAME'
+      '  and A.SEC$KEY = :SEC$KEY'
+    )
+    OnApplyUpdates = TagsUpdateApplyUpdates
+    Left = 536
+    Top = 200
+  end
+  object UserListSource: TDataSource
+    DataSet = UserList
+    Left = 304
+    Top = 360
+  end
+  object Attachments: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    AfterDelete = AttachmentsAfterDelete
+    AfterOpen = AttachmentsAfterOpen
+    BeforeOpen = AttachmentsBeforeOpen
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT *'
+      'FROM MON$ATTACHMENTS r'
+      'JOIN RDB$CHARACTER_SETS S On S.RDB$CHARACTER_SET_ID = r.MON$CHARACTER_SET_ID'
+      ''
+    )
+    Params = <>
+    UpdateObject = AttUpdate
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 280
+    Top = 433
+    object AttachmentsMONATTACHMENT_ID: TIBLargeIntField
+      FieldKind = fkData
+      FieldName = 'MON$ATTACHMENT_ID'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONSERVER_PID: TIBIntegerField
+      FieldKind = fkData
+      FieldName = 'MON$SERVER_PID'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONSTATE: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'MON$STATE'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONATTACHMENT_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$ATTACHMENT_NAME'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONUSER: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$USER'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsMONROLE: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$ROLE'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsMONREMOTE_PROTOCOL: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_PROTOCOL'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 10
+    end
+    object AttachmentsMONREMOTE_ADDRESS: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_ADDRESS'
+      Index = 7
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONREMOTE_PID: TIBIntegerField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_PID'
+      Index = 8
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONCHARACTER_SET_ID: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'MON$CHARACTER_SET_ID'
+      Index = 9
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONTIMESTAMP: TDateTimeField
+      FieldKind = fkData
+      FieldName = 'MON$TIMESTAMP'
+      Index = 10
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONGARBAGE_COLLECTION: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'MON$GARBAGE_COLLECTION'
+      Index = 11
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONREMOTE_PROCESS: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_PROCESS'
+      Index = 12
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONSTAT_ID: TIBIntegerField
+      FieldKind = fkData
+      FieldName = 'MON$STAT_ID'
+      Index = 13
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsMONCLIENT_VERSION: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$CLIENT_VERSION'
+      Index = 14
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONREMOTE_VERSION: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_VERSION'
+      Index = 15
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONREMOTE_HOST: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_HOST'
+      Index = 16
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONREMOTE_OS_USER: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$REMOTE_OS_USER'
+      Index = 17
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONAUTH_METHOD: TIBStringField
+      FieldKind = fkData
+      FieldName = 'MON$AUTH_METHOD'
+      Index = 18
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object AttachmentsMONSYSTEM_FLAG: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'MON$SYSTEM_FLAG'
+      Index = 19
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+    end
+    object AttachmentsRDBCHARACTER_SET_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$CHARACTER_SET_NAME'
+      Index = 20
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsRDBFORM_OF_USE: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$FORM_OF_USE'
+      Index = 21
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsRDBNUMBER_OF_CHARACTERS: TIBIntegerField
+      FieldKind = fkData
+      FieldName = 'RDB$NUMBER_OF_CHARACTERS'
+      Index = 22
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsRDBDEFAULT_COLLATE_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$DEFAULT_COLLATE_NAME'
+      Index = 23
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsRDBCHARACTER_SET_ID: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$CHARACTER_SET_ID'
+      Index = 24
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsRDBSYSTEM_FLAG: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$SYSTEM_FLAG'
+      Index = 25
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+    end
+    object AttachmentsRDBDESCRIPTION: TIBMemoField
+      FieldKind = fkData
+      FieldName = 'RDB$DESCRIPTION'
+      Index = 26
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      BlobType = ftMemo
+      Size = 8
+      Transliterate = False
+      DisplayTextAsClassName = False
+    end
+    object AttachmentsRDBFUNCTION_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$FUNCTION_NAME'
+      Index = 27
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsRDBBYTES_PER_CHARACTER: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'RDB$BYTES_PER_CHARACTER'
+      Index = 28
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AttachmentsRDBSECURITY_CLASS: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$SECURITY_CLASS'
+      Index = 29
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+    object AttachmentsRDBOWNER_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'RDB$OWNER_NAME'
+      Index = 30
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 31
+    end
+  end
+  object AttUpdate: TIBUpdate
+    OnApplyUpdates = AttUpdateApplyUpdates
+    Left = 376
+    Top = 432
+  end
+  object AdminUserQuery: TIBSQL
+    Database = IBDatabase1
+    CaseSensitiveParameterNames = False
+    GenerateParamNames = False
+    UniqueParamNames = False
+    ParamCheck = True
+    SQL.Strings = (
+      'Select A.SEC$ADMIN From SEC$USERS A'
+      'Where SEC$USER_NAME = CURRENT_USER'
+    )
+    Scrollable = False
+    Transaction = CurrentTransaction
+    Left = 424
+    Top = 496
+  end
+  object DBTables: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(A.RDB$RELATION_NAME) as RDB$RELATION_NAME, 1 as Selected'
+      ' From RDB$RELATIONS A'
+      ' Where RDB$SYSTEM_FLAG = 0'
+      ' order by 1'
+    )
+    Params = <>
+    UpdateObject = DBTablesUpdate
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 520
+    Top = 488
+  end
+  object DBTablesUpdate: TIBUpdate
+    RefreshSQL.Strings = (
+      ''
+    )
+    OnApplyUpdates = DBTablesUpdateApplyUpdates
+    Left = 592
+    Top = 480
+  end
+  object AuthMappings: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'SELECT r.RDB$DB_KEY, cast(''Local'' as VarChar(6)) as MAPTYPE, r.RDB$MAP_NAME,'
+      '    Case'
+      '      When r.RDB$MAP_USING = ''P'' and r.RDB$MAP_PLUGIN is not null then cast (''Plugin '' || r.RDB$MAP_PLUGIN as VarChar(20))'
+      '      When r.RDB$MAP_USING = ''P'' and r.RDB$MAP_PLUGIN is null then ''Any Plugin'''
+      '      When r.RDB$MAP_USING = ''S'' then ''Any Plugin Serverwide'''
+      '      When r.RDB$MAP_USING = ''M'' then ''Mapping'''
+      '      When r.RDB$MAP_USING = ''*'' then ''*'''
+      '      else'
+      '        ''Using '' || r.RDB$MAP_USING || '','' || coalesce(r.RDB$MAP_PLUGIN,'''') End as MAP_USING,'
+      '    r.RDB$MAP_USING, r.RDB$MAP_PLUGIN,'
+      '    r.RDB$MAP_DB, r.RDB$MAP_FROM_TYPE, r.RDB$MAP_FROM,'
+      '    Trim(r.RDB$MAP_FROM_TYPE) || '': '' || Trim(r.RDB$MAP_FROM) as MAP_FROM,'
+      '    r.RDB$MAP_TO_TYPE,'
+      '    T.RDB$TYPE_NAME as MAP_TO_TYPE, r.RDB$MAP_TO,'
+      '    Trim(T.RDB$TYPE_NAME) || '': '' || Trim(r.RDB$MAP_TO) as MAP_TO,'
+      '    r.RDB$SYSTEM_FLAG, r.RDB$DESCRIPTION'
+      'FROM RDB$AUTH_MAPPING r'
+      'JOIN RDB$TYPES T On T.RDB$TYPE = r.RDB$MAP_TO_TYPE and T.RDB$FIELD_NAME = ''RDB$MAP_TO_TYPE'''
+      'UNION'
+      'SELECT r.RDB$DB_KEY, ''Global'', r.SEC$MAP_NAME,'
+      '    Case'
+      '      When r.SEC$MAP_USING = ''P'' and r.SEC$MAP_PLUGIN is not null then cast (''Plugin '' || r.SEC$MAP_PLUGIN as VarChar(20))'
+      '      When r.SEC$MAP_USING = ''P'' and r.SEC$MAP_PLUGIN is null then ''Any Plugin'''
+      '      When r.SEC$MAP_USING = ''S'' then ''Any Plugin Serverwide'''
+      '      When r.SEC$MAP_USING = ''M'' then ''Mapping'''
+      '      When r.SEC$MAP_USING = ''*'' then ''*'''
+      '      else'
+      '        ''Using '' || r.SEC$MAP_USING || '','' || coalesce(r.SEC$MAP_PLUGIN,'''') End as MAP_USING,'
+      '    r.SEC$MAP_USING, r.SEC$MAP_PLUGIN,'
+      '    r.SEC$MAP_DB, r.SEC$MAP_FROM_TYPE,  r.SEC$MAP_FROM,'
+      '    Trim(r.SEC$MAP_FROM_TYPE) || '': '' || Trim(r.SEC$MAP_FROM) as MAP_FROM,'
+      '    r.SEC$MAP_TO_TYPE,'
+      '    T.RDB$TYPE_NAME as MAP_TO_TYPE,r.SEC$MAP_TO,'
+      '    Trim(T.RDB$TYPE_NAME) || '': '' || Trim(r.SEC$MAP_TO) as MAP_TO,'
+      '    null,null'
+      'FROM SEC$GLOBAL_AUTH_MAPPING r'
+      'JOIN RDB$TYPES T On T.RDB$TYPE = r.SEC$MAP_TO_TYPE and T.RDB$FIELD_NAME = ''RDB$MAP_TO_TYPE'''
+      ''
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 657
+    Top = 118
+  end
+  object AccessRights: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    OnCalcFields = AccessRightsCalcFields
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'with recursive AccessRight as ('
+      'Select UP.RDB$USER as SUBJECT_NAME,'
+      '  UP.RDB$USER_TYPE as SUBJECT_TYPE,'
+      '  UP.RDB$OBJECT_TYPE as OBJECT_TYPE,'
+      '  UP.RDB$RELATION_NAME as OBJECT_NAME,'
+      '  T2.RDB$TYPE_NAME as OBJECT_TYPE_NAME,'
+      '  UP.RDB$GRANTOR as GRANTOR,'
+      '  UP.RDB$GRANT_OPTION as GRANT_OPTION,'
+      '  List(Trim(UP.RDB$PRIVILEGE)) as Granted_Privileges,'
+      '  count (C.RDB$DB_KEY) as ChildCount'
+      '  From RDB$USER_PRIVILEGES UP'
+      '  JOIN RDB$TYPES T2 On T2.RDB$TYPE = UP.RDB$OBJECT_TYPE and T2.RDB$FIELD_NAME = ''RDB$OBJECT_TYPE'''
+      '  Left Outer JOIN RDB$USER_PRIVILEGES C On C.RDB$USER_TYPE = UP.RDB$OBJECT_TYPE and C.RDB$USER = UP.RDB$RELATION_NAME'
+      '  Where UP.RDB$USER <> ''SYSDBA'''
+      '  Group BY UP.RDB$USER,UP.RDB$USER_TYPE,UP.RDB$OBJECT_TYPE,'
+      '    UP.RDB$RELATION_NAME, UP.RDB$GRANTOR, UP.RDB$GRANT_OPTION,'
+      '    T2.RDB$TYPE_NAME'
+      '    ),'
+      ''
+      '   AccessRights as ('
+      '  select cast(Trim(SUBJECT_NAME) || SUBJECT_TYPE as Char(65)) as ID,SUBJECT_TYPE, SUBJECT_NAME,'
+      '         OBJECT_TYPE, OBJECT_NAME, OBJECT_TYPE_NAME, Granted_Privileges,GRANTOR, GRANT_OPTION,'
+      '         cast(NULL as Char(65) ) as Parent, ChildCount'
+      '         From AccessRight'
+      '  UNION all'
+      '  Select Trim(B.SUBJECT_NAME) || B.SUBJECT_TYPE as ID, B.SUBJECT_TYPE, B.SUBJECT_NAME,'
+      '         B.OBJECT_TYPE, B.OBJECT_NAME, B.OBJECT_TYPE_NAME, B.Granted_Privileges, B.GRANTOR, B.GRANT_OPTION,'
+      '         A.ID as Parent,B.ChildCount'
+      '         From AccessRight B'
+      '           JOIN AccessRights A On A.OBJECT_TYPE = B.SUBJECT_TYPE and A.OBJECT_NAME = B.SUBJECT_NAME'
+      '           )'
+      ''
+      'Select *'
+      'From ('
+      'Select A.ID as ID, Trim(A.SUBJECT_NAME )as SUBJECT_NAME, A.SUBJECT_TYPE as SUBJECT_TYPE,'
+      '       case When A.Parent is NULL then Trim(T.RDB$TYPE_NAME) || A.SUBJECT_TYPE Else A.Parent End as Parent,'
+      '       cast (sum(A.ChildCount) as Integer) as ChildCount'
+      '       from AccessRights A'
+      '       JOIN RDB$TYPES T On T.RDB$TYPE = A.SUBJECT_TYPE and RDB$FIELD_NAME = ''RDB$OBJECT_TYPE'''
+      '       Group By A.ID, A.SUBJECT_NAME, A.SUBJECT_TYPE, A.Parent, T.RDB$TYPE_NAME'
+      'UNION'
+      'SELECT Trim(r.RDB$TYPE_NAME) || r.RDB$TYPE as ID,  Trim(r.RDB$TYPE_NAME) || ''S'' as SUBJECT_NAME,-r.RDB$TYPE,'
+      '  NULL,1'
+      'FROM RDB$TYPES r Where RDB$FIELD_NAME = ''RDB$OBJECT_TYPE'''
+      'and Exists(Select * from RDB$USER_PRIVILEGES Where RDB$USER_TYPE = r.RDB$TYPE)'
+      ''
+      '         )'
+      ''
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 648
+    Top = 264
+    object AccessRightsID: TIBStringField
+      FieldKind = fkData
+      FieldName = 'ID'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 37
+    end
+    object AccessRightsSUBJECT_TYPE: TIBSmallintField
+      FieldKind = fkData
+      FieldName = 'SUBJECT_TYPE'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AccessRightsPARENT: TIBStringField
+      FieldKind = fkData
+      FieldName = 'PARENT'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 37
+    end
+    object AccessRightsImageIndex: TLongintField
+      FieldKind = fkCalculated
+      FieldName = 'ImageIndex'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AccessRightsDisplayName: TStringField
+      FieldKind = fkCalculated
+      FieldName = 'DisplayName'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 64
+    end
+    object AccessRightsCHILDCOUNT: TIBIntegerField
+      FieldKind = fkData
+      FieldName = 'CHILDCOUNT'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object AccessRightsSUBJECT_NAME: TIBStringField
+      FieldKind = fkData
+      FieldName = 'SUBJECT_NAME'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 64
+    end
+  end
+  object SubjectAccessRights: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase1
+    Transaction = CurrentTransaction
+    BeforeOpen = SubjectAccessRightsBeforeOpen
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select UP.RDB$USER as SUBJECT_NAME,'
+      '  UP.RDB$USER_TYPE as SUBJECT_TYPE,'
+      '  T1.RDB$TYPE_NAME as SUBJECT_TYPE_NAME,'
+      '  UP.RDB$OBJECT_TYPE as OBJECT_TYPE,'
+      '  case T2.RDB$TYPE_NAME'
+      '      When ''RELATION'' then ''TABLE'''
+      '      When ''FIELD'' then ''DOMAIN'''
+      '  Else T2.RDB$TYPE_NAME End  as OBJECT_TYPE_NAME,'
+      '  UP.RDB$RELATION_NAME as OBJECT_NAME,'
+      '  List(DISTINCT Trim(RDB$PRIVILEGE)) as Granted_Privileges,'
+      '  UC.Update_Columns,'
+      '  RC.Reference_Columns,'
+      '  UP.RDB$GRANTOR as GrantedBy,'
+      '  coalesce(UP.RDB$GRANT_OPTION,0) as GRANT_OPTION'
+      '  From RDB$USER_PRIVILEGES UP'
+      '  JOIN RDB$TYPES T1 On T1.RDB$TYPE = UP.RDB$USER_TYPE and T1.RDB$FIELD_NAME = ''RDB$OBJECT_TYPE'''
+      '  JOIN RDB$TYPES T2 On T2.RDB$TYPE = UP.RDB$OBJECT_TYPE and T2.RDB$FIELD_NAME = ''RDB$OBJECT_TYPE'''
+      '  Left Outer JOIN ('
+      '    Select RDB$USER, RDB$USER_TYPE, RDB$OBJECT_TYPE, RDB$RELATION_NAME,'
+      '      List(Trim(RDB$FIELD_NAME)) as Update_Columns'
+      '      From RDB$USER_PRIVILEGES Where RDB$PRIVILEGE = ''U'''
+      '      Group By RDB$USER, RDB$USER_TYPE, RDB$OBJECT_TYPE, RDB$RELATION_NAME) UC'
+      '    On UC.RDB$USER = UP.RDB$USER and UC.RDB$USER_TYPE = UP.RDB$USER_TYPE and'
+      '       UC.RDB$OBJECT_TYPE = UP.RDB$OBJECT_TYPE and UC.RDB$RELATION_NAME = UP.RDB$RELATION_NAME'
+      '  Left Outer JOIN ('
+      '    Select RDB$USER, RDB$USER_TYPE, RDB$OBJECT_TYPE, RDB$RELATION_NAME,'
+      '      List(Trim(RDB$FIELD_NAME)) as Reference_Columns'
+      '      From RDB$USER_PRIVILEGES Where RDB$PRIVILEGE = ''R'''
+      '      Group By RDB$USER, RDB$USER_TYPE, RDB$OBJECT_TYPE, RDB$RELATION_NAME) RC'
+      '    On RC.RDB$USER = UP.RDB$USER and RC.RDB$USER_TYPE = UP.RDB$USER_TYPE and'
+      '       RC.RDB$OBJECT_TYPE = UP.RDB$OBJECT_TYPE and RC.RDB$RELATION_NAME = UP.RDB$RELATION_NAME'
+      '  Where Trim(UP.RDB$USER) || UP.RDB$USER_TYPE = :ID and'
+      '    (not (UP.RDB$OBJECT_TYPE in (0,9,13)) or'
+      '    (UP.RDB$OBJECT_TYPE in (0,13) and'
+      '      not Exists(Select * from RDB$RELATIONS Where RDB$RELATION_NAME = UP.RDB$RELATION_NAME and RDB$SYSTEM_FLAG <> 0)) or'
+      '    (UP.RDB$OBJECT_TYPE = 9 and UP.RDB$RELATION_NAME not Similar to ''RDB$%|SEC$%|MON$%|SQL$%'')'
+      '    )'
+      '  Group BY UP.RDB$USER,UP.RDB$USER_TYPE,UP.RDB$OBJECT_TYPE,'
+      '    UP.RDB$RELATION_NAME, UP.RDB$GRANTOR, RDB$GRANT_OPTION,T1.RDB$TYPE_NAME,'
+      '    T2.RDB$TYPE_NAME, UC.Update_Columns, RC.Reference_Columns'
+      ''
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'ID'
+        ParamType = ptInput
+      end>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 648
+    Top = 336
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'ID'
+        ParamType = ptInput
+      end>
+  end
+  object IBXServicesConnection1: TIBXServicesConnection
+    Connected = False
+    AfterConnect = IBXServicesConnection1AfterConnect
+    OnLogin = IBXServicesConnection1Login
+    Params.Strings = (
+      'sql_role_name=RDB$ADMIN'
+    )
+    TraceFlags = []
+    Left = 640
+    Top = 48
+  end
+  object IBStatisticalService1: TIBXStatisticalService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    Options = [HeaderPages]
+    Left = 48
+    Top = 287
+  end
+  object IBConfigService1: TIBXConfigService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    Left = 168
+    Top = 283
+  end
+  object IBServerProperties1: TIBXServerProperties
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    Left = 40
+    Top = 365
+  end
+  object IBLogService1: TIBXLogService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    Left = 168
+    Top = 365
+  end
+  object IBSecurityService1: TIBXSecurityService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    UserID = 0
+    GroupID = 0
+    AdminRole = False
+    Left = 36
+    Top = 437
+  end
+  object IBValidationService1: TIBXValidationService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    OnGetNextLine = IBValidationService1GetNextLine
+    Options = [ValidateFull]
+    Left = 632
+    Top = 416
+  end
+  object IBOnlineValidationService1: TIBXOnlineValidationService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    OnGetNextLine = IBValidationService1GetNextLine
+    Left = 40
+    Top = 503
+  end
+  object LegacyUserList: TIBXServicesUserList
+    FieldDefs = <    
+      item
+        Name = 'UserID'
+        DataType = ftInteger
+        Precision = -1
+      end    
+      item
+        Name = 'GroupID'
+        DataType = ftInteger
+        Precision = -1
+      end    
+      item
+        Name = 'SEC$USER_NAME'
+        DataType = ftString
+        Precision = -1
+        Size = 31
+      end    
+      item
+        Name = 'SEC$FIRST_NAME'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'SEC$MIDDLE_NAME'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'SEC$LAST_NAME'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'SEC$PASSWORD'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'SEC$ADMIN'
+        DataType = ftBoolean
+        Precision = -1
+      end    
+      item
+        Name = 'SEC$PLUGIN'
+        DataType = ftString
+        Size = 21
+      end    
+      item
+        Name = 'SEC$ACTIVE'
+        DataType = ftBoolean
+      end    
+      item
+        Name = 'LOGGEDIN'
+        DataType = ftBoolean
+      end    
+      item
+        Name = 'DBCREATOR'
+        DataType = ftBoolean
+      end>
+    AfterOpen = LegacyUserListAfterOpen
+    BeforeClose = LegacyUserListBeforeClose
+    AfterInsert = UserListAfterInsert
+    AfterPost = LegacyUserListAfterPost
+    Source = IBSecurityService1
+    Left = 167
+    Top = 438
+  end
+  object InLimboList: TIBXServicesLimboTransactionsList
+    FieldDefs = <    
+      item
+        Name = 'TransactionID'
+        DataType = ftInteger
+        Precision = -1
+      end    
+      item
+        Name = 'TransactionType'
+        DataType = ftString
+        Precision = -1
+        Size = 16
+      end    
+      item
+        Name = 'HostSite'
+        DataType = ftString
+        Precision = -1
+        Size = 256
+      end    
+      item
+        Name = 'RemoteSite'
+        DataType = ftString
+        Precision = -1
+        Size = 256
+      end    
+      item
+        Name = 'DatabasePath'
+        DataType = ftString
+        Precision = -1
+        Size = 256
+      end    
+      item
+        Name = 'State'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'RecommendedAction'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end    
+      item
+        Name = 'RequestedAction'
+        DataType = ftString
+        Precision = -1
+        Size = 32
+      end>
+    Source = IBLimboTrans
+    Left = 296
+    Top = 496
+  end
+  object IBLimboTrans: TIBXLimboTransactionResolutionService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    GlobalAction = CommitGlobal
+    Left = 176
+    Top = 496
+  end
+  object ConfigDataset: TMemDataset
+    FieldDefs = <    
+      item
+        Name = 'ParamDescription'
+        DataType = ftString
+        Size = 256
+      end    
+      item
+        Name = 'ParamValue'
+        DataType = ftInteger
+      end>
+    AfterClose = ConfigDatasetAfterClose
+    Left = 528
+    Top = 424
+  end
+end

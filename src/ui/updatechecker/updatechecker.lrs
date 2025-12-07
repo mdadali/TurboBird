@@ -1,0 +1,20 @@
+{ This is an automatically generated lazarus resource file }
+
+LazarusResources.Add('TfrmUpdateChecker','FORMDATA',[
+  'TPF0'#17'TfrmUpdateChecker'#16'frmUpdateChecker'#4'Left'#3#251#1#6'Height'#2
+  +'w'#3'Top'#3#26#1#5'Width'#3'r'#1#11'BorderIcons'#11#12'biSystemMenu'#0#7'Ca'
+  +'ption'#6#16'Check for Update'#12'ClientHeight'#2'w'#11'ClientWidth'#3'r'#1#8
+  +'OnCreate'#7#10'FormCreate'#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScree'
+  +'nCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#20#6'H'
+  +'eight'#2#19#3'Top'#2#10#5'Width'#2'b'#7'Caption'#6#15'Current Version'#11'P'
+  +'arentColor'#8#0#0#6'TLabel'#16'lbCurrentVersion'#4'Left'#3#200#0#6'Height'#2
+  +#19#3'Top'#2#10#5'Width'#2'j'#7'Caption'#6#16'lbCurrentVersion'#11'ParentCol'
+  +'or'#8#0#0#6'TLabel'#9'lblStatus'#4'Left'#2#0#6'Height'#2#19#3'Top'#2'd'#5'W'
+  +'idth'#3'r'#1#5'Align'#7#8'alBottom'#7'Caption'#6#11'New Version'#11'ParentC'
+  +'olor'#8#0#0#7'TButton'#8'btnCheck'#4'Left'#2#20#6'Height'#2#25#3'Top'#2'('#5
+  +'Width'#2'x'#7'Caption'#6#5'Check'#7'OnClick'#7#13'btnCheckClick'#8'TabOrder'
+  +#2#0#0#0#7'TButton'#11'btnDownload'#4'Left'#3#200#0#6'Height'#2#25#3'Top'#2
+  +'('#5'Width'#2'x'#7'Caption'#6#8'Download'#7'OnClick'#7#16'btnDownloadClick'
+  +#8'TabOrder'#2#1#0#0#6'TPanel'#8'pnlColor'#4'Left'#3#152#0#6'Height'#2#25#3
+  +'Top'#2'('#5'Width'#2#26#10'BevelOuter'#7#6'bvNone'#8'TabOrder'#2#2#0#0#0
+]);

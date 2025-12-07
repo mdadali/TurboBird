@@ -1,0 +1,108 @@
+object DBLoginDlg: TDBLoginDlg
+  Left = 279
+  Height = 305
+  Top = 270
+  Width = 385
+  ActiveControl = Password
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Database Login'
+  ClientHeight = 305
+  ClientWidth = 385
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object Bevel1: TBevel
+    Left = 15
+    Height = 253
+    Top = 16
+    Width = 356
+    Anchors = [akTop, akLeft, akRight, akBottom]
+  end
+  object TargetCaption: TLabel
+    Left = 33
+    Height = 19
+    Top = 116
+    Width = 62
+    Caption = 'Database:'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 32
+    Height = 19
+    Top = 160
+    Width = 77
+    Caption = 'User  Name:'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 33
+    Height = 19
+    Top = 208
+    Width = 62
+    Caption = 'Password:'
+    ParentColor = False
+  end
+  object Button1: TButton
+    Left = 296
+    Height = 25
+    Top = 276
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 215
+    Height = 25
+    Top = 276
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object DatabaseName: TEdit
+    Left = 142
+    Height = 31
+    Top = 112
+    Width = 192
+    TabOrder = 2
+  end
+  object UserName: TEdit
+    Left = 142
+    Height = 31
+    Top = 156
+    Width = 192
+    TabOrder = 3
+  end
+  object Password: TEdit
+    Left = 142
+    Height = 31
+    Top = 202
+    Width = 192
+    EchoMode = emPassword
+    PasswordChar = '*'
+    TabOrder = 4
+  end
+  object Label1: TLabel
+    Left = 28
+    Height = 88
+    Top = 24
+    Width = 324
+    AutoSize = False
+    Caption = 'You must provide a valid connect string for the database (including the server name, if the database in on a remote server), and an administrator login for the database. You will be logged in with the RDB$ADMIN role, if available to you.'
+    ParentColor = False
+    WordWrap = True
+  end
+  object CreateIfNotExist: TCheckBox
+    Left = 96
+    Height = 21
+    Top = 238
+    Width = 236
+    Caption = 'Create Database if it does not exist'
+    TabOrder = 5
+  end
+end

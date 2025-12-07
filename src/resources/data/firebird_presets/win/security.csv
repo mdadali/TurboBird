@@ -1,0 +1,9 @@
+ID;Name;ActiveValue;FileValue;DefaultValue;Source;Config_is_set
+17;RemoteServiceName;;gds_db;gds_db;;True
+26;ExternalFileAccess;;None;None;;True
+27;DatabaseAccess;;None;Full;;True
+28;UdfAccess;;None;None;;True
+34;Redirection;;false;false;;True
+51;RemoteAccess;;false;true;;True
+56;AllowEncryptedSecurityDatabase;;true;false;;True
+66;ReadConsistency;;true;true;;True

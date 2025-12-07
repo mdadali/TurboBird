@@ -1,0 +1,96 @@
+object fmTransactionConfig: TfmTransactionConfig
+  Left = 601
+  Height = 366
+  Top = 175
+  Width = 486
+  Caption = 'Transaction configuration'
+  ClientHeight = 366
+  ClientWidth = 486
+  OnShow = FormShow
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 38
+    Height = 19
+    Top = 24
+    Width = 67
+    Caption = 'TxIsolation'
+    ParentColor = False
+  end
+  object ComboBox1: TComboBox
+    Left = 160
+    Height = 31
+    Top = 24
+    Width = 256
+    ItemHeight = 0
+    ItemIndex = 0
+    Items.Strings = (
+      'ReadCommitted'
+      'ReadCommitedRecVer'
+      'RepeatableRead'
+      'Serializable'
+    )
+    Style = csDropDownList
+    TabOrder = 0
+    Text = 'ReadCommitted'
+  end
+  object Label2: TLabel
+    Left = 38
+    Height = 19
+    Top = 64
+    Width = 85
+    Caption = 'TxAccesMode'
+    ParentColor = False
+  end
+  object chkBoxTxAccesMode: TCheckBox
+    Left = 160
+    Height = 21
+    Top = 64
+    Width = 94
+    Caption = 'Read/Write'
+    Checked = True
+    State = cbChecked
+    TabOrder = 1
+  end
+  object chkBoxTxWaitMode: TCheckBox
+    Left = 160
+    Height = 21
+    Top = 104
+    Width = 106
+    Caption = 'Wait for locks'
+    Checked = True
+    State = cbChecked
+    TabOrder = 2
+  end
+  object Label3: TLabel
+    Left = 38
+    Height = 19
+    Top = 104
+    Width = 77
+    Caption = 'TxWaitMode'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 38
+    Height = 19
+    Top = 144
+    Width = 92
+    Caption = 'TxAutoCommit'
+    ParentColor = False
+  end
+  object chkBoxTxAutoCommit: TCheckBox
+    Left = 160
+    Height = 21
+    Top = 144
+    Width = 102
+    Caption = 'AutoCommit'
+    TabOrder = 3
+  end
+  object Label5: TLabel
+    Left = 38
+    Height = 19
+    Top = 184
+    Width = 67
+    Caption = 'TxTimeOut'
+    ParentColor = False
+  end
+end

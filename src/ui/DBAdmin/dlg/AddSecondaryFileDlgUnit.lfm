@@ -1,0 +1,109 @@
+object AddSecondaryFileDlg: TAddSecondaryFileDlg
+  Left = 1292
+  Height = 186
+  Top = 532
+  Width = 386
+  BorderStyle = bsDialog
+  Caption = 'Add Secondary File'
+  ClientHeight = 186
+  ClientWidth = 386
+  OnClose = FormClose
+  Position = poMainFormCenter
+  LCLVersion = '1.8.3.0'
+  object Bevel1: TBevel
+    Left = 8
+    Height = 168
+    Top = 8
+    Width = 288
+  end
+  object Button1: TButton
+    Left = 304
+    Height = 29
+    Top = 8
+    Width = 75
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 304
+    Height = 29
+    Top = 45
+    Width = 75
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 14
+    Top = 24
+    Width = 58
+    Caption = 'File Name'
+    FocusControl = FileName
+    ParentColor = False
+  end
+  object FileName: TEdit
+    Left = 16
+    Height = 24
+    Top = 40
+    Width = 273
+    TabOrder = 2
+    Text = 'FileName'
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 14
+    Top = 88
+    Width = 81
+    Caption = '&Starting after'
+    FocusControl = StartAfter
+    ParentColor = False
+  end
+  object StartAfter: TEdit
+    Left = 104
+    Height = 24
+    Top = 84
+    Width = 81
+    NumbersOnly = True
+    TabOrder = 3
+    Text = 'StartAfter'
+  end
+  object InPagesBtn: TRadioButton
+    Left = 152
+    Height = 22
+    Top = 144
+    Width = 58
+    Caption = '&Pages'
+    Checked = True
+    TabOrder = 4
+    TabStop = True
+  end
+  object RadioButton2: TRadioButton
+    Left = 232
+    Height = 22
+    Top = 144
+    Width = 48
+    Caption = 'MBs'
+    TabOrder = 5
+  end
+  object Label3: TLabel
+    Left = 56
+    Height = 14
+    Top = 118
+    Width = 43
+    Caption = 'Length'
+    ParentColor = False
+  end
+  object FileLength: TEdit
+    Left = 105
+    Height = 24
+    Top = 112
+    Width = 80
+    NumbersOnly = True
+    TabOrder = 6
+    Text = 'FileLength'
+  end
+end

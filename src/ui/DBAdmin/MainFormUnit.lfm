@@ -1,0 +1,3544 @@
+object MainForm: TMainForm
+  Left = 163
+  Height = 739
+  Top = 693
+  Width = 1163
+  Caption = 'DBAdmin'
+  ClientHeight = 710
+  ClientWidth = 1163
+  Menu = MainMenu1
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 1163
+    Caption = 'ToolBar1'
+    Images = MenuImages
+    TabOrder = 0
+    object ToolButton1: TToolButton
+      Left = 24
+      Top = 2
+      Action = Backup
+      ParentShowHint = False
+      ShowCaption = False
+      ShowHint = True
+    end
+    object ToolButton2: TToolButton
+      Left = 47
+      Height = 22
+      Top = 2
+      Caption = 'ToolButton2'
+      Style = tbsSeparator
+    end
+    object ToolButton3: TToolButton
+      Left = 55
+      Top = 2
+      Action = Restore
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton4: TToolButton
+      Left = 78
+      Height = 22
+      Top = 2
+      Caption = 'ToolButton4'
+      Style = tbsDivider
+    end
+    object ToolButton5: TToolButton
+      Left = 83
+      Top = 2
+      Action = Save
+    end
+    object ToolButton6: TToolButton
+      Left = 106
+      Height = 22
+      Top = 2
+      Caption = 'ToolButton6'
+      Style = tbsSeparator
+    end
+    object ToolButton7: TToolButton
+      Left = 114
+      Top = 2
+      Action = RunScript
+    end
+    object ToolButton8: TToolButton
+      Left = 1
+      Top = 2
+      Caption = 'ToolButton8'
+      ImageIndex = 3
+      OnClick = ToolButton8Click
+    end
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 21
+    Top = 689
+    Width = 1163
+    Panels = <>
+  end
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 663
+    Top = 26
+    Width = 1163
+    ActivePage = Properties
+    Align = alClient
+    MultiLine = True
+    ParentShowHint = False
+    ShowHint = True
+    TabIndex = 0
+    TabOrder = 2
+    Options = [nboMultiLine]
+    object Properties: TTabSheet
+      Caption = 'Properties'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnShow = PropertiesShow
+      object Panel7: TPanel
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 1153
+        Align = alClient
+        BevelOuter = bvNone
+        ClientHeight = 632
+        ClientWidth = 1153
+        Color = clWindow
+        ParentColor = False
+        TabOrder = 0
+        object Label6: TLabel
+          Left = 71
+          Height = 19
+          Top = 20
+          Width = 42
+          Caption = 'Server'
+          ParentColor = False
+        end
+        object Label2: TLabel
+          Left = 15
+          Height = 19
+          Top = 52
+          Width = 98
+          Caption = 'Database Name'
+          ParentColor = False
+        end
+        object Label9: TLabel
+          Left = 19
+          Height = 19
+          Top = 83
+          Width = 91
+          Caption = 'Connect String'
+          ParentColor = False
+        end
+        object ConnectString: TEdit
+          Left = 120
+          Height = 31
+          Top = 80
+          Width = 265
+          TabOrder = 0
+          Text = 'ConnectString'
+        end
+        object Label1: TLabel
+          Left = 40
+          Height = 19
+          Top = 117
+          Width = 77
+          Caption = 'ODS Version'
+          ParentColor = False
+        end
+        object ODSVersionString: TEdit
+          Left = 120
+          Height = 31
+          Top = 112
+          Width = 266
+          ReadOnly = True
+          TabOrder = 1
+          Text = 'ODSVersionString'
+        end
+        object Label4: TLabel
+          Left = 19
+          Height = 19
+          Top = 150
+          Width = 95
+          Caption = 'Svr Version No.'
+          ParentColor = False
+        end
+        object ServerVersionNo: TEdit
+          Left = 120
+          Height = 31
+          Top = 144
+          Width = 266
+          ReadOnly = True
+          TabOrder = 2
+          Text = 'ServerVersionNo'
+        end
+        object Label5: TLabel
+          Left = 789
+          Height = 19
+          Top = 23
+          Width = 69
+          Caption = 'SQL Dialect'
+          ParentColor = False
+        end
+        object DBSQLDialect: TEdit
+          Left = 865
+          Height = 31
+          Top = 16
+          Width = 89
+          Alignment = taRightJustify
+          NumbersOnly = True
+          OnEditingDone = DBSQLDialectEditingDone
+          TabOrder = 3
+        end
+        object Label24: TLabel
+          Left = 51
+          Height = 19
+          Top = 211
+          Width = 64
+          Caption = 'DB Owner'
+          ParentColor = False
+        end
+        object Label18: TLabel
+          Left = 24
+          Height = 19
+          Top = 244
+          Width = 86
+          Caption = 'Sec. Database'
+          ParentColor = False
+        end
+        object Label13: TLabel
+          Left = 28
+          Height = 19
+          Top = 277
+          Width = 83
+          Caption = 'Character Set'
+          ParentColor = False
+        end
+        object DBCharSetRO: TDBEdit
+          Left = 120
+          Height = 31
+          Top = 272
+          Width = 264
+          DataField = 'RDB$CHARACTER_SET_NAME'
+          DataSource = DBCharSetSource
+          ReadOnly = True
+          MaxLength = 0
+          TabOrder = 5
+        end
+        object DBCharacterSet: TIBLookupComboEditBox
+          Left = 121
+          Height = 31
+          Top = 272
+          Width = 266
+          DataField = 'RDB$CHARACTER_SET_NAME'
+          DataSource = DBCharSetSource
+          KeyField = 'RDB$CHARACTER_SET_NAME'
+          ListField = 'RDB$CHARACTER_SET_NAME'
+          ListFieldIndex = 0
+          ListSource = CharSetSource
+          LookupCache = False
+          OnEditingDone = DBCharacterSetEditingDone
+          TabOrder = 4
+          AutoInsert = False
+          AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          ItemHeight = 0
+        end
+        object DBIsReadOnly: TCheckBox
+          Left = 111
+          Height = 21
+          Top = 311
+          Width = 86
+          Caption = 'Read Only'
+          OnChange = DBIsReadOnlyChange
+          TabOrder = 6
+        end
+        object DatabaseOnline: TCheckBox
+          Left = 111
+          Height = 21
+          Top = 335
+          Width = 64
+          Caption = 'Online'
+          OnChange = DatabaseOnlineChange
+          TabOrder = 7
+        end
+        object SyncWrites: TCheckBox
+          Left = 111
+          Height = 21
+          Top = 359
+          Width = 175
+          Caption = 'Synchronous Disk Writes'
+          OnChange = SyncWritesChange
+          TabOrder = 8
+        end
+        object IsShadowChk: TCheckBox
+          Left = 111
+          Height = 21
+          Top = 383
+          Width = 133
+          Caption = 'Shadow Database'
+          OnChange = IsShadowChkChange
+          TabOrder = 9
+        end
+        object NoReserve: TCheckBox
+          Left = 111
+          Height = 21
+          Top = 407
+          Width = 244
+          Caption = 'Space Reserved for Backup Records'
+          OnChange = NoReserveChange
+          TabOrder = 10
+        end
+        object Label11: TLabel
+          Left = 944
+          Height = 19
+          Top = 52
+          Width = 97
+          Anchors = [akTop, akRight]
+          Caption = 'Pages Allocated'
+          ParentColor = False
+        end
+        object AllocatedPages: TEdit
+          Left = 1048
+          Height = 31
+          Top = 48
+          Width = 89
+          Alignment = taRightJustify
+          Anchors = [akTop, akRight]
+          ReadOnly = True
+          TabOrder = 11
+          Text = 'AllocatedPages'
+        end
+        object Label19: TLabel
+          Left = 472
+          Height = 19
+          Top = 22
+          Width = 58
+          Caption = 'Page Size'
+          ParentColor = False
+        end
+        object Label3: TLabel
+          Left = 970
+          Height = 19
+          Top = 85
+          Width = 72
+          Anchors = [akTop, akRight]
+          Caption = 'Pages Used'
+          ParentColor = False
+        end
+        object PagesUsed: TEdit
+          Left = 1048
+          Height = 31
+          Top = 80
+          Width = 89
+          Alignment = taRightJustify
+          Anchors = [akTop, akRight]
+          ReadOnly = True
+          TabOrder = 12
+          Text = 'PagesUsed'
+        end
+        object Label10: TLabel
+          Left = 947
+          Height = 19
+          Top = 118
+          Width = 95
+          Anchors = [akTop, akRight]
+          Caption = 'Pages Available'
+          ParentColor = False
+        end
+        object PagesAvail: TEdit
+          Left = 1048
+          Height = 31
+          Top = 112
+          Width = 89
+          Alignment = taRightJustify
+          Anchors = [akTop, akRight]
+          ReadOnly = True
+          TabOrder = 13
+          Text = 'PagesAvail'
+        end
+        object Label12: TLabel
+          Left = 432
+          Height = 19
+          Top = 52
+          Width = 104
+          Caption = 'Current Memory'
+          ParentColor = False
+        end
+        object Edit10: TEdit
+          Left = 535
+          Height = 31
+          Top = 48
+          Width = 89
+          Alignment = taRightJustify
+          ReadOnly = True
+          TabOrder = 14
+          Text = 'Edit10'
+        end
+        object Label20: TLabel
+          Left = 632
+          Height = 19
+          Top = 22
+          Width = 34
+          Caption = 'bytes'
+          ParentColor = False
+        end
+        object Label21: TLabel
+          Left = 634
+          Height = 19
+          Top = 57
+          Width = 34
+          Caption = 'bytes'
+          ParentColor = False
+        end
+        object Label14: TLabel
+          Left = 454
+          Height = 19
+          Top = 85
+          Width = 82
+          Caption = 'Max Memory'
+          ParentColor = False
+        end
+        object Edit11: TEdit
+          Left = 536
+          Height = 31
+          Top = 80
+          Width = 89
+          Alignment = taRightJustify
+          ReadOnly = True
+          TabOrder = 15
+          Text = 'Edit11'
+        end
+        object Label22: TLabel
+          Left = 635
+          Height = 19
+          Top = 85
+          Width = 34
+          Caption = 'bytes'
+          ParentColor = False
+        end
+        object Label15: TLabel
+          Left = 955
+          Height = 19
+          Top = 150
+          Width = 87
+          Anchors = [akTop, akRight]
+          Caption = 'No. of Buffers'
+          ParentColor = False
+        end
+        object PageBuffers: TEdit
+          Left = 1048
+          Height = 31
+          Top = 141
+          Width = 89
+          Alignment = taRightJustify
+          Anchors = [akTop, akRight]
+          NumbersOnly = True
+          OnEditingDone = PageBuffersEditingDone
+          TabOrder = 16
+        end
+        object DateDBCreatedLabel: TLabel
+          Left = 0
+          Height = 19
+          Top = 180
+          Width = 104
+          Caption = 'Date DB Created'
+          ParentColor = False
+        end
+        object Label16: TLabel
+          Left = 456
+          Height = 19
+          Top = 117
+          Width = 78
+          Caption = 'Linger Delay'
+          ParentColor = False
+        end
+        object LingerDelay: TEdit
+          Left = 536
+          Height = 31
+          Top = 112
+          Width = 89
+          Alignment = taRightJustify
+          NumbersOnly = True
+          OnEditingDone = LingerDelayEditingDone
+          TabOrder = 17
+        end
+        object Label17: TLabel
+          Left = 632
+          Height = 19
+          Top = 118
+          Width = 50
+          Caption = 'seconds'
+          ParentColor = False
+        end
+        object Label7: TLabel
+          Left = 402
+          Height = 19
+          Top = 151
+          Width = 131
+          Caption = 'S&weep Interval set to'
+          FocusControl = SweepInterval
+          ParentColor = False
+        end
+        object SweepInterval: TEdit
+          Left = 535
+          Height = 31
+          Top = 144
+          Width = 89
+          Alignment = taRightJustify
+          NumbersOnly = True
+          OnEditingDone = SweepIntervalEditingDone
+          TabOrder = 18
+        end
+        object Label8: TLabel
+          Left = 632
+          Height = 19
+          Top = 151
+          Width = 76
+          Caption = 'Transactions'
+          ParentColor = False
+        end
+        object DBEdit4: TDBEdit
+          Left = 536
+          Height = 31
+          Top = 16
+          Width = 89
+          DataField = 'MON$PAGE_SIZE'
+          DataSource = DatabaseSource
+          MaxLength = 0
+          TabOrder = 19
+        end
+        object Edit1: TEdit
+          Left = 121
+          Height = 31
+          Top = 16
+          Width = 263
+          ParentFont = False
+          TabOrder = 20
+          Text = 'Edit1'
+        end
+        object SecDatabase: TEdit
+          Left = 121
+          Height = 31
+          Top = 241
+          Width = 263
+          ReadOnly = True
+          TabOrder = 21
+          Text = 'SecDatabase'
+        end
+        object DBOwner: TEdit
+          Left = 120
+          Height = 31
+          Top = 208
+          Width = 264
+          ReadOnly = True
+          TabOrder = 22
+          Text = 'DBOwner'
+        end
+        object DatabaseAliasName: TEdit
+          Left = 121
+          Height = 31
+          Top = 48
+          Width = 264
+          ReadOnly = True
+          TabOrder = 23
+          Text = 'DatabaseAliasName'
+        end
+        object Label43: TLabel
+          Left = 400
+          Height = 19
+          Top = 398
+          Width = 67
+          Caption = 'Comments'
+          ParentColor = False
+        end
+        object DBComments: TMemo
+          Left = 400
+          Height = 195
+          Top = 414
+          Width = 732
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          Lines.Strings = (
+            'DBComments'
+          )
+          OnEditingDone = DBCommentsEditingDone
+          ScrollBars = ssAutoVertical
+          TabOrder = 24
+        end
+        object ClientLibrary: TLabel
+          Left = 1054
+          Height = 19
+          Top = 612
+          Width = 78
+          Alignment = taRightJustify
+          Anchors = [akRight, akBottom]
+          Caption = 'ClientLibrary'
+          ParentColor = False
+        end
+        object Label44: TLabel
+          Left = 402
+          Height = 19
+          Top = 272
+          Width = 212
+          Caption = 'Client/Server Version and Protocol'
+          ParentColor = False
+        end
+        object ClientServerVersion: TMemo
+          Left = 400
+          Height = 104
+          Top = 288
+          Width = 731
+          Anchors = [akTop, akLeft, akRight]
+          Font.Height = -11
+          ParentFont = False
+          ScrollBars = ssAutoVertical
+          TabOrder = 25
+        end
+        object DBDateCreated: TEdit
+          Left = 121
+          Height = 31
+          Top = 176
+          Width = 263
+          TabOrder = 26
+          Text = 'DBDateCreated'
+        end
+      end
+    end
+    object FilesTab: TTabSheet
+      Caption = 'Files'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnShow = FilesTabShow
+      object Label25: TLabel
+        Left = 16
+        Height = 19
+        Top = 16
+        Width = 134
+        Caption = 'Primary Database File'
+        ParentColor = False
+      end
+      object PrimaryDBFile: TEdit
+        Left = 16
+        Height = 31
+        Top = 32
+        Width = 736
+        Anchors = [akTop, akLeft, akRight]
+        ReadOnly = True
+        TabOrder = 0
+        Text = 'PrimaryDBFile'
+      end
+      object Label26: TLabel
+        Left = 16
+        Height = 19
+        Top = 72
+        Width = 95
+        Caption = 'Secondary Files'
+        ParentColor = False
+      end
+      object IBDynamicGrid1: TIBDynamicGrid
+        Left = 16
+        Height = 160
+        Top = 88
+        Width = 1025
+        Anchors = [akTop, akLeft, akRight]
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Seq'
+            Width = 40
+            FieldName = 'RDB$FILE_SEQUENCE'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'File Name'
+            Width = 200
+            FieldName = 'RDB$FILE_NAME'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Starts'
+            Width = 80
+            FieldName = 'RDB$FILE_START'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Length'
+            Width = 80
+            FieldName = 'RDB$FILE_LENGTH'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = SecDBFilesSource
+        ReadOnly = True
+        Scrollbars = ssAutoVertical
+        TabOrder = 1
+        ExpandEditorPanelBelowRow = False
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+      object AddFileBtn: TButton
+        Left = 1057
+        Height = 25
+        Top = 88
+        Width = 91
+        Action = AddSecondary
+        Anchors = [akTop, akRight]
+        TabOrder = 2
+      end
+      object Label27: TLabel
+        Left = 16
+        Height = 19
+        Top = 264
+        Width = 78
+        Caption = 'Shadow Files'
+        ParentColor = False
+      end
+      object IBDynamicGrid2: TIBDynamicGrid
+        Left = 16
+        Height = 312
+        Top = 280
+        Width = 1025
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Set'
+            Width = 60
+            FieldName = 'RDB$SHADOW_NUMBER'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Seq No.'
+            Width = 60
+            FieldName = 'RDB$FILE_SEQUENCE'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Alignment = taCenter
+            Title.Alignment = taCenter
+            Title.Caption = 'Mode'
+            Width = 50
+            FieldName = 'FileMode'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'File Name'
+            Width = 200
+            FieldName = 'RDB$FILE_NAME'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Starts'
+            Width = 80
+            FieldName = 'RDB$FILE_START'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Length'
+            Width = 80
+            FieldName = 'RDB$FILE_LENGTH'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = ShadowSource
+        ReadOnly = True
+        Scrollbars = ssAutoVertical
+        TabOrder = 3
+        ExpandEditorPanelBelowRow = False
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+      object AddShadowBtn: TButton
+        Left = 1057
+        Height = 25
+        Top = 280
+        Width = 91
+        Action = AddShadowSet
+        Anchors = [akTop, akRight]
+        TabOrder = 4
+      end
+      object RemoveShadowBtn: TButton
+        Left = 1057
+        Height = 25
+        Top = 312
+        Width = 91
+        Action = RemoveShadow
+        Anchors = [akTop, akRight]
+        TabOrder = 5
+      end
+    end
+    object AttachmentsTab: TTabSheet
+      Caption = 'Attachments'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = AttachmentsTabHide
+      OnShow = AttachmentsTabShow
+      object AttmtGrid: TIBDynamicGrid
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 1153
+        Align = alClient
+        Color = clWindow
+        Columns = <        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'ID'
+            Width = 40
+            FieldName = 'MON$ATTACHMENT_ID'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Connect Str'
+            Width = 100
+            FieldName = 'MON$ATTACHMENT_NAME'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Client'
+            Width = 120
+            FieldName = 'MON$REMOTE_HOST'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Client Name'
+            Width = 100
+            FieldName = 'MON$REMOTE_PROCESS'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'User'
+            Width = 80
+            FieldName = 'MON$USER'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Role'
+            Width = 80
+            FieldName = 'MON$ROLE'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'IP Address'
+            Width = 100
+            FieldName = 'MON$REMOTE_ADDRESS'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Alignment = taCenter
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Protocol'
+            Width = 60
+            FieldName = 'MON$REMOTE_PROTOCOL'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Char Set'
+            Width = 60
+            FieldName = 'RDB$CHARACTER_SET_NAME'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Alignment = taCenter
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'State'
+            Width = 60
+            FieldName = 'MON$STATE'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = AttachSource
+        Options = [dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+        PopupMenu = AttmtPopup
+        Scrollbars = ssAutoVertical
+        TabOrder = 0
+        EditorPanel = AttDetailsPanel
+        ExpandEditorPanelBelowRow = True
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+      object AttDetailsPanel: TPanel
+        Left = 32
+        Height = 60
+        Top = 88
+        Width = 628
+        BevelInner = bvLowered
+        ClientHeight = 60
+        ClientWidth = 628
+        TabOrder = 1
+        object Label31: TLabel
+          Left = 21
+          Height = 19
+          Top = 14
+          Width = 68
+          Caption = 'Server PID'
+          ParentColor = False
+        end
+        object Label32: TLabel
+          Left = 15
+          Height = 19
+          Top = 36
+          Width = 75
+          Caption = 'Remote PID'
+          ParentColor = False
+        end
+        object DBEdit2: TDBEdit
+          Left = 88
+          Height = 31
+          Top = 8
+          Width = 48
+          DataField = 'MON$SERVER_PID'
+          DataSource = AttachSource
+          ReadOnly = True
+          MaxLength = 0
+          TabOrder = 0
+        end
+        object DBEdit3: TDBEdit
+          Left = 88
+          Height = 31
+          Top = 32
+          Width = 48
+          DataField = 'MON$REMOTE_PID'
+          DataSource = AttachSource
+          ReadOnly = True
+          MaxLength = 0
+          TabOrder = 1
+        end
+        object DBCheckBox1: TDBCheckBox
+          Left = 348
+          Height = 23
+          Top = 8
+          Width = 202
+          Caption = 'Garbage Collection Allowed'
+          DataField = 'MON$GARBAGE_COLLECTION'
+          DataSource = AttachSource
+          ReadOnly = True
+          TabOrder = 2
+          ValueChecked = '1'
+          ValueUnchecked = '0'
+        end
+        object Label35: TLabel
+          Left = 352
+          Height = 19
+          Top = 36
+          Width = 71
+          Caption = 'Statistics ID'
+          ParentColor = False
+        end
+        object DBEdit7: TDBEdit
+          Left = 432
+          Height = 31
+          Top = 32
+          Width = 64
+          DataField = 'MON$STAT_ID'
+          DataSource = AttachSource
+          ReadOnly = True
+          MaxLength = 0
+          TabOrder = 3
+        end
+        object AttmntODS12Panel: TPanel
+          Left = 154
+          Height = 56
+          Top = 2
+          Width = 183
+          BevelOuter = bvNone
+          ClientHeight = 56
+          ClientWidth = 183
+          TabOrder = 4
+          object AuthMethLabel: TLabel
+            Left = 8
+            Height = 19
+            Top = 12
+            Width = 82
+            Caption = 'Auth Method'
+            ParentColor = False
+          end
+          object RemoteOSLabel: TLabel
+            Left = 8
+            Height = 19
+            Top = 34
+            Width = 102
+            Caption = 'Remote OS User'
+            ParentColor = False
+          end
+          object AuthMethod: TDBEdit
+            Left = 111
+            Height = 31
+            Top = 6
+            Width = 64
+            DataField = 'MON$AUTH_METHOD'
+            DataSource = AttachSource
+            MaxLength = 0
+            TabOrder = 0
+          end
+          object RemoteOSUser: TDBEdit
+            Left = 112
+            Height = 31
+            Top = 30
+            Width = 63
+            DataField = 'MON$REMOTE_OS_USER'
+            DataSource = AttachSource
+            MaxLength = 0
+            TabOrder = 1
+          end
+        end
+      end
+    end
+    object StatisticsTab: TTabSheet
+      Caption = 'Statistics'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = StatisticsTabHide
+      OnShow = StatisticsTabShow
+      object StatsOptions: TComboBox
+        Left = 915
+        Height = 31
+        Top = 8
+        Width = 228
+        Anchors = [akTop, akRight]
+        ItemHeight = 0
+        ItemIndex = 0
+        Items.Strings = (
+          'Header Only'
+          'Performance and Operational'
+          'Header and Data'
+          'Header, Data and Indexes'
+          'All'
+        )
+        OnCloseUp = StatsOptionsCloseUp
+        TabOrder = 0
+        Text = 'Header Only'
+      end
+      object Label28: TLabel
+        Left = 8
+        Height = 19
+        Top = 24
+        Width = 114
+        Caption = 'Database Statistics'
+        ParentColor = False
+      end
+      object StatsMemo: TMemo
+        Left = 8
+        Height = 579
+        Top = 40
+        Width = 1135
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Lines.Strings = (
+          'Memo1'
+        )
+        ScrollBars = ssAutoBoth
+        TabOrder = 1
+      end
+    end
+    object SchemaTab: TTabSheet
+      Caption = 'Schema'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnShow = SchemaTabShow
+      object SchemaPanel: TPanel
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 1153
+        Align = alClient
+        BevelOuter = bvNone
+        ClientHeight = 632
+        ClientWidth = 1153
+        TabOrder = 0
+        object IncludeUserGrants: TCheckBox
+          Left = 56
+          Height = 21
+          Top = 610
+          Width = 169
+          Anchors = [akLeft, akBottom]
+          Caption = 'Include Grants to Users'
+          OnChange = SchemaTabShow
+          TabOrder = 0
+        end
+        inline SynEdit1: TSynEdit
+          Left = 0
+          Height = 488
+          Top = 0
+          Width = 1153
+          Align = alTop
+          Font.Height = -11
+          Font.Name = 'DejaVu Sans Mono'
+          Font.Pitch = fpFixed
+          Font.Quality = fqNonAntialiased
+          ParentColor = False
+          ParentFont = False
+          PopupMenu = SchemaPopup
+          TabOrder = 1
+          Gutter.Width = 55
+          Gutter.MouseActions = <>
+          RightGutter.Width = 0
+          RightGutter.MouseActions = <>
+          Highlighter = SynSQLSyn1
+          Keystrokes = <          
+            item
+              Command = ecUp
+              ShortCut = 38
+            end          
+            item
+              Command = ecSelUp
+              ShortCut = 8230
+            end          
+            item
+              Command = ecScrollUp
+              ShortCut = 16422
+            end          
+            item
+              Command = ecDown
+              ShortCut = 40
+            end          
+            item
+              Command = ecSelDown
+              ShortCut = 8232
+            end          
+            item
+              Command = ecScrollDown
+              ShortCut = 16424
+            end          
+            item
+              Command = ecLeft
+              ShortCut = 37
+            end          
+            item
+              Command = ecSelLeft
+              ShortCut = 8229
+            end          
+            item
+              Command = ecWordLeft
+              ShortCut = 16421
+            end          
+            item
+              Command = ecSelWordLeft
+              ShortCut = 24613
+            end          
+            item
+              Command = ecRight
+              ShortCut = 39
+            end          
+            item
+              Command = ecSelRight
+              ShortCut = 8231
+            end          
+            item
+              Command = ecWordRight
+              ShortCut = 16423
+            end          
+            item
+              Command = ecSelWordRight
+              ShortCut = 24615
+            end          
+            item
+              Command = ecPageDown
+              ShortCut = 34
+            end          
+            item
+              Command = ecSelPageDown
+              ShortCut = 8226
+            end          
+            item
+              Command = ecPageBottom
+              ShortCut = 16418
+            end          
+            item
+              Command = ecSelPageBottom
+              ShortCut = 24610
+            end          
+            item
+              Command = ecPageUp
+              ShortCut = 33
+            end          
+            item
+              Command = ecSelPageUp
+              ShortCut = 8225
+            end          
+            item
+              Command = ecPageTop
+              ShortCut = 16417
+            end          
+            item
+              Command = ecSelPageTop
+              ShortCut = 24609
+            end          
+            item
+              Command = ecLineStart
+              ShortCut = 36
+            end          
+            item
+              Command = ecSelLineStart
+              ShortCut = 8228
+            end          
+            item
+              Command = ecEditorTop
+              ShortCut = 16420
+            end          
+            item
+              Command = ecSelEditorTop
+              ShortCut = 24612
+            end          
+            item
+              Command = ecLineEnd
+              ShortCut = 35
+            end          
+            item
+              Command = ecSelLineEnd
+              ShortCut = 8227
+            end          
+            item
+              Command = ecEditorBottom
+              ShortCut = 16419
+            end          
+            item
+              Command = ecSelEditorBottom
+              ShortCut = 24611
+            end          
+            item
+              Command = ecToggleMode
+              ShortCut = 45
+            end          
+            item
+              Command = ecCopy
+              ShortCut = 16429
+            end          
+            item
+              Command = ecPaste
+              ShortCut = 8237
+            end          
+            item
+              Command = ecDeleteChar
+              ShortCut = 46
+            end          
+            item
+              Command = ecCut
+              ShortCut = 8238
+            end          
+            item
+              Command = ecDeleteLastChar
+              ShortCut = 8
+            end          
+            item
+              Command = ecDeleteLastChar
+              ShortCut = 8200
+            end          
+            item
+              Command = ecDeleteLastWord
+              ShortCut = 16392
+            end          
+            item
+              Command = ecUndo
+              ShortCut = 32776
+            end          
+            item
+              Command = ecRedo
+              ShortCut = 40968
+            end          
+            item
+              Command = ecLineBreak
+              ShortCut = 13
+            end          
+            item
+              Command = ecSelectAll
+              ShortCut = 16449
+            end          
+            item
+              Command = ecCopy
+              ShortCut = 16451
+            end          
+            item
+              Command = ecBlockIndent
+              ShortCut = 24649
+            end          
+            item
+              Command = ecLineBreak
+              ShortCut = 16461
+            end          
+            item
+              Command = ecInsertLine
+              ShortCut = 16462
+            end          
+            item
+              Command = ecDeleteWord
+              ShortCut = 16468
+            end          
+            item
+              Command = ecBlockUnindent
+              ShortCut = 24661
+            end          
+            item
+              Command = ecPaste
+              ShortCut = 16470
+            end          
+            item
+              Command = ecCut
+              ShortCut = 16472
+            end          
+            item
+              Command = ecDeleteLine
+              ShortCut = 16473
+            end          
+            item
+              Command = ecDeleteEOL
+              ShortCut = 24665
+            end          
+            item
+              Command = ecUndo
+              ShortCut = 16474
+            end          
+            item
+              Command = ecRedo
+              ShortCut = 24666
+            end          
+            item
+              Command = ecGotoMarker0
+              ShortCut = 16432
+            end          
+            item
+              Command = ecGotoMarker1
+              ShortCut = 16433
+            end          
+            item
+              Command = ecGotoMarker2
+              ShortCut = 16434
+            end          
+            item
+              Command = ecGotoMarker3
+              ShortCut = 16435
+            end          
+            item
+              Command = ecGotoMarker4
+              ShortCut = 16436
+            end          
+            item
+              Command = ecGotoMarker5
+              ShortCut = 16437
+            end          
+            item
+              Command = ecGotoMarker6
+              ShortCut = 16438
+            end          
+            item
+              Command = ecGotoMarker7
+              ShortCut = 16439
+            end          
+            item
+              Command = ecGotoMarker8
+              ShortCut = 16440
+            end          
+            item
+              Command = ecGotoMarker9
+              ShortCut = 16441
+            end          
+            item
+              Command = ecSetMarker0
+              ShortCut = 24624
+            end          
+            item
+              Command = ecSetMarker1
+              ShortCut = 24625
+            end          
+            item
+              Command = ecSetMarker2
+              ShortCut = 24626
+            end          
+            item
+              Command = ecSetMarker3
+              ShortCut = 24627
+            end          
+            item
+              Command = ecSetMarker4
+              ShortCut = 24628
+            end          
+            item
+              Command = ecSetMarker5
+              ShortCut = 24629
+            end          
+            item
+              Command = ecSetMarker6
+              ShortCut = 24630
+            end          
+            item
+              Command = ecSetMarker7
+              ShortCut = 24631
+            end          
+            item
+              Command = ecSetMarker8
+              ShortCut = 24632
+            end          
+            item
+              Command = ecSetMarker9
+              ShortCut = 24633
+            end          
+            item
+              Command = EcFoldLevel1
+              ShortCut = 41009
+            end          
+            item
+              Command = EcFoldLevel2
+              ShortCut = 41010
+            end          
+            item
+              Command = EcFoldLevel3
+              ShortCut = 41011
+            end          
+            item
+              Command = EcFoldLevel4
+              ShortCut = 41012
+            end          
+            item
+              Command = EcFoldLevel5
+              ShortCut = 41013
+            end          
+            item
+              Command = EcFoldLevel6
+              ShortCut = 41014
+            end          
+            item
+              Command = EcFoldLevel7
+              ShortCut = 41015
+            end          
+            item
+              Command = EcFoldLevel8
+              ShortCut = 41016
+            end          
+            item
+              Command = EcFoldLevel9
+              ShortCut = 41017
+            end          
+            item
+              Command = EcFoldLevel0
+              ShortCut = 41008
+            end          
+            item
+              Command = EcFoldCurrent
+              ShortCut = 41005
+            end          
+            item
+              Command = EcUnFoldCurrent
+              ShortCut = 41003
+            end          
+            item
+              Command = EcToggleMarkupWord
+              ShortCut = 32845
+            end          
+            item
+              Command = ecNormalSelect
+              ShortCut = 24654
+            end          
+            item
+              Command = ecColumnSelect
+              ShortCut = 24643
+            end          
+            item
+              Command = ecLineSelect
+              ShortCut = 24652
+            end          
+            item
+              Command = ecTab
+              ShortCut = 9
+            end          
+            item
+              Command = ecShiftTab
+              ShortCut = 8201
+            end          
+            item
+              Command = ecMatchBracket
+              ShortCut = 24642
+            end          
+            item
+              Command = ecColSelUp
+              ShortCut = 40998
+            end          
+            item
+              Command = ecColSelDown
+              ShortCut = 41000
+            end          
+            item
+              Command = ecColSelLeft
+              ShortCut = 40997
+            end          
+            item
+              Command = ecColSelRight
+              ShortCut = 40999
+            end          
+            item
+              Command = ecColSelPageDown
+              ShortCut = 40994
+            end          
+            item
+              Command = ecColSelPageBottom
+              ShortCut = 57378
+            end          
+            item
+              Command = ecColSelPageUp
+              ShortCut = 40993
+            end          
+            item
+              Command = ecColSelPageTop
+              ShortCut = 57377
+            end          
+            item
+              Command = ecColSelLineStart
+              ShortCut = 40996
+            end          
+            item
+              Command = ecColSelLineEnd
+              ShortCut = 40995
+            end          
+            item
+              Command = ecColSelEditorTop
+              ShortCut = 57380
+            end          
+            item
+              Command = ecColSelEditorBottom
+              ShortCut = 57379
+            end>
+          MouseActions = <>
+          MouseTextActions = <>
+          MouseSelActions = <>
+          Lines.Strings = (
+            'SynEdit1'
+          )
+          VisibleSpecialChars = [vscSpace, vscTabAtLast]
+          ReadOnly = True
+          SelectedColor.BackPriority = 50
+          SelectedColor.ForePriority = 50
+          SelectedColor.FramePriority = 50
+          SelectedColor.BoldPriority = 50
+          SelectedColor.ItalicPriority = 50
+          SelectedColor.UnderlinePriority = 50
+          SelectedColor.StrikeOutPriority = 50
+          BracketHighlightStyle = sbhsBoth
+          BracketMatchColor.Background = clNone
+          BracketMatchColor.Foreground = clNone
+          BracketMatchColor.Style = [fsBold]
+          FoldedCodeColor.Background = clNone
+          FoldedCodeColor.Foreground = clGray
+          FoldedCodeColor.FrameColor = clGray
+          MouseLinkColor.Background = clNone
+          MouseLinkColor.Foreground = clBlue
+          LineHighlightColor.Background = clNone
+          LineHighlightColor.Foreground = clNone
+          inline SynLeftGutterPartList1: TSynGutterPartList
+            object SynGutterMarks1: TSynGutterMarks
+              Width = 24
+              MouseActions = <>
+            end
+            object SynGutterLineNumber1: TSynGutterLineNumber
+              Width = 15
+              MouseActions = <>
+              MarkupInfo.Background = clBtnFace
+              MarkupInfo.Foreground = clNone
+              DigitCount = 2
+              ShowOnlyLineNumbersMultiplesOf = 1
+              ZeroStart = False
+              LeadingZeros = False
+            end
+            object SynGutterChanges1: TSynGutterChanges
+              Width = 4
+              MouseActions = <>
+              ModifiedColor = 59900
+              SavedColor = clGreen
+            end
+            object SynGutterSeparator1: TSynGutterSeparator
+              Width = 2
+              MouseActions = <>
+              MarkupInfo.Background = clWhite
+              MarkupInfo.Foreground = clGray
+            end
+            object SynGutterCodeFolding1: TSynGutterCodeFolding
+              MouseActions = <>
+              MarkupInfo.Background = clNone
+              MarkupInfo.Foreground = clGray
+              MouseActionsExpanded = <>
+              MouseActionsCollapsed = <>
+            end
+          end
+        end
+      end
+    end
+    object ServerTab: TTabSheet
+      Caption = 'Server'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = ServerTabHide
+      OnShow = ServerTabShow
+      object Panel1: TPanel
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 491
+        Align = alLeft
+        BevelOuter = bvNone
+        ClientHeight = 632
+        ClientWidth = 491
+        TabOrder = 0
+        object Label29: TLabel
+          Left = 5
+          Height = 19
+          Top = 8
+          Width = 65
+          Caption = 'Properties'
+          ParentColor = False
+        end
+        object Label53: TLabel
+          Left = 8
+          Height = 19
+          Top = 296
+          Width = 101
+          Caption = 'Open Databases'
+          ParentColor = False
+        end
+        object OpenDatabasesList: TMemo
+          Left = 8
+          Height = 90
+          Top = 312
+          Width = 480
+          Anchors = [akTop, akLeft, akRight]
+          Lines.Strings = (
+            ''
+          )
+          ScrollBars = ssAutoVertical
+          TabOrder = 0
+        end
+        object ConfigDataLabel: TLabel
+          Left = 8
+          Height = 19
+          Top = 408
+          Width = 72
+          Caption = 'Config Data'
+          ParentColor = False
+        end
+        object ConfigDataGrid: TIBDynamicGrid
+          Left = 8
+          Height = 198
+          Top = 424
+          Width = 480
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          Color = clWindow
+          Columns = <          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Description'
+              Width = 100
+              FieldName = 'ParamDescription'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Value'
+              Width = 60
+              FieldName = 'ParamValue'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = ConfigDataSource
+          Scrollbars = ssAutoVertical
+          TabOrder = 1
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object Panel10: TPanel
+          Left = 6
+          Height = 264
+          Top = 24
+          Width = 482
+          Anchors = [akTop, akLeft, akRight]
+          BevelInner = bvLowered
+          BevelOuter = bvLowered
+          ClientHeight = 264
+          ClientWidth = 482
+          Color = clWindow
+          ParentColor = False
+          TabOrder = 2
+          object Label45: TLabel
+            Left = 8
+            Height = 19
+            Top = 48
+            Width = 96
+            Caption = 'Server Version:'
+            ParentColor = False
+          end
+          object Label46: TLabel
+            Left = 8
+            Height = 19
+            Top = 102
+            Width = 149
+            Caption = 'Server Implementation:'
+            ParentColor = False
+          end
+          object Label47: TLabel
+            Left = 8
+            Height = 19
+            Top = 75
+            Width = 99
+            Caption = 'Service Version:'
+            ParentColor = False
+          end
+          object Label48: TLabel
+            Left = 8
+            Height = 19
+            Top = 129
+            Width = 112
+            Caption = 'Firebird Directory:'
+            ParentColor = False
+          end
+          object Label49: TLabel
+            Left = 8
+            Height = 19
+            Top = 156
+            Width = 117
+            Caption = 'Lock File Directory:'
+            ParentColor = False
+          end
+          object Label50: TLabel
+            Left = 8
+            Height = 19
+            Top = 183
+            Width = 115
+            Caption = 'Security Database:'
+            ParentColor = False
+          end
+          object Edit2: TEdit
+            Left = 160
+            Height = 31
+            Top = 44
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 0
+            Text = 'Edit2'
+          end
+          object Edit3: TEdit
+            Left = 160
+            Height = 31
+            Top = 71
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 1
+            Text = 'Edit3'
+          end
+          object Edit4: TEdit
+            Left = 160
+            Height = 31
+            Top = 98
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 2
+            Text = 'Edit4'
+          end
+          object Edit5: TEdit
+            Left = 160
+            Height = 31
+            Top = 125
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 3
+            Text = 'Edit5'
+          end
+          object Edit6: TEdit
+            Left = 160
+            Height = 31
+            Top = 152
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 4
+            Text = 'Edit6'
+          end
+          object Edit7: TEdit
+            Left = 160
+            Height = 31
+            Top = 179
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 5
+            Text = 'Edit7'
+          end
+          object Label51: TLabel
+            Left = 8
+            Height = 19
+            Top = 21
+            Width = 82
+            Caption = 'Server Name'
+            ParentColor = False
+          end
+          object Edit8: TEdit
+            Left = 160
+            Height = 31
+            Top = 16
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 6
+            Text = 'Edit8'
+          end
+          object Label52: TLabel
+            Left = 8
+            Height = 19
+            Top = 212
+            Width = 150
+            Caption = 'Messages File Directory:'
+            ParentColor = False
+          end
+          object Edit9: TEdit
+            Left = 160
+            Height = 31
+            Top = 208
+            Width = 312
+            Anchors = [akTop, akLeft, akRight]
+            ReadOnly = True
+            TabOrder = 7
+            Text = 'Edit9'
+          end
+          object Edit12: TEdit
+            Left = 160
+            Height = 31
+            Top = 236
+            Width = 312
+            ReadOnly = True
+            TabOrder = 8
+            Text = 'Edit12'
+          end
+          object Label54: TLabel
+            Left = 8
+            Height = 19
+            Top = 240
+            Width = 120
+            Caption = 'No. of Attachments'
+            ParentColor = False
+          end
+        end
+      end
+      object Splitter1: TSplitter
+        Left = 491
+        Height = 632
+        Top = 0
+        Width = 5
+      end
+      object Panel2: TPanel
+        Left = 496
+        Height = 632
+        Top = 0
+        Width = 657
+        Align = alClient
+        BevelOuter = bvNone
+        ClientHeight = 632
+        ClientWidth = 657
+        TabOrder = 2
+        object Label30: TLabel
+          Left = 8
+          Height = 19
+          Top = 8
+          Width = 68
+          Caption = 'Server Log'
+          ParentColor = False
+        end
+        object ServerLog: TMemo
+          Left = 8
+          Height = 597
+          Top = 26
+          Width = 639
+          Anchors = [akTop, akLeft, akRight, akBottom]
+          Lines.Strings = (
+            'ServerLog'
+          )
+          ScrollBars = ssAutoBoth
+          TabOrder = 0
+        end
+      end
+    end
+    object UserManagerTab: TTabSheet
+      Caption = 'User Manager'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = UserManagerTabHide
+      OnShow = UserManagerTabShow
+      object Panel4: TPanel
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 827
+        Align = alLeft
+        ClientHeight = 632
+        ClientWidth = 827
+        TabOrder = 0
+        object UserManagerGrid: TIBDynamicGrid
+          Left = 1
+          Height = 630
+          Top = 1
+          Width = 825
+          Align = alClient
+          Color = clWindow
+          Columns = <          
+            item
+              ReadOnly = True
+              Title.Alignment = taCenter
+              Title.Caption = 'User Name'
+              Width = 120
+              FieldName = 'SEC$USER_NAME'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'First Name'
+              Width = 80
+              FieldName = 'SEC$FIRST_NAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Middle Name'
+              Width = 85
+              FieldName = 'SEC$MIDDLE_NAME'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Last Name'
+              Width = 80
+              FieldName = 'SEC$LAST_NAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Alignment = taCenter
+              Title.Alignment = taCenter
+              Title.Caption = 'Active'
+              Width = 55
+              FieldName = 'SEC$ACTIVE'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Alignment = taCenter
+              Title.Alignment = taCenter
+              Title.Caption = 'Admin'
+              Width = 55
+              FieldName = 'SEC$ADMIN'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'DB Creator'
+              Width = 70
+              FieldName = 'DBCREATOR'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Alignment = taCenter
+              ReadOnly = True
+              Title.Alignment = taCenter
+              Title.Caption = 'Logged In'
+              Width = 70
+              FieldName = 'LOGGEDIN'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              ButtonStyle = cbsPickList
+              PickList.Strings = (
+                'Srp'
+                'Legacy_UserManager'
+              )
+              Title.Alignment = taCenter
+              Title.Caption = 'User Manager'
+              Width = 100
+              FieldName = 'SEC$PLUGIN'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'UID'
+              Width = 40
+              FieldName = 'USERID'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'GID'
+              Width = 40
+              FieldName = 'GROUPID'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = UserListSource
+          PopupMenu = UserPopup
+          Scrollbars = ssAutoVertical
+          TabOrder = 0
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+          IndexFieldNames = 'SEC$USER_NAME'
+        end
+      end
+      object Splitter2: TSplitter
+        Left = 827
+        Height = 632
+        Top = 0
+        Width = 5
+      end
+      object Panel3: TPanel
+        Left = 832
+        Height = 632
+        Top = 0
+        Width = 321
+        Align = alClient
+        BevelOuter = bvNone
+        ClientHeight = 632
+        ClientWidth = 321
+        TabOrder = 2
+        object RolesGrid: TIBDynamicGrid
+          Left = 0
+          Height = 161
+          Top = 50
+          Width = 321
+          Align = alTop
+          Color = clWindow
+          Columns = <          
+            item
+              ButtonStyle = cbsCheckboxColumn
+              Title.Caption = ''
+              Width = 30
+              FieldName = 'GRANTED'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Role'
+              Width = 70
+              FieldName = 'RDB$ROLE_NAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = RoleSource
+          Options = [dgEditing, dgIndicator, dgColumnResize, dgColumnMove, dgRowLines, dgTabs, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+          Scrollbars = ssAutoVertical
+          TabOrder = 0
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object Panel5: TPanel
+          Left = 0
+          Height = 61
+          Top = 571
+          Width = 321
+          Align = alBottom
+          BevelInner = bvLowered
+          BevelOuter = bvLowered
+          ClientHeight = 61
+          ClientWidth = 321
+          TabOrder = 1
+          object Button1: TButton
+            Left = 16
+            Height = 28
+            Top = 16
+            Width = 321
+            Action = SaveChanges
+            Anchors = [akTop, akLeft, akRight]
+            TabOrder = 0
+          end
+        end
+        object RolesHeaderPanel: TPanel
+          Left = 0
+          Height = 50
+          Top = 0
+          Width = 321
+          Align = alTop
+          BevelInner = bvLowered
+          BevelOuter = bvLowered
+          ClientHeight = 50
+          ClientWidth = 321
+          TabOrder = 2
+          object DBText1: TDBText
+            Left = 10
+            Height = 19
+            Top = 30
+            Width = 52
+            DataField = 'SEC$USER_NAME'
+            DataSource = UserListSource
+            ParentColor = False
+          end
+          object Label36: TLabel
+            Left = 10
+            Height = 19
+            Top = 10
+            Width = 108
+            Caption = 'Roles Assigned to'
+            ParentColor = False
+          end
+        end
+        object Splitter3: TSplitter
+          Cursor = crVSplit
+          Left = 0
+          Height = 5
+          Top = 211
+          Width = 321
+          Align = alTop
+          ResizeAnchor = akTop
+        end
+        object TagsHeader: TPanel
+          Left = 0
+          Height = 26
+          Top = 216
+          Width = 321
+          Align = alTop
+          BevelInner = bvRaised
+          Caption = 'Tags'
+          TabOrder = 4
+        end
+        object TagsGrid: TIBDynamicGrid
+          Left = 0
+          Height = 324
+          Top = 242
+          Width = 321
+          Align = alClient
+          Color = clWindow
+          Columns = <          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Key'
+              Width = 60
+              FieldName = 'SEC$KEY'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Alignment = taCenter
+              Title.Caption = 'Value'
+              Width = 60
+              FieldName = 'SEC$VALUE'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = UserTagsSource
+          PopupMenu = UserTagPopup
+          Scrollbars = ssAutoVertical
+          TabOrder = 5
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object Splitter4: TSplitter
+          Cursor = crVSplit
+          Left = 0
+          Height = 5
+          Top = 566
+          Width = 321
+          Align = alBottom
+          ResizeAnchor = akBottom
+        end
+      end
+    end
+    object AccessRightsTab: TTabSheet
+      Caption = 'Access Rights'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = AccessRightsTabHide
+      OnShow = AccessRightsTabShow
+      object AccessRightsTreeView: TIBTreeView
+        Left = 0
+        Height = 632
+        Top = 0
+        Width = 300
+        Align = alLeft
+        TextField = 'DisplayName'
+        DataSource = AccessRightsSource
+        Images = MenuImages
+        HasChildField = 'CHILDCOUNT'
+        ImageIndexField = 'ImageIndex'
+        SelectedIndexField = 'ImageIndex'
+        KeyField = 'ID'
+        ParentField = 'PARENT'
+        PopupMenu = AccessRightsPopup
+        ReadOnly = True
+        TabOrder = 0
+        OnSelectionChanged = AccessRightsTreeViewSelectionChanged
+        Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
+      end
+      object Splitter5: TSplitter
+        Left = 300
+        Height = 632
+        Top = 0
+        Width = 5
+      end
+      object SubjectAccessRightsGrid: TIBDynamicGrid
+        Left = 305
+        Height = 632
+        Top = 0
+        Width = 848
+        Align = alClient
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Type'
+            Width = 100
+            FieldName = 'OBJECT_TYPE_NAME'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Object'
+            Width = 150
+            FieldName = 'OBJECT_NAME'
+            AutoSizeColumn = True
+            InitialSortColumn = True
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Granted'
+            Width = 80
+            FieldName = 'GRANTED_PRIVILEGES'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Granted By'
+            Width = 80
+            FieldName = 'GRANTEDBY'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant Opt'
+            Width = 80
+            FieldName = 'GRANT_OPTION'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = SubjectAccessRightsSource
+        Scrollbars = ssAutoVertical
+        TabOrder = 2
+        EditorPanel = UpdateColsPanel
+        ExpandEditorPanelBelowRow = True
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+    end
+    object MappingsTab: TTabSheet
+      Caption = 'Auth Mappings'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = MappingsTabHide
+      OnShow = MappingsTabShow
+      object IBDynamicGrid5: TIBDynamicGrid
+        Left = 0
+        Height = 607
+        Top = 24
+        Width = 1156
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Color = clWindow
+        Columns = <        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Name'
+            Width = 200
+            FieldName = 'RDB$MAP_NAME'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Type'
+            Width = 60
+            FieldName = 'MAPTYPE'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Using'
+            Width = 150
+            FieldName = 'MAP_USING'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Database'
+            Width = 120
+            FieldName = 'RDB$MAP_DB'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Mapping From'
+            Width = 120
+            FieldName = 'MAP_FROM'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Mapping To'
+            Width = 120
+            FieldName = 'MAP_TO'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            Title.Alignment = taCenter
+            Title.Caption = 'Description'
+            Width = 80
+            FieldName = 'RDB$DESCRIPTION'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = AuthMapSource
+        Scrollbars = ssAutoVertical
+        TabOrder = 0
+        ExpandEditorPanelBelowRow = False
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+      object AutoAdmin: TCheckBox
+        Left = 996
+        Height = 21
+        Top = 2
+        Width = 154
+        Anchors = [akTop, akRight]
+        Caption = 'Auto Admin Mapping'
+        OnChange = AutoAdminChange
+        TabOrder = 1
+      end
+    end
+    object RepairTab: TTabSheet
+      Caption = 'Database Repair'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = RepairTabHide
+      OnShow = RepairTabShow
+      object SelectRepairAction: TComboBox
+        Left = 895
+        Height = 31
+        Top = 8
+        Width = 200
+        Anchors = [akTop, akRight]
+        ItemHeight = 0
+        ItemIndex = 0
+        Items.Strings = (
+          'Database Sweep'
+          'Online Validation'
+          'Database Validation'
+          'Kill Shadows'
+        )
+        OnCloseUp = SelectRepairActionCloseUp
+        TabOrder = 0
+        Text = 'Database Sweep'
+      end
+      object Button2: TButton
+        Left = 1103
+        Height = 25
+        Top = 9
+        Width = 35
+        Action = RunRepair
+        Anchors = [akTop, akRight]
+        TabOrder = 1
+      end
+      object ValidateOptions: TPageControl
+        Left = 6
+        Height = 108
+        Top = 7
+        Width = 322
+        ActivePage = RepairOptionsTab
+        ShowTabs = False
+        TabIndex = 1
+        TabOrder = 2
+        object ValidateOptionsTab: TTabSheet
+          Caption = 'ValidateOptionsTab'
+          ClientHeight = 104
+          ClientWidth = 312
+          object Label33: TLabel
+            Left = 5
+            Height = 19
+            Top = 9
+            Width = 111
+            Caption = 'Validation Options'
+            ParentColor = False
+          end
+          object RecordFragments: TCheckBox
+            Left = 32
+            Height = 21
+            Top = 29
+            Width = 188
+            Caption = 'Validate Record Fragments'
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object ReadOnlyValidation: TCheckBox
+            Left = 32
+            Height = 21
+            Top = 51
+            Width = 149
+            Caption = 'Read Only Validation'
+            TabOrder = 1
+          end
+          object IgnoreChecksums: TCheckBox
+            Left = 32
+            Height = 21
+            Top = 73
+            Width = 138
+            Caption = 'Ignore Checksums'
+            TabOrder = 2
+          end
+        end
+        object RepairOptionsTab: TTabSheet
+          Caption = 'RepairOptionsTab'
+          ClientHeight = 104
+          ClientWidth = 312
+          object Label34: TLabel
+            Left = 10
+            Height = 40
+            Top = 8
+            Width = 294
+            AutoSize = False
+            Caption = 'If errors have been reported, you should now select the repair options and click on repair'
+            ParentColor = False
+            WordWrap = True
+          end
+          object ValidateRepairRecordFragments: TCheckBox
+            Left = 16
+            Height = 21
+            Top = 48
+            Width = 188
+            Caption = 'Validate Record Fragments'
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object IgnoreChecksumsOnRepair: TCheckBox
+            Left = 16
+            Height = 21
+            Top = 71
+            Width = 173
+            Caption = 'Ignore Checksum Errors'
+            TabOrder = 1
+          end
+          object Button7: TButton
+            Left = 231
+            Height = 25
+            Top = 70
+            Width = 75
+            Action = Phase2Repair
+            TabOrder = 2
+          end
+        end
+      end
+      object Panel8: TPanel
+        Left = 10
+        Height = 499
+        Top = 123
+        Width = 1133
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BevelOuter = bvNone
+        Caption = 'ValidationPanel'
+        ClientHeight = 499
+        ClientWidth = 1133
+        TabOrder = 3
+        object DBTablesPanel: TPanel
+          Left = 0
+          Height = 499
+          Top = 0
+          Width = 170
+          Align = alLeft
+          BevelOuter = bvNone
+          ClientHeight = 499
+          ClientWidth = 170
+          TabOrder = 0
+          object Alltables: TRadioButton
+            Left = 9
+            Height = 21
+            Top = 32
+            Width = 80
+            Caption = 'All Tables'
+            Checked = True
+            OnChange = SelectedTablesOnlyChange
+            TabOrder = 0
+            TabStop = True
+          end
+          object SelectedTablesOnly: TRadioButton
+            Left = 9
+            Height = 21
+            Top = 56
+            Width = 149
+            Caption = 'Selected Tables Only'
+            OnChange = SelectedTablesOnlyChange
+            TabOrder = 1
+          end
+          object SelectedTablesGrid: TIBDynamicGrid
+            Left = 0
+            Height = 386
+            Top = 90
+            Width = 170
+            Anchors = [akTop, akLeft, akRight, akBottom]
+            Color = clWindow
+            Columns = <            
+              item
+                ButtonStyle = cbsCheckboxColumn
+                Title.Caption = 'SELECTED'
+                Width = 30
+                FieldName = 'SELECTED'
+                AutoSizeColumn = False
+                InitialSortColumn = False
+                DBLookupProperties.ItemHeight = 0
+                DBLookupProperties.ItemWidth = 0
+                DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+              end            
+              item
+                Title.Caption = 'RDB$RELATION_NAME'
+                Width = 80
+                FieldName = 'RDB$RELATION_NAME'
+                AutoSizeColumn = True
+                InitialSortColumn = True
+                DBLookupProperties.ItemHeight = 0
+                DBLookupProperties.ItemWidth = 0
+                DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+              end>
+            DataSource = DBTablesSource
+            FixedCols = 0
+            Options = [dgEditing, dgColumnResize, dgColumnMove, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+            Scrollbars = ssAutoVertical
+            TabOrder = 2
+            ExpandEditorPanelBelowRow = False
+            Descending = False
+            EditorBorderStyle = bsSingle
+            DefaultPositionAtEnd = False
+          end
+          object Label40: TLabel
+            Left = 9
+            Height = 19
+            Top = 7
+            Width = 49
+            Caption = 'Validate'
+            ParentColor = False
+          end
+          object SelectAllTables: TCheckBox
+            Left = 0
+            Height = 21
+            Top = 479
+            Width = 138
+            Anchors = [akLeft, akBottom]
+            Caption = 'Select/Deselect All'
+            OnChange = SelectAllTablesChange
+            TabOrder = 3
+          end
+        end
+        object DBTablesSplitter: TSplitter
+          Left = 170
+          Height = 499
+          Top = 0
+          Width = 5
+        end
+        object Panel9: TPanel
+          Left = 175
+          Height = 499
+          Top = 0
+          Width = 958
+          Align = alClient
+          BevelOuter = bvNone
+          ClientHeight = 499
+          ClientWidth = 958
+          TabOrder = 2
+          object Label37: TLabel
+            Left = 0
+            Height = 19
+            Top = 8
+            Width = 106
+            Caption = 'Validation Report'
+            ParentColor = False
+          end
+          object ValidationReport: TMemo
+            Left = 0
+            Height = 474
+            Top = 25
+            Width = 958
+            Align = alBottom
+            Anchors = [akTop, akLeft, akRight, akBottom]
+            Lines.Strings = (
+              'ValidationReport'
+            )
+            ScrollBars = ssAutoBoth
+            TabOrder = 0
+          end
+        end
+      end
+    end
+    object LimboTab: TTabSheet
+      Caption = 'Limbo Transactions'
+      ClientHeight = 632
+      ClientWidth = 1153
+      OnHide = LimboTabHide
+      OnShow = LimboTabShow
+      object Label38: TLabel
+        Left = 12
+        Height = 19
+        Top = 8
+        Width = 76
+        Caption = 'Transactions'
+        ParentColor = False
+      end
+      object IBDynamicGrid3: TIBDynamicGrid
+        Left = 13
+        Height = 242
+        Top = 24
+        Width = 1130
+        Anchors = [akTop, akLeft, akRight]
+        Color = clWindow
+        Columns = <        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'ID'
+            Width = 60
+            FieldName = 'TransactionID'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Type'
+            Width = 80
+            FieldName = 'TransactionType'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Host Site'
+            Width = 100
+            FieldName = 'HostSite'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Remote Site'
+            Width = 100
+            FieldName = 'RemoteSite'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Database Path'
+            Width = 150
+            FieldName = 'DatabasePath'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'State'
+            Width = 80
+            FieldName = 'State'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            ReadOnly = True
+            Title.Alignment = taCenter
+            Title.Caption = 'Rec. Action'
+            Width = 100
+            FieldName = 'RecommendedAction'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            PickList.Strings = (
+              'Commit'
+              'Rollback'
+            )
+            Title.Alignment = taCenter
+            Title.Caption = 'Req. Action'
+            Width = 100
+            FieldName = 'RequestedAction'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+        DataSource = LimboListSource
+        Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgTabs, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+        Scrollbars = ssAutoVertical
+        TabOrder = 0
+        ExpandEditorPanelBelowRow = False
+        Descending = False
+        EditorBorderStyle = bsSingle
+        DefaultPositionAtEnd = False
+      end
+      object Button3: TButton
+        Left = 16
+        Height = 25
+        Top = 597
+        Width = 100
+        Action = CommitAll
+        Anchors = [akLeft, akBottom]
+        TabOrder = 1
+      end
+      object Button4: TButton
+        Left = 128
+        Height = 25
+        Top = 597
+        Width = 100
+        Action = RollbackAll
+        Anchors = [akLeft, akBottom]
+        TabOrder = 2
+      end
+      object Button5: TButton
+        Left = 233
+        Height = 25
+        Top = 597
+        Width = 127
+        Action = Commit2Phase
+        Anchors = [akLeft, akBottom]
+        TabOrder = 3
+      end
+      object Button6: TButton
+        Left = 368
+        Height = 25
+        Top = 597
+        Width = 144
+        Action = ApplySelected
+        Anchors = [akLeft, akBottom]
+        TabOrder = 4
+      end
+      object Label39: TLabel
+        Left = 17
+        Height = 19
+        Top = 280
+        Width = 111
+        Caption = 'Resolution Report'
+        ParentColor = False
+      end
+      object LimboReport: TMemo
+        Left = 16
+        Height = 293
+        Top = 296
+        Width = 1130
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Lines.Strings = (
+          'LimboReport'
+        )
+        TabOrder = 5
+      end
+    end
+  end
+  object UpdateColsPanel: TPanel
+    Left = 40
+    Height = 64
+    Top = 488
+    Width = 544
+    BevelOuter = bvNone
+    BorderStyle = bsSingle
+    ClientHeight = 62
+    ClientWidth = 542
+    TabOrder = 3
+    object Label41: TLabel
+      Left = 32
+      Height = 19
+      Top = 8
+      Width = 102
+      Caption = 'Update Columns'
+      ParentColor = False
+    end
+    object DBEdit5: TDBEdit
+      Left = 144
+      Height = 31
+      Top = 4
+      Width = 384
+      DataField = 'UPDATE_COLUMNS'
+      DataSource = SubjectAccessRightsSource
+      Anchors = [akTop, akLeft, akRight]
+      MaxLength = 0
+      TabOrder = 0
+    end
+    object Label42: TLabel
+      Left = 9
+      Height = 19
+      Top = 35
+      Width = 128
+      Caption = 'Referenced Columns'
+      ParentColor = False
+    end
+    object DBEdit6: TDBEdit
+      Left = 144
+      Height = 31
+      Top = 35
+      Width = 384
+      DataField = 'REFERENCE_COLUMNS'
+      DataSource = SubjectAccessRightsSource
+      Anchors = [akTop, akLeft, akRight]
+      MaxLength = 0
+      TabOrder = 1
+    end
+  end
+  object MainMenu1: TMainMenu
+    Left = 720
+    Top = 80
+    object MenuItem1: TMenuItem
+      Caption = 'File'
+      object MenuItem6: TMenuItem
+        Action = OpenDatabase
+      end
+      object MenuItem8: TMenuItem
+        Action = Save
+      end
+      object MenuItem7: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem3: TMenuItem
+        Action = Backup
+      end
+      object MenuItem5: TMenuItem
+        Action = Restore
+      end
+      object MenuItem21: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem20: TMenuItem
+        Action = RunScript
+      end
+      object MenuItem10: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem9: TMenuItem
+        Action = DropDatabase
+      end
+      object MenuItem4: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem2: TMenuItem
+        Action = Quit
+      end
+    end
+  end
+  object ActionList1: TActionList
+    Images = MenuImages
+    Left = 712
+    Top = 128
+    object Quit: TAction
+      Category = 'General'
+      Caption = 'Exit'
+      OnExecute = QuitExecute
+    end
+    object Backup: TAction
+      Category = 'General'
+      Caption = 'Backup'
+      Hint = 'Backup Database to Archive File'
+      ImageIndex = 1
+      OnExecute = BackupExecute
+    end
+    object Restore: TAction
+      Category = 'General'
+      Caption = 'Restore'
+      Hint = 'Restore Database From Archive'
+      ImageIndex = 0
+      OnExecute = RestoreExecute
+    end
+    object OpenDatabase: TAction
+      Category = 'General'
+      Caption = 'Open Database'
+      OnExecute = OpenDatabaseExecute
+    end
+    object AddSecondary: TAction
+      Category = 'files'
+      Caption = 'Add'
+      OnExecute = AddSecondaryExecute
+    end
+    object AddShadowSet: TAction
+      Category = 'files'
+      Caption = 'Add Set'
+      OnExecute = AddShadowSetExecute
+    end
+    object RemoveShadow: TAction
+      Category = 'files'
+      Caption = 'Remove Set'
+      OnExecute = RemoveShadowExecute
+      OnUpdate = RemoveShadowUpdate
+    end
+    object Save: TAction
+      Category = 'General'
+      Caption = 'Save'
+      Hint = 'Save to File'
+      ImageIndex = 2
+      OnExecute = SaveExecute
+      OnUpdate = SaveUpdate
+    end
+    object DropDatabase: TAction
+      Category = 'General'
+      Caption = 'Drop Database'
+      OnExecute = DropDatabaseExecute
+      OnUpdate = DropDatabaseUpdate
+    end
+    object AddUser: TAction
+      Category = 'Users'
+      Caption = 'Add New User'
+      OnExecute = AddUserExecute
+      OnUpdate = AddUserUpdate
+    end
+    object ChgPassword: TAction
+      Category = 'Users'
+      Caption = 'Change Password'
+      OnExecute = ChgPasswordExecute
+      OnUpdate = ChgPasswordUpdate
+    end
+    object DeleteUser: TAction
+      Category = 'Users'
+      Caption = 'Delete'
+      OnExecute = DeleteUserExecute
+      OnUpdate = DeleteUserUpdate
+    end
+    object SaveChanges: TAction
+      Category = 'Users'
+      Caption = 'Save Changes'
+      OnExecute = SaveChangesExecute
+      OnUpdate = SaveChangesUpdate
+    end
+    object AddTag: TAction
+      Category = 'Tags'
+      Caption = 'Add Tag'
+      OnExecute = AddTagExecute
+      OnUpdate = AddTagUpdate
+    end
+    object DeleteTag: TAction
+      Category = 'Tags'
+      Caption = 'Delete'
+      OnExecute = DeleteTagExecute
+      OnUpdate = DeleteTagUpdate
+    end
+    object ToggleAutoRefresh: TAction
+      Category = 'Attachments'
+      Caption = 'Auto Refresh'
+      OnExecute = ToggleAutoRefreshExecute
+      OnUpdate = ToggleAutoRefreshUpdate
+    end
+    object DisconnectAttachment: TAction
+      Category = 'Attachments'
+      Caption = 'Disconnect'
+      OnExecute = DisconnectAttachmentExecute
+      OnUpdate = DisconnectAttachmentUpdate
+    end
+    object RunRepair: TAction
+      Category = 'Repair'
+      Caption = 'Run'
+      OnExecute = RunRepairExecute
+    end
+    object CommitAll: TAction
+      Category = 'Limbo'
+      Caption = 'Commit All'
+      OnExecute = CommitAllExecute
+      OnUpdate = CommitAllUpdate
+    end
+    object RollbackAll: TAction
+      Category = 'Limbo'
+      Caption = 'Rollback All'
+      OnExecute = RollbackAllExecute
+      OnUpdate = CommitAllUpdate
+    end
+    object Commit2Phase: TAction
+      Category = 'Limbo'
+      Caption = 'Commit 2 Phase All'
+      OnExecute = Commit2PhaseExecute
+      OnUpdate = CommitAllUpdate
+    end
+    object ApplySelected: TAction
+      Category = 'Limbo'
+      Caption = 'Apply Selected Action'
+      OnExecute = ApplySelectedExecute
+      OnUpdate = CommitAllUpdate
+    end
+    object Phase2Repair: TAction
+      Category = 'Repair'
+      Caption = 'Repair'
+      OnExecute = RunRepairExecute
+    end
+    object RevokeAll: TAction
+      Category = 'AccessRights'
+      Caption = 'Revoke All'
+      OnExecute = RevokeAllExecute
+      OnUpdate = RevokeAllUpdate
+    end
+    object RunScript: TAction
+      Category = 'General'
+      Caption = 'Run SQL Script'
+      Hint = 'Run SQL Script'
+      ImageIndex = 5
+      OnExecute = RunScriptExecute
+    end
+    object CopyText: TAction
+      Category = 'Schema'
+      Caption = 'Copy'
+      Hint = 'Copy to Clipboard'
+      ImageIndex = 7
+      OnExecute = CopyTextExecute
+      OnUpdate = CopyTextUpdate
+    end
+    object ClearSchema: TAction
+      Category = 'Schema'
+      Caption = 'Clear'
+      Hint = 'Clear Schema Text'
+      ImageIndex = 6
+      OnExecute = ClearSchemaExecute
+      OnUpdate = CopyTextUpdate
+    end
+    object SchemaSelectAll: TAction
+      Category = 'Schema'
+      Caption = 'Select All'
+      Hint = 'Select All'
+      ImageIndex = 8
+      OnExecute = SchemaSelectAllExecute
+      OnUpdate = CopyTextUpdate
+    end
+    object SaveSchema: TAction
+      Category = 'Schema'
+      Caption = 'Save'
+      Hint = 'Save'
+      ImageIndex = 2
+      OnExecute = SaveSchemaExecute
+      OnUpdate = CopyTextUpdate
+    end
+  end
+  object MenuImages: TImageList
+    Left = 704
+    Top = 184
+    Bitmap = {
+      4C7A090000001000000010000000B90C00000000000078DAED99095054471AC7
+      C96196B8B546CD5149551237D726864D4C4C369B435182266A99C4241E205E78
+      719F828A82071904647050E41E6E188EE198010378200A03A8A0245184414514
+      41EE4365609837FCB7FB2993C9F8504693ADADAD74D557FDFAF5FBF5D7DFFFEB
+      EE370F0C0CF42AE0B07B149E763F783C0300B7395ADFB9BE0FAF1983E575C7B8
+      37A76DFAF81FF6F930FE1F267E1E1E4E7F1E0CF42F784033D09E078FC7435959
+      99C6869FD3BE479FD1F54DEFDDB9AF31EDB146EAD3E6B56ACDB8DAAC6E9F565B
+      7B7CED7874E3F84D1F173F7C6FB8ADCDEBF6E9F25C316A9BAEF6BABCB6C63A39
+      3018D641DBB4F4FB83F6BF6E8EF5DDFF77F3FFDDFDAFAF7F4EBF7AC6CFC9FEB9
+      FFFFDCFF7FC8FE4F5AF721CCCD6FEA6D94A3E3FE1EFC83145D7EF2E4EEDFD4FA
+      F2FAB0FF8BFCEF11FF83EAFFA0A6CBE7151E1AD146CB8F34CEFF31BFE861F4A3
+      25647FF093E1E161D385C228ABC4C48460A954527CA6EACCC5862B0DAD1515E5
+      6D07F373EB25D969B2ACCCD4504956BA6D8658343332227C2C65E3E3E3E62424
+      26203E3E1631314208A32341C6812845840B172FA2545688ACF478A424452125
+      5908717A120EE466E360C1016466A4CE27CF8A8F141EC1B1E3C7505C7C1C2525
+      C53871A21C35B5B5686B6BC3E10229D2444224C787214E18CC5A4A9210399274
+      C4C54464F0F9BBC5090971283C5A88CA33A7515D5D8DFACB97D1DADA86FAFA0B
+      3851568CFC1FB391919E48FCC72035251ED2EC0CA48A12B12780270E0CE4B37C
+      11F1DFD0D000955A8D8ECE0ED4D49C834C5644E69A89A404125344104489D1C8
+      CA4A2773CF475A6A3204FC5DE2C01D8E118949F164FEC77199F003834AB4B5B7
+      432EAF21719410DF128892A2111DB98FF03177F802A4A7A540E0ED14B387EF1F
+      65B9D0143F387F8FC2345F34C94BD0DC588B4B97EA20BF20C7D9B33F233F3F07
+      05B969389A1B8FA399C188DDE38ED4F8501CCA93E6080481E2F0C808F8FBFBC2
+      D5D90156AB2DB06EF977B05EB1003E9ECEE0FB78C0DFDB1D62510C8202781086
+      8790B927E1C70339282F2B391D1818204E24F11F27BAD7917CB5B4B692382E13
+      0DEB51F5D3691C2B3A8C1CA918E94437B13819DB723D507090CE5F44E2F711F3
+      03FCC40989F1AC7E54F77EE500C95B2B89FFFCEDF8F3A46CFC3151C1B0935A62
+      71F65CACCBB5404A4A2204447FBEA79520C6CF9AE4BD088DAD3D1822674B6757
+      37EA48EC27095F90274132C9B79DC4128BA473B040628A05D259B0CA5E81706F
+      C750419040BCD1DD05964BE6609DD92C78D82C007FB33942B7AF4084F732846D
+      5F0A47F12ACC489A8A7F843F875705CFE2ADF0973035F92DCC89362DA7F12725
+      25E0E0A183AC654B73101D9F84D0C818F8F283E0B9DD1B5BDD3CB026CC022F07
+      4EC02B9B9F87D1AE37E02FE421C25F90CAE707640CAF1F1ABF52A542577717C9
+      9F1CA74E96A2205F8A14B26E9C92D7E18DD01760E4F33A3E0EF9107EF13F602F
+      DF57BC77AF606E5C3CD19FAC7DBAFEA87EAD5AFAE591F59342F4731159E1DD94
+      D7302DE3237C73E42BF093FD101624B0A07B30222A6A6C96247B664565A57D7D
+      C3E5FD72796D7EE5E9533F15151DAE914A326A931284675DE36C4B3E4834CA33
+      CD32FEF1BB23DFE59989CC8D0DB47F888ED2D6AC1A183B52DF26374C22663452
+      FFEA950346CB2DFA9DCC17F71973B15B36011E1B87E0EAA4BE6B0CCB1503466B
+      2D07606BADC4C26F6FA67EF3D58DC9BAECCE6DD486E0E6A286BD8D4A33C6AAE5
+      FD46C4379C1C54D8E609D0EB795FF638CDFEBCEB51DABF71030CDD5C86D45E5B
+      86B0DB17F0F46079ACB1541AAD5CD66F447CC3D17E105E5B00CB95FD98FB450F
+      33CBA46B8CF6FC5C1CD5868E760CB3C94D8D5DDEC0C60D0CD6AE1E00F10D07DB
+      416CF5007B3D677637636AD265C8A58F8D95CA70FD1A25E34CE6B983C4B26D2B
+      9D0BD184C4B662593FBE9CD5CD7C3E939BD5D2C970F95285DA8B702B2C000B33
+      321737E00BD36EB5C98C4EC3FBE57799B982E688E401305F0C2C590872AE0073
+      BEE8C1B44FDA8DEEC55A98298C962D55C06AED20DC5C810D84737604D18E8CB3
+      A81F33A67761EA7B2D9C632C5DD2676461AEC0FA35847501969A294074628CA7
+      75A8177C750BD656C082AFFBF0D187ED78FBCDA6DF8C41D69311F18D75AB07E1
+      E24CE7AD00D18931FEACC3F0937FB71BFE6B6A2BF3E5EC1B58B31A9837E716A6
+      BCD38A57FFDEA81983AC2713B3C57D24DF83305BA400D18999FE698746ABF7DE
+      B96EF8CFB79B199319BD983F4F81F7A7B461D24B574DB4E740D693C937F36F60
+      A671A79AE87497CE6FBED164F8FAABD7182E76D8664CEF34F9ECE3F61173F4CA
+      A446C3975FE466FF68F3D9ED8761D397DDB163C7A3B6641174747581D6B4AD07
+      FF8889E9E743376EDEC0D0D010684DDBF4FE68E64CFDF5F6F622233353E5E2B6
+      6190D6B44DEFDF2F16DA4FE74CFDBAB86F50519FB4A66D7A7F34FCC3F8D7377E
+      AE1C2D345B8CEF972C82B6FEB44DEFDF2F47F4B933555568B87A15DA63D336BD
+      4FFBEF3547D23FD470E50A060606A06218F4F7F7B3356DD3FBB47F341AA9C83B
+      353A2E56419E57D39AB6C55959838B2DCCF2479323EA97CE95BCEE1EA1356DCB
+      4A4BD9F6C3FA7FD8F8B5F3ACAD3F6D6BEB9F29C956959D286768CDA1FF7DF3BF
+      C4C22C97C64BEBE1FCD3B63EFBF871F33D730C57EE3FF7D8D220B5E18A605F7D
+      D8C796EE5BF5D7D5E1B74CF887B13CAD0E632CF62A46CB1A58EC1BF7C4F2E0EE
+      25C9D5786589074C8365305C1992375AFE8965FB7C266F95F43B14B460659A1C
+      635785DC7ADC4C30F37EDC84E29A8271856797FF6575488F45AA1CF6F9D7F182
+      63C22D3ADEFDD8CACACA31CF15D7E2CD8ACB8A89C7CFE38363F57877F741A5E1
+      8A906306A338FF0ECB6A034EC8E410C9DBB0A145819935AD9878ECFCD05307CF
+      BA1BDCE3EC7BB1ACF1C9674BEBC4934AE5FD3F9CB9C2549EBC84EAB23A48AB9B
+      6173A103E34B6A869E2AAEF1E062FF76A4E6E96764F2EAF77FB9D6E7D8A9826B
+      B71AAE1D2A8435F4A0B4B20135A5727C2D93271A14153DAECB4E3C71611C616B
+      A6D5B428575D57C0A98B61F9558D376F8F43ECFD52B9727C51D578AE393F532A
+      AFF8E85C73FFD26BB730BFBE8B7DDE89F8FE56DEA1E19F96C907B878E2F7E894
+      9F1A15947DADE2329C896F6A0B2E7462615D1756362BEEC98F2FA91D985DD741
+      FB9945576FB0EC949F1B61FA73339635F4C29868EF40F4985052A324891D73D7
+      3A91C9A791B5D2FF6CA97C90CEE19DAAAB7DCFCBEAFA4DAB9AB08EF87E89E480
+      8E4BF2726AA4BC8D2F3D3F697CF1792F124B13A9FB5E2EAB531A9F698479E30D
+      907CE1D3EAEB03134A6AB78E66BD4F94551B3D23AB153E5D22EF26F956519EDA
+      38D9F98F759F8D4D4EF4894A885145C64523225688F09828840A2311121581FD
+      91E1088E08457078882A342A8273CD874547A946F3F7A2C0E0BD2A2E9E8E4FCB
+      B5966634B55E47735B0B9ADB5B71FD8ED1362D7E7B0238DF9582FDFBD8FE968E
+      36248944484E114194FAABB57775B2FD3C7F5F4E7E775020DBDFD9D385AEDE1E
+      F4DCE8452F39BF878DB669D9CEF3E6E47705F8B3FD3D377B919E218638330399
+      9999C8CCCA64EB3E451FDBBF758717A7A63B7D796CFFCDBE5BE8EB576040A9C4
+      2079BF30E43D41DF33B44DCB46FA01C1A1A997F70E0D4FFD65676743229542AD
+      56B36328076FF3AEE423894BD3CD5E5BD96B1AEB2D328682CC817E8352BFB456
+      9077162D0EE423804BD38D5B378F2AFF0EAE4E9C9A6EF2F2F07126EF6B3ABEBD
+      8B13EC9C1D60EB640F1B073B58DBDBC2CACE06D6E49ABF27905353AE9CE8A9E9
+      5DBC3E9A72F1FA68CAC58F56533BFAA1C8F51D3E0A4DADEC6D550E2E4EEC9ECE
+      CECB9D2BC93F7035EB801499C4327225C8C8C986F8B629C8754E9A2473D648E7
+      0D79FE5A075913F4B78FAE290707D174BD1992BC5C45B23895F3BD939C91A6F9
+      DDD4D9D38DD6CE763491357AA5F91A1A9A1A71BEB696D5FE5051A1225694E8AE
+      CBC7A724B17CFD09092E9665E1426926E42562D414A7A1FA582A8EA487B17A31
+      648C948CF43E72CE4DD7E68509B12C4F59A9D7F710BBCF654D42AECF15A520CC
+      6A2602ADE7213D3E8CCCA566283C4628D53903A1263CF54BB9AA5857D6E8F5D9
+      22117E294C4245412CCA7385A8AD93232874BF5210B2EFB1617E5F7828E1D5A8
+      9365B03E75FD0FB7CF1E15B1F3E4EF1530E4DCD27C27EE09DEABE16B49DCB5C5
+      E96CECE78FA792F853B42C95E57DF9BB199F003F0DEF2FE06BF8615F5C46C7A5
+      BCB79F0FB373174FC3F376FBB2FC05C2CB5913B3751D87517E1B6F27E3B973BB
+      86DFEEE3CDEA77F18E7EDAC655B66CF76436796ED1F0F41CA0E35E2ACF66ADBE
+      5CC2AE056AEC06D3FA9F192DEE5B3633AE9BDC0D7FDD6F1E2C7FF9A47444FFC3
+      2C2D646F318EAECE1ADE65A31BCB5F3995432C17572BA81D4063E5014EFF76CE
+      8E0CD98B1A9ECCA5B9A3B373C47D4ECFAC61A3C5DED9B16DADCD7ACD6F40F2BD
+      F0B5E306E726724E32647F3356F636CC7A3B62B6D60CD9F78C8DA33DF5C7D07E
+      32EF96B5D6EBBF1D66FF03877D8A6F
+    }
+  end
+  object CharSetSource: TDataSource
+    DataSet = DBDataModule.CharSetLookup
+    Left = 552
+    Top = 240
+  end
+  object SecDBFilesSource: TDataSource
+    DataSet = DBDataModule.DBSecFiles
+    Left = 552
+    Top = 376
+  end
+  object DBCharSetSource: TDataSource
+    DataSet = DBDataModule.DBCharSet
+    Left = 552
+    Top = 304
+  end
+  object DatabaseSource: TDataSource
+    DataSet = DBDataModule.DatabaseQuery
+    Left = 560
+    Top = 448
+  end
+  object IBDatabaseInfo: TIBDatabaseInfo
+    Database = DBDataModule.IBDatabase1
+    Left = 712
+    Top = 240
+  end
+  object AttmtSource: TDataSource
+    DataSet = DBDataModule.AttmtQuery
+    Left = 416
+    Top = 448
+  end
+  object ShadowSource: TDataSource
+    DataSet = DBDataModule.ShadowFiles
+    Left = 464
+    Top = 512
+  end
+  object SynSQLSyn1: TSynSQLSyn
+    DefaultFilter = 'SQL Files (*.sql)|*.sql'
+    Enabled = False
+    CommentAttri.Foreground = clGreen
+    KeyAttri.Foreground = clBlue
+    NumberAttri.Foreground = clRed
+    SQLDialect = sqlSybase
+    Left = 712
+    Top = 352
+  end
+  object IBExtract1: TIBExtract
+    Database = DBDataModule.IBDatabase1
+    Transaction = DBDataModule.CurrentTransaction
+    ShowSystem = False
+    AlwaysQuoteIdentifiers = False
+    CaseSensitiveObjectNames = False
+    Left = 712
+    Top = 296
+  end
+  object SQlSaveDialog: TSaveDialog
+    DefaultExt = '.sql'
+    Filter = 'SQLFiles (*.sql)|*.sql|All Files|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    Left = 712
+    Top = 472
+  end
+  object SaveDialog: TSaveDialog
+    DefaultExt = '.txt'
+    Filter = 'Text Files (*.txt)|*.txt|All Files |*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    Left = 712
+    Top = 416
+  end
+  object UserListSource: TDataSource
+    DataSet = DBDataModule.UserList
+    Left = 416
+    Top = 360
+  end
+  object RoleSource: TDataSource
+    DataSet = DBDataModule.RoleNameList
+    Left = 416
+    Top = 272
+  end
+  object UserTagsSource: TDataSource
+    DataSet = DBDataModule.UserTags
+    Left = 416
+    Top = 224
+  end
+  object UserPopup: TPopupMenu
+    Left = 840
+    Top = 296
+    object MenuItem11: TMenuItem
+      Action = AddUser
+    end
+    object MenuItem12: TMenuItem
+      Action = ChgPassword
+    end
+    object MenuItem13: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem14: TMenuItem
+      Action = DeleteUser
+    end
+  end
+  object UserTagPopup: TPopupMenu
+    Left = 845
+    Top = 346
+    object MenuItem15: TMenuItem
+      Action = AddTag
+    end
+    object MenuItem16: TMenuItem
+      Action = DeleteTag
+    end
+  end
+  object AttachSource: TDataSource
+    DataSet = DBDataModule.Attachments
+    Left = 552
+    Top = 112
+  end
+  object AttmtTimer: TTimer
+    Enabled = False
+    Interval = 5000
+    OnTimer = AttmtTimerTimer
+    Left = 832
+    Top = 88
+  end
+  object AttmtPopup: TPopupMenu
+    Left = 840
+    Top = 240
+    object MenuItem17: TMenuItem
+      Action = ToggleAutoRefresh
+    end
+    object MenuItem18: TMenuItem
+      Action = DisconnectAttachment
+    end
+  end
+  object LimboListSource: TDataSource
+    DataSet = DBDataModule.InLimboList
+    Left = 552
+    Top = 176
+  end
+  object DBTablesSource: TDataSource
+    DataSet = DBDataModule.DBTables
+    Left = 304
+    Top = 224
+  end
+  object AuthMapSource: TDataSource
+    DataSet = DBDataModule.AuthMappings
+    Left = 303
+    Top = 286
+  end
+  object SubjectAccessRightsSource: TDataSource
+    DataSet = DBDataModule.SubjectAccessRights
+    OnDataChange = SubjectAccessRightsSourceDataChange
+    Left = 297
+    Top = 429
+  end
+  object AccessRightsPopup: TPopupMenu
+    Left = 845
+    Top = 415
+    object MenuItem19: TMenuItem
+      Action = RevokeAll
+    end
+  end
+  object AccessRightsSource: TDataSource
+    DataSet = DBDataModule.AccessRights
+    Left = 288
+    Top = 360
+  end
+  object ConfigDataSource: TDataSource
+    DataSet = DBDataModule.ConfigDataset
+    Left = 288
+    Top = 504
+  end
+  object SchemaPopup: TPopupMenu
+    Left = 303
+    Top = 80
+    object SchemaMenuItem22: TMenuItem
+      Action = CopyText
+    end
+    object SchemaMenuItem23: TMenuItem
+      Action = SchemaSelectAll
+    end
+    object SchemaMenuItem24: TMenuItem
+      Action = Save
+    end
+  end
+end

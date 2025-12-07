@@ -1,0 +1,240 @@
+object fmNewEditField: TfmNewEditField
+  Left = 605
+  Height = 414
+  Top = 132
+  Width = 383
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
+  Caption = 'fmNewEditField'
+  ClientHeight = 414
+  ClientWidth = 383
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 414
+    Top = 0
+    Width = 383
+    Align = alClient
+    ClientHeight = 412
+    ClientWidth = 381
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 8
+      Height = 19
+      Top = 14
+      Width = 69
+      Caption = 'Field Name'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 8
+      Height = 19
+      Top = 48
+      Width = 62
+      Caption = 'Field Type'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 8
+      Height = 19
+      Top = 81
+      Width = 24
+      Caption = 'Size'
+      ParentColor = False
+    end
+    object Label4: TLabel
+      Left = 216
+      Height = 19
+      Top = 77
+      Width = 69
+      Caption = 'Field Order'
+      ParentColor = False
+    end
+    object Label5: TLabel
+      Left = 8
+      Height = 19
+      Top = 232
+      Width = 83
+      Caption = 'Default Value'
+      ParentColor = False
+    end
+    object edFieldName: TEdit
+      Left = 111
+      Height = 31
+      Top = 8
+      Width = 251
+      ParentFont = False
+      TabOrder = 0
+    end
+    object cbType: TComboBox
+      Left = 110
+      Height = 35
+      Hint = 'Data type for this field'
+      Top = 40
+      Width = 249
+      AutoComplete = True
+      AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+      Color = 16249563
+      ItemHeight = 0
+      OnChange = cbTypeChange
+      OnEditingDone = cbTypeEditingDone
+      ParentShowHint = False
+      ShowHint = True
+      Style = csOwnerDrawFixed
+      TabOrder = 1
+    end
+    object seSize: TSpinEdit
+      Left = 111
+      Height = 29
+      Hint = 'Size of field. For text fields: size in characters, not bytes'
+      Top = 77
+      Width = 75
+      MaxValue = 10000
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
+    object cxAllowNull: TCheckBox
+      Left = 8
+      Height = 21
+      Top = 272
+      Width = 84
+      Caption = 'Allow Null'
+      Checked = True
+      State = cbChecked
+      TabOrder = 3
+    end
+    object bbAdd: TBitBtn
+      Left = 284
+      Height = 30
+      Top = 368
+      Width = 75
+      Caption = 'Add'
+      Color = clForm
+      OnClick = bbAddClick
+      TabOrder = 4
+    end
+    object seOrder: TSpinEdit
+      Left = 302
+      Height = 29
+      Top = 77
+      Width = 57
+      MaxValue = 10000
+      TabOrder = 5
+      Value = 1
+    end
+    object edDefault: TEdit
+      Left = 110
+      Height = 31
+      Top = 232
+      Width = 249
+      TabOrder = 6
+    end
+    object Label6: TLabel
+      Left = 9
+      Height = 19
+      Top = 312
+      Width = 107
+      Caption = 'Field Description:'
+      ParentColor = False
+    end
+    object edDescription: TEdit
+      Left = 9
+      Height = 31
+      Top = 336
+      Width = 352
+      TabOrder = 7
+    end
+    object Label7: TLabel
+      Left = 216
+      Height = 19
+      Top = 112
+      Width = 31
+      Caption = 'Scale'
+      ParentColor = False
+    end
+    object seScale: TSpinEdit
+      Left = 302
+      Height = 29
+      Hint = 'Sets decimal scale for numeric/decimal datatypes'
+      Top = 112
+      Width = 57
+      Enabled = False
+      MaxValue = 18
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 8
+    end
+    object cbCharset: TComboBox
+      Left = 110
+      Height = 31
+      Hint = 'New field character setIF IT DIFFERS from database character set'
+      Top = 152
+      Width = 251
+      ItemHeight = 0
+      OnEditingDone = cbCharsetEditingDone
+      TabOrder = 9
+    end
+    object lblCharset: TLabel
+      Left = 8
+      Height = 19
+      Top = 152
+      Width = 48
+      Caption = 'Charset'
+      ParentColor = False
+    end
+    object lblCollation: TLabel
+      Left = 8
+      Height = 19
+      Top = 192
+      Width = 53
+      Caption = 'Collation'
+      ParentColor = False
+    end
+    object cbCollation: TComboBox
+      Left = 110
+      Height = 31
+      Hint = 'Collation of new field IF IT DIFFERS from database collation'
+      Top = 192
+      Width = 249
+      ItemHeight = 0
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 10
+    end
+    object Label8: TLabel
+      Left = 8
+      Height = 19
+      Top = 113
+      Width = 55
+      Caption = 'Precision'
+      ParentColor = False
+    end
+    object sePrecision: TSpinEdit
+      Left = 110
+      Height = 29
+      Top = 112
+      Width = 76
+      MaxValue = 10000
+      TabOrder = 11
+      Value = 1
+    end
+    object bbGenUUID: TBitBtn
+      Left = 110
+      Height = 30
+      Hint = 'Generate a new UUID value in hexadecimal format'
+      Top = 264
+      Width = 249
+      Caption = 'Gen UUID'
+      OnClick = bbGenUUIDClick
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 12
+      Visible = False
+    end
+  end
+end

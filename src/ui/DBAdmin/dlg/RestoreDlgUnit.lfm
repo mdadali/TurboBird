@@ -1,0 +1,423 @@
+object RestoreDlg: TRestoreDlg
+  Left = 614
+  Height = 652
+  Top = 59
+  Width = 539
+  Caption = 'Restore Database'
+  ClientHeight = 652
+  ClientWidth = 539
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object Button1: TButton
+    Left = 128
+    Height = 25
+    Top = 619
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    OnClick = Button1Click
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 223
+    Height = 25
+    Top = 619
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object PageControl1: TPageControl
+    Left = 12
+    Height = 602
+    Top = 8
+    Width = 647
+    ActivePage = SelectTab
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ShowTabs = False
+    TabIndex = 0
+    TabOrder = 2
+    object SelectTab: TTabSheet
+      Caption = 'SelectTab'
+      ClientHeight = 598
+      ClientWidth = 637
+      object Label2: TLabel
+        Left = 12
+        Height = 19
+        Top = 7
+        Width = 42
+        Caption = 'Server'
+        ParentColor = False
+      end
+      object Label1: TLabel
+        Left = 12
+        Height = 19
+        Top = 128
+        Width = 171
+        Caption = 'Primary Database FileName'
+        ParentColor = False
+      end
+      object DBName: TEdit
+        Left = 12
+        Height = 31
+        Top = 152
+        Width = 444
+        TabOrder = 0
+      end
+      object ServerSideBtn: TRadioButton
+        Left = 12
+        Height = 21
+        Top = 344
+        Width = 95
+        Caption = 'Server Side'
+        TabOrder = 1
+      end
+      object ClientSideBtn: TRadioButton
+        Left = 142
+        Height = 21
+        Top = 344
+        Width = 88
+        Caption = 'Client Side'
+        Checked = True
+        TabOrder = 2
+        TabStop = True
+      end
+      object Label3: TLabel
+        Left = 12
+        Height = 19
+        Top = 64
+        Width = 69
+        Caption = 'Backup File'
+        ParentColor = False
+      end
+      object SourceArchive: TEdit
+        Left = 12
+        Height = 31
+        Top = 88
+        Width = 440
+        TabOrder = 5
+      end
+      object sbBackupFile: TSpeedButton
+        Left = 464
+        Height = 25
+        Top = 88
+        Width = 25
+        Glyph.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          00002D88D8FF2D87D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88
+          D8FF2D88D8FF2D88D8FF2D87D8FF2D88D8FF2C86D8FF0000000000000000338E
+          D9FFDCF0FAFFA7DDF4FF9EDBF4FF96DAF3FF8ED8F3FF86D7F3FF7FD4F2FF79D3
+          F2FF72D2F1FF6CD0F1FF69CFF1FFC2EAF8FF338ED9FF00000000000000003594
+          DAFFEFFAFEFFA1E9F9FF91E5F8FF81E1F7FF72DEF6FF63DAF5FF54D7F4FF47D3
+          F3FF39D0F2FF2ECDF1FF26CBF0FFCAF2FBFF3594DAFF0000000000000000369A
+          DAFFF2FAFDFFB3EDFAFFA4E9F9FF95E6F8FF85E2F7FF76DEF6FF65DBF5FF57D7
+          F4FF49D4F3FF3BD1F2FF30CEF1FFCCF2FBFF3598DAFF000000000000000036A1
+          DAFFF6FCFEFFC8F2FCFFB9EFFBFFACECFAFF9CE8F9FF8BE3F7FF7CE0F6FF6CDC
+          F6FF5DD9F5FF4FD6F4FF44D3F3FFD0F3FCFF359FDAFF000000000000000037A6
+          DAFFFEFFFFFFF8FDFFFFF6FDFFFFF5FCFFFFF3FCFEFFD8F6FCFF94E6F8FF85E3
+          F7FF76DFF6FF68DBF5FF5CD8F4FFD7F4FCFF35A4DAFF000000000000000035AB
+          DAFFE8F6FBFF94D4EFFF88CEEEFF73C1E9FFC9E9F6FFF2FCFEFFF3FCFEFFF2FC
+          FEFFF0FCFEFFEFFBFEFFEEFBFEFFFEFFFFFF36ABDAFF000000000000000036AA
+          DAFFF1FAFDFF94DEF5FF93DCF4FF81D5F2FF6ACAEDFF6CCBEAFF85D3EFFF80D2
+          EFFF7AD0EFFF76CFEEFF72CFEEFFE9F7FBFF34AEDAFF000000000000000035AF
+          DAFFF7FCFEFF8EE4F8FF91DEF5FF9FE0F5FFACE1F6FFEFFBFEFFF4FDFEFFF3FC
+          FEFFF1FCFEFFEFFBFEFFEEFBFEFFFAFDFFFF36AFDAFF000000000000000036B3
+          DAFFFDFEFEFFFEFFFFFFFEFEFFFFFDFEFFFFFEFFFFFFEAF7FBFF6BC7E4FF6BC7
+          E3FF6BC7E3FF6BC7E3FF79CDE6FF74CAE5FF00000000000000000000000034B4
+          D9FF5EC2E1FF60C3E2FF60C3E2FF60C3E2FF5FC3E2FF3CB6DBFF000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000
+        }
+        OnClick = sbBackupFileClick
+      end
+      object Label4: TLabel
+        Left = 12
+        Height = 19
+        Top = 376
+        Width = 58
+        Caption = 'Page Size'
+        ParentColor = False
+      end
+      object PageSize: TEdit
+        Left = 12
+        Height = 31
+        Top = 392
+        Width = 104
+        NumbersOnly = True
+        TabOrder = 3
+      end
+      object Label5: TLabel
+        Left = 128
+        Height = 19
+        Top = 397
+        Width = 34
+        Caption = 'bytes'
+        ParentColor = False
+      end
+      object DeActivateIndexes: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 441
+        Width = 142
+        Caption = 'Deactivate Indexes'
+        TabOrder = 6
+      end
+      object NoShadow: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 464
+        Width = 291
+        Caption = 'Do not recreate shadow files during restore'
+        TabOrder = 7
+      end
+      object NoValidityCheck: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 488
+        Width = 321
+        Caption = 'Do not enforce validity conditions during restore'
+        TabOrder = 8
+      end
+      object OneRelationAtATime: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 512
+        Width = 308
+        Caption = 'Commit after completing restore of each table'
+        TabOrder = 9
+      end
+      object RestoreMetaDataOnly: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 536
+        Width = 167
+        Caption = 'Restore MetaData Only'
+        TabOrder = 10
+      end
+      object UseAllSpace: TCheckBox
+        Left = 12
+        Height = 21
+        Top = 560
+        Width = 404
+        Caption = 'Do not reserve 20% of each data page for future rec. versions'
+        TabOrder = 11
+      end
+      object Label6: TLabel
+        Left = 205
+        Height = 19
+        Top = 376
+        Width = 127
+        Caption = 'No. of Cache Buffers'
+        ParentColor = False
+      end
+      object PageBuffers: TEdit
+        Left = 205
+        Height = 31
+        Top = 392
+        Width = 107
+        NumbersOnly = True
+        TabOrder = 4
+      end
+      object cmbBoxServers: TComboBox
+        Left = 12
+        Height = 35
+        Top = 24
+        Width = 440
+        Enabled = False
+        ItemHeight = 0
+        Style = csDropDownList
+        TabOrder = 12
+      end
+      object sbPrimDBFileName: TSpeedButton
+        Left = 464
+        Height = 25
+        Top = 152
+        Width = 25
+        Glyph.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          00002D88D8FF2D87D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88
+          D8FF2D88D8FF2D88D8FF2D87D8FF2D88D8FF2C86D8FF0000000000000000338E
+          D9FFDCF0FAFFA7DDF4FF9EDBF4FF96DAF3FF8ED8F3FF86D7F3FF7FD4F2FF79D3
+          F2FF72D2F1FF6CD0F1FF69CFF1FFC2EAF8FF338ED9FF00000000000000003594
+          DAFFEFFAFEFFA1E9F9FF91E5F8FF81E1F7FF72DEF6FF63DAF5FF54D7F4FF47D3
+          F3FF39D0F2FF2ECDF1FF26CBF0FFCAF2FBFF3594DAFF0000000000000000369A
+          DAFFF2FAFDFFB3EDFAFFA4E9F9FF95E6F8FF85E2F7FF76DEF6FF65DBF5FF57D7
+          F4FF49D4F3FF3BD1F2FF30CEF1FFCCF2FBFF3598DAFF000000000000000036A1
+          DAFFF6FCFEFFC8F2FCFFB9EFFBFFACECFAFF9CE8F9FF8BE3F7FF7CE0F6FF6CDC
+          F6FF5DD9F5FF4FD6F4FF44D3F3FFD0F3FCFF359FDAFF000000000000000037A6
+          DAFFFEFFFFFFF8FDFFFFF6FDFFFFF5FCFFFFF3FCFEFFD8F6FCFF94E6F8FF85E3
+          F7FF76DFF6FF68DBF5FF5CD8F4FFD7F4FCFF35A4DAFF000000000000000035AB
+          DAFFE8F6FBFF94D4EFFF88CEEEFF73C1E9FFC9E9F6FFF2FCFEFFF3FCFEFFF2FC
+          FEFFF0FCFEFFEFFBFEFFEEFBFEFFFEFFFFFF36ABDAFF000000000000000036AA
+          DAFFF1FAFDFF94DEF5FF93DCF4FF81D5F2FF6ACAEDFF6CCBEAFF85D3EFFF80D2
+          EFFF7AD0EFFF76CFEEFF72CFEEFFE9F7FBFF34AEDAFF000000000000000035AF
+          DAFFF7FCFEFF8EE4F8FF91DEF5FF9FE0F5FFACE1F6FFEFFBFEFFF4FDFEFFF3FC
+          FEFFF1FCFEFFEFFBFEFFEEFBFEFFFAFDFFFF36AFDAFF000000000000000036B3
+          DAFFFDFEFEFFFEFFFFFFFEFEFFFFFDFEFFFFFEFFFFFFEAF7FBFF6BC7E4FF6BC7
+          E3FF6BC7E3FF6BC7E3FF79CDE6FF74CAE5FF00000000000000000000000034B4
+          D9FF5EC2E1FF60C3E2FF60C3E2FF60C3E2FF5FC3E2FF3CB6DBFF000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000
+        }
+        OnClick = sbPrimDBFileNameClick
+      end
+      object Label7: TLabel
+        Left = 12
+        Height = 19
+        Top = 192
+        Width = 62
+        Caption = 'Segments'
+        ParentColor = False
+      end
+      object StringGrid1: TStringGrid
+        Left = 13
+        Height = 100
+        Top = 216
+        Width = 443
+        ColCount = 1
+        DefaultColWidth = 360
+        FixedCols = 0
+        FixedRows = 0
+        Flat = True
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll]
+        RowCount = 0
+        TabOrder = 13
+      end
+      object sbSegments: TSpeedButton
+        Left = 464
+        Height = 25
+        Top = 216
+        Width = 28
+        Glyph.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          00002D88D8FF2D87D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88
+          D8FF2D88D8FF2D88D8FF2D87D8FF2D88D8FF2C86D8FF0000000000000000338E
+          D9FFDCF0FAFFA7DDF4FF9EDBF4FF96DAF3FF8ED8F3FF86D7F3FF7FD4F2FF79D3
+          F2FF72D2F1FF6CD0F1FF69CFF1FFC2EAF8FF338ED9FF00000000000000003594
+          DAFFEFFAFEFFA1E9F9FF91E5F8FF81E1F7FF72DEF6FF63DAF5FF54D7F4FF47D3
+          F3FF39D0F2FF2ECDF1FF26CBF0FFCAF2FBFF3594DAFF0000000000000000369A
+          DAFFF2FAFDFFB3EDFAFFA4E9F9FF95E6F8FF85E2F7FF76DEF6FF65DBF5FF57D7
+          F4FF49D4F3FF3BD1F2FF30CEF1FFCCF2FBFF3598DAFF000000000000000036A1
+          DAFFF6FCFEFFC8F2FCFFB9EFFBFFACECFAFF9CE8F9FF8BE3F7FF7CE0F6FF6CDC
+          F6FF5DD9F5FF4FD6F4FF44D3F3FFD0F3FCFF359FDAFF000000000000000037A6
+          DAFFFEFFFFFFF8FDFFFFF6FDFFFFF5FCFFFFF3FCFEFFD8F6FCFF94E6F8FF85E3
+          F7FF76DFF6FF68DBF5FF5CD8F4FFD7F4FCFF35A4DAFF000000000000000035AB
+          DAFFE8F6FBFF94D4EFFF88CEEEFF73C1E9FFC9E9F6FFF2FCFEFFF3FCFEFFF2FC
+          FEFFF0FCFEFFEFFBFEFFEEFBFEFFFEFFFFFF36ABDAFF000000000000000036AA
+          DAFFF1FAFDFF94DEF5FF93DCF4FF81D5F2FF6ACAEDFF6CCBEAFF85D3EFFF80D2
+          EFFF7AD0EFFF76CFEEFF72CFEEFFE9F7FBFF34AEDAFF000000000000000035AF
+          DAFFF7FCFEFF8EE4F8FF91DEF5FF9FE0F5FFACE1F6FFEFFBFEFFF4FDFEFFF3FC
+          FEFFF1FCFEFFEFFBFEFFEEFBFEFFFAFDFFFF36AFDAFF000000000000000036B3
+          DAFFFDFEFEFFFEFFFFFFFEFEFFFFFDFEFFFFFEFFFFFFEAF7FBFF6BC7E4FF6BC7
+          E3FF6BC7E3FF6BC7E3FF79CDE6FF74CAE5FF00000000000000000000000034B4
+          D9FF5EC2E1FF60C3E2FF60C3E2FF60C3E2FF5FC3E2FF3CB6DBFF000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000
+        }
+        OnClick = sbSegmentsClick
+        OnChangeBounds = sbSegmentsChangeBounds
+      end
+    end
+    object ReportTab: TTabSheet
+      Caption = 'ReportTab'
+      ClientHeight = 598
+      ClientWidth = 637
+      OnShow = ReportTabShow
+      object Report: TMemo
+        Left = 0
+        Height = 578
+        Top = 0
+        Width = 637
+        Align = alClient
+        Lines.Strings = (
+          'Report'
+        )
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+      object ProgressBar1: TProgressBar
+        Left = 0
+        Height = 20
+        Top = 578
+        Width = 637
+        Align = alBottom
+        Style = pbstMarquee
+        TabOrder = 1
+      end
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Title = 'Open existing backup file'
+    DefaultExt = '.gbk'
+    Filter = 'Backup Files|*.gbk|All Files|*.*'
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 344
+    Top = 192
+  end
+  object IBXClientSideRestoreService1: TIBXClientSideRestoreService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    OnGetNextLine = IBXClientSideRestoreService1GetNextLine
+    PageSize = 0
+    PageBuffers = 0
+    Options = [Replace]
+    StatisticsRequested = [bsTotalTime]
+    Verbose = True
+    Left = 312
+    Top = 16
+  end
+  object IBXServerSideRestoreService1: TIBXServerSideRestoreService
+    ServicesConnection = IBXServicesConnection1
+    TraceFlags = []
+    OnGetNextLine = IBXClientSideRestoreService1GetNextLine
+    PageSize = 0
+    PageBuffers = 0
+    Options = [Replace]
+    StatisticsRequested = [bsTotalTime]
+    Verbose = True
+    Left = 128
+    Top = 8
+  end
+  object IBXServicesConnection1: TIBXServicesConnection
+    Connected = False
+    TraceFlags = []
+    Left = 176
+    Top = 72
+  end
+end

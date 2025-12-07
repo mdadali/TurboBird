@@ -1,0 +1,546 @@
+object fmServerRegistry: TfmServerRegistry
+  Left = 817
+  Height = 706
+  Top = 364
+  Width = 779
+  BorderIcons = []
+  BorderStyle = bsDialog
+  Caption = 'Server Registration'
+  ClientHeight = 706
+  ClientWidth = 779
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
+  ShowHint = True
+  LCLVersion = '2.2.6.0'
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 657
+    Top = 0
+    Width = 779
+    Align = alClient
+    ClientHeight = 655
+    ClientWidth = 777
+    TabOrder = 0
+    object cbServerName: TComboBox
+      Left = 192
+      Height = 35
+      Top = 16
+      Width = 248
+      ItemHeight = 0
+      OnChange = cbServerNameChange
+      Style = csOwnerDrawFixed
+      TabOrder = 0
+    end
+    object Label1: TLabel
+      Left = 20
+      Height = 19
+      Top = 21
+      Width = 42
+      Caption = 'Server'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 20
+      Height = 19
+      Top = 240
+      Width = 28
+      Caption = 'Alias'
+      ParentColor = False
+    end
+    object edtServerAlias: TEdit
+      Left = 192
+      Height = 31
+      Top = 240
+      Width = 248
+      OnChange = edtServerAliasChange
+      TabOrder = 8
+      Text = 'ServerAlias'
+    end
+    object Label3: TLabel
+      Left = 20
+      Height = 19
+      Top = 102
+      Width = 65
+      Caption = 'Username'
+      ParentColor = False
+    end
+    object edtUserName: TEdit
+      Left = 192
+      Height = 31
+      Top = 102
+      Width = 248
+      OnChange = edtUserNameChange
+      TabOrder = 4
+      Text = 'SYSDBA'
+    end
+    object edtRole: TEdit
+      Left = 192
+      Height = 31
+      Top = 203
+      Width = 248
+      OnChange = edtRoleChange
+      TabOrder = 7
+    end
+    object Label4: TLabel
+      Left = 20
+      Height = 19
+      Top = 141
+      Width = 58
+      Caption = 'Password'
+      ParentColor = False
+    end
+    object cbProtocol: TComboBox
+      Left = 192
+      Height = 31
+      Top = 61
+      Width = 92
+      ItemHeight = 0
+      ItemIndex = 3
+      Items.Strings = (
+        'TCP'
+        'SPX'
+        'NamedPipe'
+        'Local'
+        'net'
+        'inet4'
+        'inet6'
+        'wnet'
+        'xnet'
+      )
+      OnChange = cbProtocolChange
+      Style = csOwnerDrawFixed
+      TabOrder = 3
+      Text = 'Local'
+    end
+    object Label5: TLabel
+      Left = 20
+      Height = 19
+      Top = 203
+      Width = 27
+      Caption = 'Role'
+      ParentColor = False
+    end
+    object edtPassword: TEdit
+      Left = 192
+      Height = 31
+      Top = 136
+      Width = 248
+      EchoMode = emPassword
+      OnChange = edtPasswordChange
+      PasswordChar = '*'
+      TabOrder = 5
+      Text = 'Password'
+    end
+    object Label6: TLabel
+      Left = 20
+      Height = 19
+      Top = 61
+      Width = 51
+      Caption = 'Protocol'
+      ParentColor = False
+    end
+    object cbCharset: TComboBox
+      Left = 192
+      Height = 35
+      Top = 280
+      Width = 252
+      ItemHeight = 0
+      OnChange = cbCharsetChange
+      Style = csDropDownList
+      TabOrder = 9
+    end
+    object edtClientLibraryPath: TEdit
+      Left = 192
+      Height = 31
+      Top = 328
+      Width = 529
+      OnChange = edtClientLibraryPathChange
+      ReadOnly = True
+      TabStop = False
+      TabOrder = 12
+    end
+    object Label7: TLabel
+      Left = 20
+      Height = 19
+      Top = 280
+      Width = 48
+      Caption = 'Charset'
+      ParentColor = False
+    end
+    object Label8: TLabel
+      Left = 20
+      Height = 19
+      Top = 328
+      Width = 74
+      Caption = 'Clientlibrary'
+      ParentColor = False
+    end
+    object chkSavePassword: TCheckBox
+      Left = 192
+      Height = 21
+      Top = 168
+      Width = 114
+      Caption = 'Save Password'
+      TabOrder = 6
+    end
+    object btnClientLib: TButton
+      Left = 725
+      Height = 24
+      Top = 328
+      Width = 32
+      Caption = '...'
+      OnClick = btnClientLibClick
+      TabOrder = 10
+    end
+    object edtPort: TEdit
+      Left = 360
+      Height = 31
+      Top = 61
+      Width = 80
+      Enabled = False
+      OnChange = edtPortChange
+      TabOrder = 14
+      Text = '3050'
+    end
+    object Label9: TLabel
+      Left = 312
+      Height = 19
+      Top = 64
+      Width = 27
+      Caption = 'Port'
+      ParentColor = False
+    end
+    object lbFBConfigFile: TLabel
+      Left = 20
+      Height = 19
+      Top = 400
+      Width = 64
+      Caption = 'Config File'
+      ParentColor = False
+    end
+    object edtConfigFilePath: TEdit
+      Left = 192
+      Height = 31
+      Top = 400
+      Width = 531
+      OnChange = edtConfigFilePathChange
+      ParentFont = False
+      ParentShowHint = False
+      ReadOnly = True
+      ShowHint = True
+      TabOrder = 13
+    end
+    object btnfirebirdconffile: TButton
+      Left = 725
+      Height = 25
+      Top = 400
+      Width = 32
+      Caption = '...'
+      OnClick = btnfirebirdconffileClick
+      TabOrder = 11
+    end
+    object btnAddServer: TButton
+      Left = 448
+      Height = 25
+      Hint = 'Add new Server'
+      Top = 21
+      Width = 24
+      Caption = '+'
+      OnClick = btnAddServerClick
+      TabOrder = 1
+    end
+    object btnDeleteServer: TButton
+      Left = 480
+      Height = 25
+      Hint = 'Delete Selected Server'
+      Top = 21
+      Width = 23
+      Caption = '-'
+      OnClick = btnDeleteServerClick
+      TabOrder = 2
+    end
+    object lbPortInfo: TLabel
+      Left = 450
+      Height = 19
+      Top = 64
+      Width = 56
+      Caption = 'Port Info'
+      ParentColor = False
+    end
+    object lbDescription: TLabel
+      Left = 450
+      Height = 19
+      Top = 112
+      Width = 67
+      Caption = 'Description'
+      Font.Style = [fsItalic]
+      ParentColor = False
+      ParentFont = False
+    end
+    object cboxLoadRegisteredClientLib: TCheckBox
+      Left = 193
+      Height = 21
+      Top = 368
+      Width = 249
+      Caption = 'Load registered FireBird Clientlibrary'
+      OnChange = cboxLoadRegisteredClientLibChange
+      TabOrder = 15
+    end
+    object Image1: TImage
+      Left = 621
+      Height = 121
+      Top = 16
+      Width = 136
+      Picture.Data = {
+        1754506F727461626C654E6574776F726B47726170686963CC01000089504E47
+        0D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001
+        9349444154789C8DD14B4B02511806607F48CBFE487F22DABA69E5CA9DA0A0B8
+        51C2BB0879191A9B88212AF356E66DBC4559E265D14637623A4EA659A6649BB7
+        3382102972162FE7FA3DF09DA300A0F89F482C3AAF542A98CE661004017D4982
+        90CFFFACBBBBB22127438A4AA512BEA653B8DDEE0550BC2B811A48A492C8178B
+        F89C4C60F678204A7DB22ED003D1EB38845C0EE38F0F385DCE05405AA0072EC3
+        57C89236DEC763D86C36887D11725BD4C0D9C53952990C86A3111C0E077A0490
+        D7D4C029CF23914CE26D3884DD6E474F1471737B4B0F1C0559A4D269BC0E068B
+        16BABD1E22B1183DE00DF8912B142091EFB35AAD78E976711E0AD1033E86413A
+        9B5DFCBFC96482DFEF47F084A3073CDE43842311743A1D588C460408C872C7F4
+        80D96AF90E85C368B65A2892C7ACD66AB0BB5D736A601986619E542A956FD39D
+        B59B4AA5728B648F65D967B55A1D97E71CC76D6F041A8D86B1D96CD6E4D4EBF5
+        9787F2230AF75594CB65C8F376BB2D2DCF09B6BF0268B5DA5DBD5E6F22E38146
+        A349190C06FC0DCFF339F95C8E4EA7DB59D6FD02278D001D0A3E417000000000
+        49454E44AE426082
+      }
+      Stretch = True
+      Transparent = True
+    end
+    object Label10: TLabel
+      Left = 20
+      Height = 19
+      Top = 448
+      Width = 153
+      Caption = 'Connection Timeout (ms)'
+      ParentColor = False
+    end
+    object edtConnectionTimeout: TEdit
+      Left = 192
+      Height = 31
+      Top = 448
+      Width = 80
+      TabOrder = 16
+      Text = '2000'
+    end
+    object Label11: TLabel
+      Left = 328
+      Height = 19
+      Top = 448
+      Width = 74
+      Caption = 'Retry Count'
+      ParentColor = False
+    end
+    object edtRetryCount: TEdit
+      Left = 423
+      Height = 31
+      Top = 448
+      Width = 80
+      TabOrder = 17
+      Text = '3'
+    end
+    object Label12: TLabel
+      Left = 22
+      Height = 19
+      Top = 496
+      Width = 122
+      Caption = 'Query Timeout (ms)'
+      ParentColor = False
+    end
+    object edtQueryTimeout: TEdit
+      Left = 193
+      Height = 31
+      Top = 496
+      Width = 80
+      TabOrder = 18
+      Text = '0'
+    end
+    object Label13: TLabel
+      Left = 296
+      Height = 19
+      Top = 496
+      Width = 74
+      Caption = '(0 = no limit)'
+      Font.Style = [fsItalic]
+      ParentColor = False
+      ParentFont = False
+    end
+    object Label14: TLabel
+      Left = 20
+      Height = 19
+      Top = 549
+      Width = 87
+      Caption = 'Version String'
+      ParentColor = False
+    end
+    object edtVersionString: TEdit
+      Left = 193
+      Height = 31
+      Top = 549
+      Width = 191
+      ReadOnly = True
+      TabOrder = 19
+    end
+    object Label15: TLabel
+      Left = 392
+      Height = 19
+      Top = 552
+      Width = 86
+      Caption = 'Version Major'
+      ParentColor = False
+    end
+    object edtVersionMajor: TEdit
+      Left = 504
+      Height = 31
+      Top = 552
+      Width = 45
+      TabOrder = 20
+    end
+    object Label16: TLabel
+      Left = 584
+      Height = 19
+      Top = 552
+      Width = 87
+      Caption = 'Version Minor'
+      ParentColor = False
+    end
+    object edtVersionMinor: TEdit
+      Left = 688
+      Height = 31
+      Top = 552
+      Width = 40
+      TabOrder = 21
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 49
+    Top = 657
+    Width = 779
+    Align = alBottom
+    ClientHeight = 49
+    ClientWidth = 779
+    TabOrder = 1
+    object bbTestConnection: TBitBtn
+      Left = 194
+      Height = 30
+      Top = 8
+      Width = 162
+      Caption = 'Test connection'
+      Color = clForm
+      Enabled = False
+      Kind = bkAll
+      OnClick = bbTestConnectionClick
+      TabOrder = 0
+    end
+    object bbCancel: TBitBtn
+      Left = 496
+      Height = 30
+      Top = 8
+      Width = 115
+      Caption = 'Cancel'
+      Color = clForm
+      Kind = bkCancel
+      ModalResult = 2
+      OnClick = bbCancelClick
+      TabOrder = 1
+    end
+    object bbReg: TBitBtn
+      Left = 640
+      Height = 30
+      Top = 8
+      Width = 115
+      Caption = 'Register'
+      Color = clForm
+      Default = True
+      Glyph.Data = {
+        36090000424D3609000000000000360000002800000018000000180000000100
+        2000000000000009000064000000640000000000000000000000FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00555555034D4D4D0A5050
+        50105151511355555515515151164D5959144B5A5A115555550C33666605FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF0040404004555555124D53532B525855635257
+        568F5A605CAC5E6360C4616563CA5E615FB5565B5799525656765155553C4E59
+        4E174060600800000001FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0000000001606060085353532E5F636097848A87E09CA29FF6A3A9
+        A6FE969B99FF868B89FF858A88FF929896FFA2A8A5FFA3A9A6FA8F9592EA6F75
+        71BA5157544F4B5A4B1100000001FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00555555065256563E7C817FC3C4CBC8FBC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF868B89FF858A88FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFCED6
+        D2FF9AA19DE2545C566F5B5B5B0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00475555126D716E9DCED6D2FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF868B89FF858A88FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFCFD7
+        D3FFCFD7D3FF979E9ADA5359592E55555503FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF0080808002515757269BA19ED7CFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF868B89FF858A88FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFCFD7
+        D3FFCFD7D3FFC2C9C5F65157545E55715509FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00404040045157572FA5AAA7DCCFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF868B89FF858A88FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFCFD7
+        D3FFCFD7D3FFCAD1CEFB545757675D5D5D0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00404040045353532EA6ADA9D7CFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF868B89FF858A88FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFCFD7
+        D3FFCFD7D3FFCAD2CEFA53565662465D5D0BFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF0055555503555B552AA8AEABD3CFD7D3FFCFD7D3FFC5CCC9FFC0C6C4FFABAE
+        ACFF959795FF818480FF7A7D79FF7F8280FF878C8AFF9CA4A0FFBBC4C0FFCFD7
+        D3FFCFD7D3FFCBD2CFF95356535C4D4D4D0AFFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00555555034E555527AAB0ADCECFD7D3FFD0D4D3FFA3A6A4FF8E918FFF9298
+        94FF8E9290FF858A88FF858A88FF8D9390FF949996FF929794FF878C88FF9097
+        93FFC7CECBFFCBD2CFF95056535655555509FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF005555550355555524AEB4B1CAC3C7C5FFB8BFBBFFC4CBC8FFB4BBB8FFA5AB
+        A8FF969B99FF858A88FF848987FF929896FFA2A8A5FFB1B8B5FFC0C8C4FFC7D0
+        CBFF979D9AFFBBC3C0F95157544F55555509FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF005555550355555521C4CAC8DBCAD2CEFFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF8E9290FF4C4C4CFF5C5E5FFF919798FFA1A7A4FFB0B7B4FFC0C8C4FFCFD7
+        D3FFCFD7D3FFA8AEACFE5155554860606008FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF0080808002555E551EC4CAC8E4CFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF949997FF525252FF8C9CAAFFB3D1F0FF96BFD9FF91BDC0FFBFC7C3FFCFD7
+        D3FFCFD7D3FFC2CAC5FE5256524149494907FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00808080024C55551BB7BCB9BFCFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF959A98FFB8C1CBFFCFE5FAFFB6D2E9FF40CAE4FF36CAE3FF9AC7CAFFCED6
+        D2FFCFD7D3FFCCD4D0FB5256523B55555506FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF008080800255555518B6BCB8B5CFD7D3FFCFD7D3FFC4CBC8FFB4BBB8FFA5AB
+        A8FF959A98FF9DA3A4FFCCDDE9FF64CDDEFF48D0E8FF3ACBE4FF41CCE3FFA6D2
+        D4FFCED6D2FFCDD4D1F55358533455555506FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF008080800255555515B8BEBCB1CFD7D3FFCFD7D3FFC4CBC8FFB9C0BDFFB6BB
+        B9FFADB2B1FFA4A9A7FF80C9D5FF82D8E8FF52CBE0FF44D0E8FF44CCE4FF4CCE
+        E4FFAAD0D4FFCCD3D0F55359592E66666605FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF0000FF000155555512BBC1BEACCFD7D3FFD8DEDBFFD6DBD9FFC7CECBFFB8BF
+        BCFFB2B9B6FFADB4B1FFA6ADAAFF6BC7D6FF6AD5E8FF4CC9DFFF3DCEE7FF4DCD
+        E3FF56CFE5FFAACFD3F85359532840404004FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00000000015555550FBDC4C1A8DCE1DFFFCCD3CFFFC1C9C5FFBCC4C0FFB7BE
+        BBFFB2B9B6FFADB4B1FFA8AFACFFA1A8A5FF58C4D7FF4FD2EAFF43C9E0FF3BCE
+        E7FF56CFE4FF61D1E4FF65ADBD6D40404004FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00000000015555550CD0D5D3BBCFD6D3FFC6CECAFFC1C9C5FFBCC4C0FFB7BE
+        BBFFB2B9B6FFADB4B1FFA8AFACFFA3AAA7FF9CA2A0FF43C1D7FF36D0EAFF3CC7
+        E1FF33CDE7FF60D0E3FF69D2E4FD9AC1C75600000001FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF0049494907D8DDDAC3CBD3CFFFC6CECAFFC1C9C5FFBCC4C0FFB7BE
+        BBFFB2B9B6FFADB4B1FFA8AFACFFA3AAA7FF9EA4A2FF979D9BFF40C1D6FF1CCD
+        EBFF33C8E1FF2ECDE8FF9ABFC6FB8D8EB2FB37378B6100000001FFFFFF00FFFF
+        FF00FFFFFF0080808002BBC4C035D0D8D4FFC6CECAFFC1C9C5FFBCC4C0FFB7BE
+        BBFFB2B9B6FFADB4B1FFA8AFACFFA3AAA7FF9EA4A2FF999F9DFF929896FF3FBF
+        D5FF1ACDEBFF87BCC6FE8C96BBFE0A229AFF29308DFD00000003FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF0040404004CED6D45BCED5D2FDC1C9C5FFBCC4C0FFB7BE
+        BBFFB2B9B6FFADB4B1FFA8AFACFFA3AAA7FF9EA4A2FF999F9DFF949A98FF8C92
+        90FF83BBC3F4899FC3FE134CBFFF0C37AEFF3D4D9DDD00000002FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF0000000001C0E0C008CFD6D395C5CCCAEDBAC1
+        BFFEB3B9B7FFADB4B1FFA8AFACFFA3AAA7FF9DA2A0FF969B9AF8989E9CBFA2A8
+        A82D000000044783CBEB1762D2FF3F66B4E500000003FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00A2AFA8279CA3A33C80808006FFFFFF00FFFFFF00FFFFFF00FFFF
+        FF00FFFFFF00000000020000000400000002FFFFFF00FFFFFF00
+      }
+      OnClick = bbRegClick
+      TabOrder = 2
+    end
+  end
+  object OpenDlgLoadClientLib: TOpenDialog
+    Left = 616
+    Top = 440
+  end
+end
