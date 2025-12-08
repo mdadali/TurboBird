@@ -16,13 +16,12 @@ type
   { TfmImportTable }
 
   TfmImportTable = class(TForm)
-    bbClose: TBitBtn;
-    bbClose1: TSpeedButton;
     bbImport: TBitBtn;
     btnAddMapping: TButton;
     btnDeleteMapping: TButton;
     btnPrepare: TButton;
     btnSourceFileOpen: TButton;
+    btnClose: TButton;
     cbDestField: TComboBox;
     cbSourceField: TComboBox;
     chkSkipFirstRow: TCheckBox;
@@ -37,14 +36,13 @@ type
     MappingPanel: TPanel;
     Panel2: TPanel;
     pnlBottom: TPanel;
-    Panel3: TPanel;
     SourcePanel: TPanel;
     procedure bbImportClick(Sender: TObject);
-    procedure bbCloseClick(Sender: TObject);
     procedure btnAddMappingClick(Sender: TObject);
     procedure btnDeleteMappingClick(Sender: TObject);
     procedure btnPrepareClick(Sender: TObject);
     procedure btnSourceFileOpenClick(Sender: TObject);
+    procedure btnCloseClick(Sender: TObject);
     procedure chkTabDelimiterEditingDone(Sender: TObject);
     procedure edDelimiterEditingDone(Sender: TObject);
     procedure edSourceFileEditingDone(Sender: TObject);
@@ -267,11 +265,6 @@ begin
   end;
 end;
 
-procedure TfmImportTable.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
-end;
 
 procedure TfmImportTable.btnAddMappingClick(Sender: TObject);
 begin
@@ -304,6 +297,12 @@ begin
     edSourceFile.Text:=dlgSourceOpen.FileName;
   // Process delimiters etc
   edSourceFileEditingDone(Sender);
+end;
+
+procedure TfmImportTable.btnCloseClick(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
 end;
 
 procedure TfmImportTable.chkTabDelimiterEditingDone(Sender: TObject);
@@ -345,7 +344,7 @@ begin
     exit; //no destination fields
 
   Screen.Cursor:=crHourGlass;
-  bbClose.Enabled:=false;
+  btnClose.Enabled:=false;
   bbImport.Enabled:=false;
   try
     // Skip first row if necessary
@@ -412,7 +411,7 @@ begin
       end;
     end;
   finally
-    bbClose.Enabled:=true;
+    btnClose.Enabled:=true;
     bbImport.Enabled:=true;
     Screen.Cursor:=crDefault;
   end;

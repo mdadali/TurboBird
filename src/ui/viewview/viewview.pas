@@ -7,6 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, ExtCtrls, IniFiles,
+
+  turbocommon,
   uthemeselector;
 
 type
@@ -14,24 +16,21 @@ type
   { TfmViewView }
 
   TfmViewView = class(TForm)
-    bbClose: TSpeedButton;
     edName: TEdit;
       GroupBox1: TGroupBox;
       Label1: TLabel;
       Label2: TLabel;
-    Panel1: TPanel;
     Panel2: TPanel;
     seScript: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
-    procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
   private
-    { private declarations }
+    FNodeInfos: TPNodeInfos;
   public
-    { public declarations }
+   procedure Init(ANodeInfos: TPNodeInfos);
   end; 
 
 var
@@ -41,8 +40,15 @@ implementation
 
 { TfmViewView }
 
+procedure TfmViewView.Init(ANodeInfos: TPNodeInfos);
+begin
+  FNodeInfos := ANodeInfos;
+end;
+
 procedure TfmViewView.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
   CloseAction:= caFree;
 end;
 
@@ -77,12 +83,6 @@ end;
 procedure TfmViewView.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
-end;
-
-procedure TfmViewView.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 initialization

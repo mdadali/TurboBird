@@ -474,7 +474,6 @@ begin
   if  FDBIndex <> dbIndex then
     FDBIndex:= dbIndex;
 
-
   if DBDataModule.IBDatabase1.Connected then
     DBDataModule.Disconnect;
 

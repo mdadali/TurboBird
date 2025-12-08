@@ -1,11 +1,11 @@
 object fmTableManage: TfmTableManage
-  Left = 324
-  Height = 448
-  Top = 203
+  Left = 51
+  Height = 537
+  Top = 286
   Width = 998
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
-  ClientHeight = 448
+  ClientHeight = 537
   ClientWidth = 998
   KeyPreview = True
   OnClose = FormClose
@@ -15,7 +15,7 @@ object fmTableManage: TfmTableManage
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 5
-    Height = 414
+    Height = 503
     Top = 29
     Width = 988
     ActivePage = tsFields
@@ -27,13 +27,13 @@ object fmTableManage: TfmTableManage
     TabOrder = 0
     object tsFields: TTabSheet
       Caption = 'Fields'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       OnContextPopup = tsFieldsContextPopup
       OnShow = tsFieldsShow
       object sgFields: TStringGrid
         Left = 0
-        Height = 335
+        Height = 424
         Top = 0
         Width = 978
         Align = alTop
@@ -102,9 +102,9 @@ object fmTableManage: TfmTableManage
       end
       object bbEdit: TBitBtn
         Left = 136
-        Height = 28
-        Top = 344
-        Width = 86
+        Height = 40
+        Top = 433
+        Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
         Color = clForm
@@ -189,9 +189,9 @@ object fmTableManage: TfmTableManage
       end
       object bbNew: TBitBtn
         Left = 8
-        Height = 28
-        Top = 344
-        Width = 120
+        Height = 40
+        Top = 433
+        Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'New Field'
         Color = clForm
@@ -235,10 +235,10 @@ object fmTableManage: TfmTableManage
         TabOrder = 2
       end
       object edDrop: TBitBtn
-        Left = 232
-        Height = 28
-        Top = 344
-        Width = 95
+        Left = 264
+        Height = 40
+        Top = 432
+        Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
         Color = clForm
@@ -247,21 +247,31 @@ object fmTableManage: TfmTableManage
         TabOrder = 3
       end
       object bbRefreshFields: TBitBtn
-        Left = 873
-        Height = 28
-        Top = 344
-        Width = 94
-        Anchors = [akRight, akBottom]
+        Left = 456
+        Height = 40
+        Top = 432
+        Width = 115
+        Anchors = [akLeft, akBottom]
         Caption = 'Refresh'
         Color = clForm
         Kind = bkRetry
         OnClick = bbRefreshFieldsClick
         TabOrder = 4
       end
+      object Button1: TButton
+        Left = 592
+        Height = 40
+        Top = 433
+        Width = 115
+        Anchors = [akLeft, akBottom]
+        Caption = 'Close'
+        OnClick = Button1Click
+        TabOrder = 5
+      end
     end
     object tsIndices: TTabSheet
       Caption = 'Indices'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       ImageIndex = 2
       OnShow = tsIndicesShow
@@ -408,7 +418,7 @@ object fmTableManage: TfmTableManage
       object GroupBox2: TGroupBox
         Left = 5
         Height = 215
-        Top = 163
+        Top = 252
         Width = 968
         Align = alBottom
         BorderSpacing.Around = 5
@@ -523,14 +533,14 @@ object fmTableManage: TfmTableManage
     end
     object tsConstraints: TTabSheet
       Caption = 'Constraints'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       ImageIndex = 3
       OnShow = tsConstraintsShow
       object bbRefreshConstraint: TBitBtn
         Left = 862
         Height = 40
-        Top = 339
+        Top = 428
         Width = 99
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
@@ -541,7 +551,7 @@ object fmTableManage: TfmTableManage
       end
       object sgConstraints: TStringGrid
         Left = 5
-        Height = 331
+        Height = 420
         Top = 5
         Width = 968
         Align = alTop
@@ -587,7 +597,7 @@ object fmTableManage: TfmTableManage
       object bbNewConstraint: TBitBtn
         Left = 6
         Height = 40
-        Top = 339
+        Top = 428
         Width = 143
         Anchors = [akLeft, akBottom]
         Caption = 'New Constraint'
@@ -674,7 +684,7 @@ object fmTableManage: TfmTableManage
       object bbDropConstraint: TBitBtn
         Left = 160
         Height = 40
-        Top = 339
+        Top = 428
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
@@ -686,13 +696,13 @@ object fmTableManage: TfmTableManage
     end
     object tsTriggers: TTabSheet
       Caption = 'Triggers'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       ImageIndex = 1
       OnShow = tsTriggersShow
       object sgTriggers: TStringGrid
         Left = 5
-        Height = 322
+        Height = 411
         Top = 5
         Width = 968
         Align = alTop
@@ -720,7 +730,7 @@ object fmTableManage: TfmTableManage
       object bbRefreshTriggers: TBitBtn
         Left = 873
         Height = 40
-        Top = 336
+        Top = 425
         Width = 87
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
@@ -732,7 +742,7 @@ object fmTableManage: TfmTableManage
       object bbNewTrigger: TBitBtn
         Left = 6
         Height = 40
-        Top = 336
+        Top = 425
         Width = 126
         Anchors = [akLeft, akBottom]
         Caption = 'New Trigger'
@@ -819,7 +829,7 @@ object fmTableManage: TfmTableManage
       object bbEditTrigger: TBitBtn
         Left = 150
         Height = 40
-        Top = 336
+        Top = 425
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
@@ -906,7 +916,7 @@ object fmTableManage: TfmTableManage
       object bbDropTrigger: TBitBtn
         Left = 231
         Height = 40
-        Top = 336
+        Top = 425
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
@@ -918,13 +928,13 @@ object fmTableManage: TfmTableManage
     end
     object tsReferences: TTabSheet
       Caption = 'References'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       ImageIndex = 5
       OnShow = tsReferencesShow
       object sgReferences: TStringGrid
         Left = 5
-        Height = 323
+        Height = 412
         Top = 5
         Width = 968
         Align = alTop
@@ -962,7 +972,7 @@ object fmTableManage: TfmTableManage
       object bbRefreshReferences: TBitBtn
         Left = 874
         Height = 40
-        Top = 336
+        Top = 425
         Width = 99
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
@@ -974,13 +984,13 @@ object fmTableManage: TfmTableManage
     end
     object tsPermissions: TTabSheet
       Caption = 'Permissions'
-      ClientHeight = 383
+      ClientHeight = 472
       ClientWidth = 978
       ImageIndex = 4
       OnShow = tsPermissionsShow
       object sgPermissions: TStringGrid
         Left = 5
-        Height = 320
+        Height = 409
         Top = 5
         Width = 968
         Align = alTop
@@ -1054,7 +1064,7 @@ object fmTableManage: TfmTableManage
       object bbEditPermission: TBitBtn
         Left = 182
         Height = 41
-        Top = 336
+        Top = 425
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
@@ -1141,7 +1151,7 @@ object fmTableManage: TfmTableManage
       object bbRefreshPermissions: TBitBtn
         Left = 872
         Height = 41
-        Top = 336
+        Top = 425
         Width = 87
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
@@ -1153,7 +1163,7 @@ object fmTableManage: TfmTableManage
       object bbAddUser: TBitBtn
         Left = 8
         Height = 40
-        Top = 336
+        Top = 425
         Width = 158
         Anchors = [akLeft, akBottom]
         Caption = 'Add User / Role'
@@ -1294,54 +1304,6 @@ object fmTableManage: TfmTableManage
         TabOrder = 3
       end
     end
-  end
-  object bbClose: TSpeedButton
-    Left = 970
-    Height = 24
-    Top = 0
-    Width = 27
-    Anchors = [akTop, akRight]
-    Color = clForm
-    Flat = True
-    Font.Style = [fsBold]
-    Glyph.Data = {
-      36040000424D3604000000000000360000002800000010000000100000000100
-      2000000000000004000064000000640000000000000000000000FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF26FFFFFF51FFFFFF0EFFFFFF00FFFFFF00FFFF
-      FF0EFFFFFF51FFFFFF26FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF28C3C3C3624141416EF0F0F056FFFFFF0EFFFFFF0EF0F0
-      F0564141416EC3C3C362FFFFFF28FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF16B9B9B9660A0A0A840000008731313177F0F0F056F0F0F0563131
-      3177000000870A0A0A84B9B9B966FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF220E0E0EA00000009E00000091000000912F2F2F7E2F2F2F7E0000
-      0091000000910000009E0E0E0EA0FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF0BB7B7B72E040404AB000000A70000009B0000009B0000009B0000
-      009B000000A7050505AAB7B7B72EFFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF0BB8B8B8321D1D1DA5000000A5000000A5000000A50000
-      00A51E1E1EA4BBBBBB31FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF0EEBEBEB5826262692000000AF000000AF000000AF0000
-      00AF26262692EBEBEB58FFFFFF0EFFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF0BEBEBEB5825252599000000B9000000B9000000C1000000C10000
-      00B9000000B925252599EBEBEB58FFFFFF0BFFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF221F1F1FB3000000C4000000C3000000CA040404BE040404BE0000
-      00CA000000C3000000C41F1F1FB3FFFFFF22FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF163939395E000000D9000000D4030303C2AFAFAF30AFAFAF300303
-      03C2000000D4000000D93939395EFFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF183636365F040404C2ACACAC31FFFFFF0BFFFFFF0BACAC
-      AC31040404C23636365FFFFFFF18FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF16FFFFFF22FFFFFF0BFFFFFF00FFFFFF00FFFF
-      FF0BFFFFFF23FFFFFF16FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFF
-      FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
-    }
-    OnClick = bbCloseClick
-    ParentFont = False
   end
   object ImageList1: TImageList
     DrawingStyle = dsFocus

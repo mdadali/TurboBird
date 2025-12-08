@@ -22,7 +22,6 @@ type
   { TfmEditTable }
 
   TfmEditTable = class(TForm)
-    bbClose: TSpeedButton;
     btnSearch: TButton;
     cboxFields: TComboBox;
     cboxTables: TComboBox;
@@ -50,7 +49,6 @@ type
     lmExportDataAsMarkdownTable: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmStandardExportFormats: TMenuItem;
-    Panel3: TPanel;
     rgSource: TRadioGroup;
     Separator1: TMenuItem;
     miEdit: TMenuItem;
@@ -63,7 +61,6 @@ type
     StatusBar1: TStatusBar;
     tsGridView: TTabSheet;
     tsFormView: TTabSheet;
-    procedure bbCloseClick(Sender: TObject);
     procedure CurrentDateClick(Sender: TObject);
     procedure btnSearchClick(Sender: TObject);
     procedure cboxTablesChange(Sender: TObject);
@@ -366,12 +363,6 @@ end;
 procedure TfmEditTable.ibtblGridAfterOpen(DataSet: TDataSet);
 begin
   //GenerateFormView;
-end;
-
-procedure TfmEditTable.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 procedure TfmEditTable.CurrentDateClick(Sender: TObject);

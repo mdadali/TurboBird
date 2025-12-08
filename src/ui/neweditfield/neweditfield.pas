@@ -482,7 +482,7 @@ begin
   cbType.Clear;
 
   // Load basic datatypes for fields into combobox....
-  dmSysTables.GetAllTypes(cbType.Items);
+  dmSysTables.GetAllTypes(cbType.Items, dbIndex);
 
   // ... add domain types for fields
   dmSysTables.GetDomainTypes(dbIndex, cbType.Items);

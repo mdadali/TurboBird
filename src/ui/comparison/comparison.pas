@@ -16,7 +16,6 @@ type
   { TfmComparison }
 
   TfmComparison = class(TForm)
-      bbClose: TSpeedButton;
     bbStart: TBitBtn;
     bbCancel: TBitBtn;
     cbComparedDatabase: TComboBox;
@@ -42,7 +41,6 @@ type
     meLog: TMemo;
     StatusBar1: TStatusBar;
     procedure bbCancelClick(Sender: TObject);
-    procedure bbCloseClick(Sender: TObject);
     procedure bbStartClick(Sender: TObject);
     procedure cbComparedDatabaseChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -250,11 +248,6 @@ begin
   end;
 end;
 
-procedure TfmComparison.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
-end;
 
 procedure TfmComparison.bbCancelClick(Sender: TObject);
 begin
@@ -266,7 +259,9 @@ procedure TfmComparison.FormClose(Sender: TObject; var CloseAction: TCloseAction
 var
   i: Integer;
 begin
-  FNodeInfos^.ViewForm := nil;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+
   for i:= Low(FDBObjectsList) to High(FDBObjectsList) do
     FDBObjectsList[i].Free;
 

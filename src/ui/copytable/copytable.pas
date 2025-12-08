@@ -24,9 +24,8 @@ type
   { TfmCopyTable }
 
   TfmCopyTable = class(TForm)
-    bbClose1: TSpeedButton;
     bbCopy: TBitBtn;
-    bbClose: TBitBtn;
+    Button1: TButton;
     cbSourceTable: TComboBox;
     cbDestDatabase: TComboBox;
     cbDestTable: TComboBox;
@@ -38,16 +37,16 @@ type
     laDatabase: TLabel;
     laDatabase1: TLabel;
     laSourceDatabase: TLabel;
-    Panel13: TPanel;
     SynSQLSyn1: TSynSQLSyn;
     syScript: TSynEdit;
     procedure bbCopyClick(Sender: TObject);
-    procedure bbCloseClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure cbDestDatabaseChange(Sender: TObject);
     procedure cbSourceTableChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FSourceIndex: Integer;
@@ -122,10 +121,10 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
-procedure TfmCopyTable.bbCloseClick(Sender: TObject);
+procedure TfmCopyTable.SpeedButton1Click(Sender: TObject);
 begin
-  TTabSheet(Parent).Free;
-  Close;
+  close;
+  Parent.Free;
 end;
 
 procedure TfmCopyTable.bbCopyClick(Sender: TObject);
@@ -215,6 +214,12 @@ begin
   end;
 
   dmSysTables.sqQuery.Close;
+end;
+
+procedure TfmCopyTable.Button1Click(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
 end;
 
 procedure TfmCopyTable.Init(SourceIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);

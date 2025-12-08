@@ -64,11 +64,13 @@ uses
   fmetaquerys,
   uthemeselector,
 
-  DataModule, MainFormUnit, //DBAdmin
+  //MWA Tools
+  fScriptEngine,
+  DataModule,
+  MainFormUnit, //DBAdmin
   BackupDlgUnit,
   RestoreDlgUnit
   ;
-
 
 {$i turbocommon.inc}
 
@@ -84,10 +86,17 @@ type
     HtmlViewer1: THtmlViewer;
     Image1: TImage;
     Memo1: TMemo;
-    lmDBAdmin: TMenuItem;
     lmMaintenance: TMenuItem;
     lmBackupNew: TMenuItem;
     lmRestoreNew: TMenuItem;
+    lmScriptDB: TMenuItem;
+    lmRecalculateStatistics: TMenuItem;
+    lmDBAdmin: TMenuItem;
+    lmDBInfo: TMenuItem;
+    lmBackup: TMenuItem;
+    lmSweep: TMenuItem;
+    lmCompare: TMenuItem;
+    lmScriptEngine: TMenuItem;
     mnTheme: TMenuItem;
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
@@ -118,7 +127,6 @@ type
     lmPackageUDRProcedure: TMenuItem;
     lmGetPackageUDRProcedure: TMenuItem;
     lmDropPackageUDRProcedure: TMenuItem;
-    lmCopyStoredProcedureAS: TMenuItem;
     lmTestPackageUDRFunction: TMenuItem;
     lmTestPackageFunction: TMenuItem;
     lmTestPackageProcedure: TMenuItem;
@@ -144,8 +152,6 @@ type
     lmDropUser: TMenuItem;
     lmSetFBClient: TMenuItem;
     lmDisconnectAll: TMenuItem;
-    lmFirebirdConfig: TMenuItem;
-    lmBlobEditor: TMenuItem;
     lmEditException: TMenuItem;
     lmServerRegistry: TMenuItem;
     mnOptions: TMenuItem;
@@ -160,7 +166,6 @@ type
     lmCreateDB: TMenuItem;
     lmRegdb: TMenuItem;
     lmRestore: TMenuItem;
-    lmSweep: TMenuItem;
     lmAddUser: TMenuItem;
     lmChangePassword: TMenuItem;
     lmUserPermManagement: TMenuItem;
@@ -171,12 +176,9 @@ type
     lmCopyUserPermission: TMenuItem;
     lmViewFields: TMenuItem;
     lmEditField: TMenuItem;
-    lmDBInfo: TMenuItem;
     lmCopyRolePermission: TMenuItem;
-    lmCompare: TMenuItem;
     lmGetIncrementGen: TMenuItem;
     lmDropTable: TMenuItem;
-    lmRecalculateStatistics: TMenuItem;
     mnuImport: TMenuItem;
     mnExit: TMenuItem;
     mnCreateDB: TMenuItem;
@@ -217,13 +219,11 @@ type
     lmRefresh: TMenuItem;
     lmDropException: TMenuItem;
     lmScriptException: TMenuItem;
-    lmScriptDatabase: TMenuItem;
     lmConnectAs: TMenuItem;
     lmPermissions: TMenuItem;
     lmRolePermissions: TMenuItem;
     lmTableManage: TMenuItem;
     lmSeparator2: TMenuItem;
-    lmBackup: TMenuItem;
     mnRestore: TMenuItem;
     pmDatabase: TPopupMenu;
     Splitter1: TSplitter;
@@ -319,6 +319,7 @@ type
     procedure lmRolePerManagementClick(Sender: TObject);
     procedure lmRolePermissionsClick(Sender: TObject);
     procedure lmScriptDatabaseClick(Sender: TObject);
+    procedure lmScriptEngineClick(Sender: TObject);
     procedure lmScriptExceptionClick(Sender: TObject);
     procedure lmScriptInsertClick(Sender: TObject);
     procedure lmScriptTableCreateClick(Sender: TObject);
@@ -3774,8 +3775,12 @@ var
   dbIndex: integer;
 begin
   SelNode:= tvMain.Selected;
+   if (SelNode = nil) or  (SelNode.Parent = nil) then exit;
+
   dbIndex := TPNodeInfos(SelNode.Parent.Data)^.dbIndex;
-  if (SelNode <> nil) and (SelNode.Parent <> nil) then
+
+  fmNewDomain.Init(dbIndex);
+
   if fmNewDomain.ShowModal = mrOk then
   with QWindow do
   begin
@@ -4065,8 +4070,7 @@ begin
   // Prüfen, ob ViewForm schon existiert
   if Assigned(NodeInfos^.NewForm) and (NodeInfos^.NewForm is TfmNewTable) then
     Form := TfmNewTable(NodeInfos^.NewForm)
-  else
-  begin
+  else begin
     Form := TfmNewTable.Create(Application);
     ATab := TTabSheet.Create(Self);
     ATab.Parent := PageControl1;
@@ -4077,8 +4081,9 @@ begin
     Form.BorderStyle := bsNone;
 
     NodeInfos^.NewForm := Form;
-    Form.Init(dbIndex, SelNode.Data);
   end;
+
+  Form.Init(dbIndex, SelNode.Data);
 
   // Tab vorbereiten
   ATab := Form.Parent as TTabSheet;
@@ -4190,8 +4195,7 @@ begin
   // Prüfen ob ViewForm schon existiert
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmUserPermissions) then
     frmUserPermissions := TfmUserPermissions(NodeInfos^.ViewForm)
-  else
-  begin
+  else begin
     frmUserPermissions := TfmUserPermissions.Create(Application);
     ATab := TTabSheet.Create(Self);
     ATab.Parent := PageControl1;
@@ -4469,6 +4473,28 @@ begin
     Screen.Cursor:= crDefault;
     List.Free;
   end;
+end;
+
+procedure TfmMain.lmScriptEngineClick(Sender: TObject);
+var
+  frmScriptEngine: TfrmScriptEngine;
+  dbIndex: integer;
+  DBNode: TTreeNode;
+begin
+  DBNode := tvMain.Selected;
+  if DBNode = nil then
+    exit;
+
+  DBNode := turbocommon.GetAncestorAtLevel(DBNode, 1);
+  if DBNode = nil then
+    exit;
+
+  dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
+  frmScriptEngine := TfrmScriptEngine.Create(self);
+  frmScriptEngine.Init(dbIndex);
+
+  frmScriptEngine.ShowModal;
+  frmScriptEngine.Free;
 end;
 
 (**************  Script Exception  ****************)
@@ -6357,12 +6383,13 @@ end;}
 procedure TfmMain.lmDisplayViewClick(Sender: TObject);
 var
   SelNode: TTreeNode;
-  NodeInfo: TPNodeInfos;
+  NodeInfos: TPNodeInfos;
   Rec: TDatabaseRec;
   AViewName: string;
   ViewBody, Columns: string;
   dbIndex: Integer;
   ATab: TTabSheet;
+  fmViewView: TfmViewView;
 begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
@@ -6372,25 +6399,40 @@ begin
     Rec:= RegisteredDatabases[dbIndex];
     AViewName:= SelNode.Text;
 
-    // Fill ViewView grid
-    ATab:= TTabSheet.Create(self);
-    ATab.Parent:= PageControl1;
-    fmViewView:= TfmViewView.Create(nil);
-    fmViewView.Parent:= ATab;
-    fmViewView.Left:= 0;
-    fmViewView.Top:= 0;
-    fmViewView.BorderStyle:= bsNone;
+
+    // Prüfen ob ViewForm schon existiert
+    NodeInfos := TPNodeInfos(SelNode.Data);
+    if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmViewView) then
+      fmViewView := TfmViewView(NodeInfos^.ViewForm)
+    else
+    begin
+      fmViewView := TfmViewView.Create(Application);
+      ATab := TTabSheet.Create(Self);
+      ATab.Parent := PageControl1;
+      ATab.ImageIndex := SelNode.ImageIndex;
+      ATab.Tag:= dbIndex;
+      fmViewView.Parent := ATab;
+      fmViewView.Align := alClient;
+      fmViewView.BorderStyle := bsNone;
+
+      NodeInfos^.ViewForm := fmViewView;
+    end;
+
+    // Tab vorbereiten
+    ATab := fmViewView.Parent as TTabSheet;
+
     fmViewView.Align:= alClient;
     fmViewView.SynSQLSyn1.TableNames.CommaText:= GetTableNames(dbIndex);
     fmViewView.Caption:= 'View DDL: ' + AViewName;
     ATab.Caption:= fmViewView.Caption;
     fmViewView.edName.Caption:= AViewName;
-    ATab.Tag:= dbIndex;
 
     GetViewInfo(dbIndex, AViewName, Columns, ViewBody);
     fmViewView.seScript.Lines.Clear;
     fmViewView.seScript.Lines.Text:= 'create view "' + AviewName + '" (' + Columns + ')' + LineEnding + ViewBody;
     PageControl1.ActivePage:= ATab;
+
+    fmViewView.Init(NodeInfos);
     fmViewView.Show;
   end;
 end;

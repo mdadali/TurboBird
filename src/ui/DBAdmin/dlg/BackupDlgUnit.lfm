@@ -1,7 +1,7 @@
 object BackupDlg: TBackupDlg
-  Left = 530
+  Left = 448
   Height = 370
-  Top = 116
+  Top = 138
   Width = 374
   Caption = 'Backup Database'
   ClientHeight = 370
@@ -58,7 +58,7 @@ object BackupDlg: TBackupDlg
         Left = 12
         Height = 31
         Top = 24
-        Width = 180
+        Width = 296
         ReadOnly = True
         TabOrder = 0
       end
@@ -108,7 +108,7 @@ object BackupDlg: TBackupDlg
         Left = 12
         Height = 31
         Top = 160
-        Width = 288
+        Width = 296
         TabOrder = 4
       end
       object SpeedButton1: TSpeedButton

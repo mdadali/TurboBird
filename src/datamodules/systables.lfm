@@ -2,11 +2,12 @@ object dmSysTables: TdmSysTables
   OnCreate = DataModuleCreate
   OldCreateOrder = False
   Height = 367
-  HorizontalOffset = 373
-  VerticalOffset = 199
+  HorizontalOffset = 361
+  VerticalOffset = 159
   Width = 479
   object sqQuery: TIBQuery
     AllowAutoActivateTransaction = True
+    Transaction = stTrans
     BufferChunks = 1000
     BufferChunksInFirstBlock = 50
     CachedUpdates = False
@@ -25,6 +26,7 @@ object dmSysTables: TdmSysTables
   end
   object ibcDatabase: TIBDatabase
     Connected = False
+    LoginPrompt = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
     IdleTimer = 0

@@ -16,9 +16,8 @@ type
   { TfmNewTable }
 
   TfmNewTable = class(TForm)
-      bbClose: TSpeedButton;
     bbScript: TBitBtn;
-    bbCancel: TBitBtn;
+    Button1: TButton;
     cbPermission: TComboBox;
     cbRolesUsers: TComboBox;
     cxGrantPermission: TCheckBox;
@@ -27,10 +26,10 @@ type
     Image1: TImage;
     Label1: TLabel;
     laPermission: TLabel;
+    Panel1: TPanel;
     StringGrid1: TStringGrid;
-    procedure bbCloseClick(Sender: TObject);
     procedure bbScriptClick(Sender: TObject);
-    procedure bbCancelClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure cxGrantPermissionChange(Sender: TObject);
     procedure edNewTableKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -147,7 +146,8 @@ begin
   StringGrid1.Columns[1].PickList.Clear;
   // Add Basic types
   //dmSysTables.GetBasicTypes(StringGrid1.Columns[1].PickList);
-  dmSysTables.GetAllTypes(StringGrid1.Columns[1].PickList);
+
+  dmSysTables.GetAllTypes(StringGrid1.Columns[1].PickList, dbIndex);
 
   ///Add Domain types
   dmSysTables.GetDomainTypes(dbIndex, StringGrid1.Columns[1].PickList);
@@ -309,13 +309,16 @@ begin
     finally
       List.Free;
     end;
-    bbCloseClick(nil);
+    Close;
+    Parent.Free;
   end;
 end;
 
-procedure TfmNewTable.bbCancelClick(Sender: TObject);
+
+procedure TfmNewTable.Button1Click(Sender: TObject);
 begin
-  bbCloseClick(nil);
+  Close;
+  Parent.Free;
 end;
 
 procedure TfmNewTable.cxGrantPermissionChange(Sender: TObject);
@@ -332,15 +335,10 @@ begin
     StringGrid1.SetFocus;
 end;
 
-procedure TfmNewTable.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
-end;
-
 procedure TfmNewTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  FNodeInfos^.NewForm := nil;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.NewForm := nil;
   CloseAction:= caFree;
 end;
 
@@ -354,7 +352,7 @@ begin
     begin
       // Close when pressing Ctrl-W or Ctrl-F4 (Cmd-W/Cmd-F4 on OSX)
       Close;
-      Parent.Free;
+      //Parent.Free;
     end;
   end;
 end;

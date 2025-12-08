@@ -23,7 +23,6 @@ type
   { TfmTableManage }
 
   TfmTableManage = class(TForm)
-      bbClose: TSpeedButton;
     bbCreateIndex: TBitBtn;
     bbDrop: TBitBtn;
     bbDropConstraint: TBitBtn;
@@ -40,6 +39,7 @@ type
     bbDropTrigger: TBitBtn;
     bbRefreshPermissions: TBitBtn;
     bbAddUser: TBitBtn;
+    Button1: TButton;
     cbIndexType: TComboBox;
     cbSortType: TComboBox;
     clbFields: TCheckListBox;
@@ -71,7 +71,6 @@ type
     tsConstraints: TTabSheet;
     tsFields: TTabSheet;
     procedure bbAddUserClick(Sender: TObject);
-    procedure bbCloseClick(Sender: TObject);
     procedure bbCreateIndexClick(Sender: TObject);
     procedure bbDropClick(Sender: TObject);
     procedure bbDropConstraintClick(Sender: TObject);
@@ -87,6 +86,7 @@ type
     procedure bbRefreshPermissionsClick(Sender: TObject);
     procedure bbRefreshTriggersClick(Sender: TObject);
     procedure bbRefreshReferencesClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure cbIndexTypeChange(Sender: TObject);
     procedure edDropClick(Sender: TObject);
     procedure bbEditPermissionClick(Sender: TObject);
@@ -417,13 +417,6 @@ begin
   // Form initialisieren (UserType = 1 für User)
   fmPermissions.Init(NodeInfos, dbIndex, FTableName, UserRole, 1, @bbRefreshPermissionsClick);
   fmPermissions.Show;
-end;
-
-
-procedure TfmTableManage.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 procedure TfmTableManage.bbNewClick(Sender: TObject);
@@ -771,6 +764,12 @@ end;
 procedure TfmTableManage.bbRefreshReferencesClick(Sender: TObject);
 begin
   FillReferences;
+end;
+
+procedure TfmTableManage.Button1Click(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
 end;
 
 procedure TfmTableManage.bbRefreshPermissionsClick(Sender: TObject);

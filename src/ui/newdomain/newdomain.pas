@@ -32,9 +32,10 @@ type
     //end-newlib
   private
     { private declarations }
+    FDBIndex: integer;
   public
     { public declarations }
-    procedure Init;
+    procedure Init(dbIndex: integer);
   end; 
 
 var
@@ -48,7 +49,7 @@ implementation
 procedure TfmNewDomain.FormShow(Sender: TObject);
 begin
   cbType.Items.Clear;
-  dmSysTables.GetBasicTypes(cbType.Items);
+  dmSysTables.GetBasicTypes(cbType.Items, FDBIndex);
   if cbType.Items.Count > 0 then
     cbType.ItemIndex:= 0;
 
@@ -56,8 +57,9 @@ begin
 end;
 //end-newlib
 
-procedure TfmNewDomain.Init;
+procedure TfmNewDomain.Init(dbIndex: integer);
 begin
+  FDBIndex := dbIndex;
   edName.Clear;
   cbType.ItemIndex:= -1;
   edDefault.Clear;

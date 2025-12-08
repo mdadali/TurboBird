@@ -29,14 +29,15 @@ uses
   csvdocument, fServerSession, uthemeselector, lazdbexport,
   udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
   fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
-  QBuilder, QBDirFrm, QBLnkFrm, dmibx, fCheckDBIntegrity, fsqlmonitor,
+  QBuilder, QBDirFrm, QBLnkFrm,
+dmibx, fCheckDBIntegrity, fsqlmonitor,
   fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
   uArrayFormTest, fblobedit, floginservicemanager, fserverregistry,
   ftransactionconfig, tb_netutils,
 
   //DBAdmin
   MainFormUnit,
-  DataModule,
+  DataModule, fScriptEngine,
   DBLoginDlgUnit,
   ShutdownDatabaseDlgUnit,
   ShutdownRegDlgUnit,

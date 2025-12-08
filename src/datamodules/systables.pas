@@ -100,9 +100,9 @@ type
     function GetAllUserPermissions(dbIndex: Integer; const UserName: string): TDataSet;
 
     // Add field types into List
-    procedure GetBasicTypes(List: TStrings);
-    procedure GetExtendedTypes(List: TStrings);
-    procedure GetAllTypes(List: TStrings);
+    procedure GetBasicTypes(List: TStrings; dbIndex: integer);
+    procedure GetExtendedTypes(List: TStrings; dbIndex: integer);
+    procedure GetAllTypes(List: TStrings; dbIndex: integer);
 
     // Gets domain types; used in addition to basic types for GUI selections
     procedure GetDomainTypes(dbIndex: Integer; List: TStrings);
@@ -1564,10 +1564,16 @@ begin
   //Types_After');
 end;
 
-procedure TdmSysTables.GetBasicTypes(List: TStrings);
+procedure TdmSysTables.GetBasicTypes(List: TStrings; dbIndex: integer);
 begin
+  init(dbIndex);
   List.Clear;
   try
+    if sqQuery.Active then
+      sqQuery.Close;
+    if stTrans.InTransaction then
+      stTrans.Rollback;
+
     //sqQuery.SQL.Text := 'SELECT RDB$TYPE_NAME FROM RDB$TYPES WHERE RDB$FIELD_NAME = ' + quotedstr('RDB$FIELD_TYPE');
     sqQuery.SQL.Text :=
       'SELECT RDB$TYPE_NAME ' +
@@ -1585,67 +1591,68 @@ begin
       sqQuery.Next;
     end;
   finally
+    //ibcDatabase.Connected := false;
     //List.SaveToFile('types.txt');
     //CleanFirebirdTypeList(List);
   end;
 end;
 
-procedure TdmSysTables.GetExtendedTypes(List: TStrings);
+procedure TdmSysTables.GetExtendedTypes(List: TStrings; dbIndex: integer);
 var
-  qCheck: TIBQuery;
   HasDecimal, HasNumeric, HasChar, HasUUID: Boolean;
 begin
+  init(dbIndex);
+
   List.Clear;
-  qCheck := TIBQuery.Create(nil);
   try
-    qCheck.DataBase := sqQuery.DataBase;
-    qCheck.Transaction := sqQuery.Transaction;
+    if sqQuery.Active then
+      sqQuery.Close;
+    if stTrans.InTransaction then
+      stTrans.Rollback;
 
     // DECIMAL / NUMERIC
-    qCheck.SQL.Text :=
+    sqQuery.SQL.Text :=
       'SELECT DISTINCT RDB$FIELD_PRECISION ' +
       'FROM RDB$FIELDS ' +
       'WHERE RDB$FIELD_PRECISION IS NOT NULL AND RDB$FIELD_PRECISION > 0';
-    if not qCheck.Transaction.InTransaction then
-      qCheck.Transaction.StartTransaction;
-    qCheck.Open;
-    HasDecimal := not qCheck.IsEmpty;
+    if not sqQuery.Transaction.InTransaction then
+      sqQuery.Transaction.StartTransaction;
+    sqQuery.Open;
+    HasDecimal := (sqQuery.RecordCount > 0);
     HasNumeric := HasDecimal;
-    qCheck.Close;
+    sqQuery.Close;
 
     // CHAR
-    qCheck.SQL.Text :=
+    sqQuery.SQL.Text :=
       'SELECT 1 FROM RDB$FIELDS WHERE RDB$FIELD_TYPE = 14 ROWS 1';
-    if not qCheck.Transaction.InTransaction then
-      qCheck.Transaction.StartTransaction;
-    qCheck.Open;
-    HasChar := not qCheck.IsEmpty;
-    qCheck.Close;
+    if not sqQuery.Transaction.InTransaction then
+      sqQuery.Transaction.StartTransaction;
+    sqQuery.Open;
+    HasChar := (sqQuery.RecordCount > 0);
+    sqQuery.Close;
 
     // UUID
-    qCheck.SQL.Text :=
+    sqQuery.SQL.Text :=
       'SELECT 1 FROM RDB$FIELDS ' +
       'WHERE RDB$FIELD_TYPE = 14 ' + // CHAR
       'AND RDB$FIELD_LENGTH = 63 ' +
       'AND RDB$CHARACTER_SET_ID = 1 ' + // 1 = OCTETS
       'ROWS 1';
-    if not qCheck.Transaction.InTransaction then
-      qCheck.Transaction.StartTransaction;
-    qCheck.Open;
-    HasUUID := not qCheck.IsEmpty;
-    qCheck.Close;
+    if not sqQuery.Transaction.InTransaction then
+      sqQuery.Transaction.StartTransaction;
+    sqQuery.Open;
+    HasUUID := (sqQuery.RecordCount > 0);
+    sqQuery.Close;
 
     if HasDecimal then List.Add('DECIMAL');
     if HasNumeric then List.Add('NUMERIC');
     if HasChar then List.Add('CHAR');
     if HasUUID then List.Add('UUID');
-
   finally
-    qCheck.Free;
   end;
 end;
 
-procedure TdmSysTables.GetAllTypes(List: TStrings);
+procedure TdmSysTables.GetAllTypes(List: TStrings; dbIndex: integer);
 var
   BasicList, ExtendedList: TStringList;
   i: Integer;
@@ -1653,13 +1660,13 @@ var
 begin
   List.Clear;
 
-  ServerVersionMajor := GetServerMajorVersionFromIBDB(sqQuery.DataBase);
+  //ServerVersionMajor := GetServerMajorVersionFromIBDB(sqQuery.DataBase);
 
   BasicList := TStringList.Create;
   ExtendedList := TStringList.Create;
   try
-    GetBasicTypes(BasicList);
-    GetExtendedTypes(ExtendedList);
+    GetBasicTypes(BasicList, dbIndex);
+    GetExtendedTypes(ExtendedList, dbIndex);
 
     // Beide Listen zusammenführen
     for i := 0 to BasicList.Count - 1 do
@@ -1675,15 +1682,6 @@ begin
     BasicList.Free;
     ExtendedList.Free;
     CleanFirebirdTypeList(List);
-
-    if ServerVersionMajor = 2 then
-      //List.SaveToFile('FB2Types.txt')
-    else if ServerVersionMajor = 3 then
-      //List.SaveToFile('FB3Types.txt')
-    else if ServerVersionMajor = 4 then
-      //List.SaveToFile('FB4Types.txt')
-    else if ServerVersionMajor = 5 then
-      //List.SaveToFile('FB5Types.txt');
 
   end;
 end;
