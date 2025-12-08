@@ -487,11 +487,11 @@
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="1205"/>
-        <CursorPos X="27" Y="1210"/>
+        <TopLine Value="1608"/>
+        <CursorPos X="40" Y="1619"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 X="5" Y="897" ID="4"/>
+          <Item0 X="5" Y="907" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit48>
@@ -1001,7 +1001,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="137"/>
         <CursorPos X="53" Y="151"/>
-        <UsageCount Value="165"/>
+        <UsageCount Value="166"/>
       </Unit97>
       <Unit98>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
@@ -1012,7 +1012,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="26" Y="119"/>
-        <UsageCount Value="165"/>
+        <UsageCount Value="166"/>
       </Unit98>
       <Unit99>
         <Filename Value="ui\scriptengine\fscriptengine.pas"/>
@@ -1023,9 +1023,9 @@
         <UnitName Value="fScriptEngine"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="206"/>
-        <CursorPos X="24" Y="212"/>
-        <UsageCount Value="27"/>
+        <TopLine Value="114"/>
+        <CursorPos X="32" Y="130"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit99>
@@ -1038,7 +1038,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="75"/>
         <CursorPos X="36" Y="89"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="23"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit100>
@@ -1491,7 +1491,7 @@
         <EditorIndex Value="4"/>
         <TopLine Value="482"/>
         <CursorPos X="41" Y="494"/>
-        <UsageCount Value="18"/>
+        <UsageCount Value="19"/>
         <Loaded Value="True"/>
       </Unit151>
       <Unit152>
@@ -1786,7 +1786,7 @@
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit192>
     </Units>
-    <JumpHistory Count="21" HistoryIndex="20">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
         <Filename Value="ui\scriptengine\fscriptengine.pas"/>
         <Caret Line="206" Column="117" TopLine="196"/>
@@ -1871,6 +1871,34 @@
         <Filename Value="ui\scriptengine\fscriptengine.pas"/>
         <Caret Line="213" Column="24" TopLine="203"/>
       </Position21>
+      <Position22>
+        <Filename Value="ui\scriptengine\fscriptengine.pas"/>
+        <Caret Line="214" Column="54" TopLine="206"/>
+      </Position22>
+      <Position23>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="2555" Column="73" TopLine="2539"/>
+      </Position23>
+      <Position24>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="2575" Column="77" TopLine="2559"/>
+      </Position24>
+      <Position25>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="2584" Column="48" TopLine="2575"/>
+      </Position25>
+      <Position26>
+        <Filename Value="ui\scriptengine\fscriptengine.pas"/>
+        <Caret Line="214" Column="54" TopLine="220"/>
+      </Position26>
+      <Position27>
+        <Filename Value="ui\scriptengine\fscriptengine.pas"/>
+        <Caret Line="139" Column="42" TopLine="117"/>
+      </Position27>
+      <Position28>
+        <Filename Value="ui\scriptengine\fscriptengine.pas"/>
+        <Caret Line="238" Column="42" TopLine="236"/>
+      </Position28>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

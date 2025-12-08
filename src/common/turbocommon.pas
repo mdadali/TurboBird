@@ -510,6 +510,16 @@ var
     DefaultNumBuffers: integer;
     RegisterDBAfterRestore: boolean;
 
+    //Scriper
+    Echo: boolean;
+    StopOnFirstError: boolean;
+    AutoDDL: boolean;
+    IgnoreCreateDatabase: boolean;
+    IgnoreGrants: boolean;
+    ShowAffectedRows: boolean;
+    ShowPerformanceStats: boolean;
+
+
 function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 
 function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
@@ -1616,11 +1626,37 @@ begin
   DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
   DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
   RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
+
+  //Scripter
+  Echo := fIniFile.ReadBool('Scriper',  'Echo', true);
+  StopOnFirstError := fIniFile.ReadBool('Scriper',  'StopOnFirstError', false);
+  AutoDDL := fIniFile.ReadBool('Scriper',  'AutoDDL', true);
+  IgnoreCreateDatabase := fIniFile.ReadBool('Scriper',  'IgnoreCreateDatabase', false);
+  IgnoreGrants := fIniFile.ReadBool('Scriper',  'IgnoreGrants', false);
+  ShowAffectedRows := fIniFile.ReadBool('Scriper',  'ShowAffectedRows', true);
+  ShowPerformanceStats := fIniFile.ReadBool('Scriper',  'ShowPerformanceStats', true);
 end;
 
 procedure WriteIniFile;
 begin
   fIniFile.WriteString('UserInterface', 'Language', fLanguage);
+
+  //Backup
+  fIniFile.WriteBool('Backup',  'CloseDBBeforeBackup', CloseDBBeforeBackup);
+
+  //Restore
+  fIniFile.WriteInteger('Restore', 'DefaultPageSize', DefaultPageSize);
+  fIniFile.WriteInteger('Restore', 'DefaultNumBuffers', DefaultNumBuffers);
+  fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
+
+  //Scripter
+  fIniFile.WriteBool('Scriper',  'Echo', Echo);
+  fIniFile.WriteBool('Scriper',  'StopOnFirstError', StopOnFirstError);
+  fIniFile.WriteBool('Scriper',  'AutoDDL', AutoDDL);
+  fIniFile.WriteBool('Scriper',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
+  fIniFile.WriteBool('Scriper',  'IgnoreGrants', IgnoreGrants);
+  fIniFile.WriteBool('Scriper',  'ShowAffectedRows', ShowAffectedRows);
+  fIniFile.WriteBool('Scriper',  'ShowPerformanceStats', ShowPerformanceStats);
 end;
 
 
@@ -2564,7 +2600,7 @@ initialization
     //SetInitialClientLib;
 
 finalization
-  //WriteIniFile;
+  WriteIniFile;
   fIniFile.Free;
   fIniFile := nil;
 end.

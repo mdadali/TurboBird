@@ -88,6 +88,7 @@ type
   private
     FDBIndex: integer;
     procedure DoOpen(Data: PtrInt);
+    procedure ReadScripterSettings;
   public
     procedure Init(dbIndex: integer);
   end;
@@ -122,8 +123,22 @@ begin
 
 end;
 
+procedure TfrmScriptEngine.ReadScripterSettings;
+begin
+  turbocommon.ReadIniFile;
+
+  IBXScript1.AutoDDL := AutoDDL;
+  IBXScript1.StopOnFirstError := StopOnFirstError;
+  IBXScript1.Echo := Echo;
+  IBXScript1.IgnoreCreateDatabase := IgnoreCreateDatabase;
+  IBXScript1.IgnoreGrants := IgnoreGrants;
+  IBXScript1.ShowAffectedRows := ShowAffectedRows;
+  IBXScript1.ShowPerformanceStats := ShowPerformanceStats;
+end;
+
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
 begin
+  ReadScripterSettings; //from inifile
   ResultsLog.Lines.Clear;
   //IBScript.Lines.Clear;
   DBName.Caption := IBDatabase1.DatabaseName;
@@ -220,6 +235,7 @@ end;
 
 procedure TfrmScriptEngine.RunScriptExecute(Sender: TObject);
 begin
+  ReadScripterSettings; //from inifile
   ResultsLog.Lines.Clear;
   IBXScript1.RunScript(IBScript.Lines);
   Timer1.Interval := 1000;
