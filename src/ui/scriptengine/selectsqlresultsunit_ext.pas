@@ -16,7 +16,7 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  *)
             
-unit SelectSQLResultsUnit;
+unit selectsqlresultsunit_ext;
 
 {$mode objfpc}{$H+}
 
@@ -28,9 +28,9 @@ uses
 
 type
 
-  { TSelectSQLResults }
+  { TSelectSQLResultsExt }
 
-  TSelectSQLResults = class(TForm)
+  TSelectSQLResultsExt = class(TForm)
     DataSource1: TDataSource;
     IBDynamicGrid1: TIBDynamicGrid;
     IBTransaction1: TIBTransaction;
@@ -48,7 +48,7 @@ type
   end;
 
 //var
-  //SelectSQLResults: TSelectSQLResults;
+  //SelectSQLResultsExt: TSelectSQLResultsExt;
 
 implementation
 
@@ -56,9 +56,9 @@ implementation
 
 uses IBDataOutput;
 
-{ TSelectSQLResults }
+{ TSelectSQLResultsExt }
 
-procedure TSelectSQLResults.FormShow(Sender: TObject);
+procedure TSelectSQLResultsExt.FormShow(Sender: TObject);
 begin
   SelectQuery.Active := true;
 end;
@@ -67,26 +67,26 @@ type
   THackedIBXScript = class(TCustomIBXScript)
   end;
 
-procedure TSelectSQLResults.SelectQueryAfterOpen(DataSet: TDataSet);
+procedure TSelectSQLResultsExt.SelectQueryAfterOpen(DataSet: TDataSet);
 begin
   SelectQuery.Last;
   if SelectQuery.EnableStatistics then
     TIBCustomDataOutput.ShowPerfStats(SelectQuery.StmtHandle, @Add2Log );
 end;
 
-procedure TSelectSQLResults.Add2Log(const Msg: string; IsError: boolean);
+procedure TSelectSQLResultsExt.Add2Log(const Msg: string; IsError: boolean);
 begin
   THackedIBXScript(FScriptEngine).Add2Log(msg,IsError);
 end;
 
-procedure TSelectSQLResults.FormClose(Sender: TObject;
+procedure TSelectSQLResultsExt.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
   SelectQuery.Active := false;
   CloseAction := caFree;
 end;
 
-procedure TSelectSQLResults.Show(ScriptEngine: TIBXScript;
+procedure TSelectSQLResultsExt.Show(ScriptEngine: TIBXScript;
   SelectSQLText: string; EnableStatistics: boolean);
 begin
   if not SelectQuery.Database.Connected then

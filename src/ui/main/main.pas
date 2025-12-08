@@ -4482,19 +4482,16 @@ var
   DBNode: TTreeNode;
 begin
   DBNode := tvMain.Selected;
-  if DBNode = nil then
-    exit;
+  if DBNode = nil then exit;
 
   DBNode := turbocommon.GetAncestorAtLevel(DBNode, 1);
-  if DBNode = nil then
-    exit;
+  if DBNode = nil then exit;
 
   dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
+
   frmScriptEngine := TfrmScriptEngine.Create(self);
   frmScriptEngine.Init(dbIndex);
-
   frmScriptEngine.ShowModal;
-  frmScriptEngine.Free;
 end;
 
 (**************  Script Exception  ****************)

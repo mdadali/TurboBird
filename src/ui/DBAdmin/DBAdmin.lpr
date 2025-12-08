@@ -24,9 +24,10 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, memdslaz, MainFormUnit, DataModule, SelectSQLResultsUnit, ibexpress,
-  DBLoginDlgUnit, ShutdownRegDlgUnit, ShutdownDatabaseDlgUnit, BackupDlgUnit,
-  RestoreDlgUnit, AddSecondaryFileDlgUnit, AddShadowSetDlgUnit, AddShadowFileDlgUnit,
+  Forms, memdslaz, MainFormUnit, DataModule, SelectSQLResultsUnit,
+  ibexpress, DBLoginDlgUnit, ShutdownRegDlgUnit,
+  ShutdownDatabaseDlgUnit, BackupDlgUnit, RestoreDlgUnit,
+  AddSecondaryFileDlgUnit, AddShadowSetDlgUnit, AddShadowFileDlgUnit,
   NewUserDlgUnit, ChgPasswordDlgUnit, ExecuteSQLScriptDlgUnit
   { you can add units after this };
 

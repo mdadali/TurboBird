@@ -1,7 +1,7 @@
-object SelectSQLResults: TSelectSQLResults
-  Left = 427
+object SelectSQLResultsExt: TSelectSQLResultsExt
+  Left = 702
   Height = 436
-  Top = 164
+  Top = 420
   Width = 693
   Anchors = []
   Caption = 'Select SQL Results'
@@ -31,7 +31,6 @@ object SelectSQLResults: TSelectSQLResults
   end
   object SelectQuery: TIBQuery
     AllowAutoActivateTransaction = True
-    Database = DBDataModule.IBDatabase1
     Transaction = IBTransaction1
     AfterOpen = SelectQueryAfterOpen
     BufferChunks = 1000
@@ -53,7 +52,6 @@ object SelectSQLResults: TSelectSQLResults
   object IBTransaction1: TIBTransaction
     TransactionName = '{4818BA87-62CA-42F5-92F2-25D420BBF4B7}'
     Active = False
-    DefaultDatabase = DBDataModule.IBDatabase1
     Params.Strings = (
       'concurrency'
       'nowait'

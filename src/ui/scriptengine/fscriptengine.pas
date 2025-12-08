@@ -69,7 +69,9 @@ type
     SynCompletion1: TSynCompletion;
     SynSQLSyn1: TSynSQLSyn;
     Timer1: TTimer;
+    procedure btnCloseClick(Sender: TObject);
     procedure EchoInputChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure IBDatabase1BeforeConnect(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
@@ -95,7 +97,7 @@ type
 
 implementation
 
-uses IBBlob, DB, SelectSQLResultsUnit;
+uses IBBlob, DB, selectsqlresultsunit_ext;
 
 {$R *.lfm}
 
@@ -106,18 +108,24 @@ var DBRec: TDatabaseRec;
 begin
   FDBIndex := dbIndex;
 
-  DBRec := RegisteredDatabases[dbIndex];
+  DBRec := RegisteredDatabases[FDBIndex];
+
   if IBDatabase1.Connected then
     IBDatabase1.Connected := false;
 
   AssignIBDatabase(DBRec.IBDatabase, IBDatabase1);
+  IBDatabase1.Params.Clear;
+  IBDatabase1.Params.Add('user_name=' + DBRec.RegRec.UserName);
+  IBDatabase1.Params.Add('password=' + DBRec.RegRec.Password);
+
   IBDatabase1.Connected := true;
+
 end;
 
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
 begin
   ResultsLog.Lines.Clear;
-  IBScript.Lines.Clear;
+  //IBScript.Lines.Clear;
   DBName.Caption := IBDatabase1.DatabaseName;
   StopOnError.Checked := IBXScript1.StopOnFirstError;
   EchoInput.Checked :=  IBXScript1.Echo;
@@ -136,6 +144,17 @@ end;
 procedure TfrmScriptEngine.EchoInputChange(Sender: TObject);
 begin
   IBXScript1.Echo :=  EchoInput.Checked;
+end;
+
+procedure TfrmScriptEngine.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  CloseAction := caFree;
+end;
+
+procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TfrmScriptEngine.IBXScript1GetParamValue(Sender: TObject; ParamName: string;
@@ -185,9 +204,12 @@ begin
 end;
 
 procedure TfrmScriptEngine.IBXScript1SelectSQL(Sender: TObject; SQLText: string);
+var SelectSQLResults: TSelectSQLResultsExt;
 begin
-  with TSelectSQLResults.Create(Application) do
-    Show(IBXScript1, SQLText, true);
+  SelectSQLResults := TSelectSQLResultsExt.Create(self);
+  SelectSQLResults.SelectQuery.Database := IBDatabase1;
+  SelectSQLResults.IBTransaction1.DefaultDatabase := IBDatabase1;
+  SelectSQLResults.Show(IBXScript1, SQLText, true);
 end;
 
 procedure TfrmScriptEngine.LoadScriptExecute(Sender: TObject);

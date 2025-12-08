@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1569"/>
+      <BuildNr Value="1570"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -498,7 +498,7 @@
         <PackageName Value="LCL"/>
       </Item27>
     </RequiredPackages>
-    <Units Count="100">
+    <Units Count="101">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1111,6 +1111,13 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
       </Unit99>
+      <Unit100>
+        <Filename Value="ui/scriptengine/selectsqlresultsunit_ext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SelectSQLResultsExt"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit100>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

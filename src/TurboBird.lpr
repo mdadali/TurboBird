@@ -37,7 +37,9 @@ dmibx, fCheckDBIntegrity, fsqlmonitor,
 
   //DBAdmin
   MainFormUnit,
-  DataModule, fScriptEngine,
+  DataModule,
+  selectsqlresultsunit_ext,
+  fScriptEngine,
   DBLoginDlgUnit,
   ShutdownDatabaseDlgUnit,
   ShutdownRegDlgUnit,
@@ -96,6 +98,7 @@ begin
 
   Application.CreateForm(TfmMain, fmMain);
   frmThemeSelector := TfrmThemeSelector.Create(fmMain);
+  Application.CreateForm(TdmSysTables, dmSysTables);
 
   SAbout:= TfmAbout.Create(nil);
   SAbout.BitBtn1.Visible:= False;
@@ -119,7 +122,6 @@ begin
   //Application.CreateForm(TfmEditTable, fmEditTable);
   //Application.CreateForm(TfmCallProc, fmCallProc);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
-  Application.CreateForm(TdmSysTables, dmSysTables);
   Application.CreateForm(TfmNewConstraint, fmNewConstraint);
   Application.CreateForm(TfmCalen, fmCalen);
   //Application.CreateForm(TfmBackupRestore, fmBackupRestore);
