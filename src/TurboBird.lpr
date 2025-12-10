@@ -107,7 +107,7 @@ begin
 
   Application.ProcessMessages;
 
-  for i := 0 to 5000 do
+  for i := 0 to 10000 do
   begin
     //Application.ProcessMessages;
   end;

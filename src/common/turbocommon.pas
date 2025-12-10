@@ -2518,7 +2518,6 @@ begin
     finally
       frmSetFBClient.Free;
     end;
-
 end;
 
 function LoadClientLibIBX(ALib: string): boolean;

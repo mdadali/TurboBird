@@ -28,26 +28,28 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
-    lbPowered: TLabel;
-    Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
     laUpdate: TLabel;
-    laWebSite: TLabel;
     lbFPCVersion: TLabel;
     lbLazarus: TLabel;
     lbOSInfo: TLabel;
     lbPgmVersion: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    laWebSite: TLabel;
     lbVersionDate: TLabel;
     lbVersionTime: TLabel;
     lbWidgetSet: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
+    Panel2: TPanel;
+    pnlPowered: TPanel;
+    pnlTitle: TPanel;
+    pnlTop: TPanel;
     pnlMWA: TPanel;
     ProgressBar1: TProgressBar;
     TabSheet1: TTabSheet;
@@ -62,6 +64,7 @@ type
     procedure Label6Click(Sender: TObject);
     procedure laUpdateClick(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
+    procedure pnlTopClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
@@ -84,9 +87,14 @@ begin
   OpenURL(laWebSite.Caption);
 end;
 
+procedure TfmAbout.pnlTopClick(Sender: TObject);
+begin
+
+end;
+
 procedure TfmAbout.Timer1Timer(Sender: TObject);
 begin
-  GifAnim1.Left := GifAnim1.Left + 20;
+  GifAnim1.Left := GifAnim1.Left + 10;
   if  GifAnim1.Left > self.Width then
     GifAnim1.Left := 0 - GifAnim1.Width;
 end;
@@ -131,6 +139,9 @@ end;
 
 procedure TfmAbout.FormCreate(Sender: TObject);
 begin
+  pnlTitle.Width := self.Width;
+  pnlPowered.Width := self.Width;
+  pnlTop.Width := self.Width;
   GifAnim1.Width := self.Width;
   pnlMWA.Width := self.Width;
 end;
