@@ -511,7 +511,7 @@ var
     RegisterDBAfterRestore: boolean;
 
     //Scriper
-    Echo: boolean;
+    EchoInput: boolean;
     StopOnFirstError: boolean;
     AutoDDL: boolean;
     IgnoreCreateDatabase: boolean;
@@ -1628,13 +1628,13 @@ begin
   RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
 
   //Scripter
-  Echo := fIniFile.ReadBool('Scriper',  'Echo', true);
-  StopOnFirstError := fIniFile.ReadBool('Scriper',  'StopOnFirstError', false);
-  AutoDDL := fIniFile.ReadBool('Scriper',  'AutoDDL', true);
-  IgnoreCreateDatabase := fIniFile.ReadBool('Scriper',  'IgnoreCreateDatabase', false);
-  IgnoreGrants := fIniFile.ReadBool('Scriper',  'IgnoreGrants', false);
-  ShowAffectedRows := fIniFile.ReadBool('Scriper',  'ShowAffectedRows', true);
-  ShowPerformanceStats := fIniFile.ReadBool('Scriper',  'ShowPerformanceStats', true);
+  EchoInput := fIniFile.ReadBool('Scripter',  'EchoInput', true);
+  StopOnFirstError := fIniFile.ReadBool('Scripter',  'StopOnFirstError', false);
+  AutoDDL := fIniFile.ReadBool('Scripter',  'AutoDDL', true);
+  IgnoreCreateDatabase := fIniFile.ReadBool('Scripter',  'IgnoreCreateDatabase', false);
+  IgnoreGrants := fIniFile.ReadBool('Scripter',  'IgnoreGrants', false);
+  ShowAffectedRows := fIniFile.ReadBool('Scripter',  'ShowAffectedRows', true);
+  ShowPerformanceStats := fIniFile.ReadBool('Scripter',  'ShowPerformanceStats', true);
 end;
 
 procedure WriteIniFile;
@@ -1650,13 +1650,13 @@ begin
   fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
 
   //Scripter
-  fIniFile.WriteBool('Scriper',  'Echo', Echo);
-  fIniFile.WriteBool('Scriper',  'StopOnFirstError', StopOnFirstError);
-  fIniFile.WriteBool('Scriper',  'AutoDDL', AutoDDL);
-  fIniFile.WriteBool('Scriper',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
-  fIniFile.WriteBool('Scriper',  'IgnoreGrants', IgnoreGrants);
-  fIniFile.WriteBool('Scriper',  'ShowAffectedRows', ShowAffectedRows);
-  fIniFile.WriteBool('Scriper',  'ShowPerformanceStats', ShowPerformanceStats);
+  fIniFile.WriteBool('Scripter',  'EchoInput', EchoInput);
+  fIniFile.WriteBool('Scripter',  'StopOnFirstError', StopOnFirstError);
+  fIniFile.WriteBool('Scripter',  'AutoDDL', AutoDDL);
+  fIniFile.WriteBool('Scripter',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
+  fIniFile.WriteBool('Scripter',  'IgnoreGrants', IgnoreGrants);
+  fIniFile.WriteBool('Scripter',  'ShowAffectedRows', ShowAffectedRows);
+  fIniFile.WriteBool('Scripter',  'ShowPerformanceStats', ShowPerformanceStats);
 end;
 
 

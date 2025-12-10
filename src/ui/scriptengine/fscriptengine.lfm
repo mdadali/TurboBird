@@ -1,7 +1,7 @@
 object frmScriptEngine: TfrmScriptEngine
-  Left = 437
+  Left = 409
   Height = 564
-  Top = 106
+  Top = 89
   Width = 1031
   Caption = 'MWA Software IBX-Scripter'
   ClientHeight = 564
@@ -36,24 +36,24 @@ object frmScriptEngine: TfrmScriptEngine
       Caption = 'Database Name:'
       ParentColor = False
     end
-    object StopOnError: TCheckBox
+    object chkBoxStopOnError: TCheckBox
       Left = 696
       Height = 21
       Top = 16
       Width = 138
       Anchors = [akTop, akRight]
       Caption = 'Stop On First Error'
-      OnChange = StopOnErrorChange
+      OnChange = chkBoxStopOnErrorChange
       TabOrder = 0
     end
-    object EchoInput: TCheckBox
+    object chkBoxEchoInput: TCheckBox
       Left = 880
       Height = 21
       Top = 16
       Width = 90
       Anchors = [akTop, akRight]
       Caption = 'Echo Input'
-      OnChange = EchoInputChange
+      OnChange = chkBoxEchoInputChange
       TabOrder = 1
     end
   end
@@ -650,15 +650,16 @@ object frmScriptEngine: TfrmScriptEngine
     IgnoreGrants = False
     IgnoreCreateDatabase = False
     Transaction = IBTransaction1
-    ShowAffectedRows = True
-    ShowPerformanceStats = True
+    ShowAffectedRows = False
+    ShowPerformanceStats = False
+    StopOnFirstError = False
     GetParamValue = IBXScript1GetParamValue
     OnOutputLog = IBXScript1LogProc
     OnErrorLog = IBXScript1LogProc
     OnProgressEvent = IBXScript1ProgressEvent
     OnSelectSQL = IBXScript1SelectSQL
-    Left = 72
-    Top = 88
+    Left = 296
+    Top = 96
   end
   object IBDatabase1: TIBDatabase
     Connected = False
@@ -671,8 +672,8 @@ object frmScriptEngine: TfrmScriptEngine
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 200
-    Top = 176
+    Left = 216
+    Top = 184
   end
   object IBTransaction1: TIBTransaction
     TransactionName = '{D9ABDD28-0D4A-42F1-B0D8-4F41EDEEFE0E}'
@@ -686,8 +687,8 @@ object frmScriptEngine: TfrmScriptEngine
     Top = 264
   end
   object ActionList1: TActionList
-    Left = 240
-    Top = 88
+    Left = 504
+    Top = 96
     object LoadScript: TAction
       Caption = 'Load Script'
       OnExecute = LoadScriptExecute
@@ -715,8 +716,8 @@ object frmScriptEngine: TfrmScriptEngine
   object Timer1: TTimer
     Interval = 0
     OnTimer = Timer1Timer
-    Left = 152
-    Top = 88
+    Left = 384
+    Top = 96
   end
   object SynCompletion1: TSynCompletion
     Position = 0
@@ -729,8 +730,8 @@ object frmScriptEngine: TfrmScriptEngine
     EndOfTokenChr = '()[].'
     ExecCommandID = ecSynCompletionExecute
     ToggleReplaceWhole = False
-    Left = 360
-    Top = 88
+    Left = 640
+    Top = 96
   end
   object SynAutoComplete1: TSynAutoComplete
     EndOfTokenChr = '()[].'

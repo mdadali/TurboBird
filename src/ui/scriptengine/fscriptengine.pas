@@ -46,7 +46,7 @@ type
     Button2: TButton;
     btnClose: TButton;
     DBName: TLabel;
-    EchoInput: TCheckBox;
+    chkBoxEchoInput: TCheckBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     IBScript: TSynEdit;
@@ -64,13 +64,13 @@ type
     IBXScript1: TIBXScript;
     OpenDialog1: TOpenDialog;
     Splitter1: TSplitter;
-    StopOnError: TCheckBox;
+    chkBoxStopOnError: TCheckBox;
     SynAutoComplete1: TSynAutoComplete;
     SynCompletion1: TSynCompletion;
     SynSQLSyn1: TSynSQLSyn;
     Timer1: TTimer;
     procedure btnCloseClick(Sender: TObject);
-    procedure EchoInputChange(Sender: TObject);
+    procedure chkBoxEchoInputChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure IBDatabase1BeforeConnect(Sender: TObject);
@@ -83,7 +83,7 @@ type
     procedure LoadScriptExecute(Sender: TObject);
     procedure RunScriptExecute(Sender: TObject);
     procedure RunScriptUpdate(Sender: TObject);
-    procedure StopOnErrorChange(Sender: TObject);
+    procedure chkBoxStopOnErrorChange(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
     FDBIndex: integer;
@@ -129,7 +129,7 @@ begin
 
   IBXScript1.AutoDDL := AutoDDL;
   IBXScript1.StopOnFirstError := StopOnFirstError;
-  IBXScript1.Echo := Echo;
+  IBXScript1.Echo := EchoInput;
   IBXScript1.IgnoreCreateDatabase := IgnoreCreateDatabase;
   IBXScript1.IgnoreGrants := IgnoreGrants;
   IBXScript1.ShowAffectedRows := ShowAffectedRows;
@@ -137,13 +137,19 @@ begin
 end;
 
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
+var BasePath, SqlPath: string;
 begin
+  BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+  SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;
+  OpenDialog1.InitialDir := SqlPath;
+
   ReadScripterSettings; //from inifile
+
   ResultsLog.Lines.Clear;
   //IBScript.Lines.Clear;
   DBName.Caption := IBDatabase1.DatabaseName;
-  StopOnError.Checked := IBXScript1.StopOnFirstError;
-  EchoInput.Checked :=  IBXScript1.Echo;
+  chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
+  chkBoxEchoInput.Checked :=  IBXScript1.Echo;
 //  Application.QueueAsyncCall(@DoOpen,0);
 end;
 
@@ -156,14 +162,18 @@ begin
   end;
 end;
 
-procedure TfrmScriptEngine.EchoInputChange(Sender: TObject);
+procedure TfrmScriptEngine.chkBoxEchoInputChange(Sender: TObject);
 begin
-  IBXScript1.Echo :=  EchoInput.Checked;
+  IBXScript1.Echo :=  chkBoxEchoInput.Checked;
 end;
 
 procedure TfrmScriptEngine.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  //inifile
+  EchoInput := chkBoxEchoInput.Checked;
+  StopOnFirstError := chkBoxStopOnError.Checked;
+  WriteIniFile;
   CloseAction := caFree;
 end;
 
@@ -216,6 +226,8 @@ begin
   end
   else
     ProgressBar1.StepIt;
+
+  Application.ProcessMessages;
 end;
 
 procedure TfrmScriptEngine.IBXScript1SelectSQL(Sender: TObject; SQLText: string);
@@ -235,12 +247,12 @@ end;
 
 procedure TfrmScriptEngine.RunScriptExecute(Sender: TObject);
 begin
-  ReadScripterSettings; //from inifile
+  //ReadScripterSettings; //from inifile
   ResultsLog.Lines.Clear;
   IBXScript1.RunScript(IBScript.Lines);
   Timer1.Interval := 1000;
-  EchoInput.Checked := IBXScript1.Echo;
-  StopOnError.Checked := IBXScript1.StopOnFirstError;
+  chkBoxEchoInput.Checked := IBXScript1.Echo;
+  chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
   DBName.Caption := IBDatabase1.DatabaseName;
 end;
 
@@ -249,9 +261,9 @@ begin
   (Sender as TAction).Enabled := IBScript.Lines.Text <> '';
 end;
 
-procedure TfrmScriptEngine.StopOnErrorChange(Sender: TObject);
+procedure TfrmScriptEngine.chkBoxStopOnErrorChange(Sender: TObject);
 begin
-   IBXScript1.StopOnFirstError := StopOnError.Checked;
+   IBXScript1.StopOnFirstError := chkBoxStopOnError.Checked;
 end;
 
 procedure TfrmScriptEngine.Timer1Timer(Sender: TObject);
