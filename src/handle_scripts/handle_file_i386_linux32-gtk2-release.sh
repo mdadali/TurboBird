@@ -4,7 +4,7 @@ set -e
 
 PROJECT_NAME="TurboBird"
 BUILD_MODE="i386_linux32-gtk2-release"
-FULL_VERSION="1.2.1.1262"
+FULL_VERSION="1.2.1.1263"
 
 STRIP=ON
 COMPRESS=ON

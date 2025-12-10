@@ -73,8 +73,8 @@ const
 
 
 var
-  SAbout: TfmAbout;
   ErrorMessage: string;
+  i: integer;
 
 begin
   Application.Scaled:=True;
@@ -95,16 +95,25 @@ begin
   if not LoadClientLibIBX(InitialFBClientLibPath) then
     SetInitialClientLib;
 
-
   Application.CreateForm(TfmMain, fmMain);
   frmThemeSelector := TfrmThemeSelector.Create(fmMain);
   Application.CreateForm(TdmSysTables, dmSysTables);
 
-  SAbout:= TfmAbout.Create(nil);
-  SAbout.BitBtn1.Visible:= False;
-  SAbout.Show;
+  Application.CreateForm(TfmAbout, fmAbout);
+  fmAbout.Init;
+  fmAbout.bbtnClose.Visible:= False;
+  fmAbout.ProgressBar1.Align := alClient;
+  fmAbout.Show;
+
   Application.ProcessMessages;
-  SAbout.Update;
+
+  for i := 0 to 5000 do
+  begin
+    //Application.ProcessMessages;
+  end;
+
+  fmAbout.Hide;
+  fmAbout.ProgressBar1.Visible := false;
 
   fmMain.Version:= Format('%d.%d.%d', [Major, Minor, Release]);
   fmMain.StatusBar1.Panels[1].Text:= 'Version: ' + fmMain.Version;
@@ -138,7 +147,7 @@ begin
   //Application.CreateForm(TfrmArrayTest, frmArrayTest);
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
   //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
-  SAbout.Free;
+
 
   //DBAdmin
   Application.CreateForm(TMainForm, MainForm);
@@ -156,5 +165,4 @@ begin
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
 
   Application.Run;
-  //ReleaseIBase60;
 end.

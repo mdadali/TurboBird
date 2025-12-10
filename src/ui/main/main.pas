@@ -7060,10 +7060,8 @@ end;
 (**********  About  ****************)
 procedure TfmMain.mnAboutClick(Sender: TObject);
 begin
-  fmAbout:= TfmAbout.Create(nil);
-  fmAbout.Init;
+  fmAbout.bbtnClose.Visible := true;
   fmAbout.ShowModal;
-  fmAbout.Free;
 end;
 
 (****************  Unregister database *************)

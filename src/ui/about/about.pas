@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls,
+  ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls, GifAnim,
   turbocommon,
   updatechecker,
   uthemeselector;
@@ -19,12 +19,16 @@ type
   { TfmAbout }
 
   TfmAbout = class(TForm)
-    BitBtn1: TBitBtn;
+    bbtnClose: TBitBtn;
+    GifAnim1: TGifAnim;
     Image1: TImage;
-    Image2: TImage;
+    Image3: TImage;
+    Image4: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
+    Label12: TLabel;
+    lbPowered: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
@@ -44,14 +48,21 @@ type
     lbWidgetSet: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
+    pnlMWA: TPanel;
+    ProgressBar1: TProgressBar;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
-    procedure BitBtn1Click(Sender: TObject);
+    Timer1: TTimer;
+    procedure bbtnCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure GifAnim1Click(Sender: TObject);
+    procedure Image4Click(Sender: TObject);
     procedure Label6Click(Sender: TObject);
     procedure laUpdateClick(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
   public
@@ -71,6 +82,13 @@ uses Main;
 procedure TfmAbout.laWebSiteClick(Sender: TObject);
 begin
   OpenURL(laWebSite.Caption);
+end;
+
+procedure TfmAbout.Timer1Timer(Sender: TObject);
+begin
+  GifAnim1.Left := GifAnim1.Left + 20;
+  if  GifAnim1.Left > self.Width then
+    GifAnim1.Left := 0 - GifAnim1.Width;
 end;
 
 procedure TfmAbout.Init;
@@ -98,29 +116,53 @@ end;
 procedure TfmAbout.laUpdateClick(Sender: TObject);
 var frmUpdateChecker: TfrmUpdateChecker;
 begin
-  frmUpdateChecker := TfrmUpdateChecker.Create(self);
-  frmUpdateChecker.ShowModal;
-  frmUpdateChecker.Free;
-  //fmUpdate:= TfmUpdate.Create(nil);
-  //fmUpdate.Init(fmMain.Major, fmMain.Minor, fmMain.ReleaseVersion);
-  //fmUpdate.Init(VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION, VERSION_BUILD);
-  //fmUpdate.Show;
-  //Application.ProcessMessages;
+  try
+    frmUpdateChecker := TfrmUpdateChecker.Create(self);
+    frmUpdateChecker.ShowModal;
+  finally
+    frmUpdateChecker.Free;
+  end;
 end;
 
 procedure TfmAbout.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  //CloseAction:= caFree;
+  Timer1.Enabled := false;
+end;
+
+procedure TfmAbout.FormCreate(Sender: TObject);
+begin
+  GifAnim1.Width := self.Width;
+  pnlMWA.Width := self.Width;
 end;
 
 procedure TfmAbout.FormShow(Sender: TObject);
+var BasePath, ImagesPath, GifAnimFile: string;
 begin
-  if Assigned(frmThemeSelector) then
-    frmThemeSelector.btnApplyClick(self);
+  GifAnim1.Left := -150;
+  BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+  GifAnimFile  := BasePath + PathDelim + 'system' + PathDelim + 'images' + PathDelim + 'fpc_running_logo_backup.gif';
+  if FileExists(GifAnimFile) then
+  begin
+    Timer1.Enabled := true;
+    GifAnim1.FileName := GifAnimFile;
+    GifAnim1.Animate := true;
+  end;
 end;
 
-procedure TfmAbout.BitBtn1Click(Sender: TObject);
+procedure TfmAbout.GifAnim1Click(Sender: TObject);
 begin
+  OpenURL('https://www.lazarus-ide.org');
+end;
+
+procedure TfmAbout.Image4Click(Sender: TObject);
+begin
+  OpenURL('https://www.mwasoftware.co.uk');
+end;
+
+procedure TfmAbout.bbtnCloseClick(Sender: TObject);
+begin
+  Timer1.Enabled := false;
+  GifAnim1.Animate := false;
   Close;
 end;
 
