@@ -7359,6 +7359,7 @@ begin
                                                          tmpProtocol,  //  Rec.Protocol,
                                                          '0',            //Port
                                                          'UTF8',       //CharSet
+                                                         '',               //RootPath
                                                          '',  //           Rec.ClientLibraryPath,
                                                          '',  //           Rec.ConfigFilePath
                                                          0,   //Minor
@@ -8518,6 +8519,7 @@ begin
                                                                                  Rec.Protocol,
                                                                                  Rec.Port,
                                                                                  Rec.Charset,
+                                                                                 Rec.RootPath,
                                                                                  Rec.ClientLibraryPath,
                                                                                  Rec.ConfigFilePath,
                                                                                  Rec.VersionMinor,

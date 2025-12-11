@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 462
+  Left = 77
   Height = 531
-  Top = 208
+  Top = 702
   Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'

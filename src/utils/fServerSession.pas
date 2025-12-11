@@ -46,6 +46,7 @@ type
     FProtocol: TProtocol;
     FPort: string;
     FCharset: string;
+    FRootPath,
     FClientLibraryPath: string;
 
     FConfigFilePath: string;
@@ -100,6 +101,7 @@ type
                              AProtocol: TProtocol;
                              APort,
                              ACharset,
+                             ARootPath,
                              AClientLibraryPath,
                              AConfigFilePath: string;
                              VersionMinor,
@@ -108,7 +110,8 @@ type
                              AIsEmbedded: boolean;
                              AConnectTimeoutMS: LongInt;
                              ARetryCount: SmallInt;
-                             AQueryTimeoutMS: LongInt);
+                             AQueryTimeoutMS: LongInt
+                             );
 
     destructor Destroy; override;
 
@@ -136,9 +139,11 @@ type
 
     property Protocol: TProtocol read FProtocol write FProtocol;
     property Port: string read GetPort write SetPort;
-    property ClientLibraryPath: string read FClientLibraryPath write FClientLibraryPath;
 
+    property RootPath: string read FRootPath write FRootPath;
+    property ClientLibraryPath: string read FClientLibraryPath write FClientLibraryPath;
     property ConfigFilePath: string read FConfigFilePath write FConfigFilePath;
+
     property LoadRegisteredClientLib: boolean read FLoadRegisteredClientLib write FLoadRegisteredClientLib;
     property UserName: string read FUserName write FUserName;
     property Password: string read FPassword write FPassword;
@@ -235,6 +240,7 @@ constructor TServerSession.Create(const
                                         AProtocol: TProtocol;
                                         APort,
                                         ACharset,
+                                        ARootPath,
                                         AClientLibraryPath,
                                         AConfigFilePath: string;
                                         VersionMinor,
@@ -255,6 +261,7 @@ begin
   FProtocol            := AProtocol;
   FPort                := APort;
   FCharset             := ACharset;
+  FRootPath            := ARootPath;
   FClientLibraryPath   := AClientLibraryPath;
   FConfigFilePath      := AConfigFilePath;
   FBVersionMajor       := VersionMajor;
@@ -272,7 +279,6 @@ begin
   FErrorCode := seNone;
   FErrorStr := '';
 
-  TempEmbeddedDB.FirebirdLibraryPathName := FClientLibraryPath;
   IBXServicesConnection := TIBXServicesConnection.Create(nil);
   FillIBXServicesConnectionData;
 end;
@@ -453,24 +459,23 @@ end;
    IBLDBSupport1: TIBLocalDBSupport;
    FB: IFirebirdLibrary;
    FBAPI: IFirebirdAPI;
+   Attachment: IAttachment;
+   Version: TStringList;
    ImplementationVersion: string;
+   ServerRec: TServerRecord;
+   major, minor: integer;
+   verstr: string;
  begin
    Result := False;
-
-   TempDBFile := ExtractFilePath(Application.ExeName) + TmpDir + '/embedded_test.fdb';
-   if  FileExists(TempDBFile) then
-      DeleteFile(PChar(TempDBFile));
-
    try
-     FB := LoadFBLibrary(FClientLibraryPath);
-     FBAPI := FB.GetFirebirdAPI;
-     ImplementationVersion := FBAPI.GetImplementationVersion;
-     FFBVersionMajor := StrToIntDef(ImplementationVersion[1], -1);
-     FFBVersionMinor := StrToIntDef(ImplementationVersion[3], -1);
-     FErrorStr :=  'Embedded Connection Succesful';
-     FErrorCode := seNone;
-     result := true;
-     FConnected := Result;
+     ServerRec := BuildServerRecordFromSession(Self, true);
+     Result := TestEmbeddedConnection(ServerRec, major, minor, verstr);
+     if result then
+     begin
+       FErrorStr :=  'Embedded Connection Succesful';
+       FErrorCode := seNone;
+       FConnected := Result;
+     end;
    except
      on E: Exception do
      begin

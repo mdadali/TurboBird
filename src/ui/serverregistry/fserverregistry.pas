@@ -36,8 +36,10 @@ type
     btnfirebirdconffile: TButton;
     btnAddServer: TButton;
     btnDeleteServer: TButton;
+    btnOpenRootPath: TButton;
     cbServerName: TComboBox;
     cboxLoadRegisteredClientLib: TCheckBox;
+    edtRootPath: TEdit;
     edtVersionMinor: TEdit;
     edtVersionMajor: TEdit;
     edtVersionString: TEdit;
@@ -65,6 +67,7 @@ type
     Label14: TLabel;
     Label15: TLabel;
     Label16: TLabel;
+    Label17: TLabel;
     lbFBConfigFile: TLabel;
     lbDescription: TLabel;
     lbPortInfo: TLabel;
@@ -78,6 +81,7 @@ type
     Label9: TLabel;
     OpenDlgLoadClientLib: TOpenDialog;
     Panel1: TPanel;
+    SelectDirectoryDialog1: TSelectDirectoryDialog;
 
     procedure bbCancelClick(Sender: TObject);
     procedure bbRegClick(Sender: TObject);
@@ -85,6 +89,7 @@ type
     procedure btnAddServerClick(Sender: TObject);
     procedure btnDeleteServerClick(Sender: TObject);
     procedure btnfirebirdconffileClick(Sender: TObject);
+    procedure btnOpenRootPathClick(Sender: TObject);
     procedure cbCharsetChange(Sender: TObject);
     procedure cboxLoadRegisteredClientLibChange(Sender: TObject);
     procedure cbProtocolChange(Sender: TObject);
@@ -269,7 +274,11 @@ end;
 
 procedure TfmServerRegistry.cbProtocolChange(Sender: TObject);
 begin
-  edtPort.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] <> 'Embedded');
+  edtPort.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] <> 'Local');
+  edtRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
+  if not edtRootPath.Enabled then
+    edtRootPath.Text := '';
+  btnOpenRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
 end;
 
 procedure TfmServerRegistry.edtClientLibraryPathChange(Sender: TObject);
@@ -321,6 +330,12 @@ begin
   finally
     dlg.Free;
   end;
+end;
+
+procedure TfmServerRegistry.btnOpenRootPathClick(Sender: TObject);
+begin
+  if SelectDirectoryDialog1.Execute then
+    edtRootPath.Text := SelectDirectoryDialog1.FileName;
 end;
 
 procedure TfmServerRegistry.DeleteServer(const AServerName: string);
@@ -433,7 +448,8 @@ begin
       '',        //Role
       TProtocol(cbProtocol.ItemIndex),
       '3050',   //port
-      'NONE',
+      'UTF8',
+      '/opt/firebird',
       '/opt/firebird/lib/libfbclient.so',
       '/opt/firebird/firebird.conf',
       0, //minor
@@ -560,7 +576,8 @@ begin
   begin
     self.edtVersionMajor.Text := IntToStr(FServerSession.FBVersionMajor);
     self.edtVersionMinor.Text := IntToStr(FServerSession.FBVersionMinor);
-    ShowMessage(FServerSession.FBVersionString);
+    self.edtVersionString.Text := FServerSession.FBVersionString;
+    MessageDlg(FServerSession.ErrorStr, mtInformation, [mbOK], 0);
   end else
   begin
     MessageDlg(FServerSession.ErrorStr, mtError, [mbOK], 0);
@@ -875,6 +892,7 @@ begin
   Rec.Password          := edtPassword.Text;
   Rec.Protocol := TProtocol(cbProtocol.ItemIndex);
   Rec.Charset := cbCharset.Items[cbCharset.ItemIndex];
+  Rec.RootPath := edtRootPath.Text;
   Rec.Port              := edtPort.Text;
   Rec.ClientLibraryPath := edtClientLibraryPath.Text;
   Rec.ConfigFilePath    := edtConfigFilePath.Text;
@@ -910,9 +928,12 @@ begin
   else
     cbCharset.ItemIndex := -1;
 
-  edtPort.Text             := Rec.Port;
+  edtRootPath.Text := Rec.RootPath;
   edtClientLibraryPath.Text:= Rec.ClientLibraryPath;
   edtConfigFilePath.Text   := Rec.ConfigFilePath;
+
+  edtPort.Text             := Rec.Port;
+
   cboxLoadRegisteredClientLib.Checked  := Rec.LoadRegisteredClientLib;
 
   //ShowMessage(BoolToStr(Rec.LoadRegisteredClientLib));
@@ -939,6 +960,7 @@ begin
   Result.Protocol := TProtocol(cbProtocol.ItemIndex);
   Result.Charset := cbCharset.Items[cbCharset.ItemIndex];
   Result.Port              := edtPort.Text;
+  Result.RootPath          := edtRootPath.Text;
   Result.ClientLibraryPath := edtClientLibraryPath.Text;
   Result.ConfigFilePath    := edtConfigFilePath.Text;
   Result.LoadRegisteredClientLib := cboxLoadRegisteredClientLib.Checked;

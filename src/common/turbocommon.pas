@@ -343,6 +343,7 @@ type
     Protocol: TProtocol;
     Port: string[10];
     Charset: string[31];
+    RootPath: string[255];
     ClientLibraryPath: string[255];
     ConfigFilePath: string[255];
     LoadRegisteredClientLib: boolean;
@@ -354,8 +355,6 @@ type
     QueryTimeoutMS: LongInt;     // Timeout für lange Operationen (optional)
 
     Reserved: array[0..30] of Byte; // (etwas verkleinert)
-
-    RootPath: string[255];
   end;
 
 
@@ -675,7 +674,7 @@ begin
   try
     ServerRecord := GetServerRecordFromFileByName(AServerName);
     ServerSession := TServerSession.Create(
-      AServerName, '', '', '', '', TCP, '', '', '', '', 0, 0, False, False, 0, 0, 0
+      AServerName, '', '', '', '', TCP, '', '', '', '', '', 0, 0, False, False, 0, 0, 0
     );
 
     ApplyServerRecordToSession(ServerRecord, ServerSession);
@@ -1440,6 +1439,7 @@ begin
   Session.Protocol            := Rec.Protocol;
   Session.Charset             := Rec.Charset;
   Session.Port                := Rec.Port;
+  Session.RootPath            := Rec.RootPath;
   Session.ClientLibraryPath   := Rec.ClientLibraryPath;
   Session.ConfigFilePath      := Rec.ConfigFilePath;
   Session.LoadRegisteredClientLib := Rec.LoadRegisteredClientLib;
@@ -1472,6 +1472,8 @@ begin
   Rec.Charset := Session.Charset;
   Rec.Port :=     Session.Port;
   Rec.IsEmbedded := (Rec.Protocol = local);
+
+  Rec.RootPath := Session.RootPath;
   Rec.ClientLibraryPath   := Session.ClientLibraryPath;
   Rec.ConfigFilePath      := Session.ConfigFilePath;
   Rec.LoadRegisteredClientLib := Session.LoadRegisteredClientLib;
