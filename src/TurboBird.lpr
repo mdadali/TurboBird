@@ -9,7 +9,7 @@
 program TurboBird;
 
 {$mode objfpc}{$H+}
-{$Xs}
+
 
 uses
   {$IFDEF UNIX}
@@ -18,7 +18,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim,
-  lazrichview, indylaz, zcomponent, memdslaz, datetimectrls,
+  lazrichview, indylaz, memdslaz, datetimectrls,
   runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
   ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
   CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
@@ -50,7 +50,7 @@ dmibx, fCheckDBIntegrity, fsqlmonitor,
   AddShadowSetDlgUnit,
   NewUserDlgUnit,
   ChgPasswordDlgUnit,
-  ExecuteSQLScriptDlgUnit;
+  ExecuteSQLScriptDlgUnit, fClipboardExport;
   //End-DBAdmin
 
 

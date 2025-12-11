@@ -14,7 +14,7 @@ uses
   Forms, Classes, SysUtils, ComCtrls, ExtCtrls,
   Dialogs,
 
-  //ibase60;
+  //ibase60,
   ibase60dyn,
   IBHeader,
   IB,
@@ -31,7 +31,6 @@ uses
 
 
 type
-  //TProtocol = (ptTCPIP, ptEmbedded, ptXNET); // Erweiterbar bei Bedarf
 
   ISC_STATUS_ARRAY = array[0..19] of ISC_STATUS;
 

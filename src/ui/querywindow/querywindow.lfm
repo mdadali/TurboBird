@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 357
+  Left = 485
   Height = 550
-  Top = 116
+  Top = 131
   Width = 954
   Caption = 'fmQueryWindow'
   ClientHeight = 544
@@ -1553,15 +1553,11 @@ object fmQueryWindow: TfmQueryWindow
       Caption = 'Copy field'
       OnClick = lmCopyCellClick
     end
-    object lmCopyAll: TMenuItem
-      Caption = 'Copy all result'
-      OnClick = lmCopyAllClick
-    end
     object Separator2: TMenuItem
       Caption = '-'
     end
     object lmExportDataSet: TMenuItem
-      Caption = 'Export...'
+      Caption = 'Export to...'
       object lmExportDataAsMarkDownTable: TMenuItem
         Caption = 'Markdown Table'
         OnClick = lmExportDataAsMarkDownTableClick
@@ -1569,6 +1565,10 @@ object fmQueryWindow: TfmQueryWindow
       object lmExportDataAsHtml: TMenuItem
         Caption = 'Html'
         OnClick = lmExportDataAsHtmlClick
+      end
+      object lmExportToClipboard: TMenuItem
+        Caption = 'Clipboard'
+        OnClick = lmExportToClipboardClick
       end
       object Separator1: TMenuItem
         Caption = '-'

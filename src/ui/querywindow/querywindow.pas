@@ -10,8 +10,8 @@ uses
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
   dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
-  usqlqueryext,  GridPrn,
-  GridPrnPreviewDlg, QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
+  usqlqueryext,
+  QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
   LR_DSet,
 
   IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB,
@@ -75,6 +75,7 @@ type
     lmExportDataAsMarkDownTable: TMenuItem;
     lmStdExportFormats: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
+    lmExportToClipboard: TMenuItem;
     rgScreenModes: TRadioGroup;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
@@ -109,7 +110,6 @@ type
     lmFindAgain: TMenuItem;
     MenuItem3: TMenuItem;
     lmCopyCell: TMenuItem;
-    lmCopyAll: TMenuItem;
     MenuItem5: TMenuItem;
     lmRun: TMenuItem;
     lmRunSelect: TMenuItem;
@@ -141,12 +141,12 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure lmCloseTabClick(Sender: TObject);
-    procedure lmCopyAllClick(Sender: TObject);
     procedure lmCopyCellClick(Sender: TObject);
     procedure lmCopyClick(Sender: TObject);
     procedure lmCutClick(Sender: TObject);
     procedure lmExportDataAsHtmlClick(Sender: TObject);
     procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
+    procedure lmExportToClipboardClick(Sender: TObject);
     procedure lmPasteClick(Sender: TObject);
     procedure lmRedoClick(Sender: TObject);
     procedure lmRunClick(Sender: TObject);
@@ -1669,7 +1669,7 @@ function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
   AdditionalTitle: string): TTabSheet;
 var
   ATab: TTabSheet;
-  DBGrid: TDBGrid;
+  DBGrid: TIBDynamicGrid;
   DataSource: TDataSource;
   StatusBar: TStatusBar;
   Nav: TDBNavigator;
@@ -1714,7 +1714,7 @@ begin
     Pan.Align:= alTop;
 
     // Query result Grid
-    DBGrid:= TDBGrid.Create(self);
+    DBGrid:= TIBDynamicGrid.Create(self);
     DBGrid.Parent:= ATab;
     DBGrid.DataSource:= DataSource;
     DBGrid.Align:= alClient;
@@ -2080,6 +2080,12 @@ begin
           // Raise exception if an error occured during thread execution (Open)
           if FQT.Error then
             raise Exception.Create(FQT.ErrorMsg);
+
+          //additional code: refresh
+          TIBQuery(FTab.Tag).DisableControls;
+          FQT.FSQLQuery.Last;
+          FQT.FSQLQuery.First;
+          TIBQuery(FTab.Tag).EnableControls;
 
           FQT.Free;
           FTab.Caption:= FAText;
@@ -2654,59 +2660,6 @@ begin
   end;
 end;
 
-{ Copy query result in Clipboard }
-
-procedure TfmQueryWindow.lmCopyAllClick(Sender: TObject);
-var
-   Grid: TDBGrid;
-   i: Integer;
-   List: TStringList;
-   Line: string;
-begin
-  Grid:= TDBGrid(pmGrid.PopupComponent);
-  try
-    Grid.DataSource.DataSet.DisableControls;
-    Grid.DataSource.DataSet.First;
-    List:= TStringList.Create;
-    try
-      Line:= '';
-
-      // Copy fields header
-      with Grid.DataSource.DataSet do
-      for i:= 0 to FieldCount - 1 do
-      begin
-        Line:= Line + '"' + Fields[i].FieldName + '"';
-        if i + 1 < FieldCount then
-          Line:= Line + ',';
-      end;
-      List.Add(Line);
-
-      // Copy table data
-      with Grid.DataSource.DataSet do
-      while not Eof do
-      begin
-        Line:= '';
-        for i:= 0 to FieldCount - 1 do
-        begin
-          Line:= Line + '"' + Trim(Fields[i].AsString) + '"';
-          if i + 1 < FieldCount then
-            Line:= Line + ',';
-        end;
-        List.Add(Line);
-        Next;
-      end;
-      Clipboard.AsText:= List.Text;
-    finally
-      List.Free;
-    end;
-  except
-    on E: Exception do
-      ShowMessage('Error trying to copy: '+e.Message);
-  end;
-  grid.DataSource.DataSet.EnableControls;
-end;
-
-
 { Copy cell in clipboard }
 
 {procedure TfmQueryWindow.lmCopyCellClick(Sender: TObject);
@@ -2879,8 +2832,89 @@ begin
   ExportDataMarkDownTable(SqlQuery);
 end;
 
-{ Paste from clipboard into SQL editor }
+{ Copy query result to Clipboard }
 
+procedure TfmQueryWindow.lmExportToClipboardClick(Sender: TObject);
+var
+  SqlQuery: TIBQuery;
+  Grid: TIBDynamicGrid;
+  MaxExportRows, RowCount, CopiedRows: Integer;
+  MsgText: string;
+begin
+  Grid := TIBDynamicGrid(pmGrid.PopupComponent);
+  Grid.DataSource.DataSet.DisableControls;
+
+  SqlQuery := GetCurrentSelectQuery;
+  //SqlQuery.Last;
+
+  if not Assigned(SqlQuery) then
+  begin
+    MessageDlg('Query not assigned!', mtError, [mbOK], 0);
+    Grid.DataSource.DataSet.EnableControls;
+    Exit;
+  end;
+
+  if SqlQuery.IsEmpty then
+  begin
+    MessageDlg('DataSet has no records!', mtError, [mbOK], 0);
+    Grid.DataSource.DataSet.EnableControls;
+    Exit;
+  end;
+
+  // --- Max rows load from INI---
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport', 'MaxExportRows', -1);
+  if MaxExportRows <= 0 then
+  begin
+    if MaxExportRows = -1 then
+    begin
+      MaxExportRows := 200;
+      fIniFile.WriteInteger('ClipboardExport', 'MaxExportRows', MaxExportRows);
+      MessageDlg('No valid MaxExportRows entry found in turbobird.ini. Default 200 has been set.', mtWarning, [mbOK], 0);
+    end
+    else
+    begin
+      MessageDlg('MaxExportRows is set to 0 in turbobird.ini. ' +
+                 'Exporting very large tables may cause program or system crash!', mtWarning, [mbOK], 0);
+    end;
+  end;
+
+  RowCount := SqlQuery.RecordCount;
+
+  if (MaxExportRows > 0) and (RowCount > MaxExportRows) then
+  begin
+    MessageDlg(
+      'The result contains ' + IntToStr(RowCount) + ' rows, which exceeds the export limit of ' +
+      IntToStr(MaxExportRows) + ' rows.'#13#10 +
+      'Only the first ' + IntToStr(MaxExportRows) + ' rows will be copied to the clipboard.'#13#10#13#10 +
+      'You can change this limit in turbobird.ini under [ClipboardExport].',
+      mtWarning, [mbOK], 0
+    );
+  end;
+
+  if MaxExportRows = 0 then
+    CopiedRows := RowCount
+  else if RowCount > MaxExportRows then
+    CopiedRows := MaxExportRows
+  else
+    CopiedRows := RowCount;
+
+  // --- Export ---
+  try
+    ExportDataToClipboard(SqlQuery, MaxExportRows);
+
+    MsgText := 'Successfully copied ' + IntToStr(CopiedRows) + ' records to the clipboard.';
+    if MaxExportRows = 0 then
+      MsgText := MsgText + ' (Warning: no export limit set in turbobird.ini! Large tables may cause program/system crash.)';
+
+    MessageDlg(MsgText, mtInformation, [mbOK], 0);
+  finally
+    Grid.DataSource.DataSet.First;
+    Grid.DataSource.DataSet.EnableControls;
+  end;
+end;
+
+
+{ Paste from clipboard into SQL editor }
 procedure TfmQueryWindow.lmPasteClick(Sender: TObject);
 begin
   meQuery.PasteFromClipboard;

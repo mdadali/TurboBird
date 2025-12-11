@@ -1,416 +1,417 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3'e'#1#6'Height'#3'&'#2#3
-  +'Top'#2't'#5'Width'#3#186#3#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'#3
-  +' '#2#11'ClientWidth'#3#186#3#5'Color'#7#6'clForm'#10'KeyPreview'#9#4'Menu'#7
-  +#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#9'OnDes'
-  +'troy'#7#11'FormDestroy'#9'OnKeyDown'#7#11'FormKeyDown'#6'OnShow'#7#8'FormSh'
-  +'ow'#9'PopupMenu'#7#5'pmTab'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'
-  +#6#7'2.2.6.0'#0#9'TSplitter'#9'Splitter1'#6'Cursor'#7#8'crVSplit'#4'Left'#2#0
-  +#6'Height'#2#12#3'Top'#3'('#1#5'Width'#3#186#3#5'Align'#7#5'alTop'#12'Resize'
-  +'Anchor'#7#5'akTop'#0#0#6'TPanel'#14'pnlOutputPanel'#4'Left'#2#0#6'Height'#3
-  +#236#0#3'Top'#3'4'#1#5'Width'#3#186#3#5'Align'#7#8'alClient'#10'BevelOuter'#7
-  +#6'bvNone'#12'ClientHeight'#3#236#0#11'ClientWidth'#3#186#3#8'TabOrder'#2#2#0
-  +#12'TPageControl'#15'pgOutputPageCtl'#4'Left'#2#0#6'Height'#3#236#0#3'Top'#2
-  +#0#5'Width'#3#186#3#5'Align'#7#8'alClient'#6'Images'#7#6'imTabs'#8'TabOrder'
-  +#2#0#0#0#0#244#8'TSynEdit'#7'meQuery'#4'Left'#2#0#6'Height'#3#6#1#3'Top'#2'"'
-  +#5'Width'#3#186#3#5'Align'#7#5'alTop'#11'BlockIndent'#2#3#5'Color'#7#7'clCre'
-  +'am'#11'Font.Height'#2#240#9'Font.Name'#6#11'Courier New'#10'Font.Pitch'#7#7
-  +'fpFixed'#12'Font.Quality'#7#13'fqAntialiased'#11'ParentColor'#8#10'ParentFo'
-  +'nt'#8#14'ParentShowHint'#8#9'PopupMenu'#7#6'pmMemo'#8'TabOrder'#2#0#9'OnKey'
-  +'Down'#7#14'meQueryKeyDown'#12'OnMouseEnter'#7#17'meQueryMouseEnter'#12'Gutt'
-  +'er.Color'#4#246#241#246#0#12'Gutter.Width'#2'='#19'Gutter.MouseActions'#14#1
-  +#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#20'emcOnMain'
-  +'GutterClick'#0#1#6'Button'#7#7'mbRight'#7'Command'#7#14'emcContextMenu'#0#0
-  +#17'RightGutter.Width'#2#0#24'RightGutter.MouseActions'#14#1#10'ClickCount'#7
-  +#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#20'emcOnMainGutterClick'#0#1#6
-  +'Button'#7#7'mbRight'#7'Command'#7#14'emcContextMenu'#0#0#11'Highlighter'#7
-  +#10'SynSQLSyn1'#10'Keystrokes'#14#1#7'Command'#7#4'ecUp'#8'ShortCut'#2'&'#0#1
-  +#7'Command'#7#7'ecSelUp'#8'ShortCut'#3'& '#0#1#7'Command'#7#10'ecScrollUp'#8
-  +'ShortCut'#3'&@'#0#1#7'Command'#7#6'ecDown'#8'ShortCut'#2'('#0#1#7'Command'#7
-  +#9'ecSelDown'#8'ShortCut'#3'( '#0#1#7'Command'#7#12'ecScrollDown'#8'ShortCut'
-  +#3'(@'#0#1#7'Command'#7#6'ecLeft'#8'ShortCut'#2'%'#0#1#7'Command'#7#9'ecSelL'
-  +'eft'#8'ShortCut'#3'% '#0#1#7'Command'#7#10'ecWordLeft'#8'ShortCut'#3'%@'#0#1
-  +#7'Command'#7#13'ecSelWordLeft'#8'ShortCut'#3'%`'#0#1#7'Command'#7#7'ecRight'
-  +#8'ShortCut'#2''''#0#1#7'Command'#7#10'ecSelRight'#8'ShortCut'#3''' '#0#1#7
-  +'Command'#7#11'ecWordRight'#8'ShortCut'#3'''@'#0#1#7'Command'#7#14'ecSelWord'
-  +'Right'#8'ShortCut'#3'''`'#0#1#7'Command'#7#10'ecPageDown'#8'ShortCut'#2'"'#0
-  +#1#7'Command'#7#13'ecSelPageDown'#8'ShortCut'#3'" '#0#1#7'Command'#7#12'ecPa'
-  +'geBottom'#8'ShortCut'#3'"@'#0#1#7'Command'#7#15'ecSelPageBottom'#8'ShortCut'
-  +#3'"`'#0#1#7'Command'#7#8'ecPageUp'#8'ShortCut'#2'!'#0#1#7'Command'#7#11'ecS'
-  +'elPageUp'#8'ShortCut'#3'! '#0#1#7'Command'#7#9'ecPageTop'#8'ShortCut'#3'!@'
-  +#0#1#7'Command'#7#12'ecSelPageTop'#8'ShortCut'#3'!`'#0#1#7'Command'#7#11'ecL'
-  +'ineStart'#8'ShortCut'#2'$'#0#1#7'Command'#7#14'ecSelLineStart'#8'ShortCut'#3
-  +'$ '#0#1#7'Command'#7#11'ecEditorTop'#8'ShortCut'#3'$@'#0#1#7'Command'#7#14
-  +'ecSelEditorTop'#8'ShortCut'#3'$`'#0#1#7'Command'#7#9'ecLineEnd'#8'ShortCut'
-  +#2'#'#0#1#7'Command'#7#12'ecSelLineEnd'#8'ShortCut'#3'# '#0#1#7'Command'#7#14
-  +'ecEditorBottom'#8'ShortCut'#3'#@'#0#1#7'Command'#7#17'ecSelEditorBottom'#8
-  +'ShortCut'#3'#`'#0#1#7'Command'#7#12'ecToggleMode'#8'ShortCut'#2'-'#0#1#7'Co'
-  +'mmand'#7#6'ecCopy'#8'ShortCut'#3'-@'#0#1#7'Command'#7#7'ecPaste'#8'ShortCut'
-  +#3'- '#0#1#7'Command'#7#12'ecDeleteChar'#8'ShortCut'#2'.'#0#1#7'Command'#7#5
-  +'ecCut'#8'ShortCut'#3'. '#0#1#7'Command'#7#16'ecDeleteLastChar'#8'ShortCut'#2
-  +#8#0#1#7'Command'#7#16'ecDeleteLastChar'#8'ShortCut'#3#8' '#0#1#7'Command'#7
-  +#16'ecDeleteLastWord'#8'ShortCut'#3#8'@'#0#1#7'Command'#7#6'ecUndo'#8'ShortC'
-  +'ut'#4#8#128#0#0#0#1#7'Command'#7#6'ecRedo'#8'ShortCut'#4#8#160#0#0#0#1#7'Co'
-  +'mmand'#7#11'ecLineBreak'#8'ShortCut'#2#13#0#1#7'Command'#7#11'ecSelectAll'#8
-  +'ShortCut'#3'A@'#0#1#7'Command'#7#6'ecCopy'#8'ShortCut'#3'C@'#0#1#7'Command'
-  +#7#13'ecBlockIndent'#8'ShortCut'#3'I`'#0#1#7'Command'#7#11'ecLineBreak'#8'Sh'
-  +'ortCut'#3'M@'#0#1#7'Command'#7#12'ecInsertLine'#8'ShortCut'#3'N@'#0#1#7'Com'
-  +'mand'#7#12'ecDeleteWord'#8'ShortCut'#3'T@'#0#1#7'Command'#7#15'ecBlockUnind'
-  +'ent'#8'ShortCut'#3'U`'#0#1#7'Command'#7#7'ecPaste'#8'ShortCut'#3'V@'#0#1#7
-  +'Command'#7#5'ecCut'#8'ShortCut'#3'X@'#0#1#7'Command'#7#12'ecDeleteLine'#8'S'
-  +'hortCut'#3'Y@'#0#1#7'Command'#7#11'ecDeleteEOL'#8'ShortCut'#3'Y`'#0#1#7'Com'
-  +'mand'#7#6'ecUndo'#8'ShortCut'#3'Z@'#0#1#7'Command'#7#6'ecRedo'#8'ShortCut'#3
-  +'Z`'#0#1#7'Command'#7#13'ecGotoMarker0'#8'ShortCut'#3'0@'#0#1#7'Command'#7#13
-  +'ecGotoMarker1'#8'ShortCut'#3'1@'#0#1#7'Command'#7#13'ecGotoMarker2'#8'Short'
-  +'Cut'#3'2@'#0#1#7'Command'#7#13'ecGotoMarker3'#8'ShortCut'#3'3@'#0#1#7'Comma'
-  ,'nd'#7#13'ecGotoMarker4'#8'ShortCut'#3'4@'#0#1#7'Command'#7#13'ecGotoMarker5'
-  +#8'ShortCut'#3'5@'#0#1#7'Command'#7#13'ecGotoMarker6'#8'ShortCut'#3'6@'#0#1#7
-  +'Command'#7#13'ecGotoMarker7'#8'ShortCut'#3'7@'#0#1#7'Command'#7#13'ecGotoMa'
-  +'rker8'#8'ShortCut'#3'8@'#0#1#7'Command'#7#13'ecGotoMarker9'#8'ShortCut'#3'9'
-  +'@'#0#1#7'Command'#7#12'ecSetMarker0'#8'ShortCut'#3'0`'#0#1#7'Command'#7#12
-  +'ecSetMarker1'#8'ShortCut'#3'1`'#0#1#7'Command'#7#12'ecSetMarker2'#8'ShortCu'
-  +'t'#3'2`'#0#1#7'Command'#7#12'ecSetMarker3'#8'ShortCut'#3'3`'#0#1#7'Command'
-  +#7#12'ecSetMarker4'#8'ShortCut'#3'4`'#0#1#7'Command'#7#12'ecSetMarker5'#8'Sh'
-  +'ortCut'#3'5`'#0#1#7'Command'#7#12'ecSetMarker6'#8'ShortCut'#3'6`'#0#1#7'Com'
-  +'mand'#7#12'ecSetMarker7'#8'ShortCut'#3'7`'#0#1#7'Command'#7#12'ecSetMarker8'
-  +#8'ShortCut'#3'8`'#0#1#7'Command'#7#12'ecSetMarker9'#8'ShortCut'#3'9`'#0#1#7
-  +'Command'#7#12'EcFoldLevel1'#8'ShortCut'#4'1'#160#0#0#0#1#7'Command'#7#12'Ec'
-  +'FoldLevel2'#8'ShortCut'#4'2'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel1'#8'Sh'
-  +'ortCut'#4'3'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel1'#8'ShortCut'#4'4'#160
-  +#0#0#0#1#7'Command'#7#12'EcFoldLevel1'#8'ShortCut'#4'5'#160#0#0#0#1#7'Comman'
-  +'d'#7#12'EcFoldLevel6'#8'ShortCut'#4'6'#160#0#0#0#1#7'Command'#7#12'EcFoldLe'
-  +'vel7'#8'ShortCut'#4'7'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel8'#8'ShortCut'
-  +#4'8'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel9'#8'ShortCut'#4'9'#160#0#0#0#1
-  +#7'Command'#7#12'EcFoldLevel0'#8'ShortCut'#4'0'#160#0#0#0#1#7'Command'#7#13
-  +'EcFoldCurrent'#8'ShortCut'#4'-'#160#0#0#0#1#7'Command'#7#15'EcUnFoldCurrent'
-  +#8'ShortCut'#4'+'#160#0#0#0#1#7'Command'#7#18'EcToggleMarkupWord'#8'ShortCut'
-  +#4'M'#128#0#0#0#1#7'Command'#7#14'ecNormalSelect'#8'ShortCut'#3'N`'#0#1#7'Co'
-  +'mmand'#7#14'ecColumnSelect'#8'ShortCut'#3'C`'#0#1#7'Command'#7#12'ecLineSel'
-  +'ect'#8'ShortCut'#3'L`'#0#1#7'Command'#7#5'ecTab'#8'ShortCut'#2#9#0#1#7'Comm'
-  +'and'#7#10'ecShiftTab'#8'ShortCut'#3#9' '#0#1#7'Command'#7#14'ecMatchBracket'
-  +#8'ShortCut'#3'B`'#0#1#7'Command'#7#10'ecColSelUp'#8'ShortCut'#4'&'#160#0#0#0
-  +#1#7'Command'#7#12'ecColSelDown'#8'ShortCut'#4'('#160#0#0#0#1#7'Command'#7#12
-  +'ecColSelLeft'#8'ShortCut'#4'%'#160#0#0#0#1#7'Command'#7#13'ecColSelRight'#8
-  +'ShortCut'#4''''#160#0#0#0#1#7'Command'#7#16'ecColSelPageDown'#8'ShortCut'#4
-  +'"'#160#0#0#0#1#7'Command'#7#18'ecColSelPageBottom'#8'ShortCut'#4'"'#224#0#0
-  +#0#1#7'Command'#7#14'ecColSelPageUp'#8'ShortCut'#4'!'#160#0#0#0#1#7'Command'
-  +#7#15'ecColSelPageTop'#8'ShortCut'#4'!'#224#0#0#0#1#7'Command'#7#17'ecColSel'
-  +'LineStart'#8'ShortCut'#4'$'#160#0#0#0#1#7'Command'#7#15'ecColSelLineEnd'#8
-  +'ShortCut'#4'#'#160#0#0#0#1#7'Command'#7#17'ecColSelEditorTop'#8'ShortCut'#4
-  +'$'#224#0#0#0#1#7'Command'#7#20'ecColSelEditorBottom'#8'ShortCut'#4'#'#224#0
-  +#0#0#0#12'MouseActions'#14#1#9'ShiftMask'#11#7'ssShift'#5'ssAlt'#0#8'ClickDi'
-  +'r'#7#6'cdDown'#7'Command'#7#18'emcStartSelections'#9'MoveCaret'#9#0#1#5'Shi'
-  +'ft'#11#7'ssShift'#0#9'ShiftMask'#11#7'ssShift'#5'ssAlt'#0#8'ClickDir'#7#6'c'
-  +'dDown'#7'Command'#7#18'emcStartSelections'#9'MoveCaret'#9#6'Option'#2#1#0#1
-  +#5'Shift'#11#5'ssAlt'#0#9'ShiftMask'#11#7'ssShift'#5'ssAlt'#0#8'ClickDir'#7#6
-  +'cdDown'#7'Command'#7#24'emcStartColumnSelections'#9'MoveCaret'#9#0#1#5'Shif'
-  +'t'#11#7'ssShift'#5'ssAlt'#0#9'ShiftMask'#11#7'ssShift'#5'ssAlt'#0#8'ClickDi'
-  +'r'#7#6'cdDown'#7'Command'#7#24'emcStartColumnSelections'#9'MoveCaret'#9#6'O'
-  +'ption'#2#1#0#1#6'Button'#7#7'mbRight'#7'Command'#7#14'emcContextMenu'#0#1#10
-  +'ClickCount'#7#8'ccDouble'#8'ClickDir'#7#6'cdDown'#7'Command'#7#13'emcSelect'
-  +'Word'#9'MoveCaret'#9#0#1#10'ClickCount'#7#8'ccTriple'#8'ClickDir'#7#6'cdDow'
-  +'n'#7'Command'#7#13'emcSelectLine'#9'MoveCaret'#9#0#1#10'ClickCount'#7#6'ccQ'
-  +'uad'#8'ClickDir'#7#6'cdDown'#7'Command'#7#13'emcSelectPara'#9'MoveCaret'#9#0
-  +#1#6'Button'#7#8'mbMiddle'#8'ClickDir'#7#6'cdDown'#7'Command'#7#17'emcPasteS'
-  +'election'#9'MoveCaret'#9#0#1#5'Shift'#11#6'ssCtrl'#0#9'ShiftMask'#11#7'ssSh'
-  +'ift'#5'ssAlt'#6'ssCtrl'#0#7'Command'#7#12'emcMouseLink'#0#0#16'MouseTextAct'
-  +'ions'#14#0#15'MouseSelActions'#14#1#8'ClickDir'#7#6'cdDown'#7'Command'#7#16
-  +'emcStartDragMove'#0#0#19'VisibleSpecialChars'#11#8'vscSpace'#12'vscTabAtLas'
-  +'t'#0#9'RightEdge'#2'x'#10'ScrollBars'#7#10'ssAutoBoth'#26'SelectedColor.Bac'
-  +'kPriority'#2'2'#26'SelectedColor.ForePriority'#2'2'#27'SelectedColor.FrameP'
-  +'riority'#2'2'#26'SelectedColor.BoldPriority'#2'2'#28'SelectedColor.ItalicPr'
-  +'iority'#2'2'#31'SelectedColor.UnderlinePriority'#2'2'#31'SelectedColor.Stri'
-  +'keOutPriority'#2'2'#21'BracketHighlightStyle'#7#8'sbhsBoth'#28'BracketMatch'
-  +'Color.Background'#7#6'clNone'#28'BracketMatchColor.Foreground'#7#6'clNone'
-  +#23'BracketMatchColor.Style'#11#6'fsBold'#0#26'FoldedCodeColor.Background'#7
-  +#6'clNone'#26'FoldedCodeColor.Foreground'#7#6'clGray'#26'FoldedCodeColor.Fra'
-  +'meColor'#7#6'clGray'#25'MouseLinkColor.Background'#7#6'clNone'#25'MouseLink'
-  +'Color.Foreground'#7#6'clBlue'#29'LineHighlightColor.Background'#7#6'clNone'
-  +#29'LineHighlightColor.Foreground'#7#6'clNone'#0#244#18'TSynGutterPartList'#0
-  ,#0#15'TSynGutterMarks'#0#5'Width'#2#24#12'MouseActions'#14#0#0#0#20'TSynGutt'
-  +'erLineNumber'#0#5'Width'#2#21#12'MouseActions'#14#0#21'MarkupInfo.Backgroun'
-  +'d'#4#243#250#254#0#21'MarkupInfo.Foreground'#7#6'clNone'#10'DigitCount'#2#2
-  +#30'ShowOnlyLineNumbersMultiplesOf'#2#1#9'ZeroStart'#8#12'LeadingZeros'#8#0#0
-  +#17'TSynGutterChanges'#0#5'Width'#2#4#12'MouseActions'#14#0#13'ModifiedColor'
-  +#4#252#233#0#0#10'SavedColor'#7#7'clGreen'#0#0#19'TSynGutterSeparator'#0#5'W'
-  +'idth'#2#2#12'MouseActions'#14#0#21'MarkupInfo.Background'#7#7'clWhite'#21'M'
-  +'arkupInfo.Foreground'#7#6'clGray'#0#0#21'TSynGutterCodeFolding'#0#12'MouseA'
-  +'ctions'#14#1#6'Button'#7#7'mbRight'#7'Command'#7#22'emcCodeFoldContextMenu'
-  +#0#1#9'ShiftMask'#11#7'ssShift'#0#6'Button'#7#8'mbMiddle'#10'ClickCount'#7#5
-  +'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#18'emcCodeFoldCollaps'#0#1#5'Sh'
-  +'ift'#11#7'ssShift'#0#9'ShiftMask'#11#7'ssShift'#0#6'Button'#7#8'mbMiddle'#10
-  +'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#18'emcCodeFoldC'
-  +'ollaps'#6'Option'#2#1#0#1#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'
-  +#7'Command'#7#7'emcNone'#0#0#21'MarkupInfo.Background'#7#6'clNone'#21'Markup'
-  +'Info.Foreground'#7#6'clGray'#20'MouseActionsExpanded'#14#1#10'ClickCount'#7
-  +#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#18'emcCodeFoldCollaps'#0#0#21
-  +'MouseActionsCollapsed'#14#1#5'Shift'#11#6'ssCtrl'#0#9'ShiftMask'#11#6'ssCtr'
-  +'l'#0#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#17'emcC'
-  +'odeFoldExpand'#0#1#9'ShiftMask'#11#6'ssCtrl'#0#10'ClickCount'#7#5'ccAny'#8
-  +'ClickDir'#7#6'cdDown'#7'Command'#7#17'emcCodeFoldExpand'#6'Option'#2#1#0#0#0
-  +#0#0#0#8'TToolBar'#8'ToolBar1'#4'Left'#2#0#6'Height'#2'"'#3'Top'#2#0#5'Width'
-  +#3#186#3#11'BorderWidth'#2#2#12'ButtonHeight'#2' '#11'ButtonWidth'#2' '#7'Ca'
-  +'ption'#6#8'ToolBar1'#5'Color'#7#6'clForm'#6'Images'#7#13'toolbarImages'#11
-  +'ParentColor'#8#14'ParentShowHint'#8#8'ShowHint'#9#8'TabOrder'#2#3#12'OnMous'
-  +'eEnter'#7#18'ToolBar1MouseEnter'#12'OnMouseLeave'#7#18'ToolBar1MouseLeave'#0
-  +#11'TToolButton'#5'tbNew'#4'Left'#2#1#4'Hint'#6#25'Open New SQL Query Window'
-  +#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2#0#7'OnClick'#7#10'tbNewClick'#12
-  +'OnMouseEnter'#7#15'tbNewMouseEnter'#12'OnMouseLeave'#7#15'tbNewMouseLeave'
-  +#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#6'tbOpen'#4'Left'#2
-  +'%'#4'Hint'#6#13'Open SQL file'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbOp'
-  +'en'#10'ImageIndex'#2#1#7'OnClick'#7#11'tbOpenClick'#12'OnMouseEnter'#7#16't'
-  +'bOpenMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#6't'
-  +'bSave'#4'Left'#2'I'#4'Hint'#6#16'Save SQL to file'#3'Top'#2#2#8'AutoSize'#9
-  +#7'Caption'#6#6'tbSave'#10'ImageIndex'#2#2#7'OnClick'#7#11'tbSaveClick'#12'O'
-  +'nMouseEnter'#7#16'tbSaveMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0
-  +#11'TToolButton'#5'tbRun'#4'Left'#2'm'#4'Hint'#6#14'Run Query (F5)'#3'Top'#2
-  +#2#8'AutoSize'#9#10'ImageIndex'#2#5#7'OnClick'#7#10'tbRunClick'#12'OnMouseEn'
-  +'ter'#7#15'tbRunMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolB'
-  +'utton'#8'tbCommit'#4'Left'#3#186#0#4'Hint'#6#18'Commit Transaction'#3'Top'#2
-  +#2#8'AutoSize'#9#7'Caption'#6#8'tbCommit'#10'ImageIndex'#2#4#7'OnClick'#7#13
-  +'tbCommitClick'#12'OnMouseEnter'#7#18'tbCommitMouseEnter'#14'ParentShowHint'
-  +#8#8'ShowHint'#9#0#0#11'TToolButton'#10'tbRollback'#4'Left'#3#2#1#4'Hint'#6
-  +#20'Rollback Transaction'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#10'tbRollbac'
-  +'k'#10'ImageIndex'#2#7#7'OnClick'#7#15'tbRollbackClick'#12'OnMouseEnter'#7#20
-  +'tbRollbackMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'
-  +#11'ToolButton2'#4'Left'#3'&'#1#6'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'To'
-  +'olButton2'#5'Style'#7#12'tbsSeparator'#0#0#11'TToolButton'#11'ToolButton3'#4
-  +'Left'#3'R'#1#6'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton3'#5'Style'
-  +#7#12'tbsSeparator'#0#0#11'TToolButton'#9'tbHistory'#4'Left'#3'.'#1#4'Hint'#6
-  +#11'SQL History'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#9'tbHistory'#10'Image'
-  +'Index'#2#8#7'OnClick'#7#14'tbHistoryClick'#12'OnMouseEnter'#7#19'tbHistoryM'
-  +'ouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolBu'
-  +'tton5'#4'Left'#3#181#0#6'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton'
-  +'5'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButton'#6'tbMenu'#4'Left'#3'Z'#1#4
-  +'Hint'#6#4'Menu'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbMenu'#10'ImageInd'
-  +'ex'#2#9#7'OnClick'#7#11'tbMenuClick'#12'OnMouseEnter'#7#16'tbMenuMouseEnter'
-  +#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#17'tbCommitRetaining'
-  +#4'Left'#3#145#0#4'Hint'#6#16'Commit Retaining'#3'Top'#2#2#8'AutoSize'#9#7'C'
-  +'aption'#6#17'tbCommitRetaining'#10'ImageIndex'#2#6#7'OnClick'#7#22'tbCommit'
-  +'RetainingClick'#12'OnMouseEnter'#7#27'tbCommitRetainingMouseEnter'#14'Paren'
-  +'tShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#19'tbRollbackRetaining'#4'Le'
-  +'ft'#3#222#0#4'Hint'#6#18'Rollback Retaining'#3'Top'#2#2#8'AutoSize'#9#7'Cap'
-  +'tion'#6#19'tbRollbackRetaining'#10'ImageIndex'#2#3#7'OnClick'#7#24'tbRollba'
-  ,'ckRetainingClick'#12'OnMouseEnter'#7#29'tbRollbackRetainingMouseEnter'#14'P'
-  +'arentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton1'#4'Left'#3
-  +#162#1#6'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton1'#5'Style'#7#12
-  +'tbsSeparator'#0#0#9'TCheckBox'#12'cxAutoCommit'#4'Left'#3#170#1#6'Height'#2
-  +#21#4'Hint'#6#18'Auto Commit ON/OFF'#3'Top'#2#2#5'Width'#2'i'#7'Caption'#6#11
-  +'Auto Commit'#7'Checked'#9#12'OnMouseEnter'#7#22'cxAutoCommitMouseEnter'#12
-  +'OnMouseLeave'#7#22'cxAutoCommitMouseLeave'#5'State'#7#9'cbChecked'#8'TabOrd'
-  +'er'#2#0#0#0#11'TToolButton'#13'tbQueryDesign'#4'Left'#3'~'#1#4'Hint'#6#14'Q'
-  +'uery Designer'#3'Top'#2#2#7'Caption'#6#13'tbQueryDesign'#10'ImageIndex'#2#11
-  +#7'OnClick'#7#18'tbQueryDesignClick'#12'OnMouseEnter'#7#23'tbQueryDesignMous'
-  +'eEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TRadioGroup'#13'rgScreenM'
-  +'odes'#4'Left'#3'x'#2#6'Height'#2' '#4'Hint'#6#12'Screen Modes'#3'Top'#2#0#5
-  +'Width'#3#185#0#5'Align'#7#7'alRight'#8'AutoFill'#9#28'ChildSizing.LeftRight'
-  +'Spacing'#2#6#29'ChildSizing.EnlargeHorizontal'#7#24'crsHomogenousChildResiz'
-  +'e'#27'ChildSizing.EnlargeVertical'#7#24'crsHomogenousChildResize'#28'ChildS'
-  +'izing.ShrinkHorizontal'#7#14'crsScaleChilds'#26'ChildSizing.ShrinkVertical'
-  +#7#14'crsScaleChilds'#18'ChildSizing.Layout'#7#29'cclLeftToRightThenTopToBot'
-  +'tom'#27'ChildSizing.ControlsPerLine'#2#3#12'ClientHeight'#2#30#11'ClientWid'
-  +'th'#3#183#0#7'Columns'#2#3#9'ItemIndex'#2#0#13'Items.Strings'#1#6#3'NFS'#6#3
-  +'CFS'#6#3'RFC'#0#7'OnClick'#7#18'rgScreenModesClick'#12'OnMouseEnter'#7#23'r'
-  +'gScreenModesMouseEnter'#8'TabOrder'#2#1#0#0#0#11'TOpenDialog'#11'OpenDialog'
-  +'1'#10'DefaultExt'#6#4'.sql'#6'Filter'#6#29'SQL Files|*.sql|All Files|*.*'#4
-  +'Left'#2'X'#3'Top'#2'P'#0#0#11'TSaveDialog'#11'SaveDialog1'#7'Options'#11#17
-  +'ofOverwritePrompt'#14'ofEnableSizing'#12'ofViewDetail'#0#4'Left'#3#192#0#3
-  +'Top'#2'P'#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'#13'DefaultFilter'#6#23'SQL File'
-  +'s (*.sql)|*.sql'#7'Enabled'#8#23'CommentAttri.Foreground'#7#6'clTeal'#26'Id'
-  +'entifierAttri.Foreground'#4'1'#26#255#0#22'NumberAttri.Foreground'#4'644'#0
-  +#22'StringAttri.Foreground'#4#161#16#16#0#22'SymbolAttri.Foreground'#4'b'#8#8
-  +#0#25'TableNameAttri.Foreground'#7#6'clNavy'#20'TableNameAttri.Style'#11#6'f'
-  +'sBold'#0#10'SQLDialect'#7#9'sqlSybase'#4'Left'#3#224#2#3'Top'#3'Q'#1#0#0#10
-  +'TPopupMenu'#6'pmMemo'#4'Left'#3' '#2#3'Top'#3#144#1#0#9'TMenuItem'#6'lmUndo'
-  +#7'Caption'#6#4'Undo'#7'OnClick'#7#11'lmUndoClick'#0#0#9'TMenuItem'#6'lmRedo'
-  +#7'Caption'#6#4'Redo'#7'OnClick'#7#11'lmRedoClick'#0#0#9'TMenuItem'#9'MenuIt'
-  +'em1'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#6'lmCopy'#7'Caption'#6#4'Copy'#8'Sh'
-  +'ortCut'#3'C@'#7'OnClick'#7#11'lmCopyClick'#0#0#9'TMenuItem'#5'lmCut'#7'Capt'
-  +'ion'#6#3'Cut'#8'ShortCut'#3'X@'#7'OnClick'#7#10'lmCutClick'#0#0#9'TMenuItem'
-  +#7'lmPaste'#7'Caption'#6#5'Paste'#8'ShortCut'#3'V@'#7'OnClick'#7#12'lmPasteC'
-  +'lick'#0#0#9'TMenuItem'#11'lmSelectAll'#7'Caption'#6#10'Select All'#8'ShortC'
-  +'ut'#3'A@'#7'OnClick'#7#16'lmSelectAllClick'#0#0#9'TMenuItem'#9'MenuItem2'#7
-  +'Caption'#6#1'-'#0#0#9'TMenuItem'#6'lmFind'#7'Caption'#6#4'Find'#7'OnClick'#7
-  +#11'lmFindClick'#0#0#9'TMenuItem'#11'lmFindAgain'#7'Caption'#6#10'Find Again'
-  +#7'OnClick'#7#16'lmFindAgainClick'#0#0#0#11'TFindDialog'#11'FindDialog1'#6'O'
-  +'nFind'#7#15'FindDialog1Find'#4'Left'#3#192#0#3'Top'#3#168#0#0#0#10'TPopupMe'
-  +'nu'#5'pmTab'#4'Left'#3'h'#1#3'Top'#3#144#1#0#9'TMenuItem'#8'lmExport'#7'Cap'
-  +'tion'#6#19'Export Result as...'#0#0#9'TMenuItem'#9'MenuItem5'#7'Caption'#6#1
-  +'-'#0#0#9'TMenuItem'#5'lmRun'#7'Caption'#6#16'Run Query (Auto)'#8'ShortCut'#2
-  +'t'#7'OnClick'#7#10'lmRunClick'#0#0#9'TMenuItem'#11'lmRunSelect'#7'Caption'#6
-  +#21'Run Query (As Select)'#7'OnClick'#7#16'lmRunSelectClick'#0#0#9'TMenuItem'
-  +#9'lmRunExec'#7'Caption'#6#22'Run Query (As Execute)'#7'OnClick'#7#14'lmRunE'
-  +'xecClick'#0#0#9'TMenuItem'#11'lmRunScript'#7'Caption'#6#21'Run Query (As Sc'
-  +'ript)'#7'OnClick'#7#16'lmRunScriptClick'#0#0#9'TMenuItem'#10'MenuItem10'#7
-  +'Caption'#6#1'-'#0#0#9'TMenuItem'#10'lmCloseTab'#7'Caption'#6#9'Close Tab'#7
-  +'OnClick'#7#15'lmCloseTabClick'#0#0#0#9'TMainMenu'#9'MainMenu1'#4'Left'#3#240
-  +#0#3'Top'#3#144#1#0#9'TMenuItem'#9'MenuItem3'#7'Caption'#6#3'Run'#8'ShortCut'
-  +#2't'#7'Visible'#8#7'OnClick'#7#10'bbRunClick'#0#0#0#10'TImageList'#6'imTabs'
-  +#4'Left'#3#208#2#3'Top'#2#127#6'Bitmap'#10'7'#16#0#0'Lz'#7#0#0#0#16#0#0#0#16
-  +#0#0#0'!'#16#0#0#0#0#0#0'x'#218#221'Xw|UU'#182'>!'#132#4#17#153#135#242#28#5
-  +'|'#148#145#167'Hh'#169'@'#18#2#161#200#128#210#164#12'$'#2#210#164'+'#140
-  +#148#17#16#20'E'#17'$'#161#132#20'B'#128#161#4#8'F'#164#135#150'BH'#31#136
-  +#193#130#221'GM#$'#183#159'{'#238#253'f'#173'u'#206'M'#240'1'#239#253#253'~'
-  +#15'~+{'#159#181#214#183'W'#217'k'#183#251#192#6#184#0#5#168#135'N'#14'8'#205
-  +'u'#212'j'#143#146#211'l'#232'X'#224't'#185'a%'#160#221#13#168#170'J'#157'J'
-  +#226'3'#206'N'#228#212#201'B'#223'N2'#160#25'<'#167#201#208'1'#195'b'#177#8
-  +#214#226#160'?pc'#245#162')X:s'#12#222#153#19#131'U'#139#231'b'#246#164'1X'
-  ,#183'l'#17'V'#189#245'&'#150#204'z'#29#171#151#204#195#234#197#179#176'|'#246
-  +'kX:{'#130'`T'#130#154#173#28#128#29'k'#22'E'#19#175#166#193'?!'#245#190#216
-  +#146#190#195'#'#171#193#202#5#147#196#159':'#19#203' 1'#127#184'8'#134#218'*'
-  +#236#219#178#22#241#31#173#192#151'{'#183'`w'#236#26#226'='#192#209#148'MHK'
-  +#248#20#251#183#190'/:'#31#191'3'#149'lZ'#5#233#214'(.'#199#3'|'#244#246'd'
-  +#192#246#147#232'K'#140#238#26'#V'#166#251#186'm'#245#30#181#149'X=g'#172#228
-  +'I'#176'pK'#255#221'Y'#163'D'#150#182'}'#13#142'&o'#192#190#216#247'd'#172
-  +#131'['#215#226'P'#194#135'2'#206#145#132#15#168#173#192#7#11''''#18#164#214
-  +#192#178#251#245'x'#127#209'$'#193#195']'#253#144#221#154'F'#127#164#189'/:k'
-  +#23#254'Ebv8'#28'2'#247#154#221#132'uK'#166'Jl{'#197'n'#189#228'Al&~'#140#195
-  +#9#235')'#254#143'qp'#251':'#209'Y'#181'p'#178#228#143#177#170#11'R'#27'Kf'
-  +#142'm'#204#191#250'P'#236#142'{F'#222')'#215#238#251#162#179#244#205#241#212
-  +'W'#161#178#23'TV.'#167#138#191#205#155','#254'%~'#178'Bt'#247'o'#255#16#7
-  +#182#174#195#209#164'O'#5#191#235#179#181'H'#167'y`'#251'Kf'#188'&'#177#215
-  +#217'4'#169'!Mu`'#205#219#211#26#243#204#182#156#213'z'#204#142#202'F'#158
-  +#145#131#247#151'L'''#163':'#182#222#170#207#193#187#11'&'#139'o'#250#28#215
-  +'S'#222#223#23#253'3{'#226#140#185#168#195#161#29#31#17#238'.'#254'6'#127#18
-  +#156#14#187#212#159#147#167#192#229#160'19'#127'w'#30#202'3'#181#218']'#202#5
-  +#241'\UF>j'#197#127#189#254'4'#137#223'bU%'#151#203'g'#143#161#26#26#143'Uo'
-  +#142#197#199#127'}'#3#155#150'N'#197#218#185#175'a'#195#226'h'#233#175#160
-  +#252#174#158'7'#158#250#209'T'#235#147#200#164#25#14'Z'#131#178'v5'#179'a'
-  +#179'Bo'#221#21#198'\'#176#221'{F'#223'#'#175'4'#190#245#249'sh'#188'&5'#197
-  +#230'P'#161#185#244'xl'#154'JR;'#145#5'6'#242#155#251#14#183#6#147#205#14#151
-  +'K'#246#11#216#29#22#169'!'#157'4E'#227'\h'#191#199#235'X'#139'1'#150'[v'#5
-  +#15#158'1.'#210'`<K'#24#239#160#132'2'#222#236#176'=b'#255#190#169#14'62'#192
-  +'x'#139#205'.x'#198#242#24#14#213'j'#248#228#130#149#136'm'#169#196#159'C'
-  +#243#188'h'#197#28'L'#158'>'#177#193#254#131#7'V'#232#190#218#197#182#230#182
-  +#27#190'4'#250'ou:`v='#192#226#149#243'0'#239#157#25#152':'''#26'v'#151#243
-  +'w'#254#187#168'~'#237#170'Y,i4'#255'4'#21'B'#245'V'#246']#'#178#9#150#199
-  +#152'0u,i'#185#4'o'#181'Q4'#170'^s.'#137']'#21#251#204'b<K8{'#140'7'#185'+'
-  +#169#173#167#232#235'eL'#153'o'#206#175'C'#21#188#195'i1'#246'Z'#242#159#249
-  +'v'#205#216'yiosV'#25#216'Zc'#14'4X'#201#136#248#9#214#181#26'5'#224'h'#192
-  +'K'#254'y'#165#208'>'#175#210'z'#161'Q'#8#201#227#240'7eT'#211#241'*'#21#138
-  +'SS'#27#246'y'#30#139#249'R?'#178#155#217#5'3o'#217'4,X1'#29'S'#230'L'#132'E'
-  +#163#253#158#214#156'''O'#178#127'kVcV'#220#13'|'#182#161#255'7c'#209'J'#202
-  +#223'{'#179'1&z'#184'1&P]S'#167#251#224't'#24'5'#160')'#247'kk'#132#199'kI'
-  +#247#200#129'zW'#5#150#173#155'/cL'#155'?Qx2'#127'F'#157'j4'#159'<o*'#159'O'
-  +#134'}=~'#202'+'#229'^'#207#219'}'#204']'#22#131'I3G'#163#218'\)2'#142#241
-  +#191#219'g|'#189#201'f'#204#159'['#234#181#218'v'#19'K'#214#204#194#196#153
-  +#195'%'#143#186#253'F;'#144#177#28'B'#245#166#186#134#248#185#206#230'.'#158
-  +#141#149#235#151'`'#252#244'a'#226#195'='#243#207#130#231'5'#224#169#19'}'
-  +#239'o'#180#207#177'3'#223'Ds'#161#175#157'z'#193#214#227#246'#'#246#153#184
-  +#250'd'#13#184#161'8U'#13#138#162#160'Y'#179'fhB-S3'#31'/4'#241'R'#208#212'['
-  +#145'V!'#146#138'u'#202#190'!'#181#200#249't'#216'U<'#222#162#165#224#227#226
-  +#226#176'y'#211'Fl'#137#221#140#237#219'b'#177'm'#235'f'#196#197'n'#196#214
-  +'-'#159'!)a'#7#154#249#250#200#202#183#218#237'2'#6#175#21'^'#140'M'#20'/$'''
-  +'&'#138#221'V-'#30'Cs'#159#166'h'#202#182#137#252#12'?X'#198'>x{{'#11#214'j'
-  +#151#179'K'#176#137#241#9#216#244#233#167#162's%'''#27#5#151's'#145's'#233#28
-  +#202#175#149#160#184#224#178'P~n'#14#202#174#254'Ct4M'#131#230't'#201'>'#224
-  +#231#227'+cl'#143#141#195'c>'#205'PVR'#140#240#208#16#132#133#4#10#5#245#244
-  +'Gdx'#31#12#8#15#195#185#179'g'#224#199'9j'#210'D'#242#198'$'#216'-'#219#208
-  +#188#169#15#174'd'#231' '#159#236'3'#149#149#20#162#240#178#222#230'^<'#135
-  +#178#210#18#148#22#22' /7W|'#176'Yi'#142'('#239#173'['#182'B'#220#198#207#208
-  +#140#198#201'>w'#30#3#201'Nd'#191#190#8#244#239#138#200'>'#193#136' '#10#236
-  +#209#13'}'#130#2#209'/$'#24'9YY'#240#161#28#176'm'#23#5#208#148#227#223#22#15
-  +#31#26#243'ja'#17#217#204#21#251#223'^+E1'#217#207#185#144#137#27#215#203#144
-  +#151#157'%y)-.'#22#251'n'#151#148#144#194#248'-'#155'6'#163#5#197#158'w)'#11
-  +'}'#131'8'#238'`D'#133#245'AXPo'#201'A'#159#192'^'#8#163#156#4#247#238#133
-  +#220#236'l'#193'{'#226#247#243#246#193#230#13#27#225#235#213#4#197'yW'#240
-  +#245#181#171'('#201#191#130#11#167#142#227'Z'#225#21#20#229#229#16#175'T'#242
-  +'_R'#144#143#146#162'"4k'#218'T'#240#156#3#223#166#205#144#176'}'#7#197#161
-  +#144#239'y'#8'!'#27#131#250'G'#136#221'~'#193#1#210'r'#252#161#129#1#24#24#17
-  +#142#252#188'<'#177#207#177'{'#242#191'5v'#11#197#239'Ev('#206#172'K'#200':'
-  +#151#137#235'WK('#15#151#200#151#203'(-'#186#130'k4'#175#249'y'#151#197#255
-  ,#230#205#155#11#150's'#224#173'4'#193#174#228#20#25#179'0?'#31'}'#131#131'$'
-  +#215#131#6#132#163'oH'#0#130'zwGD'#191#16#244#242#239#134#176#190'}'#196#127
-  +#174'u'#174'{M_'#198#226#131#175#143#143#248#198'q^'#167#28'd_'#204'DIa'#30
-  +#10#175#208'w'#249'U'#154#247#28'd'#231'd'#161#152#242#207'x9C'#140#245#195
-  +'c0'#143#169#245#31'Z'#137'/'#188#238#188#155#232'k'#143#201#219'X'#131#172
-  +#227'K'#254#243#253#155#207'cO'#29'x'#254#169'v'#155#220'm'#248'~'#225'v'#201
-  +#30'E'#159'v'#253#188'P'#245'u'#199'kX5'#206#26'}'#195'W'#229#219'*g'#143']'
-  +#246#10#30#130#135#162#171#25#221#177#221#162'h'#214#234'u'#29#222#255#238
-  +#155'u'#172#197'"W'#128'j'#186'V'#212#213#233#159't'#28#131#174#148'0'#209'u'
-  +#199'^'#215#216#183#18#191#138#174'$'#166':'#227#218'@'#202'|'#254#212#208'U'
-  +'-'#172#251'>'#132'u='#139#136'n)'#136#10#218#142#1#189#183#161'?QX'#183'8D'
-  +#5#198#11#175#191#255'.'#132#191#148#137#160#255'LA'#237'}}'#159'7'#145'Gu4~'
-  +'T'#239'\dl'#7'r'#142#16'}'#14'd'#29#5#242'O'#2'Eg'#244'~'#193#9#224#252'~'
-  +#224'D'#18#16#225#127'Q0ut'#198'pfj'#201#159#151#218''''#227','#201#143#239#1
-  +#210#226'M8'#156'T'#135#207'SM'#184'Lc|'#185#215#129#3#219#234#144#145#2'|'
-  +#177#19#232#231#127#24#149#213#250'K'#135'OA3'#165'"'#176'K<'#10'N'#1#217#25
-  +#192#21#178#245'M.'#240'5Qy'#22'Pv'#17#184#158#3#228#30'#'#223#190' |'#143'T'
-  +#212#214#234'X'#147#181#6'|'#20'G'#5#166#224#10#201'O'#239#181#225't'#234'm\'
-  +'>dB'#217'q7'#206'$'#221#193#233#157'wPz'#210#137#179#251#28'("'#127#194#252
-  +#227'a'''#155#22'y'#3#208'='#148#230')'#188#199'vdS'#156#223'd'#3'?\'#166#246
-  +#156#11#191'Q'#251#211'%'#224'G'#226'}'#155#229#198#13#250'>'#159#6'D'#246'N'
-  +#16#140'~R'#219'e^'#194#186''' '#151'|'#255'|W5'#190'/'#2'2v'#150#227#151'b'
-  +#224#210#225#223#232#14'^'#134#11'Go'#226'@'#252'-'#177#17#209'3I0'#14'>S'
-  +#232'Bd%_"{'#165#160#248'4P|'#142#226#205'q'#226';'#178'u=['#197#15'y'#192
-  +#181#11'V'#148'^'#180#163#156#242'QD9'#234#211'5^0'#181'f'#147#212#208#3#186
-  +'"'#135'w'#219#142#203'4o'''#247#152#241'5'#229#235#194#238'Z'#156'J'#172#192
-  +#233#248'J'#252'Jc]'#216'_Ew'#242';'#200':'#12#12#13'N'#133#179#206#168']'
-  +#170'#'#141#230'bx'#224#30#228#19#190#140#237'g'#186#241'3'#197'\~'#28#248
-  +#149#242'_~'#138#227#215'e_'#157#165'\wK'#132#233#166'Q'#131#250#147#16#131
-  +'^HEQ:'#207'o'#5#190#203#167':'#216#249'+'#190#167'1'#190'L'#188#137#211#187
-  +'o'#161#156'b:w'#208#140#236#191#3'C'#186#238#209#175#211#20#131'VO'#167'"]'
-  +#245#135#4#236'%9'#217')'#160'Z#;'#28'k'#30#213'Aq&'#217#164#185#191#198#223
-  +#228'G!'#205'_x'#215'D'#253#137#164#234'k'#233#183'[@'#207'^'#235#17#20#180#7
-  +#189#186'nAX@2B'#252'w "x'#15#194#2'S'#17#216'u'#27'B{'#236'@P'#247'x'#4#7
-  +#239'EX'#248'V<'#160#212#209'u'#15'u.(5T'#136'?'#209#186'*'#187#1#252#242'#'
-  +#240#243'w'#244#253#13#181#252#253#189#222#222#228#150'd'#223#254#172#235#222
-  +'3'#233'/"'#155#147#239#206'n'#253#13'o\+'#28#252'.'#166#141#194'Qk'#17#146
-  +#190#188#149'e'#207#21']'#198'0V'#165#179#148'k@s'#187#245#214#229'l'#216'k'
-  +#244';Jc'#159'e'#15#235#10#214'xC'#217#220'|k'#161';*'#233#181'l'#247#20#252
-  +#158#165';Ek/!'#191#182#143#163'e'#219'6"c'#29#214#245#224#232#10')wr'#149'd'
-  +'&'#146'*'#255#238#139'}'#151#211#145'p)'#21'G'#190'9&'#196#253#3#185#233'"c'
-  +#29#214#229#152#24'+5`'#214#227'j'#209#174#21#142'\='#130#196#146'$'#236#251
-  +#237#16'>*'#218','#180#151#250#204'c'#25#235#200#253#139'1'#14'c'#3' j'#243
-  +#244#211#240#253'c'#11#164#21#147'n'#209'N$]'#223#133#184#175#146#176#149'('
-  +#129#250#201#196'c'#25#235#176#174#7#247#192#166#202'>'#210#186'C'#27','#223
-  +#176#10#202#147#190#200'('#200'DZ'#222#231'8'#144#159#142'4&'#234'3'#143'e'
-  +#172#195#186#140'a,'#231#164#214'm'#133#223'3-'#176'r'#243'j|'#144#180#17'J'
-  +#27#31#248'='#255'8'#148#246#138#144#244#137#199'2'#214'a]'#198'0'#150'f'#145
-  +'Ra'#135'O'#235#166'x{'#195'[x'#239#192#10#204'O'#157#133#153#169'30c'#183'N'
-  +#220'g'#30#203'X'#135'u'#25#195'X'#205']O'#243'Q'#139'g^|'#26#171'SVb'#234
-  +#214'Ix+'#131#222'\'#251'&cR'#154'N'#220'g'#30#203'X'#231#153#174'm'#4#163
-  +#186#235'e'#255#169#165#255'J;'#5#29#254#220#17'3'#146#231'"'#134#236#253'e'
-  +#255#235#24'wp'#146#16#247#153#199'2'#214'a'#221'Zz_['#27'^'#26'6xu'#240#194
-  +#127#12#239#132#142#19'_'#196#132#228'70'#241#208'T'#140'K'#143#22#226'>'#243
-  +'X'#198':'#172'k'#150';'#190'S'#14'8'#179#157#207'5'#11#148#142#10#254#248
-  +#234'3xb'#252#31#224#23#211#18#205'g'#180#18#226'>'#243'X'#198':f'#210#181#18
-  +'F'#14'GM/'#243#26's'#13#213'V='#148#14#20#199#132#14'h7'#165'#|G='#14#223
-  +#145'-'#165#207'<'#150#177#14#235#234#215'w'#217#195#20#167#205'%'#231#178'*'
-  +#245'oG'#211'g'#253#224#221#190#25#188';0'#249'J'#159'yV'#169']Mt'#25#195'X!'
-  +'M?'#242#249#26#192#239'K'#253#13#166#137'.'#147#29#250#187#208'L2'#190#243
-  +#184#180'F'#219#228#136'"'#12'^K'#156#14#167'.7'#209#198#194'K'#153#201'T'
-  +#175#9#143'e'#242#147#21#140#135'0a'#205#245'u'#250'OP'#250'=F'#244#152'x'
-  +#201'?L'#194'w'#25#251#139']'#223'k<X'#190#143'3'#223'I'#155#161#213#226#198
-  +#159#135#141'Ed'#228#8#12#29':N'#136#251#204'c'#153'<'#187#220#6#6#13'['#12
-  ,'Tz'#247';H'#22'5p'#4#250#247#31#142'={2'#16#27#187#11#177#155'S'#165'?'#128
-  +'x,c<'#235'z~:'#243#188#167#172'V'#13'C'#135#140#196#176#161'c'#145#154'z'#20
-  +';'#147#143' %'#229'(Q'#6#146#169#207#188#161'$c'#29#214#245#188#131#229'=h'
-  +#228't'#208#224#145#24'<x,'#186'w'#143#192#142#29#135#144#148#148'.'#196#253
-  +#30#196#27'<x4'#134#144#142''''#23#140#181#219#221#210#231';'#214#224'!'#163
-  +#176#127#255'q'#188#242'J'#12#134#15#143'AH'#232#8#161'a'#212'g'#222'>'#146
-  +#241#24#172#235'z'#8#203#169#224'7-'#199'}'#250#204#21#28';'#150#141'#'#233
-  +'Y8y'#170'H'#232#200#209'K'#196#203#21#25#235'8]'#250'<'#186#12#223'y'#28#198
-  +#15#25'2'#6'_'#28#187#132'3g'#10'p0'#237'<'#142#159'('#16':x'#232#28#241#138
-  +'D'#198':'#140#151'k'#166'K'#207#27#183'&'#139'K'#252'?F:'#135#15'g";'#187#28
-  +'''N'#22#10']'#162'>'#243#24#207#254#179'n'#3#150#127#239#161#251''''#231'd'
-  +#196'+'#19'p'#242'd.'#206#158'-DFF6'#210#211'/'#10'q?'#147'x''Of'#227'U'#210
-  +'a]'#193#240'{'#215'l'#215#223#180'4^P`8.'#158'/ L&'#142#144'='#30#231#236
-  +#217'b'#177#205#188#243'$c'#29#151#241#134'7Y'#172#158'w'#144#208#240#225#163
-  +#17#18#28#137#180#180#19'4'#231#135'h'#222#246'cG'#252#1#233#31'&'#30#203'^!'
-  +#29#143#190#219#237'6'#150#2#221#129',6'#25'+'#178#255#203#232#31#241'2'#6#14
-  +'|'#21'QQ'#163#133#184#207'<'#150#185#201'w'#214'u'#185#244'_'#193#248#183'O'
-  +#183'Q'#255#158#181')k'#205#209#184'v'#184#239#169#25#143#191#140'a,'#175'Ai'
-  +'='#235'@m'#196'{'#214#175#211#224#169'j'#227'O'#198'.'#167#156#211#202#255
-  +#183#127'>>i'#244'wb'#203'v'#237'v'#15#8#8'8'#187'  '#224#204#194'g'#159'M'
-  +#28#164'(Q'#255#214#190#189#162'<'#246#216#191#198#245#233#163'(O=U'#162'<'
-  +#241#196#230'v'#131#6#149'&'#204#155'w'#187'z'#233#210'*'#247#146'%'#149#174
-  +#153'3oUGF'#22'%>'#249#228#210'N'#160#23'X@@'#243'G'#240'm'#219'n'#162#191's'
-  +#154'GE'#149'm['#184#176#210#181'hQ5'#230#207#175#194#156'9U'#152'='#187#10
-  +#179'fU'#184'"#Kw'#180'k7'#190'U'#219#182#31'(C'#135#14'k'#192'.X0Vy'#238#185
-  +'r'#229#133#23'.'#4'GG'#223#186'7mZ'#21#166'L'#209')&'#166#10#227#198'U`'#196
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#229#1#6'Height'#3'&'#2#3
+  +'Top'#3#131#0#5'Width'#3#186#3#7'Caption'#6#13'fmQueryWindow'#12'ClientHeigh'
+  +'t'#3' '#2#11'ClientWidth'#3#186#3#5'Color'#7#6'clForm'#10'KeyPreview'#9#4'M'
+  +'enu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#9
+  +'OnDestroy'#7#11'FormDestroy'#9'OnKeyDown'#7#11'FormKeyDown'#6'OnShow'#7#8'F'
+  +'ormShow'#9'PopupMenu'#7#5'pmTab'#8'Position'#7#14'poScreenCenter'#10'LCLVer'
+  +'sion'#6#7'2.2.6.0'#0#9'TSplitter'#9'Splitter1'#6'Cursor'#7#8'crVSplit'#4'Le'
+  +'ft'#2#0#6'Height'#2#12#3'Top'#3'('#1#5'Width'#3#186#3#5'Align'#7#5'alTop'#12
+  +'ResizeAnchor'#7#5'akTop'#0#0#6'TPanel'#14'pnlOutputPanel'#4'Left'#2#0#6'Hei'
+  +'ght'#3#236#0#3'Top'#3'4'#1#5'Width'#3#186#3#5'Align'#7#8'alClient'#10'Bevel'
+  +'Outer'#7#6'bvNone'#12'ClientHeight'#3#236#0#11'ClientWidth'#3#186#3#8'TabOr'
+  +'der'#2#2#0#12'TPageControl'#15'pgOutputPageCtl'#4'Left'#2#0#6'Height'#3#236
+  +#0#3'Top'#2#0#5'Width'#3#186#3#5'Align'#7#8'alClient'#6'Images'#7#6'imTabs'#8
+  +'TabOrder'#2#0#0#0#0#244#8'TSynEdit'#7'meQuery'#4'Left'#2#0#6'Height'#3#6#1#3
+  +'Top'#2'"'#5'Width'#3#186#3#5'Align'#7#5'alTop'#11'BlockIndent'#2#3#5'Color'
+  +#7#7'clCream'#11'Font.Height'#2#240#9'Font.Name'#6#11'Courier New'#10'Font.P'
+  +'itch'#7#7'fpFixed'#12'Font.Quality'#7#13'fqAntialiased'#11'ParentColor'#8#10
+  +'ParentFont'#8#14'ParentShowHint'#8#9'PopupMenu'#7#6'pmMemo'#8'TabOrder'#2#0
+  +#9'OnKeyDown'#7#14'meQueryKeyDown'#12'OnMouseEnter'#7#17'meQueryMouseEnter'
+  +#12'Gutter.Color'#4#246#241#246#0#12'Gutter.Width'#2'='#19'Gutter.MouseActio'
+  +'ns'#14#1#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#20
+  +'emcOnMainGutterClick'#0#1#6'Button'#7#7'mbRight'#7'Command'#7#14'emcContext'
+  +'Menu'#0#0#17'RightGutter.Width'#2#0#24'RightGutter.MouseActions'#14#1#10'Cl'
+  +'ickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#20'emcOnMainGutte'
+  +'rClick'#0#1#6'Button'#7#7'mbRight'#7'Command'#7#14'emcContextMenu'#0#0#11'H'
+  +'ighlighter'#7#10'SynSQLSyn1'#10'Keystrokes'#14#1#7'Command'#7#4'ecUp'#8'Sho'
+  +'rtCut'#2'&'#0#1#7'Command'#7#7'ecSelUp'#8'ShortCut'#3'& '#0#1#7'Command'#7
+  +#10'ecScrollUp'#8'ShortCut'#3'&@'#0#1#7'Command'#7#6'ecDown'#8'ShortCut'#2'('
+  +#0#1#7'Command'#7#9'ecSelDown'#8'ShortCut'#3'( '#0#1#7'Command'#7#12'ecScrol'
+  +'lDown'#8'ShortCut'#3'(@'#0#1#7'Command'#7#6'ecLeft'#8'ShortCut'#2'%'#0#1#7
+  +'Command'#7#9'ecSelLeft'#8'ShortCut'#3'% '#0#1#7'Command'#7#10'ecWordLeft'#8
+  +'ShortCut'#3'%@'#0#1#7'Command'#7#13'ecSelWordLeft'#8'ShortCut'#3'%`'#0#1#7
+  +'Command'#7#7'ecRight'#8'ShortCut'#2''''#0#1#7'Command'#7#10'ecSelRight'#8'S'
+  +'hortCut'#3''' '#0#1#7'Command'#7#11'ecWordRight'#8'ShortCut'#3'''@'#0#1#7'C'
+  +'ommand'#7#14'ecSelWordRight'#8'ShortCut'#3'''`'#0#1#7'Command'#7#10'ecPageD'
+  +'own'#8'ShortCut'#2'"'#0#1#7'Command'#7#13'ecSelPageDown'#8'ShortCut'#3'" '#0
+  +#1#7'Command'#7#12'ecPageBottom'#8'ShortCut'#3'"@'#0#1#7'Command'#7#15'ecSel'
+  +'PageBottom'#8'ShortCut'#3'"`'#0#1#7'Command'#7#8'ecPageUp'#8'ShortCut'#2'!'
+  +#0#1#7'Command'#7#11'ecSelPageUp'#8'ShortCut'#3'! '#0#1#7'Command'#7#9'ecPag'
+  +'eTop'#8'ShortCut'#3'!@'#0#1#7'Command'#7#12'ecSelPageTop'#8'ShortCut'#3'!`'
+  +#0#1#7'Command'#7#11'ecLineStart'#8'ShortCut'#2'$'#0#1#7'Command'#7#14'ecSel'
+  +'LineStart'#8'ShortCut'#3'$ '#0#1#7'Command'#7#11'ecEditorTop'#8'ShortCut'#3
+  +'$@'#0#1#7'Command'#7#14'ecSelEditorTop'#8'ShortCut'#3'$`'#0#1#7'Command'#7#9
+  +'ecLineEnd'#8'ShortCut'#2'#'#0#1#7'Command'#7#12'ecSelLineEnd'#8'ShortCut'#3
+  +'# '#0#1#7'Command'#7#14'ecEditorBottom'#8'ShortCut'#3'#@'#0#1#7'Command'#7
+  +#17'ecSelEditorBottom'#8'ShortCut'#3'#`'#0#1#7'Command'#7#12'ecToggleMode'#8
+  +'ShortCut'#2'-'#0#1#7'Command'#7#6'ecCopy'#8'ShortCut'#3'-@'#0#1#7'Command'#7
+  +#7'ecPaste'#8'ShortCut'#3'- '#0#1#7'Command'#7#12'ecDeleteChar'#8'ShortCut'#2
+  +'.'#0#1#7'Command'#7#5'ecCut'#8'ShortCut'#3'. '#0#1#7'Command'#7#16'ecDelete'
+  +'LastChar'#8'ShortCut'#2#8#0#1#7'Command'#7#16'ecDeleteLastChar'#8'ShortCut'
+  +#3#8' '#0#1#7'Command'#7#16'ecDeleteLastWord'#8'ShortCut'#3#8'@'#0#1#7'Comma'
+  +'nd'#7#6'ecUndo'#8'ShortCut'#4#8#128#0#0#0#1#7'Command'#7#6'ecRedo'#8'ShortC'
+  +'ut'#4#8#160#0#0#0#1#7'Command'#7#11'ecLineBreak'#8'ShortCut'#2#13#0#1#7'Com'
+  +'mand'#7#11'ecSelectAll'#8'ShortCut'#3'A@'#0#1#7'Command'#7#6'ecCopy'#8'Shor'
+  +'tCut'#3'C@'#0#1#7'Command'#7#13'ecBlockIndent'#8'ShortCut'#3'I`'#0#1#7'Comm'
+  +'and'#7#11'ecLineBreak'#8'ShortCut'#3'M@'#0#1#7'Command'#7#12'ecInsertLine'#8
+  +'ShortCut'#3'N@'#0#1#7'Command'#7#12'ecDeleteWord'#8'ShortCut'#3'T@'#0#1#7'C'
+  +'ommand'#7#15'ecBlockUnindent'#8'ShortCut'#3'U`'#0#1#7'Command'#7#7'ecPaste'
+  +#8'ShortCut'#3'V@'#0#1#7'Command'#7#5'ecCut'#8'ShortCut'#3'X@'#0#1#7'Command'
+  +#7#12'ecDeleteLine'#8'ShortCut'#3'Y@'#0#1#7'Command'#7#11'ecDeleteEOL'#8'Sho'
+  +'rtCut'#3'Y`'#0#1#7'Command'#7#6'ecUndo'#8'ShortCut'#3'Z@'#0#1#7'Command'#7#6
+  +'ecRedo'#8'ShortCut'#3'Z`'#0#1#7'Command'#7#13'ecGotoMarker0'#8'ShortCut'#3
+  +'0@'#0#1#7'Command'#7#13'ecGotoMarker1'#8'ShortCut'#3'1@'#0#1#7'Command'#7#13
+  +'ecGotoMarker2'#8'ShortCut'#3'2@'#0#1#7'Command'#7#13'ecGotoMarker3'#8'Short'
+  ,'Cut'#3'3@'#0#1#7'Command'#7#13'ecGotoMarker4'#8'ShortCut'#3'4@'#0#1#7'Comma'
+  +'nd'#7#13'ecGotoMarker5'#8'ShortCut'#3'5@'#0#1#7'Command'#7#13'ecGotoMarker6'
+  +#8'ShortCut'#3'6@'#0#1#7'Command'#7#13'ecGotoMarker7'#8'ShortCut'#3'7@'#0#1#7
+  +'Command'#7#13'ecGotoMarker8'#8'ShortCut'#3'8@'#0#1#7'Command'#7#13'ecGotoMa'
+  +'rker9'#8'ShortCut'#3'9@'#0#1#7'Command'#7#12'ecSetMarker0'#8'ShortCut'#3'0`'
+  +#0#1#7'Command'#7#12'ecSetMarker1'#8'ShortCut'#3'1`'#0#1#7'Command'#7#12'ecS'
+  +'etMarker2'#8'ShortCut'#3'2`'#0#1#7'Command'#7#12'ecSetMarker3'#8'ShortCut'#3
+  +'3`'#0#1#7'Command'#7#12'ecSetMarker4'#8'ShortCut'#3'4`'#0#1#7'Command'#7#12
+  +'ecSetMarker5'#8'ShortCut'#3'5`'#0#1#7'Command'#7#12'ecSetMarker6'#8'ShortCu'
+  +'t'#3'6`'#0#1#7'Command'#7#12'ecSetMarker7'#8'ShortCut'#3'7`'#0#1#7'Command'
+  +#7#12'ecSetMarker8'#8'ShortCut'#3'8`'#0#1#7'Command'#7#12'ecSetMarker9'#8'Sh'
+  +'ortCut'#3'9`'#0#1#7'Command'#7#12'EcFoldLevel1'#8'ShortCut'#4'1'#160#0#0#0#1
+  +#7'Command'#7#12'EcFoldLevel2'#8'ShortCut'#4'2'#160#0#0#0#1#7'Command'#7#12
+  +'EcFoldLevel1'#8'ShortCut'#4'3'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel1'#8
+  +'ShortCut'#4'4'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel1'#8'ShortCut'#4'5'
+  +#160#0#0#0#1#7'Command'#7#12'EcFoldLevel6'#8'ShortCut'#4'6'#160#0#0#0#1#7'Co'
+  +'mmand'#7#12'EcFoldLevel7'#8'ShortCut'#4'7'#160#0#0#0#1#7'Command'#7#12'EcFo'
+  +'ldLevel8'#8'ShortCut'#4'8'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel9'#8'Shor'
+  +'tCut'#4'9'#160#0#0#0#1#7'Command'#7#12'EcFoldLevel0'#8'ShortCut'#4'0'#160#0
+  +#0#0#1#7'Command'#7#13'EcFoldCurrent'#8'ShortCut'#4'-'#160#0#0#0#1#7'Command'
+  +#7#15'EcUnFoldCurrent'#8'ShortCut'#4'+'#160#0#0#0#1#7'Command'#7#18'EcToggle'
+  +'MarkupWord'#8'ShortCut'#4'M'#128#0#0#0#1#7'Command'#7#14'ecNormalSelect'#8
+  +'ShortCut'#3'N`'#0#1#7'Command'#7#14'ecColumnSelect'#8'ShortCut'#3'C`'#0#1#7
+  +'Command'#7#12'ecLineSelect'#8'ShortCut'#3'L`'#0#1#7'Command'#7#5'ecTab'#8'S'
+  +'hortCut'#2#9#0#1#7'Command'#7#10'ecShiftTab'#8'ShortCut'#3#9' '#0#1#7'Comma'
+  +'nd'#7#14'ecMatchBracket'#8'ShortCut'#3'B`'#0#1#7'Command'#7#10'ecColSelUp'#8
+  +'ShortCut'#4'&'#160#0#0#0#1#7'Command'#7#12'ecColSelDown'#8'ShortCut'#4'('
+  +#160#0#0#0#1#7'Command'#7#12'ecColSelLeft'#8'ShortCut'#4'%'#160#0#0#0#1#7'Co'
+  +'mmand'#7#13'ecColSelRight'#8'ShortCut'#4''''#160#0#0#0#1#7'Command'#7#16'ec'
+  +'ColSelPageDown'#8'ShortCut'#4'"'#160#0#0#0#1#7'Command'#7#18'ecColSelPageBo'
+  +'ttom'#8'ShortCut'#4'"'#224#0#0#0#1#7'Command'#7#14'ecColSelPageUp'#8'ShortC'
+  +'ut'#4'!'#160#0#0#0#1#7'Command'#7#15'ecColSelPageTop'#8'ShortCut'#4'!'#224#0
+  +#0#0#1#7'Command'#7#17'ecColSelLineStart'#8'ShortCut'#4'$'#160#0#0#0#1#7'Com'
+  +'mand'#7#15'ecColSelLineEnd'#8'ShortCut'#4'#'#160#0#0#0#1#7'Command'#7#17'ec'
+  +'ColSelEditorTop'#8'ShortCut'#4'$'#224#0#0#0#1#7'Command'#7#20'ecColSelEdito'
+  +'rBottom'#8'ShortCut'#4'#'#224#0#0#0#0#12'MouseActions'#14#1#9'ShiftMask'#11
+  +#7'ssShift'#5'ssAlt'#0#8'ClickDir'#7#6'cdDown'#7'Command'#7#18'emcStartSelec'
+  +'tions'#9'MoveCaret'#9#0#1#5'Shift'#11#7'ssShift'#0#9'ShiftMask'#11#7'ssShif'
+  +'t'#5'ssAlt'#0#8'ClickDir'#7#6'cdDown'#7'Command'#7#18'emcStartSelections'#9
+  +'MoveCaret'#9#6'Option'#2#1#0#1#5'Shift'#11#5'ssAlt'#0#9'ShiftMask'#11#7'ssS'
+  +'hift'#5'ssAlt'#0#8'ClickDir'#7#6'cdDown'#7'Command'#7#24'emcStartColumnSele'
+  +'ctions'#9'MoveCaret'#9#0#1#5'Shift'#11#7'ssShift'#5'ssAlt'#0#9'ShiftMask'#11
+  +#7'ssShift'#5'ssAlt'#0#8'ClickDir'#7#6'cdDown'#7'Command'#7#24'emcStartColum'
+  +'nSelections'#9'MoveCaret'#9#6'Option'#2#1#0#1#6'Button'#7#7'mbRight'#7'Comm'
+  +'and'#7#14'emcContextMenu'#0#1#10'ClickCount'#7#8'ccDouble'#8'ClickDir'#7#6
+  +'cdDown'#7'Command'#7#13'emcSelectWord'#9'MoveCaret'#9#0#1#10'ClickCount'#7#8
+  +'ccTriple'#8'ClickDir'#7#6'cdDown'#7'Command'#7#13'emcSelectLine'#9'MoveCare'
+  +'t'#9#0#1#10'ClickCount'#7#6'ccQuad'#8'ClickDir'#7#6'cdDown'#7'Command'#7#13
+  +'emcSelectPara'#9'MoveCaret'#9#0#1#6'Button'#7#8'mbMiddle'#8'ClickDir'#7#6'c'
+  +'dDown'#7'Command'#7#17'emcPasteSelection'#9'MoveCaret'#9#0#1#5'Shift'#11#6
+  +'ssCtrl'#0#9'ShiftMask'#11#7'ssShift'#5'ssAlt'#6'ssCtrl'#0#7'Command'#7#12'e'
+  +'mcMouseLink'#0#0#16'MouseTextActions'#14#0#15'MouseSelActions'#14#1#8'Click'
+  +'Dir'#7#6'cdDown'#7'Command'#7#16'emcStartDragMove'#0#0#19'VisibleSpecialCha'
+  +'rs'#11#8'vscSpace'#12'vscTabAtLast'#0#9'RightEdge'#2'x'#10'ScrollBars'#7#10
+  +'ssAutoBoth'#26'SelectedColor.BackPriority'#2'2'#26'SelectedColor.ForePriori'
+  +'ty'#2'2'#27'SelectedColor.FramePriority'#2'2'#26'SelectedColor.BoldPriority'
+  +#2'2'#28'SelectedColor.ItalicPriority'#2'2'#31'SelectedColor.UnderlinePriori'
+  +'ty'#2'2'#31'SelectedColor.StrikeOutPriority'#2'2'#21'BracketHighlightStyle'
+  +#7#8'sbhsBoth'#28'BracketMatchColor.Background'#7#6'clNone'#28'BracketMatchC'
+  +'olor.Foreground'#7#6'clNone'#23'BracketMatchColor.Style'#11#6'fsBold'#0#26
+  +'FoldedCodeColor.Background'#7#6'clNone'#26'FoldedCodeColor.Foreground'#7#6
+  +'clGray'#26'FoldedCodeColor.FrameColor'#7#6'clGray'#25'MouseLinkColor.Backgr'
+  +'ound'#7#6'clNone'#25'MouseLinkColor.Foreground'#7#6'clBlue'#29'LineHighligh'
+  +'tColor.Background'#7#6'clNone'#29'LineHighlightColor.Foreground'#7#6'clNone'
+  ,#0#244#18'TSynGutterPartList'#0#0#15'TSynGutterMarks'#0#5'Width'#2#24#12'Mou'
+  +'seActions'#14#0#0#0#20'TSynGutterLineNumber'#0#5'Width'#2#21#12'MouseAction'
+  +'s'#14#0#21'MarkupInfo.Background'#4#243#250#254#0#21'MarkupInfo.Foreground'
+  +#7#6'clNone'#10'DigitCount'#2#2#30'ShowOnlyLineNumbersMultiplesOf'#2#1#9'Zer'
+  +'oStart'#8#12'LeadingZeros'#8#0#0#17'TSynGutterChanges'#0#5'Width'#2#4#12'Mo'
+  +'useActions'#14#0#13'ModifiedColor'#4#252#233#0#0#10'SavedColor'#7#7'clGreen'
+  +#0#0#19'TSynGutterSeparator'#0#5'Width'#2#2#12'MouseActions'#14#0#21'MarkupI'
+  +'nfo.Background'#7#7'clWhite'#21'MarkupInfo.Foreground'#7#6'clGray'#0#0#21'T'
+  +'SynGutterCodeFolding'#0#12'MouseActions'#14#1#6'Button'#7#7'mbRight'#7'Comm'
+  +'and'#7#22'emcCodeFoldContextMenu'#0#1#9'ShiftMask'#11#7'ssShift'#0#6'Button'
+  +#7#8'mbMiddle'#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7
+  +#18'emcCodeFoldCollaps'#0#1#5'Shift'#11#7'ssShift'#0#9'ShiftMask'#11#7'ssShi'
+  +'ft'#0#6'Button'#7#8'mbMiddle'#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdD'
+  +'own'#7'Command'#7#18'emcCodeFoldCollaps'#6'Option'#2#1#0#1#10'ClickCount'#7
+  +#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#7'emcNone'#0#0#21'MarkupInfo.'
+  +'Background'#7#6'clNone'#21'MarkupInfo.Foreground'#7#6'clGray'#20'MouseActio'
+  +'nsExpanded'#14#1#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Comman'
+  +'d'#7#18'emcCodeFoldCollaps'#0#0#21'MouseActionsCollapsed'#14#1#5'Shift'#11#6
+  +'ssCtrl'#0#9'ShiftMask'#11#6'ssCtrl'#0#10'ClickCount'#7#5'ccAny'#8'ClickDir'
+  +#7#6'cdDown'#7'Command'#7#17'emcCodeFoldExpand'#0#1#9'ShiftMask'#11#6'ssCtrl'
+  +#0#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#17'emcCode'
+  +'FoldExpand'#6'Option'#2#1#0#0#0#0#0#0#8'TToolBar'#8'ToolBar1'#4'Left'#2#0#6
+  +'Height'#2'"'#3'Top'#2#0#5'Width'#3#186#3#11'BorderWidth'#2#2#12'ButtonHeigh'
+  +'t'#2' '#11'ButtonWidth'#2' '#7'Caption'#6#8'ToolBar1'#5'Color'#7#6'clForm'#6
+  +'Images'#7#13'toolbarImages'#11'ParentColor'#8#14'ParentShowHint'#8#8'ShowHi'
+  +'nt'#9#8'TabOrder'#2#3#12'OnMouseEnter'#7#18'ToolBar1MouseEnter'#12'OnMouseL'
+  +'eave'#7#18'ToolBar1MouseLeave'#0#11'TToolButton'#5'tbNew'#4'Left'#2#1#4'Hin'
+  +'t'#6#25'Open New SQL Query Window'#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2
+  +#0#7'OnClick'#7#10'tbNewClick'#12'OnMouseEnter'#7#15'tbNewMouseEnter'#12'OnM'
+  +'ouseLeave'#7#15'tbNewMouseLeave'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11
+  +'TToolButton'#6'tbOpen'#4'Left'#2'%'#4'Hint'#6#13'Open SQL file'#3'Top'#2#2#8
+  +'AutoSize'#9#7'Caption'#6#6'tbOpen'#10'ImageIndex'#2#1#7'OnClick'#7#11'tbOpe'
+  +'nClick'#12'OnMouseEnter'#7#16'tbOpenMouseEnter'#14'ParentShowHint'#8#8'Show'
+  +'Hint'#9#0#0#11'TToolButton'#6'tbSave'#4'Left'#2'I'#4'Hint'#6#16'Save SQL to'
+  +' file'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbSave'#10'ImageIndex'#2#2#7
+  +'OnClick'#7#11'tbSaveClick'#12'OnMouseEnter'#7#16'tbSaveMouseEnter'#14'Paren'
+  +'tShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#5'tbRun'#4'Left'#2'm'#4'Hint'
+  +#6#14'Run Query (F5)'#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2#5#7'OnClick'
+  +#7#10'tbRunClick'#12'OnMouseEnter'#7#15'tbRunMouseEnter'#14'ParentShowHint'#8
+  +#8'ShowHint'#9#0#0#11'TToolButton'#8'tbCommit'#4'Left'#3#186#0#4'Hint'#6#18
+  +'Commit Transaction'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#8'tbCommit'#10'Im'
+  +'ageIndex'#2#4#7'OnClick'#7#13'tbCommitClick'#12'OnMouseEnter'#7#18'tbCommit'
+  +'MouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#10'tbRol'
+  +'lback'#4'Left'#3#2#1#4'Hint'#6#20'Rollback Transaction'#3'Top'#2#2#8'AutoSi'
+  +'ze'#9#7'Caption'#6#10'tbRollback'#10'ImageIndex'#2#7#7'OnClick'#7#15'tbRoll'
+  +'backClick'#12'OnMouseEnter'#7#20'tbRollbackMouseEnter'#14'ParentShowHint'#8
+  +#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton2'#4'Left'#3'&'#1#6'Height'#2
+  +' '#3'Top'#2#2#7'Caption'#6#11'ToolButton2'#5'Style'#7#12'tbsSeparator'#0#0
+  +#11'TToolButton'#11'ToolButton3'#4'Left'#3'R'#1#6'Height'#2' '#3'Top'#2#2#7
+  +'Caption'#6#11'ToolButton3'#5'Style'#7#12'tbsSeparator'#0#0#11'TToolButton'#9
+  +'tbHistory'#4'Left'#3'.'#1#4'Hint'#6#11'SQL History'#3'Top'#2#2#8'AutoSize'#9
+  +#7'Caption'#6#9'tbHistory'#10'ImageIndex'#2#8#7'OnClick'#7#14'tbHistoryClick'
+  +#12'OnMouseEnter'#7#19'tbHistoryMouseEnter'#14'ParentShowHint'#8#8'ShowHint'
+  +#9#0#0#11'TToolButton'#11'ToolButton5'#4'Left'#3#181#0#6'Height'#2' '#3'Top'
+  +#2#2#7'Caption'#6#11'ToolButton5'#5'Style'#7#10'tbsDivider'#0#0#11'TToolButt'
+  +'on'#6'tbMenu'#4'Left'#3'Z'#1#4'Hint'#6#4'Menu'#3'Top'#2#2#8'AutoSize'#9#7'C'
+  +'aption'#6#6'tbMenu'#10'ImageIndex'#2#9#7'OnClick'#7#11'tbMenuClick'#12'OnMo'
+  +'useEnter'#7#16'tbMenuMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11
+  +'TToolButton'#17'tbCommitRetaining'#4'Left'#3#145#0#4'Hint'#6#16'Commit Reta'
+  +'ining'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#17'tbCommitRetaining'#10'Image'
+  +'Index'#2#6#7'OnClick'#7#22'tbCommitRetainingClick'#12'OnMouseEnter'#7#27'tb'
+  +'CommitRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolB'
+  +'utton'#19'tbRollbackRetaining'#4'Left'#3#222#0#4'Hint'#6#18'Rollback Retain'
+  +'ing'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#19'tbRollbackRetaining'#10'Image'
+  ,'Index'#2#3#7'OnClick'#7#24'tbRollbackRetainingClick'#12'OnMouseEnter'#7#29
+  +'tbRollbackRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TT'
+  +'oolButton'#11'ToolButton1'#4'Left'#3#162#1#6'Height'#2' '#3'Top'#2#2#7'Capt'
+  +'ion'#6#11'ToolButton1'#5'Style'#7#12'tbsSeparator'#0#0#9'TCheckBox'#12'cxAu'
+  +'toCommit'#4'Left'#3#170#1#6'Height'#2#21#4'Hint'#6#18'Auto Commit ON/OFF'#3
+  +'Top'#2#2#5'Width'#2'i'#7'Caption'#6#11'Auto Commit'#7'Checked'#9#12'OnMouse'
+  +'Enter'#7#22'cxAutoCommitMouseEnter'#12'OnMouseLeave'#7#22'cxAutoCommitMouse'
+  +'Leave'#5'State'#7#9'cbChecked'#8'TabOrder'#2#0#0#0#11'TToolButton'#13'tbQue'
+  +'ryDesign'#4'Left'#3'~'#1#4'Hint'#6#14'Query Designer'#3'Top'#2#2#7'Caption'
+  +#6#13'tbQueryDesign'#10'ImageIndex'#2#11#7'OnClick'#7#18'tbQueryDesignClick'
+  +#12'OnMouseEnter'#7#23'tbQueryDesignMouseEnter'#14'ParentShowHint'#8#8'ShowH'
+  +'int'#9#0#0#11'TRadioGroup'#13'rgScreenModes'#4'Left'#3'x'#2#6'Height'#2' '#4
+  +'Hint'#6#12'Screen Modes'#3'Top'#2#0#5'Width'#3#185#0#5'Align'#7#7'alRight'#8
+  +'AutoFill'#9#28'ChildSizing.LeftRightSpacing'#2#6#29'ChildSizing.EnlargeHori'
+  +'zontal'#7#24'crsHomogenousChildResize'#27'ChildSizing.EnlargeVertical'#7#24
+  +'crsHomogenousChildResize'#28'ChildSizing.ShrinkHorizontal'#7#14'crsScaleChi'
+  +'lds'#26'ChildSizing.ShrinkVertical'#7#14'crsScaleChilds'#18'ChildSizing.Lay'
+  +'out'#7#29'cclLeftToRightThenTopToBottom'#27'ChildSizing.ControlsPerLine'#2#3
+  +#12'ClientHeight'#2#30#11'ClientWidth'#3#183#0#7'Columns'#2#3#9'ItemIndex'#2
+  +#0#13'Items.Strings'#1#6#3'NFS'#6#3'CFS'#6#3'RFC'#0#7'OnClick'#7#18'rgScreen'
+  +'ModesClick'#12'OnMouseEnter'#7#23'rgScreenModesMouseEnter'#8'TabOrder'#2#1#0
+  +#0#0#11'TOpenDialog'#11'OpenDialog1'#10'DefaultExt'#6#4'.sql'#6'Filter'#6#29
+  +'SQL Files|*.sql|All Files|*.*'#4'Left'#2'X'#3'Top'#2'P'#0#0#11'TSaveDialog'
+  +#11'SaveDialog1'#7'Options'#11#17'ofOverwritePrompt'#14'ofEnableSizing'#12'o'
+  +'fViewDetail'#0#4'Left'#3#192#0#3'Top'#2'P'#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'
+  +#13'DefaultFilter'#6#23'SQL Files (*.sql)|*.sql'#7'Enabled'#8#23'CommentAttr'
+  +'i.Foreground'#7#6'clTeal'#26'IdentifierAttri.Foreground'#4'1'#26#255#0#22'N'
+  +'umberAttri.Foreground'#4'644'#0#22'StringAttri.Foreground'#4#161#16#16#0#22
+  +'SymbolAttri.Foreground'#4'b'#8#8#0#25'TableNameAttri.Foreground'#7#6'clNavy'
+  +#20'TableNameAttri.Style'#11#6'fsBold'#0#10'SQLDialect'#7#9'sqlSybase'#4'Lef'
+  +'t'#3#224#2#3'Top'#3'Q'#1#0#0#10'TPopupMenu'#6'pmMemo'#4'Left'#3' '#2#3'Top'
+  +#3#144#1#0#9'TMenuItem'#6'lmUndo'#7'Caption'#6#4'Undo'#7'OnClick'#7#11'lmUnd'
+  +'oClick'#0#0#9'TMenuItem'#6'lmRedo'#7'Caption'#6#4'Redo'#7'OnClick'#7#11'lmR'
+  +'edoClick'#0#0#9'TMenuItem'#9'MenuItem1'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#6
+  +'lmCopy'#7'Caption'#6#4'Copy'#8'ShortCut'#3'C@'#7'OnClick'#7#11'lmCopyClick'
+  +#0#0#9'TMenuItem'#5'lmCut'#7'Caption'#6#3'Cut'#8'ShortCut'#3'X@'#7'OnClick'#7
+  +#10'lmCutClick'#0#0#9'TMenuItem'#7'lmPaste'#7'Caption'#6#5'Paste'#8'ShortCut'
+  +#3'V@'#7'OnClick'#7#12'lmPasteClick'#0#0#9'TMenuItem'#11'lmSelectAll'#7'Capt'
+  +'ion'#6#10'Select All'#8'ShortCut'#3'A@'#7'OnClick'#7#16'lmSelectAllClick'#0
+  +#0#9'TMenuItem'#9'MenuItem2'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#6'lmFind'#7
+  +'Caption'#6#4'Find'#7'OnClick'#7#11'lmFindClick'#0#0#9'TMenuItem'#11'lmFindA'
+  +'gain'#7'Caption'#6#10'Find Again'#7'OnClick'#7#16'lmFindAgainClick'#0#0#0#11
+  +'TFindDialog'#11'FindDialog1'#6'OnFind'#7#15'FindDialog1Find'#4'Left'#3#192#0
+  +#3'Top'#3#168#0#0#0#10'TPopupMenu'#5'pmTab'#4'Left'#3'h'#1#3'Top'#3#144#1#0#9
+  +'TMenuItem'#8'lmExport'#7'Caption'#6#19'Export Result as...'#0#0#9'TMenuItem'
+  +#9'MenuItem5'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#5'lmRun'#7'Caption'#6#16'Ru'
+  +'n Query (Auto)'#8'ShortCut'#2't'#7'OnClick'#7#10'lmRunClick'#0#0#9'TMenuIte'
+  +'m'#11'lmRunSelect'#7'Caption'#6#21'Run Query (As Select)'#7'OnClick'#7#16'l'
+  +'mRunSelectClick'#0#0#9'TMenuItem'#9'lmRunExec'#7'Caption'#6#22'Run Query (A'
+  +'s Execute)'#7'OnClick'#7#14'lmRunExecClick'#0#0#9'TMenuItem'#11'lmRunScript'
+  +#7'Caption'#6#21'Run Query (As Script)'#7'OnClick'#7#16'lmRunScriptClick'#0#0
+  +#9'TMenuItem'#10'MenuItem10'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#10'lmCloseTa'
+  +'b'#7'Caption'#6#9'Close Tab'#7'OnClick'#7#15'lmCloseTabClick'#0#0#0#9'TMain'
+  +'Menu'#9'MainMenu1'#4'Left'#3#240#0#3'Top'#3#144#1#0#9'TMenuItem'#9'MenuItem'
+  +'3'#7'Caption'#6#3'Run'#8'ShortCut'#2't'#7'Visible'#8#7'OnClick'#7#10'bbRunC'
+  +'lick'#0#0#0#10'TImageList'#6'imTabs'#4'Left'#3#208#2#3'Top'#2#127#6'Bitmap'
+  +#10'7'#16#0#0'Lz'#7#0#0#0#16#0#0#0#16#0#0#0'!'#16#0#0#0#0#0#0'x'#218#221'Xw|'
+  +'UU'#182'>!'#132#4#17#153#135#242#28#5'|'#148#145#167'Hh'#169'@'#18#2#161#200
+  +#128#210#164#12'$'#2#210#164'+'#140#148#17#16#20'E'#17'$'#161#132#20'B'#128
+  +#161#4#8'F'#164#135#150'BH'#31#136#193#130#221'GM#$'#183#159'{'#238#253'f'
+  +#173'u'#206'M'#240'1'#239#253#253'~'#15'~+{'#159#181#214#183'W'#217'k'#183
+  +#251#192#6#184#0#5#168#135'N'#14'8'#205'u'#212'j'#143#146#211'l'#232'X'#224
+  +'t'#185'a%'#160#221#13#168#170'J'#157'J'#226'3'#206'N'#228#212#201'B'#223'N2'
+  +#160#25'<'#167#201#208'1'#195'b'#177#8#214#226#160'?pc'#245#162')X:s'#12#222
+  ,#153#19#131'U'#139#231'b'#246#164'1X'#183'l'#17'V'#189#245'&'#150#204'z'#29
+  +#171#151#204#195#234#197#179#176'|'#246'kX:{'#130'`T'#130#154#173#28#128#29
+  +'k'#22'E'#19#175#166#193'?!'#245#190#216#146#190#195'#'#171#193#202#5#147#196
+  +#159':'#19#203' 1'#127#184'8'#134#218'*'#236#219#178#22#241#31#173#192#151'{'
+  +#183'`w'#236#26#226'='#192#209#148'MHK'#248#20#251#183#190'/:'#31#191'3'#149
+  +'lZ'#5#233#214'(.'#199#3'|'#244#246'd'#192#246#147#232'K'#140#238#26'#V'#166
+  +#251#186'm'#245#30#181#149'X=g'#172#228'I'#176'pK'#255#221'Y'#163'D'#150#182
+  +'}'#13#142'&o'#192#190#216#247'd'#172#131'['#215#226'P'#194#135'2'#206#145
+  +#132#15#168#173#192#7#11''''#18#164#214#192#178#251#245'x'#127#209'$'#193#195
+  +']'#253#144#221#154'F'#127#164#189'/:k'#23#254'Ebv8'#28'2'#247#154#221#132'u'
+  +'K'#166'Jl{'#197'n'#189#228'Al&~'#140#195#9#235')'#254#143'qp'#251':'#209'Y'
+  +#181'p'#178#228#143#177#170#11'R'#27'Kf'#142'm'#204#191#250'P'#236#142'{F'
+  +#222')'#215#238#251#162#179#244#205#241#212'W'#161#178#23'TV.'#167#138#191
+  +#205#155','#254'%~'#178'Bt'#247'o'#255#16#7#182#174#195#209#164'O'#5#191#235
+  +#179#181'H'#167'y`'#251'Kf'#188'&'#177#215#217'4'#169'!Mu`'#205#219#211#26
+  +#243#204#182#156#213'z'#204#142#202'F'#158#145#131#247#151'L'''#163':'#182
+  +#222#170#207#193#187#11'&'#139'o'#250#28#215'S'#222#223#23#253'3{'#226#140
+  +#185#168#195#161#29#31#17#238'.'#254'6'#127#18#156#14#187#212#159#147#167#192
+  +#229#160'19'#127'w'#30#202'3'#181#218']'#202#5#241'\UF>j'#197#127#189#254'4'
+  +#137#223'bU%'#151#203'g'#143#161#26#26#143'Uo'#142#197#199#127'}'#3#155#150
+  +'N'#197#218#185#175'a'#195#226'h'#233#175#160#252#174#158'7'#158#250#209'T'
+  +#235#147#200#164#25#14'Z'#131#178'v5'#179'a'#179'Bo'#221#21#198'\'#176#221'{'
+  +'F'#223'#'#175'4'#190#245#249'sh'#188'&5'#197#230'P'#161#185#244'xl'#154'JR;'
+  +#145#5'6'#242#155#251#14#183#6#147#205#14#151'K'#246#11#216#29#22#169'!'#157
+  +'4E'#227'\h'#191#199#235'X'#139'1'#150'[v'#5#15#158'1.'#210'`<K'#24#239#160
+  +#132'2'#222#236#176'=b'#255#190#169#14'62'#192'x'#139#205'.x'#198#242#24#14
+  +#213'j'#248#228#130#149#136'm'#169#196#159'C'#243#188'h'#197#28'L'#158'>'#177
+  +#193#254#131#7'V'#232#190#218#197#182#230#182#27#190'4'#250'ou:`v='#192#226
+  +#149#243'0'#239#157#25#152':'''#26'v'#151#243'w'#254#187#168'~'#237#170'Y,i4'
+  +#255'4'#21'B'#245'V'#246']#'#178#9#150#199#152'0u,i'#185#4'o'#181'Q4'#170'^s'
+  +'.'#137']'#21#251#204'b<K8{'#140'7'#185'+'#169#173#167#232#235'eL'#153'o'#206
+  +#175'C'#21#188#195'i1'#246'Z'#242#159#249'v'#205#216'yiosV'#25#216'Zc'#14'4X'
+  +#201#136#248#9#214#181#26'5'#224'h'#192'K'#254'y'#165#208'>'#175#210'z'#161
+  +'Q'#8#201#227#240'7eT'#211#241'*'#21#138'SS'#27#246'y'#30#139#249'R?'#178#155
+  +#217#5'3o'#217'4,X1'#29'S'#230'L'#132'E'#163#253#158#214#156'''O'#178#127'kV'
+  +'cV'#220#13'|'#182#161#255'7c'#209'J'#202#223'{'#179'1&z'#184'1&P]S'#167#251
+  +#224't'#24'5'#160')'#247'kk'#132#199'kI'#247#200#129'zW'#5#150#173#155'/cL'
+  +#155'?Qx2'#127'F'#157'j4'#159'<o*'#159'O'#134'}=~'#202'+'#229'^'#207#219'}'
+  +#204']'#22#131'I3G'#163#218'\)2'#142#241#191#219'g|'#189#201'f'#204#159'['
+  +#234#181#218'v'#19'K'#214#204#194#196#153#195'%'#143#186#253'F;'#144#177#28
+  +'B'#245#166#186#134#248#185#206#230'.'#158#141#149#235#151'`'#252#244'a'#226
+  +#195'='#243#207#130#231'5'#224#169#19'}'#239'o'#180#207#177'3'#223'Ds'#161
+  +#175#157'z'#193#214#227#246'#'#246#153#184#250'd'#13#184#161'8U'#13#138#162
+  +#160'Y'#179'fhB-S3'#31'/4'#241'R'#208#212'['#145'V!'#146#138'u'#202#190'!'
+  +#181#200#249't'#216'U<'#222#162#165#224#227#226#226#176'y'#211'Fl'#137#221
+  +#140#237#219'b'#177'm'#235'f'#196#197'n'#196#214'-'#159'!)a'#7#154#249#250
+  +#200#202#183#218#237'2'#6#175#21'^'#140'M'#20'/$''&'#138#221'V-'#30'Cs'#159
+  +#166'h'#202#182#137#252#12'?X'#198'>x{{'#11#214'j'#151#179'K'#176#137#241#9
+  +#216#244#233#167#162's%'''#27#5#151's'#145's'#233#28#202#175#149#160#184#224
+  +#178'P~n'#14#202#174#254'Ct4M'#131#230't'#201'>'#224#231#227'+cl'#143#141#195
+  +'c>'#205'PVR'#140#240#208#16#132#133#4#10#5#245#244'Gdx'#31#12#8#15#195#185
+  +#179'g'#224#199'9j'#210'D'#242#198'$'#216'-'#219#208#188#169#15#174'd'#231' '
+  +#159#236'3'#149#149#20#162#240#178#222#230'^<'#135#178#210#18#148#22#22' /7W'
+  +'|'#176'Yi'#142'('#239#173'['#182'B'#220#198#207#208#140#198#201'>w'#30#3#201
+  +'Nd'#191#190#8#244#239#138#200'>'#193#136' '#10#236#209#13'}'#130#2#209'/$'
+  +#24'9YY'#240#161#28#176'm'#23#5#208#148#227#223#22#15#31#26#243'ja'#17#217
+  +#204#21#251#223'^+E1'#217#207#185#144#137#27#215#203#144#151#157'%y)-.'#22
+  +#251'n'#151#148#144#194#248'-'#155'6'#163#5#197#158'w)'#11'}'#131'8'#238'`D'
+  +#133#245'AXPo'#201'A'#159#192'^'#8#163#156#4#247#238#133#220#236'l'#193'{'
+  +#226#247#243#246#193#230#13#27#225#235#213#4#197'yW'#240#245#181#171'('#201
+  +#191#130#11#167#142#227'Z'#225#21#20#229#229#16#175'T'#242'_R'#144#143#146
+  +#162'"4k'#218'T'#240#156#3#223#166#205#144#176'}'#7#197#161#144#239'y'#8'!'
+  +#27#131#250'G'#136#221'~'#193#1#210'r'#252#161#129#1#24#24#17#142#252#188'<'
+  +#177#207#177'{'#242#191'5v'#11#197#239'Ev('#206#172'K'#200':'#151#137#235'WK'
+  ,'('#15#151#200#151#203'(-'#186#130'k4'#175#249'y'#151#197#255#230#205#155#11
+  +#150's'#224#173'4'#193#174#228#20#25#179'0?'#31'}'#131#131'$'#215#131#6#132
+  +#163'oH'#0#130'zwGD'#191#16#244#242#239#134#176#190'}'#196#127#174'u'#174'{M'
+  +'_'#198#226#131#175#143#143#248#198'q^'#167#28'd_'#204'DIa'#30#10#175#208'w'
+  +#249'U'#154#247#28'd'#231'd'#161#152#242#207'x9C'#140#245#195'c0'#143#169#245
+  +#31'Z'#137'/'#188#238#188#155#232'k'#143#201#219'X'#131#172#227'K'#254#243
+  +#253#155#207'cO'#29'x'#254#169'v'#155#220'm'#248'~'#225'v'#201#30'E'#159'v'
+  +#253#188'P'#245'u'#199'kX5'#206#26'}'#195'W'#229#219'*g'#143']'#246#10#30#130
+  +#135#162#171#25#221#177#221#162'h'#214#234'u'#29#222#255#238#155'u'#172#197
+  +'"W'#128'j'#186'V'#212#213#233#159't'#28#131#174#148'0'#209'u'#199'^'#215#216
+  +#183#18#191#138#174'$'#166':'#227#218'@'#202'|'#254#212#208'U-'#172#251'>'
+  +#132'u='#139#136'n)'#136#10#218#142#1#189#183#161'?QX'#183'8D'#5#198#11#175
+  +#191#255'.'#132#191#148#137#160#255'LA'#237'}}'#159'7'#145'Gu4~T'#239'\dl'#7
+  +'r'#142#16'}'#14'd'#29#5#242'O'#2'Eg'#244'~'#193#9#224#252'~'#224'D'#18#16
+  +#225#127'Q0ut'#198'pfj'#201#159#151#218''''#227','#201#143#239#1#210#226'M8'
+  +#156'T'#135#207'SM'#184'Lc|'#185#215#129#3#219#234#144#145#2'|'#177#19#232
+  +#231#127#24#149#213#250'K'#135'OA3'#165'"'#176'K<'#10'N'#1#217#25#192#21#178
+  +#245'M.'#240'5Qy'#22'Pv'#17#184#158#3#228#30'#'#223#190' |'#143'T'#212#214
+  +#234'X'#147#181#6'|'#20'G'#5#166#224#10#201'O'#239#181#225't'#234'm\>dB'#217
+  +'q7'#206'$'#221#193#233#157'wPz'#210#137#179#251#28'("'#127#194#252#227'a'''
+  +#155#22'y'#3#208'='#148#230')'#188#199'vdS'#156#223'd'#3'?\'#166#246#156#11
+  +#191'Q'#251#211'%'#224'G'#226'}'#155#229#198#13#250'>'#159#6'D'#246'N'#16#140
+  +'~R'#219'e^'#194#186''' '#151'|'#255'|W5'#190'/'#2'2v'#150#227#151'b'#224#210
+  +#225#223#232#14'^'#134#11'Go'#226'@'#252'-'#177#17#209'3I0'#14'>S'#232'Bd%_"'
+  +'{'#165#160#248'4P|'#142#226#205'q'#226';'#178'u=['#197#15'y'#192#181#11'V'
+  +#148'^'#180#163#156#242'QD9'#234#211'5^0'#181'f'#147#212#208#3#186'"'#135'w'
+  +#219#142#203'4o'''#247#152#241'5'#229#235#194#238'Z'#156'J'#172#192#233#248
+  +'J'#252'Jc]'#216'_Ew'#242';'#200':'#12#12#13'N'#133#179#206#168']'#170'#'#141
+  +#230'bx'#224#30#228#19#190#140#237'g'#186#241'3'#197'\~'#28#248#149#242'_~'
+  +#138#227#215'e_'#157#165'\wK'#132#233#166'Q'#131#250#147#16#131'^HEQ:'#207'o'
+  +#5#190#203#167':'#216#249'+'#190#167'1'#190'L'#188#137#211#187'o'#161#156'b:'
+  +'w'#208#140#236#191#3'C'#186#238#209#175#211#20#131'VO'#167'"]'#245#135#4#236
+  +'%9'#217')'#160'Z#;'#28'k'#30#213'Aq&'#217#164#185#191#198#223#228'G!'#205'_'
+  +'x'#215'D'#253#137#164#234'k'#233#183'[@'#207'^'#235#17#20#180#7#189#186'nAX'
+  +'@2B'#252'w "x'#15#194#2'S'#17#216'u'#27'B{'#236'@P'#247'x'#4#7#239'EX'#248
+  +'V<'#160#212#209'u'#15'u.(5T'#136'?'#209#186'*'#187#1#252#242'#'#240#243'w'
+  +#244#253#13#181#252#253#189#222#222#228#150'd'#223#254#172#235#222'3'#233'/"'
+  +#155#147#239#206'n'#253#13'o\+'#28#252'.'#166#141#194'Qk'#17#146#190#188#149
+  +'e'#207#21']'#198'0V'#165#179#148'k@s'#187#245#214#229'l'#216'k'#244';Jc'#159
+  +'e'#15#235#10#214'xC'#217#220'|k'#161';*'#233#181'l'#247#20#252#158#165';Ek/'
+  +'!'#191#182#143#163'e'#219'6"c'#29#214#245#224#232#10')wr'#149'd&'#146'*'#255
+  +#238#139'}'#151#211#145'p)'#21'G'#190'9&'#196#253#3#185#233'"c'#29#214#229
+  +#152#24'+5`'#214#227'j'#209#174#21#142'\='#130#196#146'$'#236#251#237#16'>*'
+  +#218','#180#151#250#204'c'#25#235#200#253#139'1'#14'c'#3' j'#243#244#211#240
+  +#253'c'#11#164#21#147'n'#209'N$]'#223#133#184#175#146#176#149'('#129#250#201
+  +#196'c'#25#235#176#174#7#247#192#166#202'>'#210#186'C'#27','#223#176#10#202
+  +#147#190#200'('#200'DZ'#222#231'8'#144#159#142'4&'#234'3'#143'e'#172#195#186
+  +#140'a,'#231#164#214'm'#133#223'3-'#176'r'#243'j|'#144#180#17'J'#27#31#248'='
+  +#255'8'#148#246#138#144#244#137#199'2'#214'a]'#198'0'#150'f'#145'Ra'#135'O'
+  +#235#166'x{'#195'[x'#239#192#10#204'O'#157#133#153#169'30c'#183'N'#220'g'#30
+  +#203'X'#135'u'#25#195'X'#205']O'#243'Q'#139'g^|'#26#171'SVb'#234#214'Ix+'#131
+  +#222'\'#251'&cR'#154'N'#220'g'#30#203'X'#231#153#174'm'#4#163#186#235'e'#255
+  +#169#165#255'J;'#5#29#254#220#17'3'#146#231'"'#134#236#253'e'#255#235#24'wp'
+  +#146#16#247#153#199'2'#214'a'#221'Zz_['#27'^'#26'6xu'#240#194#127#12#239#132
+  +#142#19'_'#196#132#228'70'#241#208'T'#140'K'#143#22#226'>'#243'X'#198':'#172
+  +'k'#150';'#190'S'#14'8'#179#157#207'5'#11#148#142#10#254#248#234'3xb'#252#31
+  +#224#23#211#18#205'g'#180#18#226'>'#243'X'#198':f'#210#181#18'F'#14'GM/'#243
+  +#26's'#13#213'V='#148#14#20#199#132#14'h7'#165'#|G='#14#223#145'-'#165#207'<'
+  +#150#177#14#235#234#215'w'#217#195#20#167#205'%'#231#178'*'#245'oG'#211'g'
+  +#253#224#221#190#25#188';0'#249'J'#159'yV'#169']Mt'#25#195'X!M?'#242#249#26
+  +#192#239'K'#253#13#166#137'.'#147#29#250#187#208'L2'#190#243#184#180'F'#219
+  +#228#136'"'#12'^K'#156#14#167'.7'#209#198#194'K'#153#201'T'#175#9#143'e'#242
+  +#147#21#140#135'0a'#205#245'u'#250'OP'#250'=F'#244#152'x'#201'?L'#194'w'#25
+  +#251#139']'#223'k<X'#190#143'3'#223'I'#155#161#213#226#198#159#135#141'Ed'
+  ,#228#8#12#29':N'#136#251#204'c'#153'<'#187#220#6#6#13'['#12'Tz'#247';H'#22'5'
+  +'p'#4#250#247#31#142'={2'#16#27#187#11#177#155'S'#165'?'#128'x,c<'#235'z~:'
+  +#243#188#167#172'V'#13'C'#135#140#196#176#161'c'#145#154'z'#20';'#147#143' %'
+  +#229'(Q'#6#146#169#207#188#161'$c'#29#214#245#188#131#229'=h'#228't'#208#224
+  +#145#24'<x,'#186'w'#143#192#142#29#135#144#148#148'.'#196#253#30#196#27'<x4'
+  +#134#144#142''''#23#140#181#219#221#210#231';'#214#224'!'#163#176#127#255'q'
+  +#188#242'J'#12#134#15#143'AH'#232#8#161'a'#212'g'#222'>'#146#241#24#172#235
+  +'z'#8#203#169#224'7-'#199'}'#250#204#21#28';'#150#141'#'#233'Y8y'#170'H'#232
+  +#200#209'K'#196#203#21#25#235'8]'#250'<'#186#12#223'y'#28#198#15#25'2'#6'_'
+  +#28#187#132'3g'#10'p0'#237'<'#142#159'('#16':x'#232#28#241#138'D'#198':'#140
+  +#151'k'#166'K'#207#27#183'&'#139'K'#252'?F:'#135#15'g";'#187#28'''N'#22#10']'
+  +#162'>'#243#24#207#254#179'n'#3#150#127#239#161#251''''#231'd'#196'+'#19'p'
+  +#242'd.'#206#158'-DFF6'#210#211'/'#10'q?'#147'x''Of'#227'U'#210'a]'#193#240
+  +'{'#215'l'#215#223#180'4^P`8.'#158'/ L&'#142#144'='#30#231#236#217'b'#177#205
+  +#188#243'$c'#29#151#241#134'7Y'#172#158'w'#144#208#240#225#163#17#18#28#137
+  +#180#180#19'4'#231#135'h'#222#246'cG'#252#1#233#31'&'#30#203'^!'#29#143#190
+  +#219#237'6'#150#2#221#129',6'#25'+'#178#255#203#232#31#241'2'#6#14'|'#21'QQ'
+  +#163#133#184#207'<'#150#185#201'w'#214'u'#185#244'_'#193#248#183'O'#183'Q'
+  +#255#158#181')k'#205#209#184'v'#184#239#169#25#143#191#140'a,'#175'Ai='#235
+  +'@m'#196'{'#214#175#211#224#169'j'#227'O'#198'.'#167#156#211#202#255#183#127
+  +'>>i'#244'wb'#203'v'#237'v'#15#8#8'8'#187'  '#224#204#194'g'#159'M'#28#164'('
+  +'Q'#255#214#190#189#162'<'#246#216#191#198#245#233#163'(O=U'#162'<'#241#196
+  +#230'v'#131#6#149'&'#204#155'w'#187'z'#233#210'*'#247#146'%'#149#174#153'3oU'
+  +'GF'#22'%>'#249#228#210'N'#160#23'X@@'#243'G'#240'm'#219'n'#162#191's'#154'G'
+  +'E'#149'm['#184#176#210#181'hQ5'#230#207#175#194#156'9U'#152'='#187#10#179'f'
+  +'U'#184'"#Kw'#180'k7'#190'U'#219#182#31'(C'#135#14'k'#192'.X0Vy'#238#185'r'
+  +#229#133#23'.'#4'GG'#223#186'7mZ'#21#166'L'#209')&'#166#10#227#198'U`'#196
   +#136'{'#180#255#252#215#189#174']3"'#248#169'8eJL'#3#254#147'Of+'#254#254#22
   +'%0'#240#234#235#163'F'#221#213#134#13#171#192#176'a'#149'T{'#149#8#9#169#192
   +#139'/'#222#193's'#207#221'D'#143#30#183#156#129#129#133'3'#24#191'|'#249'_'
@@ -448,8 +449,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#28#215#249#207#242#237#235#215#175#255'}'#236#186#244#241#27#229#199#216'~'
   +#10'WVV'#134#203#151'/'#195#214#214#22#242#246#127'G'#143#30#229#226'^'#187
   +'v'#173'F\'#189'z'#149';'#231#168#205#147#231#229'K'#229'\'#188'p'#17#164')'
-  +#175#255#225#195'G'#184't'#147#158','#200'G'#240#162'6'#198#181#179'K'#23'+'
-  ,#182'/]'#228'a'#219#212#14'IS^'#255'C'#135#172'ym'#198#149#210'rJK+'#242'%'
+  ,#175#255#225#195'G'#184't'#147#158','#200'G'#240#162'6'#198#181#179'K'#23'+'
+  +#182'/]'#228'a'#219#212#14'IS^'#255'C'#135#172'ym'#198#149#210'rJK+'#242'%'
   +#180'iy!'#127#210#148#215#223#202#202#138';'#127#10'Y'#255'!PPP'#128's'#231
   +#206#225#236#217#179'5'#134#174#7#164')'#175#255#254#253#251'9'#207#252#252
   +'|'#14#138'O}'#234#199'B'#233'&My'#253'--'#247'r'#190'B~k'#227'-'#248#147#166
@@ -512,8 +513,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'m'#3'r'#28#13#24#250#200'qz'#159'\'''#131#15'q'#22'0'#252#0'*;'#247'eJ/'#153
   +#127'{i'#255#241#227#199#251#153'o'#223#14#27#195#217#136#223#187#136#243#205
   +':'#182'B'#196'J'#142'li'#236'te'#176#234'o'#236#137#213'('#8#216#197#250#243
-  +'>oMM%'#31#220#11#177'1'#138#203'v'#230#239#188'A'#27#177#187'gs^'#25#135#23
-  ,'sd'#18'G'#136'%2X'#250'76b'#150'U'#144'e'#171#131'lV'#134'n'#139#251'='#169
+  ,'>oMM%'#31#220#11#177'1'#138#203'v'#230#239#188'A'#27#177#187'gs^'#25#135#23
+  +'sd'#18'G'#136'%2X'#250'76b'#150'U'#144'e'#171#131'lV'#134'n'#139#251'='#169
   +#236#250#163#172#172'l'#187'i'#211'&'#28'_3'#25#201#135#150'"'#215#197#240
   +#131#242'.'#199#224'o'#156#197#24'VJ'#174#139#17#199'Y'#215#245#200#176#211
   +#163#190#191#172'2'#255'Q'#163'F'#237'#'#127'W'#189'qH'#177'['#135'3'#30'[? '
@@ -576,8 +577,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#211'y'#243#230#189'fu'#221'IT'#246'F'#244'{%'#154#223#19#230'M'#133#239#255
   +'i['#248#29#149'0'#183'L'#223#233'Q'#26#194#188#157#184'>'#134'>'#5'_'#242
   +#161'p'#20'O'#152#147#167'8'#180'M'#154#164'Os'#203#172#188'7'#137#202#254','
-  +#157#31#212#230'_'#188'x'#193#213#129'0'#159'-'#148'?}'#210#255'T>'#226#182
-  ,#157'w&'#147#219'O'#255#11#229'&|wL'#190#194#247#223#148#7#234#155')'#14#253
+  ,#157#31#212#230'_'#188'x'#193#213#129'0'#159'-'#148'?}'#210#255'T>'#226#182
+  +#157'w&'#147#219'O'#255#11#229'&|wL'#190#194#247#223#148#7#234#155')'#14#253
   +#175#174#174'~^'#228#255#146#142#145#174'0'#183'.'#248#136#253#132#239#30#132
   +#239'?'#168'N'#4#132'4'#10#223#143'H'#127'G!'#28#163'p4'#127#203#202#31'"'
   +#127#238#156#167#186#17#255#206'D'#248#173#137#240'{'#19#241'<'#183'8]'#149
@@ -640,8 +641,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#184#176#254#155#172#135'$'#187'pc'#138#197#236#158'^'#149#149'oM'#160'8'#20
   +#151'4H'#139#215#228#144#233#239#187'^'#192#226#167#232#131'0f'#245':'#143
   +#229'G'#24#251#213#4'U'#6#197'%'#13#210'"MA_'#150#191#130#151#17#209#175'M'
-  +#192#22','#187#144#140#5','#190#10#27#211#212#20#245'K'#201#152#30#233#201'}'
-  ,#146#6'i'#145'&i'#147#135'L'#127#247'u'#132#195#144'd7,'#185#156#198#198'v'
+  ,#192#22','#187#144#140#5','#190#10#27#211#212#20#245'K'#201#152#30#233#201'}'
+  +#146#6'i'#145'&i'#147#135'L'#127#247'u'#132#195#144'd7,'#185#156#198#198'v'
   +#137#31#140';'#171'C'#131'y'#170'Ex`'#224#164#241#152#197#198#205#164'AZ'#164
   +'I'#218#228'!'#211#223'E'#175'G'#27#239#13#208'*'#142#129#22'+'#191#169'l'
   +#220'W'#19'4Y'#222'g'#198#251'Cq'#216'P'#140#214'['#6'm'#150#22#218'OZ'#164
@@ -704,8 +705,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'I'#218#228'!'#211#127'@'#204#171'n*'#197#232':'#165#8']&'#255#205'T'#131'+'
   +#24'5jT'#141#160'8b'#13#210'$m'#242#144#237#31'U'#214#149#11'_'#140'N'#19#138
   +'*X`~'#141'~3Z#('#142'X'#131'4I'#155'<d'#250#247#143#140#232'8'#254',:O)F'
-  +#199#241#133#21'Lb}'#234'Z'#214#167#215#4#138'#'#214'('#215'<'#11#242#144'9'
-  ,#255#212'/'#220#176#221#200'Tt'#153'z'#30'_'#141'-'#168'SH'#147#180#201'C'
+  ,#199#241#133#21'Lb}'#234'Z'#214#167#215#4#138'#'#214'('#215'<'#11#242#144'9'
+  +#255#212'/'#220#176#221#200'Tt'#153'z'#30'_'#141'-'#168'SH'#147#180#201'C'
   +#182#127'X'#167#166#138#167#208'uz'#9#190#158'X'#132#14'c'#10#234#4#210'"M'
   +#210'&'#15#153#254'}C'#8#235#14'c2'#209'i'#26'K'#175'r>'#218#141#174'%L'#131
   +#180'H'#147#180#201'C'#182#127#16#209#179#233#128'0tV)'#193'W'#19#139#209'fd'
@@ -768,8 +769,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'S'#196#162#190#184#18#184#28#133#193#230'8'#237'j'#141#146#212'h'#208'z '
   +#242#144#153#249#144#149#197#195#138#255#203#10'r'#16'mk'#129#220#156#28#164
   +#248'lE'#240#252#222' '#143#170#250#223' '#173'_'#173#207'X'#170#224#252#9'#'
-  +'d'#156#242'C'#228'^#'#220'*'#202#196#235#215#175'?'#128#158'w&'#196#251'23'
-  ,#31'q'#159'O'#238#223'E'#186#175#3#210'c#'#144#30#23#136#248'm'#19#17#168#245
+  ,'d'#156#242'C'#228'^#'#220'*'#202#196#235#215#175'?'#128#158'w&'#196#251'23'
+  +#31'q'#159'O'#238#223'E'#186#175#3#210'c#'#144#30#23#136#248'm'#19#17#168#245
   +#235#225#234#250#255'@'#141'_{'#134#206#237#131#243#30#139#144#27#188#15#233
   +#167'B'#144#237#190#27#15'J'#11#184#245'o'#196#8#231#153#244#254#167#15#238
   +#225#220#169#0'$'#7'z"+='#25#25'.+'#17'4'#167#15'H'#187':'#127#226#196#140
@@ -832,8 +833,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#186#141'd'#141'?>'#243#153#207'|'#230#127#25'~~'#170#30'O'#3'FC'#134#2'O'
   +#163#26'"'#196'k'#200'k'#9#186'U'#249#11#190'_0'#26'3Z0Z'#243#253'w{'#198#151
   +'r'#210#158#143#211#154#215'h'#204'kr'#233#168#198#159#194'5k9'#236#140']'
-  +#179#161'y'#168#11'H'#139'4y'#237#170#252#27#240'im'#211'lH.'#12#172'o'#193
-  ,'!'#248'A'#173' '#13#210'"M^'#187'A'#21#254#13#249#242#250#166#233#160'LL2'
+  ,#179#161'y'#168#11'H'#139'4y'#237#170#252#27#240'im'#211'lH.'#12#172'o'#193
+  +'!'#248'A'#173' '#13#210'"M^'#187'A'#21#254#13#249#242#250#166#233#160'LL2'
   +#188#138#241'kKk'#5'i'#144#22'i'#242#218#13#171#240'W'#224#235#172'G'#211#129
   +#201#24#179#230'J'#249's'#16#181#128'4H'#139'4ym'#133'j'#252#219'2'#190'o'
   +#162#24#139#30'*'#231#185#223#172#215#6#210' -'#210#228#181#229#242'o'#220'/'
@@ -896,8 +897,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#15#254#255#174#252#241#142'|'#248#182'||'#210#249'BNo'#137#212';'#249#26#240
   +#233#166#243#167#5#131#174'g'#173'ym'#162#157'h'#187'5'#127#188'9'#255'N'#193
   +#134'R'#239#248#171#211#254'P'#138#143#250#251#255'v'#222#2#168'''9'#158#184
-  +'Ub'#147#209#234#31#247'vIi)qN:%9'#158#0#137'CL'#235#127#212#219#241#244#15
-  ,#245#156#146'Jgd^'#249#171#161's'#210#171#127#210'_'#226#144'0'#174#153'k'
+  ,'Ub'#147#209#234#31#247'vIi)qN:%9'#158#0#137'CL'#235#127#212#219#241#244#15
+  +#245#156#146'Jgd^'#249#171#161's'#210#171#127#210'_'#226#144'0'#174#153'k'
   +#242#211#245#23#238#190's}'#240#18#13#157#19'_'#254'S'#254#18#199#164#141#221
   +#253'2^'#28#190#249#24#219'o?'#135#219'?'#228'/q'#10'o&qJ:9<'#170#240#133#231
   +#253#231'0'#185#245#12'ZW'#159#192#227#225'K|'#241#137#253'%'#14#201#221#235
@@ -956,418 +957,419 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#252#177#198#178#218'y'#29'}_/'#30#243#215#151#158#7#168#169#222#255#3#247'G'
   +#191'L'#0#0#10'TPopupMenu'#6'pmGrid'#7'OnPopup'#7#11'pmGridPopup'#4'Left'#3
   +#192#1#3'Top'#3#144#1#0#9'TMenuItem'#10'lmCopyCell'#7'Caption'#6#10'Copy fie'
-  +'ld'#7'OnClick'#7#15'lmCopyCellClick'#0#0#9'TMenuItem'#9'lmCopyAll'#7'Captio'
-  +'n'#6#15'Copy all result'#7'OnClick'#7#14'lmCopyAllClick'#0#0#9'TMenuItem'#10
-  +'Separator2'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#15'lmExportDataSet'#7'Captio'
-  +'n'#6#9'Export...'#0#9'TMenuItem'#27'lmExportDataAsMarkDownTable'#7'Caption'
-  +#6#14'Markdown Table'#7'OnClick'#7' lmExportDataAsMarkDownTableClick'#0#0#9
-  ,'TMenuItem'#18'lmExportDataAsHtml'#7'Caption'#6#4'Html'#7'OnClick'#7#23'lmEx'
-  +'portDataAsHtmlClick'#0#0#9'TMenuItem'#10'Separator1'#7'Caption'#6#1'-'#0#0#9
-  +'TMenuItem'#18'lmStdExportFormats'#7'Caption'#6#26'Standart Export Formats..'
-  +'.'#7'OnClick'#7#23'lmStdExportFormatsClick'#0#0#0#0#14'TSynCompletion'#14'S'
-  +'ynCompletion1'#8'Position'#2#0#13'LinesInWindow'#2#6#13'SelectedColor'#7#11
-  +'clHighlight'#13'CaseSensitive'#8#5'Width'#3#6#1#18'AutoUseSingleIdent'#9#8
-  +'ShortCut'#3' @'#13'EndOfTokenChr'#6#5'()[].'#16'OnCodeCompletion'#7#28'SynC'
-  +'ompletion1CodeCompletion'#13'ExecCommandID'#7#22'ecSynCompletionExecute'#6
-  +'Editor'#7#7'meQuery'#18'ToggleReplaceWhole'#8#4'Left'#3#224#2#3'Top'#3#144#1
-  +#0#0#10'TImageList'#13'toolbarImages'#6'Height'#2' '#5'Width'#2' '#4'Left'#3
-  +'u'#2#3'Top'#2#127#6'Bitmap'#10#228'E'#0#0'Lz'#12#0#0#0' '#0#0#0' '#0#0#0#206
-  +'E'#0#0#0#0#0#0'x'#218#237#189#7'X'#20#201#215#198';`\s^'#243#154'uW'#20's'
-  +#192#156#197#172#152#3#230',***'#168#136#4#9#18#20#196#4'('#138#8'"'#25#137
-  +#162#162'(( 9'#231#156's'#142's'#238'9==8 '#24'v]'#255#247#222'o'#155#231#247
-  +'T'#135#234#243#158':U]UM'#207#244#0#0#7#254#143#227#228#238#186#198#193#205
-  +'9'#219#206#197#17#8'['#231#231'<'#156#28#192#134'p'#180#7'k'#22#171#231'v'
-  +#12#150#14#182#148#214#224#190'8'#171#231#182#186#22#14#22#253#4'm'#142'))k+'
-  +'RR'#246';'#242#7#210#139#182#155#211#183'suJ'#169#168#172#128#230#22'.'#3
-  +#254'q'#27'RZ^'#6#241#201#137#240#238#163'W'#149#133#157'u'#217'3[kI'#212#233
-  +#136'z'#147'G'#151#148#173'Fv!'#251#145#157#180#141#251''''#225#241#14#141
-  +#245#177#12'5d'#175#172#162#28'J'#202'J'#161#168#164#24#10'K'#138#160#176#168
-  +#16#242#11#11' '#183'0'#31'r'#242#243' +/'#7'2r'#179'!='''#19'R'#179#210'!3/'
-  +#27#242#240'XzN'#22#132#197'D'#130#177#155's'#185#180#175#207'3'#212'9'#245
-  +'WI'#217'u'#196#4#177'`S'#29#244#225'$'#30#19'Gz'#11#234'c,'#25#253'z'#237
-  +#226'"( '#237'"'#190'v.j'#231'B&jg'#160'VZV'#6#164'f'#166'CrF*$'#166'&3qH'
-  +#204#205#1#211#148#20'8'#22#22'Z%'#158#148#156#242'gI'#153#191'hIY'#250#187
-  +#218#218#234#133'e'#229#153#184#253#9'}x'#138'>\$'#31'0'#14#237#249#250#22
-  +#182'V'#140'>i'#23#20#147'n!'#228#161'6'#149'-'#183' '#15#178#25#253#156'z'
-  +#253#244#236'LF?%#'#13#18'P?&>'#22#2#170'k@'#23'c'#180'/7'#15#166#231#228#214
-  +'M--'#231'ZU'#215#212'P'#253#5#212#214#213'M'#194'm'#244'!'#150#245#129#226
-  +'0'#137#175'of'#253#140#209'/'#192'r'#231'3'#186#188'r'#147'6'#149'='#27#181
-  +#179'P'#187#129'>'#198' %3'#13#146#210'S'#192'7"'#12#220#170#170'A'#177#172
-  +#12#214#22#22#129'tE'#21'xTWC'#13#175#233'0'#203#199#218#218#26#185#202'*'
-  +#238#204#210#242'@'#244'A'#27'}X'#133'1hC'#250#166#150'O'#25#253'|'#129'2S}'
-  +#19#130'e'#207'D'#237#140'lA}'#170#131'4'#240#138#137#6'K'#212'?'#139#186#198
-  +#152'~m'#241#169#173#171'D'#253#135#168'/'#137'1'#232'A'#250'&O'#159'0'#250
-  +#252'v'#198#215#205#206#227'i7'#212#207'd'#244#249'm'#128#234#192'#>'#14#174
-  +#197#199#195#246#148'T'#152'VP'#4'quuMj'#23#160#200#156#210#242'|'#212'7G'
-  +#253'}'#168#223#159#244#141#205#30'3'#250'9'#5#13'uyqg'#181#217#216'g'#228#8
-  +#234#243'b'#240'11'#30#174#163#15#187'P'#127'J~'#1'H'#149#151#127#14#188#192
-  +#162'YU]'#131'm '#165'q'#249#239'?~'#196#232'g'#243#235'Z'#160#220#252'z'#207
-  +#204#161'T@'#159#173#3#138'A'#28'b'#150#149#5#231'ssayA!,.k'#186'/'#145#193
-  +#250'G}?'#182#254'W'#242#235#223#208#196#152#213#231#149#247#179'6'#165#164
-  +'+'#16#127#182#253'Q'#31#144#150#253#153#215#152'G'#15#235#237'Pa!l*)e'#244
-  +'b'#177#30#158'TVa'#219#171#171#171#197'm'#249#202#170'L6'#246''''#176#236#19
-  +#249#237#255#174#177#17'O'#159#234'Y@W'#176#252#130'q'#200'`'#253#16'$'#30
-  +#247#219'a'#220#174#21'`'#252#241#26#216'_R'#6'X'#215' '#154'W'#0#127#21#151
-  +#166#207'(-'#15'X\Vn'#139#218#23'P{'#169#224#245#127#219#232'^M'#29'_?7'#251
-  +'s'#217#191#136'EC'#178#27#17#142#245'g_'#144#15#250'x'#253#202#163#15#231'*'
-  +'*aeXx'#221#216#194'"s6'#230't'#221'/m'#220#255#233#27#220'a'#244#5#235#252
-  +#179#253'\'#166']'#228'0'#176#215'%'#182#211#220'fHF<1'#6#182#232#131#13'v?'
-  +#135'^'#184#215'L'#206#202'9L'#215';'#219#255#183'o'#220#255#235#222#209#231
-  +#149#159'm'#251#217'|'#173'z'#187#249'L'#191#192#131#215'?Q_'#241#5#236'1"'#3
-  +#243#230#163'M%'#227#251'U'#171'?'#250#12#229#183#181#166#184'~K'#143'w'#253
-  +#23#240'5?k'#241'l'#23'2'#227#1#245#205#212'G'#22'~'#133#2#6'^^Z'#180't'#175
-  +'W*'#232'(t'#249#218#248#175#173'w'#131#209#231#249#158#255'Y'#147#175#135'c'
-  +'!'#141#13#12#165#197'P\Z'#210',E'#4#155#151#22#141#235'Z'#149#10#10'_'#215
-  +#191'vC'#155#215#255#23#21#214#235'RY'#26#235#209#248'H'#148'b?Oc^S'#240#243
-  +#16#180#168'k]'#251#166#190#186#182'&'#163#207#140#249#141't'#235'5'#209'v'
-  +#25#129's'#132'r'#134#10'('#175#20#160#130#7#29'''(?-'#170#215'4'#190#169#175
-  +#170#169'Q?'#254#18'_'#232#242'5Q'#167#162#178#18'*'#170'*'#161#146#161#170
-  +#17#188'c'#21#172'O'#180'(k'#168'~S'#31#243'0'#250#130'q'#230#199#184'L@'#151
-  +#236'WUW!'#213'P]C'#212#8#192#219'G'#199#248#190#208#162#168#170#242'M}%U'#21
-  +#158'~'#153#128#254#23#218#159'ukP'#175#182#182#22'j'#235#136':'#30#184']'
-  ,#131#240'}!?iQPQ'#172'<'#249#13'}'#133#171'J'#172'~)C)'#171'O1'#167'X'#242
-  +#203']]'#253'Y'#187#14'5'#153'y(;/'#173#227#214'1'#254#240'} _i'#185#168#168
-  +#128#250''''#191#170'/'#175't'#229#179'~S'#229#175#18','#127#13#163'AZ'#228#3
-  +#233'2'#212#199#160'a'#249#229'._'#170'<y'#178'y}\'#132'/^'#185#252'e'#253
-  +#215#183#187#138#250#24'TV7'#172#3#210#170'a'#227#206#211#253#172'M'#254#210
-  +'"{I'#174'r'#231#206#157#221'QG'#168#25#253#182#178#242#23'y'#237#191#180#225
-  +'u'#199#187#230#26#182#253#202#250'XT'#213#183'E'#30'U'#245#186#252'k'#128
-  +#150'sr'#178'U3f'#204#24#136':'#173#169#172'M'#232#247':'#127#233'bVaQ'#17'{'
-  +#159#241#243#150#10#140#221#137'3'#210#229#237#219#183#23'A'#157#206'H'#203
-  +#198'q'#192#165#223#242#149#203'/'#159'>w'#182#240#244'y'#153#186'S'#231'X'
-  +#206#158#169#147'f8]wR'#134'8Uw'#226#12'!]w'#252'4'#203#169#147'uR'#132#244
-  +#137#186'c'#12#199#235#142#158'$'#164#234#142#156' '#142#149#205'_'#180#224#1
-  +'jLD'#186#179'1h'#172#223#9#233#143#140'B'#198' '#227#217#252#147#144#201#127
-  +#131#137','#227#16'*'#247'p'#164'7'#210#190#153#242#183'd'#253'j'#139#252#198
-  +#210#238''''#192#183#213#150#181#223#162#169'6('#184#12#29':'#180#13'&'#3'h'
-  +#245'+'#12#17#128#191#221'a'#209#162'E'#156#159#176#140#251#145#246'U[['#7'%'
-  +'8'#215#140#143#143'O'#30'4h'#208#18'l'#231#194#255'P'#127'.'#217'---'#171
-  +#167#172#172#188#30#218'&'#189'B'#156#219#229#226'}^ZZ:DDD'#194#251#247'^'
-  +#220'2'#28'/DE'#199'I'#204#158'=['#248'g'#232#147'^yyE'#3'Jq>K'#250'EE'#197
-  +#144#151#151#7#25#25#25#16#27#27'K'#250#224#235#235#203#205#201#201#133#249
-  +#243#231#175#255#17#31'\'#149'7'#11'nN&}A'#237#178'2J'#249#219#188#24#20#23
-  +#151'@>'#222#231'df'#226#188';>'#1'|||'#193#197#197#149#250'Dn||"'#172'Y'#179
-  +'f'#189#136#136#200'w'#251#240'Ry'#211#11#167#203'k'#224#180#248#8#230#223#29
-  +#188'x'#243#244#168#15#225'Q'#201#198#128#167'_'#128#247'9YY'#217#144#144#144
-  +#8'~~'#159#224#217'3K'#166'M$%'#165'p'#19#19'S`'#195#198#205#27#190'W'#223
-  +#236#244'R('#244'~'#12'wNo'#0#193#242'7'#212#174'd'#227#193'k'#3#164#159#157
-  +#157#13#137#137'I'#240#233#211''''#176#176#176'`'#206#165'vA>'#196#199'%0'
-  +#246#156#228#215#130#179#188#4#166'k'#16'L/'#173#6'G'#249#181#213'V'#178#235
-  +#230#240#245#239#28#154#7#201'fgAk'#203'x'#198#134'`'#185'y~`'#159'_Y'#201
-  +#214#3#213#1#181#129'"'#160#250'NJJ'#130#128#128#0'077g'#206#165#216#228#228
-  +#228'AbR'#10'D'#197'$'#192's=9Hr'#208#130'4''=Hs'#214#131't'#23'}Hs'#189#193
-  +'uS'#217#226#192#215#191#190'g6D'#220#220#5'j'#155#191#212''']~'#218'X?'#23
-  +#239'7SRR 00'#176#190#252#148#183#164#164#132#241'-!1'#25'BB#'#192'Ln#'#248
-  +'ko'#133#192#27#146#16#168#189#13'"'#141'N'#192#3#169'E'#142'|}'#189#253#179
-  +#193'_k;('#174#27#221'@'#159'4'#249'|'#174#11'^'#187' '#141#2#188#207'IOO'
-  +#135#176#176'0prrb'#206#229#231'-..'#198#250#201#5#170#7'?'#255' '#184'/'#189
-  +#2#188#213'7'#193'G'#13#242'c'#7#168#238#152#246#156#175#175#187'o'#22'x'#169
-  +'J'#192#197'U#'#235#203#208#184#236'U4'#167#171#252'\'#15#252#24'd'#225'}w\\'
-  +#28'^'#131#239#155#237#167#240#182#31'bb'#226'@'#255#224#2#240'P'#146#128#15
-  +'j'#27'A~'#195'D;'#190#190#150#228'tx'#173#184#26#206'.'#27'.'#160'OZ'#13#181
-  +'i'#252'/'#167'y)'#205#13#176#252#197#168#159#135'u'#144#158#150#6#209#209'Q'
-  +#216#7#248#128#183#215'{'#240'B_'#188#189#189#224#227#199#15#240#241#195#7#8
-  +#240#247#135#184#216'8'#200#206#204#4'}'#140#245'k'#133'Upq'#253'Dk'#190#190
-  +#234#182#169#224'zi'#5'H/'#30#202#198'_0'#246#168#141#190#148#226#156'$+='#5
-  +#18'"C!&4'#0#162#130#253' 2'#200#23#194#252'?B'#176#239'{'#240#247'z'#3'>'
-  +#158'/'#225#131#199#11#240'z'#237#138#184#192#251'W'#206#240#238#165'3'#188
-  +'qs'#132#151'Nv'#224'l'#247#12'^9X'#128#193#1'1'#184#176'n\}'#249#21'7N'#0'['
-  +#153#133'ptn?F'#159#202'G'#215#25#205'}'#152#20#181'S'#19'b'#224#165#173')'
-  +#220#191'&'#7#183#174#156#0'}'#228'&'#161#128'\>'#14'z'#242'R'#160'{'#233'(\'
-  +#191#136'\8'#2':'#23#14#131#142#220'a'#208#150'='#4'Z'#231#14#130#230#249#3
-  +#160'!'#179#23#12'5da'#247#148'nphV'#223'g|'#253#243'kD'#224#222#129#233#176
-  +'oFo'#200'NK'#130#152#144'O'#136'?'#143'P'#127#136#8#242#1#15'{3'#208'>'#183
-  +#23'2B'#156#161' '#230'%'#228#4'ZBN'#144#213'W'#176'nr'#127'n'#160'5'#228#135
-  +#218'1'#132':'#223'yE'#250#146'S{'#194#137#249'}a'#157'H;'#166'|'#250#10'T>i'
-  +#208'W$Nb'#249#164'@]z;('#31'Y'#11#5#17'n'#16'k'#165#10#177#214#26#136':'#155
-  +'^cS-D'#147']'#231#239'W'#23#200#171'^'#159'7'#193'V'#7#30'('#28#132'W'#6'g}'
-  +#138'#'#28'!?'#24'}'#10#182#135'\'#127#244'3'#192#146#7#173#251#243#214's'#3
-  +#172#153'c'#177#14':'#16'm'#165#1#209'6Z'#188#20#245#162#173#212'y)'#218#231
-  +#173'S'#170#134')'#30#183#186#134#169'@^k^'#222'x['#13#184'/'#191#15',.J@'
-  +#130#221'u'#136#177'TA'#212#16'U'#228'*K'#195#237'h'#11'6'#15'j'#240#192'cV'
-  +#252'<j'#236'1'#213#134#251'Q'#247's^'#213#250#188#241'6'#215#224#254#165#221
-  +'`qA'#130'Y'#143#198'}'#209#232'C'#244'3J5x'#219#207#174#242#252'''mKu'#30
-  +#204'q~^'#220#255'L'#157#221'V'#231#149#145#246#161'F'#3';'#204'6'#127#31'/'
-  +#127#188#141'&'#220#191#184#7#245#215'A'#28#197#196#2#143'[('#241#180#200#134
-  ,#197'U^~'#6'eD'#133')?'#3#217#162#148#159#151'A'#149'g'#131#242'1y'#149'>'
-  +#231'#[L'#252#148'Y{'#216'~0&F'#23#248#250'j'#16#133#249#24#158'R'#170#136'\'
-  +#197'u%D'#145#221#198#245'gj'#188#244#169'2'#166#170'l'#138#219'h'#151'Y'#167
-  +#252#252#188#140'='#229#207'v'#5'A'#155#177#232#143#145#156'$X'#200#173'e'
-  +#214#163#158'"'#230'x'#158#185'2'#155'*'#177#251#174#242'|1W'#248'|'#140#217
-  +#175'('#144#255#10#238'C'#223#204'Y'#255#153'c'#138#236'6?'#15#31#180#243#20
-  +#219#3#198#212'Pn7<'#149'['#7#177'X'#174'H3'#5#136#196#227#145'f'#151'y'#160
-  +#157'H3%'#228#138#0#180'O'#145#5#183#205#149#216#188#202#188#243#205#216'm&%'
-  +#148'?'#219'`'#242'*'#176'y'#175'@'#12#250'e('#187#131#137#127#130#141#6#219
-  +#198#213#5#218'{'#195#246#202'K'#213#217'c*,'#252#252#170#236#182#170#192#249
-  +#154#2'y)'#213'h'#144'7'#1#235#220'Hn'#23#220#220'<'#24#30#237#25#1#198#187
-  +'G"'#195#144#225#200#8#129'u'#254'6'#159#225'l'#222#225#205#228#29'.'#144#143
-  +'ow'#196#23#182#31#225'~'#213'5'#3#192#232#232',xqe5'#184')'#172#4#183#203
-  +#171'0'#197#245#203#180'N'#233#138'F'#219'l'#30'f??'#239'*v'#255'J'#222#190
-  +#250'<+'#27#238#175#183#195';'#238#142#227#173#10#142'{'#134#135#196#192'In'
-  +#9'<'#151']'#136',bSb1'#178#128#221#183'H'#224#24#127#255#18'6]'#216#232#220
-  +#198#249#249#231#240#215#23'0'#219'N'#23#22#131#210#230#9'`'#175#186#7#251
-  +#226#235'x='#234'@,'#246#169#177'V'#218#8'mc?m'#163#139')'#237#211#228'aC'
-  +#169#6'//'#246#223#188#253#215'y'#231#216'h'#243#242#218#240#243'k'#176#249
-  +')/k'#143#177'M::'#216#255'j'#193#19#21')0?'#183#18'"M'#21'!'#204#248',r'#9
-  +'9'#143#156'c'#145'E.'#8#172'#'#15'/"'#252#253'r'#236#254#179#236#186#28'{'
-  +#190#192#250'#J/'#178#219#231#216#227#178#16#241'H'#22#238#157#217#12#230#231
-  +'WB'#192#189#19#224'op'#138'I'#3#238#157#132#0#131#211'<h'#219'P'#134#151#26
-  +#156'E'#164'q'#157#207'q6='#201#219'O'#231#27#178#231#220';'#205#238#147#230
-  +#173'S'#158#250#188#188'|'#129#134#167'P'#127#19'X'#156'_U'#240'Vm'#11#188
-  +#189#182#21#217#4'o5'#183'a'#186#29#161'}'#155#145#157#188#253#204':'#237#219
-  +#246#249#152'&'#157#179#131#221#222'"'#176#206#207#191#157'M1'#159'&'#255#220
-  +'m'#204#190'7'#234'['#192'Ny_,'#221#155#207#30#209#241#236#236#225#29#175#204
-  +#30#222#233#202#204'a'#29#149'f'#14#235#160'<kx'#199#171'3'#135'uR'#19#27#218
-  +'^]lh'#7#141#233#131#219'_'#155'6'#164#189#214#180'!'#29#180#17#157#169#131
-  +';'#220#152'2'#184#131#238#228'A'#237#245#166#14#233'p'#3#185'>uP;'#29'L'#181
-  +#166#13'n'#175#137'hL'#31'B'#231'vT'#21#27#214#225#234#140'a'#29#149'g'#12
-  +#237'@'#182#21#209#182#2'j'#158'#'#237#255#151'<'#131#23#250'_'#251'p'#234
-  +#228#169#23'''N'#156#4'>V'#22'Opn'#251#1#231#184#159' "'#176'!'#145'A'#254'8'
-  +#255#245#135#232#208'@'#156#31#6'AlX0'#196#133#135'@\D('#196#227#252'8>*'#12
-  +#226#163'# !&'#18'b'#194'C'#193#234#153'9'#8#218#190#162'p'#229'Ec'#253#131#7
-  +#14#129#152#216#12'X'#183'v'#29#208#186''''#206#161'Ks'#210#160#170'('#183#25
-  +#242#160#170#152#200#135#234#146#2#168'.-D'#138#160#166#172#24'j'#202'K'#160
-  +#166#162#20'j+'#241'~'#13#243#190#243'x'#197#216#228's\'#234#4'4'#214#223#191
-  +#239#0',Z'#180#24'6n'#216#4#180#254#246#245#11'('#203#203#128#172#24#255'&'#8
-  +'hHl`='#217'qD'#16#18#12#217#241#193'P'#129#254'yz'#188'fl'#242'9vT'#234#11
-  +#253#189'{'#246#193#134#245#27'a'#199'vI'#160'u'#210'//'#204#134'j,'#11#143
-  +'b'#22#222'vM'#5#175#140#12#149'e'#12#181'U'#229'H'#5#212'VWBmM'#21#212#213
-  +'VC'#5#198#132#244#201'&'#159'#'#135#143'~'#161#191'g'#247'^'#16#196#211#195
-  +#29'}'#207#131#186#234#170#166'!'#251'5'#213'<jk'#24#184'u'#181'H'#221#231
-  +#207'h'#224'z'#5#214#205#27#143#151#13'l'#31'>t'#228#11#253'];w'#131' o'#241
-  +#156#10#172'S.'#183#142'G'#29#11#127#155#219#248#243' '#244'?'#240'Z'#198#143
-  +'Z'#244#169#22'}'#172#169#194#251#182#194#28#240'x'#229#222#192#246#129#253#7
-  +#191#208#151#220#177#19#4#241#160#248'c'#221'e'#199#135'6CH=Y'#4#214'7'#143
-  +' '#200#140'%'#2'!3&'#16'J'#242'2'#193#195#221#181#129#237'}{'#247#127#161
-  +#191'}'#219#14#16#196#227'%'#182#255#130','#168',+'#130'J'#172#247'z'#202#138
-  +'y'#251'X(F'#12#24#231#242#146'|'#244'9'#15#201#133#178#162#28',{6'#20'e'#167
-  +#192'KW'#167#6#182#169#14#26#235'o'#219#186#29#4'y'#133#231#20#227#245#199
-  +#179#215#4'Ey'#204#181'UF`'#140#137#210#130'l'#198#231#210#252'L,w'#6#146#14
-  +#5#25#9#224#238#226#208#192#246#238']{'#190#208#223#178'y+'#8#242#194#217#30
-  +#10#179#18'Y;M'#145#14#197#185'|'#210#208#215'T("'#176#188'E'#217#201'xn'#18
-  +#20'f&Bnj'#12#188'p'#178'm`{'#167#228#174'/'#244'7m'#220#12#130#184#225'9yi1'
-  +#144#26#246#225#27'x'#215#147#18'Jx'#241#8'y'#207#144#157#20#14'.'#246'V'#13
-  +'lS'#29'4'#214#223#176'~'#19#8#226#242#28#239'='#147'# 79'#18#242'R'#26'B'
-  +#251'r'#153'c,'#168'A'#228'$'#133'AN"'#129#237'3'#129#215'63'#177#15'r'#178
-  +'}'#214#192#246#214'-'#219#191#208'_/'#177#1#4'q'#182#181#128#172#4'l'#207'h'
-  +#167'I'#248#237#30#237#19#153'q'#4#182'{'#236#255#168#237'g`'#191#152#129'}e'
-  +'z'#180'?8'#218#152'7'#176'Mu'#208'X'#127#221'Z'#9#16#228#220#25'ixpG'#23#244
-  +#181#213#191#130'ZC'#180#8'U'#184#201'G'#243'*'#220#191#165#3'gO'#157'l`'#155
-  ,#234#160#177#254#154#213#235#224'k'#172']#'#193#176'n'#237'z'#6#137'u'#27#154
-  +#132#142#241#243#18'M'#217#162':h'#172#191'j'#229#26#248'U'#144#143#141#245
-  +'W'#174'X'#5#191#138#181'k'#214'}'#161#191'|'#217'J'#248'U'#172'^'#181#246#11
-  +'}'#241#165#203#161')lll!(('#136#249#31'os'#208#255#159#5'y'#249#242'%L'#158
-  +'<'#21#166'N'#157#14'S0'#157'4qR'#3#155'+W'#172#254'B'#127#209#194'%'#208#152
-  +#21#24'+WWW'#230#127#171#132#151#151'W'#253':'#241#238#221#187#250#253#222
-  +#222#222#12#180#254#225#195#7#152'5k'#14#204#157';'#31#230#206#153#7#211#167
-  +#137'5'#176'K>4'#214#159'?o!4'#134#242'9;;3'#26#203#151#173#128#165'K'#150'2'
-  +#204#154'5'#187#129'.'#223'/'#242#231#205#155'7'#240#250#245'k'#152'={'#14
-  +#218'X'#128#250#243'q^7'#179#129']'#242#161#177#254#156#217#243#160'1K'#22'/'
-  +'e'#254#175'M'#182#167'N'#153'^'#207#200#17#163#192#211#211#147#217#255#246
-  +#237'['#240#240#240'`b'#238#230#230#198#248'K'#231#204#198#242#207#155#187
-  +#128')'#191#216#244#25#13#236#146#15#141#245'g'#136#205#134#198#204#153'='#31
-  +#158'?'#127#206#232'L'#154'8'#165#158#191#254#28#205#148#211#221#221#157#209
-  +'ttt'#4'{{{'#176#181#181#197#246'b'#3#150#150#150'0k'#230#28#244'a.'#147'N'
-  +#157'"'#198#216'['#184'`'#9's'#253#207#158'5'#239#11#253'iS'#197#160'1'#228
-  +'+'#217'%'#253#241#227'&'#214'3|'#248#8'pqqat'#201'?;;;'#176#178#178#130'g'
-  +#207#158#129#153#153#25#152#152#152#224#249#211'Qs'#22#214#253#12#152'<i'#10
-  +'co'#225#194#197'X'#127#226#24#143#153'_'#232'O'#154'H'#237#180'!'#228''''
-  +#149#135'b+""'#10#163'G'#143'e'#24'6lx'#189'&=wy'#242#228#9#163#249#224#193#3
-  +'000'#128'{'#247#238#193#248#241#147'`'#210#164#169'0'#17#227'5~'#220#4#198
-  +#222#146#197#203#208#159#153#152#138#127#161'?^tR'#198#248'q'#147'@'#16#138
-  +#217#19#211'''L'#25#135#14#25#10#189#127#239#3#189'z'#246#130#17'X~*'#231#227
-  +#199#143#193#216#216#24#140#140#140#24#221';w'#238#192#173'['#183#224#250#245
-  +#235'0'#6#253#21#29';'#30#198#142#25#7'"'#232'3'#217#155'<i'#26#182#233#21'0'
-  +'q'#194#20#16'|'#22'L'#235'C'#135#142#154'8Vd\'#206#216'1t'#14#15#242#245#225
-  +#195#135'L\'#173#173#173#25'h'#157#202'lhh'#200'h'#222#190'}'#27#244#245#245
-  +'AWW'#23'ttt@KK'#11'444'#176#141#254#133#237'd'#12#252'9J'#132'Y'#23#180';Nt'
-  +'"'#176#207#168#133#248#159#193'@'#250't'#238#220#249'<'#230'/'#27#253#23#198
-  +#25#161#216#145'mSSS&'#190'TV'#210#189'{'#247'.'#220#188'y'#179'^'#143#208
-  +#212#212'd'#208#214#214'f'#244#135#13#29#129'q'#250#147'a'#248#176'Q'#192#183
-  +'I'#140#17#25'W'#197'>'#231#22#230#151#159#158'a#S'#219#180#249'M'#189'S'#167
-  +'.&'#200#195#233#211#197#30#239#219#183#223#235#200#145#163#159'N'#156#144#14
-  +'9}'#250'L'#212#185's'#231#19'ee'#229#210#144',99'#185'lJeee'#211#206#158'='
-  +#151'p'#230#140'L'#20#222#223#133'JJ'#238#244#25'5'#234'/'#179#206#157#187#26
-  +#147#29#22'Z7'#238#220#185#139#17#150's'#31'}'#238#162'Q'#29#8#179#159#17#248
-  +#157#253'<B'#191#129#3#7#246#153'?'#127'~'#247'e'#203#150'u'#229#179'e'#203
-  +#22'&]'#181'jU'#151#245#235#215'w'#198#227#157'i'#157#246'o'#221#186#149'96h'
-  +#208#160#206#237#219#183#239#137'6'#250#178#182#4#233#135#244#248'Y'#247#254
-  +#156'_t'#239#190#193#194#162#197#184#215#1'sg{'#134#235'o'#241#141#9#144#9'I'
-  +#201#210#141#203#170'5I'#202#171#211#138#206#200'?'#25#144#28'.'#241'.'#222
-  +'x'#130's'#196#146#185#175'_'#183#252#17#219#183#210#210#198#156#136#137#31
-  +#212#212#177#137'~~'#237#198#189#13#146#29#255'&(w'#229#199'$X'#23#146#11'[R'
-  +#202#224'xn'#21'('#148#215#130'jy'#29'('#22'T'#195#229#172'J8'#27'['#12#187
-  +'|2`'#152'}h'#254'`'#171#208'K'#191'?'#10'j'#255'='#250''''#163#227#18'NE'
-  +#166#194#148#143#129'Z'#13#250#132#183'A'#155#199#189#13'N_'#244'1'#5#164'3+'
-  +#224'xa5'#28','#248':R'#152'G!'#187#18'v'#248'e'#193#31#207#194'2'#251'Y'#132
-  +#239#248#150#254'4'#223#128'"'#249#140#10'X'#225#23#7#147'>'#4'i'#224'N'#225
-  +#137#239#3#213#166'zF'#194#230#232'"8'#132'e;'#248#131#28#166'x$'#148#130#152
-  +'s'#28#244'}'#228#127#131'c'#1'-'#154#211#159#226#19'Xt2'#165#2'N&'#149#129
-  +#248#199'X'#152#240'.(r'#163'_'#18#156'L,'#131#131')'#229#255#136'S'#201#229
-  +' '#238#28#3'='#181#157'\9'#10#175#155#244#1#227'^$'#21'['#6#7#226'J'#225'T|'
-  +')HG'#22#128't'#2'j'#227'z'#3#240'8'#229'9'#16#139#235#200#177#168'R8'#17'_'
-  +#198#172#31#248#10#199'1'#207#220#167'~'#208#229#130#137'qs'#250'G'#162#138
-  +#225#0#159#232'b8H'#196#8#128#219#187#195#10'a'#193#139#12#24#253'4'#25'z'
-  +#221#138#7'!'#245'hh'#169#25#3#131#238''''#193#20#171'4'#216#248'.'#15#14'F'
-  +#148#192#190#240'/9'#18'Z'#4#127#170'='#131#142#210'wO7'#214#159#236#29'Xt0'
-  +#180#16#246#133#22#192#254#240'B'#30#17#8#198'a'#127'$/]'#230#149#5'=L'#162
-  +#160#157'A'#4#180#189#21#1#173'oDB+'#205#8'h'#169#17#14#28#244#131#207'h'#211
-  +#20#216#237'W'#0#187#3#11#191'`'#199#219'T'#232#184'K'#190#184#243#225'['#13
-  +'>'#143'7'#201'+'#176'ho`'#30#236#9#202#135#189'!y'#176'74'#31#246#133'!'#225
-  +'y'#176'+,'#23'D'#221#18#161#163'Y$t|'#18#9#157#30#4'BW'#5#19#232'v'#232#10
-  +'t'#219'|'#184#172#243#154']e'#237#150#239#134'6'#27'/'#128#240'%O'#198#135
-  +#246#215'ca'#237#139'l'#144#244')'#248#130'I*'#166#240#155#196')'#243#6#215
-  ,#248#251#192#162#157#159'r@'#210#31#9#204#5#201#224'\'#216#25#138#160#246#216
-  +'W'#9#208#217'.'#138#199#237#215#208#235#136'|E'#239#227#138'Z}'#165#20'G'
-  +#240#207#239#185#247#146'h'#151#205'R'#186#237'f'#175#173'ly'#224#30'p'#212
-  +#162#160#173'V,lz'#157#3#155'='#243#26#242'"'#25#218#206'^_'#197#217#165'P'
-  +#255'} l'#239'E[>d'#193'V'#191'l'#216#22#128#4'!'#161#217'0'#223'7'#13':'#187
-  +'DC'#151#23#209#208#217'6'#4#250']'#188'Q8'#240#234#157#191#154#187#142'z'
-  +#156#186#217#189#243'.'#185#192#214'g,k0'#14'u'#3#239'%p7'#188#206#169#147'x'
-  +#149#3#130#12#218'%'#15'm7'#201#237#227#159'7'#238#229#199'"'#137#247#233#176
-  +#254'c'#6#172#247#203#128#13#129#153#176'!$'#11#22#248#167#193#128'w'#241#208
-  +#217'3'#22':'#189#143#133#222#6#174#208'_'#199#220#224'k}'#201#239#10#166#237
-  +#187#202#26#197#182#184#26#144#143'>$M0K'#201'Z'#225#146'U'#140'T#uH'#237#4
-  +'U'#155#186'6kN'#186#212#127'W'#202#206#189'x'#248#179#24#152#230#154#4'+'
-  +#188#210'`'#245#167'tX'#29#148#1#171#195#144#168','#152#17#158#1'}C'#146#160
-  +'S`<'#244'y'#234#3#3#31#191'S'#254#170#15#250'o'#150't'#208'x'#235#136#250
-  +#175#186#234#198'}Xd'#159#17#137'd '#5'H'#169#152#161'_Q'#235'E'#187#163#248
-  +#249#255'4s'#8#239'x?'#20':'#154'F@'''#203'H'#24#224#18#11#227#222'%'#194','
-  +#255'T'#152#19#146#14'3'#163#211'A,1'#3#134'''e@'#199#184'T'#232'o'#31#2#243
-  +#223#198#12'oV'#223'4'#186'cW]/#'#212'7'#19'V'#143#182#157#245','#245#213#172
-  +'gi'#159#144'H$a'#218#131#176#180'Vb'#18#145#252#252'#'#31'X'#142#27#166#247
-  +'0~'#176#230#189#186#129'*'#250'u'#3#174#220#168#235'/'#175'S'#215'O'#254'zm'
-  +#223#203'z5'#253#20#239#212#244'S'#189'_'#219'_'#211#140#219'_'#215#166'n'
-  +#188#185'g'#254#188'7'#145#179#191#22#131#238#186#30'W'#133#212#194'o'#161#15
-  +#247'E'#140#147','''#153#166#184' o'#17#159#137'&'#137'A-D'#23#249'p'#20#20
-  +#132#191'g|'#234'w'#245#225#143#206#9'8'#221't^'#203#10#169'E\E}'#157#30'7'
-  +#227#238#245#191#157#240#164#207#173'x'#155#158'7'#227#156#187']'#143#178'k1'
-  +'f'#158#203#183#236#244':rA'#168#231#129's-z'#30#148'm'#217'OA'#255#187#245
-  +'{'#154#132#181#239#170#237'y'#18#181#207'!'#242#136':r'#19'1Dn'#11'_'#244
-  +#188#223'r'#226'r'#163#166#206#237'|'#250#182'P'#251#211#198'Bm'#206'Z'#9#183
-  +#188#244#170'EKU'#255#150'='#207#220'k'#221'KZU'#248'{'#245'{?'#14#30#213#243
-  +#166#207'>!'#141#232#131#168'w'#2'9'#143'(!'#26#136'J'#235#211#14#215'ZL'#223
-  +#240#213'6'#140#249#132'ZhE'#11#183#190#30#213#178#147#214#199'6}'#246#156
-  +#252#173#143#130#222'7'#181#251'>'#9'n'#213#215',pE'#247';'#17#27'['#233'D'
-  +#237#16#190#22#189#19'm'#29'FN!'#199#145'3'#237'vj_h'#185#248#208#174'o'#217
-  +'j}#J'#248#183#155'Q'#173':'#220#142#252#173#191#242#211#14#189#15#159'k'#219
-  +'K'#165#249#182#208#207#194'Gx'#192'3'#191#177#131#205#194#23#182#191#21#185
-  +#172#173'^'#212'j'#244'a'#131#176'f'#244'6'#212#221#130#144'/'#251';-9p'#180
-  +#149#132#236#232'oh'#11#181#187#25')'#220#241'Nd'#171#206#6#17'm'#186#221#143
-  +'h='#228#218#179'V}O\l'#209'G'#249#182#208'@'#221#167#245'y'#7#24#187#9#253
-  +'a'#250#182#205'0['#159#254#189'M'#131#198#246'|'#16'9'#189#211#189#200'9'
-  +#232#195'B'#244'A'#28'}X'#138'qX'#137#218#235#218'*~'#220#212'n'#166#196'V'
-  +#206#129#187'_'#173'O,'#183#16'j'#11'w1'#140#16#238#254' B'#184#215#163'p'
-  +#161#222#166#225'BC'#30#251#9#247'V{ '#252#151#150'a'#203'!Zw['#15#189'm'#218
-  +'V'#196#204#181#253'@'#179'w'#157'GZ'#135#255#254#251#227#240#17'='#30#134
-  +#143#235'z?b2'#250' '#134'>Lm'#171#27'5'#171#165'v'#244'B'#142'F'#244#162'^'
-  +#251'4'#197'['#172':3'#254'['#177#199#152'3'#243'j'#212'n0'#191#30'h'#25'&4'
-  +#200':Th'#136'm'#168#240#159#14'a-E'#28#195'Z'#15#182#9'm'#251#135'uh'#251#1
-  +#207#194#186#245'5'#15#251#3#253#28#209#243'a'#248#232#174'F'#17#163':'#221
-  +#141#20'i'#167#31'9'#1#227'9'#173#235'U'#175#153#237#151#31#153#133'eo'#241
-  +'5'#237'?'#12#3#133#208#247#175#206#235#135';'#134#8#141'p'#10'i1'#194'1'#164
-  +#229#240#231'!'#173#135#218#135#182'E?:'#161#127#191#247'{'#26'6'#240'w'#211
-  +#240#254#24#135'?0~C:'#220#137#28#217#249'f'#216#152'^'#7#174#141'k'#185#229
-  +'j'#239'o'#149'}'#176#246#211'o'#222'S'#252#233#22','#244#215#11#196'-'#184
-  +#197#159#174#193'-G:'#135#180#30#246'<'#164#221'`'#219#208'n'#3','#153'8'#244
-  +#236'e'#18#254'{'#183#7#17'}'#187#26'D'#14#28#172'l='#180#149#164'V'#239#159
-  +'yO2'#214'#H'#8#17#30#243'*'#184#5#250'B>'#180#25#230#16#242#219' '#155#208
-  +#14#253'-'#194':a=t'#233'o'#26#209'm'#144#174'G'#175'V'#135#13#186#227'M'#204
-  +'O'#191'/'#194#185#131#16#222#159#8#161#15#194#20#11#172#147#214'C'#236'B'
-  +#219'b='#252'6'#210'.'#166#221#0#195#192#14'm'#228#28#219'r'#254#197'{'#179
-  +#137'^'#129'B'#227#222#4#9#141'v'#15#22#26#229#28#210'B'#244'El'#171'nF'#225
-  +#173#187#222#141'm'#217'Z;P'#248'W>'#199#29'a'#151' '#212#205'0F'#184#189'~'
-  +#132#16'G7'#230#255#252'w'#219#191'9V'#255#205#229#234#210#1#188#207'n'#235
-  +#202#152#247#229'pZ'#220#223'0'#148#243#171#151#203'3:'#25#251#152'k'#130#254
-  +#146#30#142#191'Z'#251#220#236'^KM'#206#174#135#212#16#7'pU'#223#3#15'%'#6
-  +#237#250#21#186'{'''#245#224#28#158#214#187#157#236#226#161'u'#225'oM'#185'A'
-  ,'/'#238'C'#232#27'S'#238#147'='#19#193'l'#235#200'>'#143'6'#13#255#215'}'#144
-  +#28#211#209#247#197'Ce'#238'{'#171#235#240#206'J'#7#193#244#233'5'#238#131'u'
-  +#3#19#232#248#227#205#255#158#15#155'Fw8w'#227#196':@}p3V'#130#23#8#165'.'
-  +#136#253#213'=`"'#241#135#254#207#214#172#169#169'aR'#241#1#156'a'#7#231#14#3
-  +#23'#'#5'x~'#231#2'8'#221#187#8#206#247'.1'#169#227']9p'#192#245''''#7#197
-  +#192'l'#227#144'9'#130#231#253#157#165#172#172#140'I'#233#179'1\.W'#18'S'#235
-  +'M'#227'{WZ\;'#206#181#187'q'#26#158#223'<'#11'N'#183#206#129#243#237#243'L'
-  +#250#252#166#12#216'^?'#5'V'#218#210#220';'#235#134#213'UWV8r'#185'@'#15#250
-  +#219#10#218#251#222#165#170#170#170#7#158#243#152'>'#139'N'#223#166'W<'#188
-  +#133#171#186'_'#28','#213#143#130#157#246#9'p'#212'='#5'.'#168#233#166'/'#3
-  +#174#136#147#222'if'#255'3'#245#195#240#224#252#22'0:'#188#136'['#203'~'#150
-  +#29#237#216'WVV'#14'"'#187#5#5#5#205'jfff2iqq'#241#153#194#194'B'#200#207#207
-  +#231#22#21#23#195'kGk'#216':e'#0#152')'#238#5#203#171#7#193'AK'#10#220#244'N'
-  +#193'K'#253'3'#240#250#246'Yx'#133#169'+n?'#215':'#134#199#15#192#163'K'#146
-  +#160')9'#11'<Lt'#160#184#148#190#171'Q'#192'%{'#200'5A'#157#166#150#236#236
-  +#236';'#244#189#14#204#195'|'#191'##='#29#22#14#239#4#247'd6'#128#137#220'v'
-  +#176'V'#217#7'.'#168#227'q'#243#20#188#187'{'#22#222#223';'#7#239#13#206#195
-  +'{'#163'K'#240#18#235#193'A'#243'8<'#145#223#13#183#165#215#131#220#188'>'#16
-  +#31#30#0#130#246#16#167#166't#""8iii'#139#147#147#147#153#239't'#16#185'y'
-  +#249'pl'#227'"'#208'80'#23'n'#29'Z'#4#230#231'%'#192#245#234'.'#240#210';'#6
-  +'o'#180#14#195';'#221#19#224#173'/'#13#239'nH'#129#187#202'N'#240#212#216#13
-  +#142#242#232#231'qq'#184#190'C'#12'n'#157'\'#0#230#10#171'!+'#183#176#222'&'
-  +#217'OOO'#223#215#148#15'111'#142#8#23#129#232#232'h'#136'KH'#6#173'Sb'#176
-  +'`xk'#152#208#131#3'"]90'#178#19#7#198#12#236#196'|'#150#207#239#206#25#8'48'
-  +#7#159#238#158#129#136#135#178'0'#180'oG'#24#222#133#3'3'#250#181#128'u'#127
-  +#182#3#169'Y='#193#217'`?'#196#163#29#178'Gv'#201'~lllpS'#250#222#222#222#254
-  +#193#193#193#16#18#18#2#161#161#161#16#24#24#132'>$AzV'#14#228#228#211#247
-  +#203#139#152#239#7#140#232#204#129'8'#11#5#136'0Q'#128'X'#250#204#174#233#21
-  +'H'#180'T'#132'a'#157'9'#204#241#252#194'b,s'#1#164'fdClB"'#4#7#5'3'#246#200
-  +'.'#241#225#195#135'&'#27#192#139#23'/'#188#233#153#22'}'#159#135#15'='#223
-  +#243#247#247'g'#158#129#146#141#180#244'L'#24#223#139#3#169'vWQS'#3'2'#28'u!'
-  +#201'F'#19'R'#237'UAl '#7#210'2'#178#152#239#163'P~z'#22#234#235#235#219#192
-  +#30'='#27'tvvNiJ'#255#214#173'['#193#150#150#150'\z'#134'G'#207#20#249#208'3'
-  +'>z'#222'F'#235'!a'#17'0'#179'?'#7#138'<'#213#160#192#227#6#212#248#25'A'#209
-  +#27'=(z'#171#14#171'F'#181#132#192#208'p&'#31'='#139'$'#4#237#208#179':'#178
-  +#175#171#171#155#219#148#190#166#166'f'#236#133#11#23#152#231'j'#244'}'#158
-  +'W'#175'^1'#186#4#249'@'#219'o'#223'{'#131#210#254#177#176'x0'#7'V'#140#224
-  +#160'&'#7#214#143#22#134'm'#227'Z'#129#241#197#25#224#249#254'#SF'#190#207
-  +#252#231#161#244'L'#144#158'c)**'#130#178#178'rIS'#250#170#170#170#193#135#14
-  +#29#226#222#191#127#191'^'#143#158'e'#242#203#206#127#222#250#193#247#19#248
-  +'~'#242'G'#2#216#20#241#243#135#15'>'#159#234#159#199#242#227'F'#177#164#231
-  +'wd'#131#158'['#29'<x'#16#148#148#148'r'#154#210'755'#253#176'c'#199#14#198
-  +'Gz'#206't'#254#252'y'#230#217'*='#227#254#248#241'#c'#143'b'#250#1'5h'#219
-  +#199#199#167#1#244']'#27':N'#207'f'#233#25'4'#157'G'#233#153'3g'#152#231'd'
-  +#244'\n'#211#166'M'#128#229'KmJ'#255#198#141#27'a7o'#222#228'R'#30'z'#238'E'
-  +#190#158'<y'#146#137#27'}'#207#15#251'C'#166#15'IHH`'#190'w'#213#24#218#143
-  +'}'#8#243#221#167#196#196'D'#198#247#203#151'/'#195#230#205#155#153#231#130
-  +#187'v'#237#162'gf'#220'k'#215#174#229'5'#165#143#251'cI'#143#158#227'JKK'
-  +#195#209#163'G'#233#187'|L,'#168#29'S'#31'F'#177#164'goO'#159'>e'#234#134#255
-  +#204#153#234#151#158'{'#210'sI'#250'^'#24#255';a'#20'OIII8v'#236#24#243','
-  +#245#236#217#179#160#162#162#210'd'#253#171#169#169#249'Q'#253#147#175't'#29
-  +#210#243'F'#25#25#25#230'|z'#174#231#231#231#199'<'#247#213#211#211'c'#244'('
-  +#15#197#155#218#9#217'&}z^'#25#30#30#206#196'{'#255#254#253'p'#226#196#9#198
-  +#15#202'K'#207'g'#15#28'8'#192#197#246#151#209#228#247#0#205#204'|'#247#238
-  +#221#203#212';'#149'y'#207#158'='#204#185't=S9'#169#254#176#237'0uB~Ql'#175
-  +'^'#189#10'W'#174'\'#129's'#231#206'11'#163'}'#228'+'#197#6#251't&'#221#186
-  +'u+'#243'lV]]'#29#182'l'#217'B>'#166'7'#165#143#231'EP'#189#239#222#189#155
-  +#201'+%%'#5'G'#142#28'a'#158'3S'#223'C'#223'w'#163':'#160#242'Q_Nu'#205#135
-  +#234'?22'#146#190#11#203'|7'#141#250'['#138#149#156#156#28'S'#7#244#140#148
-  +#234#159#226#130'>79'#8#163#239#238#164'G>'#211#179'T'#140#21',Z'#180#136')7'
-  +'='#131#167#239#218'Q'#28#168#254#169#158#233#217'<'#229'upp`'#226'D'#207'e'
-  +#233#153'4'#181'Qj/'#20#239#213#171'W3'#250#20''''#236'_'#169'L\'#140'ohS'
-  +#250#226#226#226#171#177#254'I'#143'K'#245'K'#253#16'='#247#165'8P|'#31'=z'
-  +#196#196#130'|'#163#246'Gm'#145#174'w'#186#182'i?'#249'E>'#208'3'#234'K'#151
-  ,'.1'#231'Q='#146#159#180#15#219#7#151#218#4#250't'#164#177#246#204#153'3'#153
-  +#20#203'{'#155#206'322'#226#146#223'xM0'#245'O'#223#241#163#235#137#202'D'
-  +#207#157#177#13'S?'#198#148#139#160'm'#242#139#250'.jk'#236'X'#199'<#_'#187
-  +'v-'#163'Mmc'#193#130#5#214#195#134#13#19#194'}_'#148#159#238#199#218#181'k'
-  +#199#153'3g'#206#5#188'Nj'#168#204#216#6#185#212'o'#209#24'D'#215'UTT'#20'c'
-  +#159#198#23#234#19#232':'#167#148#198'5'#234'g'#169'_'#162#185#14#249'L'#241
-  +#195'v'#202#221#183'o'#31#19#143#133#11#23'jM'#157':'#181#229#215#230'}'#252
-  +'8'#140#25'3f'#4#250#248#4#253#165#247'W0'#182'I'#139#174'ujC'#20'O'#178'OuJ'
-  +#237#140#174'U'#138'5'#213#17#182#19'.'#245#191#216#159#193#146'%Kj0'#222#246
-  +'ho'#220#247#206'='#167'L'#153'"'#232#207#239#184#189'w'#251#246#237#246#24
-  +#239'4l'#27'u'#212#166'I'#139#218'"'#245#175't'#253#211'uO'#253'6'#194#213
-  +#208#208#200#194#184#185'L'#155'6'#237#152#152#152#216#0#190#173#241#227#199
-  +#255#208#28'x'#192#128#1#141#183'['#12#25'2'#164#143#168#168#232#20#17#17#145
-  +#149'#F'#140#144'D'#246'Q:z'#244#232'5c'#199#142#157'6r'#228#200#254#3#7#14
-  +'l%x'#30#30#231#252#183#252#183#252#255'iiyZ'#12'Z'#156#153#190#246#127#169
-  +'/rm[E'#203'33'#21#216#207#239#252'r}'#231'D_X'#245#232'\EK'#153#25#246#28
-  +#133#137#237'~'#181#190'K'#242''''#176#141#247#134#195#207#181#171'['#157#157
-  +#25#201'9;'#181#255#175#212#183'K'#240#134#179#222#247#193'8'#242#5'('#188'}'
-  +'P'#215'Qv~~'#203'3b'#211#127#149#190'U'#220'{8'#226'y'#11#246'{'#232#130'v'
-  +#144#13#220#248'd'#13#253#20'W'#150#183'8%'#182#235#159#218#198'r'#148#127#21
-  +#204#243'4'#246'-'#236'C'#237#29'/5a'#155#251'5'#144#253'h'#12'w'#131#29'a'
-  +#172#214#142#138#22'23t9'#27'6'#180#248#187#250#6'a.L\'#31'E'#190#4#147#168
-  +'W'#240'8'#234'5'#152'F'#191#134''''#209#30'<b<'#192#2#245'%_j'#193#166#23'j'
+  +'ld'#7'OnClick'#7#15'lmCopyCellClick'#0#0#9'TMenuItem'#10'Separator2'#7'Capt'
+  +'ion'#6#1'-'#0#0#9'TMenuItem'#15'lmExportDataSet'#7'Caption'#6#12'Export to.'
+  +'..'#0#9'TMenuItem'#27'lmExportDataAsMarkDownTable'#7'Caption'#6#14'Markdown'
+  +' Table'#7'OnClick'#7' lmExportDataAsMarkDownTableClick'#0#0#9'TMenuItem'#18
+  ,'lmExportDataAsHtml'#7'Caption'#6#4'Html'#7'OnClick'#7#23'lmExportDataAsHtml'
+  +'Click'#0#0#9'TMenuItem'#19'lmExportToClipboard'#7'Caption'#6#9'Clipboard'#7
+  +'OnClick'#7#24'lmExportToClipboardClick'#0#0#9'TMenuItem'#10'Separator1'#7'C'
+  +'aption'#6#1'-'#0#0#9'TMenuItem'#18'lmStdExportFormats'#7'Caption'#6#26'Stan'
+  +'dart Export Formats...'#7'OnClick'#7#23'lmStdExportFormatsClick'#0#0#0#0#14
+  +'TSynCompletion'#14'SynCompletion1'#8'Position'#2#0#13'LinesInWindow'#2#6#13
+  +'SelectedColor'#7#11'clHighlight'#13'CaseSensitive'#8#5'Width'#3#6#1#18'Auto'
+  +'UseSingleIdent'#9#8'ShortCut'#3' @'#13'EndOfTokenChr'#6#5'()[].'#16'OnCodeC'
+  +'ompletion'#7#28'SynCompletion1CodeCompletion'#13'ExecCommandID'#7#22'ecSynC'
+  +'ompletionExecute'#6'Editor'#7#7'meQuery'#18'ToggleReplaceWhole'#8#4'Left'#3
+  +#224#2#3'Top'#3#144#1#0#0#10'TImageList'#13'toolbarImages'#6'Height'#2' '#5
+  +'Width'#2' '#4'Left'#3'u'#2#3'Top'#2#127#6'Bitmap'#10#228'E'#0#0'Lz'#12#0#0#0
+  +' '#0#0#0' '#0#0#0#206'E'#0#0#0#0#0#0'x'#218#237#189#7'X'#20#201#215#198';`\'
+  +'s^'#243#154'uW'#20's'#192#156#197#172#152#3#230',***'#168#136#4#9#18#20#196
+  +#4'('#138#8'"'#25#137#162#162'(( 9'#231#156's'#142's'#238'9==8 '#24'v]'#255
+  +#247#222'o'#155#231#247'T'#135#234#243#158':U]UM'#207#244#0#0#7#254#143#227
+  +#228#238#186#198#193#205'9'#219#206#197#17#8'['#231#231'<'#156#28#192#134'p'
+  +#180#7'k'#22#171#231'v'#12#150#14#182#148#214#224#190'8'#171#231#182#186#22
+  +#14#22#253#4'm'#142'))k+RR'#246';'#242#7#210#139#182#155#211#183'suJ'#169#168
+  +#172#128#230#22'.'#3#254'q'#27'RZ^'#6#241#201#137#240#238#163'W'#149#133#157
+  +'u'#217'3[kI'#212#233#136'z'#147'G'#151#148#173'Fv!'#251#145#157#180#141#251
+  +''''#225#241#14#141#245#177#12'5d'#175#172#162#28'J'#202'J'#161#168#164#24#10
+  +'K'#138#160#176#168#16#242#11#11' '#183'0'#31'r'#242#243' +/'#7'2r'#179'!='''
+  +#19'R'#179#210'!3/'#27#242#240'XzN'#22#132#197'D'#130#177#155's'#185#180#175
+  +#207'3'#212'9'#245'WI'#217'u'#196#4#177'`S'#29#244#225'$'#30#19'Gz'#11#234'c'
+  +','#25#253'z'#237#226'"( '#237'"'#190'v.j'#231'B&jg'#160'VZV'#6#164'f'#166'C'
+  +'rF*$'#166'&3qH'#204#205#1#211#148#20'8'#22#22'Z%'#158#148#156#242'gI'#153
+  +#191'hIY'#250#187#218#218#234#133'e'#229#153#184#253#9'}x'#138'>\$'#31'0'#14
+  +#237#249#250#22#182'V'#140'>i'#23#20#147'n!'#228#161'6'#149'-'#183' '#15#178
+  +#25#253#156'z'#253#244#236'LF?%#'#13#18'P?&>'#22#2#170'k@'#23'c'#180'/7'#15
+  +#166#231#228#214'M--'#231'ZU'#215#212'P'#253#5#212#214#213'M'#194'm'#244'!'
+  +#150#245#129#226'0'#137#175'of'#253#140#209'/'#192'r'#231'3'#186#188'r'#147
+  +'6'#149'='#27#181#179'P'#187#129'>'#198' %3'#13#146#210'S'#192'7"'#12#220#170
+  +#170'A'#177#172#12#214#22#22#129'tE'#21'xTWC'#13#175#233'0'#203#199#218#218
+  +#26#185#202'*'#238#204#210#242'@'#244'A'#27'}X'#133'1hC'#250#166#150'O'#25
+  +#253'|'#129'2S}'#19#130'e'#207'D'#237#140'lA}'#170#131'4'#240#138#137#6'K'
+  +#212'?'#139#186#198#152'~m'#241#169#173#171'D'#253#135#168'/'#137'1'#232'A'
+  +#250'&O'#159'0'#250#252'v'#198#215#205#206#227'i7'#212#207'd'#244#249'm'#128
+  +#234#192'#>'#14#174#197#199#195#246#148'T'#152'VP'#4'quuMj'#23#160#200#156
+  +#210#242'|'#212'7G'#253'}'#168#223#159#244#141#205#30'3'#250'9'#5#13'uyqg'
+  +#181#217#216'g'#228#8#234#243'b'#240'11'#30#174#163#15#187'P'#127'J~'#1'H'
+  +#149#151#127#14#188#192#162'YU]'#131'm '#165'q'#249#239'?~'#196#232'g'#243
+  +#235'Z'#160#220#252'z'#207#204#161'T@'#159#173#3#138'A'#28'b'#150#149#5#231
+  +'ssayA!,.k'#186'/'#145#193#250'G}?'#182#254'W'#242#235#223#208#196#152#213
+  +#231#149#247#179'6'#165#164'+'#16#127#182#253'Q'#31#144#150#253#153#215#152
+  +'G'#15#235#237'Pa!l*)e'#244'b'#177#30#158'TVa'#219#171#171#171#197'm'#249#202
+  +#170'L6'#246''''#176#236#19#249#237#255#174#177#17'O'#159#234'Y@W'#176#252
+  +#130'q'#200'`'#253#16'$'#30#247#219'a'#220#174#21'`'#252#241#26#216'_R'#6'X'
+  +#215' '#154'W'#0#127#21#151#166#207'(-'#15'X\Vn'#139#218#23'P{'#169#224#245
+  +#127#219#232'^M'#29'_?7'#251's'#217#191#136'EC'#178#27#17#142#245'g_'#144#15
+  +#250'x'#253#202#163#15#231'**aeXx'#221#216#194'"s6'#230't'#221'/m'#220#255
+  +#233#27#220'a'#244#5#235#252#179#253'\'#166']'#228'0'#176#215'%'#182#211#220
+  +'fHF<1'#6#182#232#131#13'v?'#135'^'#184#215'L'#206#202'9L'#215';'#219#255#183
+  +'o'#220#255#235#222#209#231#149#159'm'#251#217'|'#173'z'#187#249'L'#191#192
+  +#131#215'?Q_'#241#5#236'1"'#3#243#230#163'M%'#227#251'U'#171'?'#250#12#229
+  +#183#181#166#184'~K'#143'w'#253#23#240'5?k'#241'l'#23'2'#227#1#245#205#212'G'
+  +#22'~'#133#2#6'^^Z'#180't'#175'W*'#232'(t'#249#218#248#175#173'w'#131#209#231
+  +#249#158#255'Y'#147#175#135'c!'#141#13#12#165#197'P\Z'#210',E'#4#155#151#22
+  +#141#235'Z'#149#10#10'_'#215#191'vC'#155#215#255#23#21#214#235'RY'#26#235#209
+  +#248'H'#148'b?Oc^S'#240#243#16#180#168'k]'#251#166#190#186#182'&'#163#207#140
+  +#249#141't'#235'5'#209'v'#25#129's'#132'r'#134#10'('#175#20#160#130#7#29'''('
+  +'?-'#170#215'4'#190#169#175#170#169'Q?'#254#18'_'#232#242'5Q'#167#162#178#18
+  +'*'#170'*'#161#146#161#170#17#188'c'#21#172'O'#180'(k'#168'~S'#31#243'0'#250
+  +#130'q'#230#199#184'L@'#151#236'WUW!'#213'P]C'#212#8#192#219'G'#199#248#190
+  ,#208#162#168#170#242'M}%U'#21#158'~'#153#128#254#23#218#159'ukP'#175#182#182
+  +#22'j'#235#136':'#30#184']'#131#240'}!?iQPQ'#172'<'#249#13'}'#133#171'J'#172
+  +'~)C)'#171'O1'#167'X'#242#203']]'#253'Y'#187#14'5'#153'y(;/'#173#227#214'1'
+  +#254#240'} _i'#185#168#168#128#250''''#191#170'/'#175't'#229#179'~S'#229#175
+  +#18','#127#13#163'AZ'#228#3#233'2'#212#199#160'a'#249#229'._'#170'<y'#178'y}'
+  +'\'#132'/^'#185#252'e'#253#215#183#187#138#250#24'TV7'#172#3#210#170'a'#227
+  +#206#211#253#172'M'#254#210'"{I'#174'r'#231#206#157#221'QG'#168#25#253#182
+  +#178#242#23'y'#237#191#180#225'u'#199#187#230#26#182#253#202#250'XT'#213#183
+  +'E'#30'U'#245#186#252'k'#128#150'sr'#178'U3f'#204#24#136':'#173#169#172'M'
+  +#232#247':'#127#233'bVaQ'#17'{'#159#241#243#150#10#140#221#137'3'#210#229#237
+  +#219#183#23'A'#157#206'H'#203#198'q'#192#165#223#242#149#203'/'#159'>w'#182
+  +#240#244'y'#153#186'S'#231'X'#206#158#169#147'f8]wR'#134'8Uw'#226#12'!]w'#252
+  +'4'#203#169#147'uR'#132#244#137#186'c'#12#199#235#142#158'$'#164#234#142#156
+  +' '#142#149#205'_'#180#224#1'jLD'#186#179'1h'#172#223#9#233#143#140'B'#198' '
+  +#227#217#252#147#144#201#127#131#137','#227#16'*'#247'p'#164'7'#210#190#153
+  +#242#183'd'#253'j'#139#252#198#210#238''''#192#183#213#150#181#223#162#169'6'
+  +'('#184#12#29':'#180#13'&'#3'h'#245'+'#12#17#128#191#221'a'#209#162'E'#156
+  +#159#176#140#251#145#246'U[['#7'%8'#215#140#143#143'O'#30'4h'#208#18'l'#231
+  +#194#255'P'#127'.'#217'---'#171#167#172#172#188#30#218'&'#189'B'#156#219#229
+  +#226'}^ZZ:DDD'#194#251#247'^'#220'2'#28'/DE'#199'I'#204#158'=['#248'g'#232
+  +#147'^yyE'#3'Jq>K'#250'EE'#197#144#151#151#7#25#25#25#16#27#27'K'#250#224#235
+  +#235#203#205#201#201#133#249#243#231#175#255#17#31'\'#149'7'#11'nN&}A'#237
+  +#178'2J'#249#219#188#24#20#23#151'@>'#222#231'df'#226#188';>'#1'|||'#193#197
+  +#197#149#250'Dn||"'#172'Y'#179'f'#189#136#136#200'w'#251#240'Ry'#211#11#167
+  +#203'k'#224#180#248#8#230#223#29#188'x'#243#244#168#15#225'Q'#201#198#128#167
+  +'_'#128#247'9YY'#217#144#144#144#8'~~'#159#224#217'3K'#166'M$%'#165'p'#19#19
+  +'S`'#195#198#205#27#190'W'#223#236#244'R('#244'~'#12'wNo'#0#193#242'7'#212
+  +#174'd'#227#193'k'#3#164#159#157#157#13#137#137'I'#240#233#211''''#176#176
+  +#176'`'#206#165'vA>'#196#199'%0'#246#156#228#215#130#179#188#4#166'k'#16'L/'
+  +#173#6'G'#249#181#213'V'#178#235#230#240#245#239#28#154#7#201'fgAk'#203'x'
+  +#198#134'`'#185'y~`'#159'_Y'#201#214#3#213#1#181#129'"'#160#250'NJJ'#130#128
+  +#128#0'077g'#206#165#216#228#228#228'AbR'#10'D'#197'$'#192's=9Hr'#208#130'4'
+  +'''=Hs'#214#131't'#23'}Hs'#189#193'uS'#217#226#192#215#191#190'g6D'#220#220#5
+  +'j'#155#191#212''']~'#218'X?'#23#239'7SRR 00'#176#190#252#148#183#164#164#132
+  +#241'-!1'#25'BB#'#192'Ln#'#248'ko'#133#192#27#146#16#168#189#13'"'#141'N'#192
+  +#3#169'E'#142'|}'#189#253#179#193'_k;('#174#27#221'@'#159'4'#249'|'#174#11'^'
+  +#187' '#141#2#188#207'IOO'#135#176#176'0prrb'#206#229#231'-..'#198#250#201#5
+  +#170#7'?'#255' '#184'/'#189#2#188#213'7'#193'G'#13#242'c'#7#168#238#152#246
+  +#156#175#175#187'o'#22'x'#169'J'#192#197'U#'#235#203#208#184#236'U4'#167#171
+  +#252'\'#15#252#24'd'#225'}w\\'#28'^'#131#239#155#237#167#240#182#31'bb'#226
+  +'@'#255#224#2#240'P'#146#128#15'j'#27'A~'#195'D;'#190#190#150#228'tx'#173#184
+  +#26#206'.'#27'.'#160'OZ'#13#181'i'#252'/'#167'y)'#205#13#176#252#197#168#159
+  +#135'u'#144#158#150#6#209#209'Q'#216#7#248#128#183#215'{'#240'B_'#188#189#189
+  +#224#227#199#15#240#241#195#7#8#240#247#135#184#216'8'#200#206#204#4'}'#140
+  +#245'k'#133'Upq'#253'Dk'#190#190#234#182#169#224'zi'#5'H/'#30#202#198'_0'#246
+  +#168#141#190#148#226#156'$+='#5#18'"C!&4'#0#162#130#253' 2'#200#23#194#252'?'
+  +'B'#176#239'{'#240#247'z'#3'>'#158'/'#225#131#199#11#240'z'#237#138#184#192
+  +#251'W'#206#240#238#165'3'#188'qs'#132#151'Nv'#224'l'#247#12'^9X'#128#193#1
+  +'1'#184#176'n\}'#249#21'7N'#0'['#153#133'ptn?F'#159#202'G'#215#25#205'}'#152
+  +#20#181'S'#19'b'#224#165#173')'#220#191'&'#7#183#174#156#0'}'#228'&'#161#128
+  +'\>'#14'z'#242'R'#160'{'#233'(\'#191#136'\8'#2':'#23#14#131#142#220'a'#208
+  +#150'='#4'Z'#231#14#130#230#249#3#160'!'#179#23#12'5da'#247#148'nphV'#223'g|'
+  +#253#243'kD'#224#222#129#233#176'oFo'#200'NK'#130#152#144'O'#136'?'#143'P'
+  +#127#136#8#242#1#15'{3'#208'>'#183#23'2B'#156#161' '#230'%'#228#4'ZBN'#144
+  +#213'W'#176'nr'#127'n'#160'5'#228#135#218'1'#132':'#223'yE'#250#146'S{'#194
+  +#137#249'}a'#157'H;'#166'|'#250#10'T>i'#208'W$Nb'#249#164'@]z;('#31'Y'#11#5
+  +#17'n'#16'k'#165#10#177#214#26#136':'#155'^cS-D'#147']'#231#239'W'#23#200#171
+  +'^'#159'7'#193'V'#7#30'('#28#132'W'#6'g}'#138'#'#28'!?'#24'}'#10#182#135'\'
+  +#127#244'3'#192#146#7#173#251#243#214's'#3#172#153'c'#177#14':'#16'm'#165#1
+  +#209'6Z'#188#20#245#162#173#212'y)'#218#231#173'S'#170#134')'#30#183#186#134
+  +#169'@^k^'#222'x['#13#184'/'#191#15',.J@'#130#221'u'#136#177'TA'#212#16'U'
+  +#228'*K'#195#237'h'#11'6'#15'j'#240#192'cV'#252'<j'#236'1'#213#134#251'Q'#247
+  +'s^'#213#250#188#241'6'#215#224#254#165#221'`qA'#130'Y'#143#198'}'#209#232'C'
+  +#244'3J5x'#219#207#174#242#252'''mKu'#30#204'q~^'#220#255'L'#157#221'V'#231
+  ,#149#145#246#161'F'#3';'#204'6'#127#31'/'#127#188#141'&'#220#191#184#7#245
+  +#215'A'#28#197#196#2#143'[('#241#180#200#134#197'U^~'#6'eD'#133')?'#3#217#162
+  +#148#159#151'A'#149'g'#131#242'1y'#149'>'#231'#[L'#252#148'Y{'#216'~0&F'#23
+  +#248#250'j'#16#133#249#24#158'R'#170#136'\'#197'u%D'#145#221#198#245'gj'#188
+  +#244#169'2'#166#170'l'#138#219'h'#151'Y'#167#252#252#188#140'='#229#207'v'#5
+  +'A'#155#177#232#143#145#156'$X'#200#173'e'#214#163#158'"'#230'x'#158#185'2'
+  +#155'*'#177#251#174#242'|1W'#248'|'#140#217#175'('#144#255#10#238'C'#223#204
+  +'Y'#255#153'c'#138#236'6?'#15#31#180#243#20#219#3#198#212'Pn7<'#149'['#7#177
+  +'X'#174'H3'#5#136#196#227#145'f'#151'y'#160#157'H3%'#228#138#0#180'O'#145#5
+  +#183#205#149#216#188#202#188#243#205#216'm&%'#148'?'#219'`'#242'*'#176'y'#175
+  +'@'#12#250'e('#187#131#137#127#130#141#6#219#198#213#5#218'{'#195#246#202'K'
+  +#213#217'c*,'#252#252#170#236#182#170#192#249#154#2'y)'#213'h'#144'7'#1#235
+  +#220'Hn'#23#220#220'<'#24#30#237#25#1#198#187'G"'#195#144#225#200#8#129'u'
+  +#254'6'#159#225'l'#222#225#205#228#29'.'#144#143'ow'#196#23#182#31#225'~'#213
+  +'5'#3#192#232#232',xqe5'#184')'#172#4#183#203#171'0'#197#245#203#180'N'#233
+  +#138'F'#219'l'#30'f??'#239'*v'#255'J'#222#190#250'<+'#27#238#175#183#195';'
+  +#238#142#227#173#10#142'{'#134#135#196#192'In'#9'<'#151']'#136',bSb1'#178#128
+  +#221#183'H'#224#24#127#255#18'6]'#216#232#220#198#249#249#231#240#215#23'0'
+  +#219'N'#23#22#131#210#230#9'`'#175#186#7#251#226#235'x='#234'@,'#246#169#177
+  +'V'#218#8'mc?m'#163#139')'#237#211#228'aC'#169#6'//'#246#223#188#253#215'y'
+  +#231#216'h'#243#242#218#240#243'k'#176#249')/k'#143#177'M::'#216#255'j'#193
+  +#19#21')0?'#183#18'"M'#21'!'#204#248',r'#9'9'#143#156'c'#145'E.'#8#172'#'#15
+  +'/"'#252#253'r'#236#254#179#236#186#28'{'#190#192#250'#J/'#178#219#231#216
+  +#227#178#16#241'H'#22#238#157#217#12#230#231'WB'#192#189#19#224'op'#138'I'#3
+  +#238#157#132#0#131#211'<h'#219'P'#134#151#26#156'E'#164'q'#157#207'q6='#201
+  +#219'O'#231#27#178#231#220';'#205#238#147#230#173'S'#158#250#188#188'|'#129
+  +#134#167'P'#127#19'X'#156'_U'#240'Vm'#11#188#189#182#21#217#4'o5'#183'a'#186
+  +#29#161'}'#155#145#157#188#253#204':'#237#219#246#249#152'&'#157#179#131#221
+  +#222'"'#176#206#207#191#157'M1'#159'&'#255#220'm'#204#190'7'#234'['#192'Ny_,'
+  +#221#155#207#30#209#241#236#236#225#29#175#204#30#222#233#202#204'a'#29#149
+  +'f'#14#235#160'<kx'#199#171'3'#135'uR'#19#27#218'^]lh'#7#141#233#131#219'_'
+  +#155'6'#164#189#214#180'!'#29#180#17#157#169#131';'#220#152'2'#184#131#238
+  +#228'A'#237#245#166#14#233'p'#3#185'>uP;'#29'L'#181#166#13'n'#175#137'hL'#31
+  +'B'#231'vT'#21#27#214#225#234#140'a'#29#149'g'#12#237'@'#182#21#209#182#2'j'
+  +#158'#'#237#255#151'<'#131#23#250'_'#251'p'#234#228#169#23'''N'#156#4'>V'#22
+  +'Opn'#251#1#231#184#159' "'#176'!'#145'A'#254'8'#255#245#135#232#208'@'#156
+  +#31#6'AlX0'#196#133#135'@\D('#196#227#252'8>*'#12#226#163'# !&'#18'b'#194'C'
+  +#193#234#153'9'#8#218#190#162'p'#229'Ec'#253#131#7#14#129#152#216#12'X'#183
+  +'v'#29#208#186''''#206#161'Ks'#210#160#170'('#183#25#242#160#170#152#200#135
+  +#234#146#2#168'.-D'#138#160#166#172#24'j'#202'K'#160#166#162#20'j+'#241'~'#13
+  +#243#190#243'x'#197#216#228's\'#234#4'4'#214#223#191#239#0',Z'#180#24'6n'#216
+  +#4#180#254#246#245#11'('#203#203#128#172#24#255'&'#8'hHl`='#217'qD'#16#18#12
+  +#217#241#193'P'#129#254'yz'#188'fl'#242'9vT'#234#11#253#189'{'#246#193#134
+  +#245#27'a'#199'vI'#160'u'#210'//'#204#134'j,'#11#143'b'#22#222'vM'#5#175#140
+  +#12#149'e'#12#181'U'#229'H'#5#212'VWBmM'#21#212#213'VC'#5#198#132#244#201'&'
+  +#159'#'#135#143'~'#161#191'g'#247'^'#16#196#211#195#29'}'#207#131#186#234#170
+  +#166'!'#251'5'#213'<jk'#24#184'u'#181'H'#221#231#207'h'#224'z'#5#214#205#27
+  +#143#151#13'l'#31'>t'#228#11#253'];w'#131' o'#241#156#10#172'S.'#183#142'G'
+  +#29#11#127#155#219#248#243' '#244'?'#240'Z'#198#143'Z'#244#169#22'}'#172#169
+  +#194#251#182#194#28#240'x'#229#222#192#246#129#253#7#191#208#151#220#177#19#4
+  +#241#160#248'c'#221'e'#199#135'6CH=Y'#4#214'7'#143' '#200#140'%'#2'!3&'#16'J'
+  +#242'2'#193#195#221#181#129#237'}{'#247#127#161#191'}'#219#14#16#196#227'%'
+  +#182#255#130','#168',+'#130'J'#172#247'z'#202#138'y'#251'X(F'#12#24#231#242
+  +#146'|'#244'9'#15#201#133#178#162#28',{6'#20'e'#167#192'KW'#167#6#182#169#14
+  +#26#235'o'#219#186#29#4'y'#133#231#20#227#245#199#179#215#4'Ey'#204#181'UF`'
+  +#140#137#210#130'l'#198#231#210#252'L,w'#6#146#14#5#25#9#224#238#226#208#192
+  +#246#238']{'#190#208#223#178'y+'#8#242#194#217#30#10#179#18'Y;M'#145#14#197
+  +#185'|'#210#208#215'T("'#176#188'E'#217#201'xn'#18#20'f&Bnj'#12#188'p'#178'm'
+  +'`{'#167#228#174'/'#244'7m'#220#12#130#184#225'9yi1'#144#26#246#225#27'x'#215
+  +#147#18'Jx'#241#8'y'#207#144#157#20#14'.'#246'V'#13'lS'#29'4'#214#223#176'~'
+  +#19#8#226#242#28#239'='#147'# 79'#18#242'R'#26'B'#251'r'#153'c,'#168'A'#228
+  +'$'#133'AN"'#129#237'3'#129#215'63'#177#15'r'#178'}'#214#192#246#214'-'#219
+  +#191#208'_/'#177#1#4'q'#182#181#128#172#4'l'#207'h'#167'I'#248#237#30#237#19
+  +#153'q'#4#182'{'#236#255#168#237'g`'#191#152#129'}ez'#180'?8'#218#152'7'#176
+  ,'Mu'#208'X'#127#221'Z'#9#16#228#220#25'ixpG'#23#244#181#213#191#130'ZC'#180#8
+  +'U'#184#201'G'#243'*'#220#191#165#3'gO'#157'l`'#155#234#160#177#254#154#213
+  +#235#224'k'#172']#'#193#176'n'#237'z'#6#137'u'#27#154#132#142#241#243#18'M'
+  +#217#162':h'#172#191'j'#229#26#248'U'#144#143#141#245'W'#174'X'#5#191#138#181
+  +'k'#214'}'#161#191'|'#217'J'#248'U'#172'^'#181#246#11'}'#241#165#203#161')ll'
+  +'l!(('#136#249#31'os'#208#255#159#5'y'#249#242'%L'#158'<'#21#166'N'#157#14'S'
+  +'0'#157'4qR'#3#155'+W'#172#254'B'#127#209#194'%'#208#152#21#24'+WWW'#230#127
+  +#171#132#151#151'W'#253':'#241#238#221#187#250#253#222#222#222#12#180#254#225
+  +#195#7#152'5k'#14#204#157';'#31#230#206#153#7#211#167#137'5'#176'K>4'#214#159
+  +'?o!4'#134#242'9;;3'#26#203#151#173#128#165'K'#150'2'#204#154'5'#187#129'.'
+  +#223'/'#242#231#205#155'7'#240#250#245'k'#152'={'#14#218'X'#128#250#243'q^7'
+  +#179#129']'#242#161#177#254#156#217#243#160'1K'#22'/e'#254#175'M'#182#167'N'
+  +#153'^'#207#200#17#163#192#211#211#147#217#255#246#237'['#240#240#240'`b'#238
+  +#230#230#198#248'K'#231#204#198#242#207#155#187#128')'#191#216#244#25#13#236
+  +#146#15#141#245'g'#136#205#134#198#204#153'='#31#158'?'#127#206#232'L'#154'8'
+  +#165#158#191#254#28#205#148#211#221#221#157#209'ttt'#4'{{{'#176#181#181#197
+  +#246'b'#3#150#150#150'0k'#230#28#244'a.'#147'N'#157'"'#198#216'['#184'`'#9's'
+  +#253#207#158'5'#239#11#253'iS'#197#160'1'#228'+'#217'%'#253#241#227'&'#214'3'
+  +'|'#248#8'pqqat'#201'?;;;'#176#178#178#130'g'#207#158#129#153#153#25#152#152
+  +#152#224#249#211'Qs'#22#214#253#12#152'<i'#10'co'#225#194#197'X'#127#226#24
+  +#143#153'_'#232'O'#154'H'#237#180'!'#228''''#149#135'b+""'#10#163'G'#143'e'
+  +#24'6lx'#189'&=wy'#242#228#9#163#249#224#193#3'000'#128'{'#247#238#193#248
+  +#241#147'`'#210#164#169'0'#17#227'5~'#220#4#198#222#146#197#203#208#159#153
+  +#152#138#127#161'?^tR'#198#248'q'#147'@'#16#138#217#19#211'''L'#25#135#14#25
+  +#10#189#127#239#3#189'z'#246#130#17'X~*'#231#227#199#143#193#216#216#24#140
+  +#140#140#24#221';w'#238#192#173'['#183#224#250#245#235'0'#6#253#21#29';'#30
+  +#198#142#25#7'"'#232'3'#217#155'<i'#26#182#233#21'0q'#194#20#16'|'#22'L'#235
+  +'C'#135#142#154'8Vd\'#206#216'1t'#14#15#242#245#225#195#135'L\'#173#173#173
+  +#25'h'#157#202'lhh'#200'h'#222#190'}'#27#244#245#245'AWW'#23'ttt@KK'#11'444'
+  +#176#141#254#133#237'd'#12#252'9J'#132'Y'#23#180';Nt"'#176#207#168#133#248
+  +#159#193'@'#250't'#238#220#249'<'#230'/'#27#253#23#198#25#161#216#145'mSSS&'
+  +#190'TV'#210#189'{'#247'.'#220#188'y'#179'^'#143#208#212#212'd'#208#214#214
+  +'f'#244#135#13#29#129'q'#250#147'a'#248#176'Q'#192#183'I'#140#17#25'W'#197'>'
+  +#231#22#230#151#159#158'a#S'#219#180#249'M'#189'S'#167'.&'#200#195#233#211
+  +#197#30#239#219#183#223#235#200#145#163#159'N'#156#144#14'9}'#250'L'#212#185
+  +'s'#231#19'ee'#229#210#144',99'#185'lJeee'#211#206#158'='#151'p'#230#140'L'
+  +#20#222#223#133'JJ'#238#244#25'5'#234'/'#179#206#157#187#26#147#29#22'Z7'#238
+  +#220#185#139#17#150's'#31'}'#238#162'Q'#29#8#179#159#17#248#157#253'<B'#191
+  +#129#3#7#246#153'?'#127'~'#247'e'#203#150'u'#229#179'e'#203#22'&]'#181'jU'
+  +#151#245#235#215'w'#198#227#157'i'#157#246'o'#221#186#149'96h'#208#160#206
+  +#237#219#183#239#137'6'#250#178#182#4#233#135#244#248'Y'#247#254#156'_t'#239
+  +#190#193#194#162#197#184#215#1'sg{'#134#235'o'#241#141#9#144#9'I'#201#210#141
+  +#203#170'5I'#202#171#211#138#206#200'?'#25#144#28'.'#241'.'#222'x'#130's'#196
+  +#146#185#175'_'#183#252#17#219#183#210#210#198#156#136#137#31#212#212#177#137
+  +'~~'#237#198#189#13#146#29#255'&(w'#229#199'$X'#23#146#11'[R'#202#224'xn'#21
+  +'('#148#215#130'jy'#29'('#22'T'#195#229#172'J8'#27'['#12#187'|2`'#152'}h'#254
+  +'`'#171#208'K'#191'?'#10'j'#255'='#250''''#163#227#18'NE'#166#194#148#143#129
+  +'Z'#13#250#132#183'A'#155#199#189#13'N_'#244'1'#5#164'3+'#224'xa5'#28','#248
+  +':R'#152'G!'#187#18'v'#248'e'#193#31#207#194'2'#251'Y'#132#239#248#150#254'4'
+  +#223#128'"'#249#140#10'X'#225#23#7#147'>'#4'i'#224'N'#225#137#239#3#213#166
+  +'zF'#194#230#232'"8'#132'e;'#248#131#28#166'x$'#148#130#152's'#28#244'}'#228
+  +#127#131'c'#1'-'#154#211#159#226#19'Xt2'#165#2'N&'#149#129#248#199'X'#152#240
+  +'.(r'#163'_'#18#156'L,'#131#131')'#229#255#136'S'#201#229' '#238#28#3'='#181
+  +#157'\9'#10#175#155#244#1#227'^$'#21'['#6#7#226'J'#225'T|)HG'#22#128't'#2'j'
+  +#227'z'#3#240'8'#229'9'#16#139#235#200#177#168'R8'#17'_'#198#172#31#248#10
+  +#199'1'#207#220#167'~'#208#229#130#137'qs'#250'G'#162#138#225#0#159#232'b8H'
+  +#196#8#128#219#187#195#10'a'#193#139#12#24#253'4'#25'z'#221#138#7'!'#245'hh'
+  +#169#25#3#131#238''''#193#20#171'4'#216#248'.'#15#14'F'#148#192#190#240'/9'
+  +#18'Z'#4#127#170'='#131#142#210'wO7'#214#159#236#29'Xt0'#180#16#246#133#22
+  +#192#254#240'B'#30#17#8#198'a'#127'$/]'#230#149#5'=L'#162#160#157'A'#4#180
+  +#189#21#1#173'oDB+'#205#8'h'#169#17#14#28#244#131#207'h'#211#20#216#237'W'#0
+  +#187#3#11#191'`'#199#219'T'#232#184'K'#190#184#243#225'['#13'>'#143'7'#201'+'
+  +#176'ho`'#30#236#9#202#135#189'!y'#176'74'#31#246#133'!'#225'y'#176'+,'#23'D'
+  +#221#18#161#163'Y$t|'#18#9#157#30#4'BW'#5#19#232'v'#232#10't'#219'|'#184#172
+  ,#243#154']e'#237#150#239#134'6'#27'/'#128#240'%O'#198#135#246#215'ca'#237#139
+  +'l'#144#244')'#248#130'I*'#166#240#155#196')'#243#6#215#248#251#192#162#157
+  +#159'r@'#210#31#9#204#5#201#224'\'#216#25#138#160#246#216'W'#9#208#217'.'#138
+  +#199#237#215#208#235#136'|E'#239#227#138'Z}'#165#20'G'#240#207#239#185#247
+  +#146'h'#151#205'R'#186#237'f'#175#173'ly'#224#30'p'#212#162#160#173'V,lz'#157
+  +#3#155'='#243#26#242'"'#25#218#206'^_'#197#217#165'P'#255'} l'#239'E[>d'#193
+  +'V'#191'l'#216#22#128#4'!'#161#217'0'#223'7'#13':'#187'DC'#151#23#209#208#217
+  +'6'#4#250']'#188'Q8'#240#234#157#191#154#187#142'z'#156#186#217#189#243'.'
+  +#185#192#214'g,k0'#14'u'#3#239'%p7'#188#206#169#147'x'#149#3#130#12#218'%'#15
+  +'m7'#201#237#227#159'7'#238#229#199'"'#137#247#233#176#254'c'#6#172#247#203
+  +#128#13#129#153#176'!$'#11#22#248#167#193#128'w'#241#208#217'3'#22':'#189#143
+  +#133#222#6#174#208'_'#199#220#224'k}'#201#239#10#166#237#187#202#26#197#182
+  +#184#26#144#143'>$M0K'#201'Z'#225#146'U'#140'T#uH'#237#4'U'#155#186'6kN'#186
+  +#212#127'W'#202#206#189'x'#248#179#24#152#230#154#4'+'#188#210'`'#245#167'tX'
+  +#29#148#1#171#195#144#168','#152#17#158#1'}C'#146#160'S`<'#244'y'#234#3#3#31
+  +#191'S'#254#170#15#250'o'#150't'#208'x'#235#136#250#175#186#234#198'}Xd'#159
+  +#17#137'd '#5'H'#169#152#161'_Q'#235'E'#187#163#248#249#255'4s'#8#239'x?'#20
+  +':'#154'F@'''#203'H'#24#224#18#11#227#222'%'#194','#255'T'#152#19#146#14'3'
+  +#163#211'A,1'#3#134'''e@'#199#184'T'#232'o'#31#2#243#223#198#12'oV'#223'4'
+  +#186'cW]/#'#212'7'#19'V'#143#182#157#245','#245#213#172'gi'#159#144'H$a'#218
+  +#131#176#180'Vb'#18#145#252#252'#'#31'X'#142#27#166#247'0~'#176#230#189#186
+  +#129'*'#250'u'#3#174#220#168#235'/'#175'S'#215'O'#254'zm'#223#203'z5'#253#20
+  +#239#212#244'S'#189'_'#219'_'#211#140#219'_'#215#166'n'#188#185'g'#254#188'7'
+  +#145#179#191#22#131#238#186#30'W'#133#212#194'o'#161#15#247'E'#140#147','''
+  +#153#166#184' o'#17#159#137'&'#137'A-D'#23#249'p'#20#20#132#191'g|'#234'w'
+  +#245#225#143#206#9'8'#221't^'#203#10#169'E\E}'#157#30'7'#227#238#245#191#157
+  +#240#164#207#173'x'#155#158'7'#227#156#187']'#143#178'k1f'#158#203#183#236
+  +#244':rA'#168#231#129's-z'#30#148'm'#217'OA'#255#187#245'{'#154#132#181#239
+  +#170#237'y'#18#181#207'!'#242#136':r'#19'1Dn'#11'_'#244#188#223'r'#226'r'#163
+  +#166#206#237'|'#250#182'P'#251#211#198'Bm'#206'Z'#9#183#188#244#170'EKU'#255
+  +#150'='#207#220'k'#221'KZU'#248'{'#245'{?'#14#30#213#243#166#207'>!'#141#232
+  +#131#168'w'#2'9'#143'(!'#26#136'J'#235#211#14#215'ZL'#223#240#213'6'#140#249
+  +#132'ZhE'#11#183#190#30#213#178#147#214#199'6}'#246#156#252#173#143#130#222
+  +'7'#181#251'>'#9'n'#213#215',pE'#247';'#17#27'['#233'D'#237#16#190#22#189#19
+  +'m'#29'FN!'#199#145'3'#237'vj_h'#185#248#208#174'o'#217'j}#J'#248#183#155'Q'
+  +#173':'#220#142#252#173#191#242#211#14#189#15#159'k'#219'K'#165#249#182#208
+  +#207#194'Gx'#192'3'#191#177#131#205#194#23#182#191#21#185#172#173'^'#212'j'
+  +#244'a'#131#176'f'#244'6'#212#221#130#144'/'#251';-9p'#180#149#132#236#232'o'
+  +'h'#11#181#187#25')'#220#241'Nd'#171#206#6#17'm'#186#221#143'h='#228#218#179
+  +'V}O\l'#209'G'#249#182#208'@'#221#167#245'y'#7#24#187#9#253'a'#250#182#205'0'
+  +'['#159#254#189'M'#131#198#246'|'#16'9'#189#211#189#200'9'#232#195'B'#244'A'
+  +#28'}X'#138'qX'#137#218#235#218'*~'#220#212'n'#166#196'V'#206#129#187'_'#173
+  +'O,'#183#16'j'#11'w1'#140#16#238#254' B'#184#215#163'p'#161#222#166#225'BC'
+  +#30#251#9#247'V{ '#252#151#150'a'#203'!Zw['#15#189'm'#218'V'#196#204#181#253
+  +'@'#179'w'#157'GZ'#135#255#254#251#227#240#17'='#30#134#143#235'z?b2'#250' '
+  +#134'>Lm'#171#27'5'#171#165'v'#244'B'#142'F'#244#162'^'#251'4'#197'['#172':3'
+  +#254'['#177#199#152'3'#243'j'#212'n0'#191#30'h'#25'&4'#200':Th'#136'm'#168
+  +#240#159#14'a-E'#28#195'Z'#15#182#9'm'#251#135'uh'#251#1#207#194#186#245'5'
+  +#15#251#3#253#28#209#243'a'#248#232#174'F'#17#163':'#221#141#20'i'#167#31'9'
+  +#1#227'9'#173#235'U'#175#153#237#151#31#153#133'eo'#241'5'#237'?'#12#3#133
+  +#208#247#175#206#235#135';'#134#8#141'p'#10'i1'#194'1'#164#229#240#231'!'#173
+  +#135#218#135#182'E?:'#161#127#191#247'{'#26'6'#240'w'#211#240#254#24#135'?0~'
+  +'C:'#220#137#28#217#249'f'#216#152'^'#7#174#141'k'#185#229'j'#239'o'#149'}'
+  +#176#246#211'o'#222'S'#252#233#22','#244#215#11#196'-'#184#197#159#174#193'-'
+  +'G:'#135#180#30#246'<'#164#221'`'#219#208'n'#3','#153'8'#244#236'e'#18#254'{'
+  +#183#7#17'}'#187#26'D'#14#28#172'l='#180#149#164'V'#239#159'yO2'#214'#H'#8#17
+  +#30#243'*'#184#5#250'B>'#180#25#230#16#242#219' '#155#208#14#253'-'#194':a=t'
+  +#233'o'#26#209'm'#144#174'G'#175'V'#135#13#186#227'M'#204'O'#191'/'#194#185
+  +#131#16#222#159#8#161#15#194#20#11#172#147#214'C'#236'B'#219'b='#252'6'#210
+  +'.'#166#221#0#195#192#14'm'#228#28#219'r'#254#197'{'#179#137'^'#129'B'#227
+  +#222#4#9#141'v'#15#22#26#229#28#210'B'#244'El'#171'nF'#225#173#187#222#141'm'
+  +#217'Z;P'#248'W>'#199#29'a'#151' '#212#205'0F'#184#189'~'#132#16'G7'#230#255
+  +#252'w'#219#191'9V'#255#205#229#234#210#1#188#207'n'#235#202#152#247#229'pZ'
+  +#220#223'0'#148#243#171#151#203'3:'#25#251#152'k'#130#254#146#30#142#191'Z'
+  ,#251#220#236'^KM'#206#174#135#212#16#7'pU'#223#3#15'%'#6#237#250#21#186'{'''
+  +#245#224#28#158#214#187#157#236#226#161'u'#225'oM'#185'A/'#238'C'#232#27'S'
+  +#238#147'='#19#193'l'#235#200'>'#143'6'#13#255#215'}'#144#28#211#209#247#197
+  +'Ce'#238'{'#171#235#240#206'J'#7#193#244#233'5'#238#131'u'#3#19#232#248#227
+  +#205#255#158#15#155'Fw8w'#227#196':@}p3V'#130#23#8#165'.'#136#253#213'=`"'
+  +#241#135#254#207#214#172#169#169'aR'#241#1#156'a'#7#231#14#3#23'#'#5'x~'#231
+  +#2'8'#221#187#8#206#247'.1'#169#227']9p'#192#245''''#7#197#192'l'#227#144'9'
+  +#130#231#253#157#165#172#172#140'I'#233#179'1\.W'#18'S'#235'M'#227'{WZ\;'#206
+  +#181#187'q'#26#158#223'<'#11'N'#183#206#129#243#237#243'L'#250#252#166#12#216
+  +'^?'#5'V'#218#210#220';'#235#134#213'UWV8r'#185'@'#15#250#219#10#218#251#222
+  +#165#170#170#170#7#158#243#152'>'#139'N'#223#166'W<'#188#133#171#186'_'#28','
+  +#213#143#130#157#246#9'p'#212'='#5'.'#168#233#166'/'#3#174#136#147#222'if'
+  +#255'3'#245#195#240#224#252#22'0:'#188#136'['#203'~'#150#29#237#216'WVV'#14
+  +'"'#187#5#5#5#205'jfff2iqq'#241#153#194#194'B'#200#207#207#231#22#21#23#195
+  +'kGk'#216':e'#0#152')'#238#5#203#171#7#193'AK'#10#220#244'N'#193'K'#253'3'
+  +#240#250#246'Yx'#133#169'+n?'#215':'#134#199#15#192#163'K'#146#160')9'#11'<L'
+  +'t'#160#184#148#190#171'Q'#192'%{'#200'5A'#157#166#150#236#236#236';'#244#189
+  +#14#204#195'|'#191'##='#29#22#14#239#4#247'd6'#128#137#220'v'#176'V'#217#7'.'
+  +#168#227'q'#243#20#188#187'{'#22#222#223';'#7#239#13#206#195'{'#163'K'#240#18
+  +#235#193'A'#243'8<'#145#223#13#183#165#215#131#220#188'>'#16#31#30#0#130#246
+  +#16#167#166't#""8iii'#139#147#147#147#153#239't'#16#185'y'#249'pl'#227'"'#208
+  +'80'#23'n'#29'Z'#4#230#231'%'#192#245#234'.'#240#210';'#6'o'#180#14#195';'
+  +#221#19#224#173'/'#13#239'nH'#129#187#202'N'#240#212#216#13#142#242#232#231
+  +'qq'#184#190'C'#12'n'#157'\'#0#230#10#171'!+'#183#176#222'&'#217'OOO'#223#215
+  +#148#15'111'#142#8#23#129#232#232'h'#136'KH'#6#173'Sb'#176'`xk'#152#208#131#3
+  +'"]90'#178#19#7#198#12#236#196'|'#150#207#239#206#25#8'48'#7#159#238#158#129
+  +#136#135#178'0'#180'oG'#24#222#133#3'3'#250#181#128'u'#127#182#3#169'Y='#193
+  +#217'`?'#196#163#29#178'Gv'#201'~lllpS'#250#222#222#222#254#193#193#193#16#18
+  +#18#2#161#161#161#16#24#24#132'>$AzV'#14#228#228#211#247#203#139#152#239#7
+  +#140#232#204#129'8'#11#5#136'0Q'#128'X'#250#204#174#233#21'H'#180'T'#132'a'
+  +#157'9'#204#241#252#194'b,s'#1#164'fdClB"'#4#7#5'3'#246#200'.'#241#225#195
+  +#135'&'#27#192#139#23'/'#188#233#153#22'}'#159#135#15'='#223#243#247#247'g'
+  +#158#129#146#141#180#244'L'#24#223#139#3#169'vWQS'#3'2'#28'u!'#201'F'#19'R'
+  +#237'UAl '#7#210'2'#178#152#239#163'P~z'#22#234#235#235#219#192#30'='#27'tvv'
+  +'NiJ'#255#214#173'['#193#150#150#150'\z'#134'G'#207#20#249#208'3>z'#222'F'
+  +#235'!a'#17'0'#179'?'#7#138'<'#213#160#192#227#6#212#248#25'A'#209#27'=(z'
+  +#171#14#171'F'#181#132#192#208'p&'#31'='#139'$'#4#237#208#179':'#178#175#171
+  +#171#155#219#148#190#166#166'f'#236#133#11#23#152#231'j'#244'}'#158'W'#175'^'
+  +'1'#186#4#249'@'#219'o'#223'{'#131#210#254#177#176'x0'#7'V'#140#224#160'&'#7
+  +#214#143#22#134'm'#227'Z'#129#241#197#25#224#249#254'#SF'#190#207#252#231#161
+  +#244'L'#144#158'c)**'#130#178#178'rIS'#250#170#170#170#193#135#14#29#226#222
+  +#191#127#191'^'#143#158'e'#242#203#206#127#222#250#193#247#19#248'~'#242'G'#2
+  +#216#20#241#243#135#15'>'#159#234#159#199#242#227'F'#177#164#231'wd'#131#158
+  +'['#29'<x'#16#148#148#148'r'#154#210'755'#253#176'c'#199#14#198'Gz'#206't'
+  +#254#252'y'#230#217'*='#227#254#248#241'#c'#143'b'#250#1'5h'#219#199#199#167
+  +#1#244']'#27':N'#207'f'#233#25'4'#157'G'#233#153'3g'#152#231'd'#244'\n'#211
+  +#166'M'#128#229'KmJ'#255#198#141#27'a7o'#222#228'R'#30'z'#238'E'#190#158'<y'
+  +#146#137#27'}'#207#15#251'C'#166#15'IHH`'#190'w'#213#24#218#143'}'#8#243#221
+  +#167#196#196'D'#198#247#203#151'/'#195#230#205#155#153#231#130#187'v'#237#162
+  +'gf'#220'k'#215#174#229'5'#165#143#251'cI'#143#158#227'JKK'#195#209#163'G'
+  +#233#187'|L,'#168#29'S'#31'F'#177#164'goO'#159'>e'#234#134#255#204#153#234
+  +#151#158'{'#210'sI'#250'^'#24#255';a'#20'OIII8v'#236#24#243','#245#236#217
+  +#179#160#162#162#210'd'#253#171#169#169#249'Q'#253#147#175't'#29#210#243'F'
+  +#25#25#25#230'|z'#174#231#231#231#199'<'#247#213#211#211'c'#244'('#15#197#155
+  +#218#9#217'&}z^'#25#30#30#206#196'{'#255#254#253'p'#226#196#9#198#15#202'K'
+  +#207'g'#15#28'8'#192#197#246#151#209#228#247#0#205#204'|'#247#238#221#203#212
+  +';'#149'y'#207#158'='#204#185't=S9'#169#254#176#237'0uB~Ql'#175'^'#189#10'W'
+  +#174'\'#129's'#231#206'11'#163'}'#228'+'#197#6#251't&'#221#186'u+'#243'lV]]'
+  +#29#182'l'#217'B>'#166'7'#165#143#231'EP'#189#239#222#189#155#201'+%%'#5'G'
+  +#142#28'a'#158'3S'#223'C'#223'w'#163':'#160#242'Q_Nu'#205#135#234'?22'#146
+  +#190#11#203'|7'#141#250'['#138#149#156#156#28'S'#7#244#140#148#234#159#226
+  +#130'>79'#8#163#239#238#164'G>'#211#179'T'#140#21',Z'#180#136')7='#131#167
+  +#239#218'Q'#28#168#254#169#158#233#217'<'#229'upp`'#226'D'#207'e'#233#153'4'
+  +#181'Qj/'#20#239#213#171'W3'#250#20''''#236'_'#169'L\'#140'ohS'#250#226#226
+  ,#226#171#177#254'I'#143'K'#245'K'#253#16'='#247#165'8P|'#31'=z'#196#196#130
+  +'|'#163#246'Gm'#145#174'w'#186#182'i?'#249'E>'#208'3'#234'K'#151'.1'#231'Q='
+  +#146#159#180#15#219#7#151#218#4#250't'#164#177#246#204#153'3'#153#20#203'{'
+  +#155#206'322'#226#146#223'xM0'#245'O'#223#241#163#235#137#202'D'#207#157#177
+  +#13'S?'#198#148#139#160'm'#242#139#250'.jk'#236'X'#199'<#_'#187'v-'#163'Mmc'
+  +#193#130#5#214#195#134#13#19#194'}_'#148#159#238#199#218#181'k'#199#153'3g'
+  +#206#5#188'Nj'#168#204#216#6#185#212'o'#209#24'D'#215'UTT'#20'c'#159#198#23
+  +#234#19#232':'#167#148#198'5'#234'g'#169'_'#162#185#14#249'L'#241#195'v'#202
+  +#221#183'o'#31#19#143#133#11#23'jM'#157':'#181#229#215#230'}'#252'8'#140#25
+  +'3f'#4#250#248#4#253#165#247'W0'#182'I'#139#174'ujC'#20'O'#178'OuJ'#237#140
+  +#174'U'#138'5'#213#17#182#19'.'#245#191#216#159#193#146'%Kj0'#222#246'ho'#220
+  +#247#206'='#167'L'#153'"'#232#207#239#184#189'w'#251#246#237#246#24#239'4l'
+  +#27'u'#212#166'I'#139#218'"'#245#175't'#253#211'uO'#253'6'#194#213#208#208
+  +#200#194#184#185'L'#155'6'#237#152#152#152#216#0#190#173#241#227#199#255#208
+  +#28'x'#192#128#1#141#183'['#12#25'2'#164#143#168#168#232#20#17#17#145#149'#F'
+  +#140#144'D'#246'Q:z'#244#232'5c'#199#142#157'6r'#228#200#254#3#7#14'l%x'#30
+  +#30#231#252#183#252#183#252#255'iiyZ'#12'Z'#156#153#190#246#127#169'/rm[E'
+  +#203'33'#21#216#207#239#252'r}'#231'D_X'#245#232'\EK'#153#25#246#28#133#137
+  +#237'~'#181#190'K'#242''''#176#141#247#134#195#207#181#171'['#157#157#25#201
+  +'9;'#181#255#175#212#183'K'#240#134#179#222#247#193'8'#242#5'('#188'}P'#215
+  +'Qv~~'#203'3b'#211#127#149#190'U'#220'{8'#226'y'#11#246'{'#232#130'v'#144#13
+  +#220#248'd'#13#253#20'W'#150#183'8%'#182#235#159#218#198'r'#148#127#21#204
+  +#243'4'#246'-'#236'C'#237#29'/5a'#155#251'5'#144#253'h'#12'w'#131#29'a'#172
+  +#214#142#138#22'23t9'#27'6'#180#248#187#250#6'a.L\'#31'E'#190#4#147#168'W'
+  +#240'8'#234'5'#152'F'#191#134''''#209#30'<b<'#192#2#245'%_j'#193#166#23'j'
   +#176#222#245'*'#172'sU'#129#3#232#207#157'PGX|'#255#20#181#203#215#156's'#19
   +';'#255#29#253'{'#225'.'#176#228#249'%X'#230'x'#25'V:]'#129'5'#206'J'#176#214
   +'E'#153#209#144'@-'#9'7'#30#235#144'5'#184#127#181#179'"'#172'pR'#0'qGy'#144
@@ -1407,9 +1409,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'s'#198']'#217#207#22#183#250#142#238'G'#136'}_'#152#160#15#189#217#207#14#15
   +'b'#253#24'A'#250#202'I'#246'p1'#197#6#150#217#203#215#180#150#153#149#209'r'
   +#193'`'#234'c'#7#179'1'#235'#'#16#247#14#172#205#31#26#6#216'xudm'#244'`?'#27
-  +#205'|'#166#185#165#204#204#10#229'X'#27#152'nt'#164#178#213'i1'#31#206#232
+  ,#205'|'#166#185#165#204#204#10#229'X'#27#152'nt'#164#178#213'i1'#31#206#232
   +#222#127#177#199'z'#179#186']'#217'w'#187'}'#171#205'}'#143#31'm'#217#248'ub'
-  ,'}'#233'F'#237'o'#128#202#154#234#22''''#166#221#231't'#232'@1'#238#198#30
+  +'}'#233'F'#237'o'#128#202#154#234#22''''#166#221#231't'#232'@1'#238#198#30
   +#235#196#150#183#237'?'#212'm'#170'^'#132#249#239#139'#'#253'V'#199#167#159
   +'`u'#218#8#188#227'M'#152#243#223#242#223#242#157#203#127#159#129#248#143#255
   +#248'w8.6`'#179#209#241'U5'#166#242#251#242#183#206#236#220#245#151'j'#207
@@ -1471,9 +1473,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'S'#196#2#177'A'#158'#n'#200#27#196#27#249#132#132#128#136'H"'#247#228#201#28
   +'8v'#172#176'V\'#188'h'#222#146'%E'#156'e'#203',9C'#135#222'w['#185#210#26't'
   +'t|'#170#149#149#253#184#146#146#175#185'{'#246#188'E<'#145'w'#220#221#187
-  +#223'#'#222#200#7#196#7#241'C>!'#1'H'#16#18#130#132'"'#225'H'#4#18#137'Dqw'
+  ,#223'#'#222#200#7#196#7#241'C>!'#1'H'#16#18#130#132'"'#225'H'#4#18#137'Dqw'
   +#237#138#230#238#216#17#205#221#185'3'#142'+%'#149#194'URJ'#224'*+gU'#175'\'
-  ,#153#11'C'#134#228#185#137#139#231'p'#132#132#244':'#183'j'#165#147'2p'#160
+  +#153#11'C'#134#228#185#137#139#231'p'#132#132#244':'#183'j'#165#147'2p'#160
   +#30'\'#190#252#177'n'#219#182'`X'#181'*'#16#214#174#13#133'5k"'#144'h$'#14
   +#161#223'5IFR'#145't$'#3#201'D'#178'0/'#145#201#236'['#189':'#13'V'#174'L'
   +#134#21'+'#18'AB"'#30'v'#239#142#135#189'{Ca'#246#236#231#208#163#135'&'#236
@@ -1535,9 +1537,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#250#204#187#170#231#204#17'y'#246#252#185#157'Wpp'#240#219#160'@'#7#7'o'#175
   +#176#165'K'#151'.i*'#239#191#161#207'<'#31']'#180#232'hh\\'#138'otT'#245#193
   +#211'2'#15#154#203#247'o'#233'c'#172';'#185#191'~'#253'602"z'#198#146#21'#'
-  +#127#181#254#172'Y'#179'&'#220#189'wO'#221#229#221#187#23'3'#150#174'\'#247
+  ,#127#181#254#172'Y'#179'&'#220#189'wO'#221#229#221#187#23'3'#150#174'\'#247
   +'+'#245'7l'#216#208#2#175#5#29#11'K'#235#157'o'#3#2#172#150'o'#222'~W\\'#188
-  ,#205#175#210'Gm'#185#160#160#160#171'>'#1#1'k'#2#162#163'M/?u>'#140#237#239
+  +#205#175#210'Gm'#185#160#160#160#171'>'#1#1'k'#2#162#163'M/?u>'#140#237#239
   +#242#175#208#199#178'o'#194#235#222'-$$dcLR'#146'xXb'#226'C-'#159'$I##'#163
   +#13#232#195#174#127'S'#127#238#220#185#131#176#143#245',((x'#132#227#222#148
   +#180#204#204'%Q))'#198'z'#241#149'[?}'#250'4OCCc'#215#218#181'kE'#255'-}'#3#3
@@ -1599,9 +1601,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#148'}'#231#247#23'd'#225#252'5??'#223#253'g'#233#227#189#128#187'_R<d'#230
   +#229#21#198#199#197#191#143#137#137'q'#199'9'#128's]]'#157':'#162#219#4#170
   +'yyyV?K'#191'0'#191#192'='#167#180#164#170#178#178'*'#185#162#162'B'#19#235
-  +#195#184#170#170#234#26#234'\'#194#186'>'#215#24#220'o'#129#250'?'#181#252'h'
+  ,#195#184#170#170#234#26#234'\'#194#186'>'#215#24#220'o'#129#250'?'#181#252'h'
   +#243#10#218't'#140#142#142'~'#31#26#26#26#128#139#127'TT'#212'G'#220'/'#141
-  ,'y'#14#9#130'>'#24'a'#252#221'~'#150'~>O'#255#22#222#143'>'#194'1'#214#14#231
+  +'y'#14#9#130'>'#24'a'#252#221'~'#150'~>O'#255#22#222#143'>'#194'1'#214#14#231
   +'&'#246'X'#207'n'#184'O'#12#181'&#S'#26'q'#24'}'#181#252#201#250#207'0'#238
   +'v'#168#251'<33'#211#6#219#183'%'#234#232'#'#215#154#192#16#245#29#240#220
   +#161#184#254'''"'#130#140#197'mzvO'#207#145#155'{_Ag'#186#222#190#136#127'A'
@@ -1663,9 +1665,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#222#189'`~'#248'p'#206#179'c'#199#170'-'#142#28')3'#219#191#31'p'#127#142
   +#249#161'CeZ#G'#130'v3'#216#233#234#130#217#157';`r'#237#26#232'+(@ft'#244
   +#241'x'#156#155#184#27'='#244#242'40'#136#241'61'#137#241'B'#222'?x'#16#243
-  +#222#216'8'#198#215#210'2'#230#29#165#143#30#221#245'31'#209#247#18'8'#254
+  ,#222#216'8'#198#215#210'2'#230#29#165#143#30#221#245'31'#209#247#18'8'#254
   +#206#200'('#198#215#202'*'#198#235#225#195#24#159#167'Oi'#191'O'#192#179'g'
-  ,#186#31#13#12#238#190#189'y3'#166'I'#172#173'c'#220#173#172#131#220#159'>'#13
+  +#186#31#13#12#238#190#189'y3'#166'I'#172#173'c'#220#173#172#131#220#159'>'#13
   +#187#165#166#198#232''''#225'T'#255#163#153#153#139#225#170'Up_B'#2#12#150'-'
   +#131#235'c'#199#194#213#30'='#24'4&N'#4#236#139#250#226'u'#215#1#203#12#247
   +#150'.'#5#195#21'+'#192'h'#245'jP'#237#221#187'>'#159#173#130#194'{f>PW'#247
@@ -1727,9 +1729,9 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'c'#198#23'`'#155#140#193'8'#253'#'#26#219#164#254#203#206#206'.'#6#251#187
   +#24#210#207'IJ'#210#196#251#194'C'#152#238#201#142#139#219#145#29#31#191'!'
   +#11#231'R'#133#153#153'+'#211'""'#238#164'GG_'#203'NH8'#145#17#21'u'#21#239
-  +#217#250#252#173#251#207#226#226#169'e'#133#133#11'p'#140#23#175',-'#21'-'
+  ,#217#250#252#173#251#207#226#226#169'e'#133#133#11'p'#140#23#175',-'#21'-'
   +#201#203'['#138#233'_'#168'k'#136#247#191';J'#11#10'f'#227#253#231't'#220'G'
-  ,#247#163#179'+JJ'#196#138#178#178'6`'#254'9'#184'='#15#243','#193'A'#234'o'
+  +#247#163#179'+JJ'#196#138#178#178'6`'#254'9'#184'='#15#243','#193'A'#234'o'
   +#191#191#27#237#138#144#6#222'wN'#170#170#168#152#142#190'L'#170'(-'#29'F'
   +#218'x?'#218#183#188#184'X'#28#251#130#233#168';'#29'}'#163't'#18#150#127'1'
   +#158'3'#25#239'Q'#197'p'#223'$l'#215#29#254#201'}/'#250' '#134#247#247'7'#177

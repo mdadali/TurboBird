@@ -1,5 +1,5 @@
 object fmAbout: TfmAbout
-  Left = 434
+  Left = 465
   Height = 583
   Top = 116
   Width = 603

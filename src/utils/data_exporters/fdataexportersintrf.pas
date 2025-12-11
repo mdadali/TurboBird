@@ -13,12 +13,14 @@ uses
 
   fpcstdexporters,
   fMarkDownTableExport,
-  fhtmlexport;
+  fhtmlexport,
+  fClipboardExport;
 
 
 procedure ExportStdFormat(ADataSet: TDataSet);
 procedure ExportDataMarkDownTable(ADataSet: TDataSet);
 procedure ExportDataHtml(ADataSet: TDataSet);
+procedure ExportDataToClipboard(ADataSet: TDataSet; MaxRows: Integer);
 
 
 implementation
@@ -38,7 +40,10 @@ begin
   _ExportDataHtml(ADataSet);
 end;
 
-
+procedure ExportDataToClipboard(ADataSet: TDataSet; MaxRows: Integer);
+begin
+  _ExportDataToClipboard(ADataSet, MaxRows);
+end;
 
 end.
 

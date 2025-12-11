@@ -354,6 +354,8 @@ type
     QueryTimeoutMS: LongInt;     // Timeout für lange Operationen (optional)
 
     Reserved: array[0..30] of Byte; // (etwas verkleinert)
+
+    RootPath: string[255];
   end;
 
 
@@ -518,6 +520,9 @@ var
     IgnoreGrants: boolean;
     ShowAffectedRows: boolean;
     ShowPerformanceStats: boolean;
+
+    //Export to Clipboard
+    MaxExportRows: integer;
 
 
 function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
@@ -1635,6 +1640,10 @@ begin
   IgnoreGrants := fIniFile.ReadBool('Scripter',  'IgnoreGrants', false);
   ShowAffectedRows := fIniFile.ReadBool('Scripter',  'ShowAffectedRows', true);
   ShowPerformanceStats := fIniFile.ReadBool('Scripter',  'ShowPerformanceStats', true);
+
+  //ClipboardExport
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport',  'MaxExportRows', 200);
+
 end;
 
 procedure WriteIniFile;
@@ -1657,6 +1666,9 @@ begin
   fIniFile.WriteBool('Scripter',  'IgnoreGrants', IgnoreGrants);
   fIniFile.WriteBool('Scripter',  'ShowAffectedRows', ShowAffectedRows);
   fIniFile.WriteBool('Scripter',  'ShowPerformanceStats', ShowPerformanceStats);
+
+  //ClipboardExport
+  fIniFile.WriteInteger('ClipboardExport',  'MaxExportRows', MaxExportRows);
 end;
 
 

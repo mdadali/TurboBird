@@ -17,7 +17,6 @@ uses
   IniFiles, Types, fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig, fsqlmonitor,
 
-  ibase60dyn,
   IB,
   IBDatabase,
   IBQuery,

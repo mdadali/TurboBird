@@ -5,7 +5,7 @@ unit fedittabledata;
 interface
 
 uses
-  Classes, SysUtils, math, db, sqldb, IBConnection, FileUtil, LResources, Forms,
+  Classes, SysUtils, math, db, FileUtil, LResources, Forms,
   Controls, Graphics, Dialogs, ExtCtrls, DbCtrls, DBGrids, StdCtrls, ComCtrls,
   Buttons, Menus, DBDateTimePicker, IBDynamicGrid, DBControlGrid, IBQuery,
   IBDatabase, IBTable, IBArrayGrid, IBCustomDataSet, IB, turbocommon, calen,

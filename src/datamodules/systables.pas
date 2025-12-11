@@ -5,9 +5,8 @@ unit SysTables;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, sqldb, SQLDBLib, IBConnection, FileUtil,
-  LResources, Forms, Controls, DB, fpstdexports, Dialogs, dbugintf, ZConnection,
-  ZDataset,
+  Classes, SysUtils, StrUtils, IBConnection, FileUtil,
+  LResources, Forms, Controls, DB, fpstdexports, Dialogs, dbugintf,
 
   IB,
   IBDatabase,
@@ -15,8 +14,6 @@ uses
   //IBDatabaseInfo, IBXServices,
 
   fbcommon,
-
-
   usqlqueryext;
 
 type

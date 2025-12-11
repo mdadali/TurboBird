@@ -5,7 +5,7 @@ unit udb_package_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, sqldb,   Dialogs,
+  Classes, SysUtils, IBConnection, Dialogs,
   udb_udf_fetcher,
 
   udb_udr_func_fetcher,
