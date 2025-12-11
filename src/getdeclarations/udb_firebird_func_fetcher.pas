@@ -5,7 +5,7 @@ unit udb_firebird_func_fetcher;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, udb_firebird_struct_helper,
+  Classes, SysUtils, udb_firebird_struct_helper,
   IB,
   IBDatabase,
   IBQuery;

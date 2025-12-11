@@ -5,7 +5,7 @@ unit fbfeaturechecker;
 interface
 
 uses
-  Classes, SysUtils, IBConnection;
+  Classes, SysUtils, IBDatabase;
 
 type
   TCapabilities = record
@@ -20,11 +20,11 @@ type
   end;
 
 /// Detects Firebird capabilities silently. No exceptions or popups.
-function DetectCapabilitiesSilent(AConn: TIBConnection): TCapabilities;
+function DetectCapabilitiesSilent(AConn: TIBDatabase): TCapabilities;
 
 implementation
 
-function DetectCapabilitiesSilent(AConn: TIBConnection): TCapabilities;
+function DetectCapabilitiesSilent(AConn: TIBDatabase): TCapabilities;
 
 function SafeExecScalar(const SQL: string): Boolean;
   var

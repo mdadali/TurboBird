@@ -5,7 +5,7 @@ unit NewGen;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons,
   fbcommon,
   turbocommon,

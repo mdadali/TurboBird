@@ -5,7 +5,7 @@ unit Reg;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils,  FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls, IBDatabase, IBDatabaseInfo,
   IB,
 
@@ -344,12 +344,13 @@ begin
       IBConnection1.Close;
     end;
   except
-    on d: EIBDatabaseError do
+    on E: EIBError do
     begin
-      Result:= False;
+      Result := False;
+
       MessageDlg(
-        'Unable to connect: ' + d.Message + LineEnding +
-        'Details: GDS error code: ' + IntToStr(d.GDSErrorCode),
+        'Unable to connect: ' + E.Message + LineEnding +
+        'SQLCode: ' + IntToStr(E.SQLCode),
         mtError, [mbOK], 0
       );
     end;

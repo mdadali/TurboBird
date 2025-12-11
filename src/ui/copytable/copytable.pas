@@ -157,7 +157,7 @@ begin
   with RegisteredDatabases[cbDestDatabase.ItemIndex] do
   begin
     if RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.Password = '' then
-    //if IBConnection.Password = '' then
+    //if RegisteredDatabases[cbDestDatabase.ItemIndex].IBConnection.Password = '' then
     begin
       if fmEnterPass.ShowModal = mrOk then
       begin

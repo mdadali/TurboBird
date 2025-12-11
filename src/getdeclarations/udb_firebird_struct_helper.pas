@@ -5,7 +5,7 @@ unit udb_firebird_struct_helper;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, DB,
+  Classes, SysUtils, DB,
   IB,
   IBDatabase,
   IBQuery;

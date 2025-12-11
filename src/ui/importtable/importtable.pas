@@ -358,7 +358,7 @@ begin
     // database
     with RegisteredDatabases[FDestIndex] do
     begin
-      //if (IBConnection.HostName<>'') and (IBConnection.Password = '') then
+      //if (RegisteredDatabases[cbDestDatabase.ItemIndex].IBConnection.HostName<>'') and (IBConnection.Password = '') then
       ServerName := GetServerName(RegRec.DatabaseName);
       if  ((ServerName <> '') and (ServerName <> 'localhost')) and  (RegRec.Password = '') then
       begin

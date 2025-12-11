@@ -5,7 +5,7 @@ unit QueryWindow;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, db, fpstdexports, FileUtil,
+  Classes, SysUtils, db, fpstdexports, FileUtil,
   LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls, PairSplitter,
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,

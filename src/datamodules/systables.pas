@@ -5,7 +5,7 @@ unit SysTables;
 interface
 
 uses
-  Classes, SysUtils, StrUtils, IBConnection, FileUtil,
+  Classes, SysUtils, StrUtils,  FileUtil,
   LResources, Forms, Controls, DB, fpstdexports, Dialogs, dbugintf,
 
   IB,
