@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls, IBDatabase, IBDatabaseInfo,
-  IB, ibase60dyn,
+  IB,
 
   turbocommon,
   fbcommon,

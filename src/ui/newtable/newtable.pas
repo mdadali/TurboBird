@@ -5,7 +5,7 @@ unit NewTable;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils,  FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Grids, Buttons, ExtCtrls, SynEdit, SynCompletion,
   SynHighlighterSQL, LCLType,
   turbocommon,

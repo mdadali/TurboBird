@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 418
+  Left = 462
   Height = 531
-  Top = 281
+  Top = 208
   Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -2805,7 +2805,6 @@ object fmMain: TfmMain
       object lmBackup: TMenuItem
         Caption = 'Backup/Restore'
         Visible = False
-        OnClick = lmBackupClick
       end
       object lmSweep: TMenuItem
         Caption = 'SweepDB'
@@ -2846,7 +2845,6 @@ object fmMain: TfmMain
           0000000000000000000000000000000000000000000000000000
         }
         Visible = False
-        OnClick = lmSweepClick
       end
     end
     object lmOpenQuery: TMenuItem

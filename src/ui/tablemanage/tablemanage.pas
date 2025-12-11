@@ -5,7 +5,7 @@ unit TableManage;
 interface
 
 uses
-  Classes, SysUtils, sqldb, IBConnection, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, ComCtrls, Grids, Buttons, StdCtrls, CheckLst, LCLType,
   ExtCtrls, types,
   IB,

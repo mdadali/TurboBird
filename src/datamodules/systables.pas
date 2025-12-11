@@ -13,8 +13,7 @@ uses
   IBQuery,
   //IBDatabaseInfo, IBXServices,
 
-  fbcommon,
-  usqlqueryext;
+  fbcommon;
 
 type
 

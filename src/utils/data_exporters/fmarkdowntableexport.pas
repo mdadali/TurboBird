@@ -7,7 +7,7 @@ interface
 uses
   Forms, Dialogs, Classes, SysUtils,  StdCtrls, ComCtrls,
   Variants,
-  DB, sqldb, IBConnection,  IBDatabase, IBCustomDataSet,
+  DB, IBDatabase, IBCustomDataSet,
   IBArrayHelper;
 
 

@@ -15,7 +15,7 @@ uses
   Dialogs,
 
   //ibase60,
-  ibase60dyn,
+  //ibase60dyn,
   IBHeader,
   IB,
   FBIntf,
@@ -32,7 +32,7 @@ uses
 
 type
 
-  ISC_STATUS_ARRAY = array[0..19] of ISC_STATUS;
+  //ISC_STATUS_ARRAY = array[0..19] of ISC_STATUS;
 
   TServerSession = class
   private
@@ -59,7 +59,7 @@ type
 
     FConnected: Boolean;
     FServiceHandle: isc_svc_handle;
-    FStatus: ISC_STATUS_ARRAY;
+    //FStatus: ISC_STATUS_ARRAY;
 
     FFBVersionString: string;
     FFBVersionMajor: word;
@@ -114,9 +114,6 @@ type
 
     function GetErrorText: string;
 
-    function  AnyClientLibraryLoaded: Boolean;
-    function  UnloadClientLibrary: boolean;
-    function  LoadAnyClientLibrary: Boolean;
     function  LoadRegisteredClientLibrary: Boolean;
 
     function  __Connect: Boolean;
@@ -275,6 +272,7 @@ begin
   FErrorCode := seNone;
   FErrorStr := '';
 
+  TempEmbeddedDB.FirebirdLibraryPathName := FClientLibraryPath;
   IBXServicesConnection := TIBXServicesConnection.Create(nil);
   FillIBXServicesConnectionData;
 end;
@@ -379,147 +377,15 @@ begin
   end;
 end;
 
-function  TServerSession.AnyClientLibraryLoaded: Boolean;
-begin
-  result := (IBaseLibraryHandle <> 0);
-end;
-
-function  TServerSession.UnloadClientLibrary: boolean;
-begin
-  Disconnect;
-  if IBaseLibraryHandle <> 0 then
-    ReleaseIbase60;
-  result := (IBaseLibraryHandle = 0);
-end;
-
-function TServerSession.LoadAnyClientLibrary: Boolean;
-var LibHandle: TLibHandle;
-begin
-  Result := False;
-
-  //ReleaseIbase60;
-  //InitialiseIbase60;
-  try
-    // 1) Schon eine Library geladen? → egal welche, einfach True
-    if IBaseLibraryHandle <> 0 then
-    begin
-      Exit(True);
-    end;
-
-    // 2) Keine Lib geladen → nur wenn Pfad gesetzt + existiert, versuchen zu laden
-    if (Trim(FClientLibraryPath) = '') or (not FileExists(FClientLibraryPath)) then
-      Exit(False);
-
-    LibHandle := InitialiseIBase60(FClientLibraryPath);
-    Result := (LibHandle > 0);
-  except
-    on E: Exception do
-    begin
-      Result := False;
-    end;
-  end;
-end;
-
 function TServerSession.LoadRegisteredClientLibrary: Boolean;
-var
-  LibHandle: Int64;
-  LoadedLibName: string;
 begin
-  Result := False;
-  LibHandle := 0;
-  try
-    // 1) Schon eine Library geladen?
-    if IBaseLibraryHandle <> 0 then
-    begin
-      // Falls es die gleiche ist → alles ok
-      LoadedLibName := Trim(IBaseLoadedLibrary);
-      FClientLibraryPath := Trim(FClientLibraryPath);
-      if LoadedLibName = FClientLibraryPath then
-        Exit(True)
-      else
-      begin
-        // Andere Lib → alte freigeben
-        ReleaseIbase60;
-        // Vor dem Laden prüfen, ob Datei existiert
-        if (Trim(FClientLibraryPath) = '') or (not FileExists(FClientLibraryPath)) then
-          Exit(False);
-
-        LibHandle := InitialiseIBase60(FClientLibraryPath);
-        Exit(LibHandle > 0);
-      end;
-    end;
-
-    // 2) Bisher keine Library geladen → prüfen & laden
-    if (Trim(FClientLibraryPath) = '') or (not FileExists(FClientLibraryPath)) then
-      Exit(False);
-
-    LibHandle := InitialiseIBase60(FClientLibraryPath);
-    Result := (LibHandle > 0);
-
-  except
-    on E: Exception do
-    begin
-      // Optional: Exception weiterreichen oder nur False liefern
-      Result := False;
-    end;
-  end;
+  result := IBXConnect;
 end;
-
-function GetFirebirdErrorText(const Status: ISC_STATUS_ARRAY): string;
-var
-  fbErrMsg: array[0..511] of AnsiChar;
-  pStatus: PISC_STATUS;
-begin
-  Result := '';
-  pStatus := @Status[0];
-  while (isc_interprete(@fbErrMsg[0], @pStatus) > 0) do
-    Result := Result + string(fbErrMsg) + sLineBreak;
-end;
-
-{function TServerSession.IBXConnect: boolean;
-var ServerErrorCode: TServerErrorCode;
-  IntPort: word;
-begin
-  result := false;
-  Disconnect;
-
-  ServerErrorCode := seNone;
-
-  FillIBXServicesConnectionData;
-  IntPort := StrToIntDef(FPort, 0);
-
-  if self.FProtocol <> Local then
-    ServerErrorCode :=  tb_netutils.CheckServerStatus(FServerName, StrToIntDef(FPort, 0), FUserName, FPassword, FConnectTimeoutMS, FErrorStr);
-
-  //FErrorCode := ServerErrorCode;
-
-  if ServerErrorCode = seNone then
-      result := ConnectFirebirdService(FServerName,
-                                   IntPort,
-                                   FUserName,
-                                   FPassword,
-                                   FProtocol,
-                                   IBXServicesConnection,
-                                   FFBVersionMajor,
-                                   FFBVersionMinor,
-                                   FFBVersionString,
-                                   FErrorStr);
-
-  if result then
-  begin
-
-  end else
-  begin
-
-  end;
-  FConnected := result;
-
-
- end; }
 
  function TServerSession.IBXConnect: boolean;
  begin
-   Disconnect; // alte Verbindung trennen
+   if FConnected then
+     Disconnect; // alte Verbindung trennen
 
    if FProtocol <> Local then
      Result := ConnectServerIBX
@@ -577,11 +443,6 @@ begin
  end;
 
 function TServerSession.CreateEmbeddedTestDB(FBAPI: IFirebirdAPI; const FileName: string): boolean;
-var
-  Status: ISC_STATUS_ARRAY; //TISCStatusVector;
-  DBHandle: TISC_DB_HANDLE;
-  DPB: IDPB;
-  DPBLen: LongWord;
 begin
   Result := False;
 end;
@@ -637,195 +498,17 @@ begin
 end;
 
 function TServerSession.__Connect: Boolean;
-var
-  spb: array[0..255] of Byte;
-  spb_len: SmallInt;
-  svc_name: AnsiString;
-  unameLen, pwdLen: Integer;
-  Info: string;
-  Status: TServerErrorCode;
-  Attempt: Integer;
-  fbErrMsg: array[0..255] of AnsiChar;
 begin
-  {Result := IBXConnect;
-  self.FConnected := Result;
-  Exit;}
-
-  Result := False;
-  FConnected := False;
-  FErrorCode := seNone;
-  FErrorStr := '';
-
-  // Kein Connect bei Embedded
-  if FProtocol = Local then
-  begin
-    FErrorCode := seAttachFailed;
-    FErrorStr := 'Embedded mode: Service manager not available.';
-    Exit(false);
-  end;
-
-  // Falls schon verbunden → fertig
-  if FConnected then
-    Exit(true);
-
-  // Falls Client-Library erforderlich ist
-  if FLoadRegisteredClientLib then
-  begin
-    if not LoadRegisteredClientLibrary then
-    begin
-      FErrorCode := seAttachFailed;
-      FErrorStr := 'Failed to load registered Firebird client library.';
-      Exit(False);
-    end;
-  end;
-
-  // Verbindungsversuche mit Retry-Logik
-  if not FIsEmbedded then
-  for Attempt := 0 to FRetryCount -1  do
-  begin
-    Status := CheckServerStatus(FServerName, StrToIntDef(FPort, DEFAULT_FIREBIRD_PORT),
-                                FUserName, FPassword, FConnectTimeoutMS, Info);
-
-    FErrorCode := Status;
-    FErrorStr := Info;
-
-    if Status = seNone then
-      Break
-    else
-    begin
-      // Bei Timeout oder Refused ggf. warten und erneut versuchen
-      if (Attempt < FRetryCount) then
-        Sleep(500); // kleine Pause zwischen Retries (halbe Sekunde)
-    end;
-  end;
-
-  // Wenn nach allen Versuchen noch kein Erfolg → abbrechen
-  if FErrorCode <> seNone then
-  begin
-    FConnected := False;
-    Exit(False);
-  end;
-
-  // SPB (Service Parameter Buffer) vorbereiten
-  FillChar(spb, SizeOf(spb), 0);
-
-  unameLen := Length(FUserName);
-  pwdLen := Length(FPassword);
-
-  if (4 + unameLen + 2 + pwdLen) > Length(spb) then
-  begin
-    FErrorCode := seUnknown;
-    FErrorStr := 'Username/password too long.';
-    Exit(False);
-  end;
-
-  spb[0] := isc_spb_version;
-  spb[1] := isc_spb_current_version;
-
-  if unameLen > 0 then
-  begin
-    spb[2] := isc_spb_user_name;
-    spb[3] := Byte(unameLen);
-    Move(PAnsiChar(AnsiString(FUserName))^, spb[4], unameLen);
-  end
-  else
-  begin
-    FErrorCode := seAuthenticationFailed;
-    FErrorStr := 'Username is empty.';
-    Exit(False);
-  end;
-
-  spb[4 + unameLen] := isc_spb_password;
-  spb[5 + unameLen] := Byte(pwdLen);
-  if pwdLen > 0 then
-    Move(PAnsiChar(AnsiString(FPassword))^, spb[6 + unameLen], pwdLen);
-
-  spb_len := 6 + unameLen + pwdLen;
-
-  if FIsEmbedded then
-    svc_name := '' //'service_mgr'
-  else
-    svc_name := BuildServiceName;
-
-  // Firebird-Service verbinden
-  if isc_service_attach(@FStatus, Length(svc_name), PAnsiChar(svc_name),
-                        @FServiceHandle, spb_len, @spb) = 0 then
-  begin
-    FConnected := True;
-    FErrorCode := seNone;
-    FErrorStr := Format('Connected successfully to %s:%s.', [FServerName, FPort]);
-
-    try
-      FetchVersion;
-    except
-      // Version optional ignorieren
-    end;
-
-    Result := True;
-  end
-  else
-  begin
-    //isc_interprete(@fbErrMsg, @FStatus);
-    FConnected := False;
-    FErrorCode := seAttachFailed;
-    //FErrorStr := Format('Failed to attach Firebird service %s:%s. %s',
-                        //[FServerName, FPort, fbErrMsg]);
-    FErrorStr := GetFirebirdErrorText(FStatus);
-    Result := False;
-  end;
+  FConnected := IBXConnect;
+  Result := FConnected;
 end;
 
 function TServerSession.ReConnect(AClientLibPath: string): Boolean;
 begin
   Result := False;
-
-  // 1) Falls verbunden, zuerst trennen
   if FConnected then
     Disconnect;
-
-  // 2) Wenn ein neuer Client-Pfad übergeben wurde, diesen ggf. übernehmen
-  if Trim(AClientLibPath) <> '' then
-  begin
-    // Nur neu setzen, wenn unterschiedlich
-    if not SameText(FClientLibraryPath, AClientLibPath) then
-    begin
-      // Versuchen, alte Library zu entladen
-      UnloadClientLibrary;
-      FClientLibraryPath := AClientLibPath;
-
-      // Neu laden
-      if FLoadRegisteredClientLib then
-      begin
-        if not LoadRegisteredClientLibrary then
-          Exit(False);
-      end
-      else
-      begin
-        if not LoadAnyClientLibrary then
-          Exit(False);
-      end;
-    end;
-  end
-  else
-  begin
-    // Kein Pfad übergeben → prüfen, ob Library geladen ist
-    if not AnyClientLibraryLoaded then
-    begin
-      if FLoadRegisteredClientLib then
-      begin
-        if not LoadRegisteredClientLibrary then
-          Exit(False);
-      end
-      else
-      begin
-        if not LoadAnyClientLibrary then
-          Exit(False);
-      end;
-    end;
-  end;
-
-  // 3) Jetzt erneut verbinden
-  Result := IBXConnect;
+  result := IBXConnect;
 end;
 
 
@@ -836,62 +519,45 @@ begin
 
   FConnected := False;
   FServiceHandle := 0;
-
-  {if FConnected and (FServiceHandle <> 0) then
-  begin
-    isc_service_detach(@FStatus, @FServiceHandle);
-    FServiceHandle := 0;
-    FConnected := False;
-  end;}
 end;
 
 procedure TServerSession.FetchEmbeddedVersion;
 var tmpDbInfo: TIBDatabaseInfo;
 begin
   tmpDbInfo := TIBDatabaseInfo.Create(nil);
-  tmpDbInfo.Database := TempEmbeddedDB;
-  FFBVersionString := tmpDbInfo.FirebirdVersion;
-  ParseFBVersion;
-  tmpDbInfo.Free;
+  try
+    tmpDbInfo.Database := TempEmbeddedDB;
+    FFBVersionString := tmpDbInfo.FirebirdVersion;
+    ParseFBVersion;
+  finally
+    tmpDbInfo.Free;
+  end;
 end;
 
 procedure TServerSession.FetchVersion;
-var
-  request, buffer: array[0..511] of Byte;
-  item_len: Word;
-  p: PByte;
 begin
-  if not FConnected then Exit;
+  FetchEmbeddedVersion;
+{  if not FConnected then
+    Exit;
 
-  request[0] := isc_info_svc_server_version;
-  request[1] := isc_info_end;
+  if not Assigned(IBXServicesConnection) then
+    raise Exception.Create('IBX Services Connection is not initialized.');
 
-  FillChar(buffer, SizeOf(buffer), 0);
+  try
+    // IBX liefert die Server-Version direkt als String
+    FFBVersionString := IBXServicesConnection.ve
 
-  if isc_service_query(@FStatus, @FServiceHandle,
-    nil, 0, nil, 2, @request, SizeOf(buffer), @buffer) <> 0 then
-  begin
-    raise Exception.Create('Service query failed: ' + IntToStr(FStatus[1]));
-  end;
-
-  p := @buffer[0];
-  while (p^ <> isc_info_end) and (p^ <> 0) do
-  begin
-    case p^ of
-      isc_info_svc_server_version:
-        begin
-          Inc(p);
-          Move(p^, item_len, 2);
-          Inc(p, 2);
-          SetString(FFBVersionString, PAnsiChar(p), item_len);
-          Inc(p, item_len);
-        end;
-    else
-      Break;
+    // Optional: String in Major/Minor parsen
+    ParseFBVersion;
+  except
+    on E: Exception do
+    begin
+      FFBVersionString := '';
+      FFBVersionMajor := 0;
+      FFBVersionMinor := 0;
+      raise Exception.Create('Failed to fetch Firebird version via IBX: ' + E.Message);
     end;
-  end;
-
-  ParseFBVersion;
+  end;}
 end;
 
 procedure TServerSession.SaveCredentials;

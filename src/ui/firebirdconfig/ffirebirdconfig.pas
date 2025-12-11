@@ -5,7 +5,7 @@ unit fFirebirdConfig;
 interface
 
 uses
-  Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
+  Classes, SysUtils, DB, BufDataset,  Forms, Controls,
   IniFiles, Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons,
   ComCtrls, IBDatabase, IBQuery, FileUtil, StrUtils, SynEdit,
   synhighlighterunixshellscript, SynHighlighterIni, SynHighlighterJScript,

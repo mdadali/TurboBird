@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Dialogs,
 
-  DB, sqldb, IBConnection,  IBDatabase,
+  DB, IBDatabase,
   fpstdexports,
   fpDataExporter;
 

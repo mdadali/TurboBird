@@ -7,8 +7,7 @@ interface
 uses
   Forms, Classes, SysUtils, FBAdmin, IniFiles,
   fSetFBClient, Controls, Dialogs,
-  IBConnection, SQLDB,  SQLDBLib,
-  ibase60dyn,
+
   IB,
   IBDatabase,
   IBQuery,

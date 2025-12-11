@@ -23,9 +23,9 @@ uses
   ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
   CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
   SysTables, NewConstraint, NewEditField, Calen, Scriptdb, UserPermissions,
-  TableManage, BackupRestore, CreateUser, ChangePass, PermissionManage,
-  SQLHistory, CopyTable, dynlibs, ibase60dyn, dbInfo, sysutils, Comparison,
-  topologicalsort, UnitFirebirdServices, turbocommon, importtable, fileimport,
+  TableManage, CreateUser, ChangePass, PermissionManage,
+  SQLHistory, CopyTable, dynlibs, dbInfo, sysutils, Comparison,
+  topologicalsort, turbocommon, importtable, fileimport,
   csvdocument, fServerSession, uthemeselector, lazdbexport,
   udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
   fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
@@ -107,9 +107,9 @@ begin
 
   Application.ProcessMessages;
 
-  for i := 0 to 10000 do
+  for i := 0 to 50000 do
   begin
-    //Application.ProcessMessages;
+    Application.ProcessMessages;
   end;
 
   fmAbout.Hide;
@@ -163,6 +163,5 @@ begin
   Application.CreateForm(TNewUserDlg, NewUserDlg);
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
-
   Application.Run;
 end.

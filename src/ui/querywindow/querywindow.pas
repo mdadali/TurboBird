@@ -5,12 +5,11 @@ unit QueryWindow;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, db, sqldb, fpstdexports, FileUtil,
+  Classes, SysUtils, IBConnection, db, fpstdexports, FileUtil,
   LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls, PairSplitter,
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
   dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
-  usqlqueryext,
   QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
   LR_DSet,
 
@@ -244,7 +243,6 @@ type
 
   protected
     // This procedure will receive the events that are logged by the connection:
-    procedure GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType; Const Msg : String);
   public
     OnCommit: TNotifyEvent;
     procedure Init(dbIndex: Integer; ANodeInfos: TPNodeInfos=nil);
@@ -537,25 +535,6 @@ begin
   FSQLTrans.CommitRetaining;
   (Sender as TBitBtn).Visible:= False;
 end;
-
-procedure TfmQueryWindow.GetLogEvent(Sender: TSQLConnection;
-  EventType: TDBEventType; const Msg: String);
-// Used to log everything sent through the connection
-var
-  Source: string;
-begin
-  case EventType of
-    detCustom:   Source:='Custom:  ';
-    detPrepare:  Source:='Prepare: ';
-    detExecute:  Source:='Execute: ';
-    detFetch:    Source:='Fetch:   ';
-    detCommit:   Source:='Commit:  ';
-    detRollBack: Source:='Rollback:';
-    else Source:='Unknown event. Please fix program code.';
-  end;
-  SendDebug(Source + Msg);
-end;
-
 
 { GetCurrentSelectQuery: return result recordset of a page tab }
 

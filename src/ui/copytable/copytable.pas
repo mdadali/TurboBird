@@ -6,10 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ComCtrls, ExtCtrls, SynEdit, SynHighlighterSQL, sqldb,
+  StdCtrls, Buttons, ComCtrls, ExtCtrls, SynEdit, SynHighlighterSQL,
   IniFiles,
 
-  //ibase60dyn,
   IB,
   IBDatabase,
   IBQuery,

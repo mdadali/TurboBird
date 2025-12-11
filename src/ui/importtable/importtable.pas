@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ExtCtrls, Grids, SynEdit, SynHighlighterSQL, sqldb,
+  StdCtrls, Buttons, ExtCtrls, Grids, SynEdit, SynHighlighterSQL,
   turbocommon, fileimport,
   IB, IBDatabase, IBQuery,
   uthemeselector;

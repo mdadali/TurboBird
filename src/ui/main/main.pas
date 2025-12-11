@@ -10,7 +10,7 @@ property of the popup menu to the right value.
 interface
 
 uses
-  LCLType, LCLIntf, Classes, SysUtils, IBConnection, sqldb, sqldblib, odbcconn,
+  LCLType, LCLIntf, Classes, SysUtils,
   memds, FileUtil, LResources, Forms, Controls, Graphics, Dialogs, Menus,
   ComCtrls, Reg, QueryWindow, Grids, ExtCtrls, Buttons, StdCtrls, TableManage,
   dbugintf, turbocommon, importtable, DB,  HtmlView, FramView, FramBrwz,
@@ -22,7 +22,6 @@ uses
   IBQuery,
   IBDatabaseInfo,
 
-  usqlqueryext,
   udb_udf_fetcher,
 
   udb_udr_func_fetcher,
@@ -248,7 +247,6 @@ type
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
     procedure lmAddUserClick(Sender: TObject);
-    procedure lmBackupClick(Sender: TObject);
     procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
     procedure lmChangePasswordClick(Sender: TObject);
@@ -326,7 +324,6 @@ type
     procedure lmServerRegistryClick(Sender: TObject);
     procedure lmSetFBClientClick(Sender: TObject);
     procedure lmSetGenClick(Sender: TObject);
-    procedure lmSweepClick(Sender: TObject);
     procedure lmTableManageClick(Sender: TObject);
     procedure lmTestFireBirdFunctionClick(Sender: TObject);
     procedure lmTestPackageFunctionClick(Sender: TObject);
@@ -395,7 +392,6 @@ type
     procedure AddRootObjects(ANode: TTreeNode; AServerVersion: word);
   protected
     // This procedure will receive the events that are logged by the connection:
-    procedure GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType; Const Msg : String);
   public
     Version: string;
     VersionDate: string;
@@ -475,7 +471,7 @@ implementation
 
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
      EnterPass, CreateTrigger, fedittabledata, CallProc,  UDFInfo, ViewDomain,
-     NewDomain, SysTables, Scriptdb, UserPermissions, BackupRestore, UnitFirebirdServices, CreateUser, ChangePass,
+     NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, CopyTable, About, NewEditField, dbInfo, Comparison;
 
 
@@ -1356,15 +1352,6 @@ begin
   end;
 end;
 
-{procedure TfmMain.mnRestoreClick(Sender: TObject);
-begin
-  fmBackupRestore.Init('', '', '', '');
-  fmBackupRestore.cbOperation.ItemIndex:= 1;
-  fmBackupRestore.cbOperation.Enabled:= False;
-  fmBackupRestore.meLog.Clear;
-  fmBackupRestore.Show;
-end;}
-
 
 procedure TfmMain.mnServerRegistryClick(Sender: TObject);
 begin
@@ -1379,97 +1366,6 @@ end;
 procedure TfmMain.lmRestoreClick(Sender: TObject);
 begin
   mnRestoreClick(nil);
-end;
-
-procedure TfmMain.lmBackupClick(Sender: TObject);
-var
-  fmBackupRestore: TfmBackupRestore;
-  SelNode: TTreeNode;
-  ServerNode: TTreeNode;
-  hStr: string;
-  NodeInfos: TPNodeInfos;
-  dbIndex: Integer;
-  ATab: TTabSheet;
-  Title, FullHint, DBAlias: string;
-begin
-  SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
-
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
-  dbIndex := NodeInfos^.dbIndex;
-
-  Title := 'Backup/Restore: ' + SelNode.Text;
-
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmBackupRestore) then
-    fmBackupRestore := TfmBackupRestore(NodeInfos^.ViewForm)
-  else
-  begin
-    fmBackupRestore := TfmBackupRestore.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    fmBackupRestore.Parent := ATab;
-    fmBackupRestore.Align := alClient;
-    fmBackupRestore.BorderStyle := bsNone;
-
-    NodeInfos^.ViewForm := fmBackupRestore;
-  end;
-
-  // Tab vorbereiten
-  ATab := fmBackupRestore.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Tab-Titel
-  ATab.Caption := Title;
-  fmBackupRestore.Caption := Title;
-
-  // Detaillierte Infos als Hint
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Database' + sLineBreak +
-    'Action: Backup/Restore';
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Form initialisieren
-  if Sender = lmRestore then
-  begin
-    fmBackupRestore.Init('', tvMain.Selected.Text +  ':', '', '', NodeInfos);
-    fmBackupRestore.cbOperation.ItemIndex:= 1;
-    fmBackupRestore.cbOperation.Enabled:= False;
-  end else
-  begin
-    with RegisteredDatabases[dbIndex].RegRec do
-      fmBackupRestore.Init(SelNode.Text, DatabaseName, UserName, Password, NodeInfos);
-    fmBackupRestore.cbOperation.Enabled := True;
-  end;
-
-  //fmBackupRestore.cmbBoxHostList.Items := GetServerListFromTreeView;
-  fmBackupRestore.cmbBoxHostList.Items := GetServerAndPortListFromTreeView;
-
-  //if fmBackupRestore.cmbBoxHostList.Items.Count = 0 then
-    //fmBackupRestore.cmbBoxHostList.Items.Add('localhost');
-
-  ServerNode := SelNode.Parent;
-  hStr := Trim(ServerNode.Text);
-
-  if not TPNodeInfos(ServerNode.Data)^.ServerSession.IsEmbedded then
-    hStr := hStr + '/' + TPNodeInfos(ServerNode.Data)^.ServerSession.Port;
-
-  fmBackupRestore.cmbBoxHostList.ItemIndex := fmBackupRestore.cmbBoxHostList.Items.IndexOf(hStr);
-
-  if not TPNodeInfos(ServerNode.Data)^.ServerSession.Connected then
-  begin
-    TPNodeInfos(ServerNode.Data)^.ServerSession.LoadRegisteredClientLib := true;
-    TPNodeInfos(ServerNode.Data)^.ServerSession.IBXConnect;
-  end;
-  fmBackupRestore.Show;
 end;
 
 procedure TfmMain.lmBackupNewClick(Sender: TObject);
@@ -1564,7 +1460,10 @@ var TmpRestoreDlg: TRestoreDlg;
     isDbConnected: boolean;
 begin
   if tvMain.Items.Count = 0 then
+  begin
+    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
     exit;
+  end;
 
   DBNode := nil;
   isDbConnected := false;
@@ -1905,7 +1804,10 @@ var cboxItems: TStringList;
     ServerErrStr: string;
 begin
   if tvMain.Items.Count = 0 then
+  begin
+    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
     exit;
+  end;
 
   try
     cboxItems := GetServerListFromTreeView;
@@ -3854,28 +3756,6 @@ begin
     inherited SetFocus;
 end;
 
-procedure TfmMain.GetLogEvent(Sender: TSQLConnection; EventType: TDBEventType;
-  const Msg: String);
-// Used to log everything sent through the connection
-var
-  Source: string;
-begin
-  case EventType of
-    detCustom:   Source:='Custom:   ';
-    detPrepare:  Source:='Prepare:  ';
-    detExecute:  Source:='Execute:  ';
-    detFetch:    Source:='Fetch:    ';
-    detCommit:   Source:='Commit:   ';
-    detRollBack: Source:='Rollback: ';
-    else Source:='Unknown event. Please fix program code.';
-  end;
-  try
-    SendDebug(Source + Msg);
-  except
-    // Ignore errors (e.g. debug server not active)
-  end;
-end;
-
 (* Insert SQL query into database history file *)
 Function TfmMain.AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: string): Boolean;
 var description: string;
@@ -4947,51 +4827,6 @@ begin
     SQLQuery1.Close;
 
     ShowCompleteQueryWindow(dbIndex, 'setGenVal#' +  IntToStr(dbIndex) + ':' + AGenName, 'SET GENERATOR ' + AGenName + ' TO ' + OrigValue);
-  end;
-end;
-
-(*************   Sweep Database   ***********)
-procedure TfmMain.lmSweepClick(Sender: TObject);
-var
-  FireBirdServices: TFirebirdServices;
-  dbIndex: Integer;
-  AdbName: string;
-  Lines: string;
-  s: string;
-begin
-  dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-  FireBirdServices:= TFirebirdServices.Create;
-  Screen.Cursor:= crSQLWait;
-  try
-    FireBirdServices.VerboseOutput:= True;
-    with FireBirdServices, RegisteredDatabases[dbIndex] do
-    begin
-      HostName:= GetServerName(RegRec.DatabaseName);
-      AdbName:= RegRec.DatabaseName;
-      if Pos(':', AdbName) > 2 then
-        Delete(AdbName, 1, Pos(':', AdbName));
-      DBName:= AdbName;
-      UserName := RegRec.UserName;
-      Password := RegRec.Password;
-
-      try
-        AttachService;
-        StartSweep;
-        while ServiceQuery(S) do
-          Lines:= Lines + S;
-        Screen.Cursor:= crDefault;
-        ShowMessage('Sweep database: ' + AdbName + ' completed');
-      except
-        on E: Exception do
-        begin
-          MessageDlg('Error: ' + E.Message, mtError, [mbOK], 0);
-        end;
-      end;
-      DetachService;
-    end;
-  finally
-    Screen.Cursor:= crDefault;
-    FireBirdServices.Free;
   end;
 end;
 
@@ -6968,7 +6803,10 @@ var ServerComboBoxIdx: integer;
     ServerNode: TTreeNode;
 begin
   if tvMain.Items.Count = 0 then
+  begin
+    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
     exit;
+  end;
 
   fmReg.NewReg:= True;
   fmReg.bbReg.Caption:= 'Register Database';

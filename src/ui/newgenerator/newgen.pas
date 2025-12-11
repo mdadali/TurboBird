@@ -5,7 +5,7 @@ unit NewGen;
 interface
 
 uses
-  Classes, SysUtils, IBConnection, sqldb, FileUtil, LResources, Forms, Controls,
+  Classes, SysUtils, IBConnection, FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons,
   fbcommon,
   turbocommon,
@@ -34,8 +34,6 @@ type
   private
     { private declarations }
     FDBIndex: Integer;
-    FIBConnection: TIBConnection;
-    FSQLTrans: TSQLTransaction;
   public
     procedure Init(dbIndex: Integer);
     { public declarations }

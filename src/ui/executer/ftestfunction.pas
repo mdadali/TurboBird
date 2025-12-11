@@ -5,7 +5,7 @@ unit fTestFunction;
 interface
 
 uses
-  Classes, SysUtils, DB, BufDataset, IBConnection, SQLDB, Forms, Controls,
+  Classes, SysUtils, DB, BufDataset, Forms, Controls,
   Graphics, Dialogs, StdCtrls, DBCtrls, DBGrids, ExtCtrls, Buttons, ComCtrls,
   IBDatabase, IBQuery,
 
@@ -61,7 +61,6 @@ type
     Panel7: TPanel;
     Panel8: TPanel;
     Panel9: TPanel;
-    QParams: TSQLQuery;
     rgRoutineType: TRadioGroup;
     Splitter1: TSplitter;
 

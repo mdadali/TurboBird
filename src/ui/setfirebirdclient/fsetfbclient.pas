@@ -11,7 +11,7 @@ uses
   {$IFDEF UNIX} Unix, {$ENDIF}
   {$IFDEF DARWIN} MacOSAll, {$ENDIF}
   StrUtils,
-  dynlibs, ibase60dyn,
+
   uthemeselector;
 
 

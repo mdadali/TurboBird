@@ -8,7 +8,7 @@ uses
   Forms, Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
   LCLType,
   interfaces, LCLPlatformDef,
-  DB, sqldb, IBConnection,  IBDatabase,
+  DB, IBDatabase,
 
 
   fpcstdexporters,

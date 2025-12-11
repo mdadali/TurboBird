@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
   LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
-  EditBtn, ExtCtrls, DBCtrls, ComCtrls, usqlqueryext,
+  EditBtn, ExtCtrls, DBCtrls, ComCtrls,
   turbocommon,
   uthemeselector;
 
