@@ -523,6 +523,11 @@ var
     //Export to Clipboard
     MaxExportRows: integer;
 
+function IsFBObjectNameCaseSensitive(AObjectName: string): boolean;
+function MakeFBObjectNameCaseSensitive(AObjectName: string): string;
+procedure MakeFObjectNameListCaseSensitive(var AObjectList: TStringList);
+
+function NeedsCommit(Q: TIBQuery): Boolean;
 
 function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 
@@ -649,6 +654,52 @@ function ColorBValue(AColor: TColor): Byte;
 implementation
 
 uses Reg;
+
+procedure MakeFObjectNameListCaseSensitive(var AObjectList: TStringList);
+var i: integer;
+begin
+  for i := 0 to AObjectList.Count - 1 do
+    AObjectList[i] := MakeFBObjectNameCaseSensitive(AObjectList[i]);
+end;
+
+function IsFBObjectNameCaseSensitive(AObjectName: string): boolean;
+begin
+  result := (AObjectName <> UpperCase(AObjectName));
+end;
+
+function MakeFBObjectNameCaseSensitive(AObjectName: string): string;
+begin
+  result := '"' + AObjectName + '"';
+end;
+
+{  TIBSQLStatementTypes =
+                 (SQLUnknown, SQLSelect, SQLInsert,
+                  SQLUpdate, SQLDelete, SQLDDL,
+                  SQLGetSegment, SQLPutSegment,
+                  SQLExecProcedure, SQLStartTransaction,
+                  SQLCommit, SQLRollback,
+                  SQLSelectForUpdate, SQLSetGenerator,
+                  SQLSavePoint);
+}
+function NeedsCommit(Q: TIBQuery): Boolean;
+begin
+  Result := False;
+
+  if not Assigned(Q) then
+    Exit;
+
+  case Q.StatementType of
+    SQLInsert,
+    SQLUpdate,
+    SQLDelete,
+    SQLDDL,
+    SQLSetGenerator,
+    SQLSavePoint:
+      Result := True;
+  else
+    Result := False;
+  end;
+end;
 
 function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 begin
@@ -2408,7 +2459,6 @@ begin
   if (Index = 14) and (CharacterLengt = 63) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
       Result := 'UUID';
 end;
-//end-newlib
 
 function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
 begin

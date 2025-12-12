@@ -222,6 +222,7 @@ end;
 
 function TdmSysTables.GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer): string;
 var ServerVersionMajor: word;
+    isObjNameCaseSensitive: boolean;
 begin
   Init(DatabaseIndex);
 
@@ -441,28 +442,6 @@ begin
      'ORDER BY RDB$ROLE_NAME'
   else
 
-  //if ObjectType = otUsers then // Users
-    //sqQuery.SQL.Text:= 'select distinct RDB$User from RDB$USER_PRIVILEGES where RDB$User_Type = 8 order by rdb$User';
-
-{  if ObjectType = otUsers then
-  begin
-    // User je nach Firebird-Version
-    if FBVersionMajor < 3 then
-      // Firebird 2.5: SEC$USERS
-    sqQuery.SQL.Text :=
-      'SELECT DISTINCT RDB$USER ' +
-      'FROM RDB$USER_PRIVILEGES ' +
-      'WHERE RDB$USER_TYPE = 8 ' +
-      'ORDER BY RDB$USER'
-    else
-      // Firebird 3+: RDB$USERS
-      sqQuery.SQL.Text:=
-        'SELECT SEC$USER_NAME AS RDB$USER ' +
-        'FROM SEC$USERS ' +
-        'ORDER BY SEC$USER_NAME';
-  end;
- }
-
  if ObjectType = otUsers then
 begin
   // Benutzerliste je nach Firebird-Version
@@ -485,7 +464,7 @@ begin
       'WHERE UPPER(SEC$USER_NAME) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
       'ORDER BY SEC$USER_NAME';
   end;
-end;
+  end;
 
    // Save the result list as comma delimited string
   Result := '';
@@ -503,7 +482,12 @@ end;
   while not sqQuery.EOF do
   begin
     inc(count);
-    Result:= Result + Trim(sqQuery.Fields[0].AsString);
+    isObjNameCaseSensitive := (Trim(sqQuery.Fields[0].AsString) <> UpperCase(Trim(sqQuery.Fields[0].AsString)));
+    //if isObjNameCaseSensitive then
+      //Result := Result + '"""' + Trim(sqQuery.Fields[0].AsString) + '"""'
+    //else
+      Result:= Result + Trim(sqQuery.Fields[0].AsString);
+
     sqQuery.Next;
     if not sqQuery.EOF then
       Result:= Result + ',';

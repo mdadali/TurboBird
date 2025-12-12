@@ -489,7 +489,7 @@
         <PackageName Value="LCL"/>
       </Item24>
     </RequiredPackages>
-    <Units Count="99">
+    <Units Count="100">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1096,6 +1096,10 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="fClipboardExport"/>
       </Unit98>
+      <Unit99>
+        <Filename Value="utils/fsimpleobjextractor.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit99>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

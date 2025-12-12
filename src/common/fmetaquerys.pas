@@ -46,7 +46,13 @@ uses
 function GetFieldsIsolated(const SourceDB: TIBDatabase; const ATableName: string; AStrList: TStringList = nil): TIsolatedQuery;
 var
   SQL: string;
+  TableNameForSQL: string;
 begin
+  TableNameForSQL := ATableName;
+    // Hochkommas entfernen, falls vorhanden
+  if (TableNameForSQL[1] = '"') and (TableNameForSQL[Length(TableNameForSQL)] = '"') then
+    TableNameForSQL := Copy(TableNameForSQL, 2, Length(TableNameForSQL)-2);
+
   // QueryTemplate aus deinem bestehenden Code, nur parametrisiert
   SQL :=
     'SELECT r.RDB$FIELD_NAME AS field_name, ' +
@@ -69,7 +75,7 @@ begin
     ' LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID and f.rdb$character_set_id=coll.rdb$character_set_id ' +
     ' LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
     ' LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
-    ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(ATableName)) +
+    ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(TableNameForSQL) +
     ' ORDER BY r.RDB$FIELD_POSITION';
 
   Result := TIsolatedQuery.Create(SourceDB, SQL, AStrList);
@@ -80,7 +86,7 @@ var
   SQL: string;
   IndexName: string;
 begin
-  SQL := 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + UpperCase(ATableName) +
+  SQL := 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + ATableName +
     ''' AND RDB$FOREIGN_KEY IS NULL';
 
   Result := TIsolatedQuery.Create(SourceDB, SQL, nil);
@@ -161,16 +167,16 @@ function GetPrimaryKeyIndexNameIsolated(const SourceDB: TIBDatabase;
   const ATableName: string; out ConstraintName: string): string;
 var
   Iso: TIsolatedQuery;
-begin
+ begin
   Result := '';
   ConstraintName := '';
-
   Iso := TIsolatedQuery.Create(SourceDB,
     'select RDB$Index_name, RDB$Constraint_Name ' +
     'from RDB$RELATION_CONSTRAINTS ' +
-    'where RDB$Relation_Name = ' + QuotedStr(UpperCase(ATableName)) +
-    ' and RDB$Constraint_Type = ''PRIMARY KEY'' ');
+    'where RDB$Relation_Name = ' + QuotedStr(ATableName) +
+    ' and RDB$Constraint_Type = ' + QuotedStr('PRIMARY KEY'));
   try
+    Iso.Query.First;
     if not Iso.Query.EOF then
     begin
       Result := Trim(Iso.Query.FieldByName('RDB$Index_name').AsString);
@@ -193,8 +199,8 @@ begin
     'FROM RDB$INDEX_SEGMENTS ' + LineEnding +
     'LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME ' + LineEnding +
     'LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME ' + LineEnding +
-    ' WHERE UPPER(RDB$INDICES.RDB$RELATION_NAME)=''' + UpperCase(ATableName) + '''         -- table name ' + LineEnding +
-    '  AND UPPER(RDB$INDICES.RDB$INDEX_NAME)=''' + UpperCase(AIndexName) + ''' -- index name ' + LineEnding +
+    ' WHERE UPPER(RDB$INDICES.RDB$RELATION_NAME)=''' + ATableName + '''         -- table name ' + LineEnding +
+    '  AND UPPER(RDB$INDICES.RDB$INDEX_NAME)=''' + AIndexName + ''' -- index name ' + LineEnding +
     '--  AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE IS NULL ' + LineEnding +
     'ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION;';
 
@@ -210,7 +216,7 @@ begin
   IsoQuery := TIsolatedQuery.Create(
     SourceDB,
     'select RDB$Field_name as FieldName from RDB$INDEX_SEGMENTS ' +
-    'where RDB$Index_name = ' + QuotedStr(UpperCase(Trim(AIndexName))))
+    'where RDB$Index_name = ' + QuotedStr(Trim(AIndexName)))
   ;
   try
     while not IsoQuery.Query.EOF do
@@ -237,8 +243,8 @@ begin
      'LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ ' +
      'LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME ' +
      'LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME ' +
-     '   WHERE i.RDB$RELATION_NAME=''' + UpperCase(ATableName) + '''  ' +
-      'AND rc.RDB$INDEX_NAME=''' + UpperCase(AIndexName) + ''' ' +
+     '   WHERE i.RDB$RELATION_NAME=''' + ATableName + '''  ' +
+      'AND rc.RDB$INDEX_NAME=''' + AIndexName + ''' ' +
       'AND rc.RDB$CONSTRAINT_TYPE IS NOT NULL ' +
       'ORDER BY s.RDB$FIELD_POSITION';
 

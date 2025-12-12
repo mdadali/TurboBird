@@ -20,6 +20,7 @@ uses
   IB,
   IBDatabase,
   IBQuery,
+  IBExtract,
   IBDatabaseInfo,
 
   udb_udf_fetcher,
@@ -61,6 +62,7 @@ uses
 
   fmetaquerys,
   uthemeselector,
+  fsimpleobjextractor,
 
   //MWA Tools
   fScriptEngine,
@@ -82,6 +84,7 @@ type
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
     HtmlViewer1: THtmlViewer;
+    IBExtract1: TIBExtract;
     Image1: TImage;
     Memo1: TMemo;
     lmMaintenance: TMenuItem;
@@ -4427,14 +4430,25 @@ begin
         FieldNames:= FieldNames + Trim(FieldByName('Field_Name').AsString);
         ParamNames:= ParamNames + ':' + Trim(FieldByName('Field_Name').AsString);
         FieldLine:= Trim(FieldByName('Field_Name').AsString) + ' ';
-        FieldLine:= FieldLine +
+        {FieldLine:= FieldLine +
           GetFBTypeName(Iso.Query.FieldByName('field_type_int').AsInteger,
             Iso.Query.FieldByName('field_sub_type').AsInteger,
             Iso.Query.FieldByName('field_length').AsInteger,
             Iso.Query.FieldByName('field_precision').AsInteger,
-            Iso.Query.FieldByName('field_scale').AsInteger);
-        if Iso.Query.FieldByName('field_type_int').AsInteger in [CStringType,CharType,VarCharType] then
-          FieldLine:= FieldLine + '(' + FieldByName('CharacterLength').AsString + ') ';
+            Iso.Query.FieldByName('field_scale').AsInteger); }
+
+            FieldLine := FieldLine + GetFBTypeName(
+              FieldByName('field_type_int').AsInteger,
+              FieldByName('field_sub_type').AsInteger,
+              FieldByName('field_length').AsInteger,      // OK: wird nur für numerische Typen benötigt
+              FieldByName('field_precision').AsInteger,
+              FieldByName('field_scale').AsInteger,
+              FieldByName('field_charset').AsString,
+              FieldByName('characterlength').AsInteger    // **WICHTIG: dieser Wert muss rein!**
+            );
+
+        //if Iso.Query.FieldByName('field_type_int').AsInteger in [CStringType,CharType,VarCharType] then
+          //FieldLine:= FieldLine + '(' + FieldByName('CharacterLength').AsString + ') ';
       end
       else
         Skipped:= True;
@@ -4488,23 +4502,54 @@ var
   QWindow: TfmQueryWindow;
   ATableName: string;
   dbIndex: Integer;
+  SimpleObjExtractor: TSimpleObjExtractor;
+  Strings: TStrings;
+begin
+  SelNode:= tvMain.Selected;
+  if (SelNode <> nil) then
+  begin
+    //ATableName:= MakeFBObjectNameCaseSensitive(SelNode.Text);
+    ATableName:= SelNode.Text;
+    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+
+    QWindow:= ShowQueryWindow(dbIndex, 'Script as create#' + IntToStr(dbIndex) + ':' + ATableName);
+    QWindow.meQuery.Lines.Clear;
+
+    SimpleObjExtractor := TSimpleObjExtractor.create(dbIndex);
+    Strings := QWindow.meQuery.Lines;
+    SimpleObjExtractor.Extract(otTables, ATableName, [etIndex, etForeign, etCheck, etTrigger, etGrant],Strings);
+    SimpleObjExtractor.Free;
+  end;
+end;
+
+{procedure TfmMain.lmScriptTableCreateClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  QWindow: TfmQueryWindow;
+  ATableName: string;
+  dbIndex: Integer;
   ScriptList: TStringList;
   Line: string;
   PKIndexName: string;
   ConstraintName: string;
-  List: TStringList;
+  List, ConstraintsList: TStringList;
   i: Integer;
   UserName: string;
   ObjType: Integer;
   Triggers: TStringList;
   j: Integer;
   IsoIndices, IsoIndexFields: TIsolatedQuery;
+  SimpleObjExtractor: TSimpleObjExtractor;
 begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
     ATableName:= SelNode.Text;
     dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
+
+    QWindow:= ShowQueryWindow(dbIndex, 'Script as create#' + IntToStr(dbIndex) + ':' + ATableName);
+    QWindow.meQuery.Lines.Clear;
+
     ScriptList:= TStringList.Create;
     try
       ScriptTableAsCreate(dbIndex, ATableName, ScriptList);
@@ -4515,11 +4560,11 @@ begin
       // Script table constraints
       dmSysTables.sqQuery.Close;
       SQLQuery1.Close;
-      dmSysTables.GetTableConstraints(ATableName, dmSysTables.sqQuery);
+      dmSysTables.GetTableConstraints(ATableName, dmSysTables.sqQuery, ConstraintsList);
       with dmSysTables do
       while not sqQuery.EOF do
       begin
-         Line:= 'alter table ' + ATableName + ' add constraint ' + sqQuery.Fields[0].AsString +
+         Line:= 'alter table ' + MakeFBObjectNameCaseSensitive(ATableName) + ' add constraint ' + sqQuery.Fields[0].AsString +
            ' foreign key (' + sqQuery.Fields[3].AsString + ') references ' +  sqQuery.Fields[4].AsString  +
            ' (' + dmSysTables.GetConstraintForeignKeyFields(sqQuery.Fields[5].AsString, fmMain.SQLQuery1) + ') ';
          if Trim(sqQuery.Fields[6].AsString) <> 'RESTRICT' then
@@ -4630,7 +4675,7 @@ begin
     end;
     QWindow.Show;
   end;
-end;
+end;}
 
 (*****************  Script as Update table stored proc  ****************)
 procedure TfmMain.lmScriptUpdateClick(Sender: TObject);
@@ -4674,13 +4719,15 @@ begin
         AFieldName:= Trim(Iso.Query.FieldByName('Field_Name').AsString);
         ParamAndValue:= ParamAndValue + AFieldName + ' = :' + AFieldName;
         FieldLine:= AFieldName + ' ';
-        FieldLine:= FieldLine + GetFBTypeName(Iso.Query.FieldByName('field_type_int').AsInteger,
-          Iso.Query.FieldByName('field_sub_type').AsInteger,
-          Iso.Query.FieldByName('field_length').AsInteger,
-          Iso.Query.FieldByName('field_precision').AsInteger,
-          Iso.Query.FieldByName('field_scale').AsInteger);
-        if Iso.Query.FieldByName('field_type_int').AsInteger in [CStringType,CharType,VarCharType] then
-          FieldLine:= FieldLine + '(' + Iso.Query.FieldByName('CharacterLength').AsString + ') ';
+           FieldLine := FieldLine + GetFBTypeName(
+            FieldByName('field_type_int').AsInteger,
+            FieldByName('field_sub_type').AsInteger,
+            FieldByName('field_length').AsInteger,      // OK: wird nur für numerische Typen benötigt
+            FieldByName('field_precision').AsInteger,
+            FieldByName('field_scale').AsInteger,
+            FieldByName('field_charset').AsString,
+            FieldByName('characterlength').AsInteger    // **WICHTIG: dieser Wert muss rein!**
+          );
       end
       else
         Skipped:= True;
@@ -6941,7 +6988,7 @@ begin
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex,  SelNode.Text,  SelNode.Data);
-    QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
+    QWindow.meQuery.Lines.Text:= 'select * from ' + MakeFBObjectNameCaseSensitive(SelNode.Text);
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
@@ -8631,8 +8678,8 @@ begin
      'LEFT JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = refc.RDB$CONST_NAME_UQ ' +
      'LEFT JOIN RDB$INDICES i2 ON i2.RDB$INDEX_NAME = rc2.RDB$INDEX_NAME ' +
      'LEFT JOIN RDB$INDEX_SEGMENTS s2 ON i2.RDB$INDEX_NAME = s2.RDB$INDEX_NAME ' +
-     '   WHERE i.RDB$RELATION_NAME=''' + UpperCase(ATableName) + '''  ' +
-      'AND rc.RDB$INDEX_NAME=''' + UpperCase(AIndexName) + ''' ' +
+     '   WHERE i.RDB$RELATION_NAME =   ' + QuotedStr(ATableName)  +
+      'AND rc.RDB$INDEX_NAME = ' + QuotedStr(AIndexName) +
       'AND rc.RDB$CONSTRAINT_TYPE IS NOT NULL ' +
       'ORDER BY s.RDB$FIELD_POSITION';
   List.Clear;

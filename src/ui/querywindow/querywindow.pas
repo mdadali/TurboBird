@@ -13,6 +13,8 @@ uses
   QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
   LR_DSet,
 
+  typinfo,
+
   IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB,
   ibxscript,
 
@@ -59,6 +61,8 @@ type
       procedure DoJob;
       procedure Execute; override;
       constructor Create(aType: TQueryActions);
+
+      function CanCommit: Boolean;
   end;
 
 
@@ -78,6 +82,7 @@ type
     rgScreenModes: TRadioGroup;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
+    SynAutoComplete1: TSynAutoComplete;
     tbCommit: TToolButton;
     tbCommitRetaining: TToolButton;
     tbHistory: TToolButton;
@@ -594,9 +599,33 @@ end;
 
 { TQueryThread }
 
+function TQueryThread.CanCommit: Boolean;
+begin
+  if not Assigned(FSQLQuery) then
+    Exit(False);
+
+  case FSQLQuery.StatementType of
+    SQLSelect,
+    SQLSelectForUpdate,
+    SQLExecProcedure:  // stored procedure → lieber nicht automatisch committen!
+      Result := False;
+
+    SQLInsert,
+    SQLUpdate,
+    SQLDelete,
+    SQLDDL,
+    SQLSetGenerator,
+    SQLSavePoint:
+      Result := True;
+
+  else
+    Result := False;
+  end;
+end;
+
 { DoJob: Execute thread job: open query, execute, commit, rollback, etc }
 
-procedure TQueryThread.DoJob;
+{procedure TQueryThread.DoJob;
 begin
   try
     if fType = qaOpen then
@@ -633,7 +662,57 @@ begin
       fTerminated:= True;
     end;
   end;
+end;}
+
+procedure TQueryThread.DoJob;
+begin
+  try
+    if fType = qaOpen then
+      FSQLQuery.Open
+
+    else if fType = qaExec then
+      FSQLQuery.ExecSQL
+
+    else if fType = qaDDL then
+    begin
+      FSQLQuery.SQL.Text := Trim(AnsiString(fStatement));
+      FSQLQuery.ExecSQL;
+    end
+
+    else if fType = qaCommit then
+    begin
+      if CanCommit then
+        FTrans.Commit
+      else
+        raise Exception.Create('Cannot commit: current statement is not committable.');
+    end
+
+    else if fType = qaCommitRet then
+    begin
+      if CanCommit then
+        FTrans.CommitRetaining
+      else
+        raise Exception.Create('Cannot commit: current statement is not committable.');
+    end
+
+    else if fType = qaRollBack then
+      FTrans.Rollback
+
+    else if fType = qaRollbackRet then
+      FTrans.RollbackRetaining;
+
+    Error := False;
+    fTerminated := True;
+  except
+    on E: Exception do
+    begin
+      Error := True;
+      ErrorMsg := E.Message;
+      fTerminated := True;
+    end;
+  end;
 end;
+
 
 
 { Execute: Query thread main loop }
@@ -724,6 +803,12 @@ begin
       meResult.Lines.Add('Commited');
       meResult.Font.Color:= clGreen;
 
+
+      if not NeedsCommit(QT.FSQLQuery) then
+        exit;
+      if not NeedsCommit(SqlQuery) then
+        exit;
+
       // Call OnCommit procedure if assigned, it is used to refresh table management view
       if OnCommit <> nil then
         OnCommit(self);
@@ -735,6 +820,70 @@ begin
   end;
 
 end;
+
+{procedure TfmQueryWindow.tbCommitClick(Sender: TObject);
+var
+  meResult: TMemo;
+  SqlQuery: TIBQuery;
+  SqlScript: TIBXScript;
+  ATab: TTabSheet;
+  QT: TQueryThread;
+begin
+  ATab := CreateResultTab(qtExecute, SqlQuery, SqlScript, meResult);
+
+  // ⛔ Kein Commit, wenn nie etwas ausgeführt wurde
+  if not Assigned(SqlQuery) then
+  begin
+    meResult.Lines.Add('Commit skipped: no active statement.');
+    meResult.Font.Color := clGray;
+    Exit;
+  end;
+
+  // ⛔ Kein Commit, wenn letztes Statement kein DML/DDL war
+
+  if not NeedsCommit(SqlQuery) then
+  begin
+    meResult.Lines.Add(
+      'Commit skipped: last statement type = ' +
+      GetEnumName(TypeInfo(TIBSQLStatementTypes), Ord(SqlQuery.StatementType))
+    );
+    meResult.Font.Color := clGray;
+    Exit;
+  end;
+
+  // 🔥 Commit durchführen
+  QT := TQueryThread.Create(qaCommit);
+  try
+    QT.Trans := FSQLTrans;
+    ATab.ImageIndex := 6;
+
+    QT.Resume;
+
+    repeat
+      Application.ProcessMessages;
+    until QT.fTerminated;
+
+    if QT.Error then
+    begin
+      ATab.ImageIndex := 3;
+      meResult.Lines.Text := QT.ErrorMsg;
+      meResult.Font.Color := clRed;
+    end
+    else
+    begin
+      ATab.ImageIndex := 4;
+      meResult.Lines.Add('Committed.');
+      meResult.Font.Color := clGreen;
+
+      if Assigned(OnCommit) then
+        OnCommit(Self);
+      OnCommit := nil;
+    end;
+
+  finally
+    QT.Free;
+  end;
+end;}
 
 procedure TfmQueryWindow.tbCommitMouseEnter(Sender: TObject);
 begin
@@ -1167,6 +1316,7 @@ end;
 { Initialize query window: fill connection parameters from selected registered database }
 
 procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos=nil);
+var i: integer;
 begin
   FNodeInfos := ANodeInfos;
   FDBIndex:= dbIndex;
@@ -1217,125 +1367,12 @@ begin
     //FSQLTrans.StartTransaction;
   // Get current database tables to be highlighted in SQL query editor
   SynSQLSyn1.TableNames.CommaText:= fmMain.GetTableNames(dbIndex);
+  for i := 0 to SynSQLSyn1.TableNames.Count - 1 do
+    if IsFBObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
+      SynSQLSyn1.TableNames[i] := MakeFBObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
-  SortSynCompletion;
+  //SortSynCompletion;
 end;
-
-(************* Is Selectable (Check statement type Select, Update, Alter, etc) *******************)
-{function TfmQueryWindow.GetQueryType(AQuery: string): TQueryTypes;
-var
-  S, Line: string;
-  i: Integer;
-  List: TStringList;
-  Clean: string;
-  InBlock: Boolean;
-
-  function StripComments(const SL: TStringList): string;
-  var
-    i: Integer;
-    L, Tmp: string;
-    P1, P2: Integer;
-    Block: Boolean;
-  begin
-    Block := False;
-    Result := '';
-
-    for i := 0 to SL.Count - 1 do
-    begin
-      L := SL[i];
-
-      // --- Already in block comment?
-      if Block then
-      begin
-        P2 := Pos('*/', L);
-        if P2 > 0 then
-        begin
-          Delete(L, 1, P2 + 1);
-          Block := False;
-        end
-        else
-          Continue; // skip until */
-      end;
-
-      // --- Single-line comment --
-      P1 := Pos('--', L);
-      if P1 > 0 then
-        L := Copy(L, 1, P1 - 1);
-
-      // --- Start of block comment
-      P1 := Pos('/*', L);
-      while P1 > 0 do
-      begin
-        P2 := Pos('*/', L);
-
-        if (P2 > 0) and (P2 > P1) then
-        begin
-          Delete(L, P1, P2 - P1 + 2);
-          P1 := Pos('/*', L);
-        end
-        else
-        begin
-          // Comment extends to next lines
-          Block := True;
-          L := Copy(L, 1, P1 - 1);
-          Break;
-        end;
-      end;
-
-      // Normalize whitespace
-      Tmp := Trim(L);
-      if Tmp <> '' then
-        Result := Result + Tmp + ' ';
-    end;
-  end;
-
-  function FirstWord(const S: string): string;
-  var
-    i: Integer;
-  begin
-    Result := '';
-    for i := 1 to Length(S) do
-      if not (S[i] in [' ', #9, #13, #10, '(', ')']) then
-        Result := Result + S[i]
-      else if Result <> '' then
-        Exit;
-  end;
-
-begin
-  List := TStringList.Create;
-  try
-    List.Text := AQuery;
-
-    // Remove all comment content → gives a clean normalized SQL
-    Clean := LowerCase(StripComments(List));
-
-    Clean := Trim(Clean);
-
-    if Clean = '' then
-      Exit(qtExecute);
-
-    // --- Detect scripts (Firebird-specific)
-    if (Pos('set term', Clean) = 1) or
-       (Pos('execute block', Clean) = 1) or
-       (Pos('create trigger', Clean) = 1) or
-       (Pos('create package', Clean) = 1) or
-       (Pos('create procedure', Clean) = 1) or
-       (Pos('create function', Clean) = 1)
-    then
-      Exit(qtScript);
-
-    // Extract leading word
-    S := FirstWord(Clean);
-
-    if S = 'select' then
-      Exit(qtSelectable);
-
-    // Default for any other statement
-    Result := qtExecute;
-  finally
-    List.Free;
-  end;
-end; }
 
 (************* Is Selectable (Check statement type Select, Update, Alter, etc) *******************)
 function TfmQueryWindow.GetQueryType(AQuery: string): TQueryTypes;

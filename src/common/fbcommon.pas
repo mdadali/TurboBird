@@ -15,32 +15,39 @@ uses
 
 
 type
-
-TObjectType = (
-  otNone,
-  otTables,
-  otGenerators,
-  otTriggers,
-  otViews,
-  otStoredProcedures,
-  otUDF {User-Defined functions},
-  otSystemTables,
-  otDomains {excludes system domains},
-  otRoles,
-  otExceptions,
-  otUsers,
-  otIndexes,
-  otConstraints,
-  otFBFunctions,
-  otFBProcedures,
-  otUDRFunctions,
-  otUDRProcedures,
-  otPackages,
-  otPackageFunctions,
-  otPackageProcedures,
-  otPackageUDFFunctions,
-  otPackageUDRFunctions,
-  otPackageUDRProcedures
+  TObjectType = (
+    otNone,
+    otTables,
+    otGenerators,
+    otTriggers,
+    otViews,
+    otStoredProcedures,
+    otUDF,                   // User-Defined functions
+    otSystemTables,
+    otDomains,               // excludes system domains
+    otRoles,
+    otExceptions,
+    otUsers,
+    otIndexes,
+    otConstraints,
+    otForeign,
+    otChecks,
+    otFBFunctions,
+    otFBProcedures,
+    otUDRFunctions,
+    otUDRProcedures,
+    otUDRTriggers,
+    otPackages,
+    otPackageFunctions,
+    otPackageProcedures,
+    otPackageUDFFunctions,
+    otPackageUDRFunctions,
+    otPackageUDRProcedures,
+    otPackageUDRTriggers,
+    otDatabase,              // neu, für eoDatabase
+    otBLOBFilters,           // neu, für eoBLOBFilter
+    otComments,              // neu, für eoComments
+    otData                   // neu, für eoData
   );
 
   TRoutineType = (

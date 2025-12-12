@@ -50,9 +50,12 @@ dmibx, fCheckDBIntegrity, fsqlmonitor,
   AddShadowSetDlgUnit,
   NewUserDlgUnit,
   ChgPasswordDlgUnit,
-  ExecuteSQLScriptDlgUnit, fClipboardExport;
+  ExecuteSQLScriptDlgUnit,
+
   //End-DBAdmin
 
+  fsimpleobjextractor,
+  fClipboardExport;
 
 const
   Major = 1;

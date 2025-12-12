@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#156#1#6'Height'#3'&'#2#3
-  +'Top'#3#189#0#5'Width'#3#186#3#7'Caption'#6#13'fmQueryWindow'#12'ClientHeigh'
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#235#1#6'Height'#3'&'#2#3
+  +'Top'#3#157#0#5'Width'#3#186#3#7'Caption'#6#13'fmQueryWindow'#12'ClientHeigh'
   +'t'#3' '#2#11'ClientWidth'#3#186#3#5'Color'#7#6'clForm'#10'KeyPreview'#9#4'M'
   +'enu'#7#9'MainMenu1'#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#9
   +'OnDestroy'#7#11'FormDestroy'#9'OnKeyDown'#7#11'FormKeyDown'#6'OnShow'#7#8'F'
@@ -1742,5 +1742,7 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'s'#11#0#24'UseDefaultSystemCodePage'#8#4'Left'#3'u'#2#3'Top'#3#216#0#0#0#14
   +'TIBTransaction'#9'FSQLTrans'#15'TransactionName'#6'&{16B319E3-F966-444D-9E9'
   +'D-270E8A795ED9}'#6'Active'#8#15'DefaultDatabase'#7#13'FIBConnection'#4'Left'
-  +#3#6#2#3'Top'#3#216#0#0#0#0
+  +#3#6#2#3'Top'#3#216#0#0#0#16'TSynAutoComplete'#16'SynAutoComplete1'#13'EndOf'
+  +'TokenChr'#6#5'()[].'#8'ShortCut'#3'  '#13'ExecCommandID'#7#26'ecSynAutoComp'
+  +'letionExecute'#6'Editor'#7#7'meQuery'#4'Left'#3#27#2#3'Top'#3'@'#1#0#0#0
 ]);

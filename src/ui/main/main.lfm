@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 77
+  Left = 462
   Height = 531
-  Top = 702
+  Top = 116
   Width = 904
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -4517,5 +4517,12 @@ object fmMain: TfmMain
     DefaultDatabase = CurrentIBConnection
     Left = 80
     Top = 152
+  end
+  object IBExtract1: TIBExtract
+    ShowSystem = False
+    AlwaysQuoteIdentifiers = False
+    CaseSensitiveObjectNames = False
+    Left = 547
+    Top = 240
   end
 end

@@ -264,13 +264,11 @@ var
   Iso: TIsolatedQuery;
 begin
   ScriptList.Clear;
-  ScriptList.Add('create table ' + ATableName + ' (');
+  ScriptList.Add('CREATE TABLE ' +  MakeFBObjectNameCaseSensitive(ATableName) + ' (');
   CalculatedList:= TStringList.Create;
 
   try
     // Fields
-    //fmMain.GetFields(dbIndex, ATableName, nil);
-    //with fmMain.SQLQuery1 do
     Iso := GetFieldsIsolated(RegisteredDatabases[dbIndex].IBDatabase, ATableName);
     with Iso.Query do
     while not EOF do
@@ -279,22 +277,22 @@ begin
       if (FieldByName('computed_source').AsString = '') then
       begin
         // Field Name
-        FieldLine:= Trim(FieldByName('Field_Name').AsString) + ' ';
+        FieldLine:= Trim(FieldByName('Field_Name').AsString);
+        FieldLine := MakeFBObjectNameCaseSensitive(FieldLine)  + ' ';
 
         if (FieldByName('field_source').IsNull) or
           (trim(FieldByName('field_source').AsString)='') or
           (IsFieldDomainSystemGenerated(trim(FieldByname('field_source').AsString))) then
         begin
-          // Field type is not based on a domain but a standard SQL type
-          // Field type
-          FieldLine:= FieldLine + GetFBTypeName(FieldByName('field_type_int').AsInteger,
+          FieldLine := FieldLine + GetFBTypeName(
+            FieldByName('field_type_int').AsInteger,
             FieldByName('field_sub_type').AsInteger,
-            FieldByName('field_length').AsInteger,
+            FieldByName('field_length').AsInteger,      // OK: wird nur für numerische Typen benötigt
             FieldByName('field_precision').AsInteger,
-            FieldByName('field_scale').AsInteger);
-
-          if (FieldByName('field_type_int').AsInteger) in [CharType, CStringType, VarCharType] then
-            FieldLine:= FieldLine + '(' + FieldByName('characterlength').AsString + ') ';
+            FieldByName('field_scale').AsInteger,
+            FieldByName('field_charset').AsString,
+            FieldByName('characterlength').AsInteger    // **WICHTIG: dieser Wert muss rein!**
+          );
 
           if (FieldByName('field_type_int').AsInteger = BlobType) then
           begin
@@ -334,8 +332,8 @@ begin
 
       // Computed Fields
       if FieldByName('computed_source').AsString <> '' then
-        CalculatedList.Add('ALTER TABLE ' + ATableName + ' ADD ' +
-          Trim(FieldByName('Field_Name').AsString) + ' COMPUTED BY ' + FieldByName('computed_source').AsString + ';');
+        CalculatedList.Add('ALTER TABLE ' + MakeFBObjectNameCaseSensitive(ATableName) + ' ADD ' +
+          MakeFBObjectNameCaseSensitive(Trim(FieldByName('Field_Name').AsString)) + ' COMPUTED BY ' + FieldByName('computed_source').AsString + ';');
 
       Next;
 
@@ -369,7 +367,7 @@ begin
         else // User-specified, so explicilty mention constraint name
           FieldLine:= 'constraint ' + ConstraintName + ' primary key (';
         for i:= 0 to PKFieldsList.Count - 1 do
-          FieldLine:= FieldLine + PKFieldsList[i] + ', ';
+          FieldLine:= FieldLine + MakeFBObjectNameCaseSensitive(PKFieldsList[i]) + ', ';
         if PKFieldsList.Count > 0 then
         begin
           Delete(FieldLine, Length(FieldLine) - 1, 2);

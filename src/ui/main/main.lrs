@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#2'M'#6'Height'#3#19#2#3'Top'#3#190#2#5'Wi'
+  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#206#1#6'Height'#3#19#2#3'Top'#2't'#5'Wi'
   +'dth'#3#136#3#13'ActiveControl'#7#6'tvMain'#7'Caption'#6#28'TurboBird Admin '
   +'for FireBird'#12'ClientHeight'#3#246#1#11'ClientWidth'#3#136#3#5'Color'#7#6
   +'clForm'#8'DragMode'#7#11'dmAutomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10
@@ -5203,5 +5203,7 @@ LazarusResources.Add('TfmMain','FORMDATA',[
   +#10'TraceFlags'#11#0#24'UseDefaultSystemCodePage'#8#4'Left'#2'P'#3'Top'#2'C'
   +#0#0#14'TIBTransaction'#20'CurrentIBTransaction'#15'TransactionName'#6'&{E7A'
   +'93331-169C-407D-B805-831FABAB8845}'#6'Active'#8#15'DefaultDatabase'#7#19'Cu'
-  +'rrentIBConnection'#4'Left'#2'P'#3'Top'#3#152#0#0#0#0
+  +'rrentIBConnection'#4'Left'#2'P'#3'Top'#3#152#0#0#0#10'TIBExtract'#10'IBExtr'
+  +'act1'#10'ShowSystem'#8#22'AlwaysQuoteIdentifiers'#8#24'CaseSensitiveObjectN'
+  +'ames'#8#4'Left'#3'#'#2#3'Top'#3#240#0#0#0#0
 ]);
