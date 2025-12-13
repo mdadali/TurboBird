@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 491
+  Left = 914
   Height = 550
-  Top = 157
+  Top = 384
   Width = 954
   Caption = 'fmQueryWindow'
   ClientHeight = 544
@@ -750,6 +750,7 @@ object fmQueryWindow: TfmQueryWindow
       Top = 2
       AutoSize = True
       Caption = 'tbCommit'
+      Enabled = False
       ImageIndex = 4
       OnClick = tbCommitClick
       OnMouseEnter = tbCommitMouseEnter

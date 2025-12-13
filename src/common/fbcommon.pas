@@ -18,6 +18,7 @@ type
   TObjectType = (
     otNone,
     otTables,
+    otTableFields,
     otGenerators,
     otTriggers,
     otViews,

@@ -625,7 +625,7 @@ end;
 
 { DoJob: Execute thread job: open query, execute, commit, rollback, etc }
 
-{procedure TQueryThread.DoJob;
+procedure TQueryThread.DoJob;
 begin
   try
     if fType = qaOpen then
@@ -662,9 +662,9 @@ begin
       fTerminated:= True;
     end;
   end;
-end;}
+end;
 
-procedure TQueryThread.DoJob;
+{procedure TQueryThread.DoJob;
 begin
   try
     if fType = qaOpen then
@@ -711,9 +711,7 @@ begin
       fTerminated := True;
     end;
   end;
-end;
-
-
+end;}
 
 { Execute: Query thread main loop }
 
@@ -758,6 +756,7 @@ procedure TfmQueryWindow.SynCompletion1CodeCompletion(var Value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
+
   SynCompletion1.Deactivate;
 end;
 
@@ -783,6 +782,11 @@ begin
   QT:= TQueryThread.Create(qaCommit);
   try
     QT.Trans:= FSQLTrans;
+    if not FSQLTrans.InTransaction then
+      //FSQLTrans.StartTransaction;
+      exit;
+
+
     ATab.ImageIndex:= 6;
 
     // Run thread
@@ -804,10 +808,10 @@ begin
       meResult.Font.Color:= clGreen;
 
 
-      if not NeedsCommit(QT.FSQLQuery) then
+      {if not NeedsCommit(QT.FSQLQuery) then
         exit;
       if not NeedsCommit(SqlQuery) then
-        exit;
+        exit;}
 
       // Call OnCommit procedure if assigned, it is used to refresh table management view
       if OnCommit <> nil then
@@ -2299,7 +2303,7 @@ function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
 var
   StartTime: TDateTime;
   SqlQuery: TIBQuery;
-  SqlScript: TIBXScript;
+  FIBXScript: TIBXScript;
   meResult: TMemo;
   ATab: TTabSheet;
 begin
@@ -2309,7 +2313,7 @@ begin
 
   try
     // CreateResultTab creates the SQLScript object for us.
-    ATab:= CreateResultTab(qtScript, SqlQuery, SQLScript, meResult);
+    ATab:= CreateResultTab(qtScript, SqlQuery, FIBXScript, meResult);
     try
       ATab.ImageIndex:= 2;
       //SQLScript.Script.Text:= Script;
@@ -2317,8 +2321,7 @@ begin
       SendDebug('going to run script: ' + Script);
       {$Endif}
       Script := Trim(Script);
-      SQLScript.ExecSQLScript(Script);
-
+      FIBXScript.ExecSQLScript(Script);
       // Auto commit
       if cxAutoCommit.Checked then
         FSQLTrans.CommitRetaining;
@@ -2329,7 +2332,7 @@ begin
       meResult.Lines.Add('--------');
       meResult.Lines.Add(Script);
     finally
-      SQLScript.Free;
+      FIBXScript.Free;
     end;
   except
     on E: Exception do
@@ -2340,7 +2343,7 @@ begin
       Result:= False;
       if Assigned(ATab) then
         ATab.TabVisible:= False;
-      ATab:= CreateResultTab(qtExecute, SqlQuery, SqlScript, meResult);
+      ATab:= CreateResultTab(qtExecute, SqlQuery, FIBXScript, meResult);
       pgOutputPageCtl.ActivePage:= ATab;
       meResult.Text:= e.Message;
       meResult.Lines.Add('--------');

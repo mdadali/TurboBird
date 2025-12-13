@@ -1640,8 +1640,6 @@ var
 begin
   List.Clear;
 
-  //ServerVersionMajor := GetServerMajorVersionFromIBDB(sqQuery.DataBase);
-
   BasicList := TStringList.Create;
   ExtendedList := TStringList.Create;
   try
