@@ -58,12 +58,23 @@ type
   tvotTableField,
   tvotGeneratorRoot,
   tvotGenerator,
+
+  //triggers
   tvotTriggerRoot,
+
+  tvotTableTriggerRoot,
+  tvotTableTrigger,
+
+  tvotDBTriggerRoot,
+  tvotDBTrigger,
+
+  tvotDDLTriggerRoot,
+  tvotDDLTrigger,
+
   tvotTrigger,
   tvotViewRoot,
   tvotView,
-  tvotSystemTableRoot,
-  tvotSystemTable,
+
   tvotDomainRoot, {excludes system domains}
   tvotDomain,
   tvotRoleRoot,
@@ -72,12 +83,25 @@ type
   tvotException,
   tvotUserRoot,
   tvotUser,
-  tvotIndexRoot,
-  tvotIndex,
+
   tvotConstraintRoot,
   tvotConstraint,
-  tvotStoredProcedureRoot,
-  tvotStoredProcedure,
+  tvotIndexRoot,
+  tvotIndex,
+
+  tvotPrimaryKeyRoot,
+  tvotPrimaryKey,
+  tvotForeignKeyRoot,
+  tvotForeignKey,
+  tvotUniqueConstraintRoot,
+  tvotUniqueConstraint,
+  tvotCheckConstraintRoot,
+  tvotCheckConstraint,
+  tvotNotNullConstraintRoot,
+  tvotNotNullConstraint,
+
+  tvotProcedureRoot,
+  tvotProcedure,
   tvotFunctionRoot,
   tvotFunction,
   tvotUDRoot,
@@ -92,6 +116,8 @@ type
   tvotUDRTrigger,
   tvotPackageRoot,
   tvotPackage,
+  tvotPackageUDFFunctionRoot,
+  tvotPackageUDFFunction,
   tvotPackageFunctionRoot,
   tvotPackageFunction,
   tvotPackageProcedureRoot,
@@ -100,9 +126,39 @@ type
   tvotPackageUDRFunction,
   tvotPackageUDRProcedureRoot,
   tvotPackageUDRProcedure,
+  tvotPackageTriggerRoot,
+  tvotPackageTrigger,
   tvotPackageUDRTriggerRoot,
-  tvotPackageUDRTrigger
+  tvotPackageUDRTrigger,
+
+  tvotDatabaseRoot,
+  tvotBLOBFilterRoot,
+  tvotBLOBFilter,
+  tvotCommentRoot,
+  tvotComment,
+  tvotDataRoot,
+  tvotData,
+
+  tvotSystemTableRoot,
+  tvotSystemTable,
+  tvotSystemDomainRoot,
+  tvotSystemDomain,
+  tvotSystemGeneratorRoot,
+  tvotSystemGenerator,
+  tvotSystemTriggerRoot,
+  tvotSystemTrigger,
+  tvotSystemConstraintRoot,
+  tvotSystemConstraint,
+  tvotSystemIndexRoot,
+  tvotSystemIndex,
+  tvotSystemRoleRoot,
+  tvotSystemRole,
+  tvotSystemUserRoot,
+  tvotSystemUser,
+  tvotSystemExceptionRoot,
+  tvotSystemException
   );
+
 
 type
   TServerRecord = packed record
@@ -414,7 +470,8 @@ function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObject
 
 function FBObjectToStr(AType: TObjectType): string;
 function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
-
+function FBTypeToTreeViewType(AType: TObjectType): TTreeViewObjectType;
+function TreeViewTypeToFBType(AType: TTreeViewObjectType): TObjectType;
 
 
 // Retrieve available collations for specified Characterset into Collations
@@ -1927,7 +1984,7 @@ function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObject
 begin
   case AObjectType of
     tvotFunction:            Result := tvotFunctionRoot;
-    tvotStoredProcedure:     Result := tvotStoredProcedureRoot;
+    tvotProcedure:           Result := tvotProcedureRoot;
     tvotUDFFunction:         Result := tvotUDFRoot;
     tvotUDRFunction:         Result := tvotUDRFunctionRoot;
     tvotUDRProcedure:        Result := tvotUDRProcedureRoot;
@@ -1946,83 +2003,289 @@ end;
 function FBObjectToStr(AType: TObjectType): string;
 begin
   case AType of
+    // --- Allgemein ---
     otNone:                  Result := 'None';
+
+    // --- User-Objekte ---
     otTables:                Result := 'Table';
-    otGenerators:            Result := 'Generator';
-    otTriggers:              Result := 'Trigger';
+    otTableFields:           Result := 'Table Field';
     otViews:                 Result := 'View';
-    otStoredProcedures:      Result := 'Procedure';
+    otGenerators:            Result := 'Generator';
+    otSequences:             Result := 'Sequence';
+
+    otTriggers:              Result := 'Trigger';
+    otTableTriggers:         Result := 'Table Trigger';
+    otDBTriggers:            Result := 'Database Trigger';
+    otDDLTriggers:           Result := 'DDL Trigger';
+
     otUDF:                   Result := 'User-Defined Function';
-    otSystemTables:          Result := 'System Table';
-    otDomains:               Result := 'Domain';
     otRoles:                 Result := 'Role';
-    otExceptions:            Result := 'Exception';
     otUsers:                 Result := 'User';
-    otIndexes:               Result := 'Indexe';
+    otDomains:               Result := 'Domain';
+    otIndexes:               Result := 'Index';
+    otExceptions:            Result := 'Exception';
+
     otConstraints:           Result := 'Constraint';
-    otFBFunctions:           Result := 'Function';
-    otFBProcedures:          Result := 'Procedure';
+    otPrimaryKeys:           Result := 'Primary Key';
+    otForeignKeys:           Result := 'Foreign Key';
+    otUniqueConstraints:     Result := 'Unique Constraint';
+    otCheckConstraints:      Result := 'Check Constraint';
+    otNotNullConstraints:    Result := 'Not Null Constraint';
+
+    otFunctions:             Result := 'Function';
+    otProcedures:            Result := 'Procedure';
+
+    // --- UDR / Package ---
     otUDRFunctions:          Result := 'UDR Function';
     otUDRProcedures:         Result := 'UDR Procedure';
+    otUDRTriggers:           Result := 'UDR Trigger';
     otPackages:              Result := 'Package';
     otPackageFunctions:      Result := 'Package Function';
     otPackageProcedures:     Result := 'Package Procedure';
     otPackageUDFFunctions:   Result := 'Package UDF Function';
     otPackageUDRFunctions:   Result := 'Package UDR Function';
     otPackageUDRProcedures:  Result := 'Package UDR Procedure';
+    otPackageUDRTriggers:    Result := 'Package UDR Trigger';
+
+    // --- Datenbank / Metadaten ---
+    otDatabase:              Result := 'Database';
+    otBLOBFilters:           Result := 'BLOB Filter';
+    otComments:              Result := 'Comment';
+    otData:                  Result := 'Data';
+
+    // --- System-Objekte ---
+    otSystemTables:          Result := 'System Table';
+    otSystemDomains:         Result := 'System Domain';
+    otSystemGenerators:      Result := 'System Generator';
+    otSystemTriggers:        Result := 'System Trigger';
+    otSystemConstraints:     Result := 'System Constraint';
+    otSystemIndexes:         Result := 'System Index';
+    otSystemRoles:           Result := 'System Role';
+    otSystemUsers:           Result := 'System User';
+    otSystemExceptions:      Result := 'System Exception';
   else
     Result := 'Unknown';
+  end;
+end;
+
+function FBTypeToTreeViewType(AType: TObjectType): TTreeViewObjectType;
+begin
+  case AType of
+    otNone:                  Result := tvotNone;
+
+    // --- Tables / Views ---
+    otTables:                Result := tvotTable;
+    otTableFields:           Result := tvotTableField;
+    otViews:                 Result := tvotView;
+
+    // --- Generators / Sequences ---
+    otGenerators,
+    otSequences:             Result := tvotGenerator;
+
+    // --- Triggers ---
+    otTriggers:              Result := tvotTrigger;
+    otTableTriggers:         Result := tvotTableTrigger;
+    otDBTriggers:            Result := tvotDBTrigger;
+    otDDLTriggers:           Result := tvotDDLTrigger;
+
+    // --- Security / Types ---
+    otDomains:               Result := tvotDomain;
+    otRoles:                 Result := tvotRole;
+    otUsers:                 Result := tvotUser;
+    otExceptions:            Result := tvotException;
+
+    // --- Indexes / Constraints ---
+    otIndexes:               Result := tvotIndex;
+    otConstraints:           Result := tvotConstraint;
+    otPrimaryKeys:           Result := tvotPrimaryKey;
+    otForeignKeys:           Result := tvotForeignKey;
+    otUniqueConstraints:     Result := tvotUniqueConstraint;
+    otCheckConstraints:      Result := tvotCheckConstraint;
+    otNotNullConstraints:    Result := tvotNotNullConstraint;
+
+    // --- Procedures / Functions ---
+    otProcedures:            Result := tvotProcedure;
+    otFunctions:             Result := tvotFunction;
+    otUDF:                   Result := tvotUDFFunction;
+
+    // --- UDR ---
+    otUDRFunctions:          Result := tvotUDRFunction;
+    otUDRProcedures:         Result := tvotUDRProcedure;
+    otUDRTriggers:           Result := tvotUDRTrigger;
+
+    // --- Packages ---
+    otPackages:              Result := tvotPackage;
+    otPackageFunctions:      Result := tvotPackageFunction;
+    otPackageProcedures:     Result := tvotPackageProcedure;
+    otPackageUDFFunctions:   Result := tvotPackageUDFFunction;
+    otPackageUDRFunctions:   Result := tvotPackageUDRFunction;
+    otPackageUDRProcedures:  Result := tvotPackageUDRProcedure;
+    otPackageUDRTriggers:    Result := tvotPackageUDRTrigger;
+
+    // --- Database / Metadata ---
+    otDatabase:              Result := tvotDB;
+    otBLOBFilters:           Result := tvotBLOBFilter;
+    otComments:              Result := tvotComment;
+    otData:                  Result := tvotData;
+
+    // --- System Objects ---
+    otSystemTables:          Result := tvotSystemTable;
+    otSystemDomains:         Result := tvotSystemDomain;
+    otSystemGenerators:      Result := tvotSystemGenerator;
+    otSystemTriggers:        Result := tvotSystemTrigger;
+    otSystemConstraints:     Result := tvotSystemConstraint;
+    otSystemIndexes:         Result := tvotSystemIndex;
+    otSystemRoles:           Result := tvotSystemRole;
+    otSystemUsers:           Result := tvotSystemUser;
+    otSystemExceptions:      Result := tvotSystemException;
+  else
+    Result := tvotNone;
+  end;
+end;
+
+function TreeViewTypeToFBType(AType: TTreeViewObjectType): TObjectType;
+begin
+  case AType of
+    tvotNone:                    Result := otNone;
+
+    // --- Tables / Views ---
+    tvotTable:                   Result := otTables;
+    tvotTableField:              Result := otTableFields;
+    tvotView:                    Result := otViews;
+
+    // --- Generators ---
+    tvotGenerator:               Result := otGenerators;
+
+    // --- Triggers ---
+    tvotTrigger:                 Result := otTriggers;
+    tvotTableTrigger:            Result := otTableTriggers;
+    tvotDBTrigger:               Result := otDBTriggers;
+    tvotDDLTrigger:              Result := otDDLTriggers;
+
+    // --- Security / Types ---
+    tvotDomain:                  Result := otDomains;
+    tvotRole:                    Result := otRoles;
+    tvotUser:                    Result := otUsers;
+    tvotException:               Result := otExceptions;
+
+    // --- Indexes / Constraints ---
+    tvotIndex:                   Result := otIndexes;
+    tvotConstraint:              Result := otConstraints;
+    tvotPrimaryKey:              Result := otPrimaryKeys;
+    tvotForeignKey:              Result := otForeignKeys;
+    tvotUniqueConstraint:        Result := otUniqueConstraints;
+    tvotCheckConstraint:         Result := otCheckConstraints;
+    tvotNotNullConstraint:       Result := otNotNullConstraints;
+
+    // --- Procedures / Functions ---
+    tvotProcedure:               Result := otProcedures;
+    tvotFunction:                Result := otFunctions;
+    tvotUDFFunction:             Result := otUDF;
+
+    // --- UDR ---
+    tvotUDRFunction:             Result := otUDRFunctions;
+    tvotUDRProcedure:            Result := otUDRProcedures;
+    tvotUDRTrigger:              Result := otUDRTriggers;
+
+    // --- Packages ---
+    tvotPackage:                 Result := otPackages;
+    tvotPackageFunction:         Result := otPackageFunctions;
+    tvotPackageProcedure:        Result := otPackageProcedures;
+    tvotPackageUDFFunction:      Result := otPackageUDFFunctions;
+    tvotPackageUDRFunction:      Result := otPackageUDRFunctions;
+    tvotPackageUDRProcedure:     Result := otPackageUDRProcedures;
+    tvotPackageUDRTrigger:       Result := otPackageUDRTriggers;
+
+    // --- Database / Metadata ---
+    tvotDB:                      Result := otDatabase;
+    tvotBLOBFilter:              Result := otBLOBFilters;
+    tvotComment:                 Result := otComments;
+    tvotData:                    Result := otData;
+
+    // --- System Objects ---
+    tvotSystemTable:             Result := otSystemTables;
+    tvotSystemDomain:            Result := otSystemDomains;
+    tvotSystemGenerator:         Result := otSystemGenerators;
+    tvotSystemTrigger:           Result := otSystemTriggers;
+    tvotSystemConstraint:        Result := otSystemConstraints;
+    tvotSystemIndex:             Result := otSystemIndexes;
+    tvotSystemRole:              Result := otSystemRoles;
+    tvotSystemUser:              Result := otSystemUsers;
+    tvotSystemException:         Result := otSystemExceptions;
+  else
+    Result := otNone;
   end;
 end;
 
 function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
 begin
   case AType of
+    // --- Allgemein ---
     tvotNone:                  Result := 'None';
     tvotServer:                Result := 'Server';
     tvotDB:                    Result := 'Database';
     tvotQueryWindow:           Result := 'Query Window';
 
+    // --- Tables ---
     tvotTableRoot:             Result := 'Tables';
     tvotTable:                 Result := 'Table';
     tvotTableField:            Result := 'Table Field';
 
+    // --- Generators / Sequences ---
     tvotGeneratorRoot:         Result := 'Generators';
     tvotGenerator:             Result := 'Generator';
 
+    // --- Triggers ---
     tvotTriggerRoot:           Result := 'Triggers';
     tvotTrigger:               Result := 'Trigger';
+    tvotTableTriggerRoot:      Result := 'Table Triggers';
+    tvotTableTrigger:          Result := 'Table Trigger';
+    tvotDBTriggerRoot:         Result := 'Database Triggers';
+    tvotDBTrigger:             Result := 'Database Trigger';
+    tvotDDLTriggerRoot:        Result := 'DDL Triggers';
+    tvotDDLTrigger:            Result := 'DDL Trigger';
 
+    // --- Views ---
     tvotViewRoot:              Result := 'Views';
     tvotView:                  Result := 'View';
 
-    tvotSystemTableRoot:       Result := 'System Tables';
-    tvotSystemTable:           Result := 'System Table';
-
+    // --- Domains ---
     tvotDomainRoot:            Result := 'Domains';
     tvotDomain:                Result := 'Domain';
 
+    // --- Roles / Users ---
     tvotRoleRoot:              Result := 'Roles';
     tvotRole:                  Result := 'Role';
-
-    tvotExceptionRoot:         Result := 'Exceptions';
-    tvotException:             Result := 'Exception';
-
     tvotUserRoot:              Result := 'Users';
     tvotUser:                  Result := 'User';
 
+    // --- Exceptions ---
+    tvotExceptionRoot:         Result := 'Exceptions';
+    tvotException:             Result := 'Exception';
+
+    // --- Indexes / Constraints ---
     tvotIndexRoot:             Result := 'Indexes';
     tvotIndex:                 Result := 'Index';
-
     tvotConstraintRoot:        Result := 'Constraints';
     tvotConstraint:            Result := 'Constraint';
+    tvotPrimaryKeyRoot:        Result := 'Primary Keys';
+    tvotPrimaryKey:            Result := 'Primary Key';
+    tvotForeignKeyRoot:        Result := 'Foreign Keys';
+    tvotForeignKey:            Result := 'Foreign Key';
+    tvotUniqueConstraintRoot:  Result := 'Unique Constraints';
+    tvotUniqueConstraint:      Result := 'Unique Constraint';
+    tvotCheckConstraintRoot:   Result := 'Check Constraints';
+    tvotCheckConstraint:       Result := 'Check Constraint';
+    tvotNotNullConstraintRoot: Result := 'Not Null Constraints';
+    tvotNotNullConstraint:     Result := 'Not Null Constraint';
 
-    tvotStoredProcedureRoot:   Result := 'Stored Procedures';
-    tvotStoredProcedure:       Result := 'Stored Procedure';
-
+    // --- Stored Procedures / Functions ---
+    tvotProcedureRoot:         Result := 'Stored Procedures';
+    tvotProcedure:             Result := 'Stored Procedure';
     tvotFunctionRoot:          Result := 'Functions';
     tvotFunction:              Result := 'Function';
 
+    // --- UDR / UDF ---
     tvotUDRoot:                Result := 'UD Objects';
     tvotUDFRoot:               Result := 'UDFs';
     tvotUDFFunction:           Result := 'UDF Function';
@@ -2032,18 +2295,53 @@ begin
     tvotUDRFunction:           Result := 'UDR Function';
     tvotUDRProcedureRoot:      Result := 'UDR Procedures';
     tvotUDRProcedure:          Result := 'UDR Procedure';
+    tvotUDRTriggerRoot:        Result := 'UDR Triggers';
+    tvotUDRTrigger:            Result := 'UDR Trigger';
 
+    // --- Packages ---
     tvotPackageRoot:           Result := 'Packages';
     tvotPackage:               Result := 'Package';
     tvotPackageFunctionRoot:   Result := 'Package Functions';
     tvotPackageFunction:       Result := 'Package Function';
     tvotPackageProcedureRoot:  Result := 'Package Procedures';
     tvotPackageProcedure:      Result := 'Package Procedure';
+    tvotPackageUDFFunctionRoot:Result := 'Package UDF Functions';
+    tvotPackageUDFFunction:    Result := 'Package UDF Function';
     tvotPackageUDRFunctionRoot:Result := 'Package UDR Functions';
     tvotPackageUDRFunction:    Result := 'Package UDR Function';
     tvotPackageUDRProcedureRoot:Result := 'Package UDR Procedures';
     tvotPackageUDRProcedure:   Result := 'Package UDR Procedure';
+    tvotPackageUDRTriggerRoot: Result := 'Package UDR Triggers';
+    tvotPackageUDRTrigger:     Result := 'Package UDR Trigger';
 
+    // --- Database / Metadata ---
+    tvotDatabaseRoot:          Result := 'Database';
+    tvotBLOBFilterRoot:        Result := 'BLOB Filters';
+    tvotBLOBFilter:            Result := 'BLOB Filter';
+    tvotCommentRoot:           Result := 'Comments';
+    tvotComment:               Result := 'Comment';
+    tvotDataRoot:              Result := 'Data';
+    tvotData:                  Result := 'Data';
+
+    // --- System Objects ---
+    tvotSystemTableRoot:       Result := 'System Tables';
+    tvotSystemTable:           Result := 'System Table';
+    tvotSystemDomainRoot:      Result := 'System Domains';
+    tvotSystemDomain:          Result := 'System Domain';
+    tvotSystemGeneratorRoot:   Result := 'System Generators';
+    tvotSystemGenerator:       Result := 'System Generator';
+    tvotSystemTriggerRoot:     Result := 'System Triggers';
+    tvotSystemTrigger:         Result := 'System Trigger';
+    tvotSystemConstraintRoot:  Result := 'System Constraints';
+    tvotSystemConstraint:      Result := 'System Constraint';
+    tvotSystemIndexRoot:       Result := 'System Indexes';
+    tvotSystemIndex:           Result := 'System Index';
+    tvotSystemRoleRoot:        Result := 'System Roles';
+    tvotSystemRole:            Result := 'System Role';
+    tvotSystemUserRoot:        Result := 'System Users';
+    tvotSystemUser:            Result := 'System User';
+    tvotSystemExceptionRoot:   Result := 'System Exceptions';
+    tvotSystemException:       Result := 'System Exception';
   else
     Result := 'Unknown';
   end;
@@ -2055,7 +2353,7 @@ begin
   case RT of
     rtUDF:              Result := tvotUDFFunction;
     rtFBFunc:           Result := tvotFunction;
-    rtFBProc:           Result := tvotStoredProcedure;
+    rtFBProc:           Result := tvotProcedure;
     rtUDRFunc:          Result := tvotUDRFunction;
     rtUDRProc:          Result := tvotUDRProcedure;
     rtPackageFBFunc:    Result := tvotPackageFunction;

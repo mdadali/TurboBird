@@ -425,7 +425,7 @@ begin
   ProceduresList:= TStringList.Create;
   ProcedureScript:= TStringList.Create;
   try
-    ProceduresList.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otStoredProcedures, Count);
+    ProceduresList.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otProcedures, Count);
     // Get procedures in dependency order:
     dmSysTables.SortDependencies(ProceduresList);
     List.Clear;

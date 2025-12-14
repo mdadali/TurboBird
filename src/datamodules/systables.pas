@@ -13,7 +13,8 @@ uses
   IBQuery,
   //IBDatabaseInfo, IBXServices,
 
-  fbcommon;
+  fbcommon,
+  fsimpleobjextractor;
 
 type
 
@@ -236,13 +237,33 @@ begin
   if ObjectType = otGenerators then // Generators
     sqQuery.SQL.Text:= 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name'
   else
-  if ObjectType = otTriggers then // Triggers
+
+  //triggers
+  if ObjectType = otTriggers then // All Triggers - SystemTriggers
     sqQuery.SQL.Text:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name'
+
+  else
+  if ObjectType = otTableTriggers then
+    sqQuery.SQL.Text :=
+      'SELECT rdb$trigger_name ' +
+      'FROM rdb$triggers ' +
+      'WHERE rdb$system_flag = 0 ' +
+      'AND rdb$relation_name IS NOT NULL ' +
+      'ORDER BY rdb$trigger_name';
+  if ObjectType = otDBTriggers then // DBTriggers
+    sqQuery.SQL.Text:= 'SELECT rdb$trigger_name, rdb$trigger_type FROM rdb$triggers WHERE rdb$relation_name IS NULL'
+  else
+  if ObjectType = otDDLTriggers then
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        'AND rdb$trigger_type >= 16384 ' +
+        'ORDER BY rdb$trigger_name'
   else
   if ObjectType = otViews then // Views
     sqQuery.SQL.Text:= 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name'
   else
-  if ObjectType = otStoredProcedures then // Stored Procedures
+  if ObjectType = otProcedures then // Stored Procedures
   begin
     if ServerVersionMajor < 3 then
       sqQuery.SQL.Text:= 'SELECT RDB$Procedure_Name FROM RDB$PROCEDURES order by rdb$Procedure_Name'
@@ -282,7 +303,7 @@ begin
   end
 
   else
-  if ObjectType = otFBFunctions then // FB-Functions
+  if ObjectType = otFunctions then // FB-Functions
     sqQuery.SQL.Text :=
         'SELECT ' +
         '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
@@ -297,7 +318,7 @@ begin
         'ORDER BY RDB$FUNCTION_NAME;'
 
   else
-  if ObjectType = otFBProcedures then // FB-Procedures
+  if ObjectType = otProcedures then // FB-Procedures
   sqQuery.SQL.Text :=
     'SELECT ' +
     '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +

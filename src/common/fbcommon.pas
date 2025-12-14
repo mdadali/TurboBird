@@ -16,25 +16,41 @@ uses
 
 type
   TObjectType = (
+    // --- Allgemein / Keine Zuordnung ---
     otNone,
+
+    // --- User-Objekte ---
     otTables,
     otTableFields,
-    otGenerators,
-    otTriggers,
     otViews,
-    otStoredProcedures,
-    otUDF,                   // User-Defined functions
-    otSystemTables,
-    otDomains,               // excludes system domains
+
+    otGenerators,
+    otSequences,
+
+    otTriggers,
+    otTableTriggers,
+    otDBTriggers,
+    otDDLTriggers,
+
+    otUDF,                   // User-Defined Functions
     otRoles,
-    otExceptions,
     otUsers,
+    otDomains,               // excludes system domains
     otIndexes,
+
+    otExceptions,
+
     otConstraints,
-    otForeign,
-    otChecks,
-    otFBFunctions,
-    otFBProcedures,
+    otPrimaryKeys,
+    otForeignKeys,
+    otUniqueConstraints,
+    otCheckConstraints,
+    otNotNullConstraints,
+
+    otFunctions,           // Firebird interne Funktionen
+    otProcedures,          // Firebird interne Prozeduren
+
+    // --- UDR / Package ---
     otUDRFunctions,
     otUDRProcedures,
     otUDRTriggers,
@@ -44,11 +60,26 @@ type
     otPackageUDFFunctions,
     otPackageUDRFunctions,
     otPackageUDRProcedures,
+
     otPackageUDRTriggers,
-    otDatabase,              // neu, für eoDatabase
-    otBLOBFilters,           // neu, für eoBLOBFilter
-    otComments,              // neu, für eoComments
-    otData                   // neu, für eoData
+    otPackageTrigger,
+
+    // --- Datenbank-spezifisch / Metadaten ---
+    otDatabase,              // eoDatabase
+    otBLOBFilters,           // eoBLOBFilter
+    otComments,              // eoComments
+    otData,                  // eoData
+
+    // --- System-Objekte ---
+    otSystemTables,
+    otSystemDomains,
+    otSystemGenerators,
+    otSystemTriggers,
+    otSystemConstraints,
+    otSystemIndexes,
+    otSystemRoles,
+    otSystemUsers,
+    otSystemExceptions
   );
 
   TRoutineType = (
@@ -905,7 +936,7 @@ begin
           SQLText := 'SELECT RDB$OWNER_NAME FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = :NAME';
         end;
 
-      otStoredProcedures, otFBProcedures, otUDRProcedures, otPackageProcedures, otPackageUDRProcedures:
+      otProcedures, otUDRProcedures, otPackageProcedures, otPackageUDRProcedures:
         begin
           SQLText := 'SELECT RDB$OWNER_NAME FROM RDB$PROCEDURES WHERE RDB$PROCEDURE_NAME = :NAME';
         end;
@@ -945,7 +976,7 @@ begin
           SQLText := 'SELECT RDB$OWNER_NAME FROM RDB$PACKAGES WHERE RDB$PACKAGE_NAME = :NAME';
         end;
 
-      otFBFunctions, otUDF, otUDRFunctions:
+      otFunctions, otUDF, otUDRFunctions:
         begin
           SQLText := 'SELECT RDB$OWNER_NAME FROM RDB$FUNCTIONS WHERE RDB$FUNCTION_NAME = :NAME';
         end;

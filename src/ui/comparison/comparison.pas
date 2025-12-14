@@ -418,12 +418,12 @@ begin
         ord(otGenerators): ObjectType:= otExceptions; //these depend on nothing
         ord(otTriggers): ObjectType:= otDomains; //tables,views,procs can depend
         ord(otViews): ObjectType:= otUDF; //table check constraints can depend on these
-        ord(otStoredProcedures): ObjectType:= otSystemTables; //for completeness
+        ord(otProcedures): ObjectType:= otSystemTables; //for completeness
         ord(otUDF): ObjectType:= otTables; //from here on, more or less follow regular order
         ord(otSystemTables): ObjectType:= otGenerators;
         ord(otDomains): ObjectType:= otTriggers;
         ord(otRoles): ObjectType:= otViews;
-        ord(otExceptions): ObjectType:= otStoredProcedures;
+        ord(otExceptions): ObjectType:= otProcedures;
         ord(otUsers): ObjectType:= otIndexes;
         ord(otIndexes): ObjectType:= otConstraints;
         ord(otConstraints): ObjectType:= otUsers; //for completeness
@@ -473,7 +473,7 @@ begin
         FQueryWindow.meQuery.Lines.Add('');
       end
       else
-      if (ObjectType = otStoredProcedures) and cxStoredProcs.Checked then // Stored proc
+      if (ObjectType = otProcedures) and cxStoredProcs.Checked then // Stored proc
       for i:= 0 to FDBObjectsList[ord(ObjectType)].Count - 1 do
       begin
         ScriptList.Text:= fmMain.GetStoredProcBody(FDBIndex, FDBObjectsList[ord(ObjectType)].Strings[i], SPOwner);
@@ -655,7 +655,7 @@ begin
          ((ObjectType = otGenerators) and cxGenerators.Checked) or
          ((ObjectType = otTriggers) and cxTriggers.Checked) or
          ((ObjectType = otViews) and cxViews.Checked) or
-         ((ObjectType = otStoredProcedures) and cxStoredProcs.Checked) or
+         ((ObjectType = otProcedures) and cxStoredProcs.Checked) or
          ((ObjectType = otUDF) and cxUDFs.Checked) or
          {otSystemTables: system tables are not compared }
          ((ObjectType = otDomains) and cxDomains.Checked) or
@@ -711,7 +711,7 @@ begin
        ((ObjectType = otGenerators) and cxGenerators.Checked) or
        ((ObjectType = otTriggers) and cxTriggers.Checked) or
        ((ObjectType = otViews) and cxViews.Checked) or
-       ((ObjectType = otStoredProcedures) and cxStoredProcs.Checked) or
+       ((ObjectType = otProcedures) and cxStoredProcs.Checked) or
        ((ObjectType = otUDF) and cxUDFs.Checked) or
        {otSystemTables: system tables are not compared }
        ((ObjectType = otDomains) and cxDomains.Checked) or
@@ -1059,14 +1059,14 @@ begin
   meLog.Lines.Add('Modified Procedures');
   FModifiedProceduresList.Clear;
 
-  for i:= 0 to FDBExistingObjectsList[ord(otStoredProcedures)].Count - 1 do
+  for i:= 0 to FDBExistingObjectsList[ord(otProcedures)].Count - 1 do
   begin
     // Check for cancel button press
     Application.ProcessMessages;
     if FCanceled then
       Exit;
 
-    ProcName:= FDBExistingObjectsList[ord(otStoredProcedures)][i];
+    ProcName:= FDBExistingObjectsList[ord(otProcedures)][i];
 
     // Read procedure script
     Body:= fmMain.GetStoredProcBody(FDBIndex, ProcName, SPOwner);
@@ -1866,7 +1866,7 @@ begin
         end;
       end
       else
-      if (ObjectType = otStoredProcedures) and cxStoredProcs.Checked then
+      if (ObjectType = otProcedures) and cxStoredProcs.Checked then
       begin
         if FDBRemovedObjectsList[ord(ObjectType)].Count > 0 then
         begin
