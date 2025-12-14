@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,  Dialogs, ComCtrls, RegExpr,
-  IB, IBDatabase, IBQuery, IBExtract,
+  IB, IBDatabase, IBSQL, IBExtract,
 
   fbcommon,
 
@@ -20,7 +20,7 @@ type
     FDBIndex: integer;
     FIBDatabase: TIBDatabase;
     FIBTransaction: TIBTransaction;
-    FIBSQL: TIBQuery;
+    FIBSQL: TIBSQL;
     FIBExtract: TIBExtract;
     procedure FixDomainQuoting(AItems: TStrings);
     procedure FixArraySyntax(AItems: TStrings);
@@ -31,7 +31,7 @@ type
     procedure   ResetExtract;
     destructor  Destroy; override;
 
-    function    ExtractObjectNames(ObjectType: TObjectType): TStrings;
+    //function    ExtractObjectNames(ObjectType: TObjectType; SystemFlag: boolean): TStrings;
 
     procedure   ExtractTableNames(AItems: TStrings; Quoted: boolean);
     procedure   ExtractTableNamesToTreeNode(Quoted: boolean; Node: TTreeNode);
@@ -518,7 +518,7 @@ begin
   end;
 end;
 
-function TSimpleObjExtractor.ExtractObjectNames(ObjectType: TObjectType): TStrings;
+{function TSimpleObjExtractor.ExtractObjectNames(ObjectType; TObjectType SystemFlag: boolean): TStrings;
 var ServerVersionMajor: word;
     isObjNameCaseSensitive: boolean;
 begin
@@ -792,7 +792,7 @@ begin
   end;
 
   FIBSQL.Free;
-end;
+end;}
 
 
 end.

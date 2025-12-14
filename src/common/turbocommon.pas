@@ -60,10 +60,13 @@ type
   tvotGenerator,
 
   //triggers
+
   tvotTriggerRoot,
+  tvotTrigger,
 
   tvotTableTriggerRoot,
   tvotTableTrigger,
+
 
   tvotDBTriggerRoot,
   tvotDBTrigger,
@@ -71,7 +74,18 @@ type
   tvotDDLTriggerRoot,
   tvotDDLTrigger,
 
-  tvotTrigger,
+  tvotUDRTriggerRoot,
+  tvotUDRTrigger,
+
+  tvotUDRTableTriggerRoot,
+  tvotUDRTableTrigger,
+
+  tvotUDRDBTriggerRoot,
+  tvotUDRDBTrigger,
+
+  tvotUDRDDLTriggerRoot,
+  tvotUDRDDLTrigger,
+
   tvotViewRoot,
   tvotView,
 
@@ -112,8 +126,7 @@ type
   tvotUDRFunction,
   tvotUDRProcedureRoot,
   tvotUDRProcedure,
-  tvotUDRTriggerRoot,
-  tvotUDRTrigger,
+
   tvotPackageRoot,
   tvotPackage,
   tvotPackageUDFFunctionRoot,
@@ -370,6 +383,23 @@ var
     ExtractGrant,
     ExtractData: boolean;
 
+    //MainTreeView
+    MainTreeViewAlwaysRefresh: boolean;
+    MainTreeViewColor: TColor;
+    MainTreeViewFontName: string;
+    MainTreeViewFontStyle: TFontStyles;
+    MainTreeViewFontSize: word;
+    MainTreeViewFontColor: TColor;
+
+    //QueryWindow
+    QWEditorBackgroundColor: TColor;
+    QWEditorFontName: string;
+    QWEditorFontSize: word;
+    QWEditorFontColor: TColor;
+    QWEditorFontStyle: TFontStyles;
+
+    //Theme
+    AllowIniOverrides: boolean;
 
 
 function IsFBObjectNameCaseSensitive(AObjectName: string): boolean;
@@ -500,6 +530,9 @@ procedure SetTransactionIsolation(Params: TStrings);
 function AdjustColorByBrightness(AColor: TColor): TColor;    function ColorRValue(AColor: TColor): Byte;
 function ColorGValue(AColor: TColor): Byte;
 function ColorBValue(AColor: TColor): Byte;
+
+function StrToFontStyles(const S: string): TFontStyles;
+function FontStylesToStr(AStyles: TFontStyles): string;
 
 implementation
 
@@ -1558,6 +1591,24 @@ begin
   ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
   ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
   ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', true);
+
+  //Theme
+  AllowIniOverrides           :=  fIniFile.ReadBool('UI',  'AllowIniOverrides', true);
+
+  //MainTreeView
+  MainTreeViewAlwaysRefresh   :=  fIniFile.ReadBool('MainTreeView',  'AlwaysRefresh', false);
+  MainTreeViewColor           :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  MainTreeViewFontName        :=  fIniFile.Readstring('MainTreeView',  'FontName', 'Arial');
+  MainTreeViewFontStyle       :=  StrToFontStyles(fIniFile.Readstring('MainTreeView',  'FontStyle', 'fsNormal'));
+  MainTreeViewFontSize        :=  fIniFile.ReadInteger('MainTreeView',  'FontSize', 14);
+  MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+
+  //QueryWindow
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorBackgroundColor', 'clRed'));
+  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'EditorFontName', 'Arial');
+  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);
+  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorFontColor', 'clRed'));
+  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'EditorFontStyle', 'Arial'));
 end;
 
 procedure WriteIniFile;
@@ -1597,6 +1648,23 @@ begin
   fIniFile.WriteBool('MetaDataTableExtract',  'ExtractTrigger', ExtractTrigger);
   fIniFile.WriteBool('MetaDataTableExtract',  'ExtractGrant', ExtractGrant);
   fIniFile.WriteBool('MetaDataTableExtract',  'ExtractData', ExtractData);
+
+  //Theme
+  fIniFile.WriteBool('UI',  'AllowIniOverrides', AllowIniOverrides);
+
+  //MainTreeView
+  fIniFile.WriteBool('MainTreeView',  'AlwaysRefresh', MainTreeViewAlwaysRefresh);
+  fIniFile.WriteString('MainTreeView',  'FontName', MainTreeViewFontName);
+  fIniFile.WriteString('MainTreeView',  'FontStyle', FontStylesToStr(MainTreeViewFontStyle));
+  fIniFile.WriteInteger('MainTreeView',  'FontSize', MainTreeViewFontSize);
+  fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
+
+  //QueryWindow
+  fIniFile.WriteString('QueryWindow',  'EditorBackgroundColor', ColorToString(QWEditorBackgroundColor));
+  fIniFile.WriteString('QueryWindow',  'EditorFontName', QWEditorFontName);
+  fIniFile.WriteInteger('QueryWindow',  'FontSize', 14);
+  fIniFile.WriteString('QueryWindow',  'EditorFontColor', ColorToString(QWEditorFontColor));
+  fIniFile.WriteString('QueryWindow',  'EditorFontStyle', FontStylesToStr(QWEditorFontStyle));
 end;
 
 
@@ -2745,6 +2813,50 @@ begin
       RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := false;
       Result:= True;
     end;
+  end;
+end;
+
+function StrToFontStyles(const S: string): TFontStyles;var
+  Parts: TStringList;
+  I: Integer;
+begin
+  Result := [];
+  Parts := TStringList.Create;
+  try
+    Parts.Delimiter := ',';
+    Parts.StrictDelimiter := True;
+    Parts.DelimitedText := S;
+
+    for I := 0 to Parts.Count - 1 do
+      case LowerCase(Trim(Parts[I])) of
+        'bold':       Include(Result, fsBold);
+        'italic':     Include(Result, fsItalic);
+        'underline':  Include(Result, fsUnderline);
+        'strikeout':  Include(Result, fsStrikeOut);
+      end;
+  finally
+    Parts.Free;
+  end;
+end;
+
+function FontStylesToStr(AStyles: TFontStyles): string;
+var
+  L: TStringList;
+begin
+  L := TStringList.Create;
+  try
+    if fsBold in AStyles then
+      L.Add('Bold');
+    if fsItalic in AStyles then
+      L.Add('Italic');
+    if fsUnderline in AStyles then
+      L.Add('Underline');
+    if fsStrikeOut in AStyles then
+      L.Add('StrikeOut');
+
+    Result := L.CommaText;
+  finally
+    L.Free;
   end;
 end;
 

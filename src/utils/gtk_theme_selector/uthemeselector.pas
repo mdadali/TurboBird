@@ -115,7 +115,11 @@ end;
 procedure TfrmThemeSelector.FormCreate(Sender: TObject);
 begin
   Caption := 'Theme Selector';
-  FThemeIniPath := ExtractFilePath(ParamStr(0)) + 'data/config/' + ThemesIniFile;
+  FThemeIniPath :=
+    IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+    'data' + DirectorySeparator +
+    'config' + DirectorySeparator +
+    ThemesIniFile;
 
   if not FileExists(FThemeIniPath) then
     exit;
@@ -193,7 +197,7 @@ begin
     if c is TSynEdit then
     begin
       TSynEdit(c).Gutter.Color := Theme.BackgroundColor;
-      TSynEdit(c).Color := Theme.BackgroundColor;
+        TSynEdit(c).Color := Theme.BackgroundColor;
     end;
 
     if c is TForm then

@@ -32,10 +32,16 @@ type
     otDBTriggers,
     otDDLTriggers,
 
-    otUDF,                   // User-Defined Functions
+    otUDRTriggers,
+
+    otUDRTableTriggers,
+    otUDRDBTriggers,
+    otUDRDDLTriggers,
+
+    otUDF,
     otRoles,
     otUsers,
-    otDomains,               // excludes system domains
+    otDomains,
     otIndexes,
 
     otExceptions,
@@ -47,13 +53,15 @@ type
     otCheckConstraints,
     otNotNullConstraints,
 
-    otFunctions,           // Firebird interne Funktionen
-    otProcedures,          // Firebird interne Prozeduren
+    otFunctions,
+    otProcedures,
 
-    // --- UDR / Package ---
+    // --- UDR
     otUDRFunctions,
     otUDRProcedures,
-    otUDRTriggers,
+    //otUDRTriggers,
+
+    // Package ---
     otPackages,
     otPackageFunctions,
     otPackageProcedures,

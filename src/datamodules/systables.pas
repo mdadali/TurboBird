@@ -251,7 +251,8 @@ begin
       'AND rdb$relation_name IS NOT NULL ' +
       'ORDER BY rdb$trigger_name';
   if ObjectType = otDBTriggers then // DBTriggers
-    sqQuery.SQL.Text:= 'SELECT rdb$trigger_name, rdb$trigger_type FROM rdb$triggers WHERE rdb$relation_name IS NULL'
+    sqQuery.SQL.Text:= 'SELECT rdb$trigger_name FROM rdb$triggers WHERE rdb$system_flag = 0 AND rdb$relation_name IS NULL ' +
+                       ' AND rdb$trigger_type < 16384 ORDER BY rdb$trigger_name'
   else
   if ObjectType = otDDLTriggers then
       sqQuery.SQL.Text :=
@@ -259,7 +260,47 @@ begin
         'WHERE rdb$system_flag = 0 ' +
         'AND rdb$trigger_type >= 16384 ' +
         'ORDER BY rdb$trigger_name'
-  else
+
+else
+if ObjectType = otUDRTriggers then
+  sqQuery.SQL.Text :=
+    'SELECT rdb$trigger_name ' +
+    'FROM rdb$triggers ' +
+    'WHERE rdb$system_flag = 0 ' +
+    'AND rdb$engine_name = ''UDR'' ' +
+    'ORDER BY rdb$trigger_name'
+
+else
+    if ObjectType = otUDRTableTriggers then
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        'AND rdb$engine_name = ''UDR'' ' +
+        'AND rdb$relation_name IS NOT NULL ' +
+        'ORDER BY rdb$trigger_name'
+else
+    if ObjectType = otUDRDBTriggers then
+          sqQuery.SQL.Text :=
+            'SELECT rdb$trigger_name ' +
+            'FROM rdb$triggers ' +
+            'WHERE rdb$system_flag = 0 ' +
+            'AND rdb$engine_name = ''UDR'' ' +
+            'AND rdb$relation_name IS NULL ' +
+            'AND rdb$trigger_type < 16384 ' +
+            'ORDER BY rdb$trigger_name'
+
+else
+if ObjectType = otUDRDDLTriggers then
+  sqQuery.SQL.Text :=
+    'SELECT rdb$trigger_name ' +
+    'FROM rdb$triggers ' +
+    'WHERE rdb$system_flag = 0 ' +
+    'AND rdb$engine_name = ''UDR'' ' +
+    'AND rdb$trigger_type >= 16384 ' +
+    'ORDER BY rdb$trigger_name'
+
+else
   if ObjectType = otViews then // Views
     sqQuery.SQL.Text:= 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name'
   else

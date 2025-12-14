@@ -2665,6 +2665,15 @@ procedure TfmQueryWindow.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
   meQuery.SetFocus;
+
+  {if AllowIniOverrides then
+  begin
+    meQuery.Color      :=  QWEditorBackgroundColor;
+    meQuery.Font.Name  :=  QWEditorFontName;
+    meQuery.Font.Size  :=  QWEditorFontSize;
+    meQuery.Font.Color :=  QWEditorFontColor;
+    meQuery.Font.Style :=  QWEditorFontStyle;
+  end;}
 end;
 
 { Close current Query window }

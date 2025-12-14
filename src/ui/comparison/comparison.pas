@@ -1055,7 +1055,7 @@ var
   SPOwner: string;
   CSPOwner: string;
 begin
-  meLog.Lines.Add('');
+ { meLog.Lines.Add('');
   meLog.Lines.Add('Modified Procedures');
   FModifiedProceduresList.Clear;
 
@@ -1081,7 +1081,7 @@ begin
     end;
 
   end;
-
+  }
 end;
 
 procedure TfmComparison.CheckModifiedFunctions;
