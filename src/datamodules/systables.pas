@@ -45,7 +45,7 @@ type
     procedure Init(dbIndex: Integer);
     // Gets list of object names that have type specified by TVIndex
     // Returns count of objects in Count
-    function GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer): string;
+    function GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer; OwnerObjName: string=''): string;
 
     // Recalculates index statistics for all fields in database
     // Useful when a large amount of inserts/deletes may have changed the statistics
@@ -220,67 +220,65 @@ begin
 end;
 
 (*****  GetDBObjectNames, like Table names, Triggers, Generators, etc according to TVIndex  ****)
-
-function TdmSysTables.GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer): string;
+function TdmSysTables.GetDBObjectNames(DatabaseIndex: integer; ObjectType: TObjectType; var Count: Integer; OwnerObjName: string=''): string;
 var ServerVersionMajor: word;
     isObjNameCaseSensitive: boolean;
 begin
   Init(DatabaseIndex);
 
-  ServerVersionMajor := GetServerMajorVersionFromDBIndex(DatabaseIndex);
+  ServerVersionMajor := RegisteredDatabases[DatabaseIndex].RegRec.ServerVersionMajor;
 
   sqQuery.Close;
-  if ObjectType = otTables then // Tables
-    sqQuery.SQL.Text:= 'select rdb$relation_name from rdb$relations where rdb$view_blr is null ' +
-      ' and (rdb$system_flag is null or rdb$system_flag = 0) order by rdb$relation_name'
-  else
-  if ObjectType = otGenerators then // Generators
-    sqQuery.SQL.Text:= 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name'
-  else
 
-  //triggers
-  if ObjectType = otTriggers then // All Triggers - SystemTriggers
-    sqQuery.SQL.Text:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name'
+  case ObjectType  of
+    otTables:
+      sqQuery.SQL.Text:= 'select rdb$relation_name from rdb$relations where rdb$view_blr is null ' +
+      ' and (rdb$system_flag is null or rdb$system_flag = 0) order by rdb$relation_name';
 
-  else
-  if ObjectType = otTableTriggers then
-    sqQuery.SQL.Text :=
+    otGenerators:
+      sqQuery.SQL.Text:= 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name';
+
+    otTriggers:
+      sqQuery.SQL.Text:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name';
+
+
+    otTableTriggers:
+      sqQuery.SQL.Text :=
       'SELECT rdb$trigger_name ' +
       'FROM rdb$triggers ' +
       'WHERE rdb$system_flag = 0 ' +
       'AND rdb$relation_name IS NOT NULL ' +
       'ORDER BY rdb$trigger_name';
-  if ObjectType = otDBTriggers then // DBTriggers
+
+    otDBTriggers:
     sqQuery.SQL.Text:= 'SELECT rdb$trigger_name FROM rdb$triggers WHERE rdb$system_flag = 0 AND rdb$relation_name IS NULL ' +
-                       ' AND rdb$trigger_type < 16384 ORDER BY rdb$trigger_name'
-  else
-  if ObjectType = otDDLTriggers then
+                       ' AND rdb$trigger_type < 16384 ORDER BY rdb$trigger_name';
+
+    otDDLTriggers:
       sqQuery.SQL.Text :=
         'SELECT rdb$trigger_name FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
         'AND rdb$trigger_type >= 16384 ' +
-        'ORDER BY rdb$trigger_name'
+        'ORDER BY rdb$trigger_name';
 
-else
-if ObjectType = otUDRTriggers then
-  sqQuery.SQL.Text :=
-    'SELECT rdb$trigger_name ' +
-    'FROM rdb$triggers ' +
-    'WHERE rdb$system_flag = 0 ' +
-    'AND rdb$engine_name = ''UDR'' ' +
-    'ORDER BY rdb$trigger_name'
+    otUDRTriggers:
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+         'FROM rdb$triggers ' +
+         'WHERE rdb$system_flag = 0 ' +
+         'AND rdb$engine_name = ''UDR'' ' +
+         'ORDER BY rdb$trigger_name';
 
-else
-    if ObjectType = otUDRTableTriggers then
+    otUDRTableTriggers:
       sqQuery.SQL.Text :=
         'SELECT rdb$trigger_name ' +
         'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
         'AND rdb$engine_name = ''UDR'' ' +
         'AND rdb$relation_name IS NOT NULL ' +
-        'ORDER BY rdb$trigger_name'
-else
-    if ObjectType = otUDRDBTriggers then
+        'ORDER BY rdb$trigger_name';
+
+    otUDRDBTriggers:
           sqQuery.SQL.Text :=
             'SELECT rdb$trigger_name ' +
             'FROM rdb$triggers ' +
@@ -288,63 +286,45 @@ else
             'AND rdb$engine_name = ''UDR'' ' +
             'AND rdb$relation_name IS NULL ' +
             'AND rdb$trigger_type < 16384 ' +
-            'ORDER BY rdb$trigger_name'
+            'ORDER BY rdb$trigger_name';
 
-else
-if ObjectType = otUDRDDLTriggers then
-  sqQuery.SQL.Text :=
-    'SELECT rdb$trigger_name ' +
-    'FROM rdb$triggers ' +
-    'WHERE rdb$system_flag = 0 ' +
-    'AND rdb$engine_name = ''UDR'' ' +
-    'AND rdb$trigger_type >= 16384 ' +
-    'ORDER BY rdb$trigger_name'
+    otUDRDDLTriggers:
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        'AND rdb$engine_name = ''UDR'' ' +
+        'AND rdb$trigger_type >= 16384 ' +
+        'ORDER BY rdb$trigger_name';
 
-else
-  if ObjectType = otViews then // Views
-    sqQuery.SQL.Text:= 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name'
-  else
-  if ObjectType = otProcedures then // Stored Procedures
-  begin
-    if ServerVersionMajor < 3 then
-      sqQuery.SQL.Text:= 'SELECT RDB$Procedure_Name FROM RDB$PROCEDURES order by rdb$Procedure_Name'
-    else
-    sqQuery.SQL.Text :=
-      'SELECT RDB$PROCEDURE_NAME ' +
-      'FROM RDB$PROCEDURES ' +
-      'WHERE ' +
-      '  RDB$PACKAGE_NAME IS NULL ' +
-      '  AND   RDB$ENGINE_NAME IS NULL ' +
-      '  AND RDB$SYSTEM_FLAG IN (0, 2) ' +
-      'ORDER BY RDB$PROCEDURE_NAME'
-  end
-  else
-  {if ObjectType = otUDF then // UDF
-    if FBVersionMajor < 3 then
-      sqQuery.SQL.Text:= 'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS where RDB$SYSTEM_FLAG=0 order by rdb$Function_Name'
-    else
-      sqQuery.SQL.Text := 'SELECT RDB$FUNCTION_NAME FROM RDB$FUNCTIONS ' +
-                          'WHERE RDB$SYSTEM_FLAG = 0 ' +
-                          'AND RDB$MODULE_NAME IS NOT NULL ' +
-                          'ORDER BY RDB$FUNCTION_NAME; '}
-  if ObjectType = otUDF then
-  begin
-    sqQuery.SQL.Text :=
-      'SELECT RDB$FUNCTION_NAME ' +
-      'FROM RDB$FUNCTIONS ' +
-      'WHERE RDB$SYSTEM_FLAG = 0';
+    otViews:
+      sqQuery.SQL.Text:= 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name';
 
-    if ServerVersionMajor >= 3 then
-      sqQuery.SQL.Text := sqQuery.SQL.Text +
-        ' AND RDB$MODULE_NAME IS NOT NULL ' +
-        ' AND RDB$ENGINE_NAME IS NULL ' +
-        ' AND RDB$PACKAGE_NAME IS NULL';
+    otProcedures:
+      if ServerVersionMajor < 3 then
+        sqQuery.SQL.Text:= 'SELECT RDB$Procedure_Name FROM RDB$PROCEDURES order by rdb$Procedure_Name'
+      else
+        sqQuery.SQL.Text :=
+        'SELECT RDB$PROCEDURE_NAME ' +
+        'FROM RDB$PROCEDURES ' +
+        'WHERE ' +
+        '  RDB$PACKAGE_NAME IS NULL ' +
+        '  AND   RDB$ENGINE_NAME IS NULL ' +
+        '  AND RDB$SYSTEM_FLAG IN (0, 2) ' +
+        'ORDER BY RDB$PROCEDURE_NAME';
 
-    sqQuery.SQL.Text := sqQuery.SQL.Text + ' ORDER BY RDB$FUNCTION_NAME';
-  end
+    otUDF: begin
+      sqQuery.SQL.Text :=
+        'Select Rdb$Function_Name ' +
+        'From Rdb$Functions ' +
+        'Where Rdb$System_Flag = 0';
 
-  else
-  if ObjectType = otFunctions then // FB-Functions
+      if ServerVersionMajor >= 3 then
+        sqQuery.SQL.Text := sqQuery.SQL.Text +
+          ' And Rdb$Module_Name Is Not Null';
+    end;
+
+    otFunctions: // FB-Functions
     sqQuery.SQL.Text :=
         'SELECT ' +
         '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
@@ -356,73 +336,100 @@ else
         '  AND RDB$ENGINE_NAME IS  NULL ' +
         '  AND RDB$PACKAGE_NAME IS NULL ' +   // Nur freie Funktionen, keine Package-Funktionen
         '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-        'ORDER BY RDB$FUNCTION_NAME;'
+        'ORDER BY RDB$FUNCTION_NAME;';
 
-  else
-  if ObjectType = otProcedures then // FB-Procedures
-  sqQuery.SQL.Text :=
-    'SELECT ' +
-    '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
-    '  RDB$DESCRIPTION, ' +
-    '  RDB$SYSTEM_FLAG, ' +
-    '  RDB$PROCEDURE_SOURCE ' +
-    'FROM RDB$PROCEDURES ' +
-    'WHERE RDB$ENGINE_NAME IS NULL ' +
-    '  AND RDB$PACKAGE_NAME IS  NULL ' +
-    '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-    '  AND (RDB$PROCEDURE_TYPE IS NULL OR RDB$PROCEDURE_TYPE = 0) ' +
-    'ORDER BY RDB$PROCEDURE_NAME;'
-
-  else
-  if ObjectType = otUDRFunctions then //External Engine  Global-Funcs
-  sqQuery.SQL.Text :=
-    'SELECT ' +
-    '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
-    '  RDB$DESCRIPTION, ' +
-    '  RDB$SYSTEM_FLAG, ' +
-    '  RDB$FUNCTION_SOURCE, ' +
-    '  RDB$ENGINE_NAME ' +
-    'FROM RDB$FUNCTIONS ' +
-    'WHERE RDB$ENGINE_NAME IS NOT NULL ' +       // externe Engine (Python, Java etc)
-    'AND RDB$PACKAGE_NAME  IS NULL '      +
-    '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-    'ORDER BY RDB$FUNCTION_NAME;'
-  else
-  if ObjectType = otUDRProcedures then //External Engine  Global-Procs
-    sqQuery.SQL.Text :=
+    {otProcedures: // FB-Procedures
+      sqQuery.SQL.Text :=
       'SELECT ' +
       '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
       '  RDB$DESCRIPTION, ' +
       '  RDB$SYSTEM_FLAG, ' +
-      '  RDB$PROCEDURE_SOURCE, ' +
-      '  RDB$ENGINE_NAME ' +
+      '  RDB$PROCEDURE_SOURCE ' +
       'FROM RDB$PROCEDURES ' +
-      'WHERE RDB$ENGINE_NAME IS NOT NULL ' + // externe Procs
-      'AND RDB$PACKAGE_NAME  IS NULL ' +     // no packages-Proocs
+      'WHERE RDB$ENGINE_NAME IS NULL ' +
+      '  AND RDB$PACKAGE_NAME IS  NULL ' +
       '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-      'ORDER BY RDB$PROCEDURE_NAME;'
+      '  AND (RDB$PROCEDURE_TYPE IS NULL OR RDB$PROCEDURE_TYPE = 0) ' +
+      'ORDER BY RDB$PROCEDURE_NAME;'; }
 
-  else
-  if ObjectType = otSystemTables then // System Tables
-    sqQuery.SQL.Text:= 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS where RDB$SYSTEM_FLAG=1 ' +
-      'order by RDB$RELATION_NAME'
-  else
-  if ObjectType = otDomains then // Domains, excluding system-defined domains
-    //sqQuery.SQL.Text:= 'select RDB$FIELD_NAME from RDB$FIELDS where RDB$Field_Name not like ''RDB$%''  order by rdb$Field_Name'
-    sqQuery.SQL.Text :=   //newlib
-      'SELECT RDB$FIELD_NAME  FROM RDB$FIELDS ' +
-      'WHERE (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL) ' +
-      'AND RDB$FIELD_NAME NOT LIKE ' + QuotedStr('RDB$%') + ' ' +
-      'ORDER BY RDB$FIELD_NAME'
-    //newlib
-  else
-    if ObjectType = otPackages then
+    otUDRFunctions: //External Engine  Global-Funcs
+      sqQuery.SQL.Text :=
+        'SELECT ' +
+        '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
+        '  RDB$DESCRIPTION, ' +
+        '  RDB$SYSTEM_FLAG, ' +
+        '  RDB$FUNCTION_SOURCE, ' +
+        '  RDB$ENGINE_NAME ' +
+        'FROM RDB$FUNCTIONS ' +
+        'WHERE RDB$ENGINE_NAME IS NOT NULL ' +       // externe Engine (Python, Java etc)
+        'AND RDB$PACKAGE_NAME  IS NULL '      +
+        '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+        'ORDER BY RDB$FUNCTION_NAME;';
+
+    otUDRProcedures: //External Engine  Global-Procs
+      sqQuery.SQL.Text :=
+        'SELECT ' +
+        '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
+        '  RDB$DESCRIPTION, ' +
+        '  RDB$SYSTEM_FLAG, ' +
+        '  RDB$PROCEDURE_SOURCE, ' +
+        '  RDB$ENGINE_NAME ' +
+        'FROM RDB$PROCEDURES ' +
+        'WHERE RDB$ENGINE_NAME IS NOT NULL ' + // externe Procs
+        'AND RDB$PACKAGE_NAME  IS NULL ' +     // no packages-Proocs
+        '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+        'ORDER BY RDB$PROCEDURE_NAME;';
+
+    otSystemTables:
+      sqQuery.SQL.Text:=
+        'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS where RDB$SYSTEM_FLAG=1 ' +
+        'order by RDB$RELATION_NAME';
+
+    otDomains:
+      //sqQuery.SQL.Text:= 'select RDB$FIELD_NAME from RDB$FIELDS where RDB$Field_Name not like ''RDB$%''  order by rdb$Field_Name'
+      sqQuery.SQL.Text :=   //newlib
+        'SELECT RDB$FIELD_NAME  FROM RDB$FIELDS ' +
+        'WHERE (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL) ' +
+        'AND RDB$FIELD_NAME NOT LIKE ' + QuotedStr('RDB$%') + ' ' +
+        'ORDER BY RDB$FIELD_NAME';
+
+    otExceptions:
+      sqQuery.SQL.Text:= 'select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS order by rdb$Exception_Name';
+
+    otRoles:
+    //sqQuery.SQL.Text:= 'select RDB$ROLE_NAME from RDB$ROLES order by rdb$Role_Name'
+      sqQuery.SQL.Text :=
+       'SELECT RDB$ROLE_NAME ' +
+       'FROM RDB$ROLES ' +
+       'WHERE RDB$ROLE_NAME <> ''DUMMYROLE'' ' +  // only for FireBird Version < 3.
+       'ORDER BY RDB$ROLE_NAME';
+
+    otUsers:
+      // Benutzerliste je nach Firebird-Version
+      if ServerVersionMajor < 3 then
+        // Firebird 2.5: RDB$USER_PRIVILEGES
+        sqQuery.SQL.Text :=
+          'SELECT DISTINCT RDB$USER ' +
+          'FROM RDB$USER_PRIVILEGES ' +
+          'WHERE RDB$USER_TYPE = 8 ' +
+          'AND UPPER(RDB$USER) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
+          'ORDER BY RDB$USER'
+      else
+        // Firebird 3+: SEC$USERS
+        sqQuery.SQL.Text :=
+          'SELECT SEC$USER_NAME AS RDB$USER ' +
+           'FROM SEC$USERS ' +
+           'WHERE UPPER(SEC$USER_NAME) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
+           'ORDER BY SEC$USER_NAME';
+
+    otPackages:
       sqQuery.SQL.Text:= 'SELECT RDB$PACKAGE_NAME, RDB$OWNER_NAME, RDB$DESCRIPTION, RDB$SYSTEM_FLAG ' +
         'FROM RDB$PACKAGES WHERE RDB$SYSTEM_FLAG = 0 ' +
-        'ORDER BY RDB$PACKAGE_NAME;'
-    else
-      if ObjectType = otPackageFunctions then
-      sqQuery.SQL.Text :=
+        'ORDER BY RDB$PACKAGE_NAME;';
+
+    otPackageFunctions:
+      if OwnerObjName = '' then
+        sqQuery.SQL.Text :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -434,9 +441,23 @@ else
           '  AND RDB$PACKAGE_NAME IS NOT NULL ' +
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$FUNCTION_NAME;'
-    else
-      if ObjectType = otPackageProcedures then  //package-storedprocs
-      sqQuery.SQL.Text :=
+        else
+          sqQuery.SQL.Text :=
+            'SELECT ' +
+            '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
+            '  RDB$DESCRIPTION, ' +
+            '  RDB$SYSTEM_FLAG, ' +
+            '  RDB$FUNCTION_SOURCE ' +
+            'FROM RDB$FUNCTIONS ' +
+            'WHERE RDB$MODULE_NAME IS NULL ' +
+            '  AND RDB$ENGINE_NAME IS  NULL ' +
+            '  AND RDB$PACKAGE_NAME = ' + QuotedStr(OwnerObjName) +
+            '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+            'ORDER BY RDB$FUNCTION_NAME;';
+
+    otPackageProcedures:
+      if OwnerObjName = '' then
+        sqQuery.SQL.Text :=
           'SELECT ' +
           '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -447,9 +468,22 @@ else
           '  AND RDB$PACKAGE_NAME IS NOT NULL ' +// gehört zu einem Package
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$PROCEDURE_NAME;'
-    else
-      if ObjectType = otPackageUDFFunctions then
-      sqQuery.SQL.Text :=
+      else
+        sqQuery.SQL.Text :=
+          'SELECT ' +
+          '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
+          '  RDB$DESCRIPTION, ' +
+          '  RDB$SYSTEM_FLAG, ' +
+          '  RDB$PROCEDURE_SOURCE ' +
+          'FROM RDB$PROCEDURES ' +
+          'WHERE RDB$ENGINE_NAME IS NULL ' +     // kein UDR
+          '  AND RDB$PACKAGE_NAME = ' + QuotedStr(OwnerObjName) +
+          '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+          'ORDER BY RDB$PROCEDURE_NAME;';
+
+    otPackageUDFFunctions:
+      if OwnerObjName = '' then
+        sqQuery.SQL.Text :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -461,9 +495,9 @@ else
           '  AND RDB$PACKAGE_NAME IS NOT NULL ' +   // Nur freie Funktionen, keine Package-Funktionen
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$FUNCTION_NAME;'
-      else
-        if ObjectType = otPackageUDRFunctions then
-        sqQuery.SQL.Text :=
+        else
+          if OwnerObjName = '' then
+            sqQuery.SQL.Text :=
             'SELECT ' +
             '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
             '  RDB$DESCRIPTION, ' +
@@ -471,64 +505,66 @@ else
             '  RDB$FUNCTION_SOURCE ' +
             'FROM RDB$FUNCTIONS ' +
             'WHERE RDB$MODULE_NAME IS NULL ' +
-            '  AND RDB$ENGINE_NAME IS NOT NULL ' +  // UDR-Funktionen
-            '  AND RDB$PACKAGE_NAME IS NOT NULL ' + // Funktionen innerhalb eines Packages
+            '  AND RDB$ENGINE_NAME IS  NULL ' +
+            '  AND RDB$PACKAGE_NAME = ' + QuotedStr(OwnerObjName) +
             '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-            'ORDER BY RDB$FUNCTION_NAME;'
-  else
-    if ObjectType = otPackageUDRProcedures then
-    sqQuery.SQL.Text :=
-        'SELECT ' +
-        '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
-        '  RDB$DESCRIPTION, ' +
-        '  RDB$SYSTEM_FLAG, ' +
-        '  RDB$PROCEDURE_SOURCE ' +
-        'FROM RDB$PROCEDURES ' +
-        'WHERE RDB$ENGINE_NAME IS NOT NULL ' +   // UDR-Prozeduren
-        '  AND RDB$PACKAGE_NAME IS NOT NULL ' +  // innerhalb eines Packages
-        '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
-        'ORDER BY RDB$PROCEDURE_NAME;'
+            'ORDER BY RDB$FUNCTION_NAME;';
 
-  else
+    otPackageUDRFunctions:
+      if OwnerObjName = '' then
+        sqQuery.SQL.Text :=
+          'SELECT ' +
+          '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
+          '  RDB$DESCRIPTION, ' +
+          '  RDB$SYSTEM_FLAG, ' +
+          '  RDB$FUNCTION_SOURCE ' +
+          'FROM RDB$FUNCTIONS ' +
+          'WHERE RDB$MODULE_NAME IS NULL ' +
+          '  AND RDB$ENGINE_NAME IS NOT NULL ' +  // UDR-Funktionen
+          '  AND RDB$PACKAGE_NAME IS NOT NULL ' + // Funktionen innerhalb eines Packages
+          '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+          'ORDER BY RDB$FUNCTION_NAME;'
+      else
+        sqQuery.SQL.Text :=
+          'SELECT ' +
+          '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
+          '  RDB$DESCRIPTION, ' +
+          '  RDB$SYSTEM_FLAG, ' +
+          '  RDB$FUNCTION_SOURCE ' +
+          'FROM RDB$FUNCTIONS ' +
+          'WHERE RDB$MODULE_NAME IS NULL ' +
+          '  AND RDB$ENGINE_NAME IS NOT NULL ' +  // UDR-Funktionen
+          '  AND RDB$PACKAGE_NAME = ' + QuotedStr(OwnerObjName) +
+          '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+          'ORDER BY RDB$FUNCTION_NAME;';
 
-  if ObjectType = otExceptions then // Exceptions
-    sqQuery.SQL.Text:= 'select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS order by rdb$Exception_Name'
-  else
-
-  if ObjectType = otRoles then // Roles
-    //sqQuery.SQL.Text:= 'select RDB$ROLE_NAME from RDB$ROLES order by rdb$Role_Name'
-    sqQuery.SQL.Text :=
-     'SELECT RDB$ROLE_NAME ' +
-     'FROM RDB$ROLES ' +
-     'WHERE RDB$ROLE_NAME <> ''DUMMYROLE'' ' +  // only for FireBird Version < 3.
-     'ORDER BY RDB$ROLE_NAME'
-  else
-
- if ObjectType = otUsers then
-begin
-  // Benutzerliste je nach Firebird-Version
-  if ServerVersionMajor < 3 then
-  begin
-    // Firebird 2.5: RDB$USER_PRIVILEGES
-    sqQuery.SQL.Text :=
-      'SELECT DISTINCT RDB$USER ' +
-      'FROM RDB$USER_PRIVILEGES ' +
-      'WHERE RDB$USER_TYPE = 8 ' +
-      'AND UPPER(RDB$USER) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
-      'ORDER BY RDB$USER';
-  end
-  else
-  begin
-    // Firebird 3+: SEC$USERS
-    sqQuery.SQL.Text :=
-      'SELECT SEC$USER_NAME AS RDB$USER ' +
-      'FROM SEC$USERS ' +
-      'WHERE UPPER(SEC$USER_NAME) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
-      'ORDER BY SEC$USER_NAME';
+    otPackageUDRProcedures:
+      if OwnerObjName = '' then
+        sqQuery.SQL.Text :=
+          'SELECT ' +
+          '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
+          '  RDB$DESCRIPTION, ' +
+          '  RDB$SYSTEM_FLAG, ' +
+          '  RDB$PROCEDURE_SOURCE ' +
+          'FROM RDB$PROCEDURES ' +
+          'WHERE RDB$ENGINE_NAME IS NOT NULL ' +   // UDR-Prozeduren
+          '  AND RDB$PACKAGE_NAME IS NOT NULL ' +  // innerhalb eines Packages
+          '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+          'ORDER BY RDB$PROCEDURE_NAME;'
+      else
+        sqQuery.SQL.Text :=
+          'SELECT ' +
+          '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
+          '  RDB$DESCRIPTION, ' +
+          '  RDB$SYSTEM_FLAG, ' +
+          '  RDB$PROCEDURE_SOURCE ' +
+          'FROM RDB$PROCEDURES ' +
+          'WHERE RDB$ENGINE_NAME IS NOT NULL ' +   // UDR-Prozeduren
+          '  AND RDB$PACKAGE_NAME = ' + QuotedStr(OwnerObjName) +
+          '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
+          'ORDER BY RDB$PROCEDURE_NAME;';
   end;
-  end;
 
-   // Save the result list as comma delimited string
   Result := '';
   Count := 0;
 
@@ -766,7 +802,7 @@ begin
   try
     Init(DatabaseIndex);
 
-    ServerVersionMajor := GetServerMajorVersionFromDBIndex(DatabaseIndex);
+    ServerVersionMajor := RegisteredDatabases[DatabaseIndex].RegRec.ServerVersionMajor;
 
     // Trigger holen
     sqQuery.Close;
@@ -1413,7 +1449,7 @@ var  ServerVersionMajor: word;
 begin
   Init(dbIndex);
 
-  ServerVersionMajor := GetServerMajorVersionFromDBIndex(dbIndex);
+  ServerVersionMajor := RegisteredDatabases[dbIndex].RegRec.ServerVersionMajor;
 
   // Firebird-Version bereits erkannt → direkt loslegen
   sqQuery.Close;
@@ -1495,7 +1531,7 @@ var  ServerVersionMajor: word;
 begin
   Init(dbIndex);
 
-  ServerVersionMajor := GetServerMajorVersionFromDBIndex(dbIndex);
+  ServerVersionMajor := RegisteredDatabases[dbIndex].RegRec.ServerVersionMajor;
 
   if ServerVersionMajor < 3 then
   begin

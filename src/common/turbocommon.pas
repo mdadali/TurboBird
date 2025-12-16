@@ -415,9 +415,6 @@ function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
 
 function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
-function GetSeverImplemetationVersionFromDBIndex(dbIndex: word): string;
-function GetServerMajorVersionFromDBIndex(dbIndex: Word): Word;
-function GetServerMinorVersionFromDBIndex(dbIndex: Word): Word;
 function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
 function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
 
@@ -665,39 +662,6 @@ end;
 function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
 begin
   result := ADB.FirebirdAPI.GetImplementationVersion;
-end;
-
-function GetSeverImplemetationVersionFromDBIndex(dbIndex: word): string;
-begin
-  result := GetSeverImplemetationVersionFromIBDB (RegisteredDatabases[dbIndex].IBDatabase);
-end;
-
-function GetServerMajorVersionFromDBIndex(dbIndex: Word): Word;
-var
-  VerStr: string;
-  P: Integer;
-begin
-  VerStr := GetSeverImplemetationVersionFromDBIndex(dbIndex);
-  P := Pos('.', VerStr);
-
-  if P = 0 then
-    Result := 0
-  else
-    Result := StrToIntDef(Copy(VerStr, 1, P - 1), 0);
-end;
-
-function GetServerMinorVersionFromDBIndex(dbIndex: Word): Word;
-var
-  VerStr: string;
-  P: Integer;
-begin
-  VerStr := GetSeverImplemetationVersionFromDBIndex(dbIndex);
-  P := Pos('.', VerStr);
-
-  if P = 0 then
-    Result := 0
-  else
-    Result := StrToIntDef(Copy(VerStr, P + 1, MaxInt), 0);
 end;
 
 function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;

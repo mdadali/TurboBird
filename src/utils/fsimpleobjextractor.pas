@@ -513,8 +513,10 @@ begin
     // --- Datenbank selbst ---
     otDatabase:              Result := eoDatabase;
 
-  else;
-    //Result := [];  // Default für unbekannte Typen
+    else
+      raise Exception.Create(
+        'Unknown ObjectType in function TBTypeToIBXType (Unit TSimpleObjExtractor)'
+      );
   end;
 end;
 
@@ -523,8 +525,6 @@ var ServerVersionMajor: word;
     isObjNameCaseSensitive: boolean;
 begin
    FIBSQL:= TIBSQL.Create(FIBDatabase);
-
-  //ServerVersionMajor := GetServerMajorVersionFromDBIndex(DatabaseIndex);
 
 
   if ObjectType = otTables then // Tables
