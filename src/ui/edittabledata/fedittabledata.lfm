@@ -1,7 +1,7 @@
 object fmEditTable: TfmEditTable
-  Left = 1130
+  Left = 287
   Height = 550
-  Top = 223
+  Top = 162
   Width = 966
   ActiveControl = PageControl1
   ClientHeight = 550

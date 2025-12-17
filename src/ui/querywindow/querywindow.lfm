@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 412
+  Left = 490
   Height = 550
-  Top = 143
+  Top = 531
   Width = 954
   Caption = 'fmQueryWindow'
   ClientHeight = 544
@@ -44,6 +44,7 @@ object fmQueryWindow: TfmQueryWindow
       Align = alClient
       Images = imTabs
       TabOrder = 0
+      OnChange = pgOutputPageCtlChange
     end
   end
   inline meQuery: TSynEdit
@@ -1583,8 +1584,10 @@ object fmQueryWindow: TfmQueryWindow
   object SynCompletion1: TSynCompletion
     Position = 0
     LinesInWindow = 6
+    OnSearchPosition = SynCompletion1SearchPosition
+    OnPositionChanged = SynCompletion1PositionChanged
     SelectedColor = clHighlight
-    CaseSensitive = False
+    CaseSensitive = True
     Width = 262
     AutoUseSingleIdent = True
     ShortCut = 16416
@@ -2188,11 +2191,20 @@ object fmQueryWindow: TfmQueryWindow
     Top = 216
   end
   object SynAutoComplete1: TSynAutoComplete
+    AutoCompleteList.Strings = (
+      'id'
+      'name'
+    )
     EndOfTokenChr = '()[].'
     ShortCut = 8224
     ExecCommandID = ecSynAutoCompletionExecute
     Editor = meQuery
     Left = 539
     Top = 320
+  end
+  object pmUnIntelliSense: TPopupMenu
+    OnPopup = pmUnIntelliSensePopup
+    Left = 106
+    Top = 347
   end
 end

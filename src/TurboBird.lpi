@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1585"/>
+      <BuildNr Value="1589"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -489,7 +489,7 @@
         <PackageName Value="LCL"/>
       </Item24>
     </RequiredPackages>
-    <Units Count="100">
+    <Units Count="101">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1100,6 +1100,11 @@
         <Filename Value="utils/fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit99>
+      <Unit100>
+        <Filename Value="common/cunintellisensecache.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cUnIntelliSenseCache"/>
+      </Unit100>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

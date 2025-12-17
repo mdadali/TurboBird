@@ -21,7 +21,7 @@ uses
   IBDatabase,
   IBQuery,
   IBExtract,
-  IBDatabaseInfo,
+  IBDatabaseInfo, ibxscript,
 
   udb_udf_fetcher,
 
@@ -63,6 +63,7 @@ uses
   fmetaquerys,
   uthemeselector,
   fsimpleobjextractor,
+  cUnIntelliSenseCache,
 
   //MWA Tools
   fScriptEngine,
@@ -85,6 +86,7 @@ type
     CurrentIBTransaction: TIBTransaction;
     HtmlViewer1: THtmlViewer;
     IBExtract1: TIBExtract;
+    IBXScript1: TIBXScript;
     Image1: TImage;
     Memo1: TMemo;
     lmMaintenance: TMenuItem;
@@ -103,6 +105,8 @@ type
     lmExtractTableFields: TMenuItem;
     lmExtractTableMetaDataQuoted: TMenuItem;
     lmExtractTableMetaDataUnQuoted: TMenuItem;
+    Separator2: TMenuItem;
+    Separator1: TMenuItem;
     mnTheme: TMenuItem;
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
@@ -180,7 +184,6 @@ type
     lmDisconnect: TMenuItem;
     lmCopyTable: TMenuItem;
     lmCopyUserPermission: TMenuItem;
-    lmViewFields: TMenuItem;
     lmEditField: TMenuItem;
     lmCopyRolePermission: TMenuItem;
     lmGetIncrementGen: TMenuItem;
@@ -432,9 +435,9 @@ type
    // Function GetIndices(ATableName: string; AQuery: TIBQuery): Boolean;
     Function GetUDFInfo(DatabaseIndex: Integer; UDFName: string; var ModuleName, EntryPoint, Params: string): Boolean;
     Function ShowQueryWindow(DatabaseIndex: Integer; ATitle: string; ANodeInfos: TPNodeInfos=nil): TfmQueryWindow;
+    function ShowCompleteQueryWindow(DatabaseIndex: Integer; ATitle,
+      AQueryText: string; OnCommitProcedure: TNotifyEvent = nil; ANodeInfos: TPNodeInfos=nil): TfmQueryWindow;
     procedure FillObjectRoot(Node: TTreeNode);
-    procedure ShowCompleteQueryWindow(DatabaseIndex: Integer; ATitle,
-      AQueryText: string; OnCommitProcedure: TNotifyEvent = nil; ANodeInfos: TPNodeInfos=nil);
     Function GetTableNames(dbIndex: Integer): string;
     Function CreateNewTrigger(dbIndex: Integer; ATableName: string; OnCommitProcedure: TNotifyEvent = nil): Boolean;
     Function AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: string): Boolean;
@@ -1764,7 +1767,7 @@ begin
   if NodeInfos = nil then Exit;
   dbIndex := NodeInfos^.dbIndex;
 
-  TableName := SelNode.Text;
+  TableName := GetClearNodeText(SelNode.Text);
 
   // Prüfen ob ViewForm schon existiert
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmCopyTable) then
@@ -2748,7 +2751,7 @@ begin
   Screen.Cursor := crHourGlass;
   Application.ProcessMessages;
   try
-    ATableName:= SelNode.Text;
+    ATableName:= GetClearNodeText(SelNode.Text);
     dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
 
     if Quoted then MetaDataQuoted := 'Quoted'
@@ -2802,7 +2805,7 @@ begin
   Screen.Cursor := crHourGlass;
   Application.ProcessMessages;
   try
-    ATableName:= SelNode.Text;
+    ATableName:= GetClearNodeText(SelNode.Text);
     dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
 
     QWindow:= ShowQueryWindow(dbIndex, 'ExtractData#' + IntToStr(dbIndex) + ':' + ATableName);
@@ -2825,7 +2828,7 @@ var
   ATableName: string;
   dbIndex: Integer;
   SimpleObjExtractor: TSimpleObjExtractor;
-  Strings: TStrings;
+  Strings: TStringList;
   DBNode: TTreeNode;
 begin
   SelNode:= tvMain.Selected;
@@ -2837,7 +2840,7 @@ begin
   Screen.Cursor := crHourGlass;
   Application.ProcessMessages;
   try
-    ATableName:= SelNode.Text;
+    ATableName:= GetClearNodeText(SelNode.Text);
     dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
 
     QWindow:= ShowQueryWindow(dbIndex, 'ExtracFields#' + IntToStr(dbIndex) + ':' + ATableName);
@@ -2845,8 +2848,8 @@ begin
 
     DBNode := GetAncestorAtLevel(SelNode ,1);
     SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
-    Strings := QWindow.meQuery.Lines;
-    SimpleObjExtractor.ExtractTableFields(ATableName, Strings, AlwaysQuoteIdentifiers, ' ');
+    TStrings(Strings) := QWindow.meQuery.Lines;
+    SimpleObjExtractor.ExtractTableFields(ATableName, Strings, AlwaysQuoteIdentifiers, ' ', true);
 
   finally
     Screen.Cursor := crDefault;
@@ -3101,7 +3104,7 @@ begin
   if NodeInfos = nil then Exit;
   dbIndex := NodeInfos^.dbIndex;
 
-  Title := 'Import Table: ' + SelNode.Text;
+  Title := 'Import Table: ' + GetClearNodeText(SelNode.Text);
 
   // Prüfen, ob ViewForm schon existiert
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmImportTable) then
@@ -3141,7 +3144,7 @@ begin
   ATab.ShowHint := True;
 
   // Form initialisieren
-  fmImportTable.Init(dbIndex, SelNode.Text, NodeInfos);
+  fmImportTable.Init(dbIndex, GetClearNodeText(SelNode.Text), NodeInfos);
   fmImportTable.Show;
 end;
 
@@ -3718,7 +3721,7 @@ begin
   if NodeInfos = nil then Exit;
 
   // Tabellenname und DB-Index ermitteln
-  ATableName := SelNode.Text;
+  ATableName := GetClearNodeText(SelNode.Text);
   dbIndex := TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
   Rec := RegisteredDatabases[dbIndex];
   DBAlias := GetAncestorNodeText(SelNode, 1);
@@ -3763,6 +3766,7 @@ begin
 
   // Formular initialisieren
   EditWindow.Rec := Rec;
+  ATableName := GetClearNodeText(ATableName);
   EditWindow.Init(dbIndex, ATableName, NodeInfos);
   EditWindow.Show;
 end;
@@ -4389,9 +4393,6 @@ procedure TfmMain.lmRefreshClick(Sender: TObject);
 begin
   FillObjectRoot(tvMain.Selected);
   tvMain.Selected.Expand(false);
-  //if tvMain.Selected.Expanded then
-    //tvMain.Selected.Collapse(False);
-  //tvMainExpanded(nil, tvMain.Selected)
 end;
 
 (***********  Script Database  ************)
@@ -4554,7 +4555,7 @@ begin
 {  SelNode := tvMain.Selected;
   if SelNode = nil then Exit;
 
-  ATableName := SelNode.Text;
+  ATableName := GetClearNodeText(SelNode.Text);
   dbIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
 
   QWindow := ShowQueryWindow(dbIndex, 'Insert script#' + IntToStr(dbIndex) + ':' + ATableName);
@@ -4753,7 +4754,7 @@ begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    ATableName:= SelNode.Text;
+    ATableName:= GetClearNodeText(SelNode.Text);
     dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
     QWindow:= ShowQueryWindow(dbIndex, 'Script as update#' + IntToStr(dbIndex) + ':' + ATableName);
 
@@ -4947,7 +4948,7 @@ begin
   if NodeInfos = nil then Exit;
   dbIndex := NodeInfos^.dbIndex;
 
-  TableName := SelNode.Text;
+  TableName := GetClearNodeText(SelNode.Text);
   DBAlias := GetAncestorNodeText(SelNode, 1);
 
   // Prüfen, ob ViewForm schon existiert
@@ -5627,7 +5628,6 @@ begin
     ATab.Tag:= DatabaseIndex;
     ATab.ShowHint := True;
     Result.BorderStyle:= bsNone;
-    Result.Caption:= ACaption;
 
     if NodeQueryWindow then
     begin
@@ -5635,7 +5635,7 @@ begin
       ATab.ImageIndex := tvMain.Selected.ImageIndex;
       if tvMain.Selected.Text <> 'Query Window' then //Main-QueryWindow
       begin
-        ACaption :=  tvMain.Selected.Text;
+        ACaption :=  GetClearNodeText(tvMain.Selected.Text);
         FullHint := FullHint + 'Object type: '  + TreeViewObjectToStr(ANodeInfos^.ObjectType) + sLineBreak +
                     'Object Name:  ' + ACaption;
         //ACaption := 'SELECT:' + ACaption;
@@ -5650,6 +5650,7 @@ begin
       FullHint := FullHint + 'Object type: Query Window';
     end;
 
+    Result.Caption:= ACaption;
     ATab.Caption:= ACaption;
     ATab.Hint := FullHint;
   end
@@ -5666,8 +5667,8 @@ end;
 
 
 (***********  Show and Fill Query Window *****************)
-procedure TfmMain.ShowCompleteQueryWindow(DatabaseIndex: Integer; ATitle,
-  AQueryText: string; OnCommitProcedure: TNotifyEvent = nil; ANodeInfos: TPNodeInfos=nil);
+function TfmMain.ShowCompleteQueryWindow(DatabaseIndex: Integer; ATitle,
+  AQueryText: string; OnCommitProcedure: TNotifyEvent = nil; ANodeInfos: TPNodeInfos=nil): TfmQueryWindow;
 var
   QWindow: TfmQueryWindow;
   Part: string;
@@ -5688,6 +5689,8 @@ begin
 
     QWindow.meQuery.Lines.Add(Part);
   until AQueryText = '';
+
+  result := QWindow;
 end;
 
 (******* Fill Object Root, like (Tables, Views, etc)  ******)
@@ -5705,7 +5708,7 @@ var
   StoredProcNode, UDFNode, FBFunctionNode,
   UDRTriggerRootNode, PackagesNode, PackageNode, PackageFuncsNone, PackageProcsNode, PackagesUDFsNode,
   UDRTableTrigNode, UDRDBTrigNode, UDRDDLTrigNode, PackagesUDRsNode, PackagesUDRFuncsNode, PackagesUDRProcsNode,
-  UDRsNode, UDRsFuncNode, UDRsProcNode, SysTableNode,
+  UDRsNode, UDRsFuncNode, UDRsProcNode, SystemObjectRoot, SysTableNode,
   DomainsNode, ExceptionNode: TTreeNode;
   RoleNode, UserNode: TTreeNode;
   i, x: Integer;
@@ -5737,17 +5740,55 @@ begin
 
       // TablesRoot
       case  NodeType of
+
         tvotTableRoot: begin
           Node.DeleteChildren;
-          SimpleObjExtractor.ExtractTableNamesToTreeNode(false, Node);
-          Node.Text :=  GetClearNodeText(Node.Text);
-          Node.Text := Node.Text + ' (' + IntToStr(Node.Count) + ')';
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableNamesToTreeNode(false, Node, false);
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
         //Table
         tvotTable: begin
-          self.lmViewFieldsClick(nil);
+          //self.lmViewFieldsClick(nil);
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableFieldsToTreeNode(Node.Text, Node, false, ' ', 83);
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
+
+        tvotSystemTableRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableNamesToTreeNode(false, Node, true);
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        {tvotSystemTableRoot: begin
+          SysTableNode:= Node;
+          Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otSystemTables, Count);
+          Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
+          SysTableNode.DeleteChildren;
+          for i:= 0 to Objects.Count - 1 do
+          begin
+            Item:= tvMain.Items.AddChild(SysTableNode, Objects[i]);
+            Item.ImageIndex:= 16;
+            Item.SelectedIndex:= 16;
+            TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTable;
+            TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          end;
+        end;}
+
+
+        //SystemTable
+        tvotSystemTable: begin
+          //self.lmViewFieldsClick(nil);
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableFieldsToTreeNode(Node.Text, Node, false, ' ', 83);
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
 
         tvotGeneratorRoot: begin
           GenNode:= Node;
@@ -5917,21 +5958,6 @@ begin
             Item.ImageIndex:= 13;
             Item.SelectedIndex:= 13;
             TPNodeInfos(Item.Data)^.ObjectType := tvotUDFFunction;
-            TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
-          end;
-        end;
-
-        tvotSystemTableRoot: begin
-          SysTableNode:= Node;
-          Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otSystemTables, Count);
-          Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
-          SysTableNode.DeleteChildren;
-          for i:= 0 to Objects.Count - 1 do
-          begin
-            Item:= tvMain.Items.AddChild(SysTableNode, Objects[i]);
-            Item.ImageIndex:= 16;
-            Item.SelectedIndex:= 16;
-            TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTable;
             TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           end;
         end;
@@ -6172,6 +6198,163 @@ begin
           DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
         end;
 
+            tvotUDRFunctionRoot: begin
+              Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUDRFunctions, Count, Node.Parent.Text);
+              if Count > 0 then
+                begin
+                  Node.Text:= ANodeText + ' (' + IntToStr(Objects.Count) + ')';
+                  Node.DeleteChildren;
+                  for x := 0 to Objects.Count - 1 do
+                    begin
+                     Item:= tvMain.Items.AddChild(Node, Objects[x]);
+                     Item.ImageIndex := 64;
+                     TPNodeInfos(Item.Data)^.ObjectType := tvotUDRFunction;
+                     TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+                     Item := Item.Parent;
+                    end;
+                  end;
+                end;
+
+            tvotUDRProcedureRoot: begin
+              Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUDRProcedures, Count, Node.Parent.Text);
+              if Count > 0 then
+              begin
+                Node.Text:= ANodeText + ' (' + IntToStr(Objects.Count) + ')';
+                Node.DeleteChildren;
+                for x := 0 to Objects.Count - 1 do
+                begin
+                  Item:= tvMain.Items.AddChild(Node, Objects[x]);
+                  Item.ImageIndex := 65;
+                  TPNodeInfos(Item.Data)^.ObjectType := tvotUDRProcedure;
+                  TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+                  Item := Item.Parent;
+                end;
+              end;
+            end;
+
+
+            tvotSystemObjectRoot: begin
+              Node.DeleteChildren;
+
+              //SystemTables RootNode
+              Item := tvMain.Items.AddChild(Node, 'Tables');
+              Item.ImageIndex:= 16;
+              Item.SelectedIndex:= 16;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTableRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Domains');
+              Item.ImageIndex:= 17;
+              Item.SelectedIndex:= 17;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemDomainRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Generators');
+              Item.ImageIndex:= 6;
+              Item.SelectedIndex:= 6;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemGeneratorRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Triggers');
+              Item.ImageIndex:= 8;
+              Item.SelectedIndex := 8;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTriggerRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Constraints');
+              Item.ImageIndex:= -1;
+              Item.SelectedIndex := -1;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemConstraintRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Indexes');
+              Item.ImageIndex:= 82;
+              Item.SelectedIndex := 82;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemIndexRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Roles');
+              Item.ImageIndex:= 19;
+              Item.SelectedIndex := 19;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemRoleRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Users');
+              Item.ImageIndex:= 20;
+              Item.SelectedIndex := 20;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemUserRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+              Item := tvMain.Items.AddChild(Node, 'Exceptions');
+              Item.ImageIndex:= 22;
+              Item.SelectedIndex := 22;
+              TPNodeInfos(Item.Data)^.ObjectType := tvotSystemExceptionRoot;
+              TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+            end;
+
+            {tvotSystemDomainRoot: begin
+               ShowMessage('SystemDomainRoot');
+              //SysDomainNode:= Node;
+              //Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otSystemDomainss, Count);
+              Count := 0;
+              Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
+              Node.DeleteChildren;
+              for i:= 0 to Objects.Count - 1 do
+              begin
+                Item:= tvMain.Items.AddChild(Node, Objects[i]);
+                Item.ImageIndex:= 16;
+                Item.SelectedIndex:= 16;
+                TPNodeInfos(Item.Data)^.ObjectType := tvotSystemDomain;
+                TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+              end;
+            end;}
+
+            tvotSystemDomainRoot: begin
+              Node.DeleteChildren;
+              //SimpleObjExtractor.ExtractTableNamesToTreeNode(false, Node, true);
+              Node.Text :=  GetClearNodeText(Node.Text);
+              Node.Text := Node.Text + ' (' + IntToStr(Node.Count) + ')';
+              SimpleObjExtractor.ExtractToTreeNode(otSystemDomains, '',  [etDomain], AlwaysQuoteIdentifiers, Node, 17);
+            end;
+
+                tvotSystemDomain: begin
+                  ShowMessage('SystemDomain');
+
+                end;
+
+
+
+            {
+
+            tvotSystemTable,
+
+            tvotSystemDomain,
+
+            tvotSystemGenerator,
+            ,
+            tvotSystemTrigger,
+            ,
+            tvotSystemConstraint,
+            ,
+            tvotSystemIndex,
+            ,
+            tvotSystemRole,
+            ,
+            tvotSystemUser,
+            ,
+            tvotSystemException}
+
+        //end;
       end; //case
 
     except
@@ -6715,18 +6898,20 @@ var
   SelNode: TTreeNode;
   QWindow: TfmQueryWindow;
   dbIndex: integer;
+  CleanNodeText: string;
 begin
   SelNode:= tvMain.Selected;
   dbIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
-  if MessageDlg('Are you sure you want to delete ' + SelNode.Text + ' permanently', mtConfirmation,
+  CleanNodeText := GetClearNodeText(SelNode.Text);
+  if MessageDlg('Are you sure you want to delete ' + CleanNodeText + ' permanently', mtConfirmation,
     [mbYes, mbNo], 0) = mrYes then
   begin
     // Move selection to tables above so object is not in use when deleting it
     SelNode.Collapse(true);
     SelNode.Parent.Selected:=true;
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Drop Table#:' + IntToStr(dbIndex) + SelNode.Text);
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Drop Table#:' + IntToStr(dbIndex) + CleanNodeText);
     QWindow.meQuery.Lines.Clear;
-    QWindow.meQuery.Lines.Add('DROP TABLE ' + SelNode.Text + ';');
+    QWindow.meQuery.Lines.Add('DROP TABLE ' + CleanNodeText + ';');
     QWindow.Show;
   end;
 end;
@@ -6926,12 +7111,14 @@ procedure TfmMain.lmViewFirst1000Click(Sender: TObject);
 var
   SelNode: TTreeNode;
   QWindow: TfmQueryWindow;
+  CleanNodeText: string;
 begin
   SelNode:= tvMain.Selected;
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
-    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex,  SelNode.Text,  SelNode.Data);
-    QWindow.meQuery.Lines.Text:= 'select * from ' + MakeFBObjectNameCaseSensitive(SelNode.Text);
+    CleanNodeText := GetClearNodeText(SelNode.Text);
+    QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex,  CleanNodeText,  SelNode.Data);
+    QWindow.meQuery.Lines.Text:= 'select * from ' + MakeFBObjectNameCaseSensitive(CleanNodeText);
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
@@ -7146,8 +7333,10 @@ begin
     if ParentNodeText = 'UDFs' then // UDF
       Filter:= 6
     else
-    if ParentNodeText = 'System Tables' then // System Tables
-      Filter:= 7
+    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotSystemTableRoot then
+      Filter := 100
+    else if TPNodeInfos(SelNode.Data)^.ObjectType = tvotSystemTable then
+        Filter := 7
     else
     if ParentNodeText = 'Domains' then // Domains
       Filter:= 8
@@ -7332,6 +7521,7 @@ begin
     PNodeInfos^.ServerSession := nil;
 
     PNodeInfos^.SimpleObjExtractor := nil;
+    PNodeInfos^.UnIntelliSenseCache := nil;
 
     if Node.Level = 0 then
     begin
@@ -7414,6 +7604,12 @@ begin
     begin
       Infos^.SimpleObjExtractor.Free;
       Infos^.SimpleObjExtractor := nil;
+    end;
+
+    if Assigned(Infos^.UnIntelliSenseCache) then
+    begin
+      Infos^.UnIntelliSenseCache.Free;
+      Infos^.UnIntelliSenseCache := nil;
     end;
 
     if Assigned(Infos^.ServerSession) then
@@ -7811,14 +8007,23 @@ begin
     // Database is now connected → Extractor initialisieren
     if NodeInfo^.SimpleObjExtractor = nil then
     begin
-      NodeInfo^.SimpleObjExtractor :=
-        TSimpleObjExtractor.Create(NodeInfo^.dbIndex);
-    end
-    else
+      NodeInfo^.SimpleObjExtractor := TSimpleObjExtractor.Create(NodeInfo^.dbIndex);
+    end else
     begin
       // Vorhandenen Extractor zurücksetzen, aber nicht freigeben
       NodeInfo^.SimpleObjExtractor.ResetExtract;
     end;
+
+    if NodeInfo^.UnIntelliSenseCache = nil then
+    begin
+      NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
+    end else
+    begin
+      // Vorhandene Cache zurücksetzen, aber nicht freigeben
+      //if AlwaysRefreshIntelliCasche then
+      //NodeInfo^.UnIntelliSenseCache.RefreshCache;
+    end;
+
   end;
 
   {if Node.Level > 1 then
@@ -7847,13 +8052,6 @@ begin
     begin
       tvMain.Selected := Node;
       FillObjectRoot(Node);
-      if Node.Count = 0 then
-      begin
-        //AllowExpansion := false;
-        //Node.TreeView.Items.AddChild(Node, 'Loading...');
-        //Node.Collapse(false);
-      end;
-
     end;
   end;
 
@@ -7965,12 +8163,12 @@ try
       // ----------------------
       tvotTable:
         begin
-          try
+          {try
             lmViewFieldsClick(nil);
           except
             on E: Exception do
               ShowMessage('Error while opening table fields: ' + E.Message);
-          end;
+          end;}
 
           try
             lmViewFirst1000Click(nil);
@@ -8111,8 +8309,9 @@ try
       tvotSystemTable:
         begin
           try
-            lmViewFieldsClick(nil);
-            lmOpenSystemTableClick(nil);
+            //lmViewFieldsClick(nil);
+            //lmOpenSystemTableClick(nil);
+            lmViewFirst1000Click(nil);
           except
             on E: Exception do
               ShowMessage('Error while opening system table: ' + E.Message);
@@ -8413,13 +8612,6 @@ begin
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
   end;
 
-  CNode:= tvMain.Items.AddChild(ANode, 'System Tables');
-  CNode.ImageIndex:= 15;
-  CNode.SelectedIndex:= 15;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotSystemTableRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
   CNode:= tvMain.Items.AddChild(ANode, 'Domains');
   CNode.ImageIndex:= 17;
   CNode.SelectedIndex:= 17;
@@ -8447,6 +8639,14 @@ begin
   TPNodeInfos(CNode.Data)^.ObjectType := tvotUserRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+
+  CNode:= tvMain.Items.AddChild(ANode, 'System Objects');
+  CNode.ImageIndex:= 39;
+  CNode.SelectedIndex:= 39;
+  TPNodeInfos(CNode.Data)^.ObjectType := tvotSystemObjectRoot;
+  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+
 end;
 
 (**********************             Load databases            *********************************)

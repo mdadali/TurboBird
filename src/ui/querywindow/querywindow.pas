@@ -5,7 +5,7 @@ unit QueryWindow;
 interface
 
 uses
-  Classes, SysUtils, db, fpstdexports, FileUtil,
+  Classes, SysUtils, db, fpstdexports, FileUtil,   LMessages,
   LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls, PairSplitter,
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
@@ -20,7 +20,9 @@ uses
 
   fdataexportersintrf,
   fblobedit,
-  uthemeselector;
+  uthemeselector,
+  fsimpleobjextractor,
+  cUnIntelliSenseCache;
 
 type
 
@@ -79,6 +81,7 @@ type
     lmStdExportFormats: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmExportToClipboard: TMenuItem;
+    pmUnIntelliSense: TPopupMenu;
     rgScreenModes: TRadioGroup;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
@@ -166,8 +169,10 @@ type
     procedure meQueryMouseEnter(Sender: TObject);
     procedure Panel1MouseEnter(Sender: TObject);
     procedure Panel1MouseLeave(Sender: TObject);
+    procedure pgOutputPageCtlChange(Sender: TObject);
     procedure pmGridPopup(Sender: TObject);
     procedure pmMemoPopup(Sender: TObject);
+    procedure pmUnIntelliSensePopup(Sender: TObject);
     procedure rgScreenModesClick(Sender: TObject);
     procedure rgScreenModesMouseEnter(Sender: TObject);
 
@@ -176,6 +181,8 @@ type
     procedure SynCompletion1CodeCompletion(var Value: string;
       SourceValue: string; var SourceStart, SourceEnd: TPoint;
       KeyChar: TUTF8Char; Shift: TShiftState);
+    procedure SynCompletion1PositionChanged(Sender: TObject);
+    procedure SynCompletion1SearchPosition(var APosition: integer);
     procedure tbCloseClick(Sender: TObject);
     procedure tbCommitClick(Sender: TObject);
     procedure tbCommitMouseEnter(Sender: TObject);
@@ -246,6 +253,8 @@ type
     procedure CommitResultClick(Sender: TObject);
     procedure RemovePreviousResultTabs;
 
+    procedure pmUnIntelliSenseClick(Sender: TObject);
+
   protected
     // This procedure will receive the events that are logged by the connection:
   public
@@ -257,8 +266,10 @@ type
     function GetQuery(QueryContents: tstrings): boolean;
     function CreateResultTab(QueryType: TQueryTypes; var aSqlQuery: TIBQuery; var aSQLScript: TIBXScript;
       var meResult: TMemo; AdditionalTitle: string = ''): TTabSheet;
-    // Runs SQL script; returns result
+
+    procedure OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
     function ExecuteScript(Script: string): Boolean;
+
     // Create a new Apply button in the specified panel
     procedure NewApplyButton(var Pan: TPanel; var ATab: TTabSheet);
     // Returns whether query is DDL or DML
@@ -281,9 +292,8 @@ type
 //var
   //fmQueryWindow: TfmQueryWindow;
 
+
 implementation
-
-
 
 uses main, SQLHistory;
 
@@ -758,6 +768,16 @@ procedure TfmQueryWindow.SynCompletion1CodeCompletion(var Value: string;
 begin
 
   SynCompletion1.Deactivate;
+end;
+
+procedure TfmQueryWindow.SynCompletion1PositionChanged(Sender: TObject);
+begin
+
+end;
+
+procedure TfmQueryWindow.SynCompletion1SearchPosition(var APosition: integer);
+begin
+
 end;
 
 
@@ -2298,6 +2318,21 @@ begin
 end;
 {$ENDIF}
 
+procedure TfmQueryWindow.OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
+var
+  SelNode: TTreeNode;
+  QWindow: TfmQueryWindow;
+begin
+  SelNode := turbocommon.MainTreeView.Selected;
+  if (SelNode <> nil) and (SelNode.Parent <> nil) then
+  begin
+    QWindow := fmMain.ShowCompleteQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex, SQLText, SQLText, nil);
+    QWindow.meQuery.Lines.Text:= SQLText;
+    QWindow.bbRunClick(nil);
+    QWindow.Show;
+  end;
+end;
+
 { Execute script }
 function TfmQueryWindow.ExecuteScript(Script: string): Boolean;
 var
@@ -2321,6 +2356,7 @@ begin
       SendDebug('going to run script: ' + Script);
       {$Endif}
       Script := Trim(Script);
+      FIBXScript.OnSelectSQL := @OnFIBXScriptSelectSQL;
       FIBXScript.ExecSQLScript(Script);
       // Auto commit
       if cxAutoCommit.Checked then
@@ -2624,7 +2660,8 @@ begin
   //FIBConnection:= TIBDatabase.Create(nil);
   //FSQLTrans:= TIBTransaction.Create(nil);
   //FIBConnection.DefaultTransaction := FSQLTrans;
-  SynCompletion1.ItemList.CommaText:= 'create,table,Select,From,INTEGER,FLOAT';
+  SynCompletion1.ItemList.Add('select * from ');
+  //SynCompletion1.ItemList.CommaText:= QuotedStr('select * from ') + 'Select, *,  From, create, table';
   SortSynCompletion;
 
   // Set the editor font from config.ini
@@ -3019,20 +3056,6 @@ begin
   meQuery.SearchReplace(FindDialog1.FindText, '', FOptions);
 end;
 
-
-{ Run query by pressing Ctrl + Enter }
-
-procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  // Execute query by pressing Ctrl + Enter
-  if (ssCtrl in shift) and (key = VK_RETURN) then
-  begin
-    CallExecuteQuery(qtUnknown);
-    key:= 0;
-  end;
-end;
-
 procedure TfmQueryWindow.meQueryMouseEnter(Sender: TObject);
 begin
   Application.OnShowHint := @fmMain.AppShowHint;
@@ -3048,9 +3071,187 @@ begin
   Application.OnShowHint := @fmMain.AppShowHint;
 end;
 
+procedure TfmQueryWindow.pgOutputPageCtlChange(Sender: TObject);
+begin
+
+end;
+
 procedure TfmQueryWindow.pmMemoPopup(Sender: TObject);
 begin
 
+end;
+
+function GetSynEditCaretScreenPos(ASynEdit: TSynEdit): TPoint;
+var
+  P: TPoint;
+begin
+  // Caret → Client-Pixel
+  P := ASynEdit.RowColumnToPixels(ASynEdit.CaretXY);
+
+  // etwas unterhalb der Zeile
+  Inc(P.Y, ASynEdit.LineHeight);
+
+  // Client → Screen
+  Result := ASynEdit.ClientToScreen(P);
+end;
+
+{ Run query by pressing Ctrl + Enter }
+
+procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+
+var P: TPoint;
+begin
+  // Execute query by pressing Ctrl + Enter
+  if (ssCtrl in shift) and (key = VK_RETURN) then
+  begin
+    CallExecuteQuery(qtUnknown);
+    key:= 0;
+  end;
+
+  if (Key = VK_RIGHT) and (ssCtrl in Shift) then
+  begin
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+    Key := 0; // Event verbrauchen
+  end;
+
+end;
+
+procedure TfmQueryWindow.pmUnIntelliSenseClick(Sender: TObject);
+begin
+  if TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption) then
+    meQuery.SelText := TMenuItem(Sender).Caption
+  else
+    meQuery.SelText := MakeFBObjectNameCaseSensitive(TMenuItem(Sender).Caption);
+end;
+
+{procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
+var
+  TableItem, FieldItem, DummyItem: TMenuItem;
+  Tables, Fields: TStringList;
+  TableName, FieldName: string;
+  dbIndex, i, j: Integer;
+  SimpleObjExtractor: TSimpleObjExtractor;
+  DBNode: TTreeNode;
+  DB: TIBDatabase;
+begin
+  Tables := TStringList.Create;
+  Fields := TStringList.Create;
+
+  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+
+  dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
+  DB := RegisteredDatabases[dbIndex].IBDatabase;
+  DB.GetTableNames(Tables);
+
+  SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
+  pmUnIntelliSense.Items.Clear;
+
+  try
+    //DB.GetTableNames(Tables);
+    SimpleObjExtractor.ExtractTableNames(Tables, false, false);
+
+    for i := 0 to Tables.Count - 1 do
+    begin
+      TableName := Tables[i];
+
+      // Hauptmenü = Tabelle
+      TableItem := TMenuItem.Create(pmUnIntelliSense);
+      TableItem.Caption := TableName;
+
+      DummyItem := TMenuItem.Create(TableItem);
+      DummyItem.Caption := TableName;
+      DummyItem.OnClick := @pmUnIntelliSenseClick;
+      TableItem.Add(DummyItem);
+
+      DummyItem := TMenuItem.Create(TableItem);
+      DummyItem.Caption := '-';
+      TableItem.Add(DummyItem);
+      SimpleObjExtractor.ExtractCleanTableFields(TableName, Fields, false, ' ');
+      try
+        for j := 0 to Fields.Count - 1 do
+        begin
+          FieldName := Fields[j];
+
+          FieldItem := TMenuItem.Create(TableItem);
+          FieldItem.Caption := FieldName;
+          FieldItem.OnClick := @pmUnIntelliSenseClick;
+
+          TableItem.Add(FieldItem);
+        end;
+      finally
+        Fields.Clear;
+      end;
+
+      pmUnIntelliSense.Items.Add(TableItem);
+    end;
+  finally
+    Fields.Free;
+    Tables.Free;
+  end;
+end;}
+
+procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
+var
+  TableItem, FieldItem, DummyItem: TMenuItem;
+  TableName, FieldName: string;
+  i, j: Integer;
+  DBNode: TTreeNode;
+  IntelliCache: TUnIntelliSenseCache;
+begin
+  pmUnIntelliSense.Items.Clear;
+
+  // Ancestor & Cache holen
+  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+  IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+
+  if (IntelliCache = nil) or not IntelliCache.Initialized then
+  begin
+    // Optional: Meldung oder einfach leeres Menü
+    Exit;
+  end;
+
+  // Über Tabellen iterieren
+  for i := 0 to IntelliCache.TableCache.Count - 1 do
+  begin
+    TableName := IntelliCache.TableCache[i];
+
+    // Hauptmenü = Tabelle
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := TableName;
+
+    // DummyItem mit Tabellenname
+    DummyItem := TMenuItem.Create(TableItem);
+    DummyItem.Caption := TableName;
+    DummyItem.OnClick := @pmUnIntelliSenseClick;
+    TableItem.Add(DummyItem);
+
+    // Trennstrich
+    DummyItem := TMenuItem.Create(TableItem);
+    DummyItem.Caption := '-';
+    TableItem.Add(DummyItem);
+
+    // Felder aus Cache holen
+    if (i <= High(IntelliCache.FieldCache)) and Assigned(IntelliCache.FieldCache[i]) then
+    begin
+      for j := 0 to IntelliCache.FieldCache[i].Count - 1 do
+      begin
+        FieldName := IntelliCache.FieldCache[i][j];
+
+        // Skip first entry? (falls erste Position TableName ist)
+        if j = 0 then Continue;
+
+        FieldItem := TMenuItem.Create(TableItem);
+        FieldItem.Caption := FieldName;
+        FieldItem.OnClick := @pmUnIntelliSenseClick;
+
+        TableItem.Add(FieldItem);
+      end;
+    end;
+
+    pmUnIntelliSense.Items.Add(TableItem);
+  end;
 end;
 
 procedure TfmQueryWindow.rgScreenModesClick(Sender: TObject);

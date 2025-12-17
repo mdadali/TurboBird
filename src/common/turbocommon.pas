@@ -31,7 +31,8 @@ uses
 
   SysTables,
   EnterPass,
-  fsimpleobjextractor;
+  fsimpleobjextractor,
+  cUnIntelliSenseCache;
 
 {$I version.inc}
 {$I turbocommon.inc}
@@ -53,9 +54,11 @@ type
   tvotEmbeddedServer,
   tvotDB,
   tvotQueryWindow,
+
   tvotTableRoot,
   tvotTable,
   tvotTableField,
+
   tvotGeneratorRoot,
   tvotGenerator,
 
@@ -152,6 +155,7 @@ type
   tvotDataRoot,
   tvotData,
 
+  tvotSystemObjectRoot,
   tvotSystemTableRoot,
   tvotSystemTable,
   tvotSystemDomainRoot,
@@ -286,6 +290,7 @@ type
     ExecuteForm: TForm;
 
     SimpleObjExtractor: TSimpleObjExtractor;
+    UnIntelliSenseCache: TUnIntelliSenseCache;
     ServerSession: TServerSession;
   end;
 
