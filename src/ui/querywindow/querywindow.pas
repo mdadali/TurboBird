@@ -1392,8 +1392,8 @@ begin
   // Get current database tables to be highlighted in SQL query editor
   SynSQLSyn1.TableNames.CommaText:= fmMain.GetTableNames(dbIndex);
   for i := 0 to SynSQLSyn1.TableNames.Count - 1 do
-    if IsFBObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
-      SynSQLSyn1.TableNames[i] := MakeFBObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]);
+    if IsObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
+      SynSQLSyn1.TableNames[i] := QuoteObjectName(SynSQLSyn1.TableNames[i]);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
   //SortSynCompletion;
 end;
@@ -3123,7 +3123,7 @@ begin
   if TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption) then
     meQuery.SelText := TMenuItem(Sender).Caption
   else
-    meQuery.SelText := MakeFBObjectNameCaseSensitive(TMenuItem(Sender).Caption);
+    meQuery.SelText := QuoteObjectName(TMenuItem(Sender).Caption);
 end;
 
 {procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);

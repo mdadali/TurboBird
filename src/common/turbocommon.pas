@@ -407,9 +407,12 @@ var
     AllowIniOverrides: boolean;
 
 
-function IsFBObjectNameCaseSensitive(AObjectName: string): boolean;
-function MakeFBObjectNameCaseSensitive(AObjectName: string): string;
-procedure MakeFObjectNameListCaseSensitive(var AObjectList: TStringList);
+function  IsObjectNameCaseSensitive(const AObjectName: string): boolean;
+function  IsbjectNameQuoted(const AStr: string): Boolean;
+function  QuoteObjectName(const AObjectName: string): string;
+procedure QuoteObjectNameList(var AObjectList: TStringList);
+function  UnquoteObjectName(const AStr: string): string;
+
 
 function NeedsCommit(Q: TIBQuery): Boolean;
 
@@ -540,21 +543,50 @@ implementation
 
 uses Reg;
 
-procedure MakeFObjectNameListCaseSensitive(var AObjectList: TStringList);
-var i: integer;
-begin
-  for i := 0 to AObjectList.Count - 1 do
-    AObjectList[i] := MakeFBObjectNameCaseSensitive(AObjectList[i]);
-end;
-
-function IsFBObjectNameCaseSensitive(AObjectName: string): boolean;
+function IsObjectNameCaseSensitive(const AObjectName: string): boolean;
 begin
   result := (AObjectName <> UpperCase(AObjectName));
 end;
 
-function MakeFBObjectNameCaseSensitive(AObjectName: string): string;
+function IsbjectNameQuoted(const AStr: string): Boolean;
+var
+  S: string;
+begin
+  S := Trim(AStr);
+
+  Result :=
+    (Length(S) >= 2) and
+    (S[1] = '"') and
+    (S[Length(S)] = '"');
+end;
+
+function QuoteObjectName(const AObjectName: string): string;
 begin
   result := '"' + AObjectName + '"';
+end;
+
+procedure QuoteObjectNameList(var AObjectList: TStringList);
+var i: integer;
+begin
+  for i := 0 to AObjectList.Count - 1 do
+    AObjectList[i] := QuoteObjectName(AObjectList[i]);
+end;
+
+function UnquoteObjectName(const AStr: string): string;
+var
+  S: string;
+begin
+  S := Trim(AStr);
+
+  if IsbjectNameQuoted(S) then
+  begin
+    // äußere Quotes entfernen
+    S := Copy(S, 2, Length(S) - 2);
+    // escaped quotes zurückwandeln
+    Result := StringReplace(S, '""', '"', [rfReplaceAll]);
+  end
+  else
+    Result := S;
 end;
 
 {  TIBSQLStatementTypes =

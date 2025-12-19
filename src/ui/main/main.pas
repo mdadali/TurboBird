@@ -7118,7 +7118,7 @@ begin
   begin
     CleanNodeText := GetClearNodeText(SelNode.Text);
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex,  CleanNodeText,  SelNode.Data);
-    QWindow.meQuery.Lines.Text:= 'select * from ' + MakeFBObjectNameCaseSensitive(CleanNodeText);
+    QWindow.meQuery.Lines.Text:= 'select * from ' + QuoteObjectName(CleanNodeText);
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
