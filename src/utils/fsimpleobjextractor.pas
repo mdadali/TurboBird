@@ -10,7 +10,6 @@ uses
 
   fbcommon,
 
-
   udb_udr_func_fetcher;
 
 {$I turbocommon.inc}
@@ -564,6 +563,7 @@ end;
 
 procedure  TSimpleObjExtractor.ExtractObjectNames(dbIndex: integer; ObjectType: TObjectType; SystemFlag: boolean;  var AItems: TStrings; OwnerObjName: string='');
 var ServerVersionMajor: word;
+    isObjNameCaseSensitive: boolean;
     i, RecCount: integer;
 begin
   ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
@@ -924,9 +924,10 @@ try
   begin
 
     AItems.Add(Trim(FIBSQL.Fields[0].AsString));
+    isObjNameCaseSensitive := (AItems[i] <> UpperCase(AItems[i]));
 
-    if  IsObjectNameCaseSensitive(AItems[i]) then
-      AItems[i] := QuoteObjectName(AItems[i]);
+    if  isObjNameCaseSensitive then
+      AItems[i] := MakeObjectNameQuoted(AItems[i]);
 
     FIBSQL.Next;
   end;

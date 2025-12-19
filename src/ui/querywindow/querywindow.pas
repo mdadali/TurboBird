@@ -1393,7 +1393,7 @@ begin
   SynSQLSyn1.TableNames.CommaText:= fmMain.GetTableNames(dbIndex);
   for i := 0 to SynSQLSyn1.TableNames.Count - 1 do
     if IsObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
-      SynSQLSyn1.TableNames[i] := QuoteObjectName(SynSQLSyn1.TableNames[i]);
+      SynSQLSyn1.TableNames[i] := MakeObjectNameQuoted(SynSQLSyn1.TableNames[i]);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
   //SortSynCompletion;
 end;
@@ -3123,74 +3123,8 @@ begin
   if TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption) then
     meQuery.SelText := TMenuItem(Sender).Caption
   else
-    meQuery.SelText := QuoteObjectName(TMenuItem(Sender).Caption);
+    meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
 end;
-
-{procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
-var
-  TableItem, FieldItem, DummyItem: TMenuItem;
-  Tables, Fields: TStringList;
-  TableName, FieldName: string;
-  dbIndex, i, j: Integer;
-  SimpleObjExtractor: TSimpleObjExtractor;
-  DBNode: TTreeNode;
-  DB: TIBDatabase;
-begin
-  Tables := TStringList.Create;
-  Fields := TStringList.Create;
-
-  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
-
-  dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
-  DB := RegisteredDatabases[dbIndex].IBDatabase;
-  DB.GetTableNames(Tables);
-
-  SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
-  pmUnIntelliSense.Items.Clear;
-
-  try
-    //DB.GetTableNames(Tables);
-    SimpleObjExtractor.ExtractTableNames(Tables, false, false);
-
-    for i := 0 to Tables.Count - 1 do
-    begin
-      TableName := Tables[i];
-
-      // Hauptmenü = Tabelle
-      TableItem := TMenuItem.Create(pmUnIntelliSense);
-      TableItem.Caption := TableName;
-
-      DummyItem := TMenuItem.Create(TableItem);
-      DummyItem.Caption := TableName;
-      DummyItem.OnClick := @pmUnIntelliSenseClick;
-      TableItem.Add(DummyItem);
-
-      DummyItem := TMenuItem.Create(TableItem);
-      DummyItem.Caption := '-';
-      TableItem.Add(DummyItem);
-      SimpleObjExtractor.ExtractCleanTableFields(TableName, Fields, false, ' ');
-      try
-        for j := 0 to Fields.Count - 1 do
-        begin
-          FieldName := Fields[j];
-
-          FieldItem := TMenuItem.Create(TableItem);
-          FieldItem.Caption := FieldName;
-          FieldItem.OnClick := @pmUnIntelliSenseClick;
-
-          TableItem.Add(FieldItem);
-        end;
-      finally
-        Fields.Clear;
-      end;
-
-      pmUnIntelliSense.Items.Add(TableItem);
-    end;
-  finally
-    Fields.Free;
-    Tables.Free;
-  end;
-end;}
 
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 var

@@ -264,7 +264,7 @@ var
   Iso: TIsolatedQuery;
 begin
   ScriptList.Clear;
-  ScriptList.Add('CREATE TABLE ' +  QuoteObjectName(ATableName) + ' (');
+  ScriptList.Add('CREATE TABLE ' +  MakeObjectNameQuoted(ATableName) + ' (');
   CalculatedList:= TStringList.Create;
 
   try
@@ -278,7 +278,7 @@ begin
       begin
         // Field Name
         FieldLine:= Trim(FieldByName('Field_Name').AsString);
-        FieldLine := QuoteObjectName(FieldLine)  + ' ';
+        FieldLine := MakeObjectNameQuoted(FieldLine)  + ' ';
 
         if (FieldByName('field_source').IsNull) or
           (trim(FieldByName('field_source').AsString)='') or
@@ -332,8 +332,8 @@ begin
 
       // Computed Fields
       if FieldByName('computed_source').AsString <> '' then
-        CalculatedList.Add('ALTER TABLE ' + QuoteObjectName(ATableName) + ' ADD ' +
-          QuoteObjectName(Trim(FieldByName('Field_Name').AsString)) + ' COMPUTED BY ' + FieldByName('computed_source').AsString + ';');
+        CalculatedList.Add('ALTER TABLE ' + MakeObjectNameQuoted(ATableName) + ' ADD ' +
+          MakeObjectNameQuoted(Trim(FieldByName('Field_Name').AsString)) + ' COMPUTED BY ' + FieldByName('computed_source').AsString + ';');
 
       Next;
 
@@ -367,7 +367,7 @@ begin
         else // User-specified, so explicilty mention constraint name
           FieldLine:= 'constraint ' + ConstraintName + ' primary key (';
         for i:= 0 to PKFieldsList.Count - 1 do
-          FieldLine:= FieldLine + QuoteObjectName(PKFieldsList[i]) + ', ';
+          FieldLine:= FieldLine + MakeObjectNameQuoted(PKFieldsList[i]) + ', ';
         if PKFieldsList.Count > 0 then
         begin
           Delete(FieldLine, Length(FieldLine) - 1, 2);

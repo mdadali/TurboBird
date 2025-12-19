@@ -407,12 +407,9 @@ var
     AllowIniOverrides: boolean;
 
 
-function  IsObjectNameCaseSensitive(const AObjectName: string): boolean;
-function  IsbjectNameQuoted(const AStr: string): Boolean;
-function  QuoteObjectName(const AObjectName: string): string;
-procedure QuoteObjectNameList(var AObjectList: TStringList);
-function  UnquoteObjectName(const AStr: string): string;
-
+function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
+function  MakeObjectNameQuoted(AObjectName: string): string;
+procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 
 function NeedsCommit(Q: TIBQuery): Boolean;
 
@@ -543,50 +540,21 @@ implementation
 
 uses Reg;
 
-function IsObjectNameCaseSensitive(const AObjectName: string): boolean;
+function IsObjectNameCaseSensitive(AObjectName: string): boolean;
 begin
   result := (AObjectName <> UpperCase(AObjectName));
 end;
 
-function IsbjectNameQuoted(const AStr: string): Boolean;
-var
-  S: string;
-begin
-  S := Trim(AStr);
-
-  Result :=
-    (Length(S) >= 2) and
-    (S[1] = '"') and
-    (S[Length(S)] = '"');
-end;
-
-function QuoteObjectName(const AObjectName: string): string;
+function MakeObjectNameQuoted(AObjectName: string): string;
 begin
   result := '"' + AObjectName + '"';
 end;
 
-procedure QuoteObjectNameList(var AObjectList: TStringList);
+procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 var i: integer;
 begin
   for i := 0 to AObjectList.Count - 1 do
-    AObjectList[i] := QuoteObjectName(AObjectList[i]);
-end;
-
-function UnquoteObjectName(const AStr: string): string;
-var
-  S: string;
-begin
-  S := Trim(AStr);
-
-  if IsbjectNameQuoted(S) then
-  begin
-    // äußere Quotes entfernen
-    S := Copy(S, 2, Length(S) - 2);
-    // escaped quotes zurückwandeln
-    Result := StringReplace(S, '""', '"', [rfReplaceAll]);
-  end
-  else
-    Result := S;
+    AObjectList[i] := MakeObjectNameQuoted(AObjectList[i]);
 end;
 
 {  TIBSQLStatementTypes =
