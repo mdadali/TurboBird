@@ -47,7 +47,6 @@ begin
   Result := False;
   FTableCache.Clear;
   SetLength(FFieldCacheArray, 0);
-
   try
     FSimpleObjExtractor.ExtractTableNames(FTableCache, False, False);
     SetLength(FFieldCacheArray, FTableCache.Count);
@@ -67,19 +66,11 @@ var
   i: Integer;
 begin
   Result := False;
-
   try
     for i := 0 to FTableCache.Count - 1 do
     begin
       FFieldCacheArray[i] := TStringList.Create;
-
-      FSimpleObjExtractor.ExtractCleanTableFields(
-        FTableCache[i],
-        FFieldCacheArray[i],
-        False,
-        ' '
-      );
-
+      FSimpleObjExtractor.ExtractCleanTableFields( FTableCache[i], FFieldCacheArray[i], False, ' ');
       FFieldCacheArray[i].Insert(0, FTableCache[i]);
     end;
 
@@ -97,13 +88,7 @@ begin
         end;
       end;
 
-      MessageDlg(
-        'Error loading table fields',
-        E.Message,
-        mtError,
-        [mbOK],
-        0
-      );
+      MessageDlg('Error loading table fields', E.Message, mtError, [mbOK], 0);
     end;
   end;
 end;

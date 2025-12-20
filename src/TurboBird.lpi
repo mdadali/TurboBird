@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1589"/>
+      <BuildNr Value="1593"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -413,81 +413,90 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="24">
+    <RequiredPackages Count="27">
       <Item1>
-        <PackageName Value="LR_SqlDB"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item1>
       <Item2>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item2>
       <Item3>
-        <PackageName Value="cadsys"/>
+        <PackageName Value="rxnew"/>
       </Item3>
       <Item4>
-        <PackageName Value="lazrichview"/>
+        <PackageName Value="LR_SqlDB"/>
       </Item4>
       <Item5>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="indylaz"/>
       </Item5>
       <Item6>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="cadsys"/>
       </Item6>
       <Item7>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="lazrichview"/>
       </Item7>
       <Item8>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item8>
       <Item9>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="FrameViewer09"/>
       </Item9>
       <Item10>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="atbinhex_package"/>
       </Item10>
       <Item11>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="lazreport"/>
       </Item11>
       <Item12>
-        <PackageName Value="iblocalnongui"/>
+        <PackageName Value="lazdbexport"/>
       </Item12>
       <Item13>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item13>
       <Item14>
-        <PackageName Value="ibexpressconsolemode"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item14>
       <Item15>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="iblocalnongui"/>
       </Item15>
       <Item16>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item16>
       <Item17>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="ibexpressconsolemode"/>
       </Item17>
       <Item18>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="ibnongui"/>
       </Item18>
       <Item19>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="dclibx"/>
       </Item19>
       <Item20>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="iblocaldb"/>
       </Item20>
       <Item21>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="ibcontrols"/>
       </Item21>
       <Item22>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="ibexpress"/>
       </Item22>
       <Item23>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="Abbrevia"/>
       </Item23>
       <Item24>
-        <PackageName Value="LCL"/>
+        <PackageName Value="MemDSLaz"/>
       </Item24>
+      <Item25>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item25>
+      <Item26>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item26>
+      <Item27>
+        <PackageName Value="LCL"/>
+      </Item27>
     </RequiredPackages>
     <Units Count="101">
       <Unit0>

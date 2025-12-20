@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 463
+  Left = 420
   Height = 485
-  Top = 179
+  Top = 254
   Width = 903
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
@@ -3222,6 +3222,7 @@ object fmMain: TfmMain
     object lmExtractTableFields: TMenuItem
       Tag = 1
       Caption = 'Extract Tablefields'
+      ImageIndex = 81
       OnClick = lmExtractTableFieldsClick
     end
     object Separator1: TMenuItem

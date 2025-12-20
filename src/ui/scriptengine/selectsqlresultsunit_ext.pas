@@ -72,6 +72,7 @@ begin
   SelectQuery.Last;
   if SelectQuery.EnableStatistics then
     TIBCustomDataOutput.ShowPerfStats(SelectQuery.StmtHandle, @Add2Log );
+
 end;
 
 procedure TSelectSQLResultsExt.Add2Log(const Msg: string; IsError: boolean);

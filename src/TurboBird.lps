@@ -5,7 +5,7 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="120">
+    <Units Count="121">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -276,8 +276,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="7105"/>
-        <CursorPos X="44" Y="7108"/>
+        <TopLine Value="8017"/>
+        <CursorPos X="27" Y="8021"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -322,9 +322,9 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="3112"/>
-        <CursorPos Y="3128"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1776"/>
+        <CursorPos X="30" Y="1810"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -336,11 +336,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewView"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="31"/>
-        <CursorPos X="30" Y="41"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="28" Y="52"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit35>
       <Unit36>
         <Filename Value="ui\viewtrigger\viewtrigger.pas"/>
@@ -464,11 +463,11 @@
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="541"/>
-        <CursorPos X="33" Y="561"/>
+        <TopLine Value="2851"/>
+        <CursorPos X="42" Y="2865"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 X="5" Y="813" ID="4"/>
+          <Item0 X="5" Y="836" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit46>
@@ -984,7 +983,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="22" Y="14"/>
+        <TopLine Value="233"/>
+        <CursorPos X="48" Y="242"/>
         <UsageCount Value="297092"/>
       </Unit96>
       <Unit97>
@@ -993,10 +993,11 @@
         <ComponentName Value="SelectSQLResultsExt"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos X="28" Y="92"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="75"/>
+        <CursorPos X="3" Y="75"/>
         <UsageCount Value="297087"/>
+        <Loaded Value="True"/>
       </Unit97>
       <Unit98>
         <Filename Value="utils\data_exporters\fclipboardexport.pas"/>
@@ -1009,20 +1010,20 @@
       <Unit99>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="916"/>
-        <CursorPos X="40" Y="930"/>
-        <UsageCount Value="180"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="28"/>
+        <CursorPos X="44" Y="41"/>
+        <UsageCount Value="195"/>
         <Loaded Value="True"/>
       </Unit99>
       <Unit100>
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="165"/>
-        <CursorPos Y="189"/>
-        <UsageCount Value="31"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="152"/>
+        <CursorPos X="40" Y="159"/>
+        <UsageCount Value="46"/>
         <Loaded Value="True"/>
       </Unit100>
       <Unit101>
@@ -1117,9 +1118,9 @@
       <Unit113>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBExtract.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="719"/>
-        <CursorPos X="47" Y="727"/>
-        <UsageCount Value="32"/>
+        <TopLine Value="4348"/>
+        <CursorPos Y="4355"/>
+        <UsageCount Value="36"/>
       </Unit113>
       <Unit114>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
@@ -1163,127 +1164,135 @@
         <CursorPos X="15" Y="665"/>
         <UsageCount Value="8"/>
       </Unit119>
+      <Unit120>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\dbgrids.pas"/>
+        <UnitName Value="DBGrids"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="256"/>
+        <CursorPos X="3" Y="256"/>
+        <UsageCount Value="13"/>
+      </Unit120>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="common\cunintellisensecache.pas"/>
-        <Caret Line="53" Column="39" TopLine="42"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2614" TopLine="2590"/>
       </Position1>
       <Position2>
-        <Filename Value="common\cunintellisensecache.pas"/>
-        <Caret Line="63" TopLine="42"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1975" TopLine="1961"/>
       </Position2>
       <Position3>
-        <Filename Value="common\cunintellisensecache.pas"/>
-        <Caret Line="123" TopLine="107"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1978" TopLine="1961"/>
       </Position3>
       <Position4>
-        <Filename Value="common\cunintellisensecache.pas"/>
-        <Caret Line="127" TopLine="107"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1866" Column="37" TopLine="1861"/>
       </Position4>
       <Position5>
-        <Filename Value="common\cunintellisensecache.pas"/>
-        <Caret Line="189" TopLine="165"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1865" Column="37" TopLine="1860"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="8044" TopLine="8028"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1972" Column="36" TopLine="1956"/>
       </Position6>
       <Position7>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="538" Column="37" TopLine="532"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1914" Column="53" TopLine="1909"/>
       </Position7>
       <Position8>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="261" Column="21" TopLine="251"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1915" Column="53" TopLine="1910"/>
       </Position8>
       <Position9>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="281" Column="26" TopLine="266"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1916" Column="53" TopLine="1911"/>
       </Position9>
       <Position10>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="336" Column="15" TopLine="320"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="2855" Column="13" TopLine="2833"/>
       </Position10>
       <Position11>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="370" Column="39" TopLine="355"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1972" Column="36" TopLine="1957"/>
       </Position11>
       <Position12>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="7121" Column="57" TopLine="7106"/>
+        <Caret Line="2772" Column="26" TopLine="2762"/>
       </Position12>
       <Position13>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="538" Column="37" TopLine="532"/>
+        <Caret Line="2870" Column="68" TopLine="2843"/>
       </Position13>
       <Position14>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="549" Column="32" TopLine="529"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8025" Column="51" TopLine="8014"/>
       </Position14>
       <Position15>
         <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="3126" Column="28" TopLine="3111"/>
+        <Caret Line="1972" Column="36" TopLine="1957"/>
       </Position15>
       <Position16>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="548" Column="30" TopLine="538"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="1950" Column="37" TopLine="1937"/>
       </Position16>
       <Position17>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="545" Column="34" TopLine="542"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8025" Column="64" TopLine="8014"/>
       </Position17>
       <Position18>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="561" Column="33" TopLine="541"/>
+        <Filename Value="common\cunintellisensecache.pas"/>
+        <Caret Line="32" Column="21" TopLine="19"/>
       </Position18>
       <Position19>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="267" Column="57" TopLine="252"/>
+        <Filename Value="common\cunintellisensecache.pas"/>
+        <Caret Line="72" Column="48" TopLine="62"/>
       </Position19>
       <Position20>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="281" Column="42" TopLine="266"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8025" Column="19" TopLine="8017"/>
       </Position20>
       <Position21>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="336" Column="31" TopLine="320"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8034" Column="2" TopLine="8017"/>
       </Position21>
       <Position22>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="338" Column="27" TopLine="321"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="264" Column="50" TopLine="257"/>
       </Position22>
       <Position23>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="370" Column="55" TopLine="355"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2879" TopLine="2863"/>
       </Position23>
       <Position24>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="406" Column="31" TopLine="385"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3408" Column="31" TopLine="3401"/>
       </Position24>
       <Position25>
-        <Filename Value="utils\scriptdb.pas"/>
-        <Caret Line="428" Column="43" TopLine="412"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="260" Column="24" TopLine="250"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="7108" Column="44" TopLine="7105"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2880" Column="23" TopLine="2855"/>
       </Position26>
       <Position27>
         <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1386" Column="41" TopLine="1381"/>
+        <Caret Line="3342" Column="39" TopLine="3333"/>
       </Position27>
       <Position28>
         <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="3126" Column="44" TopLine="3111"/>
+        <Caret Line="3409" Column="5" TopLine="3391"/>
       </Position28>
       <Position29>
         <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="3128" Column="45" TopLine="3123"/>
+        <Caret Line="2872" Column="25" TopLine="2855"/>
       </Position29>
       <Position30>
-        <Filename Value="utils\fsimpleobjextractor.pas"/>
-        <Caret Line="930" Column="40" TopLine="916"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="269" Column="23" TopLine="258"/>
       </Position30>
     </JumpHistory>
     <RunParams>

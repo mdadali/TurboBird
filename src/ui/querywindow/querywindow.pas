@@ -15,8 +15,8 @@ uses
 
   typinfo,
 
-  IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB,
-  ibxscript,
+  IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB, RxDBGrid, RxDBGridExportPdf,
+  RxDBGridPrintGrid, RxDBGridExportSpreadSheet, ibxscript,
 
   fdataexportersintrf,
   fblobedit,
@@ -82,7 +82,11 @@ type
     lmExportDataAsHtml: TMenuItem;
     lmExportToClipboard: TMenuItem;
     pmUnIntelliSense: TPopupMenu;
+    pmTmpGrid: TPopupMenu;
     rgScreenModes: TRadioGroup;
+    RxDBGridExportPDF1: TRxDBGridExportPDF;
+    RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
+    RxDBGridPrint1: TRxDBGridPrint;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
     SynAutoComplete1: TSynAutoComplete;
@@ -253,7 +257,17 @@ type
     procedure CommitResultClick(Sender: TObject);
     procedure RemovePreviousResultTabs;
 
+    procedure LoadpmUnIntelliSense;
     procedure pmUnIntelliSenseClick(Sender: TObject);
+
+    //RxDBGrid////////////////////////////
+    function  BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
+    procedure ApplyGridSort(Grid: TRxDBGrid);
+    procedure SaveGridSort(Grid: TRxDBGrid);
+    procedure RestoreGridSort(Grid: TRxDBGrid);
+
+    procedure RxDBGridSortControllerTitleClick(Column: TColumn);
+    /////////////////////////////////////////
 
   protected
     // This procedure will receive the events that are logged by the connection:
@@ -289,9 +303,16 @@ type
     { public declarations }
   end; 
 
-//var
-  //fmQueryWindow: TfmQueryWindow;
 
+type
+  TSortInfo = record
+    FieldName: string;
+    SortOrder: TSortMarker;  // ← korrekt
+  end;
+
+var
+  SavedSort: array of TSortInfo;
+  SortGlobalOrderBy: string;
 
 implementation
 
@@ -1702,6 +1723,171 @@ begin
 end;
 
 
+procedure RemoveTitleCaptions(Grid: TRxDBGrid);
+var i: integer;
+begin
+  for i := 0 to Grid.Columns.Count - 1 do
+    Grid.Columns.Items[i].Title.Caption := '';
+end;
+
+procedure TfmQueryWindow.SaveGridSort(Grid: TRxDBGrid);
+var
+  i, j: Integer;
+  Cols: array of TRxColumn;
+  Tmp: TRxColumn;
+begin
+  SetLength(SavedSort, 0);
+
+  // 1️⃣ sortierte Spalten sammeln
+  SetLength(Cols, 0);
+  for i := 0 to Grid.Columns.Count - 1 do
+    if Grid.Columns[i].SortOrder <> smNone then
+    begin
+      SetLength(Cols, Length(Cols) + 1);
+      Cols[High(Cols)] := Grid.Columns[i];
+    end;
+
+  // 2️⃣ nach SortPosition sortieren
+  for i := 0 to High(Cols) - 1 do
+    for j := i + 1 to High(Cols) do
+      if Cols[i].SortPosition > Cols[j].SortPosition then
+      begin
+        Tmp := Cols[i];
+        Cols[i] := Cols[j];
+        Cols[j] := Tmp;
+      end;
+
+  // 3️⃣ in dieser Reihenfolge speichern
+  SetLength(SavedSort, Length(Cols));
+  for i := 0 to High(Cols) do
+  begin
+    SavedSort[i].FieldName := Cols[i].FieldName;
+    SavedSort[i].SortOrder := Cols[i].SortOrder;
+  end;
+end;
+
+procedure TfmQueryWindow.RestoreGridSort(Grid: TRxDBGrid);
+var
+  i, j: Integer;
+begin
+  // alles zurücksetzen
+  for j := 0 to Grid.Columns.Count - 1 do
+    Grid.Columns[j].SortOrder := smNone;
+
+  // in der gespeicherten Reihenfolge neu setzen
+  for i := 0 to High(SavedSort) do
+    for j := 0 to Grid.Columns.Count - 1 do
+      if SameText(Grid.Columns[j].FieldName, SavedSort[i].FieldName) then
+      begin
+        Grid.Columns[j].SortOrder := SavedSort[i].SortOrder;
+        Break;
+      end;
+end;
+
+function TfmQueryWindow.BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
+var
+  SortCols: TStringList;
+  i, j: Integer;
+  Col, Tmp: TRxColumn;
+  FieldName: string;
+  ResultStr: string;
+begin
+  SortCols := TStringList.Create;
+  try
+    // 1️⃣ sortierte Spalten sammeln
+    for i := 0 to Grid.Columns.Count - 1 do
+    begin
+      Col := TRxColumn(Grid.Columns[i]);
+      if Col.SortOrder <> smNone then
+        SortCols.AddObject('', Col);
+    end;
+
+    // 2️⃣ nach SortPosition sortieren (wie RxDBGrid intern)
+    for i := 0 to SortCols.Count - 2 do
+      for j := i + 1 to SortCols.Count - 1 do
+        if TRxColumn(SortCols.Objects[i]).SortPosition >
+           TRxColumn(SortCols.Objects[j]).SortPosition then
+        begin
+          Tmp := TRxColumn(SortCols.Objects[i]);
+          SortCols.Objects[i] := SortCols.Objects[j];
+          SortCols.Objects[j] := Tmp;
+        end;
+
+    // 3️⃣ ORDER BY aufbauen
+    ResultStr := '';
+    for i := 0 to SortCols.Count - 1 do
+    begin
+      Col := TRxColumn(SortCols.Objects[i]);
+
+      FieldName := Col.FieldName;
+      if QuoteNames then
+        FieldName := '"' + FieldName + '"';
+
+      if ResultStr <> '' then
+        ResultStr := ResultStr + ', ';
+
+      if Col.SortOrder = smUp then
+        ResultStr := ResultStr + FieldName + ' ASC'
+      else
+        ResultStr := ResultStr + FieldName + ' DESC';
+    end;
+
+    Result := ResultStr;
+  finally
+    SortCols.Free;
+    Grid.Repaint;
+  end;
+end;
+
+procedure TfmQueryWindow.ApplyGridSort(Grid: TRxDBGrid);
+var OrderBy: string;
+    IBQuery,
+    TmpIBQuery: TIBQuery;
+    TmpGrid: TRxDBGrid;
+    TmpDS: TDataSource;
+begin
+  OrderBy := BuildOrderBy(Grid, false);
+  ShowMessage(OrderBy);
+  SaveGridSort(Grid);
+
+  IBQuery := GetCurrentSelectQuery;
+
+  //TmpGrid := TRxDBGrid(Grid.FindComponent('TmpGrid'));
+  //TmpGrid.SetSort();
+
+  {TmpIBQuery := TIBQuery(IBQuery.FindComponent('TmpIBQuery'));
+  if TmpIBQuery.Active then
+    TmpIBQuery.Close;
+  TmpDS := TDataSource(Grid.DataSource.FindComponent('TmpDS'));
+  TmpDS.DataSet := TmpIBQuery;
+  TmpGrid.DataSource := TmpDS;
+
+  TmpGrid.Left  := Grid.Left;
+  TmpGrid.Width := Grid.Width;
+  TmpGrid.Top   := Grid.DefaultRowHeight;
+  TmpGrid.Height := Grid.Height - Grid.DefaultRowHeight;
+
+  TmpIBQuery.Database := IBQuery.Database;
+  TmpIBQuery.Transaction := IBQuery.Database.DefaultTransaction;
+  TmpIBQuery.SQL.Text := IBQuery.Text;
+  TmpIBQuery.Parser.OrderByClause := SortGlobalOrderBy;
+  TmpIBQuery.Open; }
+
+  IBQuery.Close;
+  IBQuery.Parser.OrderByClause := OrderBy;
+
+  IBQuery.SQL.Text := IBQuery.Parser.SQLText;
+  IBQuery.Open;
+
+  RestoreGridSort(Grid);
+end;
+
+procedure TfmQueryWindow.RxDBGridSortControllerTitleClick(Column: TColumn);
+begin
+  ApplyGridSort(TRxDBGrid(pmGrid.PopupComponent));
+end;
+
+
 { Create new result tab depending on query type }
 
 function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
@@ -1709,8 +1895,10 @@ function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
   AdditionalTitle: string): TTabSheet;
 var
   ATab: TTabSheet;
-  DBGrid: TIBDynamicGrid;
-  DataSource: TDataSource;
+  //DBGrid: TIBDynamicGrid;
+  DBGrid, TmpDBGrid: TRxDBGrid;
+  DataSource, TmpDS: TDataSource;
+  TmpIBQuery: TIBQuery;
   StatusBar: TStatusBar;
   Nav: TDBNavigator;
   Pan: TPanel;
@@ -1754,31 +1942,56 @@ begin
     Pan.Align:= alTop;
 
     // Query result Grid
-    DBGrid:= TIBDynamicGrid.Create(self);
+    //DBGrid:= TIBDynamicGrid.Create(self);
+    DBGrid:= TRxDBGrid.Create(self);
+
+    //TmpDBGrid.Visible := false;
     DBGrid.Parent:= ATab;
     DBGrid.DataSource:= DataSource;
     DBGrid.Align:= alClient;
     DBGrid.OnDblClick:= @DBGrid1DblClick;
+    DBGrid.OptionsRx := [rdgAllowColumnsForm,rdgAllowDialogFind,rdgHighlightFocusCol,rdgHighlightFocusRow,rdgFooterRows,rdgAllowQuickFilter,rdgAllowFilterForm,rdgAllowSortForm,rdgAllowToolMenu,rdgCaseInsensitiveSort,rdgDisableWordWrapTitles,rdgColSpanning];
+
+    DBGrid.TitleButtons := true;
+    DBGrid.AutoSort := true;
+    DBGrid.DoubleBuffered := true;
+    DBGrid.OnTitleClick := @RxDBGridSortControllerTitleClick;
+    pmGrid.PopupComponent := DBGrid;
 
     DBGrid.Tag:= ATab.TabIndex;
     DBGrid.ReadOnly:= False;
-    DBGrid.AutoEdit:= True;
+    DBGrid.AutoEdit:= false;
+
 
     DBGrid.PopupMenu:= pmGrid;
     DBGrid.TitleStyle:= tsNative;
-    DBGrid.Options:= DBGrid.Options + [dgAutoSizeColumns, dgHeaderHotTracking, dgHeaderPushedLook, dgAnyButtonCanSelect];
 
     // Navigator
     Nav:= TDBNavigator.Create(self);
     Nav.Parent:= Pan;
     Nav.VisibleButtons:= [nbFirst, nbNext, nbPrior, nbLast];
     Nav.DataSource:= DataSource;
+    Nav.Visible := QWShowNavigator;
+
 
     // Apply button
     NewApplyButton(Pan, ATab);
 
     // Commit button
     NewCommitButton(Pan, ATab);
+
+    //for RxSort
+    {TmpDBGrid:= TRxDBGrid.Create(DBGrid);
+    TmpDBGrid.Name := 'TmpGrid';
+    TmpDBGrid.Parent := DBGrid;
+    TmpDBGrid.OptionsRx := [rdgAllowColumnsForm,rdgAllowDialogFind,rdgHighlightFocusCol,rdgHighlightFocusRow,rdgFooterRows,rdgAllowQuickFilter,rdgAllowFilterForm,rdgAllowSortForm,rdgAllowToolMenu,rdgCaseInsensitiveSort,rdgDisableWordWrapTitles,rdgColSpanning];
+
+    TmpIBQuery := TIBQuery.Create(aSqlQuery);
+    TmpIBQuery.Name := 'TmpIBQuery';
+
+    TmpDS := TDataSource.Create(DataSource);
+    TmpDS.Name := 'TmpDS';
+    }
   end
   else
   if QueryType in [qtExecute, qtScript] then
@@ -2529,8 +2742,8 @@ end;
 
 procedure TfmQueryWindow.DBGrid1DblClick(Sender: TObject);
 begin
-  ShowMessage('Field contents: ' + LineEnding +
-    (Sender as TDBGrid).SelectedField.AsString)
+  {ShowMessage('Field contents: ' + LineEnding +
+    (Sender as TDBGrid).SelectedField.AsString)}
 end;
 
 
@@ -2664,12 +2877,7 @@ begin
   //SynCompletion1.ItemList.CommaText:= QuotedStr('select * from ') + 'Select, *,  From, create, table';
   SortSynCompletion;
 
-  // Set the editor font from config.ini
-  configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'config.ini']);
-  configFile:= TIniFile.Create(configFilePath);
-  meQuery.Font.Name:=configFile.ReadString('Editor Font', 'font_name', 'Monospace');
-  meQuery.Font.Size:=configFile.ReadInteger('Editor Font', 'font_size', 11);
-  configFile.Free;
+  LoadpmUnIntelliSense;
 end;
 
 procedure TfmQueryWindow.FormDestroy(Sender: TObject);
@@ -3126,7 +3334,7 @@ begin
     meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
 end;
 
-procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
+procedure TfmQueryWindow.LoadpmUnIntelliSense;
 var
   TableItem, FieldItem, DummyItem: TMenuItem;
   TableName, FieldName: string;
@@ -3142,7 +3350,13 @@ begin
 
   if (IntelliCache = nil) or not IntelliCache.Initialized then
   begin
-    // Optional: Meldung oder einfach leeres Menü
+    MessageDlg(
+      'IntelliSense',
+      'The IntelliSense cache is not initialized yet.',
+      mtInformation,
+      [mbOK],
+      0
+    );
     Exit;
   end;
 
@@ -3186,6 +3400,13 @@ begin
 
     pmUnIntelliSense.Items.Add(TableItem);
   end;
+end;
+
+//
+procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
+begin
+  if CacheMetaDataChanged then
+    LoadpmUnIntelliSense;
 end;
 
 procedure TfmQueryWindow.rgScreenModesClick(Sender: TObject);

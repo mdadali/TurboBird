@@ -6909,6 +6909,10 @@ begin
     // Move selection to tables above so object is not in use when deleting it
     SelNode.Collapse(true);
     SelNode.Parent.Selected:=true;
+
+    if IsObjectNameCaseSensitive(CleanNodeText) and ( not IsObjectNameQuoted(CleanNodeText)) then
+      CleanNodeText := MakeObjectNameQuoted(CleanNodeText);
+
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, 'Drop Table#:' + IntToStr(dbIndex) + CleanNodeText);
     QWindow.meQuery.Lines.Clear;
     QWindow.meQuery.Lines.Add('DROP TABLE ' + CleanNodeText + ';');
@@ -8020,26 +8024,15 @@ begin
     end else
     begin
       // Vorhandene Cache zurücksetzen, aber nicht freigeben
-      //if AlwaysRefreshIntelliCasche then
-      //NodeInfo^.UnIntelliSenseCache.RefreshCache;
+      // inifile.ReloadCacheOnNodeExpand, CacheMetaDataChanged = turbocommon global variable
+      if ReloadCacheOnNodeExpand or CacheMetaDataChanged then
+      begin
+        NodeInfo^.UnIntelliSenseCache.RefreshCache;
+        CacheMetaDataChanged := false;
+      end;
     end;
 
   end;
-
-  {if Node.Level > 1 then
-  begin
-    if (Node.Items[0].Text = 'Loading...') then
-    begin
-      Node.Items[0].Delete;
-      tvMain.Selected := node;
-      FillObjectRoot(Node);
-    end else
-    if MainTreeViewAlwaysRefresh then
-    begin
-      tvMain.Selected := node;
-      FillObjectRoot(Node);
-    end;
-  end;}
 
   if Node.Level > 1 then
   begin

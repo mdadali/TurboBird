@@ -1,10 +1,10 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 586
-  Height = 550
-  Top = 338
+  Left = 397
+  Height = 562
+  Top = 81
   Width = 954
   Caption = 'fmQueryWindow'
-  ClientHeight = 544
+  ClientHeight = 556
   ClientWidth = 954
   Color = clForm
   KeyPreview = True
@@ -28,17 +28,17 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 236
+    Height = 248
     Top = 308
     Width = 954
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 236
+    ClientHeight = 248
     ClientWidth = 954
     TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 236
+      Height = 248
       Top = 0
       Width = 954
       Align = alClient
@@ -976,8 +976,8 @@ object fmQueryWindow: TfmQueryWindow
     Top = 168
   end
   object pmTab: TPopupMenu
-    Left = 360
-    Top = 400
+    Left = 376
+    Top = 472
     object lmExport: TMenuItem
       Caption = 'Export Result as...'
     end
@@ -1010,8 +1010,8 @@ object fmQueryWindow: TfmQueryWindow
     end
   end
   object MainMenu1: TMainMenu
-    Left = 240
-    Top = 400
+    Left = 304
+    Top = 408
     object MenuItem3: TMenuItem
       Caption = 'Run'
       ShortCut = 116
@@ -1549,8 +1549,8 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pmGrid: TPopupMenu
     OnPopup = pmGridPopup
-    Left = 448
-    Top = 400
+    Left = 432
+    Top = 392
     object lmCopyCell: TMenuItem
       Caption = 'Copy field'
       OnClick = lmCopyCellClick
@@ -2204,7 +2204,35 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pmUnIntelliSense: TPopupMenu
     OnPopup = pmUnIntelliSensePopup
-    Left = 106
-    Top = 347
+    Left = 336
+    Top = 320
+  end
+  object pmTmpGrid: TPopupMenu
+    Left = 502
+    Top = 470
+  end
+  object RxDBGridPrint1: TRxDBGridPrint
+    Caption = 'Print grid'
+    ShowSetupForm = True
+    Options = [rxpoShowTitle, rxpoShowFooter, rxpoShowGridColor, rxpoShowFooterColor, rxpoShowReportTitle]
+    ShowProgress = True
+    Left = 96
+    Top = 408
+  end
+  object RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet
+    Caption = 'Export to speadsheet'
+    ShowSetupForm = True
+    Options = []
+    Left = 96
+    Top = 337
+  end
+  object RxDBGridExportPDF1: TRxDBGridExportPDF
+    Caption = 'Export to PDF file'
+    ShowSetupForm = True
+    Options = []
+    PdfOptions.Options = []
+    AuthorPdf = 'TurboBird'
+    Left = 91
+    Top = 490
   end
 end

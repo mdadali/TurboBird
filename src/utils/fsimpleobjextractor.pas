@@ -38,7 +38,7 @@ type
 
     procedure   Extract(ObjectType: TObjectType; ObjectName : String; ExtractTypes: TExtractTypes; Quoted: boolean; var AItems: TStrings);
     procedure   ExtractToTreeNode(ObjectType: TObjectType; ObjectName : String; ExtractTypes: TExtractTypes; Quoted: boolean; var Node: TTreeNode; AImageIndex: integer);
-    procedure   ExtractTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char; ReplaceLastComma: boolean);
+    procedure   ExtractTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char; RemoveLastComma: boolean);
     procedure   ExtractCleanTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
     procedure   ExtractTableFieldsToTreeNode(ATableName: string; var Node: TTreeNode; Quoted: boolean; Delimiter: char; ImageIndex: integer);
   end;
@@ -264,7 +264,7 @@ end;
 procedure TSimpleObjExtractor.ExtractTableFields(
   ATableName: string;
   var AItems: TStringList;
-   Quoted: boolean; Delimiter: char; ReplaceLastComma: boolean);
+   Quoted: boolean; Delimiter: char; RemoveLastComma: boolean);
 var
   i, StartIdx, EndIdx: Integer;
   Line, FieldName, FieldType: string;
@@ -341,9 +341,11 @@ begin
         else begin
           FieldName := StringReplace(FieldName, '"', '', [rfReplaceAll]);
           FieldType := StringReplace(FieldType, '"', '', [rfReplaceAll]);
-          if ReplaceLastComma then
-            FieldType := StringReplace(FieldType, ',', '', [rfReplaceAll]);
         end;
+
+        if RemoveLastComma then
+          FieldType := StringReplace(FieldType, ',', '', [rfReplaceAll]);
+
         AItems.Add(FieldName + Delimiter + FieldType);
       end;
 
@@ -376,6 +378,7 @@ begin
     AItems[i] := Trim(S);
   end;
 end;
+
 procedure TSimpleObjExtractor.ExtractTableFieldsToTreeNode(
   ATableName: string;
   var Node: TTreeNode;

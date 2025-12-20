@@ -237,6 +237,7 @@ begin
   SelectSQLResults.SelectQuery.Database := IBDatabase1;
   SelectSQLResults.IBTransaction1.DefaultDatabase := IBDatabase1;
   SelectSQLResults.Show(IBXScript1, SQLText, true);
+  SelectSQLResults.DataSource1.DataSet.First;
 end;
 
 procedure TfrmScriptEngine.LoadScriptExecute(Sender: TObject);

@@ -1,7 +1,7 @@
 object SelectSQLResultsExt: TSelectSQLResultsExt
-  Left = 377
+  Left = 804
   Height = 436
-  Top = 303
+  Top = 218
   Width = 693
   Anchors = []
   Caption = 'Select SQL Results'

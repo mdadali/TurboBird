@@ -354,6 +354,10 @@ var
 
     FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
 
+    //for IntelliSense
+    CacheMetaDataChanged: boolean;  //Tables and Fields
+
+    //Ini.File////////////////////////////////////////////////////////////////
     //Backup options
     CloseDBBeforeBackup: boolean;
 
@@ -388,6 +392,10 @@ var
     ExtractGrant,
     ExtractData: boolean;
 
+    //IntelliSense
+    ReloadCacheOnNodeExpand: boolean;
+
+
     //MainTreeView
     MainTreeViewAlwaysRefresh: boolean;
     MainTreeViewColor: TColor;
@@ -397,6 +405,7 @@ var
     MainTreeViewFontColor: TColor;
 
     //QueryWindow
+    QWShowNavigator: boolean;
     QWEditorBackgroundColor: TColor;
     QWEditorFontName: string;
     QWEditorFontSize: word;
@@ -405,9 +414,11 @@ var
 
     //Theme
     AllowIniOverrides: boolean;
+    //end-Ini.File////////////////////////////////////////////////////////////////
 
 
 function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
+function  IsObjectNameQuoted(const AStr: string): Boolean;
 function  MakeObjectNameQuoted(AObjectName: string): string;
 procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 
@@ -543,6 +554,18 @@ uses Reg;
 function IsObjectNameCaseSensitive(AObjectName: string): boolean;
 begin
   result := (AObjectName <> UpperCase(AObjectName));
+end;
+
+function IsObjectNameQuoted(const AStr: string): Boolean;
+var
+  S: string;
+begin
+  S := Trim(AStr);
+
+  Result :=
+    (Length(S) >= 2) and
+    (S[1] = '"') and
+    (S[Length(S)] = '"');
 end;
 
 function MakeObjectNameQuoted(AObjectName: string): string;
@@ -1552,6 +1575,9 @@ begin
   CaseSensitiveObjectNames := fIniFile.ReadBool('MetaData',  'CaseSensitiveObjectNames', true);
   ShowSystem               := fIniFile.ReadBool('MetaData',  'ShowSystem', false);
 
+  //IntelliSense
+  ReloadCacheOnNodeExpand := fIniFile.ReadBool('IntelliSense',  'ReloadCacheOnNodeExpand', false);
+
   //MetaDataTableExtract
   ExtractDomains := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractDomains', true);
   ExtractIndex   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractIndex', true);
@@ -1560,6 +1586,7 @@ begin
   ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
   ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
   ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', true);
+
 
   //Theme
   AllowIniOverrides           :=  fIniFile.ReadBool('UI',  'AllowIniOverrides', true);
@@ -1573,6 +1600,7 @@ begin
   MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
 
   //QueryWindow
+  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'QWShowNavigator', false);
   QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorBackgroundColor', 'clRed'));
   QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'EditorFontName', 'Arial');
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);
@@ -1609,6 +1637,10 @@ begin
   fIniFile.WriteBool('MetaData',  'CaseSensitiveObjectNames', CaseSensitiveObjectNames);
   fIniFile.WriteBool('MetaData',  'ShowSystem', ShowSystem);
 
+  //IntelliSense
+  fIniFile.WriteBool('IntelliSense',  'ReloadCacheOnNodeExpand', ReloadCacheOnNodeExpand);
+
+
   //MetaDataTableExtract
   fIniFile.WriteBool('MetaDataTableExtract',  'ExtractDomains', ExtractDomains);
   fIniFile.WriteBool('MetaDataTableExtract',  'ExtractIndex', ExtractIndex);
@@ -1629,6 +1661,7 @@ begin
   fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
 
   //QueryWindow
+  fIniFile.WriteBool('QueryWindow',  'QWShowNavigator', QWShowNavigator);
   fIniFile.WriteString('QueryWindow',  'EditorBackgroundColor', ColorToString(QWEditorBackgroundColor));
   fIniFile.WriteString('QueryWindow',  'EditorFontName', QWEditorFontName);
   fIniFile.WriteInteger('QueryWindow',  'FontSize', 14);
@@ -2830,6 +2863,8 @@ begin
 end;
 
 initialization
+  CacheMetaDataChanged := false;
+
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);
 
