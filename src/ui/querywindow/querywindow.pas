@@ -81,12 +81,16 @@ type
     lmStdExportFormats: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmExportToClipboard: TMenuItem;
+    lmExportDataAsPDF: TMenuItem;
+    lmPrintData: TMenuItem;
+    lmExportDataAsSpreadSheet: TMenuItem;
     pmUnIntelliSense: TPopupMenu;
     pmTmpGrid: TPopupMenu;
     rgScreenModes: TRadioGroup;
     RxDBGridExportPDF1: TRxDBGridExportPDF;
     RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
     RxDBGridPrint1: TRxDBGridPrint;
+    SaveDialogPDF: TSaveDialog;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
     SynAutoComplete1: TSynAutoComplete;
@@ -140,6 +144,7 @@ type
     ToolButton1: TToolButton;
     ToolButton2: TToolButton;
     ToolButton3: TToolButton;
+    ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     procedure bbRunClick(Sender: TObject);
     procedure cxAutoCommitMouseEnter(Sender: TObject);
@@ -157,8 +162,11 @@ type
     procedure lmCutClick(Sender: TObject);
     procedure lmExportDataAsHtmlClick(Sender: TObject);
     procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
+    procedure lmExportDataAsPDFClick(Sender: TObject);
+    procedure lmExportDataAsSpreadSheetClick(Sender: TObject);
     procedure lmExportToClipboardClick(Sender: TObject);
     procedure lmPasteClick(Sender: TObject);
+    procedure lmPrintDataClick(Sender: TObject);
     procedure lmRedoClick(Sender: TObject);
     procedure lmRunClick(Sender: TObject);
     procedure lmRunExecClick(Sender: TObject);
@@ -213,6 +221,7 @@ type
     procedure tbSaveMouseEnter(Sender: TObject);
     procedure ToolBar1MouseEnter(Sender: TObject);
     procedure ToolBar1MouseLeave(Sender: TObject);
+    procedure ToolButton4Click(Sender: TObject);
   private
     { private declarations }
     FDBIndex: Integer; // Index of selected registered database
@@ -1299,6 +1308,11 @@ begin
   Application.OnShowHint := @fmMain.AppShowHint;
 end;
 
+procedure TfmQueryWindow.ToolButton4Click(Sender: TObject);
+begin
+  fmMain.lmScriptEngineClick(self);
+end;
+
 //SQLDb Query Designer
 {procedure TfmQueryWindow.tbQueryDesignClick(Sender: TObject);
 var
@@ -1873,13 +1887,14 @@ begin
   TmpIBQuery.Parser.OrderByClause := SortGlobalOrderBy;
   TmpIBQuery.Open; }
 
-  IBQuery.Close;
+  {IBQuery.Close;
   IBQuery.Parser.OrderByClause := OrderBy;
 
   IBQuery.SQL.Text := IBQuery.Parser.SQLText;
-  IBQuery.Open;
+  IBQuery.Open;}
 
   RestoreGridSort(Grid);
+  ShowMessage(OrderBy);
 end;
 
 procedure TfmQueryWindow.RxDBGridSortControllerTitleClick(Column: TColumn);
@@ -1992,6 +2007,10 @@ begin
     TmpDS := TDataSource.Create(DataSource);
     TmpDS.Name := 'TmpDS';
     }
+
+    RxDBGridExportPDF1.RxDBGrid := DBGrid;
+    RxDBGridPrint1.RxDBGrid := DBGrid;
+    RxDBGridExportSpreadSheet1.RxDBGrid := DBGrid;
   end
   else
   if QueryType in [qtExecute, qtScript] then
@@ -2808,6 +2827,10 @@ procedure TfmQueryWindow.FormClose(Sender: TObject; var CloseAction: TCloseActio
 var
   i: Integer;
 begin
+  RxDBGridExportPDF1.RxDBGrid := nil;
+  RxDBGridPrint1.RxDBGrid := nil;
+  RxDBGridExportSpreadSheet1.RxDBGrid := nil;
+
   if Assigned(FNodeInfos) then
     if Assigned(FNodeInfos^.ViewForm) then
       FNodeInfos^.ViewForm := nil;
@@ -3105,6 +3128,32 @@ begin
   ExportDataMarkDownTable(SqlQuery);
 end;
 
+procedure TfmQueryWindow.lmExportDataAsPDFClick(Sender: TObject);
+begin
+  try
+    RxDBGridExportPDF1.Execute;
+
+  except
+    raise;
+  end;
+  {if SaveDialogPDF.Execute then
+  begin
+    RxDBGridExportPDF1.FileName := SaveDialogPDF.FileName;
+
+  end;}
+end;
+
+procedure TfmQueryWindow.lmExportDataAsSpreadSheetClick(Sender: TObject);
+begin
+  RxDBGridExportSpreadSheet1.Execute;
+end;
+
+procedure TfmQueryWindow.lmPrintDataClick(Sender: TObject);
+begin
+   RxDBGridPrint1.Execute;
+end;
+
+
 { Copy query result to Clipboard }
 
 procedure TfmQueryWindow.lmExportToClipboardClick(Sender: TObject);
@@ -3192,7 +3241,6 @@ procedure TfmQueryWindow.lmPasteClick(Sender: TObject);
 begin
   meQuery.PasteFromClipboard;
 end;
-
 
 { SQL Editor Redo }
 
@@ -3317,7 +3365,7 @@ begin
     key:= 0;
   end;
 
-  if (Key = VK_RIGHT) and (ssCtrl in Shift) then
+  if (Key = VK_SPACE) and (ssCtrl in Shift) then
   begin
     P := GetSynEditCaretScreenPos(meQuery);
     pmUnIntelliSense.Popup(P.X, P.Y);
@@ -3328,7 +3376,7 @@ end;
 
 procedure TfmQueryWindow.pmUnIntelliSenseClick(Sender: TObject);
 begin
-  if TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption) then
+  if (TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption)) then
     meQuery.SelText := TMenuItem(Sender).Caption
   else
     meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
@@ -3397,7 +3445,6 @@ begin
         TableItem.Add(FieldItem);
       end;
     end;
-
     pmUnIntelliSense.Items.Add(TableItem);
   end;
 end;
@@ -3405,7 +3452,7 @@ end;
 //
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 begin
-  if CacheMetaDataChanged then
+  if MetaDataChanged then
     LoadpmUnIntelliSense;
 end;
 

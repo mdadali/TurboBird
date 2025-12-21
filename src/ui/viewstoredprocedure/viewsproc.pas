@@ -55,16 +55,7 @@ begin
 end;
 
 procedure TfmViewSProc.FormCreate(Sender: TObject);
-var
-   configFile: TIniFile;
-   configFilePath:String;
 begin
-    // Set the editor font from config.ini
-    configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'config.ini']);
-    configFile:= TIniFile.Create(configFilePath);
-    seScript.Font.Name:=configFile.ReadString('Editor Font', 'font_name', 'Monospace');
-    seScript.Font.Size:=configFile.ReadInteger('Editor Font', 'font_size', 11);
-    configFile.Free;
 end;
 
 procedure TfmViewSProc.FormKeyDown(Sender: TObject; var Key: Word;

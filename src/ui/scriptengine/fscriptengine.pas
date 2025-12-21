@@ -35,7 +35,8 @@ uses
   Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls,
   ibxscript, IBDatabase, IB,
 
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -87,10 +88,11 @@ type
     procedure Timer1Timer(Sender: TObject);
   private
     FDBIndex: integer;
+    FNodeInfos: TPNodeInfos;
     procedure DoOpen(Data: PtrInt);
     procedure ReadScripterSettings;
   public
-    procedure Init(dbIndex: integer);
+    procedure Init(dbIndex: integer; AodeInfos: TPNodeInfos=nil);
   end;
 
 //var
@@ -104,9 +106,10 @@ uses IBBlob, DB, selectsqlresultsunit_ext;
 
 { TfrmScriptEngine }
 
-procedure TfrmScriptEngine.Init(dbIndex: integer);
+procedure TfrmScriptEngine.Init(dbIndex: integer; AodeInfos: TPNodeInfos=nil);
 var DBRec: TDatabaseRec;
 begin
+  FNodeInfos := AodeInfos;
   FDBIndex := dbIndex;
 
   DBRec := RegisteredDatabases[FDBIndex];
@@ -139,6 +142,8 @@ end;
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
 var BasePath, SqlPath: string;
 begin
+  frmThemeSelector.btnApplyClick(self);
+
   BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
   SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;
   OpenDialog1.InitialDir := SqlPath;
@@ -170,15 +175,20 @@ end;
 procedure TfrmScriptEngine.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
-  //inifile
+  if Assigned(FNodeInfos^.ViewForm) then
+    FNodeInfos^.ViewForm := nil;
+
   EchoInput := chkBoxEchoInput.Checked;
   StopOnFirstError := chkBoxStopOnError.Checked;
   WriteIniFile;
-  CloseAction := caFree;
+
+  //
+  //CloseAction := caFree;
 end;
 
 procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);
 begin
+  Parent.Free;
   Close;
 end;
 

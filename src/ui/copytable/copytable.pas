@@ -103,16 +103,7 @@ begin
 end;
 
 procedure TfmCopyTable.FormCreate(Sender: TObject);
-var
-   configFile: TIniFile;
-   configFilePath: String;
 begin
-     // Set the editor font from config.ini
-    configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'config.ini']);
-    configFile:= TIniFile.Create(configFilePath);
-    syScript.Font.Name:=configFile.ReadString('Editor Font', 'font_name', 'Monospace');
-    syScript.Font.Size:=configFile.ReadInteger('Editor Font', 'font_size', 11);
-    configFile.Free;
 end;
 
 procedure TfmCopyTable.FormShow(Sender: TObject);

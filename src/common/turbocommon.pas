@@ -49,10 +49,11 @@ type
   tvotNone,
   tvotServerAlias,
   tvotServerInfo,
-  tvotServerDatabases,
   tvotServer,
   tvotEmbeddedServer,
-  tvotDB,
+
+  tvotDatabase,
+
   tvotQueryWindow,
 
   tvotTableRoot,
@@ -123,7 +124,7 @@ type
   tvotFunction,
   tvotUDRoot,
   tvotUDFRoot,
-  tvotUDFFunction,
+  tvotUDF,
   tvotUDRRoot,
   tvotUDRFunctionRoot,
   tvotUDRFunction,
@@ -354,8 +355,8 @@ var
 
     FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
 
-    //for IntelliSense
-    CacheMetaDataChanged: boolean;  //Tables and Fields
+    //for Lazy-load & IntelliSense
+    MetaDataChanged: boolean;  //Tables and Fields
 
     //Ini.File////////////////////////////////////////////////////////////////
     //Backup options
@@ -2055,7 +2056,7 @@ begin
   case AObjectType of
     tvotFunction:            Result := tvotFunctionRoot;
     tvotProcedure:           Result := tvotProcedureRoot;
-    tvotUDFFunction:         Result := tvotUDFRoot;
+    tvotUDF:                 Result := tvotUDFRoot;
     tvotUDRFunction:         Result := tvotUDRFunctionRoot;
     tvotUDRProcedure:        Result := tvotUDRProcedureRoot;
     tvotPackageFunction:     Result := tvotPackageFunctionRoot;
@@ -2176,7 +2177,7 @@ begin
     // --- Procedures / Functions ---
     otProcedures:            Result := tvotProcedure;
     otFunctions:             Result := tvotFunction;
-    otUDF:                   Result := tvotUDFFunction;
+    otUDF:                   Result := tvotUDF;
 
     // --- UDR ---
     otUDRFunctions:          Result := tvotUDRFunction;
@@ -2193,7 +2194,7 @@ begin
     otPackageUDRTriggers:    Result := tvotPackageUDRTrigger;
 
     // --- Database / Metadata ---
-    otDatabase:              Result := tvotDB;
+    otDatabase:              Result := tvotDatabase;
     otBLOBFilters:           Result := tvotBLOBFilter;
     otComments:              Result := tvotComment;
     otData:                  Result := tvotData;
@@ -2250,7 +2251,7 @@ begin
     // --- Procedures / Functions ---
     tvotProcedure:               Result := otProcedures;
     tvotFunction:                Result := otFunctions;
-    tvotUDFFunction:             Result := otUDF;
+    tvotUDF:                     Result := otUDF;
 
     // --- UDR ---
     tvotUDRFunction:             Result := otUDRFunctions;
@@ -2267,7 +2268,7 @@ begin
     tvotPackageUDRTrigger:       Result := otPackageUDRTriggers;
 
     // --- Database / Metadata ---
-    tvotDB:                      Result := otDatabase;
+    tvotDatabase:                Result := otDatabase;
     tvotBLOBFilter:              Result := otBLOBFilters;
     tvotComment:                 Result := otComments;
     tvotData:                    Result := otData;
@@ -2293,7 +2294,7 @@ begin
     // --- Allgemein ---
     tvotNone:                  Result := 'None';
     tvotServer:                Result := 'Server';
-    tvotDB:                    Result := 'Database';
+    tvotDatabase:              Result := 'Database';
     tvotQueryWindow:           Result := 'Query Window';
 
     // --- Tables ---
@@ -2358,7 +2359,7 @@ begin
     // --- UDR / UDF ---
     tvotUDRoot:                Result := 'UD Objects';
     tvotUDFRoot:               Result := 'UDFs';
-    tvotUDFFunction:           Result := 'UDF Function';
+    tvotUDF:                   Result := 'UDF Function';
 
     tvotUDRRoot:               Result := 'UDRs';
     tvotUDRFunctionRoot:       Result := 'UDR Functions';
@@ -2421,7 +2422,7 @@ end;
 function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
 begin
   case RT of
-    rtUDF:              Result := tvotUDFFunction;
+    rtUDF:              Result := tvotUDF;
     rtFBFunc:           Result := tvotFunction;
     rtFBProc:           Result := tvotProcedure;
     rtUDRFunc:          Result := tvotUDRFunction;
@@ -2863,7 +2864,7 @@ begin
 end;
 
 initialization
-  CacheMetaDataChanged := false;
+  MetaDataChanged := false;
 
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);

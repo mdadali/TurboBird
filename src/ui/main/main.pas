@@ -4328,6 +4328,66 @@ begin
   lmPermissionsClick(Sender);
 end;
 
+procedure TfmMain.lmScriptEngineClick(Sender: TObject);
+var
+  frmScriptEngine: TfrmScriptEngine;
+  dbIndex: integer;
+  DBNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  ATab: TTabSheet;
+  Title, FullHint, DBAlias: string;
+begin
+  DBNode := tvMain.Selected;
+  if DBNode = nil then exit;
+  if DBNode.Level < 1 then exit;
+
+  DBNode := GetAncestorAtLevel(DBNode, 1);
+  if DBNode = nil then exit;
+
+  NodeInfos := TPNodeInfos(DBNode.Data);
+  dbIndex := NodeInfos^.dbIndex;
+
+  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfrmScriptEngine) then
+    frmScriptEngine := TfrmScriptEngine(NodeInfos^.ViewForm)
+  else
+  begin
+    frmScriptEngine := TfrmScriptEngine.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := 84;
+    frmScriptEngine.Parent := ATab;
+    frmScriptEngine.Align := alClient;
+    frmScriptEngine.BorderStyle := bsNone;
+
+    NodeInfos^.EditorForm := frmScriptEngine;
+  end;
+
+  // Tab vorbereiten
+  ATab := frmScriptEngine.Parent as TTabSheet;
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := dbIndex;
+
+  DBAlias :=  DBNode.Text;
+  Title   := 'Scripter#' + DBAlias + IntToStr(dbIndex);
+  ATab.Caption := Title;
+  frmScriptEngine.Caption := Title;
+
+  // Detaillierte Infos als Hint
+
+  FullHint :=
+    'Server:   ' + DBNode.Parent.Text + sLineBreak +
+    'DBAlias:  ' + DBAlias + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
+    'Object type: Script Engine';
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Form initialisieren
+  frmScriptEngine.Init(dbIndex, NodeInfos);
+  frmScriptEngine.Show;
+end;
+
+
 procedure TfmMain.lmRolePerManagementClick(Sender: TObject);
 var
   SelNode: TTreeNode;
@@ -4505,25 +4565,6 @@ begin
     Screen.Cursor:= crDefault;
     List.Free;
   end;
-end;
-
-procedure TfmMain.lmScriptEngineClick(Sender: TObject);
-var
-  frmScriptEngine: TfrmScriptEngine;
-  dbIndex: integer;
-  DBNode: TTreeNode;
-begin
-  DBNode := tvMain.Selected;
-  if DBNode = nil then exit;
-
-  DBNode := turbocommon.GetAncestorAtLevel(DBNode, 1);
-  if DBNode = nil then exit;
-
-  dbIndex := TPNodeInfos(DBNode.Data)^.dbIndex;
-
-  frmScriptEngine := TfrmScriptEngine.Create(self);
-  frmScriptEngine.Init(dbIndex);
-  frmScriptEngine.ShowModal;
 end;
 
 (**************  Script Exception  ****************)
@@ -5957,7 +5998,7 @@ begin
             Item:= tvMain.Items.AddChild(UDFNode, Objects[i]);
             Item.ImageIndex:= 13;
             Item.SelectedIndex:= 13;
-            TPNodeInfos(Item.Data)^.ObjectType := tvotUDFFunction;
+            TPNodeInfos(Item.Data)^.ObjectType := tvotUDF;
             TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           end;
         end;
@@ -6946,21 +6987,7 @@ begin
 end;
 
 procedure TfmMain.mnEditorFontClick(Sender: TObject);
-var
-  configFile: TIniFile;
-  configFilePath: String;
-
 begin
-     configFilePath:= ConcatPaths([ExtractFilePath(Application.ExeName), 'config.ini']);
-     configFile:= TIniFile.Create(configFilePath);
-
-     if editorFontDialog.Execute then
-     begin
-        configFile.WriteString('Editor Font', 'font_name', editorFontDialog.Font.Name);
-        configFile.WriteInteger('Editor Font', 'font_size', editorFontDialog.Font.Size);
-
-     end;
-     configFile.Free;
 end;
 
 (********  Create new database  ********)
@@ -7293,173 +7320,81 @@ var
   i: Integer;
   ParentNodeText: string;
   NodeText: string;
-
+  ObjectType: TTreeViewObjectType;
 begin
   SelNode:= tvMain.Selected;
 
-  if SelNode <> nil then
-  begin
-    //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
+  if SelNode = nil then
+    exit;
+  //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
 
-    NodeText:= SelNode.Text;
-    if Pos('(', NodeText) > 0 then
-      NodeText:= Trim(Copy(NodeText, 1, Pos('(', NodeText) - 1));
+  ObjectType := TPNodeInfos(SelNode.Data)^.ObjectType;
 
-    ParentNodeText:= '';
-    if SelNode.Parent <> nil then
-      ParentNodeText:= SelNode.Parent.Text;
-    if Pos('(', ParentNodeText) > 0 then
-      ParentNodeText:= Trim(Copy(ParentNodeText, 1, Pos('(', ParentNodeText) - 1));
+  case  ObjectType of
+    tvotSystemTableRoot: Filter := 100;
+    tvotSystemTable: Filter:= 7;
+    tvotServer: Filter:= -2;
+    tvotDatabase: Filter:= 0;
 
-    if (SelNode <> nil) then
-    if (SelNode.Parent = nil) then // Servers
-      Filter:= -2
-    else
-    if (SelNode.Parent.Parent = nil) then // Database
-      Filter:= 0
-    else
-    if ParentNodeText = 'Tables' then // Tables
-      Filter:= 1
-    else
-    if ParentNodeText = 'Generators' then // Generators
-      Filter:= 2
-    else
-    if ParentNodeText = 'Triggers' then // Triggers
-      Filter:= 3
-    else
-    if ParentNodeText = 'Views' then // View
-      Filter:= 4
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotProcedure then
-    //if ParentNodeText = 'Procedures' then // Stored Proc
-      Filter:= 5
-    else
-    if ParentNodeText = 'UDFs' then // UDF
-      Filter:= 6
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotSystemTableRoot then
-      Filter := 100
-    else if TPNodeInfos(SelNode.Data)^.ObjectType = tvotSystemTable then
-        Filter := 7
-    else
-    if ParentNodeText = 'Domains' then // Domains
-      Filter:= 8
-    else
-    if ParentNodeText = 'Roles' then // Roles
-      Filter:= 9
-    else
-    if ParentNodeText = 'Exceptions' then // Roles
-      Filter:= 10
-    else
-    if ParentNodeText = 'Users' then // Users
-      Filter:= 111
-    else
-    if NodeText = 'Tables' then // Tables root              //  Higher level (Roots)
-      Filter:= 11
-    else
-    if NodeText = 'Generators' then // Generators root
-      Filter:= 12
-    else
-    if (SelNode.Level = 2) and (NodeText = 'Procedures') then // Stored Proc root
-      Filter:= 15
-    else
-    if NodeText = 'UDFs' then // UDF root
-      Filter:= 16
-    else
-    if NodeText = 'Views' then // Views root
-      Filter:= 14
-    else
-    if NodeText = 'Triggers' then // Triggers root
-      Filter:= 13
-    else
-    if NodeText = 'Domains' then // Domains root
-      Filter:= 18
-    else
-    if NodeText = 'Roles' then // Roles root
-      Filter:= 19
-    else
-    if NodeText = 'Exceptions' then // Exceptions
-      Filter:= 20
-    else
-    if NodeText = 'Users' then // Users
-      Filter:= 21
-    else
-    if NodeText = 'Query Window' then // Query Window
-      Filter:= 30
-    else
-    if (SelNode.Level = 2) and (NodeText = 'Functions') then //
-      Filter:= 31
-    else
-    if (SelNode.Level = 3) and (ParentNodeText = 'Functions') then //
-      Filter:= 311
-    else
-    ////////////////////////////////////////////////////////////
-    //Packages
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageRoot then
-      Filter:= 32
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackage then
-      Filter:= 33
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageFunctionRoot then
-      Filter:= 331
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageFunction then
-      Filter:= 332
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageProcedureRoot then
-      Filter:= 333
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageProcedure then
-      Filter:= 334
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageUDRFunctionRoot then
-      Filter:= 335
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageUDRFunction then
-      Filter:= 336
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageUDRProcedureRoot then
-      Filter:= 337
-    else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotPackageUDRProcedure then
-      Filter:= 338
-    else
+    tvotTableRoot: Filter := 11;
+    tvotTable: Filter := 1;
+    tvotTableField: Filter := 120;
 
-    /////////////////////////////////////////////////////////////
-    //UDR's
-    if NodeText = 'UDRs' then //
-      Filter:= 42
-   else
-    if (TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRFunctionRoot)then
-      filter := 43
-    else
-     if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRFunction then
-       filter := 44
-  else
-    if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRProcedureRoot then
-      filter := 45
-   else
-     if TPNodeInfos(SelNode.Data)^.ObjectType = tvotUDRProcedure then
-       filter := 46
+    tvotGeneratorRoot: Filter:= 12;
+    tvotGenerator: Filter := 2;
+
+    tvotTriggerRoot: Filter := 13;
+    tvotTrigger: Filter := 3;
+
+    tvotViewRoot: Filter := 14;
+    tvotView: Filter := 4;
+
+    tvotProcedureRoot: Filter := 15;
+    tvotProcedure: Filter := 5;
+
+    tvotUDFRoot: Filter := 16;
+    tvotUDF: Filter := 6;
+
+    tvotDomainRoot: Filter := 18;
+    tvotDomain: Filter := 8;
+
+    tvotRoleRoot: Filter := 19;
+    tvotRole: Filter := 9;
+
+    tvotExceptionRoot: Filter := 20;
+    tvotException: Filter := 10;
+
+    tvotUserRoot: Filter:= 21;
+    tvotUser: Filter:= 111;
+
+    tvotQueryWindow: Filter:= 30;
+
+    tvotFunctionRoot: Filter := 311;
+    tvotFunction: Filter := 31;
+
+    tvotPackageRoot: Filter:= 32;
+    tvotPackage: Filter:= 33;
+    tvotPackageFunctionRoot: Filter:= 331;
+    tvotPackageFunction: Filter:= 332;
+    tvotPackageProcedureRoot: Filter:= 333;
+    tvotPackageProcedure: Filter:= 334;
+    tvotPackageUDRFunctionRoot: Filter:= 335;
+    tvotPackageUDRFunction: Filter:= 336;
+    tvotPackageUDRProcedureRoot: Filter:= 337;
+    tvotPackageUDRProcedure: Filter := 338;
+
+    tvotUDRRoot: Filter:= 42;
+    tvotUDRFunctionRoot: Filter := 43;
+    tvotUDRFunction: Filter := 44;
+    tvotUDRProcedureRoot: Filter := 45;
+    tvotUDRProcedure: Filter := 46;
 
    else
       Filter:= -1;
+  end; //casw
 
 
-    // Table Fields
-    if (SelNode.Level = 4) then
-    begin
-      ParentNodeText:= SelNode.Parent.Parent.Text;
-      if Pos('(', ParentNodeText) > 0 then
-        ParentNodeText:= Trim(Copy(ParentNodeText, 1, Pos('(', ParentNodeText) - 1));
-      if (ParentNodeText = 'Tables') then
-        Filter:= 120
-    end;
 
-  end
-  else
-    Filter:= -1;
 
   //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
 
@@ -7469,7 +7404,6 @@ begin
       ((pmDatabase.Items[i].Tag = 100) and (SelNode <> nil) and (SelNode.Parent <> nil) and
       (SelNode.Parent.Parent <> nil) and (SelNode.Parent.Parent.Parent = nil));
 
-  SelNode:= nil;
 end;
 
 procedure TfmMain.tbCheckDBIntegrityClick(Sender: TObject);
@@ -8015,7 +7949,11 @@ begin
     end else
     begin
       // Vorhandenen Extractor zurücksetzen, aber nicht freigeben
-      NodeInfo^.SimpleObjExtractor.ResetExtract;
+      if MainTreeViewAlwaysRefresh or   MetaDataChanged   then
+      begin
+        NodeInfo^.SimpleObjExtractor.ResetExtract;
+        MetaDataChanged := false;
+      end;
     end;
 
     if NodeInfo^.UnIntelliSenseCache = nil then
@@ -8024,11 +7962,11 @@ begin
     end else
     begin
       // Vorhandene Cache zurücksetzen, aber nicht freigeben
-      // inifile.ReloadCacheOnNodeExpand, CacheMetaDataChanged = turbocommon global variable
-      if ReloadCacheOnNodeExpand or CacheMetaDataChanged then
+      // inifile.ReloadCacheOnNodeExpand, MetaDataChanged = turbocommon global variable
+      if ReloadCacheOnNodeExpand or MetaDataChanged then
       begin
         NodeInfo^.UnIntelliSenseCache.RefreshCache;
-        CacheMetaDataChanged := false;
+        MetaDataChanged := false;
       end;
     end;
 
@@ -8146,7 +8084,7 @@ try
       // ----------------------
       // Database node
       // ----------------------
-      tvotDB:
+      tvotDatabase:
         begin
           // Do nothing on dblclick
         end;
@@ -8271,7 +8209,7 @@ try
       // ----------------------
       // UDF Function
       // ----------------------
-      tvotUDFFunction:
+      tvotUDF:
         begin
           try
             //lmTestUDFFunctionClick(nil);
@@ -8757,7 +8695,7 @@ begin
           MainNode.ImageIndex:= 3;
           MainNode.SelectedIndex:= 3;
           TPNodeInfos(MainNode.Data)^.dbIndex := i;
-          TPNodeInfos(MainNode.Data)^.ObjectType := tvotDB;
+          TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
           DummyNode := tvMain.Items.AddChild(MainNode, 'Loading...');
 
           tvMain.PopupMenu:= pmDatabase;
