@@ -17,6 +17,7 @@ uses
 
 type
   TSimpleObjExtractor = class
+    FInitialized: boolean;
     FDBIndex: integer;
     FIBDatabase: TIBDatabase;
     FIBTransaction: TIBTransaction;
@@ -41,6 +42,8 @@ type
     procedure   ExtractTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char; RemoveLastComma: boolean);
     procedure   ExtractCleanTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
     procedure   ExtractTableFieldsToTreeNode(ATableName: string; var Node: TTreeNode; Quoted: boolean; Delimiter: char; ImageIndex: integer);
+
+    property   Initialized: boolean read FInitialized;
   end;
 
 
@@ -62,6 +65,7 @@ begin
   AItems.Clear;
 
   ExtractObjectNames(FDBIndex, tmpObjType, SystemFlag, AItems, '');
+
 
   if Quoted then
   begin
@@ -113,30 +117,57 @@ begin
   end;
 end;
 
-constructor TSimpleObjExtractor.create(DBIndex: integer);
-var
-  DBRec: TDatabaseRec;
+constructor TSimpleObjExtractor.Create(DBIndex: integer);
 begin
+  inherited Create;
+  FInitialized := False;
   FDBIndex := DBIndex;
 
-  FIBDatabase := TIBDatabase.Create(nil);
-  AssignIBDatabase(RegisteredDatabases[FDBIndex].IBDatabase, FIBDatabase);
-  FIBDatabase.LoginPrompt := false;
+  FIBDatabase := nil;
+  FIBTransaction := nil;
+  FIBExtract := nil;
 
-  FIBTransaction := TIBTransaction.Create(FIBDatabase); // besser Ownership setzen
-  FIBDatabase.DefaultTransaction := FIBTransaction;
-  FIBTransaction.DefaultDatabase := FIBDatabase;
+  try
+    // Datenbankobjekt erstellen
+    FIBDatabase := TIBDatabase.Create(nil);
+    AssignIBDatabase(RegisteredDatabases[FDBIndex].IBDatabase, FIBDatabase);
 
-  if not FIBDatabase.Connected then
-    FIBDatabase.Connected := true;
+    // Transaction erstellen
+    FIBTransaction := TIBTransaction.Create(FIBDatabase);
+    FIBDatabase.DefaultTransaction := FIBTransaction;
+    FIBTransaction.DefaultDatabase := FIBDatabase;
 
-  FIBExtract := TIBExtract.Create(FIBDatabase);
-  FIBExtract.Database := FIBDatabase;
-  FIBExtract.Transaction := FIBTransaction; // unbedingt zuweisen
+    // Verbindung prüfen
+    if not FIBDatabase.Connected then
+      FIBDatabase.Connected := True;
 
-  FIBExtract.AlwaysQuoteIdentifiers := AlwaysQuoteIdentifiers;
-  FIBExtract.CaseSensitiveObjectNames := CaseSensitiveObjectNames;
-  FIBExtract.ShowSystem := ShowSystem;
+    // Extract-Objekt erstellen
+    FIBExtract := TIBExtract.Create(FIBDatabase);
+    FIBExtract.Database := FIBDatabase;
+    FIBExtract.Transaction := FIBTransaction;
+
+    FIBExtract.AlwaysQuoteIdentifiers := AlwaysQuoteIdentifiers;
+    FIBExtract.CaseSensitiveObjectNames := CaseSensitiveObjectNames;
+    FIBExtract.ShowSystem := ShowSystem;
+
+    // Sicherstellen, dass DB verbunden bleibt
+    FIBDatabase.Connected := True;
+
+    FInitialized := True;
+
+  except
+    on E: Exception do
+    begin
+      // Ressourcen sauber freigeben
+      FreeAndNil(FIBExtract);
+      FreeAndNil(FIBTransaction);
+      FreeAndNil(FIBDatabase);
+
+      FInitialized := False;
+
+      raise Exception.Create('Error creating TSimpleObjExtractor: ' + E.Message);
+    end;
+  end;
 end;
 
 procedure TSimpleObjExtractor.ResetExtract;
@@ -179,7 +210,10 @@ procedure TSimpleObjExtractor.Extract(
   var AItems: TStrings);
 
 var tmpQuoted: boolean;
+    ExtractObjectType: TExtractObjectTypes;
 begin
+  ExtractObjectType := TBTypeToIBXType(ObjectType);
+
   tmpQuoted := FIBExtract.AlwaysQuoteIdentifiers;
   FIBExtract.AlwaysQuoteIdentifiers := Quoted;
 
@@ -198,8 +232,8 @@ begin
           // TODO: gleiche Methode wie GetUDRFunction
         end;
 
-    else  //case
-      FIBExtract.ExtractObject(TBTypeToIBXType(ObjectType), ObjectName, ExtractTypes);
+    else//case
+      FIBExtract.ExtractObject(ExtractObjectType, ObjectName, ExtractTypes);
 
       if FIBExtract.Items.Count > 0 then
       begin
@@ -337,8 +371,11 @@ begin
         FieldType := re.Match[2];
 
         if Quoted then
-          FieldName := '"' + FieldName + '"'
-        else begin
+        begin
+          if turbocommon.IsObjectNameCaseSensitive(FieldName) then
+            FieldName := '"' + FieldName + '"'
+        end else
+        begin
           FieldName := StringReplace(FieldName, '"', '', [rfReplaceAll]);
           FieldType := StringReplace(FieldType, '"', '', [rfReplaceAll]);
         end;
@@ -568,25 +605,21 @@ procedure  TSimpleObjExtractor.ExtractObjectNames(dbIndex: integer; ObjectType: 
 var ServerVersionMajor: word;
     isObjNameCaseSensitive: boolean;
     i, RecCount: integer;
+    SQL: string;
+    ItemStr: string;
 begin
   ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
 
 try
 
-  FIBSQL := TIBSQL.Create(FIBDatabase);
-  FIBSQL.Transaction := FIBTransaction;
-
-  if not FIBTransaction.InTransaction then
-    FIBTransaction.StartTransaction;
-
   case ObjectType  of
 
     otTables:
-      FIBSQL.SQL.Text:= 'select rdb$relation_name from rdb$relations where rdb$view_blr is null ' +
+      SQL := 'select rdb$relation_name from rdb$relations where rdb$view_blr is null ' +
       ' and (rdb$system_flag is null or rdb$system_flag = 0) order by rdb$relation_name';
 
     otSystemTables:
-      FIBSQL.SQL.Text :=
+      SQL :=
         'Select Rdb$Relation_Name ' +
         'From Rdb$Relations ' +
         'Where Rdb$View_Blr Is Null ' +
@@ -594,14 +627,14 @@ try
         'Order By Rdb$Relation_Name';
 
     otGenerators:
-      FIBSQL.SQL.Text:= 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name';
+      SQL := 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name';
 
     otTriggers:
-      FIBSQL.SQL.Text:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name';
+      SQL:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name';
 
 
     otTableTriggers:
-      FIBSQL.SQL.Text :=
+       SQL :=
       'SELECT rdb$trigger_name ' +
       'FROM rdb$triggers ' +
       'WHERE rdb$system_flag = 0 ' +
@@ -609,18 +642,18 @@ try
       'ORDER BY rdb$trigger_name';
 
     otDBTriggers:
-    FIBSQL.SQL.Text:= 'SELECT rdb$trigger_name FROM rdb$triggers WHERE rdb$system_flag = 0 AND rdb$relation_name IS NULL ' +
+      SQL := 'SELECT rdb$trigger_name FROM rdb$triggers WHERE rdb$system_flag = 0 AND rdb$relation_name IS NULL ' +
                        ' AND rdb$trigger_type < 16384 ORDER BY rdb$trigger_name';
 
     otDDLTriggers:
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT rdb$trigger_name FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
         'AND rdb$trigger_type >= 16384 ' +
         'ORDER BY rdb$trigger_name';
 
     otUDRTriggers:
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT rdb$trigger_name ' +
          'FROM rdb$triggers ' +
          'WHERE rdb$system_flag = 0 ' +
@@ -628,7 +661,7 @@ try
          'ORDER BY rdb$trigger_name';
 
     otUDRTableTriggers:
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT rdb$trigger_name ' +
         'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
@@ -637,7 +670,7 @@ try
         'ORDER BY rdb$trigger_name';
 
     otUDRDBTriggers:
-          FIBSQL.SQL.Text :=
+      SQL :=
             'SELECT rdb$trigger_name ' +
             'FROM rdb$triggers ' +
             'WHERE rdb$system_flag = 0 ' +
@@ -647,7 +680,7 @@ try
             'ORDER BY rdb$trigger_name';
 
     otUDRDDLTriggers:
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT rdb$trigger_name ' +
         'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
@@ -656,13 +689,13 @@ try
         'ORDER BY rdb$trigger_name';
 
     otViews:
-      FIBSQL.SQL.Text:= 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name';
+      SQL := 'SELECT DISTINCT RDB$VIEW_NAME FROM RDB$VIEW_RELATIONS order by rdb$View_Name';
 
     otProcedures:
       if ServerVersionMajor < 3 then
-        FIBSQL.SQL.Text:= 'SELECT RDB$Procedure_Name FROM RDB$PROCEDURES order by rdb$Procedure_Name'
+        SQL := 'SELECT RDB$Procedure_Name FROM RDB$PROCEDURES order by rdb$Procedure_Name'
       else
-        FIBSQL.SQL.Text :=
+        SQL :=
         'SELECT RDB$PROCEDURE_NAME ' +
         'FROM RDB$PROCEDURES ' +
         'WHERE ' +
@@ -672,18 +705,18 @@ try
         'ORDER BY RDB$PROCEDURE_NAME';
 
     otUDF: begin
-      FIBSQL.SQL.Text :=
+      SQL :=
         'Select Rdb$Function_Name ' +
         'From Rdb$Functions ' +
         'Where Rdb$System_Flag = 0';
 
       if ServerVersionMajor >= 3 then
-        FIBSQL.SQL.Text := FIBSQL.SQL.Text +
+        SQL := FIBSQL.SQL.Text +
           ' And Rdb$Module_Name Is Not Null';
     end;
 
     otFunctions: // FB-Functions
-    FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT ' +
         '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
         '  RDB$DESCRIPTION, ' +
@@ -711,7 +744,7 @@ try
       'ORDER BY RDB$PROCEDURE_NAME;'; }
 
     otUDRFunctions: //External Engine  Global-Funcs
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT ' +
         '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
         '  RDB$DESCRIPTION, ' +
@@ -725,7 +758,7 @@ try
         'ORDER BY RDB$FUNCTION_NAME;';
 
     otUDRProcedures: //External Engine  Global-Procs
-      FIBSQL.SQL.Text :=
+      SQL :=
         'SELECT ' +
         '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
         '  RDB$DESCRIPTION, ' +
@@ -740,18 +773,18 @@ try
 
     otDomains:
       //FIBSQL.SQL.Text:= 'select RDB$FIELD_NAME from RDB$FIELDS where RDB$Field_Name not like ''RDB$%''  order by rdb$Field_Name'
-      FIBSQL.SQL.Text :=   //newlib
+      SQL :=   //newlib
         'SELECT RDB$FIELD_NAME  FROM RDB$FIELDS ' +
         'WHERE (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL) ' +
         'AND RDB$FIELD_NAME NOT LIKE ' + QuotedStr('RDB$%') + ' ' +
         'ORDER BY RDB$FIELD_NAME';
 
     otExceptions:
-      FIBSQL.SQL.Text:= 'select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS order by rdb$Exception_Name';
+      SQL:= 'select RDB$EXCEPTION_NAME from RDB$EXCEPTIONS order by rdb$Exception_Name';
 
     otRoles:
     //FIBSQL.SQL.Text:= 'select RDB$ROLE_NAME from RDB$ROLES order by rdb$Role_Name'
-      FIBSQL.SQL.Text :=
+      SQL :=
        'SELECT RDB$ROLE_NAME ' +
        'FROM RDB$ROLES ' +
        'WHERE RDB$ROLE_NAME <> ''DUMMYROLE'' ' +  // only for FireBird Version < 3.
@@ -761,7 +794,7 @@ try
       // Benutzerliste je nach Firebird-Version
       if ServerVersionMajor < 3 then
         // Firebird 2.5: RDB$USER_PRIVILEGES
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT DISTINCT RDB$USER ' +
           'FROM RDB$USER_PRIVILEGES ' +
           'WHERE RDB$USER_TYPE = 8 ' +
@@ -769,20 +802,20 @@ try
           'ORDER BY RDB$USER'
       else
         // Firebird 3+: SEC$USERS
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT SEC$USER_NAME AS RDB$USER ' +
            'FROM SEC$USERS ' +
            'WHERE UPPER(SEC$USER_NAME) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
            'ORDER BY SEC$USER_NAME';
 
     otPackages:
-      FIBSQL.SQL.Text:= 'SELECT RDB$PACKAGE_NAME, RDB$OWNER_NAME, RDB$DESCRIPTION, RDB$SYSTEM_FLAG ' +
+       SQL := 'SELECT RDB$PACKAGE_NAME, RDB$OWNER_NAME, RDB$DESCRIPTION, RDB$SYSTEM_FLAG ' +
         'FROM RDB$PACKAGES WHERE RDB$SYSTEM_FLAG = 0 ' +
         'ORDER BY RDB$PACKAGE_NAME;';
 
     otPackageFunctions:
       if OwnerObjName = '' then
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -795,7 +828,7 @@ try
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$FUNCTION_NAME;'
         else
-          FIBSQL.SQL.Text :=
+          SQL :=
             'SELECT ' +
             '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
             '  RDB$DESCRIPTION, ' +
@@ -810,7 +843,7 @@ try
 
     otPackageProcedures:
       if OwnerObjName = '' then
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -822,7 +855,7 @@ try
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$PROCEDURE_NAME;'
       else
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -836,7 +869,7 @@ try
 
     otPackageUDFFunctions:
       if OwnerObjName = '' then
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -850,7 +883,7 @@ try
           'ORDER BY RDB$FUNCTION_NAME;'
         else
           if OwnerObjName = '' then
-            FIBSQL.SQL.Text :=
+            SQL :=
             'SELECT ' +
             '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
             '  RDB$DESCRIPTION, ' +
@@ -865,7 +898,7 @@ try
 
     otPackageUDRFunctions:
       if OwnerObjName = '' then
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -878,7 +911,7 @@ try
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$FUNCTION_NAME;'
       else
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$FUNCTION_NAME AS FUNCTION_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -893,7 +926,7 @@ try
 
     otPackageUDRProcedures:
       if OwnerObjName = '' then
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -905,7 +938,7 @@ try
           '  AND (RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0) ' +
           'ORDER BY RDB$PROCEDURE_NAME;'
       else
-        FIBSQL.SQL.Text :=
+         SQL :=
           'SELECT ' +
           '  RDB$PROCEDURE_NAME AS PROCEDURE_NAME, ' +
           '  RDB$DESCRIPTION, ' +
@@ -918,32 +951,51 @@ try
           'ORDER BY RDB$PROCEDURE_NAME;';
   end;
 
-  if not FIBTransaction.InTransaction then
-    FIBTransaction.StartTransaction;
+  try
+    if FIBTransaction.InTransaction then
+      FIBTransaction.Rollback;
 
-  FIBSQL.ExecQuery;
+    if not FIBTransaction.InTransaction then
+      FIBTransaction.StartTransaction;
 
-  while not FIBSQL.EOF do
-  begin
+    FIBSQL := TIBSQL.Create(FIBDatabase);
+    FIBSQL.Transaction := FIBTransaction;
 
-    AItems.Add(Trim(FIBSQL.Fields[0].AsString));
-    isObjNameCaseSensitive := (AItems[i] <> UpperCase(AItems[i]));
+    FIBSQL.SQL.Text := SQL;
+    FIBSQL.ExecQuery;
 
-    if  isObjNameCaseSensitive then
-      AItems[i] := MakeObjectNameQuoted(AItems[i]);
+    while not FIBSQL.EOF do
+    begin
+      ItemStr := Trim(FIBSQL.Fields[0].AsString);
+      //isObjNameCaseSensitive := (ItemStr <> AnsiUpperCase(ItemStr));
+      //if  isObjNameCaseSensitive then
+        //ItemStr := MakeObjectNameQuoted(ItemStr);
+      AItems.Add(ItemStr);
+      FIBSQL.Next;
+    end;
 
-    FIBSQL.Next;
+    if FIBTransaction.InTransaction then
+      FIBTransaction.Rollback;
+
+  finally
+
+    if Assigned(FIBSQL) then
+    begin
+      FIBSQL.Close;
+      FreeAndNil(FIBSQL);
+    end;
+
   end;
-  FIBSQL.Close;
 
 finally
-  //FIBSQL.Free;
-  //if FIBTransaction.InTransaction then
-    //FIBTransaction.Rollback;
-end;
 
 end;
 
+
+end;
 
 end.
+
+
+
 

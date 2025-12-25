@@ -151,7 +151,18 @@ var
   Clk: TNotifyEvent;
   TmpFloat: Double;
   TmpInt: Int64;
+  TableName, FieldName: string;
 begin
+  TableName := Trim(FTableName);
+  if IsObjectNameCaseSensitive(TableName) then
+    if not IsObjectNameQuoted(TableName) then
+      TableName := MakeObjectNameQuoted(TableName);
+
+  FieldName := Trim(edFieldName.Text);
+  if IsObjectNameCaseSensitive(FieldName) then
+    if not IsObjectNameQuoted(FieldName) then
+      FieldName := MakeObjectNameQuoted(FieldName);
+
   if FRefreshButton = nil then
     Clk := nil
   else
@@ -169,8 +180,7 @@ begin
     if BaseType = 'UUID' then
     begin
       FieldDef := 'CHAR(16) CHARACTER SET OCTETS';
-    end
-    else
+    end else
     begin
       FieldDef := BaseType;
 
@@ -224,7 +234,7 @@ begin
     if not cxAllowNull.Checked then
       FieldDef := FieldDef + ' NOT NULL';
 
-    Line := 'ALTER TABLE ' + FTableName + ' ADD ' + edFieldName.Text + ' ' + FieldDef + ';';
+    Line := 'ALTER TABLE ' + TableName + ' ADD ' +  FieldName + ' ' + FieldDef + ';';
 
     fmMain.ShowCompleteQueryWindow(FDBIndex, 'Add new field to Table: ' + FTableName, Line, Clk);
   end
@@ -239,7 +249,7 @@ begin
 
     Line := '';
 
-    if UpperCase(Trim(edFieldName.Text)) <> OldFieldName then
+    if Trim(edFieldName.Text) <> OldFieldName then
       Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + OldFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
 
     if HasFieldTypeChanged then
@@ -247,10 +257,9 @@ begin
       if BaseType = 'UUID' then
       begin
         // UUID-Feld, Typ fest: CHAR(16) OCTETS → nicht ändern
-      end
-      else
+      end else
       begin
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' TYPE ' + cbType.Text;
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' TYPE ' + cbType.Text;
 
         if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') then
           Line := Line + '(' + IntToStr(sePrecision.Value) + ',' + IntToStr(seScale.Value) + ')'
@@ -280,24 +289,24 @@ begin
         FieldDef := FieldDef + ' COLLATE ' + NewCollation;
 
       Line := Line + '-- Charset or Collation change requires field recreation:' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
-      Line := Line + 'UPDATE ' + FTableName + ' SET ' + TempFieldName + ' = ' + edFieldName.Text + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' DROP ' + edFieldName.Text + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + TempFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + TableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
+      Line := Line + 'UPDATE ' + TableName + ' SET ' + TempFieldName + ' = ' + edFieldName.Text + ';' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + TableName + ' DROP ' + FieldName + ';' + LineEnding;
+      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + TempFieldName + ' TO ' + FieldName + ';' + LineEnding;
     end;
 
     // Fieldposition
     if seOrder.Value <> OldOrder then
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
               ' POSITION ' + IntToStr(seOrder.Value) + ';' + LineEnding;
 
     // NOT NULL
     if cxAllowNull.Checked <> OldAllowNull then
     begin
       if cxAllowNull.Checked then
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' DROP NOT NULL;' + LineEnding
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' DROP NOT NULL;' + LineEnding
       else
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' SET NOT NULL;' + LineEnding;
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' SET NOT NULL;' + LineEnding;
     end;
 
     // Default
@@ -307,15 +316,15 @@ begin
       begin
         try
           if (cbType.Text = 'INTEGER') or (cbType.Text = 'SMALLINT') or (cbType.Text = 'BIGINT') then
-            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
                     ' SET DEFAULT ' + IntToStr(StrToInt(edDefault.Text)) + ';' + LineEnding
           else if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') or
                   (cbType.Text = 'FLOAT') or (cbType.Text = 'DOUBLE PRECISION') or
                   (cbType.Text = 'REAL') then
-            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
                     ' SET DEFAULT ' + StringReplace(FloatToStrF(StrToFloat(edDefault.Text), ffGeneral, 15, 0), ',', '.', [rfReplaceAll]) + ';' + LineEnding
           else
-            Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text +
+            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
                     ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding;
         except
           on E: Exception do
@@ -323,12 +332,12 @@ begin
         end;
       end
       else
-        Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + edFieldName.Text + ' DROP DEFAULT;' + LineEnding;
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' DROP DEFAULT;' + LineEnding;
     end;
 
     // Beschreibung
     if edDescription.Text <> OldDescription then
-      Line := Line + 'COMMENT ON COLUMN ' + FTableName + '.' + edFieldName.Text +
+      Line := Line + 'COMMENT ON COLUMN ' + TableName + '.' + FieldName +
               ' IS ' + QuotedStr(edDescription.Text) + ';' + LineEnding;
 
     if Line <> '' then

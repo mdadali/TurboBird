@@ -1,7 +1,7 @@
 object fmNewEditField: TfmNewEditField
-  Left = 605
+  Left = 377
   Height = 414
-  Top = 132
+  Top = 152
   Width = 383
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle

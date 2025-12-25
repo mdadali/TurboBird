@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
   LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
-  EditBtn, ExtCtrls, DBCtrls, ComCtrls,
+  EditBtn, ExtCtrls, DBCtrls, ComCtrls, DBExtCtrls,
   turbocommon,
   uthemeselector;
 
@@ -16,7 +16,6 @@ type
   { TfmSQLHistory }
 
   TfmSQLHistory = class(TForm)
-    bbClose: TSpeedButton;
     bbDelete: TBitBtn;
     bbExport: TBitBtn;
     bbInsert: TBitBtn;
@@ -25,16 +24,25 @@ type
     cxOverwrite: TCheckBox;
     Datasource1: TDatasource;
     DateEdit1: TDateEdit;
+    DBDateEdit1: TDBDateEdit;
+    DBEdit1: TDBEdit;
     DBGrid1: TDBGrid;
+    DBMemo1: TDBMemo;
     DBNavigator1: TDBNavigator;
+    DBNavigator2: TDBNavigator;
+    DBText1: TDBText;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     Label1: TLabel;
+    Label2: TLabel;
+    SQL: TLabel;
+    Time: TLabel;
+    SQLType: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
-    Panel3: TPanel;
     SaveDialog1: TSaveDialog;
+    tsDetails: TTabSheet;
     tsHistory: TTabSheet;
     procedure bbCloseClick(Sender: TObject);
     procedure bbDeleteClick(Sender: TObject);
@@ -81,6 +89,29 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
+{procedure TfmSQLHistory.bbInsertClick(Sender: TObject);
+var
+  SQLStatement: string;
+  i: Integer;
+  aStatement: string;
+begin
+//  SQLStatement:= (fmMain.mdsHistory.FieldByName('SQLStatement').AsString);
+  for i:= 0 to DBGrid1.SelectedRows.Count - 1 do
+  begin
+    Datasource1.DataSet.GotoBookmark(DBGrid1.SelectedRows.Items[i]);
+    aStatement := fmMain.mdsHistory.FieldByName('SQLStatement').AsString;
+    if Pos(';', aStatement) = 0 then
+      aStatement:= aStatement + ';';
+    SQLStatement += aStatement;
+  end;
+
+  if cxOverwrite.Checked then
+    (FQueryForm as TfmQueryWindow).meQuery.Lines.Clear;
+
+  (FQueryForm as TfmQueryWindow).meQuery.Lines.Text:= (FQueryForm as TfmQueryWindow).meQuery.Lines.Text + SQLStatement;
+  Close;
+end;}
+
 procedure TfmSQLHistory.bbInsertClick(Sender: TObject);
 var
   SQLStatement: string;
@@ -88,7 +119,7 @@ var
   aStatement: string;
 begin
 //  SQLStatement:= (fmMain.mdsHistory.FieldByName('SQLStatement').AsString);
-  for i:=0 to DBGrid1.SelectedRows.Count - 1 do
+  for i:= 0 to DBGrid1.SelectedRows.Count - 1 do
   begin
     Datasource1.DataSet.GotoBookmark(DBGrid1.SelectedRows.Items[i]);
     aStatement := fmMain.mdsHistory.FieldByName('SQLStatement').AsString;

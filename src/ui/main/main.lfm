@@ -1,12 +1,12 @@
 object fmMain: TfmMain
-  Left = 459
-  Height = 485
-  Top = 139
-  Width = 907
+  Left = 500
+  Height = 487
+  Top = 307
+  Width = 906
   ActiveControl = tvMain
   Caption = 'TurboBird Admin for FireBird'
-  ClientHeight = 456
-  ClientWidth = 907
+  ClientHeight = 458
+  ClientWidth = 906
   Color = clForm
   DragMode = dmAutomatic
   Font.Name = 'Sans'
@@ -554,7 +554,7 @@ object fmMain: TfmMain
   WindowState = wsMaximized
   object tvMain: TTreeView
     Left = 27
-    Height = 382
+    Height = 384
     Top = 34
     Width = 300
     Align = alLeft
@@ -583,7 +583,7 @@ object fmMain: TfmMain
   end
   object Splitter1: TSplitter
     Left = 327
-    Height = 382
+    Height = 384
     Top = 34
     Width = 14
     Beveled = True
@@ -591,8 +591,8 @@ object fmMain: TfmMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 21
-    Top = 435
-    Width = 907
+    Top = 437
+    Width = 906
     Panels = <    
       item
         Width = 250
@@ -606,7 +606,7 @@ object fmMain: TfmMain
     Left = 0
     Height = 34
     Top = 0
-    Width = 907
+    Width = 906
     ButtonHeight = 32
     ButtonWidth = 32
     Caption = 'ToolBar1'
@@ -680,9 +680,9 @@ object fmMain: TfmMain
   end
   object PageControl1: TPageControl
     Left = 344
-    Height = 375
+    Height = 377
     Top = 37
-    Width = 560
+    Width = 559
     ActivePage = tsMain
     Align = alClient
     BorderSpacing.Left = 1
@@ -706,8 +706,8 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 335
-      ClientWidth = 550
+      ClientHeight = 337
+      ClientWidth = 549
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
@@ -715,7 +715,7 @@ object fmMain: TfmMain
         Left = 704
         Height = 82
         Top = 64
-        Width = 224
+        Width = 223
         Anchors = [akTop, akLeft, akRight]
         Picture.Data = {
           0A544A706567496D6167655F420000FFD8FFE000104A46494600010101006000
@@ -1254,9 +1254,9 @@ object fmMain: TfmMain
       end
       object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 335
+        Height = 337
         Top = 0
-        Width = 550
+        Width = 549
         BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
@@ -1275,24 +1275,24 @@ object fmMain: TfmMain
   object Panel1: TPanel
     Left = 0
     Height = 19
-    Top = 416
-    Width = 907
+    Top = 418
+    Width = 906
     Align = alBottom
     ClientHeight = 19
-    ClientWidth = 907
+    ClientWidth = 906
     TabOrder = 5
     object Memo1: TMemo
       Left = 1
       Height = 40
       Top = 1
-      Width = 905
+      Width = 904
       Align = alClient
       TabOrder = 0
     end
   end
   object Button1: TButton
     Left = 0
-    Height = 382
+    Height = 384
     Top = 34
     Width = 27
     Align = alLeft
@@ -2705,12 +2705,16 @@ object fmMain: TfmMain
       }
       OnClick = lmRefreshClick
     end
+    object Separator3: TMenuItem
+      Caption = '-'
+    end
     object lmMaintenance: TMenuItem
       Caption = 'DB-Tools'
       ImageIndex = 72
       object lmDBAdmin: TMenuItem
         Caption = 'MWA DBAdmin'
         ImageIndex = 36
+        Visible = False
         OnClick = lmDBAdminClick
       end
       object lmScriptEngine: TMenuItem
@@ -3142,6 +3146,10 @@ object fmMain: TfmMain
       }
       OnClick = lmUnregisterDatabaseClick
     end
+    object Separator4: TMenuItem
+      Tag = 1
+      Caption = '-'
+    end
     object lmViewFirst1000: TMenuItem
       Tag = 1
       Caption = 'View Tabledata'
@@ -3225,10 +3233,11 @@ object fmMain: TfmMain
       OnClick = lmEditTableDataClick
     end
     object lmExtractTableData: TMenuItem
-      Tag = 1
+      Tag = -1
       Caption = 'Extract Tabledata'
       Hint = 'Lists table data as DML INSERT statements for the'#10'specified table.'
       ImageIndex = 80
+      Visible = False
       OnClick = lmExtractTableDataClick
     end
     object lmExtractTableMetaData: TMenuItem
@@ -3254,7 +3263,7 @@ object fmMain: TfmMain
       Caption = '-'
     end
     object lmCopyTable: TMenuItem
-      Tag = 1
+      Tag = -1
       Caption = 'Copy Table'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
@@ -3292,16 +3301,22 @@ object fmMain: TfmMain
         C85DC7CAC95CC7CAC95CC7CAC95CC7CAC95CC7CAC95CC7CAC95CC7CAC95CC8CA
         CA5DB9BCBB4F8C918F0A8E939100000000000000000000000000
       }
+      Visible = False
       OnClick = lmCopyTableClick
     end
     object lmImportTable: TMenuItem
-      Tag = 1
+      Tag = -1
       Caption = 'Import to Table'
       ImageIndex = 75
+      Visible = False
       OnClick = lmImportTableClick
     end
     object lmSeparator: TMenuItem
       Tag = 1
+      Caption = '-'
+    end
+    object Separator5: TMenuItem
+      Tag = 11
       Caption = '-'
     end
     object lmNewTable: TMenuItem
@@ -3423,10 +3438,12 @@ object fmMain: TfmMain
       end
       object lmScriptInsert: TMenuItem
         Caption = 'Insert'
+        Visible = False
         OnClick = lmScriptInsertClick
       end
       object lmScriptUpdate: TMenuItem
         Caption = 'Update'
+        Visible = False
         OnClick = lmScriptUpdateClick
       end
     end
@@ -3439,11 +3456,19 @@ object fmMain: TfmMain
     object Separator2: TMenuItem
       Caption = '-'
     end
+    object Separator6: TMenuItem
+      Tag = 12
+      Caption = '-'
+    end
     object lmNewGen: TMenuItem
       Tag = 12
       Caption = 'Create New Generator'
       ImageIndex = 6
       OnClick = lmNewGenClick
+    end
+    object Separator7: TMenuItem
+      Tag = 2
+      Caption = '-'
     end
     object lmViewGen: TMenuItem
       Tag = 2
@@ -3475,10 +3500,18 @@ object fmMain: TfmMain
       ImageIndex = 49
       OnClick = lmDropGeneratorClick
     end
+    object Separator9: TMenuItem
+      Tag = 4
+      Caption = '-'
+    end
     object lmDisplay1000V: TMenuItem
       Tag = 4
-      Caption = 'View First 1000 records'
+      Caption = 'View Data'
       OnClick = lmDisplay1000VClick
+    end
+    object Separator8: TMenuItem
+      Tag = 14
+      Caption = '-'
     end
     object lmCreateView: TMenuItem
       Tag = 14
@@ -3897,6 +3930,11 @@ object fmMain: TfmMain
   end
   object mdsHistory: TMemDataset
     FieldDefs = <    
+      item
+        Name = 'Description'
+        DataType = ftString
+        Size = 255
+      end    
       item
         Name = 'Time'
         DataType = ftDateTime

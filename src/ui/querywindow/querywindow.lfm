@@ -1,10 +1,10 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 582
-  Height = 562
-  Top = 393
+  Left = 768
+  Height = 550
+  Top = 258
   Width = 1079
   Caption = 'fmQueryWindow'
-  ClientHeight = 556
+  ClientHeight = 544
   ClientWidth = 1079
   Color = clForm
   KeyPreview = True
@@ -28,17 +28,17 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 248
+    Height = 236
     Top = 308
     Width = 1079
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 248
+    ClientHeight = 236
     ClientWidth = 1079
     TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 248
+      Height = 236
       Top = 0
       Width = 1079
       Align = alClient
@@ -1571,6 +1571,10 @@ object fmQueryWindow: TfmQueryWindow
     end
     object lmExportDataSet: TMenuItem
       Caption = 'Export to...'
+      object lmStdExportFormats: TMenuItem
+        Caption = 'Standart Export Formats...'
+        OnClick = lmStdExportFormatsClick
+      end
       object lmExportDataAsPDF: TMenuItem
         Caption = 'PDF'
         OnClick = lmExportDataAsPDFClick
@@ -1593,10 +1597,6 @@ object fmQueryWindow: TfmQueryWindow
       end
       object Separator1: TMenuItem
         Caption = '-'
-      end
-      object lmStdExportFormats: TMenuItem
-        Caption = 'Standart Export Formats...'
-        OnClick = lmStdExportFormatsClick
       end
     end
     object lmPrintData: TMenuItem

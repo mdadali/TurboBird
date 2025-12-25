@@ -1836,7 +1836,6 @@ begin
     ' f.RDB$FIELD_LENGTH AS field_length, ' +
     ' f.RDB$Character_LENGTH AS characterlength, ' + {character_length seems a reserved word }
     ' f.RDB$FIELD_PRECISION AS field_precision, ' +
-    ' f.RDB$FIELD_PRECISION AS field_precision, ' +
     ' f.RDB$FIELD_SCALE AS field_scale, ' +
     ' f.RDB$FIELD_TYPE as field_type_int, ' +
     ' f.RDB$FIELD_SUB_TYPE AS field_sub_type, ' +
@@ -1850,8 +1849,8 @@ begin
     ' LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID and f.rdb$character_set_id=coll.rdb$character_set_id ' +
     ' LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
     ' LEFT JOIN RDB$FIELD_DIMENSIONS dim on f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME '+
-    ' WHERE r.RDB$RELATION_NAME=''' + TableName + '''  and Trim(r.RDB$FIELD_NAME) = ''' + UpperCase(FieldName) + ''' ' +
-    ' ORDER BY r.RDB$FIELD_POSITION ';
+    ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(TableName) +  ' and Trim(r.RDB$FIELD_NAME) =  ' +  QuotedStr(FieldName)  +
+    '  ORDER BY r.RDB$FIELD_POSITION ';
   if not sqQuery.Transaction.InTransaction then
     sqQuery.Transaction.StartTransaction;
   sqQuery.Open;

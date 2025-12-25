@@ -27,6 +27,7 @@ type
     Label1: TLabel;
     laPermission: TLabel;
     Panel1: TPanel;
+    ScrollBar1: TScrollBar;
     StringGrid1: TStringGrid;
     procedure bbScriptClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -54,8 +55,8 @@ type
     { public declarations }
   end; 
 
-var
-  fmNewTable: TfmNewTable;
+//var
+  //fmNewTable: TfmNewTable;
 
 implementation
 
@@ -70,12 +71,22 @@ var
   FieldLine: string;
   FieldType: string;
   PKey: string;
+  TableName: string;
 begin
-  Result:= 'create table ' + edNewTable.Text + ' (' + LineEnding;
+  TableName := Trim(turbocommon.ExtractObjectName(edNewTable.Text));
+  if IsObjectNameCaseSensitive(TableName) then
+    if not IsObjectNameQuoted(TableName) then
+      TableName := MakeObjectNameQuoted(TableName);
+
+  Result:= 'create table ' + TableName + ' (' + LineEnding;
   for i:= 1 to StringGrid1.RowCount - 1 do
     if Trim(StringGrid1.Cells[0, i]) <> '' then
     begin
-      FieldLine:= StringGrid1.Cells[0, i]; // Field Name
+      FieldLine := Trim(StringGrid1.Cells[0, i]); // Field Name
+      if IsObjectNameCaseSensitive(FieldLine) then
+        if not IsObjectNameQuoted(FieldLine) then
+          FieldLine := MakeObjectNameQuoted(FieldLine);
+
       FieldType:= StringGrid1.Cells[1, i];
       if FieldType = 'UUID' then
         FieldType := 'CHAR(16) CHARACTER SET OCTETS';
@@ -94,9 +105,12 @@ begin
       // Primary Key
       if StringGrid1.Cells[4, i] = '1' then
       begin
-        PKey:= PKey + StringGrid1.Cells[0, i] + ',';
+        PKey:= Trim(PKey + StringGrid1.Cells[0, i]) + ',';
         GeneratorName:= Trim(edNewTable.Text) + '_' + StringGrid1.Cells[0, i] + '_Gen';
-        KeyField:= StringGrid1.Cells[0, i]; // Generator should work if there is only one Key field
+        KeyField:= Trim(StringGrid1.Cells[0, i]); // Generator should work if there is only one Key field
+        if IsObjectNameCaseSensitive(KeyField) then
+          if not IsObjectNameQuoted(KeyField) then
+            KeyField := MakeObjectNameQuoted(KeyField);
       end;
       // Default value
       if Trim(StringGrid1.Cells[5, i]) <> '' then
@@ -117,6 +131,11 @@ begin
   if PKey <> '' then
   begin
     Delete(PKey, Length(PKey), 1);
+
+    if IsObjectNameCaseSensitive(PKey) then
+      if not IsObjectNameQuoted(PKey) then
+        PKey := MakeObjectNameQuoted(PKey);
+
     Result:= Result + ', ' + LineEnding + ' constraint ' + edNewTable.Text + '_pk_1 primary key (' + PKey + ') ' + LineEnding;
   end;
   Result:= Result + ');' + LineEnding;
@@ -283,12 +302,19 @@ var
   List: TStringList;
   KeyField: string;
   GeneratorName: string;
+  TableName: string;
 begin
   if Validate then
   begin
+    TableName := edNewTable.Text;
+    if IsObjectNameCaseSensitive(TableName) then
+      if not IsObjectNameQuoted(TableName) then
+        TableName := MakeObjectNameQuoted(TableName);
+
     List:= TStringList.Create;
     try
       List.Text:= GenerateCreateSQL(KeyField, GeneratorName);
+
       if cxCreateGen.Checked then
       begin;
         //todo: move this generator/trigger creation to a utility function somewhere; likewise for other create/alter DDL code
@@ -298,14 +324,15 @@ begin
 
         List.Add('');
         List.Add('-- Trigger');
-        List.Add('CREATE TRIGGER ' + GeneratorName + ' FOR ' + edNewTable.Text);
+        List.Add('CREATE TRIGGER ' + GeneratorName + ' FOR ' + TableName);
         List.Add('ACTIVE BEFORE INSERT POSITION 0 ');
         List.Add('AS BEGIN ');
         List.Add('IF (NEW.' + KeyField + ' IS NULL OR NEW.' + KeyField + ' = 0) THEN ');
         List.Add('  NEW.' + KeyField + ' = GEN_ID(' + GeneratorName + ', 1);');
         List.Add('END;');
       end;
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Create New Table: ' + edNewTable.Text, List.Text);
+
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Create New Table: ' + TableName, List.Text);
     finally
       List.Free;
     end;

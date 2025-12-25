@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 588
+  Left = 733
   Height = 634
-  Top = 51
+  Top = 47
   Width = 589
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -331,5 +331,13 @@ object fmNewTable: TfmNewTable
       OnClick = Button1Click
       TabOrder = 1
     end
+  end
+  object ScrollBar1: TScrollBar
+    Left = 342
+    Height = 20
+    Top = 44
+    Width = 121
+    PageSize = 0
+    TabOrder = 7
   end
 end

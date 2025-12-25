@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 465
+  Left = 460
   Height = 583
-  Top = 116
+  Top = 134
   Width = 603
   BorderIcons = []
   BorderStyle = bsNone
@@ -40,8 +40,8 @@ object fmAbout: TfmAbout
         Left = 8
         Height = 19
         Top = 416
-        Width = 182
-        Caption = 'http://code-sd.com/turbobird'
+        Width = 236
+        Caption = 'https://github.com/mdadali/TurboBird'
         Font.Color = 7303023
         ParentColor = False
         ParentFont = False
@@ -1638,7 +1638,7 @@ object fmAbout: TfmAbout
     Enabled = False
     Interval = 10
     OnTimer = Timer1Timer
-    Left = 256
-    Top = 456
+    Left = 504
+    Top = 104
   end
 end

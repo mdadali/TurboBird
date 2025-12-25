@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1596"/>
+      <BuildNr Value="1612"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -498,7 +498,7 @@
         <PackageName Value="LCL"/>
       </Item27>
     </RequiredPackages>
-    <Units Count="101">
+    <Units Count="102">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1114,6 +1114,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
       </Unit100>
+      <Unit101>
+        <Filename Value="utils/cselectsqlparserext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cSelectSQLParserExt"/>
+      </Unit101>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

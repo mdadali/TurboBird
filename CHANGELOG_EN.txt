@@ -4,6 +4,61 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+TurboBird v1.2.1.1263
+
+Build Date: 2025-12-25
+Build Time: 08:56:10
+
+! Complete migration of the application from SQLDB to IBX
+  (SQLDB/FPC is no longer used)
+
++ Support for multiple Firebird server versions within a single TurboBird instance
+  (Firebird 2.5, 3.x, 4.x, 5.x, 6.0)
+
++ Full support for case-sensitive object names
+  (tables and fields with mixed-case identifiers)
+   Correct handling of quoted and unquoted identifiers
+  Context menu in QueryWindow (Ctrl+Space) lists tables and fields correctly
+  Case-sensitive names are automatically inserted using double quotes
+  (Alias and dot-notation detection not yet implemented – currently intentionally simple)
+
+! Script execution with and without terminators improved
+  IBX correctly handles procedure bodies without SET TERM
+  Terminators are still added when loading DB objects into the QueryWindow
+  (for compatibility with other tools)
+
++ Integrated Tony Whyman’s IBX Scripter (MWA Software)
+
+! Backup / Restore fully migrated to Tony Whyman’s IBX-based implementation
+  More options available (server-side / client-side backups and restores)
+
+! TreeView reworked
+  Switched to lazy loading
+  Nodes are loaded from the database only when opened for the first time
+  Optional refresh behavior configurable via INI file
+  Ability to show/hide the TreeView
+  (provides more space for query code)
+
++ QueryWindow improvements
+  Code view or result view can be maximized
+  Navigator can be shown or hidden via INI file
+
+! Export to Clipboard improved
+  Maximum number of exported rows can be limited via INI file
+  Prevents accidental copying of very large tables
+
+! Server registration is now mandatory
+  Server names are no longer derived from connection strings
+  Servers must be resolvable via DNS or the hosts file
+
+! Multi-server handling via IBX
+  Loading/unloading of client libraries fully handled by IBX
+
+- Removed custom component SQLDbExt
+  (no longer required due to IBX migration)
+
+
+
 
 TurboBird v1.2.1.1262
 Build date & time: 26.09.2025, 13:26:00

@@ -105,6 +105,13 @@ type
     lmExtractTableFields: TMenuItem;
     lmExtractTableMetaDataQuoted: TMenuItem;
     lmExtractTableMetaDataUnQuoted: TMenuItem;
+    Separator9: TMenuItem;
+    Separator8: TMenuItem;
+    Separator7: TMenuItem;
+    Separator6: TMenuItem;
+    Separator5: TMenuItem;
+    Separator4: TMenuItem;
+    Separator3: TMenuItem;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
     mnTheme: TMenuItem;
@@ -415,6 +422,8 @@ type
     Function RetrieveInputParamFromSP(Body: string): string;
     function LoadRegisteredServers: Boolean;
     // Load registered databases from file and show them in treeview
+    function LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
+
     Function LoadRegisteredDatabases: Boolean;
     Function FindQueryWindow(ATitle: string): TComponent;
     // Returns BLOB subtype clause depending on subtype
@@ -440,7 +449,7 @@ type
     procedure FillObjectRoot(Node: TTreeNode);
     Function GetTableNames(dbIndex: Integer): string;
     Function CreateNewTrigger(dbIndex: Integer; ATableName: string; OnCommitProcedure: TNotifyEvent = nil): Boolean;
-    Function AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: string): Boolean;
+    Function AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: String): Boolean;
     Function SaveAndCloseSQLHistory: Boolean;
     Function OpenSQLHistory(DatabaseTitle: string): Boolean;
     // Connects to database.
@@ -505,7 +514,7 @@ begin
   {$ENDIF}
   Application.OnException:= @GlobalException;
   FActivated:= False;
-  //LoadRegisteredServers;
+  LoadRegisteredServers;
   LoadRegisteredDatabases;
   StatusBar1.Panels[0].Text:= 'TurboBird for ' + Target + '-' + Arch;
   Application.OnShowHint := @AppShowHint;
@@ -2231,11 +2240,14 @@ end;
 procedure TfmMain.lmDisconnectClick(Sender: TObject);
 var
   dbIndex: Integer;
+  DummyNode: TTreeNode;
 begin
   if tvMain.Selected = nil then Exit;
 
   dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
   CloseDB(dbIndex, true); // Silent = False → Dialoge behandelt
+  tvMain.Selected.DeleteChildren;
+  DummyNode := tvMain.Items.AddChild(tvMain.Selected, 'Loading...');
 end;
 
 // ============================================================================
@@ -2687,20 +2699,33 @@ var
   SelNode: TTreeNode;
   dbIndex: Integer;
   FieldName: string;
+  TableName: string;
   FieldType, DefaultValue: string;
   Size, Scale, Precision: Integer;
   Description, Characterset, Collation: string;
   NotNull: Boolean;
 begin
   SelNode:= tvMain.Selected;
-  dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Parent.Data)^.dbIndex;
+  dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+
   FieldName:= Copy(SelNode.Text, 1, Pos(' ', SelNode.Text) - 1);
-  if dmSysTables.GetFieldInfo(dbIndex, SelNode.Parent.Text, FieldName,
+  //if IsObjectNameCaseSensitive(FieldName) and   (not IsObjectNameQuoted(FieldName)) then
+    //((FieldName := MakeObjectNameQuoted(FieldName);
+
+  //ShowMessage(FieldName);
+
+  TableName := ExtractObjectName(SelNode.Parent.Text);
+  //if IsObjectNameCaseSensitive(TableName) and  (not IsObjectNameQuoted(TableName)) then
+    //TableName := MakeObjectNameQuoted(TableName);
+
+  //ShowMessage(TableName);
+
+  if dmSysTables.GetFieldInfo(dbIndex, TableName, FieldName,
     FieldType, Size, Precision, Scale, NotNull,
     DefaultValue, Characterset, Collation, Description) then
   begin
     fmNewEditField:= TfmNewEditField.Create(nil);
-    fmNewEditField.Init(dbIndex, SelNode.Parent.Text, foEdit,
+    fmNewEditField.Init(dbIndex, TableName, foEdit,
       FieldName, FieldType,
       CharacterSet, Collation,
       DefaultValue, Description,
@@ -2712,7 +2737,7 @@ begin
     fmNewEditField.ShowModal;
   end
   else
-    ShowMessage('Unable to locate the field: ' + SelNode.Text);
+  MessageDlg('Unable to locate the field: ' + SelNode.Text, mtError, [mbOK], 0);
 end;
 
 procedure TfmMain.lmEditPackageClick(Sender: TObject);
@@ -2814,6 +2839,11 @@ begin
     DBNode := GetAncestorAtLevel(SelNode ,1);
     SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
     Strings := QWindow.meQuery.Lines;
+
+    //if IsObjectNameCaseSensitive(ATableName) then
+      //if not IsObjectNameQuoted(ATableName) then
+        //ATableName := MakeObjectNameQuoted(ATableName);
+
     SimpleObjExtractor.Extract(otData, ATableName, [], true, Strings);
   finally
     Screen.Cursor := crDefault;
@@ -2849,7 +2879,7 @@ begin
     DBNode := GetAncestorAtLevel(SelNode ,1);
     SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
     TStrings(Strings) := QWindow.meQuery.Lines;
-    SimpleObjExtractor.ExtractTableFields(ATableName, Strings, AlwaysQuoteIdentifiers, ' ', true);
+    SimpleObjExtractor.ExtractTableFields(ATableName, Strings, true {AlwaysQuoteIdentifiers}, ' ', true);
 
   finally
     Screen.Cursor := crDefault;
@@ -3910,8 +3940,27 @@ begin
     inherited SetFocus;
 end;
 
+function GetFirstCommentLineFromSQLText(ASQLText: string): string;
+var
+  Lines: TStringList;
+  Line: string;
+  InBlockComment: Boolean;
+  p, i: Integer;
+begin
+  Result := '';
+  Lines := TStringList.Create;
+  try
+    Lines.Text := ASQLText;
+    Line := Lines[0];
+    if Line.StartsWith('--')  or Line.StartsWith('/*')  then
+      result := Line;
+  finally
+    Lines.Free;
+  end;
+end;
+
 (* Insert SQL query into database history file *)
-Function TfmMain.AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: string): Boolean;
+function TfmMain.AddToSQLHistory(DatabaseTitle: string; SQLType, SQLStatement: String): Boolean;
 var description: string;
 begin
   try
@@ -3922,8 +3971,10 @@ begin
       //if (SQLType <> 'SELECT') or (mdsHistory.FieldByName('SQLStatement').AsString <> SQLStatement) then
       if not mdsHistory.Locate('SQLStatement', SQLStatement, []) then
       begin
-        description := 'Description';
-        mdsHistory.AppendRecord([Now, SQLType, SQLStatement, 0]);
+        description := GetFirstCommentLineFromSQLText(SQLStatement);
+        if description = '' then
+          description := 'Description';
+        mdsHistory.AppendRecord([description, Now, SQLType, SQLStatement, 0]);
         if SQLType = 'DDL' then
           mdsHistory.SaveToFile(FCurrentHistoryFile);
       end;
@@ -4137,7 +4188,6 @@ begin
   ATab.Hint := FullHint;
   ATab.ShowHint := True;
 
-  // Anzeigen und Fokus setzen
   Form.Show;
   Form.edNewTable.SetFocus;
 end;
@@ -4446,7 +4496,6 @@ begin
   fmPermissions.Init(NodeInfos, dbIndex, '', SelNode.Text, 2);
   fmPermissions.Show;
 end;
-
 
 (***********  Refresh Click  *************)
 procedure TfmMain.lmRefreshClick(Sender: TObject);
@@ -5720,6 +5769,8 @@ begin
 
   QWindow.meQuery.ClearAll;
   QWindow.OnCommit:= OnCommitProcedure;
+
+  //QWindow.meQuery.Lines.Text := AQueryText;
   repeat
     if Pos(LineEnding, AQueryText) > 0 then
       Part:= Copy(AQueryText, 1, Pos(LineEnding, AQueryText))
@@ -5730,6 +5781,7 @@ begin
 
     QWindow.meQuery.Lines.Add(Part);
   until AQueryText = '';
+
 
   result := QWindow;
 end;
@@ -7321,6 +7373,7 @@ var
   ParentNodeText: string;
   NodeText: string;
   ObjectType: TTreeViewObjectType;
+  Refreshable: boolean;
 begin
   SelNode:= tvMain.Selected;
 
@@ -7399,10 +7452,17 @@ begin
   //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
 
   // Show menu for specific filter
-  for i:= 0 to pmDatabase.Items.Count - 1 do
+  {for i:= 0 to pmDatabase.Items.Count - 1 do
     pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
       ((pmDatabase.Items[i].Tag = 100) and (SelNode <> nil) and (SelNode.Parent <> nil) and
       (SelNode.Parent.Parent <> nil) and (SelNode.Parent.Parent.Parent = nil));
+ }
+
+ Refreshable := TPNodeInfos(SelNode.Data)^.Refreshable;
+
+ for i:= 0 to pmDatabase.Items.Count - 1 do
+   pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
+     ((pmDatabase.Items[i].Tag = 100) and Refreshable);
 
 end;
 
@@ -7450,6 +7510,7 @@ begin
     new(PNodeInfos);
     PNodeInfos^.dbIndex := -1;
     PNodeInfos^.ObjectType := tvotNone;
+    PNodeInfos^.Refreshable := true;
     PNodeInfos^.PopupMenuTag := -1;
     PNodeInfos^.ImageIndex := -1;
     PNodeInfos^.ViewForm := nil;
@@ -7868,8 +7929,9 @@ var
   ServerRec: TServerRecord;
   SavePwd: boolean;
   ServerErrStr: string;
+  WasDBConnectedOnEntry: Boolean;
 begin
-
+  WasDBConnectedOnEntry := true;
   AllowExpansion := True;
 
   if (Node = nil) or (Node.Data = nil) then
@@ -7910,6 +7972,7 @@ begin
       RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := Rec.Password;
       RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := false;
       RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected := true;
+      WasDBConnectedOnEntry := false;
     end;
 
     //wenn connect erfolg den server infos holen und in serverfile speichern
@@ -7949,7 +8012,7 @@ begin
     end else
     begin
       // Vorhandenen Extractor zurücksetzen, aber nicht freigeben
-      if MainTreeViewAlwaysRefresh or   MetaDataChanged   then
+      if MainTreeViewAlwaysRefresh or   MetaDataChanged  or (not WasDBConnectedOnEntry) then
       begin
         NodeInfo^.SimpleObjExtractor.ResetExtract;
         MetaDataChanged := false;
@@ -7963,7 +8026,7 @@ begin
     begin
       // Vorhandene Cache zurücksetzen, aber nicht freigeben
       // inifile.ReloadCacheOnNodeExpand, MetaDataChanged = turbocommon global variable
-      if ReloadCacheOnNodeExpand or MetaDataChanged then
+      if ReloadCacheOnNodeExpand or MetaDataChanged   or (not WasDBConnectedOnEntry) then
       begin
         NodeInfo^.UnIntelliSenseCache.RefreshCache;
         MetaDataChanged := false;
@@ -8052,7 +8115,6 @@ try
   DBNode := turbocommon.GetAncestorAtLevel(Node, 1);
   SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
   ExtractorItems := TStringList.Create;
-
 
   Info := TPNodeInfos(Node.Data);
   if Info = nil then Exit;
@@ -8436,6 +8498,7 @@ begin
   CNode.SelectedIndex:= 1;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotQueryWindow;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := false;
 
   CNode:= tvMain.Items.AddChild(ANode, 'Tables');
   TPNodeInfos(CNode.Data)^.ObjectType := tvotTableRoot;
@@ -8580,152 +8643,124 @@ begin
 
 end;
 
-(**********************             Load databases            *********************************)
-Function TfmMain.LoadRegisteredDatabases: Boolean;
+function TfmMain.LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
 var
-  Rec: TRegisteredDatabase;
-  F: file of TRegisteredDatabase;
-  FileName: string;
-  MainNode, CNode: TTreeNode;
-  DummyNode: TTreeNode;
-  i: Integer;
-  AServerName: string;
-  ServerNode: TTreeNode;
-  ServerRecord: TServerRecord;
   ClientLibPath: string;
+  ServerRecord: TServerRecord;
+  MainNode, ServerNode, DummyNode: TTreeNode;
+  i: Integer;
 begin
-  try
-    tvMain.Items.Clear;
+  Result := False;
 
-    LoadRegisteredServers;
-    if Length(RegisteredServers) = 0 then
-      exit(false);
+  if Rec.Deleted then Exit;
+
+  SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
+  i := High(RegisteredDatabases);
+
+  with RegisteredDatabases[i] do
+  begin
+    RegRec := Rec;
+    OrigRegRec := Rec;
+    Index := i;
+
+    if Rec.OverwriteLoadedClientLib then
+      ClientLibPath := Rec.FireBirdClientLibPath
+    else
+    begin
+      ServerRecord := GetServerRecordFromFileByName(Rec.ServerName);
+      ClientLibPath := ServerRecord.ClientLibraryPath;
+    end;
+
+    IBDatabase := TIBDatabase.Create(nil);
+    IBDatabase.FirebirdLibraryPathName := ClientLibPath;
+
+    IBTransaction := TIBTransaction.Create(nil);
+    IBTransaction.DefaultDatabase := IBDatabase;
+    IBDatabase.DefaultTransaction := IBTransaction;
+
+    IBQuery := TIBQuery.Create(nil);
+    IBQuery.Database := IBDatabase;
+    IBQuery.Transaction := IBTransaction;
+    IBQuery.AllowAutoActivateTransaction := True;
+
+    IBDatabase.DatabaseName := Rec.DatabaseName;
+    IBDatabase.Params.Clear;
+    IBDatabase.Params.Add('user_name=' + Rec.UserName);
+    IBDatabase.Params.Add('password=' + Rec.Password);
+
+    if Rec.Role <> '' then
+      IBDatabase.Params.Add('sql_role_name=' + Rec.Role);
+
+    if Rec.Charset <> '' then
+      IBDatabase.Params.Add('lc_ctype=' + Rec.Charset);
+
+    IBDatabase.Params.Add('sql_dialect=' + Rec.SQLDialect);
+    IBDatabase.Params.Add('isc_dpb_num_buffers=1024');
+    IBDatabase.Params.Add('isc_dpb_force_write=1');
+
+    IBDatabase.LoginPrompt := (Rec.Password = '');
+
+    IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
+    IBDatabaseInfo.Database := IBDatabase;
+  end;
+
+  ServerNode := GetServerNodeByServerName(Rec.ServerName);
+  MainNode := tvMain.Items.AddChild(ServerNode, Rec.Title);
+  MainNode.ImageIndex := 3;
+  MainNode.SelectedIndex := 3;
+
+  TPNodeInfos(MainNode.Data)^.dbIndex := i;
+  TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
+
+  DummyNode := tvMain.Items.AddChild(MainNode, 'Loading...');
+
+  tvMain.PopupMenu := pmDatabase;
+  tbCheckDBIntegrity.Enabled := True;
+
+  Result := True;
+end;
+
+function TfmMain.LoadRegisteredDatabases: Boolean;
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+begin
+  Result := False;
+
+  try
+    if Length(RegisteredServers) = 0 then Exit;
+
     if Length(RegisteredDatabases) > 0 then
       ReleaseRegisteredDatabases;
 
-    FileName:= getConfigurationDirectory + DatabasesRegFile;
+    FileName := GetConfigurationDirectory + DatabasesRegFile;
 
-    // Copy old configuration file
-    if not FileExists(FileName) and (FileExists(ChangeFileExt(ParamStr(0), '.reg'))) then
-    begin
+    if not FileExists(FileName) and FileExists(ChangeFileExt(ParamStr(0), '.reg')) then
       CopyFile(ChangeFileExt(ParamStr(0), '.reg'), FileName);
-    end;
 
-    if FileExists(FileName) then
+    if not FileExists(FileName) then Exit(True);
+
+    AssignFile(F, FileName);
+    Reset(F);
+
+    while not EOF(F) do
     begin
-      AssignFile(F, FileName);
-      Reset(F);
-      i:= 0;
-      while not Eof(F) do
-      begin
-        Read(F, Rec);
-        if not Rec.Deleted then
-        begin
-          SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
-          with RegisteredDatabases[high(RegisteredDatabases)] do
-          begin
-            RegRec:= Rec;
-            OrigRegRec:= Rec;
-            Index:= FilePos(F) - 1;
-
-            if Rec.OverwriteLoadedClientLib then
-              ClientLibPath := RegRec.FireBirdClientLibPath
-            else begin
-              AServerName := Rec.ServerName;
-              ServerRecord := GetServerRecordFromFileByName(AServerName);
-              ClientLibPath := ServerRecord.ClientLibraryPath;
-            end;
-            IBDatabase := TIBDatabase.Create(nil);
-            IBDatabase.FirebirdLibraryPathName := ClientLibPath;
-
-            IBTransaction:= TIBTransaction.Create(nil);
-            IBTransaction.DefaultDatabase := IBDatabase;
-            IBDatabase.DefaultTransaction := IBTransaction;
-
-            IBQuery := TIBQuery.Create(nil);
-            IBQuery.Database := IBDatabase;
-            IBQuery.Transaction := IBTransaction;
-            IBQuery.AllowAutoActivateTransaction := true;
-
-            IBDatabase.DatabaseName:= Rec.DatabaseName;
-            IBDatabase.Connected := False;
-            IBDatabase.DatabaseName := Rec.DatabaseName;
-
-            IBDatabase.Params.Clear;
-
-            IBDatabase.Params.Add('user_name=' + Rec.UserName);
-            IBDatabase.Params.Add('password=' + Rec.Password);
-
-            if Rec.Role <> '' then
-              IBDatabase.Params.Add('sql_role_name=' + Rec.Role);
-
-            if Rec.Charset <> '' then
-              IBDatabase.Params.Add('lc_ctype=' + Rec.Charset);
-
-            IBDatabase.Params.Add('sql_dialect=' + Rec.SQLDialect);
-            IBDatabase.Params.Add('isc_dpb_num_buffers=1024');
-            IBDatabase.Params.Add('isc_dpb_force_write=1');
-
-            IBDatabase.DefaultTransaction := IBTransaction;
-            IBDatabase.LoginPrompt := (Rec.Password = '');
-
-            IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
-            IBDatabaseInfo.Database := IBDatabase;
-
-            //IBDatabase.Connected := True;
-            //IBTransaction.StartTransaction;
-          end;
-
-          // Server node
-          //AServerName:= GetServerName(Rec.DatabaseName);
-          AServerName := Rec.ServerName;
-          ServerNode:= GetServerNodeByServerName(AServerName);
-
-          {if ServerNode = nil then // Add new Server node
-          begin
-            tvMain.Items.Add(nil, '');
-            ServerNode:= tvMain.Items.Add(nil, AServerName);
-            ServerNode.ImageIndex:= 25;
-            ServerNode.SelectedIndex:= 26;
-            TPNodeInfos(ServerNode.Data)^.ObjectType := tvotServer;
-          end;}
-
-          // Display databases
-          MainNode:= tvMain.Items.AddChild(ServerNode, Rec.Title);
-          MainNode.ImageIndex:= 3;
-          MainNode.SelectedIndex:= 3;
-          TPNodeInfos(MainNode.Data)^.dbIndex := i;
-          TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
-          DummyNode := tvMain.Items.AddChild(MainNode, 'Loading...');
-
-          tvMain.PopupMenu:= pmDatabase;
-          tbCheckDBIntegrity.Enabled := true;
-
-           Inc(i);
-        end;
-
-      end;
-      CloseFile(F);
-
-      //if Length(RegisteredDatabases) > 0 then
-        //SetConnection(0);
-
-      // Add spaces at end of tree
-      //tvMain.Items.Add(nil, '');
-      //tvMain.Items.Add(nil, '');
-      //tvMain.Items.Add(nil, '');
+      Read(F, Rec);
+      if not Rec.Deleted then
+        LoadRegisteredDatabase(Rec);
     end;
-    Result:= True;
+
+    CloseFile(F);
+    Result := True;
+
   except
     on E: Exception do
-    begin
-      Result:= False;
-      ShowMessage('Error: ' + E.Message);
-    end;
+      MessageDlg(
+        'Failed to load registered databases.' + LineEnding + LineEnding + E.Message,
+        mtError, [mbOK], 0
+      );
   end;
-  //self.Resize;
-  //self.Repaint;
-  //tvMain.Repaint;
 end;
 
 function TfmMain.LoadRegisteredServers: Boolean;
@@ -8766,6 +8801,7 @@ begin
       NodeInfo := TPNodeInfos(ServerNode.Data);
 
       NodeInfo^.ObjectType := tvotServer;
+      NodeInfo^.Refreshable := false;
 
       ServerSession := TServerSession(NodeInfo^.ServerSession).Create(           Rec.ServerName,
                                                                                  Rec.ServerAlias,

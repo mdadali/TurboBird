@@ -7,9 +7,15 @@ interface
 uses
   Classes, SysUtils,  Dialogs,
 
+  cSelectSQLParserExt,
+
   fsimpleobjextractor;
 
 type
+  TFieldMeta = record
+    FieldName: string;
+    TableName: string;
+  end;
 
   TFieldCacheArray = array of TStringList;
 
@@ -21,17 +27,26 @@ type
     FTableCache: TStringList;
     FFieldCacheArray: TFieldCacheArray;
 
+    //erweitert
+    FFieldMetaArray: array of array of TFieldMeta; // parallele Feldmetadaten
+    //end
+
     function LoadTableCache: boolean;
     function LoadFieldCache: boolean;
     function LoadCache: boolean;
     function DeleteCache: boolean;
     function DeleteTableCache: boolean;
     function DeleteFieldCache: boolean;
-
   public
     constructor Create(ASimpleObjExtractor: TSimpleObjExtractor);
     destructor  Destroy; override;
     function    RefreshCache: boolean;
+
+    //erweitert
+    function FieldsForTable(TableName: string): TStringList;
+    function FieldsForAlias(AliasName: string; Parser: TSelectSQLParserExt): TStringList;
+    procedure BuildFieldMetaArray; // baut FFieldMetaArray auf Basis FTableCache/FFieldCacheArray
+    //end
 
     property TableCache: TStringList      read  FTableCache;
     property FieldCache: TFieldCacheArray read  FFieldCacheArray;
@@ -178,5 +193,44 @@ begin
   DeleteCache;
   inherited;
 end;
+
+//erweitert
+procedure TUnIntelliSenseCache.BuildFieldMetaArray;
+var
+  i, j: Integer;
+begin
+  SetLength(FFieldMetaArray, Length(FFieldCacheArray));
+  for i := 0 to High(FFieldCacheArray) do
+  begin
+    SetLength(FFieldMetaArray[i], FFieldCacheArray[i].Count - 1); // Index 0 = Tabellenname
+    for j := 1 to FFieldCacheArray[i].Count - 1 do
+    begin
+      FFieldMetaArray[i][j-1].FieldName := FFieldCacheArray[i][j];
+      FFieldMetaArray[i][j-1].TableName := FFieldCacheArray[i][0]; // Tabelle
+    end;
+  end;
+end;
+
+function TUnIntelliSenseCache.FieldsForTable(TableName: string): TStringList;
+var
+  i, j: Integer;
+begin
+  Result := TStringList.Create;
+  for i := 0 to High(FFieldMetaArray) do
+  begin
+    if FFieldMetaArray[i][0].TableName = TableName then
+      for j := 0 to High(FFieldMetaArray[i]) do
+        Result.Add(FFieldMetaArray[i][j].FieldName);
+  end;
+end;
+
+function TUnIntelliSenseCache.FieldsForAlias(AliasName: string; Parser: TSelectSQLParserExt): TStringList;
+var
+  TableName: string;
+begin
+  TableName := Parser.ResolveAlias(AliasName); // muss Parser-Logik implementieren
+  Result := FieldsForTable(TableName);
+end;
+//end
 
 end.

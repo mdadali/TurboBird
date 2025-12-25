@@ -22,7 +22,8 @@ uses
   fblobedit,
   uthemeselector,
   fsimpleobjextractor,
-  cUnIntelliSenseCache;
+  cUnIntelliSenseCache,
+  cSelectSQLParserExt;
 
 type
 
@@ -60,6 +61,7 @@ type
       property Trans: TIBTransaction read FTrans write FTrans;
       property Connection: TIBDatabase read FConnection write FConnection;
       property Statement: String read fStatement write fStatement;
+
       procedure DoJob;
       procedure Execute; override;
       constructor Create(aType: TQueryActions);
@@ -268,6 +270,9 @@ type
 
     procedure LoadpmUnIntelliSense;
     procedure pmUnIntelliSenseClick(Sender: TObject);
+    function  GetFieldsForAlias(const AliasName: string;
+      Cache: TUnIntelliSenseCache; Parser: TSelectSQLParserExt): TStringList;
+    procedure ShowIntelliSensePopup(Parser: TSelectSQLParserExt);
 
     //RxDBGrid////////////////////////////
     function  BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
@@ -676,6 +681,7 @@ begin
     else
     if fType = qaDDL then
     begin
+      //MetaDataChanged := true;
       FSQLQuery.SQL.Text := Trim(AnsiString(fStatement));
       FSQLQuery.ExecSQL;
     end
@@ -1752,7 +1758,7 @@ var
 begin
   SetLength(SavedSort, 0);
 
-  // 1️⃣ sortierte Spalten sammeln
+  // S️ortierte Spalten sammeln
   SetLength(Cols, 0);
   for i := 0 to Grid.Columns.Count - 1 do
     if Grid.Columns[i].SortOrder <> smNone then
@@ -1761,7 +1767,7 @@ begin
       Cols[High(Cols)] := Grid.Columns[i];
     end;
 
-  // 2️⃣ nach SortPosition sortieren
+  // Nach SortPosition sortieren
   for i := 0 to High(Cols) - 1 do
     for j := i + 1 to High(Cols) do
       if Cols[i].SortPosition > Cols[j].SortPosition then
@@ -1771,7 +1777,7 @@ begin
         Cols[j] := Tmp;
       end;
 
-  // 3️⃣ in dieser Reihenfolge speichern
+  // i️n dieser Reihenfolge speichern
   SetLength(SavedSort, Length(Cols));
   for i := 0 to High(Cols) do
   begin
@@ -1808,7 +1814,7 @@ var
 begin
   SortCols := TStringList.Create;
   try
-    // 1️⃣ sortierte Spalten sammeln
+    // ️sortierte Spalten sammeln
     for i := 0 to Grid.Columns.Count - 1 do
     begin
       Col := TRxColumn(Grid.Columns[i]);
@@ -1816,7 +1822,7 @@ begin
         SortCols.AddObject('', Col);
     end;
 
-    // 2️⃣ nach SortPosition sortieren (wie RxDBGrid intern)
+    // nach SortPosition sortieren (wie RxDBGrid intern)
     for i := 0 to SortCols.Count - 2 do
       for j := i + 1 to SortCols.Count - 1 do
         if TRxColumn(SortCols.Objects[i]).SortPosition >
@@ -1827,7 +1833,7 @@ begin
           SortCols.Objects[j] := Tmp;
         end;
 
-    // 3️⃣ ORDER BY aufbauen
+    // ORDER BY aufbauen
     ResultStr := '';
     for i := 0 to SortCols.Count - 1 do
     begin
@@ -1861,7 +1867,7 @@ var OrderBy: string;
     TmpDS: TDataSource;
 begin
   OrderBy := BuildOrderBy(Grid, false);
-  ShowMessage(OrderBy);
+  //ShowMessage(OrderBy);
   SaveGridSort(Grid);
 
   IBQuery := GetCurrentSelectQuery;
@@ -1894,7 +1900,7 @@ begin
   IBQuery.Open;}
 
   RestoreGridSort(Grid);
-  ShowMessage(OrderBy);
+  //ShowMessage(OrderBy);
 end;
 
 procedure TfmQueryWindow.RxDBGridSortControllerTitleClick(Column: TColumn);
@@ -3337,6 +3343,16 @@ begin
 
 end;
 
+function CaretPosToOffset(ASynEdit: TSynEdit): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 0 to ASynEdit.CaretY - 2 do
+    Inc(Result, Length(ASynEdit.Lines[i]) + 1); // +1 für Zeilenumbruch
+  Inc(Result, ASynEdit.CaretX - 1);             // Spalte addieren
+end;
+
 function GetSynEditCaretScreenPos(ASynEdit: TSynEdit): TPoint;
 var
   P: TPoint;
@@ -3355,7 +3371,6 @@ end;
 
 procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
-
 var P: TPoint;
 begin
   // Execute query by pressing Ctrl + Enter
@@ -3373,6 +3388,41 @@ begin
   end;
 
 end;
+
+{procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  P: TPoint;
+  CursorPos: Integer;
+  TextBeforeCursor: string;
+  SQLParser: TSelectSQLParserExt;
+begin
+  if (ssCtrl in Shift) and (Key = VK_RETURN) then
+  begin
+    CallExecuteQuery(qtUnknown);
+    Key := 0;
+    Exit;
+  end;
+
+  if (ssCtrl in Shift) and (Key = VK_SPACE) then
+  begin
+    P := GetSynEditCaretScreenPos(meQuery);
+    CursorPos := CaretPosToOffset(meQuery);
+    TextBeforeCursor := Copy(meQuery.Text, 1, CursorPos);
+
+    //SQLParser := TSelectSQLParserExt.Create(TextBeforeCursor);
+    SQLParser := TSelectSQLParserExt.CreateFromString(TextBeforeCursor);
+
+    try
+      SQLParser.BuildAliasMap;
+      ShowIntelliSensePopup(SQLParser); // Jetzt passend
+      pmUnIntelliSense.Popup(P.X, P.Y);
+    finally
+      SQLParser.Free;
+    end;
+
+    Key := 0;
+  end;
+end; }
 
 procedure TfmQueryWindow.pmUnIntelliSenseClick(Sender: TObject);
 begin
@@ -3449,7 +3499,81 @@ begin
   end;
 end;
 
-//
+function TfmQueryWindow.GetFieldsForAlias(const AliasName: string;
+  Cache: TUnIntelliSenseCache; Parser: TSelectSQLParserExt): TStringList;
+var
+  TableName: string;
+  i: Integer;
+begin
+  Result := TStringList.Create;
+
+  // Alias auflösen (wenn vorhanden)
+  TableName := Parser.ResolveAlias(AliasName);
+
+  // Tabelle im Cache suchen
+  for i := 0 to Cache.TableCache.Count - 1 do
+  begin
+    if Cache.TableCache[i] = TableName then
+    begin
+      if Assigned(Cache.FieldCache[i]) then
+      begin
+        Result.AddStrings(Cache.FieldCache[i]);
+        Result.Delete(0); // Entferne den ersten Eintrag = Tabellenname
+      end;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfmQueryWindow.ShowIntelliSensePopup(Parser: TSelectSQLParserExt);
+var
+  IntelliCache: TUnIntelliSenseCache;
+  TableItem, FieldItem: TMenuItem;
+  i, j: Integer;
+  DBNode: TTreeNode;
+  Fields: TStringList;
+begin
+  pmUnIntelliSense.Items.Clear;
+
+  // DB-Cache holen
+  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+  IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+  if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
+
+  // Menü füllen
+  for i := 0 to IntelliCache.TableCache.Count - 1 do
+  begin
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := IntelliCache.TableCache[i];
+
+    Fields := GetFieldsForAlias(IntelliCache.TableCache[i], IntelliCache, Parser);
+    try
+      // Tabellenname ganz oben einfügen
+      FieldItem := TMenuItem.Create(TableItem);
+      FieldItem.Caption := IntelliCache.TableCache[i]; // wenn du Originalnamen willst
+      FieldItem.OnClick := @pmUnIntelliSenseClick;
+      TableItem.Add(FieldItem);
+
+      // Trennstrich
+      FieldItem := TMenuItem.Create(TableItem);
+      FieldItem.Caption := '-';
+      TableItem.Add(FieldItem);
+
+      for j := 0 to Fields.Count - 1 do
+      begin
+        FieldItem := TMenuItem.Create(TableItem);
+        FieldItem.Caption := Fields[j];
+        FieldItem.OnClick := @pmUnIntelliSenseClick;
+        TableItem.Add(FieldItem);
+      end;
+    finally
+      Fields.Free;
+    end;
+
+    pmUnIntelliSense.Items.Add(TableItem);
+  end;
+end;
+
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 begin
   if MetaDataChanged then
@@ -3603,13 +3727,13 @@ begin
     FResultMemo.Font.Color:= clRed;
     FTab.Font.Color:= clRed;
     FTab.ImageIndex:= 3;
-  end
-  else
+  end else
   begin
     FTab.Caption:= FAText;
     FTab.ImageIndex:= 0;
     fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
   end;
+
   FQT.Free;
   if FFinished then
     EnableButtons;

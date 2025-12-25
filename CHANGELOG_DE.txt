@@ -5,6 +5,61 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+TurboBird v1.2.1.1263
+
+Build Date: 25.12.2025
+Build Time: 08:56:10
+
+! Umstellung der kompletten Anwendung von SQLDB auf IBX
+  (SQLDB/FPC wird nicht mehr verwendet)
+
++ Unterstützung für mehrere Firebird-Serverversionen innerhalb einer TurboBird-Instanz
+  (Firebird 2.5, 3.x, 4.x, 5.x, 6.0)
+
++ Case-sensitive Objektnamen werden jetzt vollständig unterstützt
+  (Tabellen- und Feldnamen mit gemischter Groß-/Kleinschreibung)
+  Korrekte Erkennung quoted / unquoted Identifier
+  Kontextmenü im QueryWindow (Ctrl+Space) listet Tabellen und Felder korrekt
+  Case-sensitive Namen werden automatisch mit doppelten Anführungszeichen eingefügt
+  (Alias- und Punkt-Erkennung noch nicht implementiert – derzeit bewusst einfach gehalten)
+
+! Skript-Ausführung mit und ohne Terminatoren verbessert
+  Durch IBX werden Procedure Bodies korrekt ohne SET TERM verarbeitet
+  Beim Zurücklesen von DB-Objekten werden Terminatoren weiterhin ergänzt
+  (Kompatibilität zu anderen Tools)
+
++ Integration von Tony Whymans IBX-Scripter (MWA Software)
+
+! Backup / Restore komplett auf Tony Whymans IBX-Code umgestellt
+  Mehr Optionen (Server-seitig / Client-seitig)
+
+! TreeView überarbeitet
+  Umstellung auf Lazy-Load
+  Knoten werden erst beim ersten Öffnen aus der Datenbank geladen
+  Optionales Refresh-Verhalten über INI-Datei steuerbar
+  Möglichkeit, das TreeView ein- und auszublenden
+  (mehr Platz für Query-Code)
+
++ QueryWindow
+  Code-Ansicht oder Ergebnis-Ansicht kann maximiert werden
+  Navigator optional über INI-Datei ein-/ausblendbar
+
+! Export to Clipboard verbessert
+  Begrenzung der maximal exportierten Zeilen über INI-Datei
+  Schutz vor unbeabsichtigtem Kopieren großer Tabellen
+
+! Serverregistrierung ist jetzt verpflichtend
+  Servernamen werden nicht mehr aus Connection-Strings abgeleitet
+  Server müssen per DNS oder hosts-Datei auflösbar sein
+
++ Mehrserver-Handling über IBX
+  Laden/Entladen von Client-Libraries vollständig durch IBX
+  Initial wird die höchste verfügbare Client-Library (Firebird 6) geladen
+
+! Eigene Komponente SQLDbExt entfernt
+  (durch IBX nicht mehr notwendig)
+
+
 TurboBird v1.2.1.1262
 Build date & time: 26.09.2025, 13:26:00
 
@@ -13,7 +68,7 @@ Build date & time: 26.09.2025, 13:26:00
     In Debug Builds synchron (Thread ausgeschaltet)
 
 ! Bei allen Routinen (außer Package-Routinen) wurde die Doppelklick-Aktion auf "Edit" geändert.
-
+ 
 ! Tabs:
   !Beschriftungen gekürzt
   +Tabs sind jetzt verschiebbar (außer Main)

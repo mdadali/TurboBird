@@ -283,13 +283,13 @@ type
   TNodeInfos = record
     dbIndex: integer;
     ObjectType: TTreeViewObjectType;
-    PopupMenuTag: integer;
-    ImageIndex: Integer;
+    Refreshable: boolean;
+    PopupMenuTag: integer; //reserve
+    ImageIndex: Integer;   //reserve
     ViewForm,
     EditorForm,
     NewForm,
     ExecuteForm: TForm;
-
     SimpleObjExtractor: TSimpleObjExtractor;
     UnIntelliSenseCache: TUnIntelliSenseCache;
     ServerSession: TServerSession;
@@ -422,6 +422,7 @@ function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
 function  IsObjectNameQuoted(const AStr: string): Boolean;
 function  MakeObjectNameQuoted(AObjectName: string): string;
 procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
+function  StripQuotes(const S: string): string;
 
 function NeedsCommit(Q: TIBQuery): Boolean;
 
@@ -498,7 +499,6 @@ function GetLCLWidgetSet: string;
 function GetProgramBuildDate: string;
 function GetProgramBuildTime: string;
 
-function StripQuotes(const S: string): string;
 function ExtractDefaultValue(const DefaultSource: string): string;
 function IsValidUUIDHex(const S: string): Boolean;
 function CreateUUIDHexLiteral: string;
@@ -554,7 +554,7 @@ uses Reg;
 
 function IsObjectNameCaseSensitive(AObjectName: string): boolean;
 begin
-  result := (AObjectName <> UpperCase(AObjectName));
+  result := (AObjectName <> AnsiUpperCase(AObjectName));
 end;
 
 function IsObjectNameQuoted(const AStr: string): Boolean;
@@ -578,7 +578,8 @@ procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 var i: integer;
 begin
   for i := 0 to AObjectList.Count - 1 do
-    AObjectList[i] := MakeObjectNameQuoted(AObjectList[i]);
+    if IsObjectNameCaseSensitive(AObjectList[i]) then
+      AObjectList[i] := MakeObjectNameQuoted(AObjectList[i]);
 end;
 
 {  TIBSQLStatementTypes =
@@ -1601,7 +1602,7 @@ begin
   MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
 
   //QueryWindow
-  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'QWShowNavigator', false);
+  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', false);
   QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorBackgroundColor', 'clRed'));
   QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'EditorFontName', 'Arial');
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);
@@ -1662,12 +1663,13 @@ begin
   fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
 
   //QueryWindow
-  fIniFile.WriteBool('QueryWindow',  'QWShowNavigator', QWShowNavigator);
-  fIniFile.WriteString('QueryWindow',  'EditorBackgroundColor', ColorToString(QWEditorBackgroundColor));
+  fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
+  {fIniFile.WriteString('QueryWindow',  'EditorBackgroundColor', ColorToString(QWEditorBackgroundColor));
   fIniFile.WriteString('QueryWindow',  'EditorFontName', QWEditorFontName);
   fIniFile.WriteInteger('QueryWindow',  'FontSize', 14);
   fIniFile.WriteString('QueryWindow',  'EditorFontColor', ColorToString(QWEditorFontColor));
   fIniFile.WriteString('QueryWindow',  'EditorFontStyle', FontStylesToStr(QWEditorFontStyle));
+  }
 end;
 
 
@@ -2441,9 +2443,9 @@ var
 begin
   PosOpenParen := Pos('(', Input);
   if PosOpenParen > 1 then
-    Result := Copy(Input, 1, PosOpenParen - 1)
+    Result := Trim(Copy(Input, 1, PosOpenParen - 1))
   else
-    Result := Input;
+    Result := Trim(Input);
 end;
 
 function GetClearNodeText(const ANodeText: string): string;
