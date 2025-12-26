@@ -278,8 +278,6 @@ type
     function  BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
     procedure ApplyGridSort(Grid: TRxDBGrid);
     procedure SaveGridSort(Grid: TRxDBGrid);
-    procedure RestoreGridSort(Grid: TRxDBGrid);
-
     procedure RxDBGridSortControllerTitleClick(Column: TColumn);
     /////////////////////////////////////////
 
@@ -326,7 +324,6 @@ type
 
 var
   SavedSort: array of TSortInfo;
-  SortGlobalOrderBy: string;
 
 implementation
 
@@ -1743,13 +1740,6 @@ begin
 end;
 
 
-procedure RemoveTitleCaptions(Grid: TRxDBGrid);
-var i: integer;
-begin
-  for i := 0 to Grid.Columns.Count - 1 do
-    Grid.Columns.Items[i].Title.Caption := '';
-end;
-
 procedure TfmQueryWindow.SaveGridSort(Grid: TRxDBGrid);
 var
   i, j: Integer;
@@ -1784,24 +1774,6 @@ begin
     SavedSort[i].FieldName := Cols[i].FieldName;
     SavedSort[i].SortOrder := Cols[i].SortOrder;
   end;
-end;
-
-procedure TfmQueryWindow.RestoreGridSort(Grid: TRxDBGrid);
-var
-  i, j: Integer;
-begin
-  // alles zurücksetzen
-  for j := 0 to Grid.Columns.Count - 1 do
-    Grid.Columns[j].SortOrder := smNone;
-
-  // in der gespeicherten Reihenfolge neu setzen
-  for i := 0 to High(SavedSort) do
-    for j := 0 to Grid.Columns.Count - 1 do
-      if SameText(Grid.Columns[j].FieldName, SavedSort[i].FieldName) then
-      begin
-        Grid.Columns[j].SortOrder := SavedSort[i].SortOrder;
-        Break;
-      end;
 end;
 
 function TfmQueryWindow.BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
@@ -1860,54 +1832,42 @@ begin
 end;
 
 procedure TfmQueryWindow.ApplyGridSort(Grid: TRxDBGrid);
-var OrderBy: string;
-    IBQuery,
-    TmpIBQuery: TIBQuery;
-    TmpGrid: TRxDBGrid;
-    TmpDS: TDataSource;
+var
+  Fields: array of string;
+  Markers: array of TSortMarker;
+  i: Integer;
+  IBQuery: TIBQuery;
+  OrderBy: string;
 begin
-  OrderBy := BuildOrderBy(Grid, false);
-  //ShowMessage(OrderBy);
+  // ORDER BY bauen
+  OrderBy := BuildOrderBy(Grid, False);
   SaveGridSort(Grid);
 
   IBQuery := GetCurrentSelectQuery;
 
-  //TmpGrid := TRxDBGrid(Grid.FindComponent('TmpGrid'));
-  //TmpGrid.SetSort();
-
-  {TmpIBQuery := TIBQuery(IBQuery.FindComponent('TmpIBQuery'));
-  if TmpIBQuery.Active then
-    TmpIBQuery.Close;
-  TmpDS := TDataSource(Grid.DataSource.FindComponent('TmpDS'));
-  TmpDS.DataSet := TmpIBQuery;
-  TmpGrid.DataSource := TmpDS;
-
-  TmpGrid.Left  := Grid.Left;
-  TmpGrid.Width := Grid.Width;
-  TmpGrid.Top   := Grid.DefaultRowHeight;
-  TmpGrid.Height := Grid.Height - Grid.DefaultRowHeight;
-
-  TmpIBQuery.Database := IBQuery.Database;
-  TmpIBQuery.Transaction := IBQuery.Database.DefaultTransaction;
-  TmpIBQuery.SQL.Text := IBQuery.Text;
-  TmpIBQuery.Parser.OrderByClause := SortGlobalOrderBy;
-  TmpIBQuery.Open; }
-
-  {IBQuery.Close;
+  IBQuery.Close;
   IBQuery.Parser.OrderByClause := OrderBy;
-
   IBQuery.SQL.Text := IBQuery.Parser.SQLText;
-  IBQuery.Open;}
+  IBQuery.Open;
 
-  RestoreGridSort(Grid);
-  //ShowMessage(OrderBy);
+  // Arrays vorbereiten
+  SetLength(Fields, Length(SavedSort));
+  SetLength(Markers, Length(SavedSort));
+
+  for i := 0 to High(SavedSort) do
+  begin
+    Fields[i] := SavedSort[i].FieldName;
+    Markers[i] := SavedSort[i].SortOrder;
+  end;
+
+  Grid.SetSort(Fields, Markers, False);
 end;
+
 
 procedure TfmQueryWindow.RxDBGridSortControllerTitleClick(Column: TColumn);
 begin
   ApplyGridSort(TRxDBGrid(pmGrid.PopupComponent));
 end;
-
 
 { Create new result tab depending on query type }
 
@@ -1916,10 +1876,8 @@ function TfmQueryWindow.CreateResultTab(QueryType: TQueryTypes;
   AdditionalTitle: string): TTabSheet;
 var
   ATab: TTabSheet;
-  //DBGrid: TIBDynamicGrid;
-  DBGrid, TmpDBGrid: TRxDBGrid;
-  DataSource, TmpDS: TDataSource;
-  TmpIBQuery: TIBQuery;
+  DBGrid: TRxDBGrid;
+  DataSource: TDataSource;
   StatusBar: TStatusBar;
   Nav: TDBNavigator;
   Pan: TPanel;
@@ -2000,19 +1958,6 @@ begin
 
     // Commit button
     NewCommitButton(Pan, ATab);
-
-    //for RxSort
-    {TmpDBGrid:= TRxDBGrid.Create(DBGrid);
-    TmpDBGrid.Name := 'TmpGrid';
-    TmpDBGrid.Parent := DBGrid;
-    TmpDBGrid.OptionsRx := [rdgAllowColumnsForm,rdgAllowDialogFind,rdgHighlightFocusCol,rdgHighlightFocusRow,rdgFooterRows,rdgAllowQuickFilter,rdgAllowFilterForm,rdgAllowSortForm,rdgAllowToolMenu,rdgCaseInsensitiveSort,rdgDisableWordWrapTitles,rdgColSpanning];
-
-    TmpIBQuery := TIBQuery.Create(aSqlQuery);
-    TmpIBQuery.Name := 'TmpIBQuery';
-
-    TmpDS := TDataSource.Create(DataSource);
-    TmpDS.Name := 'TmpDS';
-    }
 
     RxDBGridExportPDF1.RxDBGrid := DBGrid;
     RxDBGridPrint1.RxDBGrid := DBGrid;

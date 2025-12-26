@@ -1,13 +1,13 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmSQLHistory','FORMDATA',[
-  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'y'#1#6'Height'#3'&'#2#3'T'
-  +'op'#3#148#0#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2
+  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3#219#1#6'Height'#3'&'#2#3
+  +'Top'#3#148#0#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2
   +#11'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreat'
   +'e'#6'OnShow'#7#8'FormShow'#8'Position'#7#16'poMainFormCenter'#10'LCLVersion'
   +#6#7'2.2.6.0'#0#12'TPageControl'#12'PageControl1'#4'Left'#2#0#6'Height'#3'&'
-  +#2#3'Top'#2#0#5'Width'#3'B'#3#10'ActivePage'#7#9'tsDetails'#5'Align'#7#8'alC'
-  +'lient'#8'TabIndex'#2#1#8'TabOrder'#2#0#0#9'TTabSheet'#9'tsHistory'#7'Captio'
+  +#2#3'Top'#2#0#5'Width'#3'B'#3#10'ActivePage'#7#9'tsHistory'#5'Align'#7#8'alC'
+  +'lient'#8'TabIndex'#2#0#8'TabOrder'#2#0#0#9'TTabSheet'#9'tsHistory'#7'Captio'
   +'n'#6#7'History'#12'ClientHeight'#3#7#2#11'ClientWidth'#3'8'#3#0#6'TPanel'#6
   +'Panel2'#4'Left'#2#0#6'Height'#2'@'#3'Top'#2#0#5'Width'#3'8'#3#5'Align'#7#5
   +'alTop'#12'ClientHeight'#2'@'#11'ClientWidth'#3'8'#3#8'TabOrder'#2#0#0#9'TGr'
