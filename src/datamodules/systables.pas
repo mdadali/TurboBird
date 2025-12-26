@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, StrUtils,  FileUtil,
-  LResources, Forms, Controls, DB, fpstdexports, Dialogs, dbugintf,
+  LResources, Forms, Controls, DB, BufDataset, fpstdexports, Dialogs, dbugintf,
 
   IB,
   IBDatabase,
@@ -28,6 +28,8 @@ type
   { TdmSysTables }
 
   TdmSysTables = class(TDataModule)
+    BufDsServersAlias: TStringField;
+    BufDsServersID: TAutoIncField;
     ibcDatabase: TIBDatabase;
     stTrans: TIBTransaction;
     sqQuery: TIBQuery;

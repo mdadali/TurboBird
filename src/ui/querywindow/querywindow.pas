@@ -19,7 +19,7 @@ uses
   RxDBGridPrintGrid, RxDBGridExportSpreadSheet, ibxscript,
 
   fdataexportersintrf,
-  fblobedit,
+  //fblobedit,
   uthemeselector,
   fsimpleobjextractor,
   cUnIntelliSenseCache,
@@ -2990,10 +2990,10 @@ var
   Rec: TDatabaseRec;
   dbIndex: Integer;
   ATab: TTabSheet;
-  frmBlobEdit: TfrmBlobEdit;
+  //frmBlobEdit: TfrmBlobEdit;
   Server, DBAlias, ShortTitle, FullHint: string;
 begin
-  Grid := TdbGrid(pmGrid.PopupComponent);
+  {Grid := TdbGrid(pmGrid.PopupComponent);
   Field := Grid.SelectedField;
 
   if not ((Field is TMemoField) or (Field is TBlobField)) then exit;
@@ -3051,7 +3051,7 @@ begin
   // Tab aktivieren + Initialisierung
   fmMain.PageControl1.ActivePage := ATab;
   frmBlobEdit.Init(Field, NodeInfos);
-  frmBlobEdit.Show;
+  frmBlobEdit.Show; }
 end;
 
 procedure TfmQueryWindow.pmGridPopup(Sender: TObject);

@@ -164,14 +164,11 @@ end;
 
 procedure TfrmTestFunction.FormCreate(Sender: TObject);
 var DBRec: TRegisteredDatabase;
-    ServerRec: TServerRecord;
 begin
   inherited;
 
   DBRec := RegisteredDatabases[FRoutineInfo.dbIndex].RegRec;
-  ServerRec := GetServerRecordFromFileByName(DBRec.ServerName);
-  FServerVersion := ServerRec.VersionMajor;
-
+  FServerVersion := DBRec.ServerVersionMajor;
   cboxPackages.Visible := (FServerVersion >= 3);
 
   if FServerVersion >= 3 then

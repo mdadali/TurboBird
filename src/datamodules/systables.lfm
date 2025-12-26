@@ -1,9 +1,9 @@
 object dmSysTables: TdmSysTables
   OnCreate = DataModuleCreate
   OldCreateOrder = False
-  Height = 367
-  HorizontalOffset = 361
-  VerticalOffset = 159
+  Height = 523
+  HorizontalOffset = 377
+  VerticalOffset = 116
   Width = 479
   object sqQuery: TIBQuery
     AllowAutoActivateTransaction = True
@@ -38,7 +38,7 @@ object dmSysTables: TdmSysTables
   object stTrans: TIBTransaction
     TransactionName = '{6BAA211A-EF6A-40FE-AA49-76CA671ED2E9}'
     Active = False
-    Left = 88
-    Top = 120
+    Left = 304
+    Top = 32
   end
 end

@@ -58,7 +58,8 @@ uses
   floginservicemanager,
   fserverregistry,
 
-  fblobedit, HTMLUn2, HtmlGlobals,
+  //fblobedit,
+  HTMLUn2, HtmlGlobals,
 
   fmetaquerys,
   uthemeselector,
@@ -422,7 +423,7 @@ type
     Function RetrieveInputParamFromSP(Body: string): string;
     function LoadRegisteredServers: Boolean;
     // Load registered databases from file and show them in treeview
-    function LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
+    //function LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
 
     Function LoadRegisteredDatabases: Boolean;
     Function FindQueryWindow(ATitle: string): TComponent;
@@ -514,7 +515,7 @@ begin
   {$ENDIF}
   Application.OnException:= @GlobalException;
   FActivated:= False;
-  LoadRegisteredServers;
+  //LoadRegisteredServers;
   LoadRegisteredDatabases;
   StatusBar1.Panels[0].Text:= 'TurboBird for ' + Target + '-' + Arch;
   Application.OnShowHint := @AppShowHint;
@@ -1592,10 +1593,10 @@ var
   Rec: TDatabaseRec;
   dbIndex: Integer;
   ATab: TTabSheet;
-  frmBlobEdit: TfrmBlobEdit;
+  //frmBlobEdit: TfrmBlobEdit;
   Server, DBAlias, ShortTitle, FullHint: string;
 begin
-  SelNode := tvMain.Selected;
+  {SelNode := tvMain.Selected;
   if SelNode = nil then Exit;
 
   ServerNode := TTreeNode(GetAncestorAtLevel(SelNode, 0));
@@ -1646,7 +1647,7 @@ begin
   // Tab aktivieren + Initialisierung
   PageControl1.ActivePage := ATab;
   frmBlobEdit.Init(nil, NodeInfos);
-  frmBlobEdit.Show;
+  frmBlobEdit.Show;}
 end;
 
 (**********  change user password  **********)
@@ -7422,8 +7423,8 @@ begin
 
     tvotQueryWindow: Filter:= 30;
 
-    tvotFunctionRoot: Filter := 311;
-    tvotFunction: Filter := 31;
+    tvotFunctionRoot: Filter := 31;
+    tvotFunction: Filter := 311;
 
     tvotPackageRoot: Filter:= 32;
     tvotPackage: Filter:= 33;
@@ -8643,7 +8644,7 @@ begin
 
 end;
 
-function TfmMain.LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
+{function TfmMain.LoadRegisteredDatabase(Rec: TRegisteredDatabase): Boolean;
 var
   ClientLibPath: string;
   ServerRecord: TServerRecord;
@@ -8761,6 +8762,153 @@ begin
         mtError, [mbOK], 0
       );
   end;
+end;}
+
+Function TfmMain.LoadRegisteredDatabases: Boolean;
+var
+  Rec: TRegisteredDatabase;
+  F: file of TRegisteredDatabase;
+  FileName: string;
+  MainNode, CNode: TTreeNode;
+  DummyNode: TTreeNode;
+  i: Integer;
+  AServerName: string;
+  ServerNode: TTreeNode;
+  ServerRecord: TServerRecord;
+  ClientLibPath: string;
+begin
+  try
+    tvMain.Items.Clear;
+
+    LoadRegisteredServers;
+    if Length(RegisteredServers) = 0 then
+      exit(false);
+    if Length(RegisteredDatabases) > 0 then
+      ReleaseRegisteredDatabases;
+
+    FileName:= getConfigurationDirectory + DatabasesRegFile;
+
+    // Copy old configuration file
+    if not FileExists(FileName) and (FileExists(ChangeFileExt(ParamStr(0), '.reg'))) then
+    begin
+      CopyFile(ChangeFileExt(ParamStr(0), '.reg'), FileName);
+    end;
+
+    if FileExists(FileName) then
+    begin
+      AssignFile(F, FileName);
+      Reset(F);
+      i:= 0;
+      while not Eof(F) do
+      begin
+        Read(F, Rec);
+        if not Rec.Deleted then
+        begin
+          SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
+          with RegisteredDatabases[high(RegisteredDatabases)] do
+          begin
+            RegRec:= Rec;
+            OrigRegRec:= Rec;
+            Index:= FilePos(F) - 1;
+
+            if Rec.OverwriteLoadedClientLib then
+              ClientLibPath := RegRec.FireBirdClientLibPath
+            else begin
+              AServerName := Rec.ServerName;
+              ServerRecord := GetServerRecordFromFileByName(AServerName);
+              ClientLibPath := ServerRecord.ClientLibraryPath;
+            end;
+            IBDatabase := TIBDatabase.Create(nil);
+            IBDatabase.FirebirdLibraryPathName := ClientLibPath;
+
+            IBTransaction:= TIBTransaction.Create(nil);
+            IBTransaction.DefaultDatabase := IBDatabase;
+            IBDatabase.DefaultTransaction := IBTransaction;
+
+            IBQuery := TIBQuery.Create(nil);
+            IBQuery.Database := IBDatabase;
+            IBQuery.Transaction := IBTransaction;
+            IBQuery.AllowAutoActivateTransaction := true;
+
+            IBDatabase.DatabaseName:= Rec.DatabaseName;
+            IBDatabase.Connected := False;
+            IBDatabase.DatabaseName := Rec.DatabaseName;
+
+            IBDatabase.Params.Clear;
+
+            IBDatabase.Params.Add('user_name=' + Rec.UserName);
+            IBDatabase.Params.Add('password=' + Rec.Password);
+
+            if Rec.Role <> '' then
+              IBDatabase.Params.Add('sql_role_name=' + Rec.Role);
+
+            if Rec.Charset <> '' then
+              IBDatabase.Params.Add('lc_ctype=' + Rec.Charset);
+
+            IBDatabase.Params.Add('sql_dialect=' + Rec.SQLDialect);
+            IBDatabase.Params.Add('isc_dpb_num_buffers=1024');
+            IBDatabase.Params.Add('isc_dpb_force_write=1');
+
+            IBDatabase.DefaultTransaction := IBTransaction;
+            IBDatabase.LoginPrompt := (Rec.Password = '');
+
+            IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
+            IBDatabaseInfo.Database := IBDatabase;
+
+            //IBDatabase.Connected := True;
+            //IBTransaction.StartTransaction;
+          end;
+
+          // Server node
+          //AServerName:= GetServerName(Rec.DatabaseName);
+          AServerName := Rec.ServerName;
+          ServerNode:= GetServerNodeByServerName(AServerName);
+
+          {if ServerNode = nil then // Add new Server node
+          begin
+            tvMain.Items.Add(nil, '');
+            ServerNode:= tvMain.Items.Add(nil, AServerName);
+            ServerNode.ImageIndex:= 25;
+            ServerNode.SelectedIndex:= 26;
+            TPNodeInfos(ServerNode.Data)^.ObjectType := tvotServer;
+          end;}
+
+          // Display databases
+          MainNode:= tvMain.Items.AddChild(ServerNode, Rec.Title);
+          MainNode.ImageIndex:= 3;
+          MainNode.SelectedIndex:= 3;
+          TPNodeInfos(MainNode.Data)^.dbIndex := i;
+          TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
+          DummyNode := tvMain.Items.AddChild(MainNode, 'Loading...');
+
+          tvMain.PopupMenu:= pmDatabase;
+          tbCheckDBIntegrity.Enabled := true;
+
+           Inc(i);
+        end;
+
+      end;
+      CloseFile(F);
+
+      //if Length(RegisteredDatabases) > 0 then
+        //SetConnection(0);
+
+      // Add spaces at end of tree
+      //tvMain.Items.Add(nil, '');
+      //tvMain.Items.Add(nil, '');
+      //tvMain.Items.Add(nil, '');
+    end;
+    Result:= True;
+  except
+    on E: Exception do
+    begin
+      Result:= False;
+      ShowMessage('Error: ' + E.Message);
+    end;
+  end;
+  //self.Resize;
+  //self.Repaint;
+  //tvMain.Repaint;
 end;
 
 function TfmMain.LoadRegisteredServers: Boolean;

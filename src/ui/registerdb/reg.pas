@@ -189,7 +189,7 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
-function TfmReg.RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string; SavePassword: Boolean;
+{function TfmReg.RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string; SavePassword: Boolean;
              FBClient: string; SQLDialect: string; Port: string; ServerName: string;
              OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
 var
@@ -249,6 +249,90 @@ begin
     begin
       Result:= False;
       ShowMessage('Error: ' + e.Message);
+    end;
+  end;
+end; }
+
+function TfmReg.RegisterDatabase(
+  Title, DatabaseName, UserName, Password, Charset, Role: string;
+  SavePassword: Boolean;
+  FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+  OverwriteLoadedClientLib: boolean;
+  ConnectOnApplicationStart: boolean
+): Boolean;
+var
+  Rec: TRegisteredDatabase;
+  F: file of TRegisteredDatabase;
+  FileName: string;
+  ServerRec: TServerRecord;
+begin
+  Result := False;
+
+  try
+    // Server-Infos laden (wie bisher)
+    ServerRec := GetServerRecordFromFileByName(
+      cboxServers.Items[cboxServers.ItemIndex]
+    );
+
+    FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+    AssignFile(F, FileName);
+
+    if FileExists(FileName) then
+    begin
+      FileMode := 2;
+      Reset(F);
+      Seek(F, System.FileSize(F));
+    end
+    else
+      Rewrite(F);
+
+    // Record füllen
+    FillChar(Rec, SizeOf(Rec), 0);
+
+    Rec.Title := Title;
+    Rec.DatabaseName := DatabaseName;
+    Rec.UserName := UserName;
+
+    if SavePassword then
+      Rec.Password := Password
+    else
+      Rec.Password := '';
+
+    Rec.Charset := Charset;
+    Rec.Role := Role;
+    Rec.SavePassword := SavePassword;
+    Rec.Deleted := False;
+    Rec.LastOpened := Now;
+
+    Rec.FireBirdClientLibPath := FBClient;
+    Rec.SQLDialect := SQLDialect;
+    Rec.Port := Port;
+    Rec.ServerName := ServerName;
+    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
+    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
+
+    // Server-Version übernehmen
+    Rec.ServerVersionString := ServerRec.VersionString;
+    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
+    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
+
+    // Schreiben
+    Write(F, Rec);
+    CloseFile(F);
+
+    Result := True;
+
+  except
+    on E: Exception do
+    begin
+      try
+        CloseFile(F);
+      except
+      end;
+
+      ShowMessage('Error registering database:' + LineEnding + E.Message);
+      Result := False;
     end;
   end;
 end;
@@ -396,7 +480,7 @@ var
   i: Integer;
 begin
   try
-    Sort;
+    //Sort;
     FileName:= GetConfigurationDirectory + DatabasesRegFile;
 
     AssignFile(F, FileName);

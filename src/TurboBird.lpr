@@ -32,7 +32,7 @@ uses
   QBuilder, QBDirFrm, QBLnkFrm,
 dmibx, fCheckDBIntegrity, fsqlmonitor,
   fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
-  uArrayFormTest, fblobedit, floginservicemanager, fserverregistry,
+  uArrayFormTest, floginservicemanager, fserverregistry,
   ftransactionconfig, tb_netutils,
 
   //DBAdmin
