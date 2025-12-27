@@ -278,8 +278,11 @@ begin
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
         IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
-        //for i := 0 to StringGrid1.ColCount - 1 do
-          //IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+        for i := 0 to StringGrid1.ColCount - 1 do
+        begin
+          if Trim(StringGrid1.Cells[0, i]) <> '' then
+            IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+        end;
         Application.QueueAsyncCall(@DoClientRestore,0);
       end;
     PageControl1.ActivePage := ReportTab;

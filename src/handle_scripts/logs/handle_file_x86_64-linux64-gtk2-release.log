@@ -1,4 +1,4 @@
-🕒 Started: Sa 27 Dez 2025 19:58:18 CET
+🕒 Started: Sa 27 Dez 2025 22:43:50 CET
 🚀 Starting handle script for TurboBird [x86_64-linux64-gtk2-release], version 1.2.1.1263
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release
 + '[' ON = ON ']'
@@ -31,12 +31,12 @@
 + file /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + grep -q -e ELF -e PE32
 + strip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
+🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + log '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263'
 + echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263'
 🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + '[' ON = ON ']'
 + echo '🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263'
-🔧 Binary stripped: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + chmod +x /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + log '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263'
 + echo '🔐 Marked as executable: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263'
@@ -56,7 +56,7 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263.zip
-+ ZIP_SIZE=9943938
++ ZIP_SIZE=9944232
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release/TurboBird_x86_64-linux64-gtk2-release-v1.2.1.1263
 + ORIG_SIZE=28789400
 + ((  ZIP_SIZE < ORIG_SIZE  ))

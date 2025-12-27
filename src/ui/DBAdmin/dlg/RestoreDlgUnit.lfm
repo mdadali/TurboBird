@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
   Left = 415
   Height = 652
-  Top = 116
+  Top = 87
   Width = 539
   Caption = 'Restore Database'
   ClientHeight = 652
