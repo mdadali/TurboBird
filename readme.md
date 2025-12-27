@@ -119,9 +119,70 @@ Checkf for Update
 
 ![TurboBird Screenshot](src/images/CheckForUpdate.png)
 
+Compiling
+
+Before compiling TurboBird, the following packages must be installed in Lazarus:
+![TurboBird Screenshot](src/images/Turbobird_ReqPackages.png)
+
+After that, open Turbobird.lpi with Lazarus.
+
+In the Lazarus main menu go to:
+Project → Project Options → Config and Target
+
+There, select the desired mode (OS / Debug) from the Build Mode combobox at the top center.
+
+Compiling and debugging
+
+In the Lazarus main menu go to:
+Run → Compile
+
+After that, TurboBird can be started and debugged.
+
+Final version
+
+Depending on the operating system, select a Release Build Mode, then go to:
+Run → Build
+
+Notes
+The build process under Linux starts several scripts that rename, strip, and finally compress the generated executable file.
+Renaming is important for the UpdateChecker, as the version number is added to the filename.
+However, the build scripts only exist on Linux.
+On MS Windows, the generated executable file must be renamed manually if the UpdateChecker is to be used.
+
+Zum Kompilieren:
+
+Bevor TurboBird kompiliert wird, sollten folgende Packages in Lazarus installiert sein:
+
+![TurboBird Screenshot](src/images/Turbobird_ReqPackages.png)
+
+Danach Turbobird.lpi mit Lazarus öffnen.
+
+In Lazarus Hauptmenü → Project → Project Options → Config and Target
+den gewünschten Modus (OS/Debug) oben in der Mitte über die Build-Mode-ComboBox auswählen.
+
+Zum Kompilieren und Debuggen:
+
+In Lazarus Hauptmenü → Run → Compile
+Danach kann TurboBird gestartet und debuggt werden.
+
+Für die finale Version:
+
+Je nach Betriebssystem einen Release-Build-Mode wählen, danach
+Lazarus Hauptmenü → Run → Build
+
+Der Build-Vorgang unter Linux startet mehrere Skripte, die die generierte ausführbare Datei umbenennen, strippen und anschließend komprimieren.
+
+Das Umbenennen ist wichtig für den UpdateChecker, da hierbei die Versionsnummer zum Dateinamen hinzugefügt wird.
+
+Allerdings existieren die Build-Skripte nur unter Linux.
+Unter MS Windows muss die erstellte EXE-Datei manuell umbenannt werden, wenn der UpdateChecker genutzt werden soll.
+
+
 
 
 
 FireBird Array Field
 
 ![TurboBird Screenshot](src/images/array.png)
+
+
