@@ -3,8 +3,8 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,x86_64-win64-win-debug,x86_64-win64-win-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
+    <BuildModes Active="x86_64-linux64-gtk2-release"/>
     <Units Count="128">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -194,7 +194,7 @@
       <Unit24>
         <Filename Value="common\fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="2"/>
         <CursorPos X="23" Y="16"/>
         <UsageCount Value="200"/>
@@ -322,12 +322,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="1846"/>
-        <CursorPos X="29" Y="1786"/>
+        <TopLine Value="1787"/>
+        <CursorPos X="33" Y="1800"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit34>
       <Unit35>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -462,7 +462,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="1761"/>
         <CursorPos X="36" Y="1785"/>
         <UsageCount Value="200"/>
@@ -673,7 +673,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="129"/>
         <CursorPos X="26" Y="142"/>
         <UsageCount Value="201"/>
@@ -951,10 +951,11 @@
         <ComponentName Value="BackupDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="137"/>
         <CursorPos X="53" Y="151"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit93>
       <Unit94>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
@@ -962,10 +963,13 @@
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="102"/>
-        <CursorPos X="26" Y="119"/>
+        <CursorPos X="31" Y="108"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit94>
       <Unit95>
         <Filename Value="ui\scriptengine\fscriptengine.pas"/>
@@ -1001,7 +1005,7 @@
       <Unit98>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="365"/>
         <CursorPos X="28" Y="373"/>
         <UsageCount Value="200"/>
@@ -1011,20 +1015,20 @@
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="51"/>
         <CursorPos Y="77"/>
-        <UsageCount Value="128"/>
+        <UsageCount Value="129"/>
         <Loaded Value="True"/>
       </Unit99>
       <Unit100>
         <Filename Value="utils\cselectsqlparserext.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cSelectSQLParserExt"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="68"/>
         <CursorPos X="23" Y="85"/>
-        <UsageCount Value="87"/>
+        <UsageCount Value="88"/>
         <Loaded Value="True"/>
       </Unit100>
       <Unit101>
@@ -1032,7 +1036,7 @@
         <ComponentName Value="frmBlobEdit"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="7"/>
         <CursorPos X="42" Y="6"/>
         <UsageCount Value="210"/>
         <Loaded Value="True"/>
@@ -1200,10 +1204,10 @@
       </Unit123>
       <Unit124>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\IBUtils.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="601"/>
         <CursorPos X="44" Y="610"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit124>
       <Unit125>
@@ -1230,7 +1234,7 @@
         <UsageCount Value="10"/>
       </Unit127>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
         <Caret Line="7096" Column="43" TopLine="7077"/>
@@ -1344,12 +1348,12 @@
         <Caret Line="1807" Column="9" TopLine="1806"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="1780" TopLine="1838"/>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="119" Column="26" TopLine="102"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\querywindow\querywindow.pas"/>
-        <Caret Line="280" Column="24" TopLine="267"/>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="115" TopLine="102"/>
       </Position30>
     </JumpHistory>
     <RunParams>

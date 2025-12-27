@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 614
+  Left = 415
   Height = 652
-  Top = 59
+  Top = 116
   Width = 539
   Caption = 'Restore Database'
   ClientHeight = 652
@@ -34,7 +34,7 @@ object RestoreDlg: TRestoreDlg
     TabOrder = 1
   end
   object PageControl1: TPageControl
-    Left = 12
+    Left = 16
     Height = 602
     Top = 8
     Width = 647
@@ -385,9 +385,8 @@ object RestoreDlg: TRestoreDlg
   object OpenDialog1: TOpenDialog
     Title = 'Open existing backup file'
     DefaultExt = '.gbk'
-    Filter = 'Backup Files|*.gbk|All Files|*.*'
     Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 344
+    Left = 348
     Top = 192
   end
   object IBXClientSideRestoreService1: TIBXClientSideRestoreService
@@ -417,7 +416,7 @@ object RestoreDlg: TRestoreDlg
   object IBXServicesConnection1: TIBXServicesConnection
     Connected = False
     TraceFlags = []
-    Left = 176
-    Top = 72
+    Left = 208
+    Top = 40
   end
 end

@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 287
+  Left = 392
   Height = 550
-  Top = 189
+  Top = 573
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 544

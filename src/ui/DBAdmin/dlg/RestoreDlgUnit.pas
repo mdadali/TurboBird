@@ -101,7 +101,7 @@ implementation
 
 procedure TRestoreDlg.sbBackupFileClick(Sender: TObject);
 begin
-  OpenDialog1.Filter := 'Backup Files|*.gbk|All Files|*.*';
+  OpenDialog1.Filter := 'Backup files (*.fbk; *.gbk)|*.fbk;*.gbk|All files (*.*)|*.*';
   if OpenDialog1.Execute then
   begin
     SourceArchive.Text := OpenDialog1.Filename;
