@@ -119,6 +119,13 @@ Checkf for Update
 
 ![TurboBird Screenshot](src/images/CheckForUpdate.png)
 
+
+FireBird Array Field
+
+![TurboBird Screenshot](src/images/array.png)
+
+
+
 Compiling
 
 Before compiling TurboBird, the following packages must be installed in Lazarus:
@@ -176,13 +183,3 @@ Das Umbenennen ist wichtig für den UpdateChecker, da hierbei die Versionsnummer
 
 Allerdings existieren die Build-Skripte nur unter Linux.
 Unter MS Windows muss die erstellte EXE-Datei manuell umbenannt werden, wenn der UpdateChecker genutzt werden soll.
-
-
-
-
-
-FireBird Array Field
-
-![TurboBird Screenshot](src/images/array.png)
-
-
