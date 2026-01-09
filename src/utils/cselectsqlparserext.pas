@@ -83,7 +83,7 @@ begin
 
       FAliasMap.AddObject(AliasName, TObject(Pointer(AnsiString(TableName))));
     end;
-    ShowMessage(IntToStr(FAliasMap.Count));
+    //ShowMessage(FAliasMap.Text);
   finally
     Parts.Free;
   end;

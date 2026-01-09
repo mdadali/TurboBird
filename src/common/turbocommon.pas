@@ -54,6 +54,8 @@ type
 
   tvotDatabase,
 
+  tvotSearchFiter,
+
   tvotQueryWindow,
 
   tvotTableRoot,
@@ -416,6 +418,9 @@ var
     //Theme
     AllowIniOverrides: boolean;
     //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+function MatchesFilter(const AName, AFilter: string): Boolean;
 
 
 function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
@@ -1603,11 +1608,11 @@ begin
 
   //QueryWindow
   QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', false);
-  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorBackgroundColor', 'clRed'));
-  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'EditorFontName', 'Arial');
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clRed'));
+  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Arial');
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);
-  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'EditorFontColor', 'clRed'));
-  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'EditorFontStyle', 'Arial'));
+  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clRed'));
+  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
 end;
 
 procedure WriteIniFile;
@@ -1664,12 +1669,11 @@ begin
 
   //QueryWindow
   fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
-  {fIniFile.WriteString('QueryWindow',  'EditorBackgroundColor', ColorToString(QWEditorBackgroundColor));
-  fIniFile.WriteString('QueryWindow',  'EditorFontName', QWEditorFontName);
-  fIniFile.WriteInteger('QueryWindow',  'FontSize', 14);
-  fIniFile.WriteString('QueryWindow',  'EditorFontColor', ColorToString(QWEditorFontColor));
-  fIniFile.WriteString('QueryWindow',  'EditorFontStyle', FontStylesToStr(QWEditorFontStyle));
-  }
+  fIniFile.WriteString('QueryWindow',  'BackgroundColor', ColorToString(QWEditorBackgroundColor));
+  fIniFile.WriteString('QueryWindow',  'FontName', QWEditorFontName);
+  fIniFile.WriteInteger('QueryWindow',  'FontSize', QWEditorFontSize);
+  fIniFile.WriteString('QueryWindow',  'FontColor', ColorToString(QWEditorFontColor));
+  fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
 end;
 
 
@@ -2864,6 +2868,45 @@ begin
     L.Free;
   end;
 end;
+
+function MatchesFilter(const AName, AFilter: string): Boolean;
+var
+  FilterPattern, NameUpper, FilterUpper: string;
+begin
+  // leerer Filter → alles matcht
+  if Trim(AFilter) = '' then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // Großschreibung vereinheitlichen für case-insensitive Vergleich
+  NameUpper := UpperCase(AName);
+  FilterUpper := UpperCase(Trim(AFilter));
+
+  // Pattern vorbereiten
+  if (Copy(FilterUpper, 1, 1) <> '*') and (Copy(FilterUpper, Length(FilterUpper), 1) <> '*') then
+  begin
+    // kein Stern am Anfang/Ende → enthält
+    Result := Pos(FilterUpper, NameUpper) > 0;
+  end
+  else if (Copy(FilterUpper, 1, 1) = '*') and (Copy(FilterUpper, Length(FilterUpper), 1) = '*') then
+  begin
+    // *Text* → enthält
+    Result := Pos(Copy(FilterUpper, 2, Length(FilterUpper)-2), NameUpper) > 0;
+  end
+  else if Copy(FilterUpper, 1, 1) = '*' then
+  begin
+    // *Text → endet mit
+    Result := EndsText(Copy(FilterUpper, 2, Length(FilterUpper)-1), NameUpper);
+  end
+  else
+  begin
+    // Text* → beginnt mit
+    Result := StartsText(Copy(FilterUpper, 1, Length(FilterUpper)-1), NameUpper);
+  end;
+end;
+
 
 initialization
   MetaDataChanged := false;

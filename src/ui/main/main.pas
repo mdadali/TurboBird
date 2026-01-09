@@ -14,14 +14,18 @@ uses
   memds, FileUtil, LResources, Forms, Controls, Graphics, Dialogs, Menus,
   ComCtrls, Reg, QueryWindow, Grids, ExtCtrls, Buttons, StdCtrls, TableManage,
   dbugintf, turbocommon, importtable, DB,  HtmlView, FramView, FramBrwz,
-  IniFiles, Types, fSetFBClient, fTestFunction, fCheckDBIntegrity,
-  fFirebirdConfig, fsqlmonitor,
+  IniFiles, Types,   SynEdit,
 
   IB,
   IBDatabase,
   IBQuery,
   IBExtract,
-  IBDatabaseInfo, ibxscript,
+  IBDatabaseInfo,
+  ibxscript,
+
+  fSetFBClient, fTestFunction, fCheckDBIntegrity,
+  fFirebirdConfig, fsqlmonitor,
+  fservers,
 
   udb_udf_fetcher,
 
@@ -82,9 +86,12 @@ type
 
   TfmMain = class(TForm)
     Button1: TButton;
+    CheckBox1: TCheckBox;
+    edtObjectFilter: TEdit;
     editorFontDialog: TFontDialog;
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
+    grBoxObjectFilter: TGroupBox;
     HtmlViewer1: THtmlViewer;
     IBExtract1: TIBExtract;
     IBXScript1: TIBXScript;
@@ -106,6 +113,8 @@ type
     lmExtractTableFields: TMenuItem;
     lmExtractTableMetaDataQuoted: TMenuItem;
     lmExtractTableMetaDataUnQuoted: TMenuItem;
+    lmServers: TMenuItem;
+    pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
     Separator7: TMenuItem;
@@ -345,6 +354,7 @@ type
     procedure lmScriptTableCreateClick(Sender: TObject);
     procedure lmScriptUpdateClick(Sender: TObject);
     procedure lmServerRegistryClick(Sender: TObject);
+    procedure lmServersClick(Sender: TObject);
     procedure lmSetFBClientClick(Sender: TObject);
     procedure lmSetGenClick(Sender: TObject);
     procedure lmTableManageClick(Sender: TObject);
@@ -413,6 +423,9 @@ type
     procedure SetConnection(Index: Integer);
     procedure SetFocus; override; // solve a bug in Lazarus
     procedure AddRootObjects(ANode: TTreeNode; AServerVersion: word);
+
+    procedure CreateIntelliSenseCache(Data: PtrInt);
+
   protected
     // This procedure will receive the events that are logged by the connection:
   public
@@ -3318,7 +3331,8 @@ end;
 
 procedure TfmMain.Button1Click(Sender: TObject);
 begin
-  tvMain.Visible := not tvMain.Visible;
+  pnlLeft.Visible := not pnlLeft.Visible;
+  Splitter1.Enabled := pnlLeft.Visible;
 end;
 
 procedure TfmMain.OnIBConnectionLogin(Database: TIBDatabase; LoginParams: TStrings);
@@ -4988,6 +5002,14 @@ begin
   end;
 end;
 
+procedure TfmMain.lmServersClick(Sender: TObject);
+var frmServers: TfrmServers;
+begin
+  frmServers := TfrmServers.Create(self);
+  frmServers.ShowModal;
+  frmServers.Free;
+end;
+
 
 procedure TfmMain.lmSetFBClientClick(Sender: TObject);
 begin
@@ -6338,7 +6360,7 @@ begin
               TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
               DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
 
-              Item := tvMain.Items.AddChild(Node, 'Domains');
+              {Item := tvMain.Items.AddChild(Node, 'Domains');
               Item.ImageIndex:= 17;
               Item.SelectedIndex:= 17;
               TPNodeInfos(Item.Data)^.ObjectType := tvotSystemDomainRoot;
@@ -6393,7 +6415,7 @@ begin
               TPNodeInfos(Item.Data)^.ObjectType := tvotSystemExceptionRoot;
               TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
               DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
-
+              }
             end;
 
             {tvotSystemDomainRoot: begin
@@ -7039,8 +7061,85 @@ begin
     ShowMessage('Error recalculating index statistics: '+Message);
 end;
 
-procedure TfmMain.mnEditorFontClick(Sender: TObject);
+{procedure TfmMain.mnEditorFontClick(Sender: TObject);
+var
+  i, j: Integer;
+  page: TTabSheet;
+  c: TControl;
+  queryWin: TfmQueryWindow;
+  syn: TSynEdit;
 begin
+  editorFontDialog.Font.Size  := turbocommon.QWEditorFontSize;
+  editorFontDialog.Font.Name  := turbocommon.QWEditorFontName;
+  editorFontDialog.Font.Style := turbocommon.QWEditorFontStyle;
+
+  if not editorFontDialog.Execute then
+    exit;
+
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    page := PageControl1.Pages[i];
+    // Suche alle Controls in der Page
+    for j := 0 to page.ControlCount - 1 do
+    begin
+      c := page.Controls[j];
+
+      if c is TfmQueryWindow then
+      begin
+        queryWin := TfmQueryWindow(c);
+        syn := queryWin.meQuery;
+        syn.Font := editorFontDialog.Font;
+      end;
+    end;
+  end;
+
+  turbocommon.QWEditorFontSize := editorFontDialog.Font.Size;
+  turbocommon.QWEditorFontName := editorFontDialog.Font.Name;
+  turbocommon.QWEditorFontStyle := editorFontDialog.Font.Style;
+end;}
+
+procedure TfmMain.mnEditorFontClick(Sender: TObject);
+var
+  i, j: Integer;
+  page: TTabSheet;
+  c: TControl;
+  queryWin: TfmQueryWindow;
+begin
+  // Dialog initialisieren
+  editorFontDialog.Font.Name  := turbocommon.QWEditorFontName;
+  editorFontDialog.Font.Size  := turbocommon.QWEditorFontSize;
+  editorFontDialog.Font.Style := turbocommon.QWEditorFontStyle;
+
+  editorFontDialog.Options := editorFontDialog.Options + [fdEffects];
+
+  if not editorFontDialog.Execute then
+    Exit;
+
+  turbocommon.QWEditorFontName  := editorFontDialog.Font.Name;
+  turbocommon.QWEditorFontSize  := editorFontDialog.Font.Size;
+  turbocommon.QWEditorFontStyle := editorFontDialog.Font.Style;
+
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    page := PageControl1.Pages[i];
+
+    for j := 0 to page.ControlCount - 1 do
+    begin
+      c := page.Controls[j];
+      if c is TfmQueryWindow then
+      begin
+        queryWin := TfmQueryWindow(c);
+        with queryWin.meQuery.Font do
+        begin
+          Name  := turbocommon.QWEditorFontName;
+          Size  := turbocommon.QWEditorFontSize;
+          Style := turbocommon.QWEditorFontStyle;
+          Pitch   := fpFixed;
+          Quality := fqCleartypeNatural;
+        end;
+      end;
+    end;
+  end;
 end;
 
 (********  Create new database  ********)
@@ -7917,6 +8016,18 @@ begin
   Result := ServerSession.Connected;
 end;
 
+procedure TfmMain.CreateIntelliSenseCache(Data: PtrInt);
+var Node: TTreeNode;
+    NodeInfo: TPNodeInfos;
+begin
+  Node := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
+  if Node = nil then
+    exit;
+  NodeInfo := TPNodeInfos(Node.Data);
+  if NodeInfo^.UnIntelliSenseCache = nil then
+    NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
+end;
+
 // ============================================================================
 // Called when the user tries to expand a database node (Level 1).
 // Here we check the connection and optionally prevent expansion.
@@ -7932,6 +8043,11 @@ var
   ServerErrStr: string;
   WasDBConnectedOnEntry: Boolean;
 begin
+  try
+  //tvMain.Enabled := false;
+  Screen.Cursor := crSQLWait;
+  Application.ProcessMessages;
+
   WasDBConnectedOnEntry := true;
   AllowExpansion := True;
 
@@ -8022,6 +8138,7 @@ begin
 
     if NodeInfo^.UnIntelliSenseCache = nil then
     begin
+      //Application.QueueAsyncCall(@CreateIntelliSenseCache, 0)
       NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
     end else
     begin
@@ -8049,6 +8166,12 @@ begin
       FillObjectRoot(Node);
     end;
   end;
+finally
+  Application.ProcessMessages;
+  //tvMain.Enabled := true;
+  Screen.Cursor := crDefault;
+  Application.ProcessMessages;
+end;
 
 end;
 

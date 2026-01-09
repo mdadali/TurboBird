@@ -76,7 +76,7 @@ type
     // Number of mapped items
     function GetMappingCount: integer;
     function GetSourceFields: TStringlist;
-    // Indicates if field mapping already exists for this field
+    // Indicates if field mapping already exists for CSVStream must exist.this field
     function MappingExists(SourceField, DestinationField: string): boolean;
     // Extracts likely delimiters from text file
     procedure GuessDelimiter();
@@ -509,9 +509,8 @@ begin
     FreeAndNil(FCSVParser);
   if assigned(FCSVStream) then
     FreeAndNil(FCSVStream);
-  //if AValue<>'' then
-    //FCSVStream:=TFileStream.Create(FSourceFile,fmOpenRead and fmShareDenyNoneFlags);
-  // We do not create the csv parser as we want to do things with the stream first
+  if AValue<>'' then
+    FCSVStream := TFileStream.Create(FSourceFile, fmOpenRead or fmShareDenyNone);
   FRowCount:=-1; //invalidate cache
   FSourceFields.Clear;
   DeleteMapping(-1);

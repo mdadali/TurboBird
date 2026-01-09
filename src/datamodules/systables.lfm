@@ -2,7 +2,7 @@ object dmSysTables: TdmSysTables
   OnCreate = DataModuleCreate
   OldCreateOrder = False
   Height = 523
-  HorizontalOffset = 377
+  HorizontalOffset = 421
   VerticalOffset = 116
   Width = 479
   object sqQuery: TIBQuery

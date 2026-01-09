@@ -1,0 +1,313 @@
+object dmSystem: TdmSystem
+  OnCreate = DataModuleCreate
+  OldCreateOrder = False
+  Height = 391
+  HorizontalOffset = 533
+  VerticalOffset = 153
+  Width = 630
+  object dsServers: TDataSource
+    Left = 48
+    Top = 128
+  end
+  object dsDBs: TDataSource
+    Left = 168
+    Top = 128
+  end
+  object BufDsServers: TBufDataset
+    IndexName = 'DEFAULT_ORDER'
+    MaxIndexesCount = 4
+    FieldDefs = <    
+      item
+        Name = 'ID'
+        DataType = ftAutoInc
+        Precision = -1
+      end    
+      item
+        Name = 'Alias'
+        Attributes = [faRequired]
+        DataType = ftString
+        Precision = -1
+        Size = 255
+      end    
+      item
+        Name = 'Host'
+        Attributes = [faRequired]
+        DataType = ftString
+        Precision = -1
+        Size = 50
+      end    
+      item
+        Name = 'Protocol'
+        Attributes = [faRequired]
+        DataType = ftString
+        Precision = -1
+        Size = 30
+      end    
+      item
+        Name = 'Port'
+        Attributes = [faRequired]
+        DataType = ftWord
+        Precision = -1
+      end    
+      item
+        Name = 'VersionMajor'
+        DataType = ftWord
+        Precision = -1
+      end    
+      item
+        Name = 'VersionMinor'
+        DataType = ftWord
+        Precision = -1
+      end    
+      item
+        Name = 'VersionString'
+        DataType = ftString
+        Precision = -1
+        Size = 50
+      end    
+      item
+        Name = 'ClientLibraryPath'
+        DataType = ftString
+        Precision = -1
+        Size = 512
+      end    
+      item
+        Name = 'RootPath'
+        DataType = ftString
+        Precision = -1
+        Size = 512
+      end    
+      item
+        Name = 'ConfigFilePath'
+        DataType = ftString
+        Precision = -1
+        Size = 512
+      end    
+      item
+        Name = 'LoadOwnClientLib'
+        Attributes = [faRequired]
+        DataType = ftBoolean
+        Precision = -1
+      end    
+      item
+        Name = 'IsEmbedded'
+        DataType = ftBoolean
+        Precision = -1
+      end    
+      item
+        Name = 'ServiceUserName'
+        Attributes = [faRequired]
+        DataType = ftString
+        Precision = -1
+        Size = 50
+      end    
+      item
+        Name = 'ServicePassword'
+        Attributes = [faRequired]
+        DataType = ftString
+        Precision = -1
+        Size = 50
+      end    
+      item
+        Name = 'ServiceSavePassword'
+        Attributes = [faRequired]
+        DataType = ftBoolean
+        Precision = -1
+      end    
+      item
+        Name = 'Description'
+        DataType = ftBlob
+        Precision = -1
+        Size = 4096
+      end    
+      item
+        Name = 'ServerInfos'
+        DataType = ftBlob
+        Precision = -1
+        Size = 4096
+      end>
+    Left = 48
+    Top = 24
+    object BufDsServersID: TAutoIncField
+      FieldKind = fkData
+      FieldName = 'ID'
+      Index = 0
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object BufDsServersAlias: TStringField
+      FieldKind = fkData
+      FieldName = 'Alias'
+      Index = 1
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      Size = 127
+    end
+    object BufDsServersHost: TStringField
+      FieldKind = fkData
+      FieldName = 'Host'
+      Index = 2
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      Size = 50
+    end
+    object BufDsServersProtokol: TStringField
+      FieldKind = fkData
+      FieldName = 'Protokol'
+      Index = 3
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      Size = 50
+    end
+    object BufDsServersPort: TSmallintField
+      FieldKind = fkData
+      FieldName = 'Port'
+      Index = 4
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object BufDsServersVersionMajor: TSmallintField
+      FieldKind = fkData
+      FieldName = 'VersionMajor'
+      Index = 5
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object BufDsServersVersionMinor: TSmallintField
+      FieldKind = fkData
+      FieldName = 'VersionMinor'
+      Index = 6
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+    end
+    object BufDsServersVersionString: TStringField
+      FieldKind = fkData
+      FieldName = 'VersionString'
+      Index = 7
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 50
+    end
+    object BufDsServersClientLibraryPath: TStringField
+      FieldKind = fkData
+      FieldName = 'ClientLibraryPath'
+      Index = 8
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      Size = 255
+    end
+    object BufDsServersRootPath: TStringField
+      FieldKind = fkData
+      FieldName = 'RootPath'
+      Index = 9
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object BufDsServersConfigFilePath: TStringField
+      FieldKind = fkData
+      FieldName = 'ConfigFilePath'
+      Index = 10
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object BufDsServersLoadOwnClientLib: TBooleanField
+      FieldKind = fkData
+      FieldName = 'LoadOwnClientLib'
+      Index = 11
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = True
+      DisplayValues = 'True;False'
+    end
+    object BufDsServersIsEmbedded: TBooleanField
+      FieldKind = fkData
+      FieldName = 'IsEmbedded'
+      Index = 12
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      DisplayValues = 'True;False'
+    end
+    object BufDsServersServiceUserName: TStringField
+      FieldKind = fkData
+      FieldName = 'ServiceUserName'
+      Index = 13
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 50
+    end
+    object BufDsServersServicePassword: TStringField
+      FieldKind = fkData
+      FieldName = 'ServicePassword'
+      Index = 14
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 50
+    end
+    object BufDsServersServiceSavePassword: TBooleanField
+      FieldKind = fkData
+      FieldName = 'ServiceSavePassword'
+      Index = 15
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      DisplayValues = 'True;False'
+    end
+    object BufDsServersDescription: TStringField
+      FieldKind = fkData
+      FieldName = 'Description'
+      Index = 16
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 255
+    end
+    object BufDsServersServerInfos: TBlobField
+      FieldKind = fkData
+      FieldName = 'ServerInfos'
+      Index = 17
+      LookupCache = False
+      ProviderFlags = [pfInUpdate, pfInWhere]
+      ReadOnly = False
+      Required = False
+      Size = 4096
+    end
+  end
+  object BufDsDBs: TBufDataset
+    FieldDefs = <>
+    Left = 168
+    Top = 24
+  end
+end

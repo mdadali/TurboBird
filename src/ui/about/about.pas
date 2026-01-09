@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls, GifAnim,
+  ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls, GifAnim, rxctrls,
   turbocommon,
   updatechecker,
   uthemeselector;
@@ -22,6 +22,7 @@ type
     bbtnClose: TBitBtn;
     GifAnim1: TGifAnim;
     Image1: TImage;
+    Image2: TImage;
     Image3: TImage;
     Image4: TImage;
     Label1: TLabel;
@@ -29,29 +30,29 @@ type
     Label11: TLabel;
     Label12: TLabel;
     Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
     laUpdate: TLabel;
+    laWebSite: TLabel;
     lbFPCVersion: TLabel;
     lbLazarus: TLabel;
     lbOSInfo: TLabel;
     lbPgmVersion: TLabel;
-    Label4: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
-    laWebSite: TLabel;
     lbVersionDate: TLabel;
     lbVersionTime: TLabel;
     lbWidgetSet: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
-    Panel2: TPanel;
+    pnlMWA: TPanel;
     pnlPowered: TPanel;
     pnlTitle: TPanel;
     pnlTop: TPanel;
-    pnlMWA: TPanel;
     ProgressBar1: TProgressBar;
+    SecretPanel1: TSecretPanel;
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     Timer1: TTimer;
@@ -64,6 +65,7 @@ type
     procedure Label6Click(Sender: TObject);
     procedure laUpdateClick(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
     procedure pnlTopClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
   private
@@ -85,6 +87,11 @@ uses Main;
 procedure TfmAbout.laWebSiteClick(Sender: TObject);
 begin
   OpenURL(laWebSite.Caption);
+end;
+
+procedure TfmAbout.PageControl1Change(Sender: TObject);
+begin
+  SecretPanel1.Active := (PageControl1.PageIndex = 1);
 end;
 
 procedure TfmAbout.pnlTopClick(Sender: TObject);

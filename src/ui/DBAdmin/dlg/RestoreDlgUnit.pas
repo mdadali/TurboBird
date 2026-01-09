@@ -277,12 +277,21 @@ begin
       end else
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
+
         IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
-        for i := 0 to StringGrid1.ColCount - 1 do
-        begin
-          if Trim(StringGrid1.Cells[0, i]) <> '' then
-            IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
-        end;
+        //IBXClientSideRestoreService1.DatabaseFiles.Add('16000m');
+
+        if StringGrid1.RowCount > 0 then
+          for i := 0 to StringGrid1.RowCount - 1 do
+          begin
+            if Trim(StringGrid1.Cells[0, i]) <> '' then
+            begin
+              IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+              IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
+            end;
+          end;
+
+
         Application.QueueAsyncCall(@DoClientRestore,0);
       end;
     PageControl1.ActivePage := ReportTab;
