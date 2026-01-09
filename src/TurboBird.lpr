@@ -30,7 +30,7 @@ uses
   udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
   fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
   QBuilder, QBDirFrm, QBLnkFrm,
-dmibx, fCheckDBIntegrity, fsqlmonitor,
+fCheckDBIntegrity, fsqlmonitor,
   fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
   uArrayFormTest, floginservicemanager, fserverregistry,
   ftransactionconfig, tb_netutils,
@@ -55,7 +55,7 @@ dmibx, fCheckDBIntegrity, fsqlmonitor,
   //End-DBAdmin
 
   fsimpleobjextractor,
-  fClipboardExport;
+  fClipboardExport, datamodulesystem, fservers;
 
 const
   Major = 1;
@@ -97,6 +97,8 @@ begin
 
   if not LoadClientLibIBX(InitialFBClientLibPath) then
     SetInitialClientLib;
+
+  Application.CreateForm(TdmSystem, dmSystem);
 
   Application.CreateForm(TfmMain, fmMain);
   frmThemeSelector := TfrmThemeSelector.Create(fmMain);
@@ -166,5 +168,7 @@ begin
   Application.CreateForm(TNewUserDlg, NewUserDlg);
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
+  Application.CreateForm(TdmSystem, dmSystem);
+  //Application.CreateForm(TfrmServers, frmServers);
   Application.Run;
 end.

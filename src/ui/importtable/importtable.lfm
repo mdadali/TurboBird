@@ -1,7 +1,7 @@
 object fmImportTable: TfmImportTable
-  Left = 388
+  Left = 459
   Height = 429
-  Top = 137
+  Top = 116
   Width = 792
   ActiveControl = SourcePanel
   Caption = 'Import'

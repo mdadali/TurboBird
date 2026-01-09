@@ -63,6 +63,10 @@ type
     procedure OpenDestinationTable;
     // Load/update mapping grid
     procedure UpdateMappingGrid;
+
+    procedure ResetImporter;
+    procedure PrepareInsertSQLFromMapping;
+
     { private declarations }
   public
     { public declarations }
@@ -107,6 +111,7 @@ procedure TfmImportTable.FormClose(Sender: TObject;
 begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
+
   FImporter.Free;
   if assigned(FDestinationQuery) then
     FreeAndNil(FDestinationQuery);
@@ -219,6 +224,8 @@ begin
     if not Assigned(FDestinationQuery) then
       FDestinationQuery := TIBQuery.Create(nil);
 
+   FDestinationQuery.AllowAutoActivateTransaction := true;
+
     // Verbindung und Transaktion zuweisen
     FDestinationQuery.Close;
     FDestinationQuery.Database := IBDatabase;
@@ -279,7 +286,7 @@ begin
     UpdateMappingGrid;
 end;
 
-procedure TfmImportTable.btnPrepareClick(Sender: TObject);
+{procedure TfmImportTable.btnPrepareClick(Sender: TObject);
 begin
   // Only try if valid import file specified
   if (FImporter.FileName<>'') and
@@ -289,7 +296,63 @@ begin
     LoadMappingCombos;
     UpdateMappingGrid;
   end;
+end; }
+
+procedure TfmImportTable.ResetImporter;
+var
+  FileName: string;
+  Delim: Char;
+begin
+  if not Assigned(FImporter) then Exit;
+
+  FileName := FImporter.FileName;
+  Delim := FImporter.Delimiter;
+
+  FreeAndNil(FImporter);
+  FImporter := TFileImport.Create;
+
+  FImporter.FileName := FileName;
+  FImporter.Delimiter := Delim;
 end;
+
+
+procedure TfmImportTable.btnPrepareClick(Sender: TObject);
+begin
+  // Grundprüfungen
+  if FImporter.FileName = '' then
+  begin
+    MessageDlg('No source file selected.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  if FImporter.Delimiter = #0 then
+  begin
+    MessageDlg('No delimiter specified.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  ResetImporter;
+
+  try
+    // Ziel-Tabelle öffnen (nur für Feldinfos)
+    OpenDestinationTable;
+
+    // Mapping-Combos neu laden
+    LoadMappingCombos;
+
+    // Mapping-Grid aktualisieren
+    UpdateMappingGrid;
+
+    // INSERT-Statement aus Mapping erzeugen
+    PrepareInsertSQLFromMapping;
+
+    MessageDlg('Preparation successful.', mtInformation, [mbOK], 0);
+  except
+    on E: Exception do
+      MessageDlg('Prepare failed: ' + E.Message, mtError, [mbOK], 0);
+  end;
+end;
+
 
 procedure TfmImportTable.btnSourceFileOpenClick(Sender: TObject);
 begin
@@ -333,7 +396,146 @@ begin
   end;
 end;
 
+procedure TfmImportTable.PrepareInsertSQLFromMapping;
+var
+  i: Integer;
+  FieldList: string;
+  ParamList: string;
+begin
+  if not Assigned(FDestinationQuery) then
+    raise Exception.Create('DestinationQuery not assigned');
+
+  if FImporter.MappingCount = 0 then
+    raise Exception.Create('No field mapping defined');
+
+  FieldList := '';
+  ParamList := '';
+
+  for i := 0 to FImporter.MappingCount - 1 do
+  begin
+    if i > 0 then
+    begin
+      FieldList := FieldList + ', ';
+      ParamList := ParamList + ', ';
+    end;
+
+    FieldList := FieldList + FImporter.Mapping[i].DestinationField;
+    ParamList := ParamList + ':' + FImporter.Mapping[i].DestinationField;
+  end;
+
+  FDestinationQuery.Close;
+  FDestinationQuery.SQL.Clear;
+  FDestinationQuery.SQL.Text :=
+    'INSERT INTO ' + FDestTable +
+    ' (' + FieldList + ') VALUES (' + ParamList + ')';
+
+  FDestinationQuery.Prepare;
+end;
+
 procedure TfmImportTable.bbImportClick(Sender: TObject);
+var
+  DestColumn: string;
+  i: Integer;
+  Num: Integer;
+  ServerName: string;
+begin
+  if not Assigned(FDestinationQuery) then
+  begin
+    MessageDlg('Import not prepared.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  Screen.Cursor := crHourGlass;
+  btnClose.Enabled := False;
+  bbImport.Enabled := False;
+
+  try
+    // Passwort prüfen (Client/Server)
+    with RegisteredDatabases[FDestIndex] do
+    begin
+      ServerName := GetServerName(RegRec.DatabaseName);
+      if ((ServerName <> '') and (ServerName <> 'localhost')) and
+         (RegRec.Password = '') then
+      begin
+        if fmEnterPass.ShowModal <> mrOk then
+          Exit;
+
+        if not fmReg.TestConnection(
+          RegRec.DatabaseName,
+          fmEnterPass.edUser.Text,
+          fmEnterPass.edPassword.Text,
+          RegRec.Charset,
+          RegRec.FireBirdClientLibPath,
+          RegRec.SQLDialect,
+          RegRec.Port,
+          RegRec.ServerName,
+          RegRec.OverwriteLoadedClientLib
+        ) then
+          Exit;
+
+        RegRec.UserName := fmEnterPass.edUser.Text;
+        RegRec.Password := fmEnterPass.edPassword.Text;
+        RegRec.Role     := fmEnterPass.cbRole.Text;
+      end;
+    end;
+
+    // Skip Header-Zeile
+    if chkSkipFirstRow.Checked then
+      FImporter.ReadRow;
+
+    // Transaktion sauber starten
+    if RegisteredDatabases[FDestIndex].IBTransaction.InTransaction then
+      RegisteredDatabases[FDestIndex].IBTransaction.Rollback;
+
+    RegisteredDatabases[FDestIndex].IBTransaction.StartTransaction;
+
+    Num := 0;
+
+    try
+      while FImporter.ReadRow do
+      begin
+        for i := 0 to FImporter.MappingCount - 1 do
+        begin
+          DestColumn := FImporter.Mapping[i].DestinationField;
+
+          // CSV liefert Strings – Firebird konvertiert
+          FDestinationQuery.ParamByName(DestColumn).AsString :=
+            FImporter.GetData(i);
+        end;
+
+        FDestinationQuery.ExecSQL;
+        Inc(Num);
+
+        // Performance-Commit
+        if (Num mod 1000) = 0 then
+          RegisteredDatabases[FDestIndex].IBTransaction.CommitRetaining;
+      end;
+
+      RegisteredDatabases[FDestIndex].IBTransaction.Commit;
+
+      Screen.Cursor := crDefault;
+      MessageDlg(IntToStr(Num) + ' record(s) imported successfully.',
+                 mtInformation, [mbOK], 0);
+    except
+      on E: Exception do
+      begin
+        RegisteredDatabases[FDestIndex].IBTransaction.Rollback;
+        raise;
+      end;
+    end;
+
+  except
+    on E: Exception do
+      MessageDlg('Import failed: ' + E.Message, mtError, [mbOK], 0);
+  end;
+
+  btnClose.Enabled := True;
+  bbImport.Enabled := True;
+  Screen.Cursor := crDefault;
+end;
+
+
+{procedure TfmImportTable.bbImportClick(Sender: TObject);
 var
   DestColumn: string;
   i: Integer;
@@ -380,6 +582,7 @@ begin
         IBTransaction.RollBack;
 
       IBTransaction.StartTransaction;
+
       FDestinationQuery.Open;
       Num:=0;
       try
@@ -415,7 +618,7 @@ begin
     bbImport.Enabled:=true;
     Screen.Cursor:=crDefault;
   end;
-end;
+end;}
 
 procedure TfmImportTable.Init(DestinationIndex: Integer; DestinationTableName: string; ANodeInfos: TPNodeInfos);
 var

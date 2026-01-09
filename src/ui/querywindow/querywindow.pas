@@ -77,6 +77,7 @@ type
     FindDialog1: TFindDialog;
     FontDialog1: TFontDialog;
     FIBConnection: TIBDatabase;
+    FontDialogEditor: TFontDialog;
     FSQLTrans: TIBTransaction;
     lmExportDataSet: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
@@ -87,7 +88,6 @@ type
     lmPrintData: TMenuItem;
     lmExportDataAsSpreadSheet: TMenuItem;
     pmUnIntelliSense: TPopupMenu;
-    pmTmpGrid: TPopupMenu;
     rgScreenModes: TRadioGroup;
     RxDBGridExportPDF1: TRxDBGridExportPDF;
     RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
@@ -185,7 +185,6 @@ type
     procedure Panel1MouseLeave(Sender: TObject);
     procedure pgOutputPageCtlChange(Sender: TObject);
     procedure pmGridPopup(Sender: TObject);
-    procedure pmMemoPopup(Sender: TObject);
     procedure pmUnIntelliSensePopup(Sender: TObject);
     procedure rgScreenModesClick(Sender: TObject);
     procedure rgScreenModesMouseEnter(Sender: TObject);
@@ -269,10 +268,10 @@ type
     procedure RemovePreviousResultTabs;
 
     procedure LoadpmUnIntelliSense;
-    procedure pmUnIntelliSenseClick(Sender: TObject);
+    procedure pmUnIntelliSenseMaintemClick(Sender: TObject);
+    procedure pmUnIntelliSenseSubItemClick(Sender: TObject);
     function  GetFieldsForAlias(const AliasName: string;
       Cache: TUnIntelliSenseCache; Parser: TSelectSQLParserExt): TStringList;
-    procedure ShowIntelliSensePopup(Parser: TSelectSQLParserExt);
 
     //RxDBGrid////////////////////////////
     function  BuildOrderBy(Grid: TRxDBGrid; QuoteNames: Boolean = True): string;
@@ -799,7 +798,6 @@ procedure TfmQueryWindow.SynCompletion1CodeCompletion(var Value: string;
   SourceValue: string; var SourceStart, SourceEnd: TPoint; KeyChar: TUTF8Char;
   Shift: TShiftState);
 begin
-
   SynCompletion1.Deactivate;
 end;
 
@@ -2852,6 +2850,12 @@ begin
   SortSynCompletion;
 
   LoadpmUnIntelliSense;
+
+  meQuery.Font.Name  := turbocommon.QWEditorFontName;
+  meQuery.Font.Size  := turbocommon.QWEditorFontSize;
+  meQuery.Font.Style := turbocommon.QWEditorFontStyle;
+
+  meQuery.Color := turbocommon.QWEditorBackgroundColor;
 end;
 
 procedure TfmQueryWindow.FormDestroy(Sender: TObject);
@@ -3283,57 +3287,7 @@ begin
 
 end;
 
-procedure TfmQueryWindow.pmMemoPopup(Sender: TObject);
-begin
-
-end;
-
-function CaretPosToOffset(ASynEdit: TSynEdit): Integer;
-var
-  i: Integer;
-begin
-  Result := 0;
-  for i := 0 to ASynEdit.CaretY - 2 do
-    Inc(Result, Length(ASynEdit.Lines[i]) + 1); // +1 für Zeilenumbruch
-  Inc(Result, ASynEdit.CaretX - 1);             // Spalte addieren
-end;
-
-function GetSynEditCaretScreenPos(ASynEdit: TSynEdit): TPoint;
-var
-  P: TPoint;
-begin
-  // Caret → Client-Pixel
-  P := ASynEdit.RowColumnToPixels(ASynEdit.CaretXY);
-
-  // etwas unterhalb der Zeile
-  Inc(P.Y, ASynEdit.LineHeight);
-
-  // Client → Screen
-  Result := ASynEdit.ClientToScreen(P);
-end;
-
-{ Run query by pressing Ctrl + Enter }
-
-procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-var P: TPoint;
-begin
-  // Execute query by pressing Ctrl + Enter
-  if (ssCtrl in shift) and (key = VK_RETURN) then
-  begin
-    CallExecuteQuery(qtUnknown);
-    key:= 0;
-  end;
-
-  if (Key = VK_SPACE) and (ssCtrl in Shift) then
-  begin
-    P := GetSynEditCaretScreenPos(meQuery);
-    pmUnIntelliSense.Popup(P.X, P.Y);
-    Key := 0; // Event verbrauchen
-  end;
-
-end;
-
+//mit parser
 {procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   P: TPoint;
@@ -3369,12 +3323,127 @@ begin
   end;
 end; }
 
-procedure TfmQueryWindow.pmUnIntelliSenseClick(Sender: TObject);
+function CaretPosToOffset(ASynEdit: TSynEdit): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 0 to ASynEdit.CaretY - 2 do
+    Inc(Result, Length(ASynEdit.Lines[i]) + 1); // +1 für Zeilenumbruch
+  Inc(Result, ASynEdit.CaretX - 1);             // Spalte addieren
+end;
+
+function GetSynEditCaretScreenPos(ASynEdit: TSynEdit): TPoint;
+var
+  P: TPoint;
+begin
+  // Caret → Client-Pixel
+  P := ASynEdit.RowColumnToPixels(ASynEdit.CaretXY);
+
+  // etwas unterhalb der Zeile
+  Inc(P.Y, ASynEdit.LineHeight);
+
+  // Client → Screen
+  Result := ASynEdit.ClientToScreen(P);
+end;
+
+{ Run query by pressing Ctrl + Enter }
+
+procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var P: TPoint;
+    Node: TTreeNode;
+    NodeInfo: TPNodeInfos;
+begin
+  // Execute query by pressing Ctrl + Enter
+  if (ssCtrl in shift) and (key = VK_RETURN) then
+  begin
+    CallExecuteQuery(qtUnknown);
+    key:= 0;
+  end;
+
+  if (Key = VK_SPACE) and (ssCtrl in Shift) then
+  begin
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+    Key := 0; // Event verbrauchen
+  end;
+end;
+
+procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
 begin
   if (TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption)) then
     meQuery.SelText := TMenuItem(Sender).Caption
   else
     meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
+end;
+
+function TfmQueryWindow.GetFieldsForAlias(const AliasName: string;
+  Cache: TUnIntelliSenseCache; Parser: TSelectSQLParserExt): TStringList;
+var
+  TableName: string;
+  i: Integer;
+begin
+  Result := TStringList.Create;
+
+  // Alias auflösen (wenn vorhanden)
+  TableName := Parser.ResolveAlias(AliasName);
+
+  // Tabelle im Cache suchen
+  for i := 0 to Cache.TableCache.Count - 1 do
+  begin
+    if Cache.TableCache[i] = TableName then
+    begin
+      if Assigned(Cache.FieldCache[i]) then
+      begin
+        Result.AddStrings(Cache.FieldCache[i]);
+        Result.Delete(0); // Entferne den ersten Eintrag = Tabellenname
+      end;
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfmQueryWindow.pmUnIntelliSenseMaintemClick(Sender: TObject);
+var
+  DBNode: TTreeNode;
+  IntelliCache: TUnIntelliSenseCache;
+  TableItem, FieldItem: TMenuItem;
+  Fields: TStringList;
+  i: Integer;
+begin
+  TableItem := TMenuItem(Sender);
+
+  // Nur einmal laden (Tabellenname + Separator)
+  if TableItem.Count <> 2 then Exit;
+
+  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+  IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+
+  if (IntelliCache = nil) or not IntelliCache.Initialized then
+  begin
+    MessageDlg(
+      'IntelliSense',
+      'The IntelliSense cache is not initialized yet.',
+      mtInformation,
+      [mbOK],
+      0
+    );
+    Exit;
+  end;
+
+  // 🔥 LAZY LOAD aus Cache
+  Fields := IntelliCache.FieldsForTable(TableItem.Caption);
+  if Fields = nil then Exit;
+
+  // Felder unterhalb des Separators einfügen
+  for i := 1 to Fields.Count - 1 do   // Index 0 = Tabellenname
+  begin
+    FieldItem := TMenuItem.Create(TableItem);
+    FieldItem.Caption := Fields[i];
+    FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
+    TableItem.Add(FieldItem);
+  end;
 end;
 
 procedure TfmQueryWindow.LoadpmUnIntelliSense;
@@ -3411,11 +3480,13 @@ begin
     // Hauptmenü = Tabelle
     TableItem := TMenuItem.Create(pmUnIntelliSense);
     TableItem.Caption := TableName;
+    TableItem.OnClick := @pmUnIntelliSenseMaintemClick;
+
 
     // DummyItem mit Tabellenname
     DummyItem := TMenuItem.Create(TableItem);
     DummyItem.Caption := TableName;
-    DummyItem.OnClick := @pmUnIntelliSenseClick;
+    DummyItem.OnClick := @pmUnIntelliSenseSubItemClick;
     TableItem.Add(DummyItem);
 
     // Trennstrich
@@ -3424,7 +3495,7 @@ begin
     TableItem.Add(DummyItem);
 
     // Felder aus Cache holen
-    if (i <= High(IntelliCache.FieldCache)) and Assigned(IntelliCache.FieldCache[i]) then
+    {if (i <= High(IntelliCache.FieldCache)) and Assigned(IntelliCache.FieldCache[i]) then
     begin
       for j := 0 to IntelliCache.FieldCache[i].Count - 1 do
       begin
@@ -3435,86 +3506,12 @@ begin
 
         FieldItem := TMenuItem.Create(TableItem);
         FieldItem.Caption := FieldName;
-        FieldItem.OnClick := @pmUnIntelliSenseClick;
+        FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
 
         TableItem.Add(FieldItem);
       end;
     end;
-    pmUnIntelliSense.Items.Add(TableItem);
-  end;
-end;
-
-function TfmQueryWindow.GetFieldsForAlias(const AliasName: string;
-  Cache: TUnIntelliSenseCache; Parser: TSelectSQLParserExt): TStringList;
-var
-  TableName: string;
-  i: Integer;
-begin
-  Result := TStringList.Create;
-
-  // Alias auflösen (wenn vorhanden)
-  TableName := Parser.ResolveAlias(AliasName);
-
-  // Tabelle im Cache suchen
-  for i := 0 to Cache.TableCache.Count - 1 do
-  begin
-    if Cache.TableCache[i] = TableName then
-    begin
-      if Assigned(Cache.FieldCache[i]) then
-      begin
-        Result.AddStrings(Cache.FieldCache[i]);
-        Result.Delete(0); // Entferne den ersten Eintrag = Tabellenname
-      end;
-      Exit;
-    end;
-  end;
-end;
-
-procedure TfmQueryWindow.ShowIntelliSensePopup(Parser: TSelectSQLParserExt);
-var
-  IntelliCache: TUnIntelliSenseCache;
-  TableItem, FieldItem: TMenuItem;
-  i, j: Integer;
-  DBNode: TTreeNode;
-  Fields: TStringList;
-begin
-  pmUnIntelliSense.Items.Clear;
-
-  // DB-Cache holen
-  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
-  IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
-  if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
-
-  // Menü füllen
-  for i := 0 to IntelliCache.TableCache.Count - 1 do
-  begin
-    TableItem := TMenuItem.Create(pmUnIntelliSense);
-    TableItem.Caption := IntelliCache.TableCache[i];
-
-    Fields := GetFieldsForAlias(IntelliCache.TableCache[i], IntelliCache, Parser);
-    try
-      // Tabellenname ganz oben einfügen
-      FieldItem := TMenuItem.Create(TableItem);
-      FieldItem.Caption := IntelliCache.TableCache[i]; // wenn du Originalnamen willst
-      FieldItem.OnClick := @pmUnIntelliSenseClick;
-      TableItem.Add(FieldItem);
-
-      // Trennstrich
-      FieldItem := TMenuItem.Create(TableItem);
-      FieldItem.Caption := '-';
-      TableItem.Add(FieldItem);
-
-      for j := 0 to Fields.Count - 1 do
-      begin
-        FieldItem := TMenuItem.Create(TableItem);
-        FieldItem.Caption := Fields[j];
-        FieldItem.OnClick := @pmUnIntelliSenseClick;
-        TableItem.Add(FieldItem);
-      end;
-    finally
-      Fields.Free;
-    end;
-
+    }
     pmUnIntelliSense.Items.Add(TableItem);
   end;
 end;
@@ -3522,7 +3519,10 @@ end;
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 begin
   if MetaDataChanged then
+  begin
     LoadpmUnIntelliSense;
+    MetaDataChanged := false;
+  end;
 end;
 
 procedure TfmQueryWindow.rgScreenModesClick(Sender: TObject);

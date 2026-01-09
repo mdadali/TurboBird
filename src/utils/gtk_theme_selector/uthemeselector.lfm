@@ -1,7 +1,7 @@
 object frmThemeSelector: TfrmThemeSelector
-  Left = 247
+  Left = 300
   Height = 590
-  Top = 149
+  Top = 591
   Width = 731
   Caption = 'Theme Selector'
   ClientHeight = 590

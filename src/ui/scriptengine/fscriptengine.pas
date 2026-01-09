@@ -35,6 +35,24 @@ uses
   Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls,
   ibxscript, IBDatabase, IB,
 
+  EncConv,
+  ATStrings,
+  ATStringProc,
+  ATSynEdit,
+  ATSynEdit_Globals,
+  ATSynEdit_LineParts,
+  ATSynEdit_Carets,
+  ATSynEdit_Bookmarks,
+  ATSynEdit_Markers,
+  ATSynEdit_Gaps,
+  ATSynEdit_Finder,
+  ATSynEdit_Export_HTML,
+  ATSynEdit_Gutter_Decor,
+  ATScrollBar,
+  //formkey,
+  //formopt,
+  //formfind,
+
   turbocommon,
   uthemeselector;
 
@@ -43,6 +61,7 @@ type
   { TfrmScriptEngine }
 
   TfrmScriptEngine = class(TForm)
+    ed: TATSynEdit;
     Button1: TButton;
     Button2: TButton;
     btnClose: TButton;
@@ -50,7 +69,6 @@ type
     chkBoxEchoInput: TCheckBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
-    IBScript: TSynEdit;
     Label1: TLabel;
     OpenBlobDialog: TOpenDialog;
     Panel1: TPanel;
@@ -66,13 +84,11 @@ type
     OpenDialog1: TOpenDialog;
     Splitter1: TSplitter;
     chkBoxStopOnError: TCheckBox;
-    SynAutoComplete1: TSynAutoComplete;
-    SynCompletion1: TSynCompletion;
-    SynSQLSyn1: TSynSQLSyn;
     Timer1: TTimer;
     procedure btnCloseClick(Sender: TObject);
     procedure chkBoxEchoInputChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure IBDatabase1BeforeConnect(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
@@ -151,7 +167,7 @@ begin
   ReadScripterSettings; //from inifile
 
   ResultsLog.Lines.Clear;
-  //IBScript.Lines.Clear;
+  //ed.Lines.Clear;
   DBName.Caption := IBDatabase1.DatabaseName;
   chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
   chkBoxEchoInput.Checked :=  IBXScript1.Echo;
@@ -184,6 +200,23 @@ begin
 
   //
   //CloseAction := caFree;
+end;
+
+procedure TfrmScriptEngine.FormCreate(Sender: TObject);
+begin
+  {$ifdef windows}
+  ed.Font.Name:= 'Consolas';
+  {$else}
+  ed.Font.Name:= 'Courier New';
+  //if Screen.Fonts.IndexOf(cGoodFont)>=0 then
+    //ed.Font.Name:= cGoodFont;
+  {$endif}
+
+  ed.Micromap.Columns:= nil;
+  ed.Micromap.ColumnAdd(1, 100, clRed);
+  ed.Micromap.ColumnAdd(2, 100, clBlue);
+  ed.Micromap.ColumnAdd(3, 100, clGreen);
+
 end;
 
 procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);
@@ -253,14 +286,21 @@ end;
 procedure TfrmScriptEngine.LoadScriptExecute(Sender: TObject);
 begin
   if OpenDialog1.Execute then
-    IBScript.Lines.LoadFromFile(OpenDialog1.FileName);
+  begin
+    ed.BeginUpdate;
+
+    ed.Strings.EncodingCodepage:= eidUTF8;
+    ed.LoadFromFile(OpenDialog1.FileName, []);
+    ed.Strings.EncodingDetect:= true;
+    ed.EndUpdate;
+  end;
 end;
 
 procedure TfrmScriptEngine.RunScriptExecute(Sender: TObject);
 begin
   //ReadScripterSettings; //from inifile
   ResultsLog.Lines.Clear;
-  IBXScript1.RunScript(IBScript.Lines);
+  IBXScript1.ExecSQLScript(ed.Strings.TextString_Unicode(0));
   Timer1.Interval := 1000;
   chkBoxEchoInput.Checked := IBXScript1.Echo;
   chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
@@ -269,7 +309,7 @@ end;
 
 procedure TfrmScriptEngine.RunScriptUpdate(Sender: TObject);
 begin
-  (Sender as TAction).Enabled := IBScript.Lines.Text <> '';
+  (Sender as TAction).Enabled := ed.Text <> '';
 end;
 
 procedure TfrmScriptEngine.chkBoxStopOnErrorChange(Sender: TObject);

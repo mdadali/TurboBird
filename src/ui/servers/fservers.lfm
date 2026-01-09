@@ -1,0 +1,8 @@
+object frmServers: TfrmServers
+  Left = 674
+  Height = 533
+  Top = 286
+  Width = 989
+  Caption = 'Registered Servers'
+  LCLVersion = '2.2.6.0'
+end
