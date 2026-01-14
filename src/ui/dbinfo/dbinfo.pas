@@ -43,8 +43,6 @@ type
     btnPrev: TButton;
     chkBoxEncrypted: TCheckBox;
     DataSource1: TDataSource;
-    DBGrid1: TDBGrid;
-    DBNavigator1: TDBNavigator;
     edDBSize: TEdit;
     edImplNo: TEdit;
     edImplNo1: TEdit;
@@ -111,10 +109,9 @@ type
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
+    pnlTop: TPanel;
     Panel7: TPanel;
     Splitter1: TSplitter;
-    tsAttachments: TTabSheet;
-    tsConfig: TTabSheet;
     tsInfos: TTabSheet;
     tsPages: TTabSheet;
     procedure bbRefreshClick(Sender: TObject);

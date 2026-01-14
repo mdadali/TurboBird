@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1633"/>
+      <BuildNr Value="1636"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -38,7 +38,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -86,7 +86,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -134,7 +134,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -181,7 +181,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -235,7 +235,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -288,7 +288,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -341,7 +341,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -413,86 +413,89 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="25">
+    <RequiredPackages Count="26">
       <Item1>
-        <PackageName Value="encconv_package"/>
+        <PackageName Value="ibnongui"/>
       </Item1>
       <Item2>
-        <PackageName Value="atsynedit_cmp_package"/>
+        <PackageName Value="encconv_package"/>
       </Item2>
       <Item3>
-        <PackageName Value="atsynedit_package"/>
+        <PackageName Value="atsynedit_cmp_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="atsynedit_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="rxdbgrid_print"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item5>
       <Item6>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item6>
       <Item7>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="rxnew"/>
       </Item7>
       <Item8>
-        <PackageName Value="lazrichview"/>
+        <PackageName Value="indylaz"/>
       </Item8>
       <Item9>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="lazrichview"/>
       </Item9>
       <Item10>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item10>
       <Item11>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="FrameViewer09"/>
       </Item11>
       <Item12>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="atbinhex_package"/>
       </Item12>
       <Item13>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="lazreport"/>
       </Item13>
       <Item14>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="lazdbexport"/>
       </Item14>
       <Item15>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item15>
       <Item16>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item16>
       <Item17>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item17>
       <Item18>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="dclibx"/>
       </Item18>
       <Item19>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="iblocaldb"/>
       </Item19>
       <Item20>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="ibcontrols"/>
       </Item20>
       <Item21>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="ibexpress"/>
       </Item21>
       <Item22>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="Abbrevia"/>
       </Item22>
       <Item23>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="MemDSLaz"/>
       </Item23>
       <Item24>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item24>
       <Item25>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item25>
+      <Item26>
+        <PackageName Value="LCL"/>
+      </Item26>
     </RequiredPackages>
-    <Units Count="102">
+    <Units Count="103">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1113,6 +1116,14 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit101>
+      <Unit102>
+        <Filename Value="ui/activitymonitor/factivitymonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmActivityMonitor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fActivityMonitor"/>
+      </Unit102>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1122,7 +1133,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers"/>
+      <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
       <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
     </SearchPaths>
     <Parsing>

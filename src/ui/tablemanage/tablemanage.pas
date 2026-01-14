@@ -768,6 +768,7 @@ end;
 
 procedure TfmTableManage.Button1Click(Sender: TObject);
 begin
+  turbocommon.MetaDataChanged := true;
   Close;
   Parent.Free;
 end;

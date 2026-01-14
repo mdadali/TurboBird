@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 733
+  Left = 455
   Height = 634
-  Top = 47
+  Top = 56
   Width = 589
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -25,7 +25,7 @@ object fmNewTable: TfmNewTable
   end
   object edNewTable: TEdit
     Left = 8
-    Height = 31
+    Height = 30
     Top = 32
     Width = 238
     OnKeyUp = edNewTableKeyUp
@@ -77,18 +77,18 @@ object fmNewTable: TfmNewTable
   end
   object cxCreateGen: TCheckBox
     Left = 18
-    Height = 21
-    Top = 496
-    Width = 307
+    Height = 22
+    Top = 495
+    Width = 331
     Anchors = [akLeft, akBottom]
     Caption = 'Create Auto increment Generator and Trigger'
     TabOrder = 2
   end
   object cxGrantPermission: TCheckBox
     Left = 18
-    Height = 21
-    Top = 546
-    Width = 59
+    Height = 22
+    Top = 545
+    Width = 62
     Anchors = [akLeft, akBottom]
     Caption = 'Grant'
     OnChange = cxGrantPermissionChange
@@ -96,8 +96,8 @@ object fmNewTable: TfmNewTable
   end
   object cbPermission: TComboBox
     Left = 88
-    Height = 31
-    Top = 542
+    Height = 28
+    Top = 545
     Width = 145
     Anchors = [akLeft, akBottom]
     Enabled = False
@@ -114,9 +114,9 @@ object fmNewTable: TfmNewTable
   end
   object laPermission: TLabel
     Left = 248
-    Height = 19
-    Top = 546
-    Width = 84
+    Height = 20
+    Top = 545
+    Width = 91
     Anchors = [akLeft, akBottom]
     Caption = 'Permission to'
     ParentColor = False
@@ -124,8 +124,8 @@ object fmNewTable: TfmNewTable
   end
   object cbRolesUsers: TComboBox
     Left = 352
-    Height = 31
-    Top = 543
+    Height = 30
+    Top = 544
     Width = 181
     Anchors = [akLeft, akBottom]
     ItemHeight = 0
@@ -334,7 +334,7 @@ object fmNewTable: TfmNewTable
   end
   object ScrollBar1: TScrollBar
     Left = 342
-    Height = 20
+    Height = 12
     Top = 44
     Width = 121
     PageSize = 0

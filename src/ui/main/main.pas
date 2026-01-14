@@ -75,7 +75,9 @@ uses
   DataModule,
   MainFormUnit, //DBAdmin
   BackupDlgUnit,
-  RestoreDlgUnit
+  RestoreDlgUnit,
+
+  fActivityMonitor
   ;
 
 {$i turbocommon.inc}
@@ -114,6 +116,7 @@ type
     lmExtractTableMetaDataQuoted: TMenuItem;
     lmExtractTableMetaDataUnQuoted: TMenuItem;
     lmServers: TMenuItem;
+    lmActivityMonitor: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -274,6 +277,7 @@ type
     procedure ImNewFBFunctionClick(Sender: TObject);
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
+    procedure lmActivityMonitorClick(Sender: TObject);
     procedure lmAddUserClick(Sender: TObject);
     procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
@@ -1274,6 +1278,14 @@ begin
   Rec := RegisteredDatabases[dbIndex];
   TmpQueryStr := GetFirebirdFunctionDeclaration(Rec.IBDatabase, tvMain.Selected.Text, '');
   ShowCompleteQueryWindow(dbIndex, 'Edit Function#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
+end;
+
+procedure TfmMain.lmActivityMonitorClick(Sender: TObject);
+var frmActivityMonitor: TfrmActivityMonitor;
+begin
+  frmActivityMonitor := TfrmActivityMonitor.Create(self);
+  frmActivityMonitor.ShowModal;
+  frmActivityMonitor.Free;
 end;
 
 {
