@@ -55,7 +55,7 @@ fCheckDBIntegrity, fsqlmonitor,
   //End-DBAdmin
 
   fsimpleobjextractor,
-  fClipboardExport, datamodulesystem, fservers;
+  fClipboardExport, datamodulesystem, fservers, fActivityMonitor;
 
 const
   Major = 1;
@@ -112,7 +112,7 @@ begin
 
   Application.ProcessMessages;
 
-  for i := 0 to 50000 do
+  for i := 0 to 5000 do
   begin
     Application.ProcessMessages;
   end;
@@ -146,6 +146,8 @@ begin
 
   //Application.CreateForm(TDataModuleIBX, DataModuleIBX);
   Application.CreateForm(TfmTransactionConfig, fmTransactionConfig);
+
+  //Application.CreateForm(TfrmActivityMonitor, frmActivityMonitor);
   //Application.CreateForm(TfrmLoginServiceManager, frmLoginServiceManager);
   //Application.CreateForm(TfmServerRegistry, fmServerRegistry);
   //Application.CreateForm(TfrmBlobEdit, frmBlobEdit);
@@ -169,6 +171,7 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
+
   //Application.CreateForm(TfrmServers, frmServers);
   Application.Run;
 end.

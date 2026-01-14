@@ -306,6 +306,7 @@ var
 begin
   if Validate then
   begin
+    turbocommon.MetaDataChanged := true;
     TableName := edNewTable.Text;
     if IsObjectNameCaseSensitive(TableName) then
       if not IsObjectNameQuoted(TableName) then

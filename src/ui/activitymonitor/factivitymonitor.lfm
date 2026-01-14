@@ -1,0 +1,237 @@
+object frmActivityMonitor: TfrmActivityMonitor
+  Left = 772
+  Height = 673
+  Top = 182
+  Width = 1100
+  Caption = 'Activity Monitor'
+  ClientHeight = 673
+  ClientWidth = 1100
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object pnlTop: TPanel
+    Left = 0
+    Height = 40
+    Top = 0
+    Width = 1100
+    Align = alTop
+    ClientHeight = 40
+    ClientWidth = 1100
+    TabOrder = 0
+    object btnRefresh: TButton
+      Left = 8
+      Height = 31
+      Top = 0
+      Width = 152
+      Caption = 'Refresh'
+      OnClick = btnRefreshClick
+      TabOrder = 0
+    end
+  end
+  object pnlMain: TPanel
+    Left = 0
+    Height = 593
+    Top = 40
+    Width = 1100
+    Align = alClient
+    ClientHeight = 593
+    ClientWidth = 1100
+    TabOrder = 1
+    object grdAttachments: TDBGrid
+      Left = 1
+      Height = 200
+      Top = 183
+      Width = 1098
+      Align = alTop
+      Color = clWindow
+      Columns = <>
+      DataSource = dsAttachments
+      ReadOnly = True
+      TabOrder = 0
+      OnCellClick = grdAttachmentsCellClick
+    end
+    object Splitter1: TSplitter
+      Cursor = crVSplit
+      Left = 1
+      Height = 1
+      Top = 182
+      Width = 1098
+      Align = alTop
+      ResizeAnchor = akTop
+    end
+    object grdTransactions: TDBGrid
+      Left = 1
+      Height = 180
+      Top = 1
+      Width = 1098
+      Align = alTop
+      Color = clWindow
+      Columns = <>
+      DataSource = dsTransactions
+      ReadOnly = True
+      TabOrder = 2
+      OnCellClick = grdTransactionsCellClick
+    end
+    object Splitter2: TSplitter
+      Cursor = crVSplit
+      Left = 1
+      Height = 1
+      Top = 181
+      Width = 1098
+      Align = alTop
+      ResizeAnchor = akTop
+    end
+    object grdStatements: TDBGrid
+      Left = 1
+      Height = 209
+      Top = 383
+      Width = 1098
+      Align = alClient
+      Color = clWindow
+      Columns = <>
+      DataSource = dsStatements
+      ReadOnly = True
+      TabOrder = 4
+    end
+  end
+  object pnlBottom: TPanel
+    Left = 0
+    Height = 40
+    Top = 633
+    Width = 1100
+    Align = alBottom
+    ClientHeight = 40
+    ClientWidth = 1100
+    TabOrder = 2
+    object btnKillAttachment: TButton
+      Left = 200
+      Height = 31
+      Top = 1
+      Width = 152
+      Caption = 'Trenne Verbindung'
+      OnClick = btnKillAttachmentClick
+      TabOrder = 0
+    end
+    object btnKillTransaction: TButton
+      Left = 16
+      Height = 31
+      Top = 0
+      Width = 168
+      Caption = 'Rollback Transaktion'
+      OnClick = btnKillTransactionClick
+      TabOrder = 1
+    end
+    object btnKillStatement: TButton
+      Left = 376
+      Height = 32
+      Top = 0
+      Width = 168
+      Caption = 'Abbruch Statement'
+      OnClick = btnKillStatementClick
+      TabOrder = 2
+    end
+  end
+  object IBDatabase: TIBDatabase
+    Connected = False
+    LoginPrompt = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 40
+    Top = 120
+  end
+  object trRead: TIBTransaction
+    TransactionName = '{91BD531F-8226-4242-8966-7484F017E702}'
+    Active = False
+    DefaultDatabase = IBDatabase
+    Params.Strings = (
+      'read committed'
+    )
+    Left = 776
+    Top = 152
+  end
+  object trExec: TIBTransaction
+    TransactionName = '{F3C0108B-2094-419C-BC56-94FE4F3A40FA}'
+    Active = False
+    DefaultDatabase = IBDatabase
+    Left = 776
+    Top = 64
+  end
+  object qryAttachments: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDatabase
+    Transaction = trRead
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 560
+    Top = 136
+  end
+  object qryTransactions: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDatabase
+    Transaction = trRead
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 392
+    Top = 136
+  end
+  object qryStatements: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDatabase
+    Transaction = trRead
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 240
+    Top = 136
+  end
+  object dsAttachments: TDataSource
+    DataSet = qryAttachments
+    Left = 560
+    Top = 64
+  end
+  object dsTransactions: TDataSource
+    DataSet = qryTransactions
+    Left = 392
+    Top = 64
+  end
+  object dsStatements: TDataSource
+    DataSet = qryStatements
+    Left = 240
+    Top = 64
+  end
+end

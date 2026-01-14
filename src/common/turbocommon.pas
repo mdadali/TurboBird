@@ -1607,7 +1607,7 @@ begin
   MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
 
   //QueryWindow
-  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', false);
+  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
   QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clRed'));
   QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Arial');
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);

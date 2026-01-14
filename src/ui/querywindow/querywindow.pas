@@ -1948,8 +1948,8 @@ begin
     Nav.Parent:= Pan;
     Nav.VisibleButtons:= [nbFirst, nbNext, nbPrior, nbLast];
     Nav.DataSource:= DataSource;
-    Nav.Visible := QWShowNavigator;
 
+    Nav.Visible := QWShowNavigator;
 
     // Apply button
     NewApplyButton(Pan, ATab);
@@ -3432,7 +3432,7 @@ begin
     Exit;
   end;
 
-  // 🔥 LAZY LOAD aus Cache
+  //LAZY LOAD aus Cache
   Fields := IntelliCache.FieldsForTable(TableItem.Caption);
   if Fields = nil then Exit;
 
@@ -3517,11 +3517,33 @@ begin
 end;
 
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
+var DBNode: TTreeNode;
+    IntelliCache: TUnIntelliSenseCache;
 begin
   if MetaDataChanged then
   begin
-    LoadpmUnIntelliSense;
+    DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+    if DBNode = nil  then exit;
+    if DBNode.Data = nil then exit;
+
+    IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+
+    if (IntelliCache = nil) or not IntelliCache.Initialized then
+    begin
+      MessageDlg(
+        'IntelliSense',
+        'The IntelliSense cache is not initialized yet.',
+        mtInformation,
+        [mbOK],
+        0
+      );
+      Exit;
+    end;
+
+    IntelliCache.RefreshCache;
     MetaDataChanged := false;
+    LoadpmUnIntelliSense;
+
   end;
 end;
 
