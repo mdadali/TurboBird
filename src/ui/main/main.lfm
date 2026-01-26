@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 458
+  Left = 475
   Height = 638
-  Top = 103
+  Top = 125
   Width = 906
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 612
@@ -71055,6 +71055,7 @@ object fmMain: TfmMain
       ClientHeight = 34
       ClientWidth = 327
       TabOrder = 1
+      Visible = False
       object edtObjectFilter: TEdit
         Left = 48
         Height = 29
@@ -71079,6 +71080,7 @@ object fmMain: TfmMain
       Caption = '&File'
       object lmServers: TMenuItem
         Caption = 'Servers'
+        Visible = False
         OnClick = lmServersClick
       end
       object mnServerRegistry: TMenuItem

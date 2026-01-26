@@ -1,11 +1,11 @@
 object RestoreDlg: TRestoreDlg
-  Left = 726
+  Left = 447
   Height = 652
-  Top = 87
-  Width = 539
+  Top = 89
+  Width = 575
   Caption = 'Restore Database'
   ClientHeight = 652
-  ClientWidth = 539
+  ClientWidth = 575
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
     1A0A0000000D49484452000004000000040008060000007F1D2B8300224F2C49
@@ -70307,7 +70307,7 @@ object RestoreDlg: TRestoreDlg
     Left = 16
     Height = 602
     Top = 8
-    Width = 647
+    Width = 683
     ActivePage = SelectTab
     Anchors = [akTop, akLeft, akRight, akBottom]
     ShowTabs = False
@@ -70316,59 +70316,59 @@ object RestoreDlg: TRestoreDlg
     object SelectTab: TTabSheet
       Caption = 'SelectTab'
       ClientHeight = 598
-      ClientWidth = 637
+      ClientWidth = 679
       object Label2: TLabel
         Left = 12
-        Height = 19
+        Height = 20
         Top = 7
-        Width = 42
+        Width = 43
         Caption = 'Server'
         ParentColor = False
       end
       object Label1: TLabel
         Left = 12
-        Height = 19
+        Height = 20
         Top = 128
-        Width = 171
+        Width = 186
         Caption = 'Primary Database FileName'
         ParentColor = False
       end
-      object DBName: TEdit
+      object __DBName: TEdit
         Left = 12
-        Height = 31
+        Height = 30
         Top = 152
         Width = 444
         TabOrder = 0
       end
       object ServerSideBtn: TRadioButton
         Left = 12
-        Height = 21
+        Height = 22
         Top = 344
-        Width = 95
+        Width = 100
         Caption = 'Server Side'
+        Checked = True
         TabOrder = 1
+        TabStop = True
       end
       object ClientSideBtn: TRadioButton
         Left = 142
-        Height = 21
+        Height = 22
         Top = 344
-        Width = 88
+        Width = 96
         Caption = 'Client Side'
-        Checked = True
         TabOrder = 2
-        TabStop = True
       end
       object Label3: TLabel
         Left = 12
-        Height = 19
+        Height = 20
         Top = 64
-        Width = 69
+        Width = 76
         Caption = 'Backup File'
         ParentColor = False
       end
       object SourceArchive: TEdit
         Left = 12
-        Height = 31
+        Height = 30
         Top = 88
         Width = 440
         TabOrder = 5
@@ -70418,15 +70418,15 @@ object RestoreDlg: TRestoreDlg
       end
       object Label4: TLabel
         Left = 12
-        Height = 19
+        Height = 20
         Top = 376
-        Width = 58
+        Width = 64
         Caption = 'Page Size'
         ParentColor = False
       end
       object PageSize: TEdit
         Left = 12
-        Height = 31
+        Height = 30
         Top = 392
         Width = 104
         NumbersOnly = True
@@ -70434,71 +70434,71 @@ object RestoreDlg: TRestoreDlg
       end
       object Label5: TLabel
         Left = 128
-        Height = 19
+        Height = 20
         Top = 397
-        Width = 34
+        Width = 35
         Caption = 'bytes'
         ParentColor = False
       end
       object DeActivateIndexes: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 441
-        Width = 142
+        Width = 151
         Caption = 'Deactivate Indexes'
         TabOrder = 6
       end
       object NoShadow: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 464
-        Width = 291
+        Width = 317
         Caption = 'Do not recreate shadow files during restore'
         TabOrder = 7
       end
       object NoValidityCheck: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 488
-        Width = 321
+        Width = 351
         Caption = 'Do not enforce validity conditions during restore'
         TabOrder = 8
       end
       object OneRelationAtATime: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 512
-        Width = 308
+        Width = 335
         Caption = 'Commit after completing restore of each table'
         TabOrder = 9
       end
       object RestoreMetaDataOnly: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 536
-        Width = 167
+        Width = 179
         Caption = 'Restore MetaData Only'
         TabOrder = 10
       end
       object UseAllSpace: TCheckBox
         Left = 12
-        Height = 21
+        Height = 22
         Top = 560
-        Width = 404
+        Width = 437
         Caption = 'Do not reserve 20% of each data page for future rec. versions'
         TabOrder = 11
       end
       object Label6: TLabel
         Left = 205
-        Height = 19
+        Height = 20
         Top = 376
-        Width = 127
+        Width = 138
         Caption = 'No. of Cache Buffers'
         ParentColor = False
       end
       object PageBuffers: TEdit
         Left = 205
-        Height = 31
+        Height = 30
         Top = 392
         Width = 107
         NumbersOnly = True
@@ -70506,7 +70506,7 @@ object RestoreDlg: TRestoreDlg
       end
       object cmbBoxServers: TComboBox
         Left = 12
-        Height = 35
+        Height = 32
         Top = 24
         Width = 440
         Enabled = False
@@ -70559,9 +70559,9 @@ object RestoreDlg: TRestoreDlg
       end
       object Label7: TLabel
         Left = 12
-        Height = 19
+        Height = 20
         Top = 192
-        Width = 62
+        Width = 67
         Caption = 'Segments'
         ParentColor = False
       end
@@ -70627,13 +70627,13 @@ object RestoreDlg: TRestoreDlg
     object ReportTab: TTabSheet
       Caption = 'ReportTab'
       ClientHeight = 598
-      ClientWidth = 637
+      ClientWidth = 679
       OnShow = ReportTabShow
       object Report: TMemo
         Left = 0
         Height = 578
         Top = 0
-        Width = 637
+        Width = 679
         Align = alClient
         Lines.Strings = (
           'Report'
@@ -70645,7 +70645,7 @@ object RestoreDlg: TRestoreDlg
         Left = 0
         Height = 20
         Top = 578
-        Width = 637
+        Width = 679
         Align = alBottom
         Style = pbstMarquee
         TabOrder = 1
@@ -70668,8 +70668,8 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 328
-    Top = 8
+    Left = 336
+    Top = 104
   end
   object IBXServerSideRestoreService1: TIBXServerSideRestoreService
     ServicesConnection = IBXServicesConnection1
@@ -70680,13 +70680,13 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 128
-    Top = 8
+    Left = 200
+    Top = 40
   end
   object IBXServicesConnection1: TIBXServicesConnection
     Connected = False
     TraceFlags = []
-    Left = 424
-    Top = 376
+    Left = 408
+    Top = 40
   end
 end
