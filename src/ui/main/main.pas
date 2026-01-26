@@ -1569,11 +1569,12 @@ begin
         fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(ServerName);
 
         if ServerRec.IsEmbedded then
-          fmReg.edDatabaseName.Text := TmpRestoreDlg.DBName.Text
+          fmReg.edDatabaseName.Text := TmpRestoreDlg.StringGrid1.Cells[0, 0] //TmpRestoreDlg.DBName.Text
         else
-          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.DBName.Text);
+          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.StringGrid1.Cells[0, 0]);
+          //fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.DBName.Text);
 
-        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.DBName.Text), '');
+        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.StringGrid1.Cells[0, 0]), '');
 
         fmReg.edtPort.Text := ServerRec.Port;
         fmReg.cboxSQLDialect.ItemIndex := 2;

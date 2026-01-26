@@ -50,7 +50,7 @@ type
     sbSegments: TSpeedButton;
     StringGrid1: TStringGrid;
     UseAllSpace: TCheckBox;
-    DBName: TEdit;
+    __DBName: TEdit;
     SourceArchive: TEdit;
     PageSize: TEdit;
     Label1: TLabel;
@@ -105,8 +105,8 @@ begin
   if OpenDialog1.Execute then
   begin
     SourceArchive.Text := OpenDialog1.Filename;
-    if Pos('RestoredDB_at_', DBName.Text) > 0 then
-      DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
+    if Pos('RestoredDB_at_', __DBName.Text) > 0 then
+      __DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
   end;
 end;
 
@@ -115,9 +115,9 @@ begin
   OpenDialog1.Filter := 'Database Files|*.fdb|All Files|*.*';
   if OpenDialog1.Execute then
   begin
-    DBName.Text := OpenDialog1.Filename;
+    __DBName.Text := OpenDialog1.Filename;
     StringGrid1.RowCount := StringGrid1.RowCount + 1;
-    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := DBName.Text;
+    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := __DBName.Text;
   end;
 end;
 
@@ -131,7 +131,9 @@ begin
   if OpenDialog1.Execute then
   begin
     StringGrid1.RowCount := StringGrid1.RowCount + 1;
-    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
+    //StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
+    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename;
+    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  '16000';
   end;
 end;
 
@@ -150,7 +152,7 @@ begin
   if cmbBoxServers.Items.Count > 0 then
     cmbBoxServers.ItemIndex := cmbBoxServers.Items.IndexOf(FServerName);
 
-  DBName.Text      := FDatabaseName;
+  __DBName.Text      := FDatabaseName;
   PageSize.Text    := IntToStr(FDefaultPageSize);
   PageBuffers.Text := IntToStr(FDefaultNumBuffers);
 
@@ -243,7 +245,7 @@ procedure TRestoreDlg.FormShow(Sender: TObject);
 begin
   PageControl1.ActivePage := SelectTab;
   //ServerName.Text := IBXClientSideRestoreService1.ServicesConnection.ServerName;
-  //DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];
+  //__DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];
   SourceArchive.SetFocus;
 end;
 
@@ -272,23 +274,38 @@ begin
       if ServerSideBtn.Checked then
       begin
         IBXServerSideRestoreService1.DatabaseFiles.Clear;
-        IBXServerSideRestoreService1.DatabaseFiles.Add(DBName.Text);
+        //IBXServerSideRestoreService1.DatabaseFiles.Add(__DBName.Text);
+        for i := 0 to StringGrid1.RowCount - 1 do
+        begin
+          if Trim(StringGrid1.Cells[0, i]) <> '' then
+          begin
+            IBXServerSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+
+            if i <  StringGrid1.RowCount - 1 then
+              IBXServerSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
+
+          end;
+        end;
         Application.QueueAsyncCall(@DoServerRestore,0)
       end else
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
 
-        IBXClientSideRestoreService1.DatabaseFiles.Add(DBName.Text);
-        //IBXClientSideRestoreService1.DatabaseFiles.Add('16000m');
+        //IBXClientSideRestoreService1.DatabaseFiles.Add(__DBName.Text);
+        //IBXClientSideRestoreService1.DatabaseFiles.Add('20000');
 
         if StringGrid1.RowCount > 0 then
           for i := 0 to StringGrid1.RowCount - 1 do
           begin
+
             if Trim(StringGrid1.Cells[0, i]) <> '' then
             begin
               IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
-              IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
+
+              if i <  StringGrid1.RowCount - 1 then
+                IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
             end;
+
           end;
 
 
