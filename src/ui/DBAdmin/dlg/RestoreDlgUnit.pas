@@ -133,7 +133,7 @@ begin
     StringGrid1.RowCount := StringGrid1.RowCount + 1;
     //StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
     StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename;
-    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  '16000';
+    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  PageSize.Text;
   end;
 end;
 

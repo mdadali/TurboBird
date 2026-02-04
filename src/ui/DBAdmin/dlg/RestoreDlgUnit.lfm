@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
   Left = 447
   Height = 652
-  Top = 89
+  Top = 110
   Width = 575
   Caption = 'Restore Database'
   ClientHeight = 652
@@ -70332,6 +70332,7 @@ object RestoreDlg: TRestoreDlg
         Width = 186
         Caption = 'Primary Database FileName'
         ParentColor = False
+        Visible = False
       end
       object __DBName: TEdit
         Left = 12
@@ -70339,6 +70340,7 @@ object RestoreDlg: TRestoreDlg
         Top = 152
         Width = 444
         TabOrder = 0
+        Visible = False
       end
       object ServerSideBtn: TRadioButton
         Left = 12
@@ -70555,6 +70557,7 @@ object RestoreDlg: TRestoreDlg
           0000000000000000000000000000000000000000000000000000000000000000
           0000000000000000000000000000000000000000000000000000
         }
+        Visible = False
         OnClick = sbPrimDBFileNameClick
       end
       object Label7: TLabel
@@ -70656,8 +70659,8 @@ object RestoreDlg: TRestoreDlg
     Title = 'Open existing backup file'
     DefaultExt = '.gbk'
     Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 348
-    Top = 192
+    Left = 208
+    Top = 432
   end
   object IBXClientSideRestoreService1: TIBXClientSideRestoreService
     ServicesConnection = IBXServicesConnection1
@@ -70668,8 +70671,8 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 336
-    Top = 104
+    Left = 360
+    Top = 240
   end
   object IBXServerSideRestoreService1: TIBXServerSideRestoreService
     ServicesConnection = IBXServicesConnection1
@@ -70680,13 +70683,13 @@ object RestoreDlg: TRestoreDlg
     Options = [Replace]
     StatisticsRequested = [bsTotalTime]
     Verbose = True
-    Left = 200
-    Top = 40
+    Left = 120
+    Top = 240
   end
   object IBXServicesConnection1: TIBXServicesConnection
     Connected = False
     TraceFlags = []
-    Left = 408
-    Top = 40
+    Left = 248
+    Top = 224
   end
 end
