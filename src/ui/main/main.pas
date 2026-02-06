@@ -4532,8 +4532,16 @@ end;
 (***********  Refresh Click  *************)
 procedure TfmMain.lmRefreshClick(Sender: TObject);
 begin
-  FillObjectRoot(tvMain.Selected);
-  tvMain.Selected.Expand(false);
+  try
+    Screen.Cursor := crSQLWait;
+    tvMain.BeginUpdate;
+    FillObjectRoot(tvMain.Selected);
+    tvMain.Selected.Expand(false);
+  finally
+    tvMain.EndUpdate;
+    Screen.Cursor := crDefault;
+    Application.ProcessMessages;
+  end;
 end;
 
 (***********  Script Database  ************)
@@ -8117,58 +8125,63 @@ begin
 
       if (NI <> nil) then
       begin
-        //if CheckBoxFilter.Checked then
-        //begin
-          case NI^.ObjectType of
-            tvotServer,
-            tvotDatabase,
-            tvotQueryWindow,
-            tvotTableRoot,
-            tvotGeneratorRoot,
-            tvotViewRoot,
-            tvotUDFRoot,
-            tvotProcedureRoot,
-            tvotFunctionRoot,
-            tvotDomainRoot,
-            tvotUserRoot,
-            tvotRoleRoot,
-            tvotExceptionRoot,
+        {case NI^.ObjectType of
+          tvotServer,
+          tvotDatabase,
+          tvotQueryWindow,
 
-            tvotTriggerRoot,
-            tvotTableTriggerRoot,
-            tvotDBTriggerRoot,
-            tvotDDLTriggerRoot,
-            tvotUDRTriggerRoot,
-            tvotUDRTableTriggerRoot,
-            tvotUDRDBTriggerRoot,
-            tvotUDRDDLTriggerRoot,
+          tvotTableRoot,
+          tvotGeneratorRoot,
+          tvotViewRoot,
+          tvotUDFRoot,
+          tvotProcedureRoot,
+          tvotFunctionRoot,
+          tvotDomainRoot,
+          tvotUserRoot,
+          tvotRoleRoot,
+          tvotExceptionRoot,
 
-            tvotPackageRoot,
-            tvotPackageUDFFunctionRoot,
-            tvotPackageFunctionRoot,
-            tvotPackageProcedureRoot,
-            tvotPackageUDRFunctionRoot,
-            tvotPackageUDRProcedureRoot,
-            tvotPackageTriggerRoot,
-            tvotPackageUDRTriggerRoot,
+          tvotTriggerRoot,
+          tvotTableTriggerRoot,
+          tvotDBTriggerRoot,
+          tvotDDLTriggerRoot,
 
-            tvotSystemObjectRoot,
-            tvotSystemTableRoot:
+          tvotUDRRoot,
+          tvotUDRTriggerRoot,
+          tvotUDRTableTriggerRoot,
+          tvotUDRDBTriggerRoot,
+          tvotUDRDDLTriggerRoot,
 
-              Node.Visible := True
+          tvotPackage,
+          tvotPackageRoot,
+          //tvotPackageUDFFunctionRoot,
+          tvotPackageFunctionRoot,
+          tvotPackageProcedureRoot,
+          tvotPackageUDRFunctionRoot,
+          tvotPackageUDRProcedureRoot,
+          //tvotPackageTriggerRoot,
+          //tvotPackageUDRTriggerRoot,
 
-          else  begin
+          tvotSystemObjectRoot,
+          tvotSystemTableRoot:
+            Node.Visible := True}
+          if IsFilterScopeNode(Node)  then
+            Node.Visible := True
+          else
+          begin
             if CheckBoxFilter.Checked then
-              Node.Visible := MatchesFilter(Node.Text, FilterText)
+            begin
+              Node.Visible := MatchesFilter(Node.Text, FilterText);
+              //if Node.Visible then
+                //Node.Selected := true;
+            end
             else
               Node.Visible := True;
-          end;
+          end; //else
 
-          end;
-
-        //end;
-
+        //end; //case
       end;
+
       Node := Node.GetNext;
     end;
   finally
@@ -8330,7 +8343,10 @@ begin
     if MainTreeViewAlwaysRefresh or (Node.Count = 0) then
     begin
       tvMain.Selected := Node;
+      tvMain.BeginUpdate;
       FillObjectRoot(Node);
+      tvMain.EndUpdate;
+      Application.ProcessMessages;
     end;
 
   end;
