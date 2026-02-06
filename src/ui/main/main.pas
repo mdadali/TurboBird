@@ -88,8 +88,8 @@ type
 
   TfmMain = class(TForm)
     Button1: TButton;
-    CheckBox1: TCheckBox;
-    edtObjectFilter: TEdit;
+    CheckBoxFilter: TCheckBox;
+    edtFilter: TEdit;
     editorFontDialog: TFontDialog;
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
@@ -269,6 +269,8 @@ type
     tsMain: TTabSheet;
     tvMain: TTreeView;
     procedure Button1Click(Sender: TObject);
+    procedure CheckBoxFilterChange(Sender: TObject);
+    procedure edtFilterChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -412,6 +414,8 @@ type
     procedure GlobalException(Sender: TObject; E : Exception);
     procedure tvMainExpanding(Sender: TObject; Node: TTreeNode;
       var AllowExpansion: Boolean);
+    procedure ApplyFilterToAllNodes;
+
     procedure tvMainKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     FCurrentHistoryFile: string;
@@ -7669,6 +7673,8 @@ begin
 
   end;
   Node.Data := PNodeInfos;
+  PNodeInfos^.Visible := true;
+  Node.Visible := PNodeInfos^.Visible;
 end;
 
 procedure TfmMain.tvMainChange(Sender: TObject; Node: TTreeNode);
@@ -8041,6 +8047,154 @@ begin
     NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
 end;
 
+{procedure TfmMain.ApplyFilterToAllNodes;
+var
+  Node: TTreeNode;
+  NI: TPNodeInfos;
+  FilterText: string;
+begin
+  FilterText := Trim(edtFilter.Text);
+
+  tvMain.BeginUpdate;
+  try
+    Node := tvMain.Items.GetFirstNode;
+    while Node <> nil do
+    begin
+      NI := Node.Data;
+
+      if (NI <> nil) then
+      begin
+        if CheckBoxFilter.Checked
+           and not IsFilterScopeNode(Node)  //RootNodes
+           and (NI^.ObjectType <> tvotServer)
+           and (NI^.ObjectType <> tvotDatabase)
+           and (NI^.ObjectType <> tvotQueryWindow) then
+        begin
+          //NI^.Visible := MatchesFilter(Node.Text, FilterText);
+          //Node.Visible := NI^.Visible;
+          Node.Visible := MatchesFilter(Node.Text, FilterText);
+        end
+        else
+        begin
+          //NI^.Visible := True;
+          Node.Visible := True;
+        end;
+      end;
+
+      Node := Node.GetNext;
+    end;
+  finally
+    tvMain.EndUpdate;
+  end;
+end;}
+
+procedure TfmMain.CheckBoxFilterChange(Sender: TObject);
+begin
+  if (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
+    ApplyFilterToAllNodes;
+end;
+
+procedure TfmMain.edtFilterChange(Sender: TObject);
+begin
+  if CheckBoxFilter.Checked and (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
+    ApplyFilterToAllNodes;
+end;
+
+procedure TfmMain.ApplyFilterToAllNodes;
+var
+  Node: TTreeNode;
+  NI: TPNodeInfos;
+  FilterText: string;
+begin
+  FilterText := Trim(edtFilter.Text);
+
+  tvMain.BeginUpdate;
+  try
+    Node := tvMain.Items.GetFirstNode;
+    while Node <> nil do
+    begin
+      NI := Node.Data;
+
+      if (NI <> nil) then
+      begin
+        //if CheckBoxFilter.Checked then
+        //begin
+          case NI^.ObjectType of
+            tvotServer,
+            tvotDatabase,
+            tvotQueryWindow,
+            tvotTableRoot,
+            tvotGeneratorRoot,
+            tvotViewRoot,
+            tvotUDFRoot,
+            tvotProcedureRoot,
+            tvotFunctionRoot,
+            tvotDomainRoot,
+            tvotUserRoot,
+            tvotRoleRoot,
+            tvotExceptionRoot,
+
+            tvotTriggerRoot,
+            tvotTableTriggerRoot,
+            tvotDBTriggerRoot,
+            tvotDDLTriggerRoot,
+            tvotUDRTriggerRoot,
+            tvotUDRTableTriggerRoot,
+            tvotUDRDBTriggerRoot,
+            tvotUDRDDLTriggerRoot,
+
+            tvotPackageRoot,
+            tvotPackageUDFFunctionRoot,
+            tvotPackageFunctionRoot,
+            tvotPackageProcedureRoot,
+            tvotPackageUDRFunctionRoot,
+            tvotPackageUDRProcedureRoot,
+            tvotPackageTriggerRoot,
+            tvotPackageUDRTriggerRoot,
+
+            tvotSystemObjectRoot,
+            tvotSystemTableRoot:
+
+              Node.Visible := True
+
+          else  begin
+            if CheckBoxFilter.Checked then
+              Node.Visible := MatchesFilter(Node.Text, FilterText)
+            else
+              Node.Visible := True;
+          end;
+
+          end;
+
+        //end;
+
+      end;
+      Node := Node.GetNext;
+    end;
+  finally
+    tvMain.EndUpdate;
+  end;
+end;
+
+
+procedure ApplyVisibilityToChildren(AParent: TTreeNode);
+var
+  Child: TTreeNode;
+  NI: TPNodeInfos;
+begin
+  if AParent = nil then Exit;
+
+  Child := AParent.GetFirstChild;
+  while Child <> nil do
+  begin
+    NI := Child.Data;
+    if NI <> nil then
+      Child.Visible := NI^.Visible;
+
+    Child := Child.GetNextSibling;
+  end;
+end;
+
 // ============================================================================
 // Called when the user tries to expand a database node (Level 1).
 // Here we check the connection and optionally prevent expansion.
@@ -8178,10 +8332,23 @@ begin
       tvMain.Selected := Node;
       FillObjectRoot(Node);
     end;
+
   end;
 finally
   Application.ProcessMessages;
   //tvMain.Enabled := true;
+
+  if IsFilterScopeNode(Node) then
+  begin
+    tvMain.BeginUpdate;
+    try
+     // ApplyVisibilityToChildren(Node);
+      ApplyFilterToAllNodes;
+    finally
+      tvMain.EndUpdate;
+    end;
+  end;
+
   Screen.Cursor := crDefault;
   Application.ProcessMessages;
 end;

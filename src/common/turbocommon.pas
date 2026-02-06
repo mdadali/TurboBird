@@ -295,6 +295,7 @@ type
     SimpleObjExtractor: TSimpleObjExtractor;
     UnIntelliSenseCache: TUnIntelliSenseCache;
     ServerSession: TServerSession;
+    Visible: boolean;
   end;
 
   //search
@@ -420,7 +421,9 @@ var
     //end-Ini.File////////////////////////////////////////////////////////////////
 
 
-function MatchesFilter(const AName, AFilter: string): Boolean;
+function IsFilterScopeNode(ANode: TTreeNode): Boolean;
+
+function MatchesFilter(const AText, AFilter: string): Boolean;
 
 
 function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
@@ -556,6 +559,52 @@ function FontStylesToStr(AStyles: TFontStyles): string;
 implementation
 
 uses Reg;
+
+
+function IsFilterScopeNode(ANode: TTreeNode): Boolean;
+var
+  NI: TPNodeInfos;
+begin
+  Result := False;
+  if (ANode = nil) or (ANode.Data = nil) then Exit;
+
+  NI := TPNodeInfos(ANode.Data);
+
+  case NI^.ObjectType of
+    tvotTableRoot,
+    tvotGeneratorRoot,
+    tvotViewRoot,
+    tvotUDFRoot,
+    tvotProcedureRoot,
+    tvotFunctionRoot,
+    tvotDomainRoot,
+    tvotUserRoot,
+    tvotRoleRoot,
+    tvotExceptionRoot,
+
+    tvotTriggerRoot,
+    tvotTableTriggerRoot,
+    tvotDBTriggerRoot,
+    tvotDDLTriggerRoot,
+    tvotUDRTriggerRoot,
+    tvotUDRTableTriggerRoot,
+    tvotUDRDBTriggerRoot,
+    tvotUDRDDLTriggerRoot,
+
+    tvotPackageRoot,
+    tvotPackageUDFFunctionRoot,
+    tvotPackageFunctionRoot,
+    tvotPackageProcedureRoot,
+    tvotPackageUDRFunctionRoot,
+    tvotPackageUDRProcedureRoot,
+    tvotPackageTriggerRoot,
+    tvotPackageUDRTriggerRoot,
+
+    tvotSystemObjectRoot,
+    tvotSystemTableRoot:
+      Result := True;
+  end;
+end;
 
 function IsObjectNameCaseSensitive(AObjectName: string): boolean;
 begin
@@ -2869,42 +2918,30 @@ begin
   end;
 end;
 
-function MatchesFilter(const AName, AFilter: string): Boolean;
+function MatchesFilter(const AText, AFilter: string): Boolean;
 var
-  FilterPattern, NameUpper, FilterUpper: string;
+  Text, Filter: string;
 begin
-  // leerer Filter → alles matcht
-  if Trim(AFilter) = '' then
-  begin
-    Result := True;
-    Exit;
-  end;
+  if AFilter = '' then
+    Exit(True);
 
-  // Großschreibung vereinheitlichen für case-insensitive Vergleich
-  NameUpper := UpperCase(AName);
-  FilterUpper := UpperCase(Trim(AFilter));
+  Text   := AnsiLowerCase(AText);
+  Filter := AnsiLowerCase(AFilter);
 
-  // Pattern vorbereiten
-  if (Copy(FilterUpper, 1, 1) <> '*') and (Copy(FilterUpper, Length(FilterUpper), 1) <> '*') then
-  begin
-    // kein Stern am Anfang/Ende → enthält
-    Result := Pos(FilterUpper, NameUpper) > 0;
-  end
-  else if (Copy(FilterUpper, 1, 1) = '*') and (Copy(FilterUpper, Length(FilterUpper), 1) = '*') then
-  begin
-    // *Text* → enthält
-    Result := Pos(Copy(FilterUpper, 2, Length(FilterUpper)-2), NameUpper) > 0;
-  end
-  else if Copy(FilterUpper, 1, 1) = '*' then
-  begin
-    // *Text → endet mit
-    Result := EndsText(Copy(FilterUpper, 2, Length(FilterUpper)-1), NameUpper);
-  end
-  else
-  begin
-    // Text* → beginnt mit
-    Result := StartsText(Copy(FilterUpper, 1, Length(FilterUpper)-1), NameUpper);
-  end;
+  // *abc*
+  if (Filter[1] = '*') and (Filter[Length(Filter)] = '*') then
+    Exit(Pos(Copy(Filter, 2, Length(Filter)-2), Text) > 0);
+
+  // *abc
+  if Filter[1] = '*' then
+    Exit(EndsText(Copy(Filter, 2, MaxInt), Text));
+
+  // abc*
+  if Filter[Length(Filter)] = '*' then
+    Exit(StartsText(Copy(Filter, 1, Length(Filter)-1), Text));
+
+  // exakt
+  Result := Text = Filter;
 end;
 
 
