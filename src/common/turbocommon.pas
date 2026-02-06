@@ -571,6 +571,10 @@ begin
   NI := TPNodeInfos(ANode.Data);
 
   case NI^.ObjectType of
+    tvotServer,
+    tvotDatabase,
+    tvotQueryWindow,
+
     tvotTableRoot,
     tvotGeneratorRoot,
     tvotViewRoot,
@@ -586,23 +590,26 @@ begin
     tvotTableTriggerRoot,
     tvotDBTriggerRoot,
     tvotDDLTriggerRoot,
+
+    tvotUDRRoot,
     tvotUDRTriggerRoot,
     tvotUDRTableTriggerRoot,
     tvotUDRDBTriggerRoot,
     tvotUDRDDLTriggerRoot,
 
+    tvotPackage,
     tvotPackageRoot,
-    tvotPackageUDFFunctionRoot,
+    //tvotPackageUDFFunctionRoot,
     tvotPackageFunctionRoot,
     tvotPackageProcedureRoot,
     tvotPackageUDRFunctionRoot,
     tvotPackageUDRProcedureRoot,
-    tvotPackageTriggerRoot,
-    tvotPackageUDRTriggerRoot,
+    //tvotPackageTriggerRoot,
+    //tvotPackageUDRTriggerRoot,
 
     tvotSystemObjectRoot,
     tvotSystemTableRoot:
-      Result := True;
+      Result := true;
   end;
 end;
 
