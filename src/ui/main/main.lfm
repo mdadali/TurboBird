@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 456
+  Left = 556
   Height = 638
-  Top = 110
+  Top = 126
   Width = 906
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 612
@@ -71058,7 +71058,7 @@ object fmMain: TfmMain
       object edtFilter: TEdit
         Left = 48
         Height = 29
-        Top = 0
+        Top = 2
         Width = 272
         OnChange = edtFilterChange
         TabOrder = 0
@@ -71066,9 +71066,11 @@ object fmMain: TfmMain
       object CheckBoxFilter: TCheckBox
         Left = 16
         Height = 22
-        Top = 0
+        Top = 5
         Width = 22
+        Checked = True
         OnChange = CheckBoxFilterChange
+        State = cbChecked
         TabOrder = 1
       end
     end
