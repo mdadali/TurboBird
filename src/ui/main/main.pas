@@ -8098,13 +8098,14 @@ end;}
 
 procedure TfmMain.CheckBoxFilterChange(Sender: TObject);
 begin
-  if (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
+  //if (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
     ApplyFilterToAllNodes;
 end;
 
 procedure TfmMain.edtFilterChange(Sender: TObject);
 begin
-  if CheckBoxFilter.Checked and (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
+  //if CheckBoxFilter.Checked and (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
+  if CheckBoxFilter.Checked then
     ApplyFilterToAllNodes;
 end;
 
