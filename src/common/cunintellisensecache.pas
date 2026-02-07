@@ -70,6 +70,9 @@ begin
   try
     FSimpleObjExtractor.ExtractTableNames(FTableCache, False, False);
 
+    if FTableCache.Count = 0 then
+      exit(true);
+
     SetLength(FFieldCacheArray, FTableCache.Count);
     SetLength(FFieldsLoaded, FTableCache.Count);
 
