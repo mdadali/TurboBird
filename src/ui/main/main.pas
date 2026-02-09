@@ -623,6 +623,10 @@ end;
 procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   try
+    Screen.Cursor := crSQLWait;
+    tvMain.BeginUpdate;
+    CheckBoxFilter.Checked := false;
+  try
     //if Length(RegisteredDatabases) > 0 then
       //fmReg.SaveRegistrations;
     SaveAndCloseSQLHistory;
@@ -632,9 +636,13 @@ begin
   except
     on E: Exception do
     begin
+      Screen.Cursor := crDefault;
       ShowMessage('Error while closing the databases: ' + E.Message);
       CloseAction := caNone; // NICHT schließen
     end;
+  end;
+  finally
+    tvMain.EndUpdate;
   end;
 end;
 
