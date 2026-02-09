@@ -70325,8 +70325,8 @@ object fmAbout: TfmAbout
     Height = 544
     Top = 0
     Width = 605
-    ActivePage = TabSheet2
-    TabIndex = 0
+    ActivePage = TabSheet1
+    TabIndex = 1
     TabOrder = 1
     OnChange = PageControl1Change
     object TabSheet2: TTabSheet
@@ -123302,7 +123302,7 @@ object fmAbout: TfmAbout
           ''
           'A heartfelt thanks to the open-source community for their'
           'tremendous support.'
-          'Special thanks to Tony Wayman for his assistance with IBX,'
+          'Special thanks to Tony Whyman for his assistance with IBX,'
           'Piero Valagussa for providing the CADSys4 2D & 3D CAD Library,'
           'and to all other developers who have contributed their components'
           'to the community.'

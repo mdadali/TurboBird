@@ -95638,7 +95638,7 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +#6'Height'#2'$'#3'Top'#2#0#5'Width'#2'h'#5'Color'#7#6'clGray'#11'ParentColor'
   +#8#5'Style'#7#11'pbstMarquee'#8'TabOrder'#2#1#0#0#0#12'TPageControl'#12'Page'
   +'Control1'#4'Left'#2#0#6'Height'#3' '#2#3'Top'#2#0#5'Width'#3']'#2#10'Active'
-  +'Page'#7#9'TabSheet2'#8'TabIndex'#2#0#8'TabOrder'#2#1#8'OnChange'#7#18'PageC'
+  +'Page'#7#9'TabSheet1'#8'TabIndex'#2#1#8'TabOrder'#2#1#8'OnChange'#7#18'PageC'
   +'ontrol1Change'#0#9'TTabSheet'#9'TabSheet2'#7'Caption'#6#4'Info'#12'ClientHe'
   +'ight'#3#254#1#11'ClientWidth'#3'Y'#2#14'ParentShowHint'#8#8'ShowHint'#9#0#6
   +'TLabel'#6'Label4'#4'Left'#2#8#6'Height'#2#20#3'Top'#3#136#1#5'Width'#3#200#0
@@ -166278,7 +166278,7 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +#0#12'TSecretPanel'#12'SecretPanel1'#4'Left'#2#0#6'Height'#3#254#1#3'Top'#2#0
   +#5'Width'#3'Y'#2#6'Cycled'#9#13'Lines.Strings'#1#6#23'Thanks to the Communit'
   +'y'#6#0#6'9A heartfelt thanks to the open-source community for their'#6#19't'
-  +'remendous support.'#6':Special thanks to Tony Wayman for his assistance wit'
+  +'remendous support.'#6':Special thanks to Tony Whyman for his assistance wit'
   +'h IBX,'#6'>Piero Valagussa for providing the CADSys4 2D & 3D CAD Library,'#6
   +'Aand to all other developers who have contributed their components'#6#17'to'
   +' the community.'#6'6Further thanks go to the English Lazarus Forum and the'
