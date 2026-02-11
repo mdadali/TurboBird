@@ -1,3 +1,8 @@
+This software is dedicated to the memory of Sevinc, 
+a philosopher and victim of domestic violence.
+Her life ended through violence in front of her son.
+Her son continues to live with the consequences to this day.
+
 # TurboBird – Firebird Database Tool
 
 TurboBird is a powerful, modern administration and development tool for **Firebird databases**.  
