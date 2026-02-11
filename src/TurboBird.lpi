@@ -22,13 +22,13 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1649"/>
+      <BuildNr Value="1651"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="gtk2"/>
     </MacroValues>
-    <BuildModes Count="8">
+    <BuildModes Count="9">
       <Item1 Name="x86_64-linux64-gtk2-debug" Default="True"/>
       <Item2 Name="x86_64-linux64-gtk2-release">
         <CompilerOptions>
@@ -388,9 +388,61 @@
           </Other>
         </CompilerOptions>
       </Item8>
+      <Item9 Name="x86_64-linux64-gtk3-debug">
+        <MacroValues Count="1">
+          <Macro2 Name="LCLWidgetType" Value="gtk3"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="libs;getdeclarations;classes;deps;common;ui/about;ui/callprocedure;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;ui/edittabledata;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;ui/transconfig;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1
+-dUseCThreads"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item9>
       <SharedMatrixOptions Count="3">
         <Item1 ID="844124804436" Modes="x86_64-linux64-gtk2-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
-        <Item2 ID="875199933056" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
+        <Item2 ID="875199933056" Modes="x86_64-linux64-gtk3-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
         <Item3 ID="013957187272" Type="IDEMacro" MacroName="LCLWidgetType" Value="customdrawn"/>
       </SharedMatrixOptions>
     </BuildModes>
@@ -413,7 +465,7 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="26">
+    <RequiredPackages Count="25">
       <Item1>
         <PackageName Value="ibnongui"/>
       </Item1>
@@ -439,61 +491,58 @@
         <PackageName Value="indylaz"/>
       </Item8>
       <Item9>
-        <PackageName Value="lazrichview"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item9>
       <Item10>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="FrameViewer09"/>
       </Item10>
       <Item11>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="atbinhex_package"/>
       </Item11>
       <Item12>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="lazreport"/>
       </Item12>
       <Item13>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="lazdbexport"/>
       </Item13>
       <Item14>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item14>
       <Item15>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item15>
       <Item16>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item16>
       <Item17>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="dclibx"/>
       </Item17>
       <Item18>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="iblocaldb"/>
       </Item18>
       <Item19>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="ibcontrols"/>
       </Item19>
       <Item20>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="ibexpress"/>
       </Item20>
       <Item21>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="Abbrevia"/>
       </Item21>
       <Item22>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="MemDSLaz"/>
       </Item22>
       <Item23>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item23>
       <Item24>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
       </Item24>
       <Item25>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item25>
-      <Item26>
         <PackageName Value="LCL"/>
-      </Item26>
+      </Item25>
     </RequiredPackages>
     <Units Count="103">
       <Unit0>
