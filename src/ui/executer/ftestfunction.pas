@@ -101,6 +101,7 @@ uses main;
 
 constructor TfrmTestFunction.CreateForRoutine(AOwner: TComponent; ARoutineInfo: TRoutineInfo);
 begin
+  self.FRoutineInfo := ARoutineInfo;
   inherited Create(AOwner);
 end;
 
@@ -186,8 +187,11 @@ end;
 procedure TfrmTestFunction.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
-  DBGridParams.Columns[0].Width := 100;
-  DBGridParams.Columns[1].Width := 100;
+  //if DBGridParams.Columns.Count > 0 then
+  //begin
+    DBGridParams.Columns[0].Width := 100;
+    DBGridParams.Columns[1].Width := 100;
+  //end;
 end;
 
 procedure TfrmTestFunction.FillPackagesComboBox;
@@ -554,10 +558,14 @@ begin
     //BufDataset.Fields[0].ReadOnly := true;
     //BufDataset.Fields[1].ReadOnly := true;
   end;
-  DBGridParams.Columns[0].ReadOnly := true;
-  DBGridParams.Columns[1].ReadOnly := true;
-  DBGridParams.Columns[0].Width := 120;
-  DBGridParams.Columns[1].Width := 200;
+
+  //if DBGridParams.Columns.Count > 0 then
+  //begin
+    DBGridParams.Columns[0].ReadOnly := true;
+    DBGridParams.Columns[1].ReadOnly := true;
+    DBGridParams.Columns[0].Width := 120;
+    DBGridParams.Columns[1].Width := 200;
+  //end;
 end;
 
 procedure TfrmTestFunction.bbCloseClick(Sender: TObject);

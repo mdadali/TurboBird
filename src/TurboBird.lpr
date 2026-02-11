@@ -18,7 +18,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim,
-  lazrichview, indylaz, rxnew, memdslaz, datetimectrls,
+  indylaz, rxnew, memdslaz, datetimectrls,
   runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
   ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
   CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,

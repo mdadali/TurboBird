@@ -12,8 +12,6 @@ uses
   fdataexportersintrf,
   fbcommon,
 
-  dmibx,
-
   uthemeselector;
 
 

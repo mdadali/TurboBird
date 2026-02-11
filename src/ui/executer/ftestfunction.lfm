@@ -1,7 +1,7 @@
 object frmTestFunction: TfrmTestFunction
-  Left = 280
+  Left = 588
   Height = 608
-  Top = 81
+  Top = 213
   Width = 947
   ActiveControl = Panel13
   BorderIcons = [biSystemMenu]
@@ -35,7 +35,7 @@ object frmTestFunction: TfrmTestFunction
       TabOrder = 0
       object cboxPackages: TComboBox
         Left = 8
-        Height = 35
+        Height = 32
         Top = 24
         Width = 152
         ItemHeight = 0
@@ -45,9 +45,9 @@ object frmTestFunction: TfrmTestFunction
       end
       object Label5: TLabel
         Left = 8
-        Height = 19
+        Height = 20
         Top = 8
-        Width = 51
+        Width = 55
         Caption = 'Package'
         ParentColor = False
       end
@@ -76,8 +76,8 @@ object frmTestFunction: TfrmTestFunction
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 305
-        ClientWidth = 179
+        ClientHeight = 303
+        ClientWidth = 177
         ItemIndex = 0
         Items.Strings = (
           'UDF'
@@ -130,31 +130,31 @@ object frmTestFunction: TfrmTestFunction
           Width = 767
           Align = alTop
           Caption = 'Routine'
-          ClientHeight = 115
-          ClientWidth = 765
+          ClientHeight = 113
+          ClientWidth = 763
           TabOrder = 0
           OnClick = rgRoutineTypeClick
           object Label1: TLabel
             Left = 8
-            Height = 19
+            Height = 20
             Top = 56
-            Width = 43
+            Width = 46
             Caption = 'Return'
             ParentColor = False
           end
           object lbReturn: TLabel
             Left = 112
-            Height = 19
+            Height = 20
             Top = 56
-            Width = 65
+            Width = 71
             Caption = 'lbReturn/s'
             ParentColor = False
           end
           object DBLookupComboBox1: TDBLookupComboBox
             Left = 0
-            Height = 35
+            Height = 32
             Top = 0
-            Width = 765
+            Width = 763
             Align = alTop
             KeyField = 'NAME'
             ListField = 'NAME'
@@ -167,33 +167,33 @@ object frmTestFunction: TfrmTestFunction
           end
           object lbRoutineNm: TLabel
             Left = 8
-            Height = 19
+            Height = 20
             Top = 30
-            Width = 88
+            Width = 96
             Caption = 'Routine Name'
             ParentColor = False
           end
           object lbRoutineName: TLabel
             Left = 112
-            Height = 19
+            Height = 20
             Top = 30
-            Width = 96
+            Width = 105
             Caption = 'lbRoutineName'
             ParentColor = False
           end
           object Label4: TLabel
             Left = 8
-            Height = 19
+            Height = 20
             Top = 80
-            Width = 81
+            Width = 88
             Caption = 'Routine Type'
             ParentColor = False
           end
           object lbRoutineType: TLabel
             Left = 112
-            Height = 19
+            Height = 20
             Top = 80
-            Width = 89
+            Width = 97
             Caption = 'lbRoutineType'
             ParentColor = False
           end
@@ -210,9 +210,9 @@ object frmTestFunction: TfrmTestFunction
         TabOrder = 1
         object Label2: TLabel
           Left = 8
-          Height = 19
+          Height = 20
           Top = 0
-          Width = 113
+          Width = 122
           Caption = 'Input Parameters:'
           ParentColor = False
         end
@@ -293,9 +293,9 @@ object frmTestFunction: TfrmTestFunction
         TabOrder = 2
         object Label3: TLabel
           Left = 8
-          Height = 19
+          Height = 20
           Top = 8
-          Width = 42
+          Width = 46
           Caption = 'Result:'
           ParentColor = False
         end
@@ -371,17 +371,17 @@ object frmTestFunction: TfrmTestFunction
     end
     object Label6: TLabel
       Left = 8
-      Height = 19
+      Height = 20
       Top = 4
-      Width = 65
+      Width = 71
       Caption = 'Database: '
       ParentColor = False
     end
     object lbDatabase: TLabel
       Left = 80
-      Height = 19
+      Height = 20
       Top = 4
-      Width = 69
+      Width = 76
       Caption = 'lbDatabase'
       ParentColor = False
     end

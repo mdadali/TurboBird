@@ -70325,8 +70325,8 @@ object fmAbout: TfmAbout
     Height = 544
     Top = 0
     Width = 605
-    ActivePage = TabSheet1
-    TabIndex = 1
+    ActivePage = TabSheet2
+    TabIndex = 0
     TabOrder = 1
     OnChange = PageControl1Change
     object TabSheet2: TTabSheet
