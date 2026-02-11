@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 624
+  Left = 434
   Height = 583
-  Top = 130
+  Top = 108
   Width = 601
   BorderIcons = []
   BorderStyle = bsNone
@@ -123298,6 +123298,12 @@ object fmAbout: TfmAbout
         Width = 601
         Cycled = True
         Lines.Strings = (
+          'This software is dedicated to the memory of Sevinc, '
+          'a philosopher and victim of domestic violence.'
+          'Her life ended through violence in front of her son.'
+          'Her son continues to live with the consequences to this day.'
+          ''
+          ''
           'Thanks to the Community'
           ''
           'A heartfelt thanks to the open-source community for their'
@@ -123324,7 +123330,7 @@ object fmAbout: TfmAbout
     Enabled = False
     Interval = 10
     OnTimer = Timer1Timer
-    Left = 304
-    Top = 176
+    Left = 488
+    Top = 464
   end
 end

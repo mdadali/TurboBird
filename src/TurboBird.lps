@@ -217,10 +217,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="87"/>
         <CursorPos X="6" Y="98"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit26>
       <Unit27>
         <Filename Value="ui\newtable\newtable.pas"/>
@@ -321,7 +324,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="3512"/>
         <CursorPos X="43" Y="3515"/>
         <UsageCount Value="200"/>
@@ -460,7 +463,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="474"/>
         <CursorPos X="40" Y="483"/>
         <UsageCount Value="200"/>
@@ -671,10 +674,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="404"/>
-        <CursorPos Y="419"/>
+        <CursorPos X="90" Y="418"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -952,7 +954,7 @@
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="97"/>
         <CursorPos Y="127"/>
         <UsageCount Value="200"/>
@@ -993,7 +995,7 @@
       <Unit97>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="332"/>
         <CursorPos X="29" Y="362"/>
         <UsageCount Value="200"/>
@@ -1003,7 +1005,7 @@
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="61"/>
         <CursorPos Y="69"/>
         <UsageCount Value="200"/>
@@ -1036,7 +1038,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="5" Y="19"/>
-        <UsageCount Value="196"/>
+        <UsageCount Value="197"/>
       </Unit101>
       <Unit102>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
@@ -1045,10 +1047,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="217"/>
         <CursorPos X="38" Y="225"/>
-        <UsageCount Value="124"/>
+        <UsageCount Value="125"/>
         <Loaded Value="True"/>
       </Unit102>
       <Unit103>
@@ -1206,7 +1208,7 @@
       </Unit122>
       <Unit123>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBTransaction.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="321"/>
         <CursorPos Y="342"/>
         <UsageCount Value="33"/>
@@ -1249,7 +1251,7 @@
       </Unit128>
       <Unit129>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\fbintf.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <CursorPos X="42" Y="17"/>
         <UsageCount Value="16"/>
         <Loaded Value="True"/>
@@ -1296,123 +1298,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="490" TopLine="488"/>
+        <Caret Line="504" TopLine="497"/>
       </Position1>
       <Position2>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="496" TopLine="488"/>
+        <Caret Line="507" TopLine="497"/>
       </Position2>
       <Position3>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="498" TopLine="488"/>
+        <Caret Line="512" Column="30" TopLine="503"/>
       </Position3>
       <Position4>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="501" TopLine="488"/>
+        <Caret Line="511" TopLine="503"/>
       </Position4>
       <Position5>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="503" TopLine="497"/>
+        <Caret Line="512" TopLine="503"/>
       </Position5>
       <Position6>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="504" TopLine="497"/>
+        <Caret Line="513" TopLine="503"/>
       </Position6>
       <Position7>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="507" TopLine="497"/>
+        <Caret Line="514" TopLine="503"/>
       </Position7>
       <Position8>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="512" Column="30" TopLine="503"/>
+        <Caret Line="515" TopLine="503"/>
       </Position8>
       <Position9>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="511" TopLine="503"/>
+        <Caret Line="516" TopLine="503"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="512" TopLine="503"/>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="127" TopLine="97"/>
       </Position10>
       <Position11>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="513" TopLine="503"/>
+        <Caret Line="520" TopLine="513"/>
       </Position11>
       <Position12>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="514" TopLine="503"/>
+        <Caret Line="523" TopLine="513"/>
       </Position12>
       <Position13>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="515" TopLine="503"/>
+        <Caret Line="525" TopLine="513"/>
       </Position13>
       <Position14>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="516" TopLine="503"/>
+        <Caret Line="526" TopLine="513"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="127" TopLine="97"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="528" TopLine="513"/>
       </Position15>
       <Position16>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="520" TopLine="513"/>
+        <Caret Line="547" TopLine="538"/>
       </Position16>
       <Position17>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="523" TopLine="513"/>
+        <Caret Line="548" TopLine="538"/>
       </Position17>
       <Position18>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="525" TopLine="513"/>
+        <Caret Line="549" TopLine="538"/>
       </Position18>
       <Position19>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="526" TopLine="513"/>
+        <Caret Line="550" TopLine="538"/>
       </Position19>
       <Position20>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="528" TopLine="513"/>
+        <Caret Line="551" TopLine="538"/>
       </Position20>
       <Position21>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="547" TopLine="538"/>
+        <Caret Line="553" TopLine="538"/>
       </Position21>
       <Position22>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="548" TopLine="538"/>
+        <Caret Line="518" TopLine="508"/>
       </Position22>
       <Position23>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="549" TopLine="538"/>
+        <Caret Line="556" TopLine="552"/>
       </Position23>
       <Position24>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="550" TopLine="538"/>
+        <Caret Line="692" Column="29" TopLine="672"/>
       </Position24>
       <Position25>
         <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="551" TopLine="538"/>
+        <Caret Line="356" TopLine="340"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="553" TopLine="538"/>
+        <Filename Value="ui\about\about.pas"/>
+        <Caret Line="98" Column="6" TopLine="87"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="518" TopLine="508"/>
+        <Filename Value="ui\about\about.pas"/>
+        <Caret Line="99" Column="6" TopLine="88"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="556" TopLine="552"/>
+        <Filename Value="ui\about\about.pas"/>
+        <Caret Line="100" Column="6" TopLine="89"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="692" Column="29" TopLine="672"/>
+        <Filename Value="ui\about\about.pas"/>
+        <Caret Line="99" Column="6" TopLine="88"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\executer\ftestfunction.pas"/>
-        <Caret Line="356" TopLine="340"/>
+        <Filename Value="ui\about\about.pas"/>
+        <Caret Line="98" Column="6" TopLine="87"/>
       </Position30>
     </JumpHistory>
     <RunParams>
