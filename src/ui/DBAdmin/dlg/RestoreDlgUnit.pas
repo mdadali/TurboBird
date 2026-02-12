@@ -33,8 +33,11 @@ type
   TRestoreDlg = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    ClientSideBtn: TRadioButton;
     cmbBoxServers: TComboBox;
     DeActivateIndexes: TCheckBox;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     IBXClientSideRestoreService1: TIBXClientSideRestoreService;
     IBXServerSideRestoreService1: TIBXServerSideRestoreService;
     IBXServicesConnection1: TIBXServicesConnection;
@@ -45,9 +48,12 @@ type
     NoValidityCheck: TCheckBox;
     OneRelationAtATime: TCheckBox;
     ProgressBar1: TProgressBar;
+    rbMBs: TRadioButton;
+    rgPages: TRadioButton;
     RestoreMetaDataOnly: TCheckBox;
     sbPrimDBFileName: TSpeedButton;
     sbSegments: TSpeedButton;
+    ServerSideBtn: TRadioButton;
     StringGrid1: TStringGrid;
     UseAllSpace: TCheckBox;
     __DBName: TEdit;
@@ -61,12 +67,12 @@ type
     Report: TMemo;
     OpenDialog1: TOpenDialog;
     PageControl1: TPageControl;
-    ServerSideBtn: TRadioButton;
-    ClientSideBtn: TRadioButton;
     sbBackupFile: TSpeedButton;
     SelectTab: TTabSheet;
     ReportTab: TTabSheet;
     procedure Button1Click(Sender: TObject);
+
+    function  MakeFileSize(AFileSize: string): string;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure IBXClientSideRestoreService1GetNextLine(Sender: TObject;
@@ -261,6 +267,16 @@ begin
   Report.Lines.Clear;
 end;
 
+function TRestoreDlg.MakeFileSize(AFileSize: string): string;
+var PagesSize, MBsInt: integer;
+begin
+  if rgPages.Checked then
+    result := AFileSize
+  else begin
+    result :=  IntToStr(  (StrToInt(AFileSize) * 1024 * 1024) div (StrToInt(PageSize.Text))  );
+  end;
+end;
+
 procedure TRestoreDlg.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var i: integer;
 begin
@@ -282,7 +298,8 @@ begin
             IBXServerSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
 
             if i <  StringGrid1.RowCount - 1 then
-              IBXServerSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
+
+              IBXServerSideRestoreService1.DatabaseFiles.Add(MakeFileSize(StringGrid1.Cells[1, i]));
 
           end;
         end;

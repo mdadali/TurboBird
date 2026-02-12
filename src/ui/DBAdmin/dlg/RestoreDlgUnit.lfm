@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 772
+  Left = 450
   Height = 652
-  Top = 151
+  Top = 96
   Width = 575
   Caption = 'Restore Database'
   ClientHeight = 652
@@ -70328,7 +70328,7 @@ object RestoreDlg: TRestoreDlg
       object Label1: TLabel
         Left = 12
         Height = 20
-        Top = 128
+        Top = 120
         Width = 186
         Caption = 'Primary Database FileName'
         ParentColor = False
@@ -70337,28 +70337,10 @@ object RestoreDlg: TRestoreDlg
       object __DBName: TEdit
         Left = 12
         Height = 30
-        Top = 152
+        Top = 136
         Width = 444
         TabOrder = 0
         Visible = False
-      end
-      object ServerSideBtn: TRadioButton
-        Left = 12
-        Height = 22
-        Top = 344
-        Width = 100
-        Caption = 'Server Side'
-        Checked = True
-        TabOrder = 1
-        TabStop = True
-      end
-      object ClientSideBtn: TRadioButton
-        Left = 142
-        Height = 22
-        Top = 344
-        Width = 96
-        Caption = 'Client Side'
-        TabOrder = 2
       end
       object Label3: TLabel
         Left = 12
@@ -70373,7 +70355,7 @@ object RestoreDlg: TRestoreDlg
         Height = 30
         Top = 88
         Width = 440
-        TabOrder = 5
+        TabOrder = 3
       end
       object sbBackupFile: TSpeedButton
         Left = 464
@@ -70432,7 +70414,7 @@ object RestoreDlg: TRestoreDlg
         Top = 392
         Width = 104
         NumbersOnly = True
-        TabOrder = 3
+        TabOrder = 1
       end
       object Label5: TLabel
         Left = 128
@@ -70448,7 +70430,7 @@ object RestoreDlg: TRestoreDlg
         Top = 441
         Width = 151
         Caption = 'Deactivate Indexes'
-        TabOrder = 6
+        TabOrder = 4
       end
       object NoShadow: TCheckBox
         Left = 12
@@ -70456,7 +70438,7 @@ object RestoreDlg: TRestoreDlg
         Top = 464
         Width = 317
         Caption = 'Do not recreate shadow files during restore'
-        TabOrder = 7
+        TabOrder = 5
       end
       object NoValidityCheck: TCheckBox
         Left = 12
@@ -70464,7 +70446,7 @@ object RestoreDlg: TRestoreDlg
         Top = 488
         Width = 351
         Caption = 'Do not enforce validity conditions during restore'
-        TabOrder = 8
+        TabOrder = 6
       end
       object OneRelationAtATime: TCheckBox
         Left = 12
@@ -70472,7 +70454,7 @@ object RestoreDlg: TRestoreDlg
         Top = 512
         Width = 335
         Caption = 'Commit after completing restore of each table'
-        TabOrder = 9
+        TabOrder = 7
       end
       object RestoreMetaDataOnly: TCheckBox
         Left = 12
@@ -70480,7 +70462,7 @@ object RestoreDlg: TRestoreDlg
         Top = 536
         Width = 179
         Caption = 'Restore MetaData Only'
-        TabOrder = 10
+        TabOrder = 8
       end
       object UseAllSpace: TCheckBox
         Left = 12
@@ -70488,7 +70470,7 @@ object RestoreDlg: TRestoreDlg
         Top = 560
         Width = 437
         Caption = 'Do not reserve 20% of each data page for future rec. versions'
-        TabOrder = 11
+        TabOrder = 9
       end
       object Label6: TLabel
         Left = 205
@@ -70504,7 +70486,7 @@ object RestoreDlg: TRestoreDlg
         Top = 392
         Width = 107
         NumbersOnly = True
-        TabOrder = 4
+        TabOrder = 2
       end
       object cmbBoxServers: TComboBox
         Left = 12
@@ -70514,12 +70496,12 @@ object RestoreDlg: TRestoreDlg
         Enabled = False
         ItemHeight = 0
         Style = csDropDownList
-        TabOrder = 12
+        TabOrder = 10
       end
       object sbPrimDBFileName: TSpeedButton
         Left = 464
         Height = 25
-        Top = 152
+        Top = 136
         Width = 25
         Glyph.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
@@ -70563,15 +70545,15 @@ object RestoreDlg: TRestoreDlg
       object Label7: TLabel
         Left = 12
         Height = 20
-        Top = 192
+        Top = 176
         Width = 67
         Caption = 'Segments'
         ParentColor = False
       end
       object StringGrid1: TStringGrid
-        Left = 13
+        Left = 12
         Height = 100
-        Top = 216
+        Top = 200
         Width = 443
         ColCount = 2
         DefaultColWidth = 360
@@ -70580,12 +70562,12 @@ object RestoreDlg: TRestoreDlg
         Flat = True
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goSmoothScroll]
         RowCount = 0
-        TabOrder = 13
+        TabOrder = 11
       end
       object sbSegments: TSpeedButton
         Left = 464
         Height = 25
-        Top = 216
+        Top = 200
         Width = 28
         Glyph.Data = {
           36040000424D3604000000000000360000002800000010000000100000000100
@@ -70626,6 +70608,62 @@ object RestoreDlg: TRestoreDlg
         OnClick = sbSegmentsClick
         OnChangeBounds = sbSegmentsChangeBounds
       end
+      object GroupBox1: TGroupBox
+        Left = 12
+        Height = 48
+        Top = 318
+        Width = 248
+        Caption = 'Restore'
+        ClientHeight = 26
+        ClientWidth = 244
+        TabOrder = 12
+        object ServerSideBtn: TRadioButton
+          Left = 16
+          Height = 22
+          Top = 0
+          Width = 100
+          Caption = 'Server Side'
+          Checked = True
+          TabOrder = 0
+          TabStop = True
+        end
+        object ClientSideBtn: TRadioButton
+          Left = 136
+          Height = 22
+          Top = 0
+          Width = 96
+          Caption = 'Client Side'
+          TabOrder = 1
+        end
+      end
+      object GroupBox2: TGroupBox
+        Left = 272
+        Height = 48
+        Top = 318
+        Width = 185
+        Caption = 'Size'
+        ClientHeight = 26
+        ClientWidth = 181
+        TabOrder = 13
+        object rgPages: TRadioButton
+          Left = 16
+          Height = 22
+          Top = 0
+          Width = 64
+          Caption = 'Pages'
+          TabOrder = 0
+        end
+        object rbMBs: TRadioButton
+          Left = 112
+          Height = 22
+          Top = 0
+          Width = 53
+          Caption = 'MBs'
+          Checked = True
+          TabOrder = 1
+          TabStop = True
+        end
+      end
     end
     object ReportTab: TTabSheet
       Caption = 'ReportTab'
@@ -70659,7 +70697,7 @@ object RestoreDlg: TRestoreDlg
     Title = 'Open existing backup file'
     DefaultExt = '.gbk'
     Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 208
+    Left = 448
     Top = 432
   end
   object IBXClientSideRestoreService1: TIBXClientSideRestoreService
