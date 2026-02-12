@@ -94,6 +94,7 @@ type
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
     grBoxObjectFilter: TGroupBox;
+    HtmlViewer1: THtmlViewer;
     IBExtract1: TIBExtract;
     IBXScript1: TIBXScript;
     Image1: TImage;
@@ -547,11 +548,10 @@ begin
 
   htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + '/help/index.html';
 
-  {if FileExists(htmlPath) then
+  if FileExists(htmlPath) then
     HtmlViewer1.LoadFromFile(htmlPath)
   else
     HtmlViewer1.LoadFromString('<html><body><h1>index.html not found</h1></body></html>');
-  }
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
@@ -568,7 +568,7 @@ procedure TfmMain.HtmlViewer1Link(Sender: TObject; const Rel, Rev, Href: ThtStri
 var htmlPath: string;
 begin
   // Lokale Datei: ohne http/https → load in THtmlViewer
-  {htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'index.html';
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'index.html';
   if (Pos('http://', Href) = 0) and (Pos('https://', Href) = 0) then
   begin
     if FileExists(htmlPath + Href) then
@@ -580,7 +580,7 @@ begin
   begin
     // Externe Links öffnen im Standardbrowser
     OpenURL(Href);
-  end;}
+  end;
 end;
 
 procedure TfmMain.AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);

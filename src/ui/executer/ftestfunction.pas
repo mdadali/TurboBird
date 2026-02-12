@@ -22,7 +22,6 @@ type
   { TfrmTestFunction }
 
   TfrmTestFunction = class(TForm)
-    bbClose: TSpeedButton;
     bbExecute: TBitBtn;
     BufDataset: TBufDataset;
     BufDataSource: TDataSource;
@@ -64,7 +63,6 @@ type
     rgRoutineType: TRadioGroup;
     Splitter1: TSplitter;
 
-    procedure bbCloseClick(Sender: TObject);
     procedure bbExecuteClick(Sender: TObject);
     procedure cboxPackagesChange(Sender: TObject);
     procedure DBGridParamsKeyPress(Sender: TObject; var Key: char);
@@ -566,12 +564,6 @@ begin
     DBGridParams.Columns[0].Width := 120;
     DBGridParams.Columns[1].Width := 200;
   //end;
-end;
-
-procedure TfrmTestFunction.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 procedure TfrmTestFunction.bbExecuteClick(Sender: TObject);
