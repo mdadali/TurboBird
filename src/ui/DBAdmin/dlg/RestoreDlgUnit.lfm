@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 450
+  Left = 646
   Height = 652
-  Top = 96
+  Top = 108
   Width = 575
   Caption = 'Restore Database'
   ClientHeight = 652
@@ -70645,7 +70645,7 @@ object RestoreDlg: TRestoreDlg
         ClientHeight = 26
         ClientWidth = 181
         TabOrder = 13
-        object rgPages: TRadioButton
+        object rbPages: TRadioButton
           Left = 16
           Height = 22
           Top = 0

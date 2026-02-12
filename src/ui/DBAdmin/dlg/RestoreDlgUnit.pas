@@ -49,7 +49,7 @@ type
     OneRelationAtATime: TCheckBox;
     ProgressBar1: TProgressBar;
     rbMBs: TRadioButton;
-    rgPages: TRadioButton;
+    rbPages: TRadioButton;
     RestoreMetaDataOnly: TCheckBox;
     sbPrimDBFileName: TSpeedButton;
     sbSegments: TSpeedButton;
@@ -139,7 +139,7 @@ begin
     StringGrid1.RowCount := StringGrid1.RowCount + 1;
     //StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
     StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename;
-    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  PageSize.Text;
+    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  DefaultSegmentSize;
   end;
 end;
 
@@ -161,6 +161,11 @@ begin
   __DBName.Text      := FDatabaseName;
   PageSize.Text    := IntToStr(FDefaultPageSize);
   PageBuffers.Text := IntToStr(FDefaultNumBuffers);
+
+  if  LowerCase(DefaultSegmentUnit) = 'mb' then
+    rbMBs.Checked := true
+  else
+    rbPages.Checked := true;
 
 
   ServerRec := GetServerRecordFromFileByName(FServerName);
@@ -270,7 +275,7 @@ end;
 function TRestoreDlg.MakeFileSize(AFileSize: string): string;
 var PagesSize, MBsInt: integer;
 begin
-  if rgPages.Checked then
+  if rbPages.Checked then
     result := AFileSize
   else begin
     result :=  IntToStr(  (StrToInt(AFileSize) * 1024 * 1024) div (StrToInt(PageSize.Text))  );
@@ -320,11 +325,11 @@ begin
               IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
 
               if i <  StringGrid1.RowCount - 1 then
-                IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[1, i]);
+                IBXClientSideRestoreService1.DatabaseFiles.Add(MakeFileSize(StringGrid1.Cells[1, i]));
+
             end;
 
           end;
-
 
         Application.QueueAsyncCall(@DoClientRestore,0);
       end;

@@ -369,6 +369,9 @@ var
     DefaultPageSize,
     DefaultNumBuffers: integer;
     RegisterDBAfterRestore: boolean;
+    DefaultSegmentSize: string;
+    DefaultSegmentUnit: string;
+
 
     //Scriper
     EchoInput: boolean;
@@ -1620,6 +1623,8 @@ begin
   DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
   DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
   RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
+  DefaultSegmentSize     := fIniFile.ReadString('Restore',  'DefaultSegmentSize', '64');
+  DefaultSegmentUnit     := fIniFile.ReadString('Restore',  'DefaultSegmentUnit', 'MB');
 
   //Scripter
   EchoInput := fIniFile.ReadBool('Scripter',  'EchoInput', true);
@@ -1682,6 +1687,8 @@ begin
   fIniFile.WriteInteger('Restore', 'DefaultPageSize', DefaultPageSize);
   fIniFile.WriteInteger('Restore', 'DefaultNumBuffers', DefaultNumBuffers);
   fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
+  fIniFile.WriteString('Restore',  'DefaultSegmentSize', DefaultSegmentSize);
+  fIniFile.WriteString('Restore',  'DefaultSegmentUnit', DefaultSegmentUnit);
 
   //Scripter
   fIniFile.WriteBool('Scripter',  'EchoInput', EchoInput);
