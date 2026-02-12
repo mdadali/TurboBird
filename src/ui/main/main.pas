@@ -7575,6 +7575,29 @@ begin
     tvotUDRProcedureRoot: Filter := 45;
     tvotUDRProcedure: Filter := 46;
 
+    tvotTableTriggerRoot,
+    tvotTableTrigger,
+
+
+    tvotDBTriggerRoot,
+    tvotDBTrigger,
+
+    tvotDDLTriggerRoot,
+    tvotDDLTrigger,
+
+    tvotUDRTriggerRoot,
+    tvotUDRTrigger,
+
+    tvotUDRTableTriggerRoot,
+    tvotUDRTableTrigger,
+
+    tvotUDRDBTriggerRoot,
+    tvotUDRDBTrigger,
+
+    tvotUDRDDLTriggerRoot,
+    tvotUDRDDLTrigger: Filter:= -1;
+
+
    else
       Filter:= -1;
   end; //casw
