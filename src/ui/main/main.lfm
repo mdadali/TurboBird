@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 819
+  Left = 711
   Height = 612
-  Top = 307
+  Top = 209
   Width = 906
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 586
@@ -72495,6 +72495,7 @@ object fmMain: TfmMain
       object lmDBAdmin: TMenuItem
         Caption = 'MWA DBAdmin'
         ImageIndex = 36
+        Visible = False
         OnClick = lmDBAdminClick
       end
       object lmScriptEngine: TMenuItem
@@ -73016,7 +73017,7 @@ object fmMain: TfmMain
       OnClick = lmEditTableDataClick
     end
     object lmExtractTableData: TMenuItem
-      Tag = -1
+      Tag = 1
       Caption = 'Extract Tabledata'
       Hint = 'Lists table data as DML INSERT statements for the'#10'specified table.'
       ImageIndex = 80
@@ -73046,7 +73047,7 @@ object fmMain: TfmMain
       Caption = '-'
     end
     object lmCopyTable: TMenuItem
-      Tag = -1
+      Tag = 1
       Caption = 'Copy Table'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100

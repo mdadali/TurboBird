@@ -70289,7 +70289,6 @@ object RestoreDlg: TRestoreDlg
     Caption = 'OK'
     Default = True
     ModalResult = 1
-    OnClick = Button1Click
     TabOrder = 0
   end
   object Button2: TButton
@@ -70403,7 +70402,7 @@ object RestoreDlg: TRestoreDlg
       object Label4: TLabel
         Left = 12
         Height = 20
-        Top = 376
+        Top = 378
         Width = 64
         Caption = 'Page Size'
         ParentColor = False
@@ -70411,7 +70410,7 @@ object RestoreDlg: TRestoreDlg
       object PageSize: TEdit
         Left = 12
         Height = 30
-        Top = 392
+        Top = 400
         Width = 104
         NumbersOnly = True
         TabOrder = 1
@@ -70419,7 +70418,7 @@ object RestoreDlg: TRestoreDlg
       object Label5: TLabel
         Left = 128
         Height = 20
-        Top = 397
+        Top = 400
         Width = 35
         Caption = 'bytes'
         ParentColor = False
@@ -70475,7 +70474,7 @@ object RestoreDlg: TRestoreDlg
       object Label6: TLabel
         Left = 205
         Height = 20
-        Top = 376
+        Top = 378
         Width = 138
         Caption = 'No. of Cache Buffers'
         ParentColor = False
@@ -70483,7 +70482,7 @@ object RestoreDlg: TRestoreDlg
       object PageBuffers: TEdit
         Left = 205
         Height = 30
-        Top = 392
+        Top = 400
         Width = 107
         NumbersOnly = True
         TabOrder = 2

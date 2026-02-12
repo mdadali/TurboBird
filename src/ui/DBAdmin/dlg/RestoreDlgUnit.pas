@@ -70,7 +70,6 @@ type
     sbBackupFile: TSpeedButton;
     SelectTab: TTabSheet;
     ReportTab: TTabSheet;
-    procedure Button1Click(Sender: TObject);
 
     function  MakeFileSize(AFileSize: string): string;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -111,8 +110,8 @@ begin
   if OpenDialog1.Execute then
   begin
     SourceArchive.Text := OpenDialog1.Filename;
-    if Pos('RestoredDB_at_', __DBName.Text) > 0 then
-      __DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
+    //if Pos('RestoredDB_at_', __DBName.Text) > 0 then
+      //__DBName.Text := ChangeFileExt(SourceArchive.Text, '.fdb');
   end;
 end;
 
@@ -309,6 +308,7 @@ begin
           end;
         end;
         Application.QueueAsyncCall(@DoServerRestore,0)
+
       end else
       begin
         IBXClientSideRestoreService1.DatabaseFiles.Clear;
@@ -335,11 +335,6 @@ begin
       end;
     PageControl1.ActivePage := ReportTab;
   end;
-
-end;
-
-procedure TRestoreDlg.Button1Click(Sender: TObject);
-begin
 
 end;
 
