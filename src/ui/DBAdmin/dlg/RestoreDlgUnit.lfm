@@ -1,7 +1,7 @@
 object RestoreDlg: TRestoreDlg
-  Left = 646
+  Left = 476
   Height = 652
-  Top = 108
+  Top = 96
   Width = 575
   Caption = 'Restore Database'
   ClientHeight = 652
@@ -70549,7 +70549,7 @@ object RestoreDlg: TRestoreDlg
         Caption = 'Segments'
         ParentColor = False
       end
-      object StringGrid1: TStringGrid
+      object strGridsegments: TStringGrid
         Left = 12
         Height = 100
         Top = 200

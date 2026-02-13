@@ -277,8 +277,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="7600"/>
-        <CursorPos X="26" Y="7609"/>
+        <TopLine Value="4447"/>
+        <CursorPos X="26" Y="4494"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -286,7 +286,7 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="4916" ID="3"/>
+          <Item0 Y="4918" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -322,7 +322,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="3512"/>
         <CursorPos X="43" Y="3515"/>
         <UsageCount Value="200"/>
@@ -461,7 +461,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="68"/>
         <CursorPos X="76" Y="92"/>
         <UsageCount Value="200"/>
@@ -672,10 +672,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="558"/>
-        <CursorPos X="30" Y="567"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="296"/>
+        <CursorPos X="11" Y="298"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit65>
       <Unit66>
         <Filename Value="datamodules\systables.pas"/>
@@ -950,12 +952,11 @@
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="282"/>
-        <CursorPos X="53" Y="291"/>
+        <CursorPos X="25" Y="295"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit93>
       <Unit94>
         <Filename Value="ui\scriptengine\fscriptengine.pas"/>
@@ -991,7 +992,7 @@
       <Unit97>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="332"/>
         <CursorPos X="29" Y="362"/>
         <UsageCount Value="200"/>
@@ -1001,7 +1002,7 @@
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="61"/>
         <CursorPos Y="69"/>
         <UsageCount Value="200"/>
@@ -1043,10 +1044,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="217"/>
         <CursorPos X="38" Y="225"/>
-        <UsageCount Value="138"/>
+        <UsageCount Value="144"/>
         <Loaded Value="True"/>
       </Unit102>
       <Unit103>
@@ -1204,11 +1205,10 @@
       </Unit122>
       <Unit123>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBTransaction.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="321"/>
         <CursorPos Y="342"/>
-        <UsageCount Value="39"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="41"/>
       </Unit123>
       <Unit124>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBAttachment.pas"/>
@@ -1247,10 +1247,9 @@
       </Unit128>
       <Unit129>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\fbintf.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="42" Y="17"/>
-        <UsageCount Value="22"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="24"/>
       </Unit129>
       <Unit130>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\BGRABitmap\bgrabitmap\bgragtkbitmap.pas"/>
@@ -1291,123 +1290,127 @@
         <UsageCount Value="9"/>
       </Unit134>
     </Units>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="127" TopLine="97"/>
+        <Caret Line="159" Column="23" TopLine="151"/>
       </Position1>
       <Position2>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="128" TopLine="98"/>
+        <Caret Line="288" Column="3" TopLine="284"/>
       </Position2>
       <Position3>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="129" TopLine="99"/>
+        <Caret Line="321" Column="26" TopLine="303"/>
       </Position3>
       <Position4>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="130" TopLine="100"/>
+        <Caret Line="4" Column="20"/>
       </Position4>
       <Position5>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="272" Column="42" TopLine="263"/>
+        <Caret Line="59" Column="13" TopLine="33"/>
       </Position5>
       <Position6>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="273" Column="44" TopLine="259"/>
+        <Caret Line="117" Column="20" TopLine="88"/>
       </Position6>
       <Position7>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="281" Column="45" TopLine="264"/>
+        <Caret Line="124" Column="35" TopLine="98"/>
       </Position7>
       <Position8>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="275" Column="69" TopLine="257"/>
+        <Caret Line="126" Column="63" TopLine="109"/>
       </Position8>
       <Position9>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="278" Column="34" TopLine="260"/>
+        <Caret Line="154" Column="25" TopLine="141"/>
       </Position9>
       <Position10>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="2968" Column="83" TopLine="2946"/>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="289" TopLine="277"/>
       </Position10>
       <Position11>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="2963" Column="45" TopLine="2946"/>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <Caret Line="344" Column="27" TopLine="317"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="278" Column="34" TopLine="260"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="583" Column="7" TopLine="558"/>
       </Position12>
       <Position13>
         <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="7" Column="75"/>
+        <Caret Line="291" Column="108" TopLine="282"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="61" Column="13" TopLine="36"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1586" Column="128" TopLine="1567"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="142" Column="64" TopLine="116"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1595" Column="24" TopLine="1590"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="154" Column="33" TopLine="142"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="540" Column="13" TopLine="527"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="161" Column="10" TopLine="145"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1605" Column="32" TopLine="1580"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="159" Column="23" TopLine="151"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="1900" Column="30" TopLine="1875"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="288" Column="3" TopLine="284"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7228" Column="28" TopLine="7203"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="321" Column="26" TopLine="303"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7230" Column="28" TopLine="7205"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="4" Column="20"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7278" Column="30" TopLine="7253"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="59" Column="13" TopLine="33"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7280" Column="30" TopLine="7255"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="117" Column="20" TopLine="88"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7317" Column="30" TopLine="7291"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="124" Column="35" TopLine="98"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9077" Column="41" TopLine="9051"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="126" Column="63" TopLine="109"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="567" Column="79" TopLine="558"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="154" Column="25" TopLine="141"/>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="326" Column="3" TopLine="322"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="289" TopLine="277"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9143" Column="14" TopLine="9135"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
-        <Caret Line="344" Column="27" TopLine="317"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="484" Column="26" TopLine="470"/>
       </Position28>
       <Position29>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="583" Column="7" TopLine="558"/>
+        <Caret Line="3445" Column="41" TopLine="3445"/>
       </Position29>
+      <Position30>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <Caret Line="95" Column="30" TopLine="92"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

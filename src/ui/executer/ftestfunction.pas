@@ -103,33 +103,6 @@ begin
   inherited Create(AOwner);
 end;
 
-{procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
-begin
-  FNodeInfos := ANodeInfos;
-  FRoutineInfo := ARoutineInfo;
-
-  AssignIBConnection(IBConnection1, FRoutineInfo.Connection);
-  IBConnection1.Connected := true;
-
-  lbDatabase.Caption := IBConnection1.DatabaseName;
-
-  rgRoutineType.OnClick := nil;
-
-  FillPackagesComboBox;
-
-  if FRoutineInfo.PackageName <> '' then
-    cboxPackages.ItemIndex := cboxPackages.Items.IndexOf(FRoutineInfo.PackageName);
-
-  rgRoutineType.ItemIndex := ord(FRoutineInfo.RoutineType);
-  cboxPackages.Enabled := IsPackageRoutine(StrToRoutineType(rgRoutineType.Items[rgRoutineType.ItemIndex]));
-
-  LoadFunctions;
-
-  rgRoutineType.OnClick := @rgRoutineTypeClick;
-  SetDBLookupComboBoxByDisplayText(FRoutineInfo.RoutineName);
-  LoadParamsForFunction;
-end;}
-
 procedure TfrmTestFunction.Init(ARoutineInfo: TRoutineInfo; ANodeInfos: TPNodeInfos);
 begin
   FNodeInfos := ANodeInfos;
@@ -328,7 +301,7 @@ begin
   QParamInfo.Close;
   QFuncs.Close;
   IBConnection1.Connected := false;
-  FNodeInfos^.ExecuteForm := nil;
+  FNodeInfos^.ViewForm := nil;
   CloseAction := caFree;
 end;
 

@@ -54,7 +54,7 @@ type
     sbPrimDBFileName: TSpeedButton;
     sbSegments: TSpeedButton;
     ServerSideBtn: TRadioButton;
-    StringGrid1: TStringGrid;
+    strGridsegments: TStringGrid;
     UseAllSpace: TCheckBox;
     __DBName: TEdit;
     SourceArchive: TEdit;
@@ -121,8 +121,8 @@ begin
   if OpenDialog1.Execute then
   begin
     __DBName.Text := OpenDialog1.Filename;
-    StringGrid1.RowCount := StringGrid1.RowCount + 1;
-    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := __DBName.Text;
+    strGridsegments.RowCount := strGridsegments.RowCount + 1;
+    strGridsegments.Cells[0, strGridsegments.RowCount - 1] := __DBName.Text;
   end;
 end;
 
@@ -135,10 +135,10 @@ begin
   OpenDialog1.Filter := 'Database Files|*.fdb|All Files|*.*';
   if OpenDialog1.Execute then
   begin
-    StringGrid1.RowCount := StringGrid1.RowCount + 1;
-    //StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
-    StringGrid1.Cells[0, StringGrid1.RowCount - 1] := OpenDialog1.Filename;
-    StringGrid1.Cells[1, StringGrid1.RowCount - 1] :=  DefaultSegmentSize;
+    strGridsegments.RowCount := strGridsegments.RowCount + 1;
+    //strGridsegments.Cells[0, strGridsegments.RowCount - 1] := OpenDialog1.Filename + ' 50 MB';
+    strGridsegments.Cells[0, strGridsegments.RowCount - 1] := OpenDialog1.Filename;
+    strGridsegments.Cells[1, strGridsegments.RowCount - 1] :=  DefaultSegmentSize;
   end;
 end;
 
@@ -286,24 +286,28 @@ var i: integer;
 begin
   if ModalResult <> mrOK then Exit;
 
+  if SourceArchive.Text = '' then
+    raise Exception.Create('A Backup File Name must be given');
+
+  if strGridsegments.RowCount = 0 then
+    raise Exception.Create('A Database File Name must be given');
+
   if PageControl1.ActivePage = SelectTab then
   begin
     CloseAction := caNone;
-    if SourceArchive.Text = '' then
-      raise Exception.Create('A Backup File Name must be given');
       if ServerSideBtn.Checked then
       begin
         IBXServerSideRestoreService1.DatabaseFiles.Clear;
         //IBXServerSideRestoreService1.DatabaseFiles.Add(__DBName.Text);
-        for i := 0 to StringGrid1.RowCount - 1 do
+        for i := 0 to strGridsegments.RowCount - 1 do
         begin
-          if Trim(StringGrid1.Cells[0, i]) <> '' then
+          if Trim(strGridsegments.Cells[0, i]) <> '' then
           begin
-            IBXServerSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+            IBXServerSideRestoreService1.DatabaseFiles.Add(strGridsegments.Cells[0, i]);
 
-            if i <  StringGrid1.RowCount - 1 then
+            if i <  strGridsegments.RowCount - 1 then
 
-              IBXServerSideRestoreService1.DatabaseFiles.Add(MakeFileSize(StringGrid1.Cells[1, i]));
+              IBXServerSideRestoreService1.DatabaseFiles.Add(MakeFileSize(strGridsegments.Cells[1, i]));
 
           end;
         end;
@@ -316,16 +320,16 @@ begin
         //IBXClientSideRestoreService1.DatabaseFiles.Add(__DBName.Text);
         //IBXClientSideRestoreService1.DatabaseFiles.Add('20000');
 
-        if StringGrid1.RowCount > 0 then
-          for i := 0 to StringGrid1.RowCount - 1 do
+        if strGridsegments.RowCount > 0 then
+          for i := 0 to strGridsegments.RowCount - 1 do
           begin
 
-            if Trim(StringGrid1.Cells[0, i]) <> '' then
+            if Trim(strGridsegments.Cells[0, i]) <> '' then
             begin
-              IBXClientSideRestoreService1.DatabaseFiles.Add(StringGrid1.Cells[0, i]);
+              IBXClientSideRestoreService1.DatabaseFiles.Add(strGridsegments.Cells[0, i]);
 
-              if i <  StringGrid1.RowCount - 1 then
-                IBXClientSideRestoreService1.DatabaseFiles.Add(MakeFileSize(StringGrid1.Cells[1, i]));
+              if i <  strGridsegments.RowCount - 1 then
+                IBXClientSideRestoreService1.DatabaseFiles.Add(MakeFileSize(strGridsegments.Cells[1, i]));
 
             end;
 
