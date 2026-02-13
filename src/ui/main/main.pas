@@ -1581,12 +1581,12 @@ begin
         fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(ServerName);
 
         if ServerRec.IsEmbedded then
-          fmReg.edDatabaseName.Text := TmpRestoreDlg.StringGrid1.Cells[0, 0] //TmpRestoreDlg.DBName.Text
+          fmReg.edDatabaseName.Text := TmpRestoreDlg.strGridsegments.Cells[0, 0] //TmpRestoreDlg.DBName.Text
         else
-          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.StringGrid1.Cells[0, 0]);
+          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.strGridsegments.Cells[0, 0]);
           //fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.DBName.Text);
 
-        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.StringGrid1.Cells[0, 0]), '');
+        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.strGridsegments.Cells[0, 0]), '');
 
         fmReg.edtPort.Text := ServerRec.Port;
         fmReg.cboxSQLDialect.ItemIndex := 2;
@@ -3452,6 +3452,8 @@ begin
   begin
     frmTestFunction := TfrmTestFunction.CreateForRoutine(Application, FRoutineInfo);
 
+    //frmTestFunction := TfrmTestFunction.Create(self);
+
     ATab := TTabSheet.Create(Self);
     ATab.PageControl := PageControl1;
     ATab.ControlStyle := ATab.ControlStyle + [csAcceptsControls];
@@ -4449,7 +4451,7 @@ begin
     frmScriptEngine.Align := alClient;
     frmScriptEngine.BorderStyle := bsNone;
 
-    NodeInfos^.EditorForm := frmScriptEngine;
+    NodeInfos^.ViewForm := frmScriptEngine;
   end;
 
   // Tab vorbereiten
@@ -7602,9 +7604,6 @@ begin
       Filter:= -1;
   end; //casw
 
-
-
-
   //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
 
   // Show menu for specific filter
@@ -9249,10 +9248,6 @@ begin
       //if Length(RegisteredDatabases) > 0 then
         //SetConnection(0);
 
-      // Add spaces at end of tree
-      //tvMain.Items.Add(nil, '');
-      //tvMain.Items.Add(nil, '');
-      //tvMain.Items.Add(nil, '');
     end;
     Result:= True;
   except
@@ -9262,9 +9257,6 @@ begin
       ShowMessage('Error: ' + E.Message);
     end;
   end;
-  //self.Resize;
-  //self.Repaint;
-  //tvMain.Repaint;
 end;
 
 function TfmMain.LoadRegisteredServers: Boolean;
