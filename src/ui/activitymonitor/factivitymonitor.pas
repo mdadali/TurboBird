@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, DBGrids,
   ExtCtrls, StdCtrls, DB,
-  IBDatabase, IBQuery;
+  IBDatabase, IBQuery,
+  turbocommon;
 
 type
 
@@ -41,6 +42,7 @@ type
     dsTransactions: TDataSource;
     dsStatements: TDataSource;
 
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
 
@@ -53,6 +55,8 @@ type
     procedure grdTransactionsCellClick(Column: TColumn);
 
   private
+    FNodeInfos: TPNodeInfos;
+    FDBIndex: integer;
     FMyAttachmentID: Integer;
     procedure LoadAttachments;
     procedure LoadTransactions;
@@ -61,7 +65,7 @@ type
     procedure ExecAdminSQL(const ASQL: string; const AParam: Integer);
 
   public
-
+    procedure Init(ANodeInfos: TPNodeInfos; dbIndex: integer);
   end;
 
 implementation
@@ -70,28 +74,35 @@ implementation
 
 { TfrmActivityMonitor }
 
-procedure TfrmActivityMonitor.FormCreate(Sender: TObject);
+procedure TfrmActivityMonitor.Init(ANodeInfos: TPNodeInfos; dbIndex: integer);
 begin
-  Caption := 'Activity Monitor';
+  FNodeInfos := ANodeInfos;
+  FDBIndex   := dbIndex;
 
-  // Beispiel DB-Verbindung konfigurieren (passen!)
-  IBDatabase.DatabaseName := 'mxLinux/3030:employee';
-  IBDatabase.LoginPrompt := False;
-  IBDatabase.Params.Clear;
-  IBDatabase.Params.Add('user_name=sysdba');
-  IBDatabase.Params.Add('password=masterkey');
-  IBDatabase.Connected := True;
+  if not IBDatabase.Connected then
+  begin
+    IBDatabase.DatabaseName := RegisteredDatabases[dbIndex].IBDatabase.DatabaseName;
+    IBDatabase.LoginPrompt := False;
+    IBDatabase.Params.Clear;
+    IBDatabase.Params.Add('user_name=' + RegisteredDatabases[dbIndex].RegRec.UserName);
+    IBDatabase.Params.Add('password=' + RegisteredDatabases[dbIndex].RegRec.Password);
+    IBDatabase.Connected := True;
+  end;
 
   // Transactions
-  trRead.DefaultDatabase := IBDatabase;
-  trRead.Params.Clear;
-  trRead.Params.Add('read_committed');
-  trRead.Params.Add('rec_version');
-  trRead.Params.Add('nowait');
-  trRead.StartTransaction;
+  if not trRead.InTransaction then
+  begin
+    trRead.DefaultDatabase := IBDatabase;
+    trRead.Params.Clear;
+    trRead.Params.Add('read_committed');
+    trRead.Params.Add('rec_version');
+    trRead.Params.Add('nowait');
+    trRead.StartTransaction;
+  end;
 
   trExec.DefaultDatabase := IBDatabase;
-  trExec.StartTransaction;
+  if not trExec.InTransaction then
+    trExec.StartTransaction;
 
   // Queries zuweisen
   qryAttachments.Database := IBDatabase;
@@ -119,6 +130,19 @@ begin
   end;
 
   LoadAttachments;
+
+end;
+
+procedure TfrmActivityMonitor.FormCreate(Sender: TObject);
+begin
+  Caption := 'Activity Monitor';
+end;
+
+procedure TfrmActivityMonitor.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
 end;
 
 procedure TfrmActivityMonitor.FormDestroy(Sender: TObject);
@@ -129,6 +153,8 @@ begin
   if trRead.Active then trRead.Commit;
   if trExec.Active then trExec.Commit;
   IBDatabase.Connected := False;
+
+  Parent.Free;
 end;
 
 procedure TfrmActivityMonitor.btnRefreshClick(Sender: TObject);
@@ -146,7 +172,7 @@ begin
   qryAttachments.Close;
   trRead.Commit;
   qryAttachments.SQL.Text :=
-    'SELECT MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$ATTACHMENT_ID, MON$USER, ' +
+    'SELECT  MON$ATTACHMENT_ID, MON$USER, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, ' +
     'MON$TIMESTAMP ' +
     'FROM MON$ATTACHMENTS ' +
     'WHERE (:MY_ID = 0 OR MON$ATTACHMENT_ID <> :MY_ID) ' +

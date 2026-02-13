@@ -1292,13 +1292,78 @@ begin
   ShowCompleteQueryWindow(dbIndex, 'Edit Function#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
 end;
 
-procedure TfmMain.lmActivityMonitorClick(Sender: TObject);
+{procedure TfmMain.lmActivityMonitorClick(Sender: TObject);
 var frmActivityMonitor: TfrmActivityMonitor;
 begin
   frmActivityMonitor := TfrmActivityMonitor.Create(self);
   frmActivityMonitor.ShowModal;
   frmActivityMonitor.Free;
+end;}
+
+procedure TfmMain.lmActivityMonitorClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  dbIndex: Integer;
+  Form: TfrmActivityMonitor;
+  ATab: TTabSheet;
+  ShortTitle, FullHint, DBAlias: string;
+begin
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
+
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  if NodeInfos = nil then Exit;
+  dbIndex := NodeInfos^.dbIndex;
+
+  DBAlias := GetAncestorNodeText(SelNode, 1);
+
+  // Prüfen, ob ActivityMonitor schon existiert
+  if Assigned(NodeInfos^.ViewForm) and
+     (NodeInfos^.ViewForm is TfrmActivityMonitor) then
+    Form := TfrmActivityMonitor(NodeInfos^.ViewForm)
+  else
+  begin
+    Form := TfrmActivityMonitor.Create(Application);
+
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := SelNode.ImageIndex;
+
+    Form.Parent := ATab;
+    Form.Align := alClient;
+    Form.BorderStyle := bsNone;
+
+    NodeInfos^.ViewForm := Form;
+  end;
+
+  // Falls du eine Init-Methode hast:
+  // Form.Init(dbIndex);
+
+  // Tab vorbereiten
+  ATab := Form.Parent as TTabSheet;
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := dbIndex;
+
+  // Kurzer Titel
+  ShortTitle := 'Activity Monitor';
+  ATab.Caption := ShortTitle;
+  Form.Caption := ShortTitle;
+
+  // Tooltip
+  FullHint :=
+    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+    'DBAlias:  ' + DBAlias + sLineBreak +
+    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
+    'Action:   Activity Monitor';
+
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  Form.Init(NodeInfos, dbIndex);
+  Form.Show;
 end;
+
 
 {
   Why do we create a dummy role?
