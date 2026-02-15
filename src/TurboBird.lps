@@ -276,8 +276,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1342"/>
-        <CursorPos X="64" Y="1365"/>
+        <TopLine Value="2278"/>
+        <CursorPos Y="2293"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -321,7 +321,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="3512"/>
         <CursorPos X="43" Y="3515"/>
         <UsageCount Value="200"/>
@@ -417,7 +417,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CallProc"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="31"/>
         <CursorPos X="121" Y="46"/>
         <UsageCount Value="200"/>
@@ -462,7 +462,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="68"/>
         <CursorPos X="76" Y="92"/>
         <UsageCount Value="200"/>
@@ -580,7 +580,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="dbInfo"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="575"/>
         <CursorPos X="36" Y="595"/>
         <UsageCount Value="201"/>
@@ -674,7 +674,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="290"/>
         <CursorPos X="34" Y="304"/>
         <UsageCount Value="201"/>
@@ -712,10 +712,12 @@
         <ComponentName Value="OQBForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2028"/>
-        <CursorPos X="32" Y="2037"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="2683"/>
+        <CursorPos X="47" Y="2694"/>
         <UsageCount Value="211"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit68>
       <Unit69>
         <Filename Value="ui\openquerybuilder\QBDirFrm.pas"/>
@@ -953,7 +955,7 @@
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="282"/>
         <CursorPos X="25" Y="295"/>
         <UsageCount Value="200"/>
@@ -993,7 +995,7 @@
       <Unit97>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="332"/>
         <CursorPos X="29" Y="362"/>
         <UsageCount Value="200"/>
@@ -1003,7 +1005,7 @@
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="61"/>
         <CursorPos Y="69"/>
         <UsageCount Value="200"/>
@@ -1046,10 +1048,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="244"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="243"/>
         <CursorPos X="3" Y="251"/>
-        <UsageCount Value="148"/>
+        <UsageCount Value="150"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit102>
@@ -1105,10 +1107,10 @@
       </Unit108>
       <Unit109>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="482"/>
         <CursorPos X="37" Y="491"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit109>
       <Unit110>
@@ -1294,126 +1296,126 @@
         <UsageCount Value="9"/>
       </Unit134>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="30" HistoryIndex="28">
       <Position1>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4222" Column="32" TopLine="4350"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2038" Column="32" TopLine="2029"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1312" TopLine="1298"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2715" Column="11" TopLine="2706"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1313" TopLine="1298"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2701" Column="37" TopLine="2692"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1315" TopLine="1298"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="41" TopLine="2679"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1316" TopLine="1305"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2692" Column="41" TopLine="2680"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1317" TopLine="1305"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2693" Column="41" TopLine="2681"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1318" Column="4" TopLine="1305"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2692" Column="41" TopLine="2680"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1322" TopLine="1305"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2693" Column="41" TopLine="2681"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1327" TopLine="1314"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2692" Column="41" TopLine="2680"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1329" TopLine="1314"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="41" TopLine="2679"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1330" TopLine="1314"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2690" Column="41" TopLine="2678"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1331" Column="15" TopLine="1320"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="41" TopLine="2679"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1334" TopLine="1320"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2690" Column="41" TopLine="2678"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1335" TopLine="1320"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2689" Column="41" TopLine="2677"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1337" TopLine="1320"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2688" Column="41" TopLine="2676"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1344" TopLine="1332"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2687" Column="41" TopLine="2675"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1345" TopLine="1332"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2686" Column="41" TopLine="2674"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1346" TopLine="1332"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2685" Column="41" TopLine="2673"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1312" TopLine="1305"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2684" Column="41" TopLine="2672"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1346" TopLine="1331"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2683" Column="41" TopLine="2671"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1301" Column="26" TopLine="1296"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2682" Column="41" TopLine="2670"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1313" TopLine="1296"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2681" Column="41" TopLine="2669"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1315" TopLine="1296"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2680" Column="41" TopLine="2668"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1305" Column="12" TopLine="1296"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2679" Column="41" TopLine="2667"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\callprocedure\callproc.pas"/>
-        <Caret Line="46" Column="121" TopLine="31"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2678" Column="41" TopLine="2666"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1325" Column="56" TopLine="1335"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2691" Column="41" TopLine="2679"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="86" Column="42" TopLine="56"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2692" Column="41" TopLine="2680"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="83" Column="68" TopLine="72"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2693" Column="41" TopLine="2681"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="239" Column="21" TopLine="77"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2702" Column="25" TopLine="2682"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="163" Column="52" TopLine="158"/>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <Caret Line="2736" TopLine="2718"/>
       </Position30>
     </JumpHistory>
     <RunParams>

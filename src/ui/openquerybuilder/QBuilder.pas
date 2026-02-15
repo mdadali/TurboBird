@@ -278,10 +278,14 @@ type
     btnSaveResults: TToolButton;
     btnSQL: TToolButton;
     btnTables: TToolButton;
+    chkBoxCreateView: TCheckBox;
+    edtViewName: TEdit;
     lmExportData: TMenuItem;
     lmExportDataAsMarkdownTable: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataStdFormats: TMenuItem;
+    Panel1: TPanel;
+    pnlTop: TPanel;
     Separator1: TMenuItem;
     mnuResult: TPopupMenu;
     ResDBGrid: TIBDynamicGrid;
@@ -2493,6 +2497,8 @@ var
   tbl1, tbl2: string;
   Link: TOQBLink;
 
+  CreateViewStr: string;
+
   function ExtractName(s: string):string;
   var
     p: Integer;
@@ -2682,6 +2688,13 @@ begin
     end;
 
     SynSQL.Lines.Text := QBDialog.OQBEngine.GenerateSQL;
+
+    if chkBoxCreateView.Checked then
+    begin
+      CreateViewStr := 'CREATE OR ALTER VIEW ' +  edtViewName.Text + ' AS ';
+      SynSQL.Lines.Insert(0,  CreateViewStr);
+    end;
+
     Pages.ActivePage := TabSQL;
   finally
     Lst.Free;
