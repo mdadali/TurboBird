@@ -435,6 +435,7 @@ begin
     'DELETE FROM MON$STATEMENTS WHERE MON$STATEMENT_ID=:ID',
     SelectedID(qryStatements,'MON$STATEMENT_ID')
   );
+
   LoadStatements;
 end;
 
