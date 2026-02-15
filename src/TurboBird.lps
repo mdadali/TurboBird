@@ -321,7 +321,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="3512"/>
         <CursorPos X="43" Y="3515"/>
         <UsageCount Value="200"/>
@@ -417,7 +417,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CallProc"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="31"/>
         <CursorPos X="121" Y="46"/>
         <UsageCount Value="200"/>
@@ -462,7 +462,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="68"/>
         <CursorPos X="76" Y="92"/>
         <UsageCount Value="200"/>
@@ -580,7 +580,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="dbInfo"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="575"/>
         <CursorPos X="36" Y="595"/>
         <UsageCount Value="201"/>
@@ -674,7 +674,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="290"/>
         <CursorPos X="34" Y="304"/>
         <UsageCount Value="201"/>
@@ -712,11 +712,10 @@
         <ComponentName Value="OQBForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="2683"/>
         <CursorPos X="47" Y="2694"/>
         <UsageCount Value="211"/>
-        <Loaded Value="True"/>
       </Unit68>
       <Unit69>
         <Filename Value="ui\openquerybuilder\QBDirFrm.pas"/>
@@ -954,7 +953,7 @@
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="282"/>
         <CursorPos X="25" Y="295"/>
         <UsageCount Value="200"/>
@@ -994,7 +993,7 @@
       <Unit97>
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="332"/>
         <CursorPos X="29" Y="362"/>
         <UsageCount Value="200"/>
@@ -1004,7 +1003,7 @@
         <Filename Value="common\cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="61"/>
         <CursorPos Y="69"/>
         <UsageCount Value="200"/>
@@ -1047,10 +1046,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
         <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="422"/>
-        <CursorPos X="34" Y="423"/>
-        <UsageCount Value="159"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="421"/>
+        <CursorPos Y="438"/>
+        <UsageCount Value="160"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit102>
@@ -1106,7 +1105,7 @@
       </Unit108>
       <Unit109>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="482"/>
         <CursorPos X="37" Y="491"/>
         <UsageCount Value="27"/>
@@ -1133,7 +1132,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="212"/>
         <CursorPos X="55" Y="229"/>
-        <UsageCount Value="0"/>
+        <UsageCount Value="10"/>
       </Unit112>
       <Unit113>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\objpas\classes\classesh.inc"/>
@@ -1298,123 +1297,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="268" Column="19" TopLine="262"/>
+        <Caret Line="285" TopLine="265"/>
       </Position1>
       <Position2>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="285" TopLine="265"/>
+        <Caret Line="284" TopLine="264"/>
       </Position2>
       <Position3>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="284" TopLine="264"/>
+        <Caret Line="285" TopLine="265"/>
       </Position3>
       <Position4>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="285" TopLine="265"/>
+        <Caret Line="286" TopLine="266"/>
       </Position4>
       <Position5>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="286" TopLine="266"/>
+        <Caret Line="287" TopLine="267"/>
       </Position5>
       <Position6>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="287" TopLine="267"/>
+        <Caret Line="286" TopLine="266"/>
       </Position6>
       <Position7>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="286" TopLine="266"/>
+        <Caret Line="289" TopLine="269"/>
       </Position7>
       <Position8>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="289" TopLine="269"/>
+        <Caret Line="498" Column="3" TopLine="494"/>
       </Position8>
       <Position9>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="498" Column="3" TopLine="494"/>
+        <Caret Line="422" Column="8" TopLine="417"/>
       </Position9>
       <Position10>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="422" Column="8" TopLine="417"/>
+        <Caret Line="82" Column="20" TopLine="67"/>
       </Position10>
       <Position11>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="82" Column="20" TopLine="67"/>
+        <Caret Line="259" Column="18" TopLine="249"/>
       </Position11>
       <Position12>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="259" Column="18" TopLine="249"/>
+        <Caret Line="240" Column="44" TopLine="235"/>
       </Position12>
       <Position13>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="240" Column="44" TopLine="235"/>
+        <Caret Line="426" TopLine="417"/>
       </Position13>
       <Position14>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="426" TopLine="417"/>
+        <Caret Line="438" TopLine="414"/>
       </Position14>
       <Position15>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="438" TopLine="414"/>
+        <Caret Line="444" Column="3" TopLine="442"/>
       </Position15>
       <Position16>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="444" Column="3" TopLine="442"/>
+        <Caret Line="417" Column="32" TopLine="408"/>
       </Position16>
       <Position17>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="417" Column="32" TopLine="408"/>
+        <Caret Line="436" Column="3" TopLine="420"/>
       </Position17>
       <Position18>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="436" Column="3" TopLine="420"/>
+        <Caret Line="415" Column="3" TopLine="410"/>
       </Position18>
       <Position19>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="415" Column="3" TopLine="410"/>
+        <Caret Line="419" Column="17" TopLine="406"/>
       </Position19>
       <Position20>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="419" Column="17" TopLine="406"/>
+        <Caret Line="424" Column="51" TopLine="406"/>
       </Position20>
       <Position21>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="424" Column="51" TopLine="406"/>
+        <Caret Line="440" Column="22" TopLine="430"/>
       </Position21>
       <Position22>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="440" Column="22" TopLine="430"/>
+        <Caret Line="86" Column="19" TopLine="72"/>
       </Position22>
       <Position23>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="86" Column="19" TopLine="72"/>
+        <Caret Line="311" Column="19" TopLine="291"/>
       </Position23>
       <Position24>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="311" Column="19" TopLine="291"/>
+        <Caret Line="332" Column="19" TopLine="315"/>
       </Position24>
       <Position25>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="332" Column="19" TopLine="315"/>
+        <Caret Line="364" Column="49" TopLine="348"/>
       </Position25>
       <Position26>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="364" Column="49" TopLine="348"/>
+        <Caret Line="447" Column="37" TopLine="434"/>
       </Position26>
       <Position27>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="447" Column="37" TopLine="434"/>
+        <Caret Line="443" Column="9" TopLine="435"/>
       </Position27>
       <Position28>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="443" Column="9" TopLine="435"/>
+        <Caret Line="424" Column="34" TopLine="423"/>
       </Position28>
       <Position29>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="424" Column="34" TopLine="423"/>
+        <Caret Line="423" Column="34" TopLine="422"/>
       </Position29>
       <Position30>
         <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="423" Column="34" TopLine="422"/>
+        <Caret Line="427" Column="62" TopLine="422"/>
       </Position30>
     </JumpHistory>
     <RunParams>
