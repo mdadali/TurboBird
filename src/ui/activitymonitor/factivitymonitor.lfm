@@ -1,7 +1,7 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 361
+  Left = 319
   Height = 673
-  Top = 41
+  Top = 268
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
@@ -31,11 +31,11 @@ object frmActivityMonitor: TfrmActivityMonitor
   end
   object pnlMain: TPanel
     Left = 0
-    Height = 593
+    Height = 577
     Top = 40
     Width = 1100
     Align = alClient
-    ClientHeight = 593
+    ClientHeight = 577
     ClientWidth = 1100
     TabOrder = 1
     object grdAttachments: TDBGrid
@@ -84,7 +84,7 @@ object frmActivityMonitor: TfrmActivityMonitor
     end
     object grdStatements: TDBGrid
       Left = 1
-      Height = 209
+      Height = 193
       Top = 383
       Width = 1098
       Align = alClient
@@ -97,35 +97,35 @@ object frmActivityMonitor: TfrmActivityMonitor
   end
   object pnlBottom: TPanel
     Left = 0
-    Height = 40
-    Top = 633
+    Height = 56
+    Top = 617
     Width = 1100
     Align = alBottom
-    ClientHeight = 40
+    ClientHeight = 56
     ClientWidth = 1100
     TabOrder = 2
     object btnKillAttachment: TButton
-      Left = 200
+      Left = 24
       Height = 31
-      Top = 1
+      Top = 8
       Width = 152
       Caption = 'Trenne Verbindung'
       OnClick = btnKillAttachmentClick
       TabOrder = 0
     end
     object btnKillTransaction: TButton
-      Left = 16
+      Left = 216
       Height = 31
-      Top = 0
+      Top = 8
       Width = 168
       Caption = 'Rollback Transaktion'
       OnClick = btnKillTransactionClick
       TabOrder = 1
     end
     object btnKillStatement: TButton
-      Left = 376
+      Left = 416
       Height = 32
-      Top = 0
+      Top = 8
       Width = 168
       Caption = 'Abbruch Statement'
       OnClick = btnKillStatementClick

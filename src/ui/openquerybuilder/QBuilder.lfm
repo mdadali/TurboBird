@@ -1,12 +1,12 @@
 object OQBForm: TOQBForm
-  Left = 354
+  Left = 389
   Height = 550
-  Top = 189
-  Width = 834
+  Top = 111
+  Width = 996
   ActiveControl = QBPanel
   Caption = 'Open QBuilder'
   ClientHeight = 550
-  ClientWidth = 834
+  ClientWidth = 996
   Color = clBtnFace
   Font.Color = clWindowText
   Font.Name = 'Tahoma'
@@ -15,17 +15,17 @@ object OQBForm: TOQBForm
   LCLVersion = '2.2.6.0'
   object QBPanel: TPanel
     Left = 0
-    Height = 510
-    Top = 40
-    Width = 834
+    Height = 508
+    Top = 42
+    Width = 996
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 510
-    ClientWidth = 834
+    ClientHeight = 508
+    ClientWidth = 996
     TabOrder = 0
     object VSplitter: TSplitter
-      Left = 656
-      Height = 353
+      Left = 818
+      Height = 351
       Top = 0
       Width = 2
       Align = alRight
@@ -37,8 +37,8 @@ object OQBForm: TOQBForm
       Cursor = crVSplit
       Left = 0
       Height = 2
-      Top = 353
-      Width = 834
+      Top = 351
+      Width = 996
       Align = alBottom
       Color = clBtnFace
       ParentColor = False
@@ -47,8 +47,8 @@ object OQBForm: TOQBForm
     object Pages: TPageControl
       Left = 0
       Height = 155
-      Top = 355
-      Width = 834
+      Top = 353
+      Width = 996
       ActivePage = TabColumns
       Align = alBottom
       TabIndex = 0
@@ -58,13 +58,13 @@ object OQBForm: TOQBForm
       end
       object TabSQL: TTabSheet
         Caption = 'SQL'
-        ClientHeight = 124
-        ClientWidth = 824
+        ClientHeight = 122
+        ClientWidth = 992
         inline SynSQL: TSynEdit
           Left = 0
-          Height = 124
+          Height = 122
           Top = 0
-          Width = 824
+          Width = 992
           Align = alClient
           Font.Height = 13
           Font.Name = 'DejaVu Sans Mono'
@@ -560,13 +560,13 @@ object OQBForm: TOQBForm
       end
       object TabResults: TTabSheet
         Caption = 'Results'
-        ClientHeight = 124
-        ClientWidth = 824
+        ClientHeight = 122
+        ClientWidth = 992
         object ResDBGrid: TIBDynamicGrid
           Left = 0
-          Height = 124
+          Height = 122
           Top = 0
-          Width = 824
+          Width = 992
           Align = alClient
           Color = clWindow
           Columns = <>
@@ -582,8 +582,8 @@ object OQBForm: TOQBForm
       end
     end
     object QBTables: TListBox
-      Left = 658
-      Height = 353
+      Left = 820
+      Height = 351
       Top = 0
       Width = 176
       Align = alRight
@@ -596,120 +596,161 @@ object OQBForm: TOQBForm
       TopIndex = -1
     end
   end
-  object ToolBar1: TToolBar
+  object pnlTop: TPanel
     Left = 0
-    Height = 40
+    Height = 42
     Top = 0
-    Width = 834
-    BorderWidth = 2
-    ButtonHeight = 40
-    ButtonWidth = 40
-    Caption = 'ToolBar1'
-    Color = clForm
-    Images = ToolImages
-    ParentColor = False
-    ParentShowHint = False
-    ShowHint = True
+    Width = 996
+    Align = alTop
+    ClientHeight = 42
+    ClientWidth = 996
     TabOrder = 1
-    object btnDB: TToolButton
+    object ToolBar1: TToolBar
       Left = 1
-      Hint = 'Select Database'
-      Top = 2
-      Caption = 'Select Database'
-      ImageIndex = 5
-      OnClick = btnDBClick
+      Height = 40
+      Top = 1
+      Width = 703
+      Align = alLeft
+      ButtonHeight = 40
+      ButtonWidth = 40
+      Caption = 'ToolBar1'
+      Color = clForm
+      Images = ToolImages
+      ParentColor = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      object btnDB: TToolButton
+        Left = 1
+        Hint = 'Select Database'
+        Top = 2
+        Caption = 'Select Database'
+        ImageIndex = 5
+        OnClick = btnDBClick
+      end
+      object btnOpen: TToolButton
+        Left = 81
+        Hint = 'Open Model'
+        Top = 2
+        Caption = 'Open Model'
+        ImageIndex = 1
+        OnClick = btnOpenClick
+      end
+      object btnNew: TToolButton
+        Left = 41
+        Hint = 'New Model'
+        Top = 2
+        Caption = 'New Model'
+        ImageIndex = 0
+        OnClick = btnNewClick
+      end
+      object btnSave: TToolButton
+        Left = 121
+        Hint = 'Save Model'
+        Top = 2
+        Caption = 'Save Model'
+        ImageIndex = 2
+        OnClick = btnSaveClick
+      end
+      object btnPages: TToolButton
+        Left = 201
+        Hint = 'Show Pages'
+        Top = 2
+        Caption = 'Show Pages'
+        Down = True
+        ImageIndex = 4
+        OnClick = btnPagesClick
+        Style = tbsCheck
+      end
+      object btnTables: TToolButton
+        Left = 161
+        Hint = 'Show Tables'
+        Top = 2
+        Caption = 'Show Tables'
+        Down = True
+        ImageIndex = 3
+        OnClick = btnTablesClick
+        Style = tbsCheck
+      end
+      object btnSQL: TToolButton
+        Left = 241
+        Hint = 'Generate SQL'
+        Top = 2
+        Caption = 'Generate SQL'
+        ImageIndex = 6
+        OnClick = btnSQLClick
+      end
+      object btnResults: TToolButton
+        Left = 281
+        Hint = 'Run Current SQL'
+        Top = 2
+        Caption = 'Run Current SQL'
+        ImageIndex = 7
+        OnClick = btnResultsClick
+      end
+      object btnSaveResults: TToolButton
+        Left = 321
+        Hint = 'Save Results'
+        Top = 2
+        Caption = 'Save Results'
+        ImageIndex = 9
+        OnClick = btnSaveResultsClick
+      end
+      object btnAbout: TToolButton
+        Left = 361
+        Hint = 'About'
+        Top = 2
+        Caption = 'About'
+        ImageIndex = 8
+        OnClick = btnAboutClick
+      end
+      object btnOK: TToolButton
+        Left = 401
+        Hint = 'OK'
+        Top = 2
+        Caption = 'btnOK'
+        ImageIndex = 11
+        OnClick = btnOKClick
+      end
+      object btnCancel: TToolButton
+        Left = 441
+        Hint = 'Cancel'
+        Top = 2
+        Caption = 'btnCancel'
+        ImageIndex = 10
+        OnClick = btnCancelClick
+      end
     end
-    object btnOpen: TToolButton
-      Left = 81
-      Hint = 'Open Model'
-      Top = 2
-      Caption = 'Open Model'
-      ImageIndex = 1
-      OnClick = btnOpenClick
-    end
-    object btnNew: TToolButton
-      Left = 41
-      Hint = 'New Model'
-      Top = 2
-      Caption = 'New Model'
-      ImageIndex = 0
-      OnClick = btnNewClick
-    end
-    object btnSave: TToolButton
-      Left = 121
-      Hint = 'Save Model'
-      Top = 2
-      Caption = 'Save Model'
-      ImageIndex = 2
-      OnClick = btnSaveClick
-    end
-    object btnPages: TToolButton
-      Left = 201
-      Hint = 'Show Pages'
-      Top = 2
-      Caption = 'Show Pages'
-      Down = True
-      ImageIndex = 4
-      OnClick = btnPagesClick
-      Style = tbsCheck
-    end
-    object btnTables: TToolButton
-      Left = 161
-      Hint = 'Show Tables'
-      Top = 2
-      Caption = 'Show Tables'
-      Down = True
-      ImageIndex = 3
-      OnClick = btnTablesClick
-      Style = tbsCheck
-    end
-    object btnSQL: TToolButton
-      Left = 241
-      Hint = 'Generate SQL'
-      Top = 2
-      Caption = 'Generate SQL'
-      ImageIndex = 6
-      OnClick = btnSQLClick
-    end
-    object btnResults: TToolButton
-      Left = 281
-      Hint = 'Run Current SQL'
-      Top = 2
-      Caption = 'Run Current SQL'
-      ImageIndex = 7
-      OnClick = btnResultsClick
-    end
-    object btnSaveResults: TToolButton
-      Left = 321
-      Hint = 'Save Results'
-      Top = 2
-      Caption = 'Save Results'
-      ImageIndex = 9
-      OnClick = btnSaveResultsClick
-    end
-    object btnAbout: TToolButton
-      Left = 361
-      Hint = 'About'
-      Top = 2
-      Caption = 'About'
-      ImageIndex = 8
-      OnClick = btnAboutClick
-    end
-    object btnOK: TToolButton
-      Left = 401
-      Hint = 'OK'
-      Top = 2
-      Caption = 'btnOK'
-      ImageIndex = 11
-      OnClick = btnOKClick
-    end
-    object btnCancel: TToolButton
-      Left = 441
-      Hint = 'Cancel'
-      Top = 2
-      Caption = 'btnCancel'
-      ImageIndex = 10
-      OnClick = btnCancelClick
+    object Panel1: TPanel
+      Left = 704
+      Height = 40
+      Top = 1
+      Width = 291
+      Align = alClient
+      BevelOuter = bvNone
+      ClientHeight = 40
+      ClientWidth = 291
+      Color = clForm
+      ParentColor = False
+      TabOrder = 1
+      object chkBoxCreateView: TCheckBox
+        Left = 8
+        Height = 22
+        Top = 8
+        Width = 96
+        Anchors = [akTop, akRight]
+        Caption = 'Create View'
+        TabOrder = 0
+      end
+      object edtViewName: TEdit
+        Left = 115
+        Height = 40
+        Top = 0
+        Width = 176
+        Align = alRight
+        TabOrder = 1
+        Text = 'View_Name'
+      end
     end
   end
   object mnuTbl: TPopupMenu
