@@ -1,7 +1,7 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 918
+  Left = 394
   Height = 673
-  Top = 226
+  Top = 63
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
@@ -42,7 +42,6 @@ object frmActivityMonitor: TfrmActivityMonitor
       ReadOnly = True
       TabOrder = 0
       OnCellClick = grdAttachmentsCellClick
-      OnDrawColumnCell = grdAttachmentsDrawColumnCell
     end
     object Splitter1: TSplitter
       Cursor = crVSplit
