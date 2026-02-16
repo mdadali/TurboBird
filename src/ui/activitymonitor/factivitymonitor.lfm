@@ -1,13 +1,12 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 394
+  Left = 540
   Height = 673
-  Top = 63
+  Top = 75
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
   ClientWidth = 1100
   OnClose = FormClose
-  OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object pnlTop: TPanel
@@ -30,83 +29,116 @@ object frmActivityMonitor: TfrmActivityMonitor
     ClientHeight = 585
     ClientWidth = 1100
     TabOrder = 1
-    object grdAttachments: TDBGrid
-      Left = 1
-      Height = 231
-      Top = 1
-      Width = 1098
-      Align = alTop
-      Color = clWindow
-      Columns = <>
-      DataSource = dsAttachments
-      ReadOnly = True
-      TabOrder = 0
-      OnCellClick = grdAttachmentsCellClick
-    end
     object Splitter1: TSplitter
       Cursor = crVSplit
       Left = 1
-      Height = 1
-      Top = 232
+      Height = 7
+      Top = 217
       Width = 1098
       Align = alTop
       ResizeAnchor = akTop
-    end
-    object grdTransactions: TDBGrid
-      Left = 1
-      Height = 143
-      Top = 262
-      Width = 1098
-      Align = alTop
-      Color = clWindow
-      Columns = <>
-      DataSource = dsTransactions
-      ReadOnly = True
-      TabOrder = 2
     end
     object Splitter2: TSplitter
       Cursor = crVSplit
       Left = 1
       Height = 9
-      Top = 405
+      Top = 408
       Width = 1098
       Align = alTop
-      OnCanOffset = Splitter2CanOffset
       ResizeAnchor = akTop
     end
-    object grdStatements: TDBGrid
+    object pagecontrolAttachments: TPageControl
       Left = 1
-      Height = 144
-      Top = 440
+      Height = 216
+      Top = 1
       Width = 1098
+      ActivePage = tsAttachments
+      Align = alTop
+      TabIndex = 0
+      TabOrder = 2
+      object tsAttachments: TTabSheet
+        Caption = 'Attachments'
+        ClientHeight = 182
+        ClientWidth = 1094
+        object grdAttachments: TDBGrid
+          Left = 0
+          Height = 182
+          Top = 0
+          Width = 1094
+          Align = alClient
+          Color = clWindow
+          Columns = <>
+          DataSource = dsAttachments
+          ReadOnly = True
+          TabOrder = 0
+          OnCellClick = grdAttachmentsCellClick
+          OnDrawColumnCell = grdAttachmentsDrawColumnCell
+        end
+      end
+      object TabSheet2: TTabSheet
+        Caption = 'Detail'
+      end
+    end
+    object pagecontrolStatements: TPageControl
+      Left = 1
+      Height = 167
+      Top = 417
+      Width = 1098
+      ActivePage = tsStatements
       Align = alClient
-      Color = clWindow
-      Columns = <>
-      DataSource = dsStatements
-      ReadOnly = True
+      TabIndex = 0
+      TabOrder = 3
+      object tsStatements: TTabSheet
+        Caption = 'Statements'
+        ClientHeight = 133
+        ClientWidth = 1094
+        object grdStatements: TDBGrid
+          Left = 0
+          Height = 133
+          Top = 0
+          Width = 1094
+          Align = alClient
+          Color = clWindow
+          Columns = <>
+          DataSource = dsStatements
+          ReadOnly = True
+          TabOrder = 0
+        end
+      end
+      object tsStatementDetail: TTabSheet
+        Caption = 'Detail'
+      end
+    end
+    object pageControlTransactions: TPageControl
+      Left = 1
+      Height = 184
+      Top = 224
+      Width = 1098
+      ActivePage = tsTransactions
+      Align = alTop
+      TabIndex = 0
       TabOrder = 4
-    end
-    object Panel1: TPanel
-      Left = 1
-      Height = 29
-      Top = 233
-      Width = 1098
-      Align = alTop
-      Caption = 'Transactions'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 5
-    end
-    object lbStatements: TPanel
-      Left = 1
-      Height = 26
-      Top = 414
-      Width = 1098
-      Align = alTop
-      Caption = 'Statements'
-      Font.Style = [fsBold]
-      ParentFont = False
-      TabOrder = 6
+      object tsTransactions: TTabSheet
+        Caption = 'Transactions'
+        ClientHeight = 150
+        ClientWidth = 1094
+        object grdTransactions: TDBGrid
+          Left = 0
+          Height = 150
+          Top = 0
+          Width = 1094
+          Align = alClient
+          Color = clWindow
+          Columns = <>
+          DataSource = dsTransactions
+          ReadOnly = True
+          TabOrder = 0
+          OnCellClick = grdTransactionsCellClick
+        end
+      end
+      object tsTransactiondetail: TTabSheet
+        Caption = 'Detail'
+      end
     end
   end
   object pnlBottom: TPanel
@@ -164,14 +196,14 @@ object frmActivityMonitor: TfrmActivityMonitor
     Params.Strings = (
       'read committed'
     )
-    Left = 776
-    Top = 152
+    Left = 888
+    Top = 144
   end
   object trExec: TIBTransaction
     TransactionName = '{F3C0108B-2094-419C-BC56-94FE4F3A40FA}'
     Active = False
     DefaultDatabase = IBDatabase
-    Left = 776
+    Left = 888
     Top = 64
   end
   object qryAttachments: TIBQuery
@@ -248,5 +280,25 @@ object frmActivityMonitor: TfrmActivityMonitor
     DataSet = qryStatements
     Left = 240
     Top = 64
+  end
+  object qryExec: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDatabase
+    Transaction = trExec
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 784
+    Top = 120
   end
 end

@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  DBGrids, Grids, ExtCtrls, StdCtrls, DB,
+  DBGrids, Grids, ExtCtrls, StdCtrls, ComCtrls, DB,
   IBDatabase, IBQuery,
-  turbocommon;
+  turbocommon, Types;
 
 type
 
@@ -19,8 +19,13 @@ type
     btnKillAttachment: TButton;
     btnKillStatement: TButton;
     btnRefresh: TButton;
-    Panel1: TPanel;
-    lbStatements: TPanel;
+    grdAttachments: TDBGrid;
+    grdStatements: TDBGrid;
+    grdTransactions: TDBGrid;
+    qryExec: TIBQuery;
+    pageControlTransactions: TPageControl;
+    pagecontrolStatements: TPageControl;
+    pagecontrolAttachments: TPageControl;
 
     pnlTop: TPanel;
     pnlMain: TPanel;
@@ -29,11 +34,13 @@ type
     Splitter1: TSplitter;
     Splitter2: TSplitter;
 
-    grdAttachments: TDBGrid;
-    grdTransactions: TDBGrid;
-    grdStatements: TDBGrid;
-
     IBDatabase: TIBDatabase;
+    tsTransactions: TTabSheet;
+    tsTransactiondetail: TTabSheet;
+    tsStatements: TTabSheet;
+    tsStatementDetail: TTabSheet;
+    tsAttachments: TTabSheet;
+    TabSheet2: TTabSheet;
     trRead: TIBTransaction;
     trExec: TIBTransaction;
 
@@ -45,7 +52,6 @@ type
     dsTransactions: TDataSource;
     dsStatements: TDataSource;
 
-    procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
 
     procedure btnRefreshClick(Sender: TObject);
@@ -60,11 +66,9 @@ type
       DataCol: Integer;
       Column: TColumn;
       State: TGridDrawState);
-    procedure Splitter2CanOffset(Sender: TObject; var NewOffset: Integer;
-      var Accept: Boolean);
+    procedure grdTransactionsCellClick(Column: TColumn);
 
   private
-
     FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
     FMyAttachmentID: Int64;
@@ -80,29 +84,41 @@ type
     procedure LoadTransactions;
     procedure LoadStatements;
 
-    function SelectedID(
-      DataSet: TDataSet;
-      const FieldName: String): Int64;
-
-    procedure ExecSQL(
-      const SQL: String;
-      const ID: Int64);
-
-    function IsMyAttachment(
-      const ID: Int64): Boolean;
-
+    function SelectedID(DataSet: TDataSet; const FieldName: String): Int64;
+    procedure ExecSQL(const SQL: String; const ID: Int64);
+    function IsMyAttachment(const ID: Int64): Boolean;
   public
-
-    procedure Init(
-      ANodeInfos: TPNodeInfos;
-      dbIndex: Integer);
-
+    procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer);
   end;
 
 implementation
 
 {$R *.lfm}
 
+procedure TfrmActivityMonitor.Init(ANodeInfos: TPNodeInfos; dbIndex: Integer);
+begin
+  FNodeInfos := ANodeInfos;
+  FDBIndex := dbIndex;
+
+  DisconnectDatabase;
+  ConnectDatabase;
+
+  qryAttachments.Database := IBDatabase;
+  qryTransactions.Database := IBDatabase;
+  qryStatements.Database := IBDatabase;
+
+  qryAttachments.Transaction := trRead;
+  qryTransactions.Transaction := trRead;
+  qryStatements.Transaction := trRead;
+
+  dsAttachments.DataSet := qryAttachments;
+  dsTransactions.DataSet := qryTransactions;
+  dsStatements.DataSet := qryStatements;
+
+  FMyAttachmentID := FetchMyAttachmentID;
+
+  LoadAttachments;
+end;
 
 procedure TfrmActivityMonitor.DisconnectDatabase;
 begin
@@ -128,53 +144,30 @@ end;
 { ============================================= }
 { Database Connection }
 { ============================================= }
-
 procedure TfrmActivityMonitor.ConnectDatabase;
 begin
   DisconnectDatabase;
 
-  IBDatabase.DatabaseName :=
-    RegisteredDatabases[FDBIndex].
-    IBDatabase.DatabaseName;
-
+  IBDatabase.DatabaseName := RegisteredDatabases[FDBIndex].IBDatabase.DatabaseName;
   IBDatabase.LoginPrompt := False;
-
   IBDatabase.Params.Clear;
-
-  IBDatabase.Params.Add(
-    'user_name=' +
-    RegisteredDatabases[FDBIndex].
-    RegRec.UserName);
-
-  IBDatabase.Params.Add(
-    'password=' +
-    RegisteredDatabases[FDBIndex].
-    RegRec.Password);
-
+  IBDatabase.Params.Add('user_name=' + RegisteredDatabases[FDBIndex].RegRec.UserName);
+  IBDatabase.Params.Add('password=' + RegisteredDatabases[FDBIndex]. RegRec.Password);
   IBDatabase.Connected := True;
 
   trRead.DefaultDatabase := IBDatabase;
   trExec.DefaultDatabase := IBDatabase;
 
-  trRead.Params.Text :=
-    'read_committed'#13+
-    'rec_version'#13+
-    'nowait';
-
-  trExec.Params.Text :=
-    'read_committed'#13+
-    'rec_version'#13+
-    'nowait';
+  trRead.Params.Text := 'read_committed'#13 + 'rec_version'#13 + 'nowait';
+  trExec.Params.Text := 'read_committed'#13 + 'rec_version'#13 + 'nowait';
 
   trRead.StartTransaction;
   trExec.StartTransaction;
-
 end;
 
 { ============================================= }
 { Snapshot Handling }
 { ============================================= }
-
 procedure TfrmActivityMonitor.RefreshSnapshot;
 begin
   if trRead.Active then
@@ -186,12 +179,9 @@ end;
 { ============================================= }
 { Own Attachment Detection }
 { ============================================= }
-
 function TfrmActivityMonitor.FetchMyAttachmentID: Int64;
-var
-  q: TIBQuery;
+var q: TIBQuery;
 begin
-
   Result := -1;
 
   q := TIBQuery.Create(nil);
@@ -208,7 +198,7 @@ begin
 
     q.Open;
 
-    if not q.IsEmpty then
+    if q.RecordCount > 0 then
       Result := q.Fields[0].AsLargeInt;
 
     q.Close;
@@ -216,7 +206,6 @@ begin
   finally
     q.Free;
   end;
-
 end;
 
 function TfrmActivityMonitor.IsMyAttachment(
@@ -225,66 +214,11 @@ begin
   Result := ID = FMyAttachmentID;
 end;
 
-{ ============================================= }
-{ Init }
-{ ============================================= }
-
-procedure TfrmActivityMonitor.Init(
-  ANodeInfos: TPNodeInfos;
-  dbIndex: Integer);
-begin
-
-  FNodeInfos := ANodeInfos;
-  FDBIndex := dbIndex;
-
-  DisconnectDatabase;
-  ConnectDatabase;
-
-  qryAttachments.Database := IBDatabase;
-  qryTransactions.Database := IBDatabase;
-  qryStatements.Database := IBDatabase;
-
-  qryAttachments.Transaction := trRead;
-  qryTransactions.Transaction := trRead;
-  qryStatements.Transaction := trRead;
-
-  dsAttachments.DataSet := qryAttachments;
-  dsTransactions.DataSet := qryTransactions;
-  dsStatements.DataSet := qryStatements;
-
-  FMyAttachmentID := FetchMyAttachmentID;
-
-  LoadAttachments;
-
-end;
-
-{ ============================================= }
-{ Load Data }
-{ ============================================= }
-
 procedure TfrmActivityMonitor.LoadAttachments;
 begin
   qryAttachments.Close;
 
   RefreshSnapshot;
-
-  {qryAttachments.SQL.Text :=
-    'SELECT '+
-    ' MON$TIMESTAMP, '+
-    ' MON$USER, '+
-    ' MON$REMOTE_PROCESS, '+
-    ' MON$REMOTE_ADDRESS, '+
-    ' MON$SERVER_PID, '+
-    ' MON$REMOTE_PROTOCOL, '+
-    ' MON$ATTACHMENT_ID, '+
-    ' MON$STATE, '+
-    ' MON$ATTACHMENT_NAME, '+
-    ' MON$ROLE, '+
-    ' MON$CHARACTER_SET_ID, '+
-    ' MON$GARBAGE_COLLECTION '+
-    //' MON$AUTH_METHOD '+
-    'FROM MON$ATTACHMENTS '+
-    'ORDER BY MON$ATTACHMENT_ID';  }
 
     qryAttachments.SQL.Text :=
       'SELECT '+
@@ -307,23 +241,18 @@ begin
       ' AND v.MON$VARIABLE_NAME = ''ApplicationName'' '+
       'ORDER BY a.MON$ATTACHMENT_ID';
 
-
   qryAttachments.Open;
 
   LoadTransactions;
   LoadStatements;
-
 end;
 
 procedure TfrmActivityMonitor.LoadTransactions;
-var
-  ID: Int64;
+var ID: Int64;
 begin
-
   qryTransactions.Close;
 
   ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
-
   if ID < 0 then Exit;
 
   qryTransactions.SQL.Text :=
@@ -331,20 +260,16 @@ begin
     'WHERE MON$ATTACHMENT_ID = :ID';
 
   qryTransactions.ParamByName('ID').AsLargeInt := ID;
-
   qryTransactions.Open;
-
 end;
 
 procedure TfrmActivityMonitor.LoadStatements;
 var
   ID: Int64;
 begin
-
   qryStatements.Close;
 
   ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
-
   if ID < 0 then Exit;
 
   qryStatements.SQL.Text :=
@@ -352,43 +277,51 @@ begin
     'WHERE MON$ATTACHMENT_ID = :ID';
 
   qryStatements.ParamByName('ID').AsLargeInt := ID;
-
   qryStatements.Open;
-
 end;
+
+{procedure TfrmActivityMonitor.LoadStatements;
+var ID: Int64;
+begin
+  qryStatements.Close;
+
+  ID := SelectedID(qryTransactions,'MON$TRANSACTION_ID');
+  if ID < 0 then Exit;
+
+  qryStatements.SQL.Text :=
+    'SELECT * FROM MON$STATEMENTS '+
+    'WHERE MON$TRANSACTION_ID = :ID';
+
+  qryStatements.ParamByName('ID').AsLargeInt := ID;
+  qryStatements.Open;
+end;}
+
 
 { ============================================= }
 { Selected ID }
 { ============================================= }
-
 function TfrmActivityMonitor.SelectedID(
   DataSet: TDataSet;
   const FieldName: String): Int64;
 begin
-
   Result := -1;
 
   if not Assigned(DataSet) then Exit;
   if not DataSet.Active then Exit;
   if DataSet.IsEmpty then Exit;
 
-  Result :=
-    DataSet.FieldByName(FieldName).
-    AsLargeInt;
-
+  Result := DataSet.FieldByName(FieldName).AsLargeInt;
 end;
 
 { ============================================= }
 { Exec Admin SQL }
 { ============================================= }
-
-procedure TfrmActivityMonitor.ExecSQL(
+{procedure TfrmActivityMonitor.ExecSQL(
   const SQL: String;
   const ID: Int64);
 var
   q: TIBQuery;
 begin
-
   if IsMyAttachment(ID) then
   begin
     ShowMessage(
@@ -399,7 +332,6 @@ begin
   q := TIBQuery.Create(nil);
 
   try
-
     q.Database := IBDatabase;
     q.Transaction := trExec;
 
@@ -410,16 +342,33 @@ begin
 
     trExec.Commit;
     trExec.StartTransaction;
-
   finally
     q.Free;
   end;
+end;}
 
+procedure TfrmActivityMonitor.ExecSQL(const SQL: String; const ID: Int64);
+begin
+  if IsMyAttachment(ID) then
+  begin
+    ShowMessage(
+      'Cannot kill own attachment.');
+    Exit;
+  end;
+
+  try
+    qryExec.SQL.Text := SQL;
+    qryExec.ParamByName('ID').AsLargeInt := ID;
+
+    qryExec.ExecSQL;
+
+    trExec.Commit;
+    trExec.StartTransaction;
+  finally
+    qryExec.Close;
+  end;
 end;
 
-{ ============================================= }
-{ UI }
-{ ============================================= }
 
 procedure TfrmActivityMonitor.btnRefreshClick(Sender: TObject);
 begin
@@ -444,13 +393,15 @@ begin
   LoadAttachments;
 end;
 
-
 procedure TfrmActivityMonitor.btnKillStatementClick(Sender: TObject);
 begin
   ExecSQL(
     'DELETE FROM MON$STATEMENTS WHERE MON$STATEMENT_ID=:ID',
     SelectedID(qryStatements,'MON$STATEMENT_ID')
   );
+
+  qryStatements.Close;
+  qryStatements.UnPrepare;
 
   LoadStatements;
 end;
@@ -462,64 +413,9 @@ begin
   LoadStatements;
 end;
 
-{ ============================================= }
-{ Drawing }
-{ ============================================= }
-
-procedure TfrmActivityMonitor.grdAttachmentsDrawColumnCell(
-  Sender: TObject;
-  const Rect: TRect;
-  DataCol: Integer;
-  Column: TColumn;
-  State: TGridDrawState);
-var
-  grid: TDBGrid;
-  ID: Int64;
-  txt: String;
+procedure TfrmActivityMonitor.grdTransactionsCellClick(Column: TColumn);
 begin
-
-  grid := Sender as TDBGrid;
-
-  ID :=
-    SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
-
-  if IsMyAttachment(ID) then
-  begin
-    grid.Canvas.Brush.Color := $00D8FFD8;
-    grid.Canvas.Font.Style := [fsBold];
-  end
-  else
-  begin
-    grid.Canvas.Brush.Color := clWhite;
-    grid.Canvas.Font.Style := [];
-  end;
-
-  grid.Canvas.FillRect(Rect);
-
-  txt := Column.Field.DisplayText;
-
-  grid.Canvas.TextRect(
-    Rect,
-    Rect.Left+4,
-    Rect.Top+2,
-    txt);
-
-end;
-
-procedure TfrmActivityMonitor.Splitter2CanOffset(Sender: TObject;
-  var NewOffset: Integer; var Accept: Boolean);
-begin
-
-end;
-
-{ ============================================= }
-{ Lifecycle }
-{ ============================================= }
-
-procedure TfrmActivityMonitor.FormCreate(Sender: TObject);
-begin
-  grdAttachments.OnDrawColumnCell :=
-    @grdAttachmentsDrawColumnCell;
+  LoadStatements;
 end;
 
 procedure TfrmActivityMonitor.FormClose(
@@ -532,6 +428,56 @@ begin
     if Assigned(FNodeInfos) then
       FNodeInfos^.ViewForm := nil;
   end;
+end;
+
+procedure TfrmActivityMonitor.grdAttachmentsDrawColumnCell(
+  Sender: TObject;
+  const Rect: TRect;
+  DataCol: Integer;
+  Column: TColumn;
+  State: TGridDrawState);
+var
+  grid: TDBGrid;
+  ID: Int64;
+  txt: String;
+begin
+  grid := Sender as TDBGrid;
+
+  ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
+
+  // Wenn selektiert → Systemfarben verwenden
+  if gdSelected in State then
+  begin
+    grid.Canvas.Brush.Color := clHighlight;
+    grid.Canvas.Font.Color := clHighlightText;
+    grid.Canvas.Font.Style := [fsBold];
+  end
+  else
+  begin
+    // nicht selektiert → dein eigenes Farbschema
+    if IsMyAttachment(ID) then
+    begin
+      grid.Canvas.Brush.Color := $00D8FFD8; // hellgrün
+      grid.Canvas.Font.Color := clBlack;
+      grid.Canvas.Font.Style := [fsBold];
+    end
+    else
+    begin
+      grid.Canvas.Brush.Color := clWhite;
+      grid.Canvas.Font.Color := clBlack;
+      grid.Canvas.Font.Style := [];
+    end;
+  end;
+
+  grid.Canvas.FillRect(Rect);
+
+  txt := Column.Field.DisplayText;
+
+  grid.Canvas.TextRect(
+    Rect,
+    Rect.Left + 4,
+    Rect.Top + 2,
+    txt);
 end;
 
 end.
