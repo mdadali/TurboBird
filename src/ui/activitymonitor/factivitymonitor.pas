@@ -46,7 +46,6 @@ type
     dsStatements: TDataSource;
 
     procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
 
     procedure btnRefreshClick(Sender: TObject);
@@ -269,28 +268,45 @@ begin
 
   RefreshSnapshot;
 
-  qryAttachments.SQL.Text :=
+  {qryAttachments.SQL.Text :=
     'SELECT '+
     ' MON$TIMESTAMP, '+
-    ' MON$REMOTE_PROCESS, '+
     ' MON$USER, '+
+    ' MON$REMOTE_PROCESS, '+
     ' MON$REMOTE_ADDRESS, '+
     ' MON$SERVER_PID, '+
     ' MON$REMOTE_PROTOCOL, '+
-
     ' MON$ATTACHMENT_ID, '+
-
     ' MON$STATE, '+
     ' MON$ATTACHMENT_NAME, '+
-
     ' MON$ROLE, '+
-
     ' MON$CHARACTER_SET_ID, '+
-
-    ' MON$GARBAGE_COLLECTION, '+
-    ' MON$AUTH_METHOD '+
+    ' MON$GARBAGE_COLLECTION '+
+    //' MON$AUTH_METHOD '+
     'FROM MON$ATTACHMENTS '+
-    'ORDER BY MON$ATTACHMENT_ID';
+    'ORDER BY MON$ATTACHMENT_ID';  }
+
+    qryAttachments.SQL.Text :=
+      'SELECT '+
+      ' a.MON$TIMESTAMP, '+
+      ' a.MON$USER, '+
+      ' a.MON$REMOTE_PROCESS, '+
+      ' a.MON$REMOTE_ADDRESS, '+
+      ' a.MON$SERVER_PID, '+
+      ' a.MON$REMOTE_PROTOCOL, '+
+      ' a.MON$ATTACHMENT_ID, '+
+      ' a.MON$STATE, '+
+      ' a.MON$ATTACHMENT_NAME, '+
+      ' a.MON$ROLE, '+
+      ' a.MON$CHARACTER_SET_ID, '+
+      ' a.MON$GARBAGE_COLLECTION, '+
+      ' v.MON$VARIABLE_VALUE AS MON$APPLICATION_NAME '+
+      'FROM MON$ATTACHMENTS a '+
+      'LEFT JOIN MON$CONTEXT_VARIABLES v '+
+      '  ON v.MON$ATTACHMENT_ID = a.MON$ATTACHMENT_ID '+
+      ' AND v.MON$VARIABLE_NAME = ''ApplicationName'' '+
+      'ORDER BY a.MON$ATTACHMENT_ID';
+
 
   qryAttachments.Open;
 
@@ -506,20 +522,6 @@ begin
     @grdAttachmentsDrawColumnCell;
 end;
 
-procedure TfrmActivityMonitor.FormDestroy(Sender: TObject);
-begin
-
-  {qryStatements.Close;
-  qryTransactions.Close;
-  qryAttachments.Close;
-
-  if trRead.Active then trRead.Commit;
-  if trExec.Active then trExec.Commit;
-
-  IBDatabase.Connected := False;
-  }
-end;
-
 procedure TfrmActivityMonitor.FormClose(
   Sender: TObject;
   var CloseAction: TCloseAction);
@@ -533,280 +535,3 @@ begin
 end;
 
 end.
-
-
-{unit fActivityMonitor;
-
-{$mode objfpc}{$H+}
-
-interface
-
-uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, DBGrids,
-  ExtCtrls, StdCtrls, DB,
-  IBDatabase, IBQuery,
-  turbocommon;
-
-type
-
-  { TfrmActivityMonitor }
-
-  TfrmActivityMonitor = class(TForm)
-    btnRefresh: TButton;
-    btnKillAttachment: TButton;
-    btnKillTransaction: TButton;
-    btnKillStatement: TButton;
-
-    pnlTop: TPanel;
-    pnlMain: TPanel;
-    pnlBottom: TPanel;
-    Splitter1: TSplitter;
-    Splitter2: TSplitter;
-
-    grdAttachments: TDBGrid;
-    grdTransactions: TDBGrid;
-    grdStatements: TDBGrid;
-
-    IBDatabase: TIBDatabase;
-    trRead: TIBTransaction;
-    trExec: TIBTransaction;
-
-    qryAttachments: TIBQuery;
-    qryTransactions: TIBQuery;
-    qryStatements: TIBQuery;
-
-    dsAttachments: TDataSource;
-    dsTransactions: TDataSource;
-    dsStatements: TDataSource;
-
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-
-    procedure btnRefreshClick(Sender: TObject);
-    procedure btnKillAttachmentClick(Sender: TObject);
-    procedure btnKillTransactionClick(Sender: TObject);
-    procedure btnKillStatementClick(Sender: TObject);
-
-    procedure grdAttachmentsCellClick(Column: TColumn);
-    procedure grdTransactionsCellClick(Column: TColumn);
-
-  private
-    FNodeInfos: TPNodeInfos;
-    FDBIndex: integer;
-    FMyAttachmentID: Integer;
-    procedure LoadAttachments;
-    procedure LoadTransactions;
-    procedure LoadStatements;
-    function SelectedIntField(ADataSet: TDataSet; const AField: string): Integer;
-    procedure ExecAdminSQL(const ASQL: string; const AParam: Integer);
-
-  public
-    procedure Init(ANodeInfos: TPNodeInfos; dbIndex: integer);
-  end;
-
-implementation
-
-{$R *.lfm}
-
-{ TfrmActivityMonitor }
-
-procedure TfrmActivityMonitor.Init(ANodeInfos: TPNodeInfos; dbIndex: integer);
-begin
-  FNodeInfos := ANodeInfos;
-  FDBIndex   := dbIndex;
-
-  if not IBDatabase.Connected then
-  begin
-    IBDatabase.DatabaseName := RegisteredDatabases[dbIndex].IBDatabase.DatabaseName;
-    IBDatabase.LoginPrompt := False;
-    IBDatabase.Params.Clear;
-    IBDatabase.Params.Add('user_name=' + RegisteredDatabases[dbIndex].RegRec.UserName);
-    IBDatabase.Params.Add('password=' + RegisteredDatabases[dbIndex].RegRec.Password);
-    IBDatabase.Connected := True;
-  end;
-
-  // Transactions
-  if not trRead.InTransaction then
-  begin
-    trRead.DefaultDatabase := IBDatabase;
-    trRead.Params.Clear;
-    trRead.Params.Add('read_committed');
-    trRead.Params.Add('rec_version');
-    trRead.Params.Add('nowait');
-    trRead.StartTransaction;
-  end;
-
-  trExec.DefaultDatabase := IBDatabase;
-  if not trExec.InTransaction then
-    trExec.StartTransaction;
-
-  // Queries zuweisen
-  qryAttachments.Database := IBDatabase;
-  qryAttachments.Transaction := trRead;
-
-  qryTransactions.Database := IBDatabase;
-  qryTransactions.Transaction := trRead;
-
-  qryStatements.Database := IBDatabase;
-  qryStatements.Transaction := trRead;
-
-  // DataSources zuweisen
-  dsAttachments.DataSet := qryAttachments;
-  dsTransactions.DataSet := qryTransactions;
-  dsStatements.DataSet := qryStatements;
-
-  // Eigene Attachment-ID (FB >= 2.1)
-  try
-    qryAttachments.SQL.Text := 'SELECT CURRENT_CONNECTION FROM RDB$DATABASE';
-    qryAttachments.Open;
-    FMyAttachmentID := qryAttachments.Fields[0].AsInteger;
-    qryAttachments.Close;
-  except
-    FMyAttachmentID := 0; // FB 2.0
-  end;
-
-  LoadAttachments;
-
-end;
-
-procedure TfrmActivityMonitor.FormCreate(Sender: TObject);
-begin
-  Caption := 'Activity Monitor';
-end;
-
-procedure TfrmActivityMonitor.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
-begin
-  if Assigned(FNodeInfos) then
-    FNodeInfos^.ViewForm := nil;
-end;
-
-procedure TfrmActivityMonitor.FormDestroy(Sender: TObject);
-begin
-  qryStatements.Close;
-  qryTransactions.Close;
-  qryAttachments.Close;
-  if trRead.Active then trRead.Commit;
-  if trExec.Active then trExec.Commit;
-  IBDatabase.Connected := False;
-
-  Parent.Free;
-end;
-
-procedure TfrmActivityMonitor.btnRefreshClick(Sender: TObject);
-begin
-  qryAttachments.SQL.Text := 'SELECT CURRENT_CONNECTION FROM RDB$DATABASE';
-  qryAttachments.Open;
-  FMyAttachmentID := qryAttachments.Fields[0].AsInteger;
-  qryAttachments.Close;
-
-  LoadAttachments;
-end;
-
-procedure TfrmActivityMonitor.LoadAttachments;
-begin
-  qryAttachments.Close;
-  trRead.Commit;
-  qryAttachments.SQL.Text :=
-    'SELECT  MON$ATTACHMENT_ID, MON$USER, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, ' +
-    'MON$TIMESTAMP ' +
-    'FROM MON$ATTACHMENTS ' +
-    'WHERE (:MY_ID = 0 OR MON$ATTACHMENT_ID <> :MY_ID) ' +
-    'ORDER BY MON$ATTACHMENT_ID';
-  qryAttachments.ParamByName('MY_ID').AsInteger := FMyAttachmentID;
-  qryAttachments.Open;
-
-  LoadTransactions;
-  LoadStatements;
-end;
-
-procedure TfrmActivityMonitor.LoadTransactions;
-begin
-  qryTransactions.Close;
-  if qryAttachments.IsEmpty then Exit;
-
-  qryTransactions.SQL.Text :=
-    'SELECT * FROM MON$TRANSACTIONS ' +
-    'WHERE MON$ATTACHMENT_ID = :ATT_ID ' +
-    'ORDER BY MON$TRANSACTION_ID';
-  qryTransactions.ParamByName('ATT_ID').AsInteger :=
-    SelectedIntField(qryAttachments,'MON$ATTACHMENT_ID');
-  qryTransactions.Open;
-end;
-
-procedure TfrmActivityMonitor.LoadStatements;
-begin
-  qryStatements.Close;
-  if qryAttachments.IsEmpty then Exit;
-
-  qryStatements.SQL.Text :=
-    'SELECT * FROM MON$STATEMENTS ' +
-    'WHERE MON$ATTACHMENT_ID = :ATT_ID ' +
-    'ORDER BY MON$STATEMENT_ID';
-  qryStatements.ParamByName('ATT_ID').AsInteger :=
-    SelectedIntField(qryAttachments,'MON$ATTACHMENT_ID');
-  qryStatements.Open;
-end;
-
-procedure TfrmActivityMonitor.grdAttachmentsCellClick(Column: TColumn);
-begin
-  LoadTransactions;
-  LoadStatements;
-end;
-
-procedure TfrmActivityMonitor.grdTransactionsCellClick(Column: TColumn);
-begin
-  // optional Statements nach Transaction filtern
-end;
-
-function TfrmActivityMonitor.SelectedIntField(ADataSet: TDataSet;
-  const AField: string): Integer;
-begin
-  Result := ADataSet.FieldByName(AField).AsInteger;
-end;
-
-procedure TfrmActivityMonitor.ExecAdminSQL(const ASQL: string;
-  const AParam: Integer);
-begin
-  with TIBQuery.Create(nil) do
-  try
-    Database := IBDatabase;
-    Transaction := trExec;
-    SQL.Text := ASQL;
-    ParamByName('ID').AsInteger := AParam;
-    ExecSQL;
-    trExec.Commit;
-    trExec.StartTransaction;
-  finally
-    Free;
-  end;
-end;
-
-procedure TfrmActivityMonitor.btnKillStatementClick(Sender: TObject);
-begin
-  if qryStatements.IsEmpty then Exit;
-  ExecAdminSQL('DELETE FROM MON$STATEMENTS WHERE MON$STATEMENT_ID = :ID',
-    SelectedIntField(qryStatements,'MON$STATEMENT_ID'));
-  LoadStatements;
-end;
-
-procedure TfrmActivityMonitor.btnKillTransactionClick(Sender: TObject);
-begin
-  if qryTransactions.IsEmpty then Exit;
-  ExecAdminSQL('DELETE FROM MON$TRANSACTIONS WHERE MON$TRANSACTION_ID = :ID',
-    SelectedIntField(qryTransactions,'MON$TRANSACTION_ID'));
-  LoadTransactions;
-  LoadStatements;
-end;
-
-procedure TfrmActivityMonitor.btnKillAttachmentClick(Sender: TObject);
-begin
-  if qryAttachments.IsEmpty then Exit;
-  ExecAdminSQL('DELETE FROM MON$ATTACHMENTS WHERE MON$ATTACHMENT_ID = :ID',
-    SelectedIntField(qryAttachments,'MON$ATTACHMENT_ID'));
-  LoadAttachments;
-end;
-
-end. }
-

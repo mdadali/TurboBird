@@ -7143,6 +7143,7 @@ begin
   //Recalculate index statistics. May take a while for big dbs.
   Message:= '';
   Screen.Cursor:= crSQLWait;
+  Application.ProcessMessages;
   try
     try
       dmSysTables.RecalculateIndexStatistics(TPNodeInfos(tvMain.Selected.Data)^.dbIndex);

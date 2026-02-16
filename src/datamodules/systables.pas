@@ -639,7 +639,7 @@ begin
   sqQuery.Close;
 end;
 
-function TdmSysTables.RecalculateIndexStatistics(dbIndex: integer): boolean;
+{function TdmSysTables.RecalculateIndexStatistics(dbIndex: integer): boolean;
 var
   i: integer;
   Indices, Tables: TStringList;
@@ -681,6 +681,67 @@ begin
     Tables.Free;
   end;
   result:= true;
+end;}
+
+function TdmSysTables.RecalculateIndexStatistics(dbIndex: integer): boolean;
+var
+  i: integer;
+  Indices, Tables: TStringList;
+  WasActive: boolean;
+begin
+  Result := False;
+
+  Init(dbIndex);
+
+  Indices := TStringList.Create;
+  Tables := TStringList.Create;
+
+  try
+    if not GetAllIndices(dbIndex, Indices, Tables) then
+      Exit(False);
+
+    WasActive := stTrans.InTransaction;
+
+    if WasActive then
+      stTrans.Commit;
+
+    for i := 0 to Indices.Count - 1 do
+    begin
+      try
+        sqQuery.Close;
+
+        sqQuery.SQL.Text :=
+          'SET STATISTICS INDEX "' + Indices[i] + '"';
+
+        stTrans.StartTransaction;
+
+        sqQuery.ExecSQL;
+
+        stTrans.Commit;
+
+      except
+        on E: Exception do
+        begin
+          if stTrans.InTransaction then
+            stTrans.Rollback;
+
+          {$IFDEF DEBUG}
+          SendDebug('SET STATISTICS failed for index ' +
+                    Indices[i] + ': ' + E.Message);
+          {$ENDIF}
+        end;
+      end;
+    end;
+
+    if WasActive then
+      stTrans.StartTransaction;
+
+    Result := True;
+
+  finally
+    Indices.Free;
+    Tables.Free;
+  end;
 end;
 
 procedure TdmSysTables.SortDependencies(var ObjectList: TStringList);
@@ -2272,7 +2333,7 @@ begin
   sqQuery.Close
 end;
 
-function TdmSysTables.GetAllIndices(dbIndex: Integer; List, TablesList: TStringList): Boolean;
+{function TdmSysTables.GetAllIndices(dbIndex: Integer; List, TablesList: TStringList): Boolean;
 const
   SQL = 'SELECT * FROM RDB$INDICES ' +
     'WHERE RDB$FOREIGN_KEY IS NULL ' +
@@ -2301,6 +2362,64 @@ begin
     end;
   end;
   sqQuery.Close
+end;}
+
+function TdmSysTables.GetAllIndices(
+  dbIndex: Integer;
+  List, TablesList: TStringList
+): Boolean;
+const
+  SQL =
+    'SELECT '+
+    ' RDB$INDEX_NAME, '+
+    ' RDB$RELATION_NAME '+
+    'FROM RDB$INDICES '+
+    'WHERE RDB$SYSTEM_FLAG = 0 '+
+    ' AND RDB$FOREIGN_KEY IS NULL '+
+    'ORDER BY RDB$RELATION_NAME, RDB$INDEX_NAME';
+begin
+  Result := False;
+
+  Init(dbIndex);
+
+  List.Clear;
+
+  if Assigned(TablesList) then
+    TablesList.Clear;
+
+  sqQuery.Close;
+  sqQuery.SQL.Text := SQL;
+
+  if not sqQuery.Transaction.InTransaction then
+    sqQuery.Transaction.StartTransaction;
+
+  try
+    sqQuery.Open;
+
+    Result := not sqQuery.IsEmpty;
+
+    while not sqQuery.EOF do
+    begin
+      List.Add(
+        Trim(sqQuery.FieldByName('RDB$INDEX_NAME').AsString)
+      );
+
+      if Assigned(TablesList) then
+        TablesList.Add(
+          Trim(sqQuery.FieldByName('RDB$RELATION_NAME').AsString)
+        );
+
+      sqQuery.Next;
+    end;
+
+    sqQuery.Close;
+
+    sqQuery.Transaction.Commit;
+
+  except
+    sqQuery.Transaction.Rollback;
+    raise;
+  end;
 end;
 
 function TdmSysTables.GetPrimaryKeyIndexName(dbIndex: Integer; ATableName: string; var ConstraintName: string): string;

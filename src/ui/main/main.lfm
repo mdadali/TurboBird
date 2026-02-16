@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 811
+  Left = 430
   Height = 612
-  Top = 252
+  Top = 439
   Width = 906
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 586
@@ -72626,6 +72626,7 @@ object fmMain: TfmMain
           BB9DDADCDBFFDCDEDDFEDCDDDDFEDCDDDDFEDCDDDDFEDCDDDDFEDCDDDDFEDCDD
           DDFEDCDDDDFEDCDDDDFEDCDDDDFEDADCDBFFB9BCBB9D00000002
         }
+        Visible = False
         OnClick = lmCompareClick
       end
       object lmScriptDB: TMenuItem
