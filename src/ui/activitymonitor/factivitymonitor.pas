@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   DBGrids, Grids, ExtCtrls, StdCtrls, ComCtrls, DB,
-  IBDatabase, IBQuery,
+  IBDatabase, IBQuery, RxDBGrid,
   turbocommon, Types;
 
 type
@@ -19,9 +19,6 @@ type
     btnKillAttachment: TButton;
     btnKillStatement: TButton;
     btnRefresh: TButton;
-    grdAttachments: TDBGrid;
-    grdStatements: TDBGrid;
-    grdTransactions: TDBGrid;
     qryExec: TIBQuery;
     pageControlTransactions: TPageControl;
     pagecontrolStatements: TPageControl;
@@ -30,6 +27,9 @@ type
     pnlTop: TPanel;
     pnlMain: TPanel;
     pnlBottom: TPanel;
+    grdAttachments: TRxDBGrid;
+    grdTransactions: TRxDBGrid;
+    grdStatements: TRxDBGrid;
 
     Splitter1: TSplitter;
     Splitter2: TSplitter;
@@ -220,28 +220,32 @@ begin
 
   RefreshSnapshot;
 
-    qryAttachments.SQL.Text :=
-      'SELECT '+
-      ' a.MON$TIMESTAMP, '+
-      ' a.MON$USER, '+
-      ' a.MON$REMOTE_PROCESS, '+
-      ' a.MON$REMOTE_ADDRESS, '+
-      ' a.MON$SERVER_PID, '+
-      ' a.MON$REMOTE_PROTOCOL, '+
-      ' a.MON$ATTACHMENT_ID, '+
-      ' a.MON$STATE, '+
-      ' a.MON$ATTACHMENT_NAME, '+
-      ' a.MON$ROLE, '+
-      ' a.MON$CHARACTER_SET_ID, '+
-      ' a.MON$GARBAGE_COLLECTION, '+
-      ' v.MON$VARIABLE_VALUE AS MON$APPLICATION_NAME '+
-      'FROM MON$ATTACHMENTS a '+
-      'LEFT JOIN MON$CONTEXT_VARIABLES v '+
-      '  ON v.MON$ATTACHMENT_ID = a.MON$ATTACHMENT_ID '+
-      ' AND v.MON$VARIABLE_NAME = ''ApplicationName'' '+
-      'ORDER BY a.MON$ATTACHMENT_ID';
+      qryAttachments.SQL.Text :=
+        'SELECT '+
+        ' a.MON$TIMESTAMP AS TS, '+
+        ' a.MON$STATE AS ST, '+
+        ' a.MON$USER AS DBUSER, '+
+        ' a.MON$REMOTE_ADDRESS AS REMOTE, '+
+        ' a.MON$REMOTE_PROTOCOL AS PROTO, '+
+        ' COALESCE('+
+        '   CAST(v.MON$VARIABLE_VALUE AS VARCHAR(255)), '+
+        '   CAST(a.MON$REMOTE_PROCESS AS VARCHAR(255))'+
+        ' ) AS CLIENT, '+
+        ' a.MON$SERVER_PID AS SRV_PID, '+
+        ' a.MON$ATTACHMENT_ID, '+
+        ' a.MON$ATTACHMENT_NAME AS DBNAME, '+
+        ' a.MON$ROLE AS DBROLE, '+
+        ' a.MON$CHARACTER_SET_ID, '+
+        ' a.MON$GARBAGE_COLLECTION '+
+        'FROM MON$ATTACHMENTS a '+
+        'LEFT JOIN MON$CONTEXT_VARIABLES v '+
+        '  ON v.MON$ATTACHMENT_ID = a.MON$ATTACHMENT_ID '+
+        ' AND v.MON$VARIABLE_NAME = ''ApplicationName'' '+
+        'ORDER BY a.MON$ATTACHMENT_ID';
 
   qryAttachments.Open;
+
+  grdAttachments.OptimizeColumnsWidthAll;
 
   LoadTransactions;
   LoadStatements;
@@ -261,6 +265,8 @@ begin
 
   qryTransactions.ParamByName('ID').AsLargeInt := ID;
   qryTransactions.Open;
+
+  grdTransactions.OptimizeColumnsWidthAll;
 end;
 
 procedure TfrmActivityMonitor.LoadStatements;
@@ -277,7 +283,8 @@ begin
     'WHERE MON$ATTACHMENT_ID = :ID';
 
   qryStatements.ParamByName('ID').AsLargeInt := ID;
-  qryStatements.Open;
+
+  qryStatements.Open;  grdStatements.OptimizeColumnsWidthAll;
 end;
 
 {procedure TfrmActivityMonitor.LoadStatements;
@@ -369,7 +376,6 @@ begin
   end;
 end;
 
-
 procedure TfrmActivityMonitor.btnRefreshClick(Sender: TObject);
 begin
   DisconnectDatabase;
@@ -390,8 +396,7 @@ begin
   ConnectDatabase;
 
   FMyAttachmentID := FetchMyAttachmentID;
-  LoadAttachments;
-end;
+  LoadAttachments;end;
 
 procedure TfrmActivityMonitor.btnKillStatementClick(Sender: TObject);
 begin
@@ -403,8 +408,7 @@ begin
   qryStatements.Close;
   qryStatements.UnPrepare;
 
-  LoadStatements;
-end;
+  LoadStatements;end;
 
 procedure TfrmActivityMonitor.grdAttachmentsCellClick(
   Column: TColumn);
@@ -437,11 +441,11 @@ procedure TfrmActivityMonitor.grdAttachmentsDrawColumnCell(
   Column: TColumn;
   State: TGridDrawState);
 var
-  grid: TDBGrid;
+  grid: TRxDBGrid;
   ID: Int64;
   txt: String;
 begin
-  grid := Sender as TDBGrid;
+  grid := Sender as TRxDBGrid;
 
   ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
 

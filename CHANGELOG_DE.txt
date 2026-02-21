@@ -5,6 +5,15 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+
+TurboBird v1.2.1.1265
+Build date & time: 21.02.2026, 06:30:03
+
+Mehrere Bugs wurden behoben
+
+
+----------------------------------------------------------------------------------------
+
 TurboBird v1.2.1.1264
 Build date & time: 16.02.2026, 20:30:03
 
