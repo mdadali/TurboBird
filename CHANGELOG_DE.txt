@@ -5,6 +5,48 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+TurboBird v1.2.1.1264
+Build date & time: 16.02.2026, 20:30:03
+
++ Activity Monitor hinzugefügt
+  Anzeige von Attachments, Transactions und Statements
+  Attachments können beendet werden
+  Statements können beendet werden (bleiben sichtbar bis Attachment beendet ist)
+  Aufruf über: Rechtsklick auf DB-Knoten → DB-Tools → Activity Monitor
+  (Maske ist noch in Entwicklung)
+
++ Baum-Filter hinzugefügt
+  Einfacher Filter für Baum-Objekte
+  Container-Objekte (z. B. Packages) bleiben sichtbar, um Struktur zu erhalten
+  Filter arbeitet auch bei sehr großen Datenbanken performant
+
+! TreeView Performance deutlich verbessert
+  Optimierte Ladegeschwindigkeit und Anzeige
+  Getestet mit extrem großen Datenbanken:
+    10.000 Packages (jeweils mit Unterknoten)
+    1.000.000 Domains
+    mehrere tausend Tabellen
+  Baum lädt und arbeitet stabil und schnell
+
++ Multiple-File Restore vollständig implementiert
+  Restore aus gesplitteten Backup-Dateien wird jetzt unterstützt
+
+! ToolButton "TT" wieder aktiviert
+  Schriftart und Schriftgröße im QueryWindow (Editor) einstellbar
+  Editor-Hintergrundfarbe über INI-Datei konfigurierbar
+  Editor aus ThemeManager ausgeschlossen (stabilere Darstellung)
+
+! Verbesserungen und interne Optimierungen
+
+* Hinweis:
+  Serverseitiger Restore arbeitet zuverlässig und vollständig
+  Clientseitiger Restore kann aktuell ohne Fehlermeldung unvollständig sein
+  Empfehlung: Serverseitigen Restore verwenden
+
+
+----------------------------------------------------------------------------------------
+
+
 TurboBird v1.2.1.1263
 
 Build Date: 25.12.2025
@@ -58,6 +100,8 @@ Build Time: 08:56:10
 
 ! Eigene Komponente SQLDbExt entfernt
   (durch IBX nicht mehr notwendig)
+  
+----------------------------------------------------------------------------------------
 
 
 TurboBird v1.2.1.1262

@@ -414,14 +414,12 @@ begin
           'SELECT DISTINCT RDB$USER ' +
           'FROM RDB$USER_PRIVILEGES ' +
           'WHERE RDB$USER_TYPE = 8 ' +
-          'AND UPPER(RDB$USER) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
           'ORDER BY RDB$USER'
       else
         // Firebird 3+: SEC$USERS
         sqQuery.SQL.Text :=
           'SELECT SEC$USER_NAME AS RDB$USER ' +
            'FROM SEC$USERS ' +
-           'WHERE UPPER(SEC$USER_NAME) <> ' + QuotedStr(UpperCase(InitialServiceUser)) + ' ' +
            'ORDER BY SEC$USER_NAME';
 
     otPackages:
@@ -1602,7 +1600,6 @@ begin
       'SELECT RDB$RELATION_NAME, RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
       'FROM RDB$USER_PRIVILEGES ' +
       'WHERE RDB$USER = ' + QuotedStr(UserName) + ' ' +
-      'AND UPPER(RDB$USER) <> ' + QuotedStr(UpperCase('SERVICE_USER')) + ' ' +
       'AND RDB$RELATION_NAME <> ' + QuotedStr('DUMMYROLE');
   end
   else
@@ -1611,7 +1608,6 @@ begin
       'SELECT RDB$RELATION_NAME, RDB$OBJECT_TYPE, RDB$PRIVILEGE, RDB$GRANT_OPTION ' +
       'FROM RDB$USER_PRIVILEGES ' +
       'WHERE RDB$USER = ' + QuotedStr(UserName) + ' ' +
-      'AND UPPER(RDB$USER) <> ' + QuotedStr(UpperCase('SERVICE_USER')) + ' ' +
       'AND RDB$USER_TYPE IN (8, 13)';
   end;
 

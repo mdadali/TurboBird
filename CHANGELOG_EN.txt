@@ -3,6 +3,50 @@ What's New for TurboBird
 + : added
 * : fixed
 - : removed
+-------------------------------------------------------------------------------------------
+
+
+TurboBird v1.2.1.1264
+Build date & time: 2026-02-16, 20:30:03
+
++ Activity Monitor (first version) added
+  Displays Attachments, Transactions, and Statements
+  Attachments can be terminated
+  Statements can also be terminated (remain visible until the related attachment ends)
+  Accessible via: Right-click on database node → DB-Tools → Activity Monitor
+  (This feature is still under development)
+
++ Tree object filter added
+  Simple filter for tree objects
+  Container objects (e.g. Packages) remain visible to preserve structure
+  Filter performance is fast and stable even with very large databases
+
+! TreeView performance significantly improved
+  Faster loading and navigation
+  Tested with extremely large databases:
+    10,000 Packages (each with multiple subnodes)
+    1,000,000 Domains
+    several thousand tables
+  Tree loading and filtering remain responsive and stable
+
++ Multiple-file restore fully implemented
+  Restore from split backup files is now supported
+
+! ToolButton "TT" re-enabled
+  Font name and font size in QueryWindow (Editor) can now be configured via this button
+  Editor background color can be configured via INI file
+  Editor excluded from ThemeManager to ensure stable and consistent rendering
+
+! Internal improvements and optimizations
+
+* Known issue:
+  Server-side restore works reliably and restores large databases completely
+  Client-side restore may silently produce incomplete databases
+  (issue currently under investigation)
+  Recommendation: use server-side restore
+
+
+-------------------------------------------------------------------------------------------
 
 TurboBird v1.2.1.1263
 
@@ -57,8 +101,7 @@ Build Time: 08:56:10
 - Removed custom component SQLDbExt
   (no longer required due to IBX migration)
 
-
-
+-------------------------------------------------------------------------------------------
 
 TurboBird v1.2.1.1262
 Build date & time: 26.09.2025, 13:26:00

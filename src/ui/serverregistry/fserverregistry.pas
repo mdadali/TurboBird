@@ -637,14 +637,14 @@ begin
 
 
     // 6️⃣ User nur erstellen, wenn er noch nicht existiert
-    if not UserExists then
+    {if not UserExists then
     begin
       IBXSecurityService.UserName := InitialServiceUser;
       IBXSecurityService.Password := InitialServiceUserPwd;
       IBXSecurityService.AddUser;
-    end;
+    end; }
 
-    Result := True;
+    Result := false;
 
   finally
     if ServicesConn.Connected then
