@@ -6,9 +6,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ExtCtrls, Grids, SynEdit, SynHighlighterSQL,
+  ComCtrls, StdCtrls, Buttons, ExtCtrls, Grids, SynEdit, SynHighlighterSQL,
   turbocommon, fileimport,
-  IB, IBDatabase, IBQuery,
+  DB, IB, IBDatabase, IBQuery,
   uthemeselector;
 
 type
@@ -29,6 +29,7 @@ type
     dlgSourceOpen: TOpenDialog;
     edSourceFile: TEdit;
     edDelimiter: TEdit;
+    DestinationQuery: TIBQuery;
     Label1: TLabel;
     Label2: TLabel;
     Label5: TLabel;
@@ -52,7 +53,6 @@ type
     procedure FormShow(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
-    FDestinationQuery: TIBQuery;
     FImporter: TFileImport;
     FDestDB: string; //destination database
     FDestTable: string; //destination table
@@ -113,8 +113,6 @@ begin
     FNodeInfos^.ViewForm := nil;
 
   FImporter.Free;
-  if assigned(FDestinationQuery) then
-    FreeAndNil(FDestinationQuery);
 end;
 
 procedure TfmImportTable.FormCreate(Sender: TObject);
@@ -144,14 +142,12 @@ begin
   if cbSourceField.Items.Count > -1 then
     cbSourceField.ItemIndex := 0;
 
-  if assigned(FDestinationQuery) then
+  if not(DestinationQuery.Active) then DestinationQuery.Open;
+  for i:=0 to DestinationQuery.FieldCount-1 do
   begin
-    if not(FDestinationQuery.Active) then FDestinationQuery.Open;
-    for i:=0 to FDestinationQuery.FieldCount-1 do
-    begin
-      cbDestField.Items.Add(FDestinationQuery.Fields[i].FieldName);
-    end;
+    cbDestField.Items.Add(DestinationQuery.Fields[i].FieldName);
   end;
+
   if cbDestField.Items.Count > -1 then
     cbDestField.ItemIndex := 0;
 end;
@@ -220,22 +216,16 @@ begin
       end;
     end;
 
-    // IBQuery anlegen, falls noch nicht vorhanden
-    if not Assigned(FDestinationQuery) then
-      FDestinationQuery := TIBQuery.Create(nil);
-
-   FDestinationQuery.AllowAutoActivateTransaction := true;
-
     // Verbindung und Transaktion zuweisen
-    FDestinationQuery.Close;
-    FDestinationQuery.Database := IBDatabase;
-    FDestinationQuery.Transaction := IBTransaction;
+    DestinationQuery.Close;
+    DestinationQuery.Database := IBDatabase;
+    DestinationQuery.Transaction := IBTransaction;
 
     // SQL vorbereiten
-    FDestinationQuery.SQL.Text := 'SELECT * FROM ' + FDestTable;
+    DestinationQuery.SQL.Text := 'SELECT * FROM ' + FDestTable;
 
     // Tabelle öffnen
-    FDestinationQuery.Open;
+    DestinationQuery.Open;
   end;
 end;
 
@@ -247,12 +237,11 @@ begin
   // MappingCount will map fields if necessary so we need destination fields
   if FImporter.DestinationFields.Count=0 then
   begin
-    if not(assigned(FDestinationQuery)) then
-      raise Exception.Create('Cannot update mapping info without valid destination query.');
-    MappingCount := FDestinationQuery.Fields.Count;
+    MappingCount := DestinationQuery.Fields.Count;
     for i := 0 to MappingCount - 1 do
     begin
-      FImporter.DestinationFields.Add(FDestinationQuery.Fields[i].FieldName);
+      FImporter.DestinationFields.Add(DestinationQuery.Fields[i].FieldName);
+
     end;
   end;
 
@@ -275,7 +264,7 @@ end;
 
 procedure TfmImportTable.btnAddMappingClick(Sender: TObject);
 begin
-  if FImporter.AddMapping(cbSourceField.Text, cbDestField.Text) then
+  if FImporter.AddMapping(cbSourceField.Text, cbDestField.Text, ftString, ftString, '') then
     UpdateMappingGrid;
 end;
 
@@ -402,9 +391,6 @@ var
   FieldList: string;
   ParamList: string;
 begin
-  if not Assigned(FDestinationQuery) then
-    raise Exception.Create('DestinationQuery not assigned');
-
   if FImporter.MappingCount = 0 then
     raise Exception.Create('No field mapping defined');
 
@@ -423,13 +409,13 @@ begin
     ParamList := ParamList + ':' + FImporter.Mapping[i].DestinationField;
   end;
 
-  FDestinationQuery.Close;
-  FDestinationQuery.SQL.Clear;
-  FDestinationQuery.SQL.Text :=
+  DestinationQuery.Close;
+  DestinationQuery.SQL.Clear;
+  DestinationQuery.SQL.Text :=
     'INSERT INTO ' + FDestTable +
     ' (' + FieldList + ') VALUES (' + ParamList + ')';
 
-  FDestinationQuery.Prepare;
+  DestinationQuery.Prepare;
 end;
 
 procedure TfmImportTable.bbImportClick(Sender: TObject);
@@ -438,19 +424,221 @@ var
   i: Integer;
   Num: Integer;
   ServerName: string;
-begin
-  if not Assigned(FDestinationQuery) then
-  begin
-    MessageDlg('Import not prepared.', mtWarning, [mbOK], 0);
-    Exit;
-  end;
 
+  // Progress Form Komponenten
+  ProgressForm : TForm;
+  ProgressBar  : TProgressBar;
+  ProgressLabel: TLabel;
+  CancelButton : TButton;
+  lblStart     : TLabel;
+  lblEnd       : TLabel;
+  lblElapsed   : TLabel;
+
+  Cancelled: Boolean;
+  StartTime, EndTime: TDateTime;
+begin
+  Screen.Cursor := crHourGlass;
+  btnClose.Enabled := False;
+  bbImport.Enabled := False;
+
+  Cancelled := False;
+
+  // ==========================
+  // Progress Form erzeugen
+  // ==========================
+
+  ProgressForm := TForm.Create(nil);
+  try
+    ProgressForm.Caption := 'Import running...';
+    ProgressForm.Width := 500;
+    ProgressForm.Height := 200;
+    ProgressForm.Position := poScreenCenter;
+    ProgressForm.BorderStyle := bsDialog;
+
+    // Status Label
+    ProgressLabel := TLabel.Create(ProgressForm);
+    ProgressLabel.Parent := ProgressForm;
+    ProgressLabel.Left := 16;
+    ProgressLabel.Top := 16;
+    ProgressLabel.Caption := 'Starting import...';
+    ProgressLabel.Font.Size := 10;
+
+    // Progress Bar
+    ProgressBar := TProgressBar.Create(ProgressForm);
+    ProgressBar.Parent := ProgressForm;
+    ProgressBar.Left := 16;
+    ProgressBar.Top := 45;
+    ProgressBar.Width := 460;
+    ProgressBar.Height := 20;
+    ProgressBar.Min := 0;
+    ProgressBar.Max := 100;
+    ProgressBar.Position := 0;
+
+    // Cancel Button
+    CancelButton := TButton.Create(ProgressForm);
+    CancelButton.Parent := ProgressForm;
+    CancelButton.Caption := 'Cancel';
+    CancelButton.Left := 190;
+    CancelButton.Top := 75;
+    CancelButton.Width := 100;
+    CancelButton.ModalResult := mrNone;
+
+    {CancelButton.OnClick :=
+      procedure(Sender: TObject)
+      begin
+        Cancelled := True;
+        ProgressLabel.Caption := 'Cancelling...';
+      end;}
+
+    // Start/End/Elapsed Labels
+    lblStart := TLabel.Create(ProgressForm);
+    lblStart.Parent := ProgressForm;
+    lblStart.Left := 16;
+    lblStart.Top := 110;
+    lblStart.Caption := 'Start: --:--:--';
+
+    lblEnd := TLabel.Create(ProgressForm);
+    lblEnd.Parent := ProgressForm;
+    lblEnd.Left := 16;
+    lblEnd.Top := 130;
+    lblEnd.Caption := 'End: --:--:--';
+
+    lblElapsed := TLabel.Create(ProgressForm);
+    lblElapsed.Parent := ProgressForm;
+    lblElapsed.Left := 16;
+    lblElapsed.Top := 150;
+    lblElapsed.Caption := 'Elapsed: 0 sec';
+
+    ProgressForm.Show;
+    ProgressForm.Update;
+    Application.ProcessMessages;
+
+    StartTime := Now;
+    lblStart.Caption := 'Start: ' + FormatDateTime('hh:nn:ss', StartTime);
+    Application.ProcessMessages;
+
+    // ==========================
+    // Passwort prüfen
+    // ==========================
+
+    with RegisteredDatabases[FDestIndex] do
+    begin
+      ServerName := GetServerName(RegRec.DatabaseName);
+
+      if ((ServerName <> '') and (ServerName <> 'localhost')) and
+         (RegRec.Password = '') then
+      begin
+        if fmEnterPass.ShowModal <> mrOk then Exit;
+
+        if not fmReg.TestConnection(
+          RegRec.DatabaseName,
+          fmEnterPass.edUser.Text,
+          fmEnterPass.edPassword.Text,
+          RegRec.Charset,
+          RegRec.FireBirdClientLibPath,
+          RegRec.SQLDialect,
+          RegRec.Port,
+          RegRec.ServerName,
+          RegRec.OverwriteLoadedClientLib) then Exit;
+
+        RegRec.UserName := fmEnterPass.edUser.Text;
+        RegRec.Password := fmEnterPass.edPassword.Text;
+        RegRec.Role     := fmEnterPass.cbRole.Text;
+      end;
+    end;
+
+    // Skip Header
+    if chkSkipFirstRow.Checked then
+      FImporter.ReadRow;
+
+    // Transaktion starten
+    if RegisteredDatabases[FDestIndex].IBTransaction.InTransaction then
+      RegisteredDatabases[FDestIndex].IBTransaction.Rollback;
+
+    RegisteredDatabases[FDestIndex].IBTransaction.StartTransaction;
+
+    Num := 0;
+
+    try
+      while FImporter.ReadRow do
+      begin
+        if Cancelled then
+          raise Exception.Create('Import cancelled by user.');
+
+        for i := 0 to FImporter.MappingCount - 1 do
+        begin
+          DestColumn := FImporter.Mapping[i].DestinationField;
+
+          DestinationQuery.ParamByName(DestColumn).AsString :=
+            FImporter.GetData(i);
+        end;
+
+        DestinationQuery.ExecSQL;
+        Inc(Num);
+
+        // Commit alle 1000
+        if (Num mod 1000) = 0 then
+        begin
+          RegisteredDatabases[FDestIndex].IBTransaction.CommitRetaining;
+
+          // ProgressBar Animation (unbestimmter Fortschritt)
+          ProgressBar.Position :=
+            (ProgressBar.Position + 1) mod ProgressBar.Max;
+
+          ProgressLabel.Caption :=
+            Format('Imported %d records...', [Num]);
+
+          // Elapsed aktualisieren
+          lblElapsed.Caption := 'Elapsed: ' +
+            FormatDateTime('nn:ss', Now - StartTime) + ' min:sec';
+
+          Application.ProcessMessages;
+        end;
+      end;
+
+      RegisteredDatabases[FDestIndex].IBTransaction.Commit;
+
+      EndTime := Now;
+      lblEnd.Caption := 'End: ' + FormatDateTime('hh:nn:ss', EndTime);
+      lblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', EndTime - StartTime);
+
+      ProgressBar.Position := ProgressBar.Max;
+      ProgressLabel.Caption :=
+        Format('Finished. %d records imported.', [Num]);
+
+      Sleep(500);
+
+      MessageDlg(IntToStr(Num) + ' record(s) imported successfully.',
+                 mtInformation, [mbOK], 0);
+
+    except
+      on E: Exception do
+      begin
+        RegisteredDatabases[FDestIndex].IBTransaction.Rollback;
+        raise;
+      end;
+    end;
+
+  finally
+    ProgressForm.Free;
+    btnClose.Enabled := True;
+    bbImport.Enabled := True;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+{procedure TfmImportTable.bbImportClick(Sender: TObject);
+var
+  DestColumn: string;
+  i: Integer;
+  Num: Integer;
+  ServerName: string;
+begin
   Screen.Cursor := crHourGlass;
   btnClose.Enabled := False;
   bbImport.Enabled := False;
 
   try
-    // Passwort prüfen (Client/Server)
     with RegisteredDatabases[FDestIndex] do
     begin
       ServerName := GetServerName(RegRec.DatabaseName);
@@ -479,15 +667,15 @@ begin
       end;
     end;
 
-    // Skip Header-Zeile
-    if chkSkipFirstRow.Checked then
-      FImporter.ReadRow;
-
     // Transaktion sauber starten
     if RegisteredDatabases[FDestIndex].IBTransaction.InTransaction then
       RegisteredDatabases[FDestIndex].IBTransaction.Rollback;
-
     RegisteredDatabases[FDestIndex].IBTransaction.StartTransaction;
+
+
+    // Skip Header-Zeile
+    if chkSkipFirstRow.Checked then
+      FImporter.ReadRow;
 
     Num := 0;
 
@@ -499,11 +687,11 @@ begin
           DestColumn := FImporter.Mapping[i].DestinationField;
 
           // CSV liefert Strings – Firebird konvertiert
-          FDestinationQuery.ParamByName(DestColumn).AsString :=
+          DestinationQuery.ParamByName(DestColumn).AsString :=
             FImporter.GetData(i);
         end;
 
-        FDestinationQuery.ExecSQL;
+        DestinationQuery.ExecSQL;
         Inc(Num);
 
         // Performance-Commit
@@ -532,8 +720,7 @@ begin
   btnClose.Enabled := True;
   bbImport.Enabled := True;
   Screen.Cursor := crDefault;
-end;
-
+end;}
 
 {procedure TfmImportTable.bbImportClick(Sender: TObject);
 var

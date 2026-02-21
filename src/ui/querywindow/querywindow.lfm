@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 472
+  Left = 985
   Height = 613
-  Top = 128
+  Top = 229
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 613
@@ -70324,7 +70324,7 @@ object fmQueryWindow: TfmQueryWindow
     Width = 1079
     Align = alTop
     BlockIndent = 3
-    Color = clCream
+    Color = clMedGray
     Font.Height = -16
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
@@ -70336,7 +70336,7 @@ object fmQueryWindow: TfmQueryWindow
     TabOrder = 0
     OnKeyDown = meQueryKeyDown
     OnMouseEnter = meQueryMouseEnter
-    Gutter.Color = 16183798
+    Gutter.Color = clSilver
     Gutter.Width = 61
     Gutter.MouseActions = <    
       item
@@ -70850,6 +70850,7 @@ object fmQueryWindow: TfmQueryWindow
         ClickDir = cdDown
         Command = emcStartDragMove
       end>
+    MouseOptions = [emDragDropEditing, emCtrlWheelZoom]
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
     RightEdge = 120
     ScrollBars = ssAutoBoth
@@ -70969,7 +70970,7 @@ object fmQueryWindow: TfmQueryWindow
     OnMouseEnter = ToolBar1MouseEnter
     OnMouseLeave = ToolBar1MouseLeave
     object tbNew: TToolButton
-      Left = 1
+      Left = 37
       Hint = 'Open New SQL Query Window'
       Top = 2
       AutoSize = True
@@ -70981,7 +70982,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbOpen: TToolButton
-      Left = 37
+      Left = 1
       Hint = 'Open SQL file'
       Top = 2
       AutoSize = True
@@ -71121,7 +71122,7 @@ object fmQueryWindow: TfmQueryWindow
       Height = 22
       Hint = 'Auto Commit ON/OFF'
       Top = 2
-      Width = 111
+      Width = 110
       Caption = 'Auto Commit'
       Checked = True
       OnMouseEnter = cxAutoCommitMouseEnter
@@ -71258,9 +71259,6 @@ object fmQueryWindow: TfmQueryWindow
   object pmTab: TPopupMenu
     Left = 376
     Top = 472
-    object lmExport: TMenuItem
-      Caption = 'Export Result as...'
-    end
     object MenuItem5: TMenuItem
       Caption = '-'
     end
@@ -71878,8 +71876,6 @@ object fmQueryWindow: TfmQueryWindow
   object SynCompletion1: TSynCompletion
     Position = -1
     LinesInWindow = 6
-    OnSearchPosition = SynCompletion1SearchPosition
-    OnPositionChanged = SynCompletion1PositionChanged
     SelectedColor = clHighlight
     CaseSensitive = True
     Width = 262

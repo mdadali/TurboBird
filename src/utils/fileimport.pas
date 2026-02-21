@@ -33,13 +33,17 @@ unit fileimport;
 interface
 
 uses
-  Classes, SysUtils, {laz_fpspreadsheet,} csvdocument;
+  Classes, SysUtils, {laz_fpspreadsheet,} csvdocument,
+  DB;
 
 type
   TMap = record
     SourceField: string;
+    SourceFieldType: TFieldType;
     SourceFieldIndex: integer; //0-based
     DestinationField: string;
+    DestinationFieldType: TFieldType;
+    TransFormExpression: string;
   end;
 
   { TFileImport }
@@ -92,7 +96,8 @@ type
   public
     // Adds mapping from source/file field to db/destination field
     // if it doesn't already exist. Returns true if mapping added
-    function AddMapping(SourceField, DestinationField: string): boolean;
+    function AddMapping(SourceField, DestinationField: string;
+                   SourceFieldType, DestinationFieldType: TFieldType; TransFormExpression: string): boolean;
     // Delete mapping number specified. Mapping and listbox numbers match
     // if -1 specified: delete entire mapping array
     // Returns true if one or more mappings were deleted
@@ -137,7 +142,8 @@ implementation
 
 { TFileImport }
 
-function TFileImport.AddMapping(SourceField, DestinationField: string): boolean;
+function TFileImport.AddMapping(SourceField, DestinationField: string;
+               SourceFieldType, DestinationFieldType: TFieldType; TransFormExpression: string): boolean;
 var
   SourceIndex: integer;
 begin
@@ -152,6 +158,7 @@ begin
     FMapping[high(FMapping)].SourceField:=SourceField;
     FMapping[high(FMapping)].SourceFieldIndex:=SourceIndex;
     FMapping[high(FMapping)].DestinationField:=DestinationField;
+
     while FRowData.Count<Length(FMapping) do
     begin
       FRowData.Add(''); //reserve space for data
@@ -166,6 +173,7 @@ var
   DestField: string; //database field name
   FileField: string; //source field
   FileFieldNo: integer; // source field number
+
 begin
   SetLength(FMapping,0);
 
@@ -183,7 +191,7 @@ begin
       // Add mapping if it doesn't already exist
       if trim(lowercase(FileField)) = trim(lowercase(DestField)) then
       begin
-        AddMapping(FileField, DestField);
+        AddMapping(FileField, DestField, ftString, ftString, 'TransformationsExpression');
       end;
     end;
   end;

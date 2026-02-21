@@ -333,7 +333,7 @@ type
 
 
 const
-  InitialServiceUser = 'service_user';
+  InitialServiceUser = 'service';
   InitialServiceUserPwd = 'service_pwd';
 
   DatabasesRegFile = 'databases.reg';

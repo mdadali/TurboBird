@@ -120,7 +120,6 @@ type
     MenuItem1: TMenuItem;
     MenuItem10: TMenuItem;
     lmCut: TMenuItem;
-    lmExport: TMenuItem;
     lmRedo: TMenuItem;
     MenuItem2: TMenuItem;
     lmFind: TMenuItem;
@@ -194,8 +193,6 @@ type
     procedure SynCompletion1CodeCompletion(var Value: string;
       SourceValue: string; var SourceStart, SourceEnd: TPoint;
       KeyChar: TUTF8Char; Shift: TShiftState);
-    procedure SynCompletion1PositionChanged(Sender: TObject);
-    procedure SynCompletion1SearchPosition(var APosition: integer);
     procedure tbCloseClick(Sender: TObject);
     procedure tbCommitClick(Sender: TObject);
     procedure tbCommitMouseEnter(Sender: TObject);
@@ -801,23 +798,11 @@ begin
   SynCompletion1.Deactivate;
 end;
 
-procedure TfmQueryWindow.SynCompletion1PositionChanged(Sender: TObject);
-begin
-
-end;
-
-procedure TfmQueryWindow.SynCompletion1SearchPosition(var APosition: integer);
-begin
-
-end;
-
-
 { Close button pressed: close current Query window and free parent page tab }
 
 procedure TfmQueryWindow.tbCloseClick(Sender: TObject);
 begin
 end;
-
 
 { Commit current transaction }
 
@@ -1995,7 +1980,7 @@ end;
 
 
 (***************  Execute Query   ******************)
-{$IFDEF ___DEBUG}
+//{$IFDEF ___DEBUG}
 procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
 var
   StartTime: TDateTime;
@@ -2056,6 +2041,7 @@ begin
                 FSQLTrans.CommitRetaining;
             FTab := CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
             FTab.ImageIndex := 6;
+
             FTab.Hint := FQueryPart;
             FTab.ShowHint := True;
             FSQLQuery.SQL.Text := FQueryPart;
@@ -2064,8 +2050,8 @@ begin
             if not FSQLTrans_Local.InTransaction then
               FSQLTrans_Local.StartTransaction;
             FSQLQuery.Transaction := FSQLTrans_Local;
+            FTab.Caption := 'Running...';
             FSQLQuery.Open;
-
             FTab.Caption := 'Query Result';
             FTab.ImageIndex := 0;
             fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
@@ -2106,6 +2092,7 @@ begin
             begin
               // Execute DML synchronously
               FSQLQuery.SQL.Text := FQueryPart;
+              FTab.Caption := 'Running...';
               FSQLQuery.ExecSQL;
               if cxAutoCommit.Checked then
                 FSQLTrans.CommitRetaining;
@@ -2203,9 +2190,9 @@ begin
   end;
 end;
 
-{$ELSE}
+//{$ELSE}
 
-procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
+{procedure TfmQueryWindow.ExecuteQuery;  //with TQueryThread
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -2287,7 +2274,7 @@ begin
           FQT:= TQueryThread.Create(qaOpen);
           FQT.Query:= FSQLQuery;
           FQT.Trans:= FSQLTrans;
-          //FQT.OnTerminate:= @ThreadTerminated;
+          FQT.OnTerminate:= @ThreadTerminated;
           FAText:= FTab.Caption;
           FTab.Caption:= 'Running..';
           FQT.Resume;
@@ -2353,7 +2340,7 @@ begin
 
               // Wait for thread completion
               repeat
-                application.ProcessMessages;
+                //application.ProcessMessages;
               until (FQT.fTerminated) or (FCanceled);
 
               // Raise exception if an error occured during thread execution (ExecProc)
@@ -2387,7 +2374,7 @@ begin
 
                 // Wait for thread completion
                 repeat
-                  //application.ProcessMessages;
+                  application.ProcessMessages;
                 until (FQT.fTerminated) or (FCanceled);
 
                 // Raise exception if an error occured during thread execution (ExecProc)
@@ -2496,8 +2483,8 @@ begin
       FSQLTrans.Rollback;
     end;
   end;
-end;
-{$ENDIF}
+end;}
+//{$ENDIF}
 
 procedure TfmQueryWindow.OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
 var
@@ -3634,6 +3621,7 @@ begin
   tbRollback.Enabled:= False;
   tbRollbackRetaining.Enabled:= False;
 
+  Application.ProcessMessages;
   FModifyCount:= 0;
 
   // Get initial query type; this can be changed later in the next parts
@@ -3650,6 +3638,7 @@ begin
     ExecuteQuery;
   until FFinished;
   EnableButtons;
+  Application.ProcessMessages;
 end;
 
 
