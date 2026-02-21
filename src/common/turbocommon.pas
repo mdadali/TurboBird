@@ -1669,10 +1669,10 @@ begin
 
   //QueryWindow
   QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
-  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clRed'));
-  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Arial');
-  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 14);
-  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clRed'));
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clCream'));
+  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
+  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
+  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
   QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
 end;
 

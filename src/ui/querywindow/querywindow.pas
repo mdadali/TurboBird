@@ -1076,7 +1076,12 @@ end;
 { Read SQL query from text file }
 
 procedure TfmQueryWindow.tbOpenClick(Sender: TObject);
+var BasePath, SqlPath: string;
 begin
+  BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+  SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;
+  OpenDialog1.InitialDir := SqlPath;
+
   OpenDialog1.DefaultExt:= '.sql';
   if OpenDialog1.Execute then
     meQuery.Lines.LoadFromFile(OpenDialog1.FileName);
@@ -1183,7 +1188,12 @@ end;
 { Save current SQL in a text file }
 
 procedure TfmQueryWindow.tbSaveClick(Sender: TObject);
+var BasePath, SqlPath: string;
 begin
+  BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+  SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;
+  SaveDialog1.InitialDir := SqlPath;
+
   SaveDialog1.DefaultExt:= '.sql';
   if SaveDialog1.Execute then
     meQuery.Lines.SaveToFile(SaveDialog1.FileName);
