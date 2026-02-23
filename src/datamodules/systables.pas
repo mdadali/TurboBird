@@ -228,7 +228,8 @@ var ServerVersionMajor: word;
 begin
   Init(DatabaseIndex);
 
-  ServerVersionMajor := RegisteredDatabases[DatabaseIndex].RegRec.ServerVersionMajor;
+  //ServerVersionMajor := RegisteredDatabases[DatabaseIndex].RegRec.ServerVersionMajor;
+  ServerVersionMajor := GetServerMajorVersionFromIBDB(RegisteredDatabases[DatabaseIndex].IBDatabase);
 
   sqQuery.Close;
 

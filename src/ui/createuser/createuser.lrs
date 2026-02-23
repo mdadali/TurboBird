@@ -1,20 +1,20 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmCreateUser','FORMDATA',[
-  'TPF0'#13'TfmCreateUser'#12'fmCreateUser'#4'Left'#3#221#1#6'Height'#3#198#0#3
-  +'Top'#3#196#0#5'Width'#3#225#1#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#15
+  'TPF0'#13'TfmCreateUser'#12'fmCreateUser'#4'Left'#3#148#1#6'Height'#3#198#0#3
+  +'Top'#3#163#0#5'Width'#3#225#1#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#15
   +'Create New User'#12'ClientHeight'#3#198#0#11'ClientWidth'#3#225#1#6'OnShow'
   +#7#8'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0
-  +#6'TLabel'#6'Label1'#4'Left'#2#13#6'Height'#2#19#3'Top'#2'('#5'Width'#2'b'#7
+  +#6'TLabel'#6'Label1'#4'Left'#2#13#6'Height'#2#20#3'Top'#2'('#5'Width'#2'k'#7
   +'Caption'#6#13'New User name'#11'ParentColor'#8#0#0#6'TLabel'#6'Label2'#4'Le'
-  +'ft'#2#13#6'Height'#2#19#3'Top'#2'P'#5'Width'#2':'#7'Caption'#6#8'Password'
-  +#11'ParentColor'#8#0#0#5'TEdit'#10'edUserName'#4'Left'#3#128#0#6'Height'#2#31
+  +'ft'#2#13#6'Height'#2#20#3'Top'#2'P'#5'Width'#2'@'#7'Caption'#6#8'Password'
+  +#11'ParentColor'#8#0#0#5'TEdit'#10'edUserName'#4'Left'#3#128#0#6'Height'#2#30
   +#3'Top'#2'('#5'Width'#3#192#0#8'TabOrder'#2#0#0#0#5'TEdit'#10'edPassword'#4
-  +'Left'#3#128#0#6'Height'#2#31#3'Top'#2'P'#5'Width'#3#192#0#8'EchoMode'#7#10
+  +'Left'#3#128#0#6'Height'#2#30#3'Top'#2'P'#5'Width'#3#192#0#8'EchoMode'#7#10
   +'emPassword'#12'PasswordChar'#6#1'*'#8'TabOrder'#2#1#0#0#9'TCheckBox'#11'cxG'
-  +'rantRole'#4'Left'#2#7#6'Height'#2#21#3'Top'#2'u'#5'Width'#2'Y'#7'Caption'#6
+  +'rantRole'#4'Left'#2#7#6'Height'#2#22#3'Top'#2'u'#5'Width'#2'^'#7'Caption'#6
   +#10'Grant Role'#8'OnChange'#7#17'cxGrantRoleChange'#8'TabOrder'#2#2#0#0#9'TC'
-  +'omboBox'#7'cbRoles'#4'Left'#3#128#0#6'Height'#2#31#3'Top'#2'u'#5'Width'#3
+  +'omboBox'#7'cbRoles'#4'Left'#3#128#0#6'Height'#2#30#3'Top'#2'u'#5'Width'#3
   +#192#0#10'ItemHeight'#2#0#8'TabOrder'#2#3#7'Visible'#8#0#0#7'TBitBtn'#8'bbCr'
   +'eate'#4'Left'#3#24#1#6'Height'#2'('#3'Top'#3#152#0#5'Width'#2'V'#7'Caption'
   +#6#6'Create'#5'Color'#7#6'clForm'#7'Default'#9#4'Kind'#7#4'bkOK'#11'ModalRes'

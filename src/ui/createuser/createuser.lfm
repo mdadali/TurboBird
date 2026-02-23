@@ -1,7 +1,7 @@
 object fmCreateUser: TfmCreateUser
-  Left = 477
+  Left = 404
   Height = 198
-  Top = 196
+  Top = 163
   Width = 481
   BorderStyle = bsSingle
   Caption = 'Create New User'
@@ -12,30 +12,30 @@ object fmCreateUser: TfmCreateUser
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 13
-    Height = 19
+    Height = 20
     Top = 40
-    Width = 98
+    Width = 107
     Caption = 'New User name'
     ParentColor = False
   end
   object Label2: TLabel
     Left = 13
-    Height = 19
+    Height = 20
     Top = 80
-    Width = 58
+    Width = 64
     Caption = 'Password'
     ParentColor = False
   end
   object edUserName: TEdit
     Left = 128
-    Height = 31
+    Height = 30
     Top = 40
     Width = 192
     TabOrder = 0
   end
   object edPassword: TEdit
     Left = 128
-    Height = 31
+    Height = 30
     Top = 80
     Width = 192
     EchoMode = emPassword
@@ -44,16 +44,16 @@ object fmCreateUser: TfmCreateUser
   end
   object cxGrantRole: TCheckBox
     Left = 7
-    Height = 21
+    Height = 22
     Top = 117
-    Width = 89
+    Width = 94
     Caption = 'Grant Role'
     OnChange = cxGrantRoleChange
     TabOrder = 2
   end
   object cbRoles: TComboBox
     Left = 128
-    Height = 31
+    Height = 30
     Top = 117
     Width = 192
     ItemHeight = 0
