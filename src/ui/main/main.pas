@@ -548,7 +548,7 @@ begin
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
 
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + '/help/index.html';
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + 'index.html';
 
   if FileExists(htmlPath) then
     HtmlViewer1.LoadFromFile(htmlPath)
@@ -570,7 +570,8 @@ procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
 var htmlPath: string;
 begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help/';
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim;
+
   if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
     if FileExists(htmlPath + SRC) then

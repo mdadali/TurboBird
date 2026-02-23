@@ -3,9 +3,9 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="12"/>
-    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release"/>
+    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="133">
+    <Units Count="135">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -217,10 +217,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="87"/>
         <CursorPos X="47" Y="92"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit26>
       <Unit27>
         <Filename Value="ui\newtable\newtable.pas"/>
@@ -275,10 +278,9 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="586"/>
-        <CursorPos Y="588"/>
+        <TopLine Value="544"/>
+        <CursorPos X="3" Y="550"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -286,7 +288,7 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="4988" ID="3"/>
+          <Item0 Y="4989" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -338,7 +340,7 @@
         <UnitName Value="ViewView"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
-        <CursorPos X="18" Y="41"/>
+        <CursorPos X="35" Y="42"/>
         <UsageCount Value="200"/>
       </Unit35>
       <Unit36>
@@ -463,7 +465,7 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="251"/>
         <CursorPos X="21" Y="267"/>
         <UsageCount Value="200"/>
@@ -559,7 +561,7 @@
         <UnitName Value="CreateUser"/>
         <EditorIndex Value="2"/>
         <TopLine Value="44"/>
-        <CursorPos Y="51"/>
+        <CursorPos X="87" Y="53"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1045,7 +1047,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="144"/>
         <CursorPos X="41" Y="157"/>
         <UsageCount Value="200"/>
@@ -1104,11 +1106,10 @@
       </Unit108>
       <Unit109>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="444"/>
         <CursorPos Y="508"/>
         <UsageCount Value="28"/>
-        <Loaded Value="True"/>
       </Unit109>
       <Unit110>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\IBUtils.pas"/>
@@ -1279,128 +1280,137 @@
         <CursorPos X="13" Y="231"/>
         <UsageCount Value="9"/>
       </Unit132>
+      <Unit133>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\htmlview.pas"/>
+        <UnitName Value="HtmlView"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="560"/>
+        <CursorPos X="14" Y="571"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\HtmlGlobals.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="106"/>
+        <CursorPos X="3" Y="91"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit134>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="28">
+    <JumpHistory Count="28" HistoryIndex="27">
       <Position1>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="77" Column="19" TopLine="73"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="583" Column="21" TopLine="572"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="83" Column="21" TopLine="74"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="574" Column="20" TopLine="567"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="251" Column="17" TopLine="243"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="577" Column="36" TopLine="566"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="272" Column="46" TopLine="266"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="590" Column="16" TopLine="568"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="290" Column="46" TopLine="281"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="589" Column="49" TopLine="583"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
-        <Caret Line="6" Column="61"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="574" Column="5" TopLine="569"/>
       </Position6>
       <Position7>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4087" Column="65" TopLine="4081"/>
+        <Caret Line="577" TopLine="569"/>
       </Position7>
       <Position8>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="1240" Column="35" TopLine="1232"/>
+        <Caret Line="578" Column="35" TopLine="569"/>
       </Position8>
       <Position9>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="583" Column="21" TopLine="572"/>
+        <Caret Line="574" Column="7" TopLine="569"/>
       </Position9>
       <Position10>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" Column="20" TopLine="567"/>
+        <Caret Line="578" Column="45" TopLine="569"/>
       </Position10>
       <Position11>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="577" Column="36" TopLine="566"/>
+        <Caret Line="572" Column="7" TopLine="569"/>
       </Position11>
       <Position12>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="590" Column="16" TopLine="568"/>
+        <Caret Line="574" Column="9" TopLine="569"/>
       </Position12>
       <Position13>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="589" Column="49" TopLine="583"/>
+        <Caret Line="577" TopLine="569"/>
       </Position13>
       <Position14>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" Column="5" TopLine="569"/>
+        <Caret Line="571" Column="13" TopLine="569"/>
       </Position14>
       <Position15>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="577" TopLine="569"/>
+        <Caret Line="574" TopLine="569"/>
       </Position15>
       <Position16>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="578" Column="35" TopLine="569"/>
+        <Caret Line="575" TopLine="569"/>
       </Position16>
       <Position17>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" Column="7" TopLine="569"/>
+        <Caret Line="577" TopLine="569"/>
       </Position17>
       <Position18>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="578" Column="45" TopLine="569"/>
+        <Caret Line="574" TopLine="563"/>
       </Position18>
       <Position19>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="572" Column="7" TopLine="569"/>
+        <Caret Line="577" TopLine="563"/>
       </Position19>
       <Position20>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" Column="9" TopLine="569"/>
+        <Caret Line="578" TopLine="563"/>
       </Position20>
       <Position21>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="577" TopLine="569"/>
+        <Caret Line="587" TopLine="587"/>
       </Position21>
       <Position22>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="571" Column="13" TopLine="569"/>
+        <Caret Line="575" Column="3" TopLine="568"/>
       </Position22>
       <Position23>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" TopLine="569"/>
+        <Caret Line="9625" TopLine="9564"/>
       </Position23>
       <Position24>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="575" TopLine="569"/>
+        <Caret Line="573" Column="76" TopLine="569"/>
       </Position24>
       <Position25>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="577" TopLine="569"/>
+        <Caret Line="577" Column="42" TopLine="569"/>
       </Position25>
       <Position26>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="574" TopLine="563"/>
+        <Caret Line="554" Column="68" TopLine="543"/>
       </Position26>
       <Position27>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="577" TopLine="563"/>
+        <Caret Line="551" Column="23" TopLine="544"/>
       </Position27>
       <Position28>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="578" TopLine="563"/>
+        <Caret Line="550" Column="3" TopLine="544"/>
       </Position28>
-      <Position29>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="587" TopLine="587"/>
-      </Position29>
-      <Position30>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="281" TopLine="269"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

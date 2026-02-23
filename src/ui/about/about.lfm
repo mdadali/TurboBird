@@ -1,13 +1,13 @@
 object fmAbout: TfmAbout
-  Left = 434
+  Left = 511
   Height = 583
-  Top = 108
-  Width = 601
+  Top = 102
+  Width = 641
   BorderIcons = []
   BorderStyle = bsNone
   Caption = 'About TurboBird'
   ClientHeight = 583
-  ClientWidth = 601
+  ClientWidth = 641
   Color = clForm
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
@@ -70288,11 +70288,11 @@ object fmAbout: TfmAbout
     Left = 0
     Height = 38
     Top = 545
-    Width = 601
+    Width = 641
     Align = alBottom
     BevelOuter = bvNone
     ClientHeight = 38
-    ClientWidth = 601
+    ClientWidth = 641
     Color = clSilver
     ParentColor = False
     TabOrder = 0
@@ -70321,7 +70321,7 @@ object fmAbout: TfmAbout
     end
   end
   object PageControl1: TPageControl
-    Left = 0
+    Left = 32
     Height = 544
     Top = 0
     Width = 605
@@ -70331,8 +70331,8 @@ object fmAbout: TfmAbout
     OnChange = PageControl1Change
     object TabSheet2: TTabSheet
       Caption = 'Info'
-      ClientHeight = 510
-      ClientWidth = 601
+      ClientHeight = 506
+      ClientWidth = 599
       ParentShowHint = False
       ShowHint = True
       object Label4: TLabel
@@ -70373,12 +70373,12 @@ object fmAbout: TfmAbout
         Top = 464
         Width = 317
         Caption = 'License: MIT License'#10#10'Copyright (c) 2015-2025 by Motaz Abdel Azeem.'#10
-        Font.Color = 3487029
+        Font.Color = 7303023
         ParentColor = False
         ParentFont = False
       end
       object Image1: TImage
-        Left = 384
+        Left = 398
         Height = 78
         Top = 424
         Width = 201
@@ -70702,12 +70702,12 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 85
         Top = 304
-        Width = 596
+        Width = 599
         BevelOuter = bvNone
         BevelWidth = 2
         Caption = 'pnlMWA'
         ClientHeight = 85
-        ClientWidth = 596
+        ClientWidth = 599
         Color = clWhite
         ParentColor = False
         TabOrder = 0
@@ -71336,7 +71336,7 @@ object fmAbout: TfmAbout
         end
         object Image4: TImage
           Cursor = crHandPoint
-          Left = 60
+          Left = 61
           Height = 58
           Hint = 'Go to https://www.mwasoftware.co.uk'
           Top = 16
@@ -71686,9 +71686,9 @@ object fmAbout: TfmAbout
       end
       object GifAnim1: TGifAnim
         Cursor = crHandPoint
-        Left = 3
+        Left = 2
         Height = 72
-        Top = 191
+        Top = 189
         Width = 600
         Anchors = []
         AutoSize = False
@@ -71699,19 +71699,21 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 148
         Top = 38
-        Width = 601
+        Width = 599
         Align = alTop
         BevelOuter = bvNone
         ClientHeight = 148
-        ClientWidth = 601
+        ClientWidth = 599
         Color = clWhite
+        Font.Color = 7303023
         ParentColor = False
+        ParentFont = False
         TabOrder = 1
         OnClick = pnlTopClick
         object lbPgmVersion: TLabel
           Left = 95
           Height = 20
-          Top = 16
+          Top = 15
           Width = 80
           Caption = 'PgmVersion'
           Font.Color = 7303023
@@ -71748,6 +71750,7 @@ object fmAbout: TfmAbout
           Top = 16
           Width = 50
           Caption = 'Version'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71758,6 +71761,7 @@ object fmAbout: TfmAbout
           Top = 16
           Width = 106
           Caption = 'Lazarus Version'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71776,6 +71780,7 @@ object fmAbout: TfmAbout
           Top = 40
           Width = 76
           Caption = 'FPC Version'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71812,6 +71817,7 @@ object fmAbout: TfmAbout
           Top = 64
           Width = 68
           Caption = 'WidgetSet'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71819,7 +71825,7 @@ object fmAbout: TfmAbout
         object lbWidgetSet: TLabel
           Left = 351
           Height = 20
-          Top = 64
+          Top = 63
           Width = 82
           Caption = 'lbWidgetSet'
           ParentColor = False
@@ -71830,6 +71836,7 @@ object fmAbout: TfmAbout
           Top = 40
           Width = 69
           Caption = 'Build Date'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71840,6 +71847,7 @@ object fmAbout: TfmAbout
           Top = 64
           Width = 70
           Caption = 'Build Time'
+          Font.Color = 7303023
           Font.Style = [fsBold]
           ParentColor = False
           ParentFont = False
@@ -71850,7 +71858,9 @@ object fmAbout: TfmAbout
           Top = 64
           Width = 96
           Caption = 'lbVersionTime'
+          Font.Color = 7303023
           ParentColor = False
+          ParentFont = False
         end
         object Label12: TLabel
           Left = 175
@@ -123275,7 +123285,7 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 38
         Top = 0
-        Width = 601
+        Width = 599
         Align = alTop
         BevelOuter = bvNone
         Caption = 'TurboBird - Firebird Admin Tool'
@@ -123289,13 +123299,13 @@ object fmAbout: TfmAbout
     end
     object TabSheet1: TTabSheet
       Caption = 'Credits'
-      ClientHeight = 510
-      ClientWidth = 601
+      ClientHeight = 506
+      ClientWidth = 599
       object SecretPanel1: TSecretPanel
         Left = 0
-        Height = 510
+        Height = 506
         Top = 0
-        Width = 601
+        Width = 599
         Cycled = True
         Lines.Strings = (
           'Thanks to the Community'
@@ -123324,7 +123334,7 @@ object fmAbout: TfmAbout
     Enabled = False
     Interval = 10
     OnTimer = Timer1Timer
-    Left = 488
-    Top = 464
+    Left = 576
+    Top = 304
   end
 end
