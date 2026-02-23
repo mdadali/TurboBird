@@ -60,18 +60,16 @@ type
 
     procedure grdAttachmentsCellClick(Column: TColumn);
 
-    procedure grdAttachmentsDrawColumnCell(
-      Sender: TObject;
-      const Rect: TRect;
-      DataCol: Integer;
-      Column: TColumn;
-      State: TGridDrawState);
+    procedure grdAttachmentsDrawColumnCell(Sender: TObject; const Rect: TRect; DataCol: Integer;
+                                           Column: TColumn; State: TGridDrawState);
     procedure grdTransactionsCellClick(Column: TColumn);
 
   private
     FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
     FMyAttachmentID: Int64;
+
+    FServerVersionMajor: word;
 
     procedure ConnectDatabase;
     procedure DisconnectDatabase;
@@ -163,6 +161,8 @@ begin
 
   trRead.StartTransaction;
   trExec.StartTransaction;
+
+  FServerVersionMajor := GetServerMajorVersionFromIBDB(RegisteredDatabases[FDBIndex].IBDatabase);
 end;
 
 { ============================================= }
@@ -171,9 +171,9 @@ end;
 procedure TfrmActivityMonitor.RefreshSnapshot;
 begin
   if trRead.Active then
-    trRead.CommitRetaining
-  else
-    trRead.StartTransaction;
+    trRead.Commit;
+
+  trRead.StartTransaction;
 end;
 
 { ============================================= }
@@ -269,7 +269,7 @@ begin
   grdTransactions.OptimizeColumnsWidthAll;
 end;
 
-procedure TfrmActivityMonitor.LoadStatements;
+{procedure TfrmActivityMonitor.LoadStatements;
 var
   ID: Int64;
 begin
@@ -285,6 +285,89 @@ begin
   qryStatements.ParamByName('ID').AsLargeInt := ID;
 
   qryStatements.Open;  grdStatements.OptimizeColumnsWidthAll;
+end; }
+
+{procedure TfrmActivityMonitor.LoadStatements;
+var
+  ID: Int64;
+begin
+  qryStatements.Close;
+
+  // Attachment ID ermitteln
+  ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
+  if ID < 0 then Exit;
+
+  // Abfrage: MON$STATE als lesbaren Text
+  qryStatements.SQL.Text :=
+    'SELECT MON$STATEMENT_ID,'+
+    '       MON$SQL_TEXT,'+
+    '       CASE MON$STATE '+
+    '            WHEN 0 THEN ''idle'' '+
+    '            WHEN 1 THEN ''active'' '+
+    '            WHEN 2 THEN ''stalled'' '+
+    '            ELSE ''unknown'' '+
+    '       END AS MON$STATE,'+
+    '       MON$ATTACHMENT_ID '+
+    'FROM MON$STATEMENTS '+
+    'WHERE MON$ATTACHMENT_ID = :ID';
+
+  qryStatements.ParamByName('ID').AsLargeInt := ID;
+
+  qryStatements.Open;
+  grdStatements.OptimizeColumnsWidthAll;
+end;}
+
+procedure TfrmActivityMonitor.LoadStatements;
+var
+  ID: Int64;
+begin
+  qryStatements.Close;
+
+  // Attachment ID ermitteln
+  ID := SelectedID(qryAttachments,'MON$ATTACHMENT_ID');
+  if ID < 0 then Exit;
+
+  // Abfrage mit allen benötigten Feldern, MON$STATE als Text
+  {qryStatements.SQL.Text :=
+    'SELECT MON$STATEMENT_ID,'+
+    '       MON$ATTACHMENT_ID,'+
+    '       MON$TRANSACTION_ID,'+
+    '       CASE MON$STATE '+
+    '            WHEN 0 THEN ''idle'' '+
+    '            WHEN 1 THEN ''active'' '+
+    '            WHEN 2 THEN ''stalled'' '+
+    '            ELSE ''unknown'' '+
+    '       END AS MON$STATE,'+
+    '       MON$TIMESTAMP,'+
+    '       MON$SQL_TEXT,'+
+    '       MON$STAT_ID '+
+    'FROM MON$STATEMENTS '+
+    'WHERE MON$ATTACHMENT_ID = :ID';}
+
+    qryStatements.SQL.Text :=
+      'SELECT MON$TIMESTAMP,'+
+      '       CASE MON$STATE '+
+      '            WHEN 0 THEN ''idle'' '+
+      '            WHEN 1 THEN ''active'' '+
+      '            WHEN 2 THEN ''stalled'' '+
+      '            ELSE ''unknown'' '+
+      '       END AS MON$STATE,'+
+
+      '       MON$SQL_TEXT,'+
+
+      '       MON$STATEMENT_ID,'+
+      '       MON$ATTACHMENT_ID,'+
+      '       MON$TRANSACTION_ID,'+
+      '       MON$STAT_ID '+
+      'FROM MON$STATEMENTS '+
+      'WHERE MON$ATTACHMENT_ID = :ID '+
+      'ORDER BY MON$TIMESTAMP DESC';
+
+
+  qryStatements.ParamByName('ID').AsLargeInt := ID;
+
+  qryStatements.Open;
+  grdStatements.OptimizeColumnsWidthAll;
 end;
 
 {procedure TfrmActivityMonitor.LoadStatements;
@@ -396,7 +479,8 @@ begin
   ConnectDatabase;
 
   FMyAttachmentID := FetchMyAttachmentID;
-  LoadAttachments;end;
+  LoadAttachments;
+end;
 
 procedure TfrmActivityMonitor.btnKillStatementClick(Sender: TObject);
 begin
@@ -408,7 +492,8 @@ begin
   qryStatements.Close;
   qryStatements.UnPrepare;
 
-  LoadStatements;end;
+  LoadStatements;
+end;
 
 procedure TfrmActivityMonitor.grdAttachmentsCellClick(
   Column: TColumn);

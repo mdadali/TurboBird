@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 214
+  Left = 689
   Height = 612
-  Top = 171
+  Top = 99
   Width = 906
   Caption = 'TurboBird Admin for FireBird'
   ClientHeight = 588
@@ -6265,6 +6265,7 @@ object fmMain: TfmMain
         PrintMarginRight = 2
         PrintMarginTop = 2
         PrintScale = 1
+        OnHotSpotClick = HtmlViewer1HotSpotClick
         Align = alClient
         TabOrder = 0
       end
@@ -6350,15 +6351,15 @@ object fmMain: TfmMain
       ParentBackground = False
       TabOrder = 1
       object edtFilter: TEdit
-        Left = 48
+        Left = 32
         Height = 29
         Top = 2
-        Width = 272
+        Width = 285
         OnChange = edtFilterChange
         TabOrder = 0
       end
       object CheckBoxFilter: TCheckBox
-        Left = 16
+        Left = 2
         Height = 21
         Top = 5
         Width = 21
@@ -6367,6 +6368,14 @@ object fmMain: TfmMain
         State = cbChecked
         TabOrder = 1
       end
+    end
+    object Label1: TLabel
+      Left = 41
+      Height = 19
+      Top = 322
+      Width = 41
+      Caption = 'Label1'
+      ParentColor = False
     end
   end
   object MainMenu1: TMainMenu

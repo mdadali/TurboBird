@@ -98,6 +98,7 @@ type
     IBExtract1: TIBExtract;
     IBXScript1: TIBXScript;
     Image1: TImage;
+    Label1: TLabel;
     Memo1: TMemo;
     lmMaintenance: TMenuItem;
     lmBackupNew: TMenuItem;
@@ -275,7 +276,8 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure HtmlViewer1Link(Sender: TObject; const Rel, Rev, Href: ThtString);
+    procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
+      var Handled: Boolean);
     procedure ImNewFBFunctionClick(Sender: TObject);
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
@@ -564,23 +566,24 @@ begin
   //Repaint;
 end;
 
-procedure TfmMain.HtmlViewer1Link(Sender: TObject; const Rel, Rev, Href: ThtString);
+procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
+  const SRC: ThtString; var Handled: Boolean);
 var htmlPath: string;
 begin
-  // Lokale Datei: ohne http/https → load in THtmlViewer
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'index.html';
-  if (Pos('http://', Href) = 0) and (Pos('https://', Href) = 0) then
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help/';
+  if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
-    if FileExists(htmlPath + Href) then
-      HtmlViewer1.LoadFromFile(htmlPath + Href)
+    if FileExists(htmlPath + SRC) then
+      HtmlViewer1.LoadFromFile(htmlPath + SRC)
     else
-      HtmlViewer1.LoadFromString('<html><body><h1>File not found: ' + Href + '</h1></body></html>');
+      HtmlViewer1.LoadFromString('<html><body><h1>File not found: ' + htmlPath + SRC + '</h1></body></html>');
   end
   else
   begin
     // Externe Links öffnen im Standardbrowser
-    OpenURL(Href);
+    OpenURL(SRC);
   end;
+  Handled := true;
 end;
 
 procedure TfmMain.AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
@@ -1424,7 +1427,9 @@ begin
 
       // FB 2.5: Dummy-Rolle prüfen / anlegen und ggf. zuweisen
 
-      ServerVersionMajor := RegisteredDatabases[dbIndex].RegRec.ServerVersionMajor;
+      //ServerVersionMajor := RegisteredDatabases[dbIndex].RegRec.ServerVersionMajor;
+
+      ServerVersionMajor := GetServerMajorVersionFromIBDB(RegisteredDatabases[dbIndex].IBDatabase);
 
       if ServerVersionMajor < 3 then
       begin
@@ -4059,7 +4064,7 @@ begin
   try
     Lines.Text := ASQLText;
     Line := Lines[0];
-    if Line.StartsWith('--')  or Line.StartsWith('/*')  then
+    //if Line.StartsWith('--')  or Line.StartsWith('/*')  then
       result := Line;
   finally
     Lines.Free;
@@ -6226,7 +6231,7 @@ begin
         tvotUserRoot: begin
           UserNode:= Node;
           Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUsers, Count);
-          Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')'; // - Public User
+          Node.Text:= ANodeText + ' (' + IntToStr(Count -1) + ')'; // - Public User
           UserNode.DeleteChildren;
           for i:= 0 to Objects.Count - 1 do
           begin

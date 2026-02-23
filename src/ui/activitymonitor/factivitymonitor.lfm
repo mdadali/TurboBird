@@ -1,7 +1,7 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 1012
+  Left = 937
   Height = 673
-  Top = 438
+  Top = 170
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
@@ -41,7 +41,7 @@ object frmActivityMonitor: TfrmActivityMonitor
       Cursor = crVSplit
       Left = 1
       Height = 5
-      Top = 406
+      Top = 379
       Width = 1098
       Align = alTop
       ResizeAnchor = akTop
@@ -61,7 +61,7 @@ object frmActivityMonitor: TfrmActivityMonitor
         ClientWidth = 1092
         object grdAttachments: TRxDBGrid
           Left = 0
-          Height = 178
+          Height = 136
           Top = 0
           Width = 1092
           ColumnDefValues.BlobText = '(blob)'
@@ -127,7 +127,7 @@ object frmActivityMonitor: TfrmActivityMonitor
           SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
           SearchOptions.FromStart = False
           OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
-          Align = alClient
+          Align = alTop
           Color = clWindow
           DrawFullLine = False
           FocusColor = clRed
@@ -146,8 +146,8 @@ object frmActivityMonitor: TfrmActivityMonitor
     end
     object pagecontrolStatements: TPageControl
       Left = 1
-      Height = 219
-      Top = 411
+      Height = 246
+      Top = 384
       Width = 1098
       ActivePage = tsStatements
       Align = alClient
@@ -155,11 +155,11 @@ object frmActivityMonitor: TfrmActivityMonitor
       TabOrder = 3
       object tsStatements: TTabSheet
         Caption = 'Statements'
-        ClientHeight = 181
+        ClientHeight = 208
         ClientWidth = 1092
         object grdStatements: TRxDBGrid
           Left = 0
-          Height = 181
+          Height = 208
           Top = 0
           Width = 1092
           ColumnDefValues.BlobText = '(blob)'
@@ -242,7 +242,7 @@ object frmActivityMonitor: TfrmActivityMonitor
     end
     object pageControlTransactions: TPageControl
       Left = 1
-      Height = 184
+      Height = 157
       Top = 222
       Width = 1098
       ActivePage = tsTransactions
@@ -251,11 +251,11 @@ object frmActivityMonitor: TfrmActivityMonitor
       TabOrder = 4
       object tsTransactions: TTabSheet
         Caption = 'Transactions'
-        ClientHeight = 146
+        ClientHeight = 119
         ClientWidth = 1092
         object grdTransactions: TRxDBGrid
           Left = 0
-          Height = 146
+          Height = 119
           Top = 0
           Width = 1092
           ColumnDefValues.BlobText = '(blob)'
