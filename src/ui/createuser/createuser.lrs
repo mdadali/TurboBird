@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmCreateUser','FORMDATA',[
-  'TPF0'#13'TfmCreateUser'#12'fmCreateUser'#4'Left'#3#148#1#6'Height'#3#198#0#3
-  +'Top'#3#163#0#5'Width'#3#225#1#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#15
+  'TPF0'#13'TfmCreateUser'#12'fmCreateUser'#4'Left'#3'm'#1#6'Height'#3#198#0#3
+  +'Top'#3#223#0#5'Width'#3#225#1#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#15
   +'Create New User'#12'ClientHeight'#3#198#0#11'ClientWidth'#3#225#1#6'OnShow'
   +#7#8'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0
   +#6'TLabel'#6'Label1'#4'Left'#2#13#6'Height'#2#20#3'Top'#2'('#5'Width'#2'k'#7
