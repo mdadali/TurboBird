@@ -6,7 +6,7 @@ What's New for TurboBird
 
 -------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1266
-Build date & time: 23.02.2026, 13:54:25
+Build date & time: 23.02.2026, 13:48:57
 
 !Several bugs have been fixed.
 

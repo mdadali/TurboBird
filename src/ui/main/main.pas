@@ -6232,7 +6232,7 @@ begin
         tvotUserRoot: begin
           UserNode:= Node;
           Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otUsers, Count);
-          Node.Text:= ANodeText + ' (' + IntToStr(Count -1) + ')'; // - Public User
+          Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')'; // - Public User
           UserNode.DeleteChildren;
           for i:= 0 to Objects.Count - 1 do
           begin
