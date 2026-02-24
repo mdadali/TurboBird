@@ -1,11 +1,11 @@
 object fmAbout: TfmAbout
-  Left = 511
+  Left = 549
   Height = 583
-  Top = 102
+  Top = 143
   Width = 641
   BorderIcons = []
   BorderStyle = bsNone
-  Caption = 'About TurboBird'
+  Caption = 'About Turbobird'
   ClientHeight = 583
   ClientWidth = 641
   Color = clForm

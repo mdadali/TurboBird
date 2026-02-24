@@ -1,9 +1,9 @@
 object fmMain: TfmMain
-  Left = 410
+  Left = 834
   Height = 612
-  Top = 99
+  Top = 136
   Width = 906
-  Caption = 'TurboBird Admin for FireBird'
+  Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
   ClientWidth = 906
   Color = clForm

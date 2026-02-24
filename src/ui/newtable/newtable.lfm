@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 455
+  Left = 463
   Height = 634
-  Top = 56
+  Top = 91
   Width = 589
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -79,7 +79,7 @@ object fmNewTable: TfmNewTable
     Left = 18
     Height = 22
     Top = 495
-    Width = 331
+    Width = 330
     Anchors = [akLeft, akBottom]
     Caption = 'Create Auto increment Generator and Trigger'
     TabOrder = 2
@@ -88,7 +88,7 @@ object fmNewTable: TfmNewTable
     Left = 18
     Height = 22
     Top = 545
-    Width = 62
+    Width = 61
     Anchors = [akLeft, akBottom]
     Caption = 'Grant'
     OnChange = cxGrantPermissionChange
@@ -331,13 +331,5 @@ object fmNewTable: TfmNewTable
       OnClick = Button1Click
       TabOrder = 1
     end
-  end
-  object ScrollBar1: TScrollBar
-    Left = 342
-    Height = 12
-    Top = 44
-    Width = 121
-    PageSize = 0
-    TabOrder = 7
   end
 end

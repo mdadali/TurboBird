@@ -27,7 +27,6 @@ type
     Label1: TLabel;
     laPermission: TLabel;
     Panel1: TPanel;
-    ScrollBar1: TScrollBar;
     StringGrid1: TStringGrid;
     procedure bbScriptClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
@@ -70,7 +69,7 @@ var
   i: Integer;
   FieldLine: string;
   FieldType: string;
-  PKey: string;
+  PKey, PKey_Quoted: string;
   TableName: string;
 begin
   TableName := Trim(turbocommon.ExtractObjectName(edNewTable.Text));
@@ -105,12 +104,17 @@ begin
       // Primary Key
       if StringGrid1.Cells[4, i] = '1' then
       begin
-        PKey:= Trim(PKey + StringGrid1.Cells[0, i]) + ',';
+        if IsObjectNameCaseSensitive(StringGrid1.Cells[0, i]) then
+          PKey_Quoted := MakeObjectNameQuoted(StringGrid1.Cells[0, i])
+        else
+          PKey_Quoted := StringGrid1.Cells[0, i];
+
+        PKey:= Trim(PKey + PKey_Quoted) + ',';
         GeneratorName:= Trim(edNewTable.Text) + '_' + StringGrid1.Cells[0, i] + '_Gen';
         KeyField:= Trim(StringGrid1.Cells[0, i]); // Generator should work if there is only one Key field
-        if IsObjectNameCaseSensitive(KeyField) then
-          if not IsObjectNameQuoted(KeyField) then
-            KeyField := MakeObjectNameQuoted(KeyField);
+        //if IsObjectNameCaseSensitive(KeyField) then
+          //if not IsObjectNameQuoted(KeyField) then
+            //KeyField := MakeObjectNameQuoted(KeyField);
       end;
       // Default value
       if Trim(StringGrid1.Cells[5, i]) <> '' then
@@ -316,9 +320,12 @@ begin
     try
       List.Text:= GenerateCreateSQL(KeyField, GeneratorName);
 
+      if IsObjectNameCaseSensitive(KeyField) then
+        if not IsObjectNameQuoted(KeyField) then
+          KeyField := MakeObjectNameQuoted(KeyField);
+
       if cxCreateGen.Checked then
       begin;
-        //todo: move this generator/trigger creation to a utility function somewhere; likewise for other create/alter DDL code
         List.Add('');
         List.Add('-- Generator');
         List.Add('create generator ' + GeneratorName + ';');
