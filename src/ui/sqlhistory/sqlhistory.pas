@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, db, memds, FileUtil, SynHighlighterSQL, SynEdit,
   LResources, Forms, Controls, Graphics, Dialogs, DBGrids, Buttons, StdCtrls,
-  EditBtn, ExtCtrls, DBCtrls, ComCtrls, DBExtCtrls,
+  EditBtn, ExtCtrls, DBCtrls, ComCtrls, DBExtCtrls, RxDBGrid,
   turbocommon,
   uthemeselector;
 
@@ -26,7 +26,6 @@ type
     DateEdit1: TDateEdit;
     DBDateEdit1: TDBDateEdit;
     DBEdit1: TDBEdit;
-    DBGrid1: TDBGrid;
     DBMemo1: TDBMemo;
     DBNavigator1: TDBNavigator;
     DBNavigator2: TDBNavigator;
@@ -40,6 +39,7 @@ type
     PageControl1: TPageControl;
     Panel1: TPanel;
     Panel2: TPanel;
+    DBGrid1: TRxDBGrid;
     SaveDialog1: TSaveDialog;
     Splitter1: TSplitter;
     SQLType: TLabel;
@@ -88,6 +88,7 @@ end;
 
 procedure TfmSQLHistory.FormShow(Sender: TObject);
 begin
+  DBGrid1.OptimizeColumnsWidthAll;
   frmThemeSelector.btnApplyClick(self);
 end;
 

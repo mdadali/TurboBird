@@ -6,35 +6,35 @@ LazarusResources.Add('TfmNewConstraint','FORMDATA',[
   +'yle'#7#8'bsSingle'#7'Caption'#6#15'fmNewConstraint'#12'ClientHeight'#3#24#2
   +#11'ClientWidth'#3#189#1#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScreenCe'
   +'nter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#8#6'Heigh'
-  +'t'#2#19#3'Top'#2#15#5'Width'#3#146#0#7'Caption'#6#23'New Constraint on tabl'
+  +'t'#2#20#3'Top'#2#15#5'Width'#3#163#0#7'Caption'#6#23'New Constraint on tabl'
   +'e'#11'ParentColor'#8#0#0#6'TLabel'#7'laTable'#4'Left'#3#184#0#6'Height'#2#19
   +#3'Top'#2#15#5'Width'#2'/'#7'Caption'#6#7'laTable'#10'Font.Style'#11#6'fsBol'
   +'d'#0#11'ParentColor'#8#10'ParentFont'#8#0#0#6'TLabel'#6'Label6'#4'Left'#2#8
-  +#6'Height'#2#19#3'Top'#3#176#1#5'Width'#2'V'#7'Caption'#6#13'Update action'
-  +#11'ParentColor'#8#0#0#6'TLabel'#6'Label7'#4'Left'#2#12#6'Height'#2#19#3'Top'
-  +#3#216#1#5'Width'#2'R'#7'Caption'#6#13'Delete action'#11'ParentColor'#8#0#0#9
+  +#6'Height'#2#20#3'Top'#3#176#1#5'Width'#2'^'#7'Caption'#6#13'Update action'
+  +#11'ParentColor'#8#0#0#6'TLabel'#6'Label7'#4'Left'#2#12#6'Height'#2#20#3'Top'
+  +#3#216#1#5'Width'#2'X'#7'Caption'#6#13'Delete action'#11'ParentColor'#8#0#0#9
   +'TGroupBox'#9'GroupBox1'#4'Left'#2#0#6'Height'#3#170#0#3'Top'#2'('#5'Width'#3
   +#185#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#7'Caption'#6#13'Current'
-  +' table'#12'ClientHeight'#3#150#0#11'ClientWidth'#3#183#1#8'TabOrder'#2#0#0#6
-  +'TLabel'#6'Label2'#4'Left'#2#8#6'Height'#2#19#3'Top'#2#8#5'Width'#3#129#0#7
+  +' table'#12'ClientHeight'#3#148#0#11'ClientWidth'#3#181#1#8'TabOrder'#2#0#0#6
+  +'TLabel'#6'Label2'#4'Left'#2#8#6'Height'#2#20#3'Top'#2#8#5'Width'#3#144#0#7
   +'Caption'#6#19'New constraint name'#11'ParentColor'#8#0#0#6'TLabel'#6'Label3'
-  +#4'Left'#2#10#6'Height'#2#19#3'Top'#2''''#5'Width'#2'6'#7'Caption'#6#9'On fi'
+  +#4'Left'#2#10#6'Height'#2#20#3'Top'#2''''#5'Width'#2'<'#7'Caption'#6#9'On fi'
   +'elds'#11'ParentColor'#8#0#0#5'TEdit'#9'edNewName'#4'Left'#3#150#0#6'Height'
-  +#2#31#3'Top'#2#8#5'Width'#3#226#0#8'TabOrder'#2#0#4'Text'#6#9'edNewName'#0#0
+  +#2#30#3'Top'#2#8#5'Width'#3#226#0#8'TabOrder'#2#0#4'Text'#6#9'edNewName'#0#0
   +#13'TCheckListBox'#11'clxOnFields'#4'Left'#3#150#0#6'Height'#2'h'#3'Top'#2
   +''''#5'Width'#3#26#1#10'ItemHeight'#2#0#8'TabOrder'#2#1#8'TopIndex'#2#255#0#0
   +#0#9'TGroupBox'#9'GroupBox2'#4'Left'#2#0#6'Height'#3#200#0#3'Top'#3#224#0#5
   +'Width'#3#185#1#7'Anchors'#11#5'akTop'#6'akLeft'#7'akRight'#0#7'Caption'#6#13
-  +'Foreign Table'#12'ClientHeight'#3#180#0#11'ClientWidth'#3#183#1#8'TabOrder'
-  +#2#1#0#6'TLabel'#6'Label4'#4'Left'#2#11#6'Height'#2#19#3'Top'#2#12#5'Width'#2
-  +'F'#7'Caption'#6#10'Table name'#11'ParentColor'#8#0#0#6'TLabel'#6'Label5'#4
-  +'Left'#2#11#6'Height'#2#19#3'Top'#2'4'#5'Width'#2'6'#7'Caption'#6#9'On field'
+  +'Foreign Table'#12'ClientHeight'#3#178#0#11'ClientWidth'#3#181#1#8'TabOrder'
+  +#2#1#0#6'TLabel'#6'Label4'#4'Left'#2#11#6'Height'#2#20#3'Top'#2#12#5'Width'#2
+  +'N'#7'Caption'#6#10'Table name'#11'ParentColor'#8#0#0#6'TLabel'#6'Label5'#4
+  +'Left'#2#11#6'Height'#2#20#3'Top'#2'4'#5'Width'#2'<'#7'Caption'#6#9'On field'
   +'s'#11'ParentColor'#8#0#0#9'TComboBox'#8'cbTables'#4'Left'#2'l'#6'Height'#2
-  +'#'#3'Top'#2#7#5'Width'#3#12#1#10'ItemHeight'#2#0#8'OnChange'#7#14'cbTablesC'
+  +' '#3'Top'#2#7#5'Width'#3#12#1#10'ItemHeight'#2#0#8'OnChange'#7#14'cbTablesC'
   +'hange'#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#0#0#0#13'TCheckListBox'
   +#12'clxForFields'#4'Left'#2'l'#6'Height'#2'}'#3'Top'#2'0'#5'Width'#3'D'#1#10
   +'ItemHeight'#2#0#8'TabOrder'#2#1#8'TopIndex'#2#255#0#0#0#9'TComboBox'#14'cbU'
-  +'pdateAction'#4'Left'#2'q'#6'Height'#2#31#3'Top'#3#176#1#5'Width'#3#7#1#10'I'
+  +'pdateAction'#4'Left'#2'q'#6'Height'#2#28#3'Top'#3#176#1#5'Width'#3#7#1#10'I'
   +'temHeight'#2#0#9'ItemIndex'#2#0#13'Items.Strings'#1#6#8'Restrict'#6#9'No Ac'
   +'tion'#6#7'Cascade'#6#11'Set Default'#6#8'Set null'#0#5'Style'#7#14'csDropDo'
   +'wnList'#8'TabOrder'#2#2#4'Text'#6#8'Restrict'#0#0#7'TBitBtn'#8'bbScript'#4
@@ -86,7 +86,7 @@ LazarusResources.Add('TfmNewConstraint','FORMDATA',[
   +#0#0#17#17#17#12#0#0#0'9'#0#0#0'='#0#0#0'='#0#0#0'='#0#0#0'='#0#0#0'='#0#0#0
   +'='#0#0#0'='#0#0#0'='#0#0#0'='#0#0#0'='#0#0#0'9'#7#7#7#15#0#0#0#0#11'ModalRe'
   +'sult'#2#1#7'OnClick'#7#13'bbScriptClick'#8'TabOrder'#2#3#0#0#9'TComboBox'#14
-  +'cbDeleteAction'#4'Left'#2'q'#6'Height'#2#31#3'Top'#3#216#1#5'Width'#3#9#1#10
+  +'cbDeleteAction'#4'Left'#2'q'#6'Height'#2#28#3'Top'#3#216#1#5'Width'#3#9#1#10
   +'ItemHeight'#2#0#9'ItemIndex'#2#0#13'Items.Strings'#1#6#8'Restrict'#6#9'No A'
   +'ction'#6#7'Cascade'#6#11'Set Default'#6#8'Set null'#0#5'Style'#7#14'csDropD'
   +'ownList'#8'TabOrder'#2#4#4'Text'#6#8'Restrict'#0#0#0

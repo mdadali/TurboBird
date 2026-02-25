@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3'B'#3#6'Height'#3'd'#2#3'Top'#3#136#0#5
+  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#200#1#6'Height'#3'd'#2#3'Top'#3#201#1#5
   +'Width'#3#138#3#7'Caption'#6#28'TurboBird Admin for Firebird'#12'ClientHeigh'
   +'t'#3'L'#2#11'ClientWidth'#3#138#3#5'Color'#7#6'clForm'#8'DragMode'#7#11'dmA'
   +'utomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10#239#182#2#0#235#182#2#0#0#0
