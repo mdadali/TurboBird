@@ -74,33 +74,128 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
-procedure TfmNewConstraint.bbScriptClick(Sender: TObject);
+{procedure TfmNewConstraint.bbScriptClick(Sender: TObject);
 var
   CurrFields, ForFields: string;
   i: Integer;
+  QuotedItem: string;
+  QuotedTableName: string;
 begin
   CurrFields:= '';
+
   for i:= 0 to clxOnFields.Count - 1 do
+  begin
     if clxOnFields.Checked[i] then
+
+      if IsObjectNameCaseSensitive(clxOnFields.Items[i]) then
+        if not IsObjectNameQuoted(clxOnFields.Items[i]) then
+          clxOnFields.Items[i] := MakeObjectNameQuoted(clxOnFields.Items[i]);
+
       CurrFields:= CurrFields + clxOnFields.Items[i] + ', ';
+  end;
+
   if CurrFields <> '' then
     Delete(CurrFields, Length(CurrFields) - 1, 2);
 
   ForFields:= '';
   for i:= 0 to clxForFields.Count - 1 do
+  begin
     if clxForFields.Checked[i] then
+
+      if IsObjectNameCaseSensitive(clxForFields.Items[i]) then
+        if not IsObjectNameQuoted(clxForFields.Items[i]) then
+          clxForFields.Items[i] := MakeObjectNameQuoted(clxForFields.Items[i]);
+
+
       ForFields:= ForFields + clxForFields.Items[i] + ', ';
+  end;
+
   if ForFields <> '' then
     Delete(ForFields, Length(ForFields) - 1, 2);
 
-  QWindow:= fmMain.ShowQueryWindow(DatabaseIndex, 'new constraint on table : ' + laTable.Caption);
-  QWindow.meQuery.Lines.Text:= 'alter table ' + laTable.Caption + ' ADD CONSTRAINT ' + edNewName.Text;
+  QuotedTableName := laTable.Caption;
+  if IsObjectNameCaseSensitive(QuotedTableName) then
+    if not IsObjectNameQuoted(QuotedTableName) then
+      QuotedTableName := MakeObjectNameQuoted(QuotedTableName);
+
+
+  QWindow:= fmMain.ShowQueryWindow(DatabaseIndex, 'new constraint on table : ' + QuotedTableName);
+  QWindow.meQuery.Lines.Text:= 'alter table ' + QuotedTableName + ' ADD CONSTRAINT ' + edNewName.Text;
   QWindow.meQuery.Lines.Add(' foreign key (' + CurrFields + ') ');
-  QWindow.meQuery.Lines.Add(' references ' + cbTables.Text + ' (' + ForFields + ') ');
+
+  QuotedTableName := cbTables.Text;
+  if IsObjectNameCaseSensitive(QuotedTableName) then
+    if not IsObjectNameQuoted(QuotedTableName) then
+      QuotedTableName := MakeObjectNameQuoted(QuotedTableName);
+
+  QWindow.meQuery.Lines.Add(' references ' + QuotedTableName + ' (' + ForFields + ') ');
   if cbUpdateAction.Text <> 'Restrict' then
     QWindow.meQuery.Lines.Add(' on update ' + cbUpdateAction.Text + ' ');
   if cbDeleteAction.Text <> 'Restrict' then
     QWindow.meQuery.Lines.Add(' on delete ' + cbDeleteAction.Text + ' ');
+
+  fmMain.Show;
+end;}
+
+procedure TfmNewConstraint.bbScriptClick(Sender: TObject);
+var
+  CurrFields, ForFields: string;
+  i: Integer;
+  TargetTable, RefTable: string;
+begin
+  CurrFields := '';
+  ForFields := '';
+
+  // Zusammenstellen der aktuellen Spalten
+  for i := 0 to clxOnFields.Count - 1 do
+  begin
+    if clxOnFields.Checked[i] then
+    begin
+      if IsObjectNameCaseSensitive(clxOnFields.Items[i]) and
+         not IsObjectNameQuoted(clxOnFields.Items[i]) then
+        clxOnFields.Items[i] := MakeObjectNameQuoted(clxOnFields.Items[i]);
+      CurrFields := CurrFields + clxOnFields.Items[i] + ', ';
+    end;
+  end;
+
+  if CurrFields.EndsWith(', ') then
+    CurrFields := Copy(CurrFields, 1, Length(CurrFields)-2);
+
+  // Zusammenstellen der referenzierten Spalten
+  for i := 0 to clxForFields.Count - 1 do
+  begin
+    if clxForFields.Checked[i] then
+    begin
+      if IsObjectNameCaseSensitive(clxForFields.Items[i]) and
+         not IsObjectNameQuoted(clxForFields.Items[i]) then
+        clxForFields.Items[i] := MakeObjectNameQuoted(clxForFields.Items[i]);
+      ForFields := ForFields + clxForFields.Items[i] + ', ';
+    end;
+  end;
+
+  if ForFields.EndsWith(', ') then
+    ForFields := Copy(ForFields, 1, Length(ForFields)-2);
+
+  // Tabellen
+  TargetTable := laTable.Caption;
+  if IsObjectNameCaseSensitive(TargetTable) and not IsObjectNameQuoted(TargetTable) then
+    TargetTable := MakeObjectNameQuoted(TargetTable);
+
+  RefTable := cbTables.Text;
+  if IsObjectNameCaseSensitive(RefTable) and not IsObjectNameQuoted(RefTable) then
+    RefTable := MakeObjectNameQuoted(RefTable);
+
+  // Query erstellen
+  QWindow := fmMain.ShowQueryWindow(DatabaseIndex, 'new constraint on table : ' + TargetTable);
+  QWindow.meQuery.Lines.Text := 'ALTER TABLE ' + TargetTable +
+                                ' ADD CONSTRAINT ' + edNewName.Text +
+                                ' FOREIGN KEY (' + CurrFields + ')' +
+                                ' REFERENCES ' + RefTable + ' (' + ForFields + ')';
+
+  if cbUpdateAction.Text <> 'Restrict' then
+    QWindow.meQuery.Lines.Add(' ON UPDATE ' + cbUpdateAction.Text);
+  if cbDeleteAction.Text <> 'Restrict' then
+    QWindow.meQuery.Lines.Add(' ON DELETE ' + cbDeleteAction.Text);
 
   fmMain.Show;
 end;

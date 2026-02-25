@@ -1,7 +1,7 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 756
+  Left = 469
   Height = 673
-  Top = 113
+  Top = 475
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673

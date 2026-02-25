@@ -1,12 +1,12 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmNewTable','FORMDATA',[
-  'TPF0'#11'TfmNewTable'#10'fmNewTable'#4'Left'#3#207#1#6'Height'#3'z'#2#3'Top'
-  +#2'['#5'Width'#3'M'#2#13'ActiveControl'#7#10'edNewTable'#7'Caption'#6#9'New '
-  +'Table'#12'ClientHeight'#3'z'#2#11'ClientWidth'#3'M'#2#10'KeyPreview'#9#7'On'
-  +'Close'#7#9'FormClose'#9'OnKeyDown'#7#11'FormKeyDown'#6'OnShow'#7#8'FormShow'
-  +#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6
-  +'Label1'#4'Left'#2#8#6'Height'#2#16#3'Top'#2#12#5'Width'#2'U'#7'Caption'#6#14
+  'TPF0'#11'TfmNewTable'#10'fmNewTable'#4'Left'#3'-'#2#6'Height'#3'z'#2#3'Top'#2
+  +'0'#5'Width'#3'M'#2#13'ActiveControl'#7#10'edNewTable'#7'Caption'#6#9'New Ta'
+  +'ble'#12'ClientHeight'#3'z'#2#11'ClientWidth'#3'M'#2#10'KeyPreview'#9#7'OnCl'
+  +'ose'#7#9'FormClose'#9'OnKeyDown'#7#11'FormKeyDown'#6'OnShow'#7#8'FormShow'#8
+  +'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6'La'
+  +'bel1'#4'Left'#2#8#6'Height'#2#16#3'Top'#2#12#5'Width'#2'U'#7'Caption'#6#14
   +'New Table name'#11'Font.Height'#2#245#11'ParentColor'#8#10'ParentFont'#8#0#0
   +#5'TEdit'#10'edNewTable'#4'Left'#2#8#6'Height'#2#30#3'Top'#2' '#5'Width'#3
   +#238#0#7'OnKeyUp'#7#15'edNewTableKeyUp'#8'TabOrder'#2#0#0#0#11'TStringGrid'

@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 463
+  Left = 557
   Height = 634
-  Top = 91
+  Top = 48
   Width = 589
   ActiveControl = edNewTable
   Caption = 'New Table'
