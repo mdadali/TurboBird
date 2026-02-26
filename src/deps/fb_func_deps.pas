@@ -25,6 +25,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AFuncName = '' then Exit;
 
   // Vollqualifizierter Funktionsname (für Suche im SQL-Quelltext)

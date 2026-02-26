@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AUDFName = '' then Exit;
 
   if APackageName <> '' then

@@ -1,7 +1,7 @@
 object fmCreateUser: TfmCreateUser
-  Left = 378
+  Left = 337
   Height = 198
-  Top = 203
+  Top = 263
   Width = 481
   BorderStyle = bsSingle
   Caption = 'Create New User'

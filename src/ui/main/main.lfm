@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 456
+  Left = 623
   Height = 612
-  Top = 457
+  Top = 389
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588

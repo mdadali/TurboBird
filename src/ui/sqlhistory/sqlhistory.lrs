@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmSQLHistory','FORMDATA',[
-  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3'd'#2#6'Height'#3'&'#2#3'T'
-  +'op'#2'V'#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2#11
+  'TPF0'#13'TfmSQLHistory'#12'fmSQLHistory'#4'Left'#3#204#1#6'Height'#3'&'#2#3
+  +'Top'#2'Z'#5'Width'#3'B'#3#7'Caption'#6#6'Querys'#12'ClientHeight'#3'&'#2#11
   +'ClientWidth'#3'B'#3#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#6
   +'OnShow'#7#8'FormShow'#8'Position'#7#16'poMainFormCenter'#10'LCLVersion'#6#7
   +'2.2.6.0'#0#12'TPageControl'#12'PageControl1'#4'Left'#2#0#6'Height'#3'&'#2#3
@@ -82,7 +82,7 @@ LazarusResources.Add('TfmSQLHistory','FORMDATA',[
   +'irst'#7'nbPrior'#6'nbNext'#6'nbLast'#8'nbDelete'#6'nbEdit'#6'nbPost'#8'nbCa'
   +'ncel'#9'nbRefresh'#0#0#0#9'TGroupBox'#9'GroupBox3'#4'Left'#2#0#6'Height'#3
   +#128#0#3'Top'#2'('#5'Width'#3'<'#3#5'Align'#7#5'alTop'#7'Caption'#6#11'Query'
-  +' Infos'#12'ClientHeight'#2'j'#11'ClientWidth'#3'8'#3#8'TabOrder'#2#1#0#6'TL'
+  +' Infos'#12'ClientHeight'#2'|'#11'ClientWidth'#3'8'#3#8'TabOrder'#2#1#0#6'TL'
   +'abel'#6'Label2'#4'Left'#2#24#6'Height'#2#20#3'Top'#2#19#5'Width'#2'M'#7'Cap'
   +'tion'#6#11'Description'#11'ParentColor'#8#0#0#6'TLabel'#7'SQLType'#4'Left'#2
   +#24#6'Height'#2#20#3'Top'#2'8'#5'Width'#2':'#7'Caption'#6#7'SQLType'#11'Pare'

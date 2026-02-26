@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AViewName = '' then Exit;
 
   ViewNameUpper := UpperCase(Trim(AViewName));

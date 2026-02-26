@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if APackageName = '' then Exit;
 
   PkgNameUpper := UpperCase(Trim(APackageName));

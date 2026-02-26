@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AUDRProcName = '' then Exit;
 
   if APackageName <> '' then

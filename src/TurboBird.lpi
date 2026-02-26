@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1674"/>
+      <BuildNr Value="1686"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -262,11 +262,6 @@
               <GenerateDebugInfo Value="False"/>
               <DebugInfoType Value="dsDwarf2Set"/>
             </Debugging>
-            <Options>
-              <Win32>
-                <GraphicApplication Value="True"/>
-              </Win32>
-            </Options>
           </Linking>
           <Other>
             <ExecuteBefore>
@@ -1314,8 +1309,16 @@
       </Debugging>
     </Linking>
     <Other>
-      <CustomOptions Value="-dDEBUG -O-1
--dUseCThreads"/>
+      <CustomOptions Value="-O-
+-O1
+-dDEBUG
+-dUseCThreads
+-dWITH_GTK2_IM"/>
+      <OtherDefines Count="3">
+        <Define0 Value="DEBUG"/>
+        <Define1 Value="UseCThreads"/>
+        <Define2 Value="WITH_GTK2_IM"/>
+      </OtherDefines>
       <ExecuteBefore>
         <Command Value="./gen_versions_scripts.sh"/>
         <CompileReasons Compile="False" Run="False"/>

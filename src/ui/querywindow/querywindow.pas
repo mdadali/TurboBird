@@ -2011,13 +2011,13 @@ begin
     //FSQLTrans.StartTransaction;
 
   try
-    //fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQuery.Text);
     if (FOrigQueryType = qtScript) then
     begin
       ExecuteScript(FQuery.Text);
       Inc(FModifyCount);
       SqlType := GetSQLType(FQuery.Text, Command);
-      fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQuery.Text);
+      //fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQuery.Text);
+      fmMain.AddToSQLHistory(FRegRec.Title, SqlType, meQuery.Text);
       FFinished := True;
       FQuery.Clear;
     end
@@ -2065,7 +2065,8 @@ begin
             FSQLQuery.Open;
             FTab.Caption := 'Query Result';
             FTab.ImageIndex := 0;
-            fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
+            //fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', FQueryPart);
+            fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', meQuery.Text);
           except
             on e: Exception do
             begin
@@ -2111,7 +2112,7 @@ begin
               FTab.Caption := 'DML Executed';
             end;
             Inc(FModifyCount);
-            fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
+            fmMain.AddToSQLHistory(FRegRec.Title, SqlType, meQuery.Text);
             FResultMemo.Visible := True;
             FResultMemo.Clear;
             FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
@@ -2148,7 +2149,7 @@ begin
             begin
               Inc(FModifyCount);
               SqlType := GetSQLType(FQueryPart, Command);
-              fmMain.AddToSQLHistory(FRegRec.Title, SqlType, FQueryPart);
+              fmMain.AddToSQLHistory(FRegRec.Title, SqlType, meQuery.Text);
             end;
           except
             on E: Exception do

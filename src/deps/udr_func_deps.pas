@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AUDRFuncName = '' then Exit;
 
   if APackageName <> '' then

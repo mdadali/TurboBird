@@ -74,69 +74,6 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
-{procedure TfmNewConstraint.bbScriptClick(Sender: TObject);
-var
-  CurrFields, ForFields: string;
-  i: Integer;
-  QuotedItem: string;
-  QuotedTableName: string;
-begin
-  CurrFields:= '';
-
-  for i:= 0 to clxOnFields.Count - 1 do
-  begin
-    if clxOnFields.Checked[i] then
-
-      if IsObjectNameCaseSensitive(clxOnFields.Items[i]) then
-        if not IsObjectNameQuoted(clxOnFields.Items[i]) then
-          clxOnFields.Items[i] := MakeObjectNameQuoted(clxOnFields.Items[i]);
-
-      CurrFields:= CurrFields + clxOnFields.Items[i] + ', ';
-  end;
-
-  if CurrFields <> '' then
-    Delete(CurrFields, Length(CurrFields) - 1, 2);
-
-  ForFields:= '';
-  for i:= 0 to clxForFields.Count - 1 do
-  begin
-    if clxForFields.Checked[i] then
-
-      if IsObjectNameCaseSensitive(clxForFields.Items[i]) then
-        if not IsObjectNameQuoted(clxForFields.Items[i]) then
-          clxForFields.Items[i] := MakeObjectNameQuoted(clxForFields.Items[i]);
-
-
-      ForFields:= ForFields + clxForFields.Items[i] + ', ';
-  end;
-
-  if ForFields <> '' then
-    Delete(ForFields, Length(ForFields) - 1, 2);
-
-  QuotedTableName := laTable.Caption;
-  if IsObjectNameCaseSensitive(QuotedTableName) then
-    if not IsObjectNameQuoted(QuotedTableName) then
-      QuotedTableName := MakeObjectNameQuoted(QuotedTableName);
-
-
-  QWindow:= fmMain.ShowQueryWindow(DatabaseIndex, 'new constraint on table : ' + QuotedTableName);
-  QWindow.meQuery.Lines.Text:= 'alter table ' + QuotedTableName + ' ADD CONSTRAINT ' + edNewName.Text;
-  QWindow.meQuery.Lines.Add(' foreign key (' + CurrFields + ') ');
-
-  QuotedTableName := cbTables.Text;
-  if IsObjectNameCaseSensitive(QuotedTableName) then
-    if not IsObjectNameQuoted(QuotedTableName) then
-      QuotedTableName := MakeObjectNameQuoted(QuotedTableName);
-
-  QWindow.meQuery.Lines.Add(' references ' + QuotedTableName + ' (' + ForFields + ') ');
-  if cbUpdateAction.Text <> 'Restrict' then
-    QWindow.meQuery.Lines.Add(' on update ' + cbUpdateAction.Text + ' ');
-  if cbDeleteAction.Text <> 'Restrict' then
-    QWindow.meQuery.Lines.Add(' on delete ' + cbDeleteAction.Text + ' ');
-
-  fmMain.Show;
-end;}
-
 procedure TfmNewConstraint.bbScriptClick(Sender: TObject);
 var
   CurrFields, ForFields: string;
