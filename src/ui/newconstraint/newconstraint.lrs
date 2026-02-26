@@ -1,16 +1,16 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmNewConstraint','FORMDATA',[
-  'TPF0'#16'TfmNewConstraint'#15'fmNewConstraint'#4'Left'#3#243#1#6'Height'#3#24
-  +#2#3'Top'#2'5'#5'Width'#3#189#1#13'ActiveControl'#7#9'edNewName'#11'BorderSt'
-  +'yle'#7#8'bsSingle'#7'Caption'#6#15'fmNewConstraint'#12'ClientHeight'#3#24#2
-  +#11'ClientWidth'#3#189#1#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScreenCe'
-  +'nter'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#8#6'Heigh'
-  +'t'#2#20#3'Top'#2#15#5'Width'#3#163#0#7'Caption'#6#23'New Constraint on tabl'
-  +'e'#11'ParentColor'#8#0#0#6'TLabel'#7'laTable'#4'Left'#3#184#0#6'Height'#2#19
-  +#3'Top'#2#15#5'Width'#2'/'#7'Caption'#6#7'laTable'#10'Font.Style'#11#6'fsBol'
-  +'d'#0#11'ParentColor'#8#10'ParentFont'#8#0#0#6'TLabel'#6'Label6'#4'Left'#2#8
-  +#6'Height'#2#20#3'Top'#3#176#1#5'Width'#2'^'#7'Caption'#6#13'Update action'
+  'TPF0'#16'TfmNewConstraint'#15'fmNewConstraint'#4'Left'#3'u'#1#6'Height'#3#24
+  +#2#3'Top'#3#131#0#5'Width'#3#189#1#13'ActiveControl'#7#9'edNewName'#11'Borde'
+  +'rStyle'#7#8'bsSingle'#7'Caption'#6#15'fmNewConstraint'#12'ClientHeight'#3#24
+  +#2#11'ClientWidth'#3#189#1#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScreen'
+  +'Center'#10'LCLVersion'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#8#6'Hei'
+  +'ght'#2#20#3'Top'#2#15#5'Width'#3#163#0#7'Caption'#6#23'New Constraint on ta'
+  +'ble'#11'ParentColor'#8#0#0#6'TLabel'#7'laTable'#4'Left'#3#184#0#6'Height'#2
+  +#19#3'Top'#2#15#5'Width'#2'/'#7'Caption'#6#7'laTable'#10'Font.Style'#11#6'fs'
+  +'Bold'#0#11'ParentColor'#8#10'ParentFont'#8#0#0#6'TLabel'#6'Label6'#4'Left'#2
+  +#8#6'Height'#2#20#3'Top'#3#176#1#5'Width'#2'^'#7'Caption'#6#13'Update action'
   +#11'ParentColor'#8#0#0#6'TLabel'#6'Label7'#4'Left'#2#12#6'Height'#2#20#3'Top'
   +#3#216#1#5'Width'#2'X'#7'Caption'#6#13'Delete action'#11'ParentColor'#8#0#0#9
   +'TGroupBox'#9'GroupBox1'#4'Left'#2#0#6'Height'#3#170#0#3'Top'#2'('#5'Width'#3

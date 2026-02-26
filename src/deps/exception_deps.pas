@@ -25,6 +25,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+ 
   if AExceptionName = '' then Exit;
 
   ExceptionNameUpper := UpperCase(Trim(AExceptionName));

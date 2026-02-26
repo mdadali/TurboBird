@@ -1,7 +1,7 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 612
+  Left = 460
   Height = 550
-  Top = 86
+  Top = 90
   Width = 834
   Caption = 'Querys'
   ClientHeight = 550
@@ -286,7 +286,7 @@ object fmSQLHistory: TfmSQLHistory
         Width = 828
         Align = alTop
         Caption = 'Query Infos'
-        ClientHeight = 106
+        ClientHeight = 124
         ClientWidth = 824
         TabOrder = 1
         object Label2: TLabel

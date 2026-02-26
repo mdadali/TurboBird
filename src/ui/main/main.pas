@@ -548,12 +548,14 @@ begin
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
 
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + 'index.html';
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'index.html';
 
   if FileExists(htmlPath) then
     HtmlViewer1.LoadFromFile(htmlPath)
   else
-    HtmlViewer1.LoadFromString('<html><body><h1>index.html not found</h1></body></html>');
+    HtmlViewer1.LoadFromFile(
+      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
+    );
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
@@ -570,14 +572,15 @@ procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
 var htmlPath: string;
 begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim;
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim;
 
   if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
     if FileExists(htmlPath + SRC) then
       HtmlViewer1.LoadFromFile(htmlPath + SRC)
     else
-      HtmlViewer1.LoadFromString('<html><body><h1>File not found: ' + htmlPath + SRC + '</h1></body></html>');
+    HtmlViewer1.LoadFromFile(
+      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
   end
   else
   begin
@@ -4053,23 +4056,58 @@ begin
     inherited SetFocus;
 end;
 
-function GetFirstCommentLineFromSQLText(ASQLText: string): string;
+{function GetFirstCommentLineFromSQLText(const ASQLText: string): string;
 var
   Lines: TStringList;
-  Line: string;
-  InBlockComment: Boolean;
-  p, i: Integer;
+  i: Integer;
 begin
   Result := '';
+
+  if Trim(ASQLText) = '' then
+    Exit;
+
   Lines := TStringList.Create;
   try
     Lines.Text := ASQLText;
-    Line := Lines[0];
-    //if Line.StartsWith('--')  or Line.StartsWith('/*')  then
-      result := Line;
+
+    for i := 0 to Lines.Count - 1 do
+    begin
+      if Trim(Lines[i]) <> '' then
+      begin
+        Result := Trim(Lines[i]);
+        Exit;
+      end;
+    end;
+
   finally
     Lines.Free;
   end;
+end;}
+
+function GetFirstCommentLineFromSQLText(const ASQLText: string): string;
+var
+  p, StartPos, Len: Integer;
+  S: string;
+begin
+  Result := '';
+  S := TrimLeft(ASQLText);
+
+  if S = '' then
+    Exit;
+
+  Len := Length(S);
+  StartPos := 1;
+
+  for p := 1 to Len do
+  begin
+    if (S[p] = #13) or (S[p] = #10) then
+    begin
+      Result := Trim(Copy(S, StartPos, p - StartPos));
+      Exit;
+    end;
+  end;
+
+  Result := Trim(S);
 end;
 
 (* Insert SQL query into database history file *)
@@ -4086,7 +4124,11 @@ begin
       begin
         description := GetFirstCommentLineFromSQLText(SQLStatement);
         if description = '' then
-          description := 'Description';
+          description := Copy(Trim(SQLStatement), 1, 100);
+
+        //description max 100 Chars
+        //description := Copy(description, 1, 100);
+
         mdsHistory.AppendRecord([description, Now, SQLType, SQLStatement, 0]);
         if SQLType = 'DDL' then
           mdsHistory.SaveToFile(FCurrentHistoryFile);

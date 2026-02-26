@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AUserName = '' then Exit;
 
   UserNameUpper := UpperCase(Trim(AUserName));

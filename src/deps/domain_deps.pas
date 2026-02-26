@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+   
   if ADomainName = '' then Exit;
 
   DomainNameUpper := UpperCase(Trim(ADomainName));

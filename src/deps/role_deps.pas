@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if ARoleName = '' then Exit;
 
   RoleNameUpper := UpperCase(Trim(ARoleName));

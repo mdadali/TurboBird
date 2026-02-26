@@ -5,6 +5,23 @@ What's New for TurboBird
 - : removed
 
 -------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1267
+Build date & time: 26.02.2026, 16:03:01
+
++Simple Activity Monitor: It is now possible to cancel attachments and statements directly.
+
++Object Filter in TreeView: Objects in the main TreeView can now be filtered selectively. Filter format: Identifier Identifier or identifier.
+
++Multilingual Help – simple interface (HTML pages currently serve as placeholders): Subfolders in the help directory for languages, e.g., eng, ger, fra. Language can be set in the INI file:
+
+[UI]
+Language=eng
+
+The application will then load the respective index.html. This interface can also be used later for GUI language.
+
++Various minor bugs have been fixed.
+
+-------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1266
 Build date & time: 23.02.2026, 13:48:57
 

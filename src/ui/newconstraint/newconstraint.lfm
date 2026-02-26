@@ -1,7 +1,7 @@
 object fmNewConstraint: TfmNewConstraint
-  Left = 499
+  Left = 373
   Height = 536
-  Top = 53
+  Top = 131
   Width = 445
   ActiveControl = edNewName
   BorderStyle = bsSingle

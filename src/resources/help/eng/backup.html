@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TurboBird — Backup & Restore</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #ffffff; color: #111; margin: 0; padding: 10px; }
+  h1 { font-size: 22px; margin-bottom: 6px; }
+  h2 { font-size: 18px; margin-top: 16px; }
+  h3 { font-size: 15px; margin-top: 12px; }
+  p { margin: 6px 0; }
+  ul { padding-left: 20px; }
+  li { margin-bottom: 4px; }
+  pre {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    padding: 8px;
+    white-space: pre-wrap;
+    font-size: 13px;
+  }
+  .note {
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    padding: 8px;
+    border-radius: 6px;
+    margin: 10px 0;
+  }
+  .signature {
+    font-size: 12px;
+    color: #555;
+    margin-top: 20px;
+  }
+  a { color: #0645AD; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+
+<body>
+
+<h1>Backup & Restore</h1>
+
+<p>
+This page explains database backup and restore concepts relevant to TurboBird and Firebird.
+</p>
+
+<div class="note">
+<b>Important:</b><br>
+TurboBird performs backup and restore operations internally using
+<b>IBX (InterBase Express) components</b>.
+GBAK is <b>not executed directly</b> by TurboBird, but the concepts,
+options, and behavior described below are applicable to Firebird backups in general.
+</div>
+
+<p><a href="index.html">Back to Home</a></p>
+
+<hr>
+
+<h2>GBAK – Firebird Backup and Restore</h2>
+
+<p>
+GBAK is Firebird's command line tool for online backup and restore of a complete database.
+</p>
+
+<h3>General Syntax</h3>
+
+<pre>
+gbak &lt;options&gt; -user &lt;username&gt; -password &lt;password&gt; &lt;source&gt; &lt;destination&gt;
+</pre>
+
+<h3>Backup</h3>
+
+<p>
+For backups, <code>&lt;source&gt;</code> is the database you want to back up,
+<code>&lt;destination&gt;</code> is the file name of the backup file.
+The usual extension is <code>.fbk</code> for Firebird and <code>.gbk</code> for InterBase.
+</p>
+
+<p>
+Only SYSDBA or the database owner can perform a backup.
+For multi-file databases, specify only the name of the first file as the database name.
+</p>
+
+<h3>Restore</h3>
+
+<p>
+For restores, <code>&lt;source&gt;</code> is the backup file and
+<code>&lt;destination&gt;</code> is the name of the database that is to be built up
+from the backup file. You must specify the <code>-C</code> option for restore.
+</p>
+
+<h3>General Options</h3>
+
+<ul>
+  <li><code>-pa[ssword] &lt;password&gt;</code> – Database password</li>
+  <li><code>-role &lt;role&gt;</code> – Connect as role</li>
+  <li><code>-se[rvice] &lt;hostname&gt;:service_mgr</code> – Use Service Manager</li>
+  <li><code>-u[ser] &lt;username&gt;</code> – Database user name</li>
+  <li><code>-v[erbose]</code> – Verbose output</li>
+  <li><code>-y &lt;filename&gt;</code> – Redirect output to file</li>
+  <li><code>-y suppress_output</code> – Quiet mode</li>
+  <li><code>-z</code> – Show GBAK and server version</li>
+</ul>
+
+<h3>Backup Options</h3>
+
+<ul>
+  <li><code>-b[ackup_database]</code> – Backup (optional)</li>
+  <li><code>-co[nvert]</code> – Convert external tables</li>
+  <li><code>-e[xpand]</code> – Uncompressed backup</li>
+  <li><code>-fa[ctor] n</code> – Blocking factor for tape device</li>
+  <li><code>-g[arbage collect]</code> – Disable garbage collection</li>
+  <li><code>-ig[nore]</code> – Ignore checksum errors</li>
+  <li><code>-l[imbo]</code> – Ignore limbo transactions</li>
+  <li><code>-m[etadata]</code> – Backup metadata only</li>
+  <li><code>-nt</code> – Non-transportable format</li>
+  <li><code>-t[ransportable]</code> – Transportable backup</li>
+</ul>
+
+<h3>Restore Options</h3>
+
+<ul>
+  <li><code>-bu[ffers]</code> – Set cache size</li>
+  <li><code>-c[reate_database]</code> – Restore (mandatory)</li>
+  <li><code>-i[nactive]</code> – Restore indexes as inactive</li>
+  <li><code>-k[ill]</code> – Do not create shadows</li>
+  <li><code>-mo[de] read_write</code> – Restore as read/write</li>
+  <li><code>-mo[de] read_only</code> – Restore as read-only</li>
+  <li><code>-n[o_validity]</code> – Do not restore validity constraints</li>
+  <li><code>-o[ne_at_a_time]</code> – Restore one table at a time</li>
+  <li><code>-p[age_size]</code> – Page size</li>
+  <li><code>-r[eplace_database]</code> – Restore over existing database</li>
+  <li><code>-use_[all_space]</code> – Fill pages to 100%</li>
+</ul>
+
+<h3>Examples</h3>
+
+<pre>
+gbak -v -t -user SYSDBA -password "masterkey" dbserver:/db/warehouse.fdb
+c:\backups\warehouse.fbk
+</pre>
+
+<pre>
+gbak -c -v -user SYSDBA -password masterkey c:\backups\warehouse.fbk
+dbserver:/db/warehouse2.fdb
+</pre>
+
+<hr>
+
+<h2>Multi-file Backups</h2>
+
+<h3>Syntax for Backup</h3>
+
+<pre>
+gbak [options] &lt;database&gt;
+     &lt;target file 1&gt; &lt;size 1&gt;
+     &lt;target file 2&gt; &lt;size 2&gt;
+     ...
+     &lt;target file n&gt;
+</pre>
+
+<p>
+<b>Note:</b> Do not specify a size for the last file.
+It will always be filled with whatever space is left.
+</p>
+
+<p>
+Size can be given in bytes (8192), kilobytes (1024k),
+megabytes (5m), or gigabytes (2g).
+</p>
+
+<h3>Syntax for Restore</h3>
+
+<pre>
+gbak -c [options]
+     &lt;source file 1&gt;
+     &lt;source file 2&gt;
+     ...
+     &lt;source file n&gt;
+     &lt;database&gt;
+</pre>
+
+<h3>Restoring to a Multi-file Database</h3>
+
+<pre>
+gbak -c [options]
+     &lt;source file&gt;
+     &lt;db file 1&gt; &lt;size 1&gt;
+     &lt;db file 2&gt; &lt;size 2&gt;
+     ...
+     &lt;db file n&gt;
+</pre>
+
+<p>
+<b>Note:</b> Do not specify a size for the last database file.
+It can always grow without limit.
+</p>
+
+<h3>Restoring from a Multi-file Backup to a Multi-file Database</h3>
+
+<pre>
+gbak -c [options]
+     &lt;source file 1&gt;
+     &lt;source file 2&gt;
+     ...
+     &lt;source file n&gt;
+     &lt;db file 1&gt; &lt;size 1&gt;
+     &lt;db file 2&gt; &lt;size 2&gt;
+     ...
+     &lt;db file n&gt;
+</pre>
+
+<hr>
+
+<div class="signature">
+Stefan Heymann, 2004-04-12<br>
+This documentation is licensed under (choose your favorite):<br>
+GPL, LGPL, CC, IDPL, GFDL, BSD
+</div>
+
+</body>
+</html>

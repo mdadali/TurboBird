@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if ATriggerName = '' then Exit;
 
   TrigNameUpper := UpperCase(Trim(ATriggerName));

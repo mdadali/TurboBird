@@ -26,6 +26,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AProcName = '' then Exit;
 
   // Vollständiger Prozedurname, abhängig vom Package

@@ -25,6 +25,8 @@ var
   i: Integer;
 begin
   Result := '';
+  exit;
+
   if AGeneratorName = '' then Exit;
 
   GenNameUpper := UpperCase(Trim(AGeneratorName));

@@ -344,7 +344,6 @@ const
 var
     MainTreeView: TTreeView;
 
-    fLanguage: string;
     fIniFileName: string;
     fIniFile: TInifile;
 
@@ -362,6 +361,9 @@ var
     MetaDataChanged: boolean;  //Tables and Fields
 
     //Ini.File////////////////////////////////////////////////////////////////
+    //UserInterface
+    Language: string;
+
     //Backup options
     CloseDBBeforeBackup: boolean;
 
@@ -1613,7 +1615,7 @@ end;
 
 procedure ReadIniFile;
 begin
-  fLanguage  := fIniFile.ReadString('UserInterface',  'Language', 'en');
+  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
   InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
 
   //Backup
@@ -1669,7 +1671,7 @@ begin
 
   //QueryWindow
   QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
-  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clCream'));
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clSilver'));
   QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
   QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
@@ -1678,7 +1680,7 @@ end;
 
 procedure WriteIniFile;
 begin
-  fIniFile.WriteString('UserInterface', 'Language', fLanguage);
+  fIniFile.WriteString('UI', 'Language', Language);
 
   //Backup
   fIniFile.WriteBool('Backup',  'CloseDBBeforeBackup', CloseDBBeforeBackup);

@@ -5,6 +5,25 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 ----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1267
+Build date & time: 26.02.2026, 16:03:01
+
++Einfacher Activity Monitor: Es ist jetzt möglich, Attachments und Statements direkt abzubrechen.
+
++Object Filter im TreeView: Objekte im Haupt-TreeView können jetzt gezielt gefiltert werden. Filterformat: Identifier Identifier oder identifier.
+
++Multilingual Help – einfache Schnittstelle (HTML-Seiten dienen aktuell als Platzhalter)
+Unterverzeichnisse im help-Ordner für Sprachen z. B. eng, ger, fra. Sprache in der INI-Datei einstellbar:
+
+[UI]
+Language=eng
+
+Anwendung greift dann auf die jeweilige index.html zu. Später auch für GUI-Sprache nutzbar.
+
+!Mehrere Bugs wurden behoben.
+
+
+----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1266
 Build date & time: 23.02.2026, 14:48:57
 
