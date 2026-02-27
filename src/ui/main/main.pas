@@ -77,7 +77,8 @@ uses
   BackupDlgUnit,
   RestoreDlgUnit,
 
-  fActivityMonitor
+  fActivityMonitor,
+  edit_tabledata_new
   ;
 
 {$i turbocommon.inc}
@@ -118,6 +119,7 @@ type
     lmExtractTableMetaDataUnQuoted: TMenuItem;
     lmServers: TMenuItem;
     lmActivityMonitor: TMenuItem;
+    lmEditTableDataNew: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -310,6 +312,7 @@ type
     procedure lmEditExceptionClick(Sender: TObject);
     procedure lmEditFieldClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
+    procedure lmEditTableDataNewClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -2866,6 +2869,72 @@ begin
   TmpQueryStr  := TmpQueryList.Text;
   TmpQueryList.Free;
   ShowCompleteQueryWindow(dbIndex, 'Edit Package#' + IntToStr(dbIndex) + ':' +  tvMain.Selected.Text, TmpQueryStr, nil);
+end;
+
+procedure TfmMain.lmEditTableDataNewClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  NodeInfos: TPNodeInfos;
+  Rec: TDatabaseRec;
+  EditWindow: TfrmEditTableDataNew;
+  ATableName, DBAlias, ShortTitle, FullHint: string;
+  dbIndex: Integer;
+  ATab: TTabSheet;
+begin
+  SelNode := tvMain.Selected;
+  if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
+
+  NodeInfos := TPNodeInfos(SelNode.Data);
+  if NodeInfos = nil then Exit;
+
+  // Tabellenname und DB-Index ermitteln
+  ATableName := GetClearNodeText(SelNode.Text);
+  dbIndex := TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
+  Rec := RegisteredDatabases[dbIndex];
+  DBAlias := GetAncestorNodeText(SelNode, 1);
+
+  // Prüfen ob ViewForm schon existiert
+  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfrmEditTableDataNew) then
+    EditWindow := TfrmEditTableDataNew(NodeInfos^.EditorForm)
+  else
+  begin
+    EditWindow := TfrmEditTableDataNew.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := SelNode.ImageIndex;
+    EditWindow.Parent := ATab;
+    EditWindow.Align := alClient;
+    EditWindow.BorderStyle := bsNone;
+
+    NodeInfos^.EditorForm := EditWindow;
+  end;
+
+  // Tab vorbereiten
+  ATab := EditWindow.Parent as TTabSheet;
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := dbIndex;
+
+  // Kurzer Tab-Titel
+  ShortTitle := ATableName;
+  ATab.Caption := ShortTitle;
+  EditWindow.Caption := ShortTitle;
+
+  // Detaillierte Infos als Hint
+  FullHint :=
+    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+    'DBAlias:  ' + DBAlias + sLineBreak +
+    'DBPath:   ' + Rec.IBDatabase.DatabaseName + sLineBreak +
+    'Object type: Table' + sLineBreak +
+    'Table name: ' + ATableName  + sLineBreak +
+    'Modus: Edit Tabledata';
+
+  ATab.Hint := FullHint;
+  ATab.ShowHint := True;
+
+  // Formular initialisieren
+  ATableName := GetClearNodeText(ATableName);
+  EditWindow.Init(NodeInfos, dbIndex, ATableName);
+  EditWindow.Show;
 end;
 
 procedure TfmMain.ExtractTableMetaData(Quoted: boolean);

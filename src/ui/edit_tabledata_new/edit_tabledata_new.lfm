@@ -1,0 +1,243 @@
+object frmEditTableDataNew: TfrmEditTableDataNew
+  Left = 304
+  Height = 507
+  Top = 148
+  Width = 936
+  Caption = 'Edit Tabledata'
+  ClientHeight = 507
+  ClientWidth = 936
+  OnClose = FormClose
+  LCLVersion = '2.2.6.0'
+  object pnlDetailTables: TPanel
+    Left = 600
+    Height = 507
+    Top = 0
+    Width = 336
+    Align = alRight
+    ClientHeight = 507
+    ClientWidth = 336
+    TabOrder = 0
+    object pnlFKTablesCaption: TPanel
+      Left = 1
+      Height = 34
+      Top = 1
+      Width = 334
+      Align = alTop
+      Caption = 'Reference Tables'
+      Font.Style = [fsBold]
+      ParentFont = False
+      TabOrder = 0
+    end
+  end
+  object Splitter1: TSplitter
+    Left = 591
+    Height = 507
+    Top = 0
+    Width = 9
+    Align = alRight
+    ResizeAnchor = akRight
+  end
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 507
+    Top = 0
+    Width = 591
+    ActivePage = tsMainTableGrid
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 2
+    object tsMainTableGrid: TTabSheet
+      Caption = 'Grid View'
+      ClientHeight = 469
+      ClientWidth = 585
+      object pnlMainTable: TPanel
+        Left = 0
+        Height = 469
+        Top = 0
+        Width = 585
+        Align = alClient
+        ClientHeight = 469
+        ClientWidth = 585
+        TabOrder = 0
+        object pnlMainTableCaption: TPanel
+          Left = 1
+          Height = 32
+          Top = 1
+          Width = 583
+          Align = alTop
+          Caption = 'pnlMainTableCaption'
+          TabOrder = 0
+        end
+        object DBNavigator1: TDBNavigator
+          Left = 1
+          Height = 26
+          Top = 33
+          Width = 583
+          Align = alTop
+          BevelOuter = bvNone
+          ChildSizing.EnlargeHorizontal = crsScaleChilds
+          ChildSizing.EnlargeVertical = crsScaleChilds
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 100
+          ClientHeight = 26
+          ClientWidth = 583
+          DataSource = dsMain
+          Options = []
+          TabOrder = 1
+        end
+        object RxDBGridMain: TRxDBGrid
+          Left = 1
+          Height = 409
+          Top = 59
+          Width = 583
+          ColumnDefValues.BlobText = '(blob)'
+          TitleButtons = False
+          AutoSort = True
+          KeyStrokes = <          
+            item
+              Command = rxgcShowFindDlg
+              ShortCut = 16454
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowColumnsDlg
+              ShortCut = 16471
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowFilterDlg
+              ShortCut = 16468
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowSortDlg
+              ShortCut = 16467
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowQuickFilter
+              ShortCut = 16465
+              Enabled = True
+            end          
+            item
+              Command = rxgcHideQuickFilter
+              ShortCut = 16456
+              Enabled = True
+            end          
+            item
+              Command = rxgcSelectAll
+              ShortCut = 16449
+              Enabled = True
+            end          
+            item
+              Command = rxgcDeSelectAll
+              ShortCut = 16429
+              Enabled = True
+            end          
+            item
+              Command = rxgcInvertSelection
+              ShortCut = 16426
+              Enabled = True
+            end          
+            item
+              Command = rxgcOptimizeColumnsWidth
+              ShortCut = 16427
+              Enabled = True
+            end          
+            item
+              Command = rxgcCopyCellValue
+              ShortCut = 16451
+              Enabled = True
+            end>
+          FooterOptions.DrawFullLine = False
+          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+          SearchOptions.FromStart = False
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+          Align = alClient
+          Color = clWindow
+          DrawFullLine = False
+          FocusColor = clRed
+          SelectedColor = clHighlight
+          DataSource = dsMain
+          Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+          TabOrder = 2
+        end
+      end
+    end
+    object tsFormView: TTabSheet
+      Caption = 'Form View'
+      ClientHeight = 469
+      ClientWidth = 585
+      object pnlRecord: TPanel
+        Left = 0
+        Height = 444
+        Top = 25
+        Width = 585
+        Align = alClient
+        TabOrder = 0
+      end
+      object dbnavMainTableFormView: TDBNavigator
+        Left = 0
+        Height = 25
+        Top = 0
+        Width = 585
+        Align = alTop
+        BevelOuter = bvNone
+        ChildSizing.EnlargeHorizontal = crsScaleChilds
+        ChildSizing.EnlargeVertical = crsScaleChilds
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 100
+        ClientHeight = 25
+        ClientWidth = 585
+        DataSource = dsMain
+        Options = []
+        TabOrder = 1
+      end
+    end
+  end
+  object IBDatabaseMain: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = transMain
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 74
+    Top = 146
+  end
+  object transMain: TIBTransaction
+    TransactionName = '{AA661540-ED8B-4EC8-B6F3-55EF1B71B1B1}'
+    Active = False
+    DefaultDatabase = IBDatabaseMain
+    Left = 176
+    Top = 152
+  end
+  object dsMain: TDataSource
+    DataSet = IBTableMain
+    Left = 176
+    Top = 264
+  end
+  object IBTableMain: TIBTable
+    AllowAutoActivateTransaction = False
+    Database = IBDatabaseMain
+    Transaction = transMain
+    AfterPost = IBTableMainAfterPost
+    AfterScroll = IBTableMainAfterScroll
+    BeforePost = IBTableMainBeforePost
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    DataSetCloseAction = dcDiscardChanges
+    EnableStatistics = False
+    SQLFiltered = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Left = 56
+    Top = 272
+  end
+end
