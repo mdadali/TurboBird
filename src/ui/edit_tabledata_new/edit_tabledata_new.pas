@@ -209,7 +209,7 @@ begin
     begin
       FForeignKeyInfoArray := GetForeignKeys(IBDatabaseMain, FTableName);
       CreateForeignKeyForms(FForeignKeyInfoArray);
-      CreateDynamicControls;
+      //CreateDynamicControls;
     end;
   end;
 end;

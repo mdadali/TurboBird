@@ -1276,6 +1276,7 @@
         <Filename Value="ui/edit_tabledata_new/edit_tabledata_new.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmEditTableDataNew"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit103>
       <Unit104>
