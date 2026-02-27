@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 623
+  Left = 861
   Height = 612
-  Top = 389
+  Top = 119
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
@@ -8318,6 +8318,11 @@ object fmMain: TfmMain
         7AE15E5E5E3B3A3E440700000002000006030000000100000000
       }
       OnClick = lmEditTableDataClick
+    end
+    object lmEditTableDataNew: TMenuItem
+      Tag = 1
+      Caption = 'Edit Tabledata FK'
+      OnClick = lmEditTableDataNewClick
     end
     object lmExtractTableData: TMenuItem
       Tag = 1

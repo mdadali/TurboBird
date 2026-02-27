@@ -55,7 +55,8 @@ fCheckDBIntegrity, fsqlmonitor,
   //End-DBAdmin
 
   fsimpleobjextractor,
-  fClipboardExport, datamodulesystem, fservers, fActivityMonitor;
+  fClipboardExport, datamodulesystem, fservers, fActivityMonitor,
+edit_tabledata_new, foreign_key_table;
 
 const
   Major = 1;
@@ -171,7 +172,6 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-
   //Application.CreateForm(TfrmServers, frmServers);
   Application.Run;
 end.

@@ -298,6 +298,18 @@ type
     Visible: boolean;
   end;
 
+
+  TForeignKeyInfo = record
+    ConstraintName: string;
+    ForeignTable: string;
+    ForeignField: string;
+    MasterTable: string;
+    MasterField: string;
+  end;
+
+  TForeignKeyInfoArray = array of TForeignKeyInfo;
+
+
   //search
   TDBField = (
    dbfTitle,
