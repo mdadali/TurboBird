@@ -636,7 +636,7 @@ begin
     end;
 
 
-    // 6️⃣ User nur erstellen, wenn er noch nicht existiert
+    // User nur erstellen, wenn er noch nicht existiert
     {if not UserExists then
     begin
       IBXSecurityService.UserName := InitialServiceUser;

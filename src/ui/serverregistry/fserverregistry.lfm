@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 541
+  Left = 543
   Height = 706
-  Top = 119
+  Top = 5
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70292,7 +70292,6 @@ object fmServerRegistry: TfmServerRegistry
     ClientHeight = 653
     ClientWidth = 775
     TabOrder = 0
-    Visible = False
     object cbServerName: TComboBox
       Left = 192
       Height = 32

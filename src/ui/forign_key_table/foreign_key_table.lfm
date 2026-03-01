@@ -1,11 +1,12 @@
 object frmForeignKeyTable: TfrmForeignKeyTable
-  Left = 517
+  Left = 456
   Height = 368
-  Top = 113
+  Top = 104
   Width = 647
   Caption = 'ForeignKeyTable'
   ClientHeight = 368
   ClientWidth = 647
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object RxDBGrid1: TRxDBGrid
     Left = 0
@@ -74,7 +75,7 @@ object frmForeignKeyTable: TfrmForeignKeyTable
     FooterOptions.DrawFullLine = False
     SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
     SearchOptions.FromStart = False
-    OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+    OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickSearch, rdgAllowQuickFilter, rdgAllowFilterForm, rdgAllowToolMenu]
     Align = alClient
     Color = clWindow
     DrawFullLine = False

@@ -7,7 +7,9 @@ interface
 uses
   Classes, SysUtils, DB, Forms, Controls, Graphics, Dialogs, DBCtrls,
   IBDatabase, IBTable, RxDBGrid, ExtCtrls,
-  turbocommon;
+
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -19,6 +21,7 @@ type
     IBTableForeingKey: TIBTable;
     pnlFKTableName: TPanel;
     RxDBGrid1: TRxDBGrid;
+    procedure FormShow(Sender: TObject);
   private
     FDatabase: TIBDatabase;
     FTransaction: TIBTransaction;
@@ -49,6 +52,11 @@ begin
   Result := FForeignKeyInfo.ForeignField;
 end;
 
+procedure TfrmForeignKeyTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
+
 procedure TfrmForeignKeyTable.Init(AIBDatabase: TIBDatabase;
                                    ATransaction: TIBTransaction;
                                    AForeignKeyInfo: TForeignKeyInfo);
@@ -64,6 +72,7 @@ begin
   pnlFKTableName.Caption := FForeignKeyInfo.MasterTable;
 
   IBTableForeingKey.Open;
+  RxDBGrid1.OptimizeColumnsWidthAll;
 end;
 
 end.

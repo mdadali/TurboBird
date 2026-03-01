@@ -1,12 +1,13 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 304
+  Left = 440
   Height = 507
-  Top = 148
+  Top = 158
   Width = 936
   Caption = 'Edit Tabledata'
   ClientHeight = 507
   ClientWidth = 936
   OnClose = FormClose
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object pnlDetailTables: TPanel
     Left = 600
@@ -154,7 +155,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           FooterOptions.DrawFullLine = False
           SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
           SearchOptions.FromStart = False
-          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickFilter]
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgAllowQuickSearch, rdgAllowQuickFilter, rdgAllowFilterForm, rdgAllowToolMenu]
           Align = alClient
           Color = clWindow
           DrawFullLine = False
@@ -170,6 +171,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
       Caption = 'Form View'
       ClientHeight = 469
       ClientWidth = 585
+      TabVisible = False
       object pnlRecord: TPanel
         Left = 0
         Height = 444
@@ -207,8 +209,8 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 74
-    Top = 146
+    Left = 64
+    Top = 152
   end
   object transMain: TIBTransaction
     TransactionName = '{AA661540-ED8B-4EC8-B6F3-55EF1B71B1B1}'
@@ -220,13 +222,12 @@ object frmEditTableDataNew: TfrmEditTableDataNew
   object dsMain: TDataSource
     DataSet = IBTableMain
     Left = 176
-    Top = 264
+    Top = 272
   end
   object IBTableMain: TIBTable
     AllowAutoActivateTransaction = False
     Database = IBDatabaseMain
     Transaction = transMain
-    AfterPost = IBTableMainAfterPost
     AfterScroll = IBTableMainAfterScroll
     BeforePost = IBTableMainBeforePost
     BufferChunks = 1000
@@ -237,7 +238,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     SQLFiltered = False
     GeneratorField.ApplyOnEvent = gaeOnNewRecord
     MasterDetailDelay = 0
-    Left = 56
+    Left = 64
     Top = 272
   end
 end
