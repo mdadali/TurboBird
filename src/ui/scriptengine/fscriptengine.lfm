@@ -1,7 +1,7 @@
 object frmScriptEngine: TfrmScriptEngine
-  Left = 238
+  Left = 494
   Height = 564
-  Top = 184
+  Top = 199
   Width = 1031
   Caption = 'MWA Software IBX-Scripter'
   ClientHeight = 564

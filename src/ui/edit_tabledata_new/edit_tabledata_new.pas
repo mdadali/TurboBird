@@ -15,6 +15,7 @@ uses
   IBTable,
 
   turbocommon,
+  uthemeselector,
   foreign_key_table;
 
 type
@@ -39,7 +40,7 @@ type
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure IBTableMainAfterPost(DataSet: TDataSet);
+    procedure FormShow(Sender: TObject);
     procedure IBTableMainAfterScroll(DataSet: TDataSet);
     procedure IBTableMainBeforePost(DataSet: TDataSet);
   private
@@ -61,6 +62,8 @@ type
     function GetForeignKeys(Database: TIBDatabase;
                             TableName: string): TForeignKeyInfoArray;
 
+    procedure ClearDynamicControls;
+    procedure RebuildControls;
     procedure CreateDynamicControls;
     function  GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
     function  IsForeignKeyField(const AFieldName: string): Boolean;
@@ -97,10 +100,9 @@ begin
   CloseAction:= caFree;
 end;
 
-procedure TfrmEditTableDataNew.IBTableMainAfterPost(DataSet: TDataSet);
+procedure TfrmEditTableDataNew.FormShow(Sender: TObject);
 begin
-  //CloseDB;
-  //OpenDB;
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmEditTableDataNew.IBTableMainAfterScroll(DataSet: TDataSet);
@@ -207,9 +209,10 @@ begin
   begin
     if OpenDB then
     begin
+      RxDBGridMain.OptimizeColumnsWidthAll;
+      //RebuildControls;
       FForeignKeyInfoArray := GetForeignKeys(IBDatabaseMain, FTableName);
       CreateForeignKeyForms(FForeignKeyInfoArray);
-      //CreateDynamicControls;
     end;
   end;
 end;
@@ -315,6 +318,36 @@ begin
   end;
 end;}
 
+procedure TfrmEditTableDataNew.RebuildControls;
+begin
+  Screen.Cursor := crHourGlass;
+  try
+    ClearDynamicControls;
+    CreateDynamicControls;
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+procedure TfrmEditTableDataNew.ClearDynamicControls;
+var
+  i: Integer;
+begin
+  dsMain.DataSet.DisableControls;
+  //dsMain.DataSet := nil;
+  try
+    for i := tsFormView.ControlCount - 1 downto 0 do
+    begin
+      if (tsFormView.Controls[i].Name <> 'pnlRecord') and
+         (tsFormView.Controls[i].Name <> 'dbnavMainTableFormView') then
+        tsFormView.Controls[i].Free;
+    end;
+  finally
+    //dsMain.DataSet := IBTableMain;
+    dsMain.DataSet.EnableControls;
+  end;
+end;
+
 procedure TfrmEditTableDataNew.CreateDynamicControls;
 var
   ALabel: TLabel;
@@ -325,12 +358,6 @@ var
   i, AWidth, VSpacing: Integer;
   ATop: Integer;
 begin
-  for i := tsFormView.ControlCount - 1 downto 0 do
-  begin
-    if (tsFormView.Controls[i].Name <> 'pnlRecord') and
-       (tsFormView.Controls[i].Name <> 'dbnavMainTableFormView') then
-      tsFormView.Controls[i].Free;
-  end;
 
   ATop := 20;
   VSpacing := 10; // vertikaler Abstand zwischen Controls

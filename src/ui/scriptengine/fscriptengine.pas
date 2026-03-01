@@ -204,19 +204,14 @@ end;
 
 procedure TfrmScriptEngine.FormCreate(Sender: TObject);
 begin
-  {$ifdef windows}
-  ed.Font.Name:= 'Consolas';
-  {$else}
-  ed.Font.Name:= 'Courier New';
-  //if Screen.Fonts.IndexOf(cGoodFont)>=0 then
-    //ed.Font.Name:= cGoodFont;
-  {$endif}
+  ed.Font.Name := QWEditorFontName;
+  ed.Colors.TextBG := QWEditorBackgroundColor;
+  ed.OptUnprintedVisible := False;
 
   ed.Micromap.Columns:= nil;
   ed.Micromap.ColumnAdd(1, 100, clRed);
   ed.Micromap.ColumnAdd(2, 100, clBlue);
   ed.Micromap.ColumnAdd(3, 100, clGreen);
-
 end;
 
 procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);

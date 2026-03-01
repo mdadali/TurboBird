@@ -21,7 +21,6 @@ type
   TfmAbout = class(TForm)
     bbtnClose: TBitBtn;
     GifAnim1: TGifAnim;
-    Image1: TImage;
     Image2: TImage;
     Image3: TImage;
     Image4: TImage;
@@ -47,6 +46,7 @@ type
     lbWidgetSet: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
+    Panel2: TPanel;
     pnlMWA: TPanel;
     pnlPowered: TPanel;
     pnlTitle: TPanel;
