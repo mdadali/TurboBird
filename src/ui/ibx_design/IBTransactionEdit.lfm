@@ -1,0 +1,129 @@
+object IBTransactionEditForm: TIBTransactionEditForm
+  Left = 248
+  Height = 201
+  Top = 213
+  Width = 396
+  ActiveControl = rbSnapShot
+  BorderStyle = bsDialog
+  BorderWidth = 5
+  Caption = 'Transaction Editor'
+  ClientHeight = 201
+  ClientWidth = 396
+  HelpFile = 'ibx.hlp'
+  OnCreate = FormCreate
+  ParentFont = True
+  Position = poScreenCenter
+  LCLVersion = '1.6.0.4'
+  object GroupBox1: TGroupBox
+    Left = 5
+    Height = 157
+    Top = 5
+    Width = 386
+    Align = alClient
+    Caption = 'Transaction Properties'
+    ClientHeight = 141
+    ClientWidth = 384
+    TabOrder = 0
+    object Label1: TLabel
+      Left = 241
+      Height = 15
+      Top = 16
+      Width = 54
+      Caption = 'Se&ttings:'
+      FocusControl = TransactionParams
+      ParentColor = False
+    end
+    object rbSnapShot: TRadioButton
+      Left = 8
+      Height = 22
+      Top = 18
+      Width = 81
+      Caption = '&Snapshot'
+      Checked = True
+      OnClick = rbSnapShotClick
+      TabOrder = 0
+      TabStop = True
+    end
+    object rbReadCommitted: TRadioButton
+      Left = 8
+      Height = 22
+      Top = 42
+      Width = 124
+      Caption = 'Read &Committed'
+      OnClick = rbReadCommittedClick
+      TabOrder = 1
+    end
+    object rbReadOnlyTableStability: TRadioButton
+      Left = 7
+      Height = 22
+      Top = 66
+      Width = 171
+      Caption = '&Read-Only Table Stability'
+      OnClick = rbReadOnlyTableStabilityClick
+      TabOrder = 2
+    end
+    object rbReadWriteTableStability: TRadioButton
+      Left = 7
+      Height = 22
+      Top = 90
+      Width = 179
+      Caption = 'Read-&Write Table Stability '
+      OnClick = rbReadWriteTableStabilityClick
+      TabOrder = 3
+    end
+    object TransactionParams: TMemo
+      Left = 241
+      Height = 95
+      Top = 33
+      Width = 126
+      Lines.Strings = (
+        ''
+      )
+      OnClick = TransactionParamsClick
+      OnExit = TransactionParamsExit
+      ScrollBars = ssAutoBoth
+      TabOrder = 4
+      WordWrap = False
+    end
+    object rbOtherButton: TRadioButton
+      Left = 7
+      Height = 22
+      Top = 114
+      Width = 95
+      Caption = 'Unspecified'
+      TabOrder = 5
+    end
+  end
+  object Panel1: TPanel
+    Left = 5
+    Height = 34
+    Top = 162
+    Width = 386
+    Align = alBottom
+    BevelOuter = bvNone
+    BorderWidth = 5
+    ClientHeight = 34
+    ClientWidth = 386
+    TabOrder = 1
+    object Cancelbtn: TButton
+      Left = 189
+      Height = 25
+      Top = 8
+      Width = 74
+      Cancel = True
+      Caption = 'Cancel'
+      ModalResult = 2
+      TabOrder = 1
+    end
+    object OKBtn: TButton
+      Left = 104
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'OK'
+      Default = True
+      OnClick = OKBtnClick
+      TabOrder = 0
+    end
+  end
+end

@@ -15,7 +15,7 @@ uses
 
   typinfo,
 
-  IBDynamicGrid, IBQuery, IBDatabase, IBTable, IB, RxDBGrid, RxDBGridExportPdf,
+  IBDynamicGrid, IBQuery, IBSQL, IBDatabase, IBTable, IB, RxDBGrid, RxDBGridExportPdf,
   RxDBGridPrintGrid, RxDBGridExportSpreadSheet, ibxscript,
 
   fdataexportersintrf,
@@ -23,7 +23,9 @@ uses
   uthemeselector,
   fsimpleobjextractor,
   cUnIntelliSenseCache,
-  cSelectSQLParserExt;
+  cSelectSQLParserExt,
+
+  ibsqleditor;
 
 type
 
@@ -147,6 +149,7 @@ type
     ToolButton3: TToolButton;
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
+    tbIBSQL: TToolButton;
     procedure bbRunClick(Sender: TObject);
     procedure cxAutoCommitMouseEnter(Sender: TObject);
     procedure cxAutoCommitMouseLeave(Sender: TObject);
@@ -220,6 +223,7 @@ type
     procedure ToolBar1MouseEnter(Sender: TObject);
     procedure ToolBar1MouseLeave(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
+    procedure tbIBSQLClick(Sender: TObject);
   private
     { private declarations }
     FDBIndex: Integer; // Index of selected registered database
@@ -1307,6 +1311,34 @@ end;
 procedure TfmQueryWindow.ToolButton4Click(Sender: TObject);
 begin
   fmMain.lmScriptEngineClick(self);
+end;
+
+procedure TfmQueryWindow.tbIBSQLClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  AGenName: string;
+  dbIndex: Integer;
+  Rec: TDatabaseRec;
+  IBSQL: TIBSQL;
+begin
+  try
+    SelNode:= fmMain.tvMain.Selected;
+
+    if (SelNode = nil) or (SelNode.Parent = nil) then
+      exit;
+
+    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+    Rec := RegisteredDatabases[dbIndex];
+
+    IBSQL := TIBSQL.Create(self);
+    IBSQL.Database := Rec.IBDatabase;
+    IBSQL.Transaction := Rec.IBDatabase.DefaultTransaction;
+
+    if EditSQL(IBSQL) then
+      meQuery.Text := IBSQL.SQL.Text;
+  finally
+    IBSQL.Free;
+  end;
 end;
 
 //SQLDb Query Designer

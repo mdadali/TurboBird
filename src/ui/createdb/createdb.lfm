@@ -1,7 +1,7 @@
 object fmCreateDB: TfmCreateDB
-  Left = 611
+  Left = 565
   Height = 614
-  Top = 112
+  Top = 134
   Width = 710
   BorderStyle = bsSingle
   Caption = 'Create new Firebird Database'
@@ -269,7 +269,7 @@ object fmCreateDB: TfmCreateDB
     end
     object comboxSQLDialect: TComboBox
       Left = 533
-      Height = 30
+      Height = 28
       Top = 64
       Width = 100
       ItemHeight = 0
@@ -286,7 +286,7 @@ object fmCreateDB: TfmCreateDB
     object Label10: TLabel
       Left = 24
       Height = 20
-      Top = 112
+      Top = 114
       Width = 59
       Caption = 'Pagesize'
       ParentColor = False
@@ -311,7 +311,7 @@ object fmCreateDB: TfmCreateDB
     object Label11: TLabel
       Left = 408
       Height = 20
-      Top = 112
+      Top = 114
       Width = 100
       Caption = 'Sweep Interval'
       ParentColor = False

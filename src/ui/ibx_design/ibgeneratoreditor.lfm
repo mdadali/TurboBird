@@ -1,0 +1,216 @@
+object GeneratorEditor: TGeneratorEditor
+  Left = 334
+  Height = 374
+  Top = 239
+  Width = 478
+  ActiveControl = Button1
+  Caption = 'Define Generator'
+  ClientHeight = 374
+  ClientWidth = 478
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.0.7.0'
+  object Bevel1: TBevel
+    Left = 16
+    Height = 336
+    Top = 16
+    Width = 355
+  end
+  object Label1: TLabel
+    Left = 32
+    Height = 15
+    Top = 40
+    Width = 99
+    Caption = 'Generator Name'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 32
+    Height = 15
+    Top = 192
+    Width = 66
+    Caption = 'Field Name'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 35
+    Height = 15
+    Top = 269
+    Width = 82
+    Caption = 'Increment By'
+    ParentColor = False
+  end
+  object Button1: TButton
+    Left = 392
+    Height = 30
+    Top = 24
+    Width = 75
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 392
+    Height = 30
+    Top = 64
+    Width = 75
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object OnNewRecord: TRadioButton
+    Left = 38
+    Height = 22
+    Top = 112
+    Width = 116
+    Caption = 'On New Record'
+    Checked = True
+    TabOrder = 2
+    TabStop = True
+  end
+  object OnPost: TRadioButton
+    Left = 38
+    Height = 22
+    Top = 144
+    Width = 70
+    Caption = 'On Post'
+    TabOrder = 3
+  end
+  object IncrementBy: TEdit
+    Left = 39
+    Height = 25
+    Top = 292
+    Width = 52
+    TabOrder = 4
+    Text = 'IncrementBy'
+  end
+  object UpDown1: TUpDown
+    Left = 91
+    Height = 25
+    Top = 292
+    Width = 17
+    Associate = IncrementBy
+    Min = 0
+    Position = 0
+    TabOrder = 5
+  end
+  object GeneratorNames: TIBLookupComboEditBox
+    Left = 33
+    Height = 27
+    Top = 56
+    Width = 313
+    KeyField = 'RDB$GENERATOR_NAME'
+    ListField = 'RDB$GENERATOR_NAME'
+    ListFieldIndex = 0
+    ListSource = GeneratorSource
+    LookupCache = False
+    ScrollListDataset = True
+    TabOrder = 6
+    AutoInsert = False
+    AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+    ItemHeight = 0
+  end
+  object FieldNames: TIBLookupComboEditBox
+    Left = 33
+    Height = 27
+    Top = 208
+    Width = 303
+    KeyField = 'ColumnName'
+    ListField = 'ColumnName'
+    ListFieldIndex = 0
+    ListSource = PrimaryKeySource
+    LookupCache = False
+    ScrollListDataset = True
+    TabOrder = 7
+    AutoInsert = False
+    AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+    ItemHeight = 0
+  end
+  object SQLTransaction: TIBTransaction
+    Active = False
+    Params.Strings = (
+      'read'
+      'consistency'
+    )
+    left = 400
+    top = 264
+  end
+  object GeneratorQuery: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(RDB$GENERATOR_NAME) as RDB$GENERATOR_NAME FROM RDB$GENERATORS'
+      'Where RDB$SYSTEM_FLAG = 0'
+      'Order by 1 asc'
+    )
+    Params = <>
+    DataSetCloseAction = dcDiscardChanges
+    left = 269
+    top = 322
+  end
+  object GeneratorSource: TDataSource
+    DataSet = GeneratorQuery
+    left = 176
+    top = 322
+  end
+  object PrimaryKeys: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BeforeOpen = PrimaryKeysBeforeOpen
+    BufferChunks = 1000
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(S.RDB$FIELD_NAME) as ColumnName From (Select '
+      'RDB$INDEX_NAME,RDB$FIELD_NAME FROM '
+      'RDB$INDEX_SEGMENTS Order by RDB$FIELD_POSITION ASC) S '
+      'JOIN RDB$RELATION_CONSTRAINTS C On C.RDB$INDEX_NAME '
+      '= S.RDB$INDEX_NAME Where C.RDB$CONSTRAINT_TYPE = '
+      '''PRIMARY KEY'' and RDB$RELATION_NAME = '
+      ':RDB$RELATION_NAME'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+    DataSetCloseAction = dcDiscardChanges
+    left = 269
+    top = 264
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object PrimaryKeySource: TDataSource
+    DataSet = PrimaryKeys
+    left = 160
+    top = 264
+  end
+  object IdentifyStatementSQL: TIBSQL
+    CaseSensitiveParameterNames = False
+    GenerateParamNames = False
+    UniqueParamNames = False
+    ParamCheck = True
+    Transaction = SQLTransaction
+    left = 400
+    top = 192
+  end
+end
