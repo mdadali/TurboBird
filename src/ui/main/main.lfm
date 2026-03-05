@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 604
+  Left = 397
   Height = 612
-  Top = 281
+  Top = 581
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
@@ -8023,6 +8023,10 @@ object fmMain: TfmMain
         Caption = 'Activity Monitor'
         OnClick = lmActivityMonitorClick
       end
+      object lmIBSQLEditor: TMenuItem
+        Caption = 'IBSQLEditor '
+        OnClick = lmIBSQLEditorClick
+      end
     end
     object lmOpenQuery: TMenuItem
       Caption = 'Open Query Window'
@@ -9776,5 +9780,14 @@ object fmMain: TfmMain
     ShowPerformanceStats = False
     Left = 760
     Top = 96
+  end
+  object IBSQLMain: TIBSQL
+    CaseSensitiveParameterNames = False
+    GenerateParamNames = False
+    UniqueParamNames = False
+    ParamCheck = True
+    Scrollable = False
+    Left = 234
+    Top = 136
   end
 end

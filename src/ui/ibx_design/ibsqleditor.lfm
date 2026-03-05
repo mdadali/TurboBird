@@ -1,0 +1,282 @@
+inherited IBSQLEditorForm: TIBSQLEditorForm
+  Left = 791
+  Height = 555
+  Top = 331
+  Width = 786
+  Caption = 'IBSQL Editor'
+  ClientHeight = 555
+  ClientWidth = 786
+  OnShow = FormShow
+  inherited Button1: TButton
+    Left = 586
+    Top = 504
+    Caption = 'Apply'
+  end
+  inherited Button2: TButton
+    Left = 674
+    Top = 504
+  end
+  inherited GenerateBtn: TButton
+    Left = 314
+    Top = 504
+    OnClick = GenerateBtnClick
+  end
+  inherited TestBtn: TButton
+    Left = 450
+    Top = 504
+  end
+  inherited QuoteFields: TCheckBox
+    Left = 11
+    Top = 496
+    Width = 137
+  end
+  inherited PageControl: TPageControl
+    Left = 68
+    ActivePage = ExecutePage
+    ShowTabs = False
+    TabIndex = 1
+    inherited SelectPage: TTabSheet
+      ClientHeight = 450
+      inherited Label1: TLabel
+        Height = 20
+        Width = 80
+      end
+      inherited Label2: TLabel
+        Height = 20
+        Width = 141
+      end
+      inherited Label4: TLabel
+        Height = 20
+        Width = 87
+      end
+      inherited SelectTableNames: TIBLookupComboEditBox
+        Height = 30
+      end
+      inherited FieldNamesGrid: TIBDynamicGrid
+        Height = 104
+      end
+      inherited SelectSelectAll: TCheckBox
+        Top = 424
+        Width = 146
+      end
+      inherited IncludeSysTables: TCheckBox
+        Width = 173
+      end
+      inherited Label6: TLabel
+        Height = 20
+        Width = 115
+      end
+      inherited Label5: TLabel
+        Height = 20
+        Width = 153
+      end
+      inherited ReadOnlyGrid: TIBDynamicGrid
+        Left = 9
+      end
+    end
+    inherited ExecutePage: TTabSheet
+      ClientHeight = 450
+      inherited Label16: TLabel
+        Left = 10
+        Height = 20
+        Width = 113
+      end
+      inherited Label17: TLabel
+        Height = 20
+        Top = 128
+        Width = 118
+      end
+      inherited Label18: TLabel
+        Height = 20
+        Top = 280
+        Width = 129
+      end
+      inherited ProcedureNames: TIBLookupComboEditBox
+        Left = 10
+        Height = 30
+        Top = 72
+      end
+      inherited InputProcGrid: TIBDynamicGrid
+        Left = 8
+        Height = 122
+        Top = 144
+      end
+      inherited OutputProcGrid: TIBDynamicGrid
+        Top = 296
+        Columns = <        
+          item
+            ButtonStyle = cbsCheckboxColumn
+            PickList.Strings = (            )
+            Title.Caption = 'SELECTED'
+            Width = 30
+            FieldName = 'SELECTED'
+            AutoSizeColumn = False
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end        
+          item
+            PickList.Strings = (            )
+            Title.Caption = 'COLUMNNAME'
+            Width = 64
+            FieldName = 'COLUMNNAME'
+            AutoSizeColumn = True
+            InitialSortColumn = False
+            DBLookupProperties.ItemHeight = 0
+            DBLookupProperties.ItemWidth = 0
+            DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          end>
+      end
+      inherited PackageNameLabel: TLabel
+        Height = 20
+        Width = 99
+      end
+      inherited PackageNames: TIBLookupComboEditBox
+        Height = 30
+      end
+      object SelectProcedure: TLabel[8]
+        Left = 10
+        Height = 16
+        Top = 101
+        Width = 145
+        Anchors = [akLeft, akBottom]
+        Caption = 'This is a ''Select Procedure'''
+        Font.Height = -11
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+        Visible = False
+      end
+    end
+  end
+  inherited GenerateParams: TCheckBox
+    Left = 11
+    Top = 472
+    Width = 189
+  end
+  inherited Panel1: TPanel
+    Left = 300
+    Width = 470
+    ClientWidth = 470
+    inherited Label3: TLabel
+      Height = 20
+      Width = 470
+    end
+    inherited IBSQLEditFrame1: TIBSQLEditFrame
+      Height = 436
+      Top = 20
+      Width = 470
+      Align = alClient
+      AutoSize = True
+      ClientHeight = 436
+      ClientWidth = 470
+      DesignLeft = 1974
+      DesignTop = 200
+      inherited SQLText: TSynEdit
+        Height = 410
+        Width = 470
+      end
+      inherited ToolBar1: TToolBar
+        Width = 470
+        inherited ToolButton3: TToolButton
+          Height = 22
+        end
+        inherited ToolButton7: TToolButton
+          Height = 22
+        end
+      end
+      inherited UserTables: TIBQuery
+        Top = 60
+      end
+      inherited FieldNameList: TIBQuery
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$RELATION_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited PrimaryKeys: TIBQuery
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$RELATION_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited UserProcedures: TIBQuery
+        AfterScroll = UserProceduresAfterScroll
+      end
+      inherited ProcInputParams: TIBQuery
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$PROCEDURE_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited ProcOutputParams: TIBQuery
+        Left = 343
+        Top = 400
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$PROCEDURE_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited SQLTransaction: TIBTransaction
+        Params.Strings = (        )
+      end
+      inherited IdentityCols: TIBQuery
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$RELATION_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited ReadOnlyFields: TIBQuery
+        ParamData = <        
+          item
+            DataType = ftUnknown
+            Name = 'RDB$RELATION_NAME'
+            ParamType = ptInput
+          end>
+      end
+      inherited ReadOnlyFieldsSource: TDataSource
+        Left = 436
+        Top = 203
+      end
+      inherited PackageNames: TIBQuery
+        BeforeClose = nil
+      end
+    end
+  end
+  object TabControl1: TTabControl[8]
+    Left = 11
+    Height = 312
+    Top = 8
+    Width = 59
+    OnChange = TabControl1Change
+    TabPosition = tpLeft
+    TabIndex = 0
+    Tabs.Strings = (
+      'Select'
+      'Insert'
+      'Modify'
+      'Delete'
+      'Execute'
+    )
+    TabOrder = 8
+  end
+  object IncludePrimaryKeys: TCheckBox[9]
+    Left = 11
+    Height = 22
+    Top = 520
+    Width = 263
+    Caption = 'Include Primary keys in Update SQL'
+    TabOrder = 9
+  end
+end

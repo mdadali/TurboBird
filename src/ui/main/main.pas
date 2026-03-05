@@ -21,7 +21,7 @@ uses
   IBQuery,
   IBExtract,
   IBDatabaseInfo,
-  ibxscript,
+  ibxscript, IBSQL,
 
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig, fsqlmonitor,
@@ -78,7 +78,9 @@ uses
   RestoreDlgUnit,
 
   fActivityMonitor,
-  edit_tabledata_new
+  edit_tabledata_new,
+
+  ibsqleditor
   ;
 
 {$i turbocommon.inc}
@@ -97,6 +99,7 @@ type
     grBoxObjectFilter: TGroupBox;
     HtmlViewer1: THtmlViewer;
     IBExtract1: TIBExtract;
+    IBSQLMain: TIBSQL;
     IBXScript1: TIBXScript;
     Image1: TImage;
     Label1: TLabel;
@@ -120,6 +123,7 @@ type
     lmServers: TMenuItem;
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
+    lmIBSQLEditor: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -326,6 +330,7 @@ type
     procedure lmEditUDRFunctionClick(Sender: TObject);
     procedure lmEditUDRProcedureClick(Sender: TObject);
     procedure lmGetIncrementGenClick(Sender: TObject);
+    procedure lmIBSQLEditorClick(Sender: TObject);
     procedure lmImportTableClick(Sender: TObject);
     procedure lmNewUDRFunctionClick(Sender: TObject);
     procedure lmNewUDRProcedureClick(Sender: TObject);
@@ -3286,6 +3291,29 @@ begin
     ShowCompleteQueryWindow(dbIndex, 'getIncSQL#'  + IntToStr(dbIndex) + ':'  + AGenName,
       'SELECT GEN_ID(' + AGenName + ', 1) FROM RDB$DATABASE;');
   end;
+end;
+
+procedure TfmMain.lmIBSQLEditorClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  AGenName: string;
+  dbIndex: Integer;
+  Rec: TDatabaseRec;
+  IBSQL: TIBSQL;
+begin
+  SelNode:= tvMain.Selected;
+
+  if (SelNode = nil) or (SelNode.Parent = nil) then
+    exit;
+
+  dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+  Rec := RegisteredDatabases[dbIndex];
+
+  IBSQL := TIBSQL.Create(self);
+  IBSQL.Database := Rec.IBDatabase;
+  IBSQL.Transaction := Rec.IBDatabase.DefaultTransaction;
+
+  EditSQL(IBSQL);
 end;
 
 {procedure TfmMain.lmImportTableClick(Sender: TObject);
