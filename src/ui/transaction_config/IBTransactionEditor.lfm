@@ -1,0 +1,171 @@
+object IBTransactionEditorForm: TIBTransactionEditorForm
+  Left = 420
+  Height = 310
+  Top = 140
+  Width = 440
+  BorderStyle = bsDialog
+  Caption = 'Transaction Editor'
+  ClientHeight = 310
+  ClientWidth = 440
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object GroupIsolation: TGroupBox
+    Left = 10
+    Height = 110
+    Top = 10
+    Width = 150
+    Caption = 'Isolation'
+    ClientHeight = 88
+    ClientWidth = 146
+    TabOrder = 0
+    object rbConcurrency: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 20
+      Width = 86
+      Caption = 'Snapshot'
+      Checked = True
+      TabOrder = 0
+    end
+    object rbReadCommitted: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 45
+      Width = 135
+      Caption = 'Read Committed'
+      TabOrder = 1
+    end
+    object rbConsistency: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 70
+      Width = 117
+      Caption = 'Table Stability'
+      TabOrder = 2
+    end
+  end
+  object GroupAccess: TGroupBox
+    Left = 170
+    Height = 110
+    Top = 10
+    Width = 120
+    Caption = 'Access'
+    ClientHeight = 88
+    ClientWidth = 116
+    TabOrder = 1
+    object rbRead: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 30
+      Width = 57
+      Caption = 'Read'
+      Checked = True
+      TabOrder = 0
+    end
+    object rbWrite: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 55
+      Width = 59
+      Caption = 'Write'
+      TabOrder = 1
+    end
+  end
+  object GroupRecordVersion: TGroupBox
+    Left = 300
+    Height = 110
+    Top = 10
+    Width = 130
+    Caption = 'Record Version'
+    ClientHeight = 88
+    ClientWidth = 126
+    TabOrder = 2
+    object rbRecVersion: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 30
+      Width = 99
+      Caption = 'rec_version'
+      Checked = True
+      TabOrder = 0
+    end
+    object rbNoRecVersion: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 55
+      Width = 122
+      Caption = 'no_rec_version'
+      TabOrder = 1
+    end
+  end
+  object GroupLocking: TGroupBox
+    Left = 10
+    Height = 100
+    Top = 130
+    Width = 280
+    Caption = 'Locking'
+    ClientHeight = 78
+    ClientWidth = 276
+    TabOrder = 3
+    object rbWait: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 25
+      Width = 53
+      Caption = 'Wait'
+      Checked = True
+      TabOrder = 0
+    end
+    object rbNoWait: TRadioButton
+      Left = 90
+      Height = 22
+      Top = 25
+      Width = 72
+      Caption = 'NoWait'
+      TabOrder = 1
+    end
+    object lblTimeout: TLabel
+      Left = 10
+      Height = 20
+      Top = 60
+      Width = 88
+      Caption = 'Lock Timeout'
+      ParentColor = False
+    end
+    object edtTimeout: TEdit
+      Left = 110
+      Height = 30
+      Top = 55
+      Width = 60
+      TabOrder = 2
+    end
+  end
+  object cbAutocommit: TCheckBox
+    Left = 310
+    Height = 22
+    Top = 150
+    Width = 104
+    Caption = 'Autocommit'
+    TabOrder = 4
+  end
+  object btnOK: TButton
+    Left = 250
+    Height = 30
+    Top = 260
+    Width = 80
+    Caption = 'OK'
+    ModalResult = 1
+    OnClick = btnOKClick
+    TabOrder = 5
+  end
+  object btnCancel: TButton
+    Left = 340
+    Height = 30
+    Top = 260
+    Width = 80
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 6
+  end
+end

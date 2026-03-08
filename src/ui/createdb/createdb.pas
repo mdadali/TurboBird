@@ -26,11 +26,11 @@ type
     cmbBoxServers: TComboBox;
     comboxPageSize: TComboBox;
     comboxSQLDialect: TComboBox;
+    edtServerType: TEdit;
     edtRole: TEdit;
     edPassword: TEdit;
     edtSweepInterval: TEdit;
     edNewDatabase: TEdit;
-    edtServerType: TEdit;
     edtServerVersion: TEdit;
     edUserName: TEdit;
     grboxDatabase: TGroupBox;
@@ -68,6 +68,7 @@ type
     FDatabase,
     FPort: string;
 
+    FServerRec: TServerRecord;
 
   public
     { public declarations }
@@ -106,33 +107,30 @@ begin
 end;
 
 procedure TfmCreateDB.FormShow(Sender: TObject);
-var ServerRec: TServerRecord;
 begin
-  ServerRec := GetServerRecordFromFileByName(cmbBoxServers.Text);
-  edUserName.Text := ServerRec.UserName;
-  edPassword.Text := ServerRec.Password;
-
+  edUserName.Text := FServerRec.UserName;
+  edPassword.Text := FServerRec.Password;
+  edtServerVersion.Text := FServerRec.VersionString;
   frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure  TfmCreateDB.Init;
-var ServerRec: TServerRecord;
 begin
-  ServerRec := GetServerRecordFromFileByName(cmbBoxServers.Text);
-  IBDatabase1.FirebirdLibraryPathName := ServerRec.ClientLibraryPath;
+  FServerRec := GetServerRecordFromFileByName(cmbBoxServers.Text);
+  IBDatabase1.FirebirdLibraryPathName := FServerRec.ClientLibraryPath;
 
-  if ServerRec.IsEmbedded then
+  if FServerRec.IsEmbedded then
     IBDatabase1.DatabaseName := edNewDatabase.Text
   else begin
     IBDatabase1.DatabaseName := cmbBoxServers.Text;
-    if StrToIntDef(ServerRec.Port, 0) <> 0 then
-      IBDatabase1.DatabaseName := IncludeTrailingPathDelimiter(IBDatabase1.DatabaseName) + ServerRec.Port + ':';
+    if StrToIntDef(FServerRec.Port, 0) <> 0 then
+      IBDatabase1.DatabaseName := IncludeTrailingPathDelimiter(IBDatabase1.DatabaseName) + FServerRec.Port + ':';
     IBDatabase1.DatabaseName := IBDatabase1.DatabaseName + edNewDatabase.Text;
   end;
 
-  FPort := ServerRec.Port;
+  FPort := FServerRec.Port;
 
-  cbCharset.ItemIndex := fmCreateDB.cbCharset.Items.IndexOf(ServerRec.Charset);
+  cbCharset.ItemIndex := fmCreateDB.cbCharset.Items.IndexOf(FServerRec.Charset);
 
   IBDatabase1.Params.Clear;
   IBDatabase1.LoginPrompt := false;

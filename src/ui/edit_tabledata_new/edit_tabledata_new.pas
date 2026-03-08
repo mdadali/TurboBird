@@ -362,7 +362,6 @@ var
   i, AWidth, VSpacing: Integer;
   ATop: Integer;
 begin
-
   ATop := 20;
   VSpacing := 10; // vertikaler Abstand zwischen Controls
 
@@ -429,10 +428,6 @@ begin
 
         // DataSource + DataField setzen
         AArrayGrid.DataSource := dsMain;
-
-        if not dsMain.DataSet.Active then
-          dsMain.DataSet.Open;
-
         AArrayGrid.DataField := FieldName;
 
         Inc(ATop, AArrayGrid.Height + 2); // Abstand für Label

@@ -19,9 +19,8 @@ uses
   IB,
   IBDatabase,
   IBQuery,
-  IBExtract,
   IBDatabaseInfo,
-  ibxscript, IBSQL,
+  ibxscript, IBSQL, IBExtract,
 
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig, fsqlmonitor,
@@ -80,7 +79,9 @@ uses
   fActivityMonitor,
   edit_tabledata_new,
 
-  ibsqleditor
+  ibsqleditor,
+  IBTransactionEdit,  //orig
+  IBTransactionEditor //new
   ;
 
 {$i turbocommon.inc}
@@ -98,9 +99,6 @@ type
     CurrentIBTransaction: TIBTransaction;
     grBoxObjectFilter: TGroupBox;
     HtmlViewer1: THtmlViewer;
-    IBExtract1: TIBExtract;
-    IBSQLMain: TIBSQL;
-    IBXScript1: TIBXScript;
     Image1: TImage;
     Label1: TLabel;
     Memo1: TMemo;
@@ -123,7 +121,7 @@ type
     lmServers: TMenuItem;
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
-    lmIBSQLEditor: TMenuItem;
+    lmTransConfig: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -330,7 +328,6 @@ type
     procedure lmEditUDRFunctionClick(Sender: TObject);
     procedure lmEditUDRProcedureClick(Sender: TObject);
     procedure lmGetIncrementGenClick(Sender: TObject);
-    procedure lmIBSQLEditorClick(Sender: TObject);
     procedure lmImportTableClick(Sender: TObject);
     procedure lmNewUDRFunctionClick(Sender: TObject);
     procedure lmNewUDRProcedureClick(Sender: TObject);
@@ -382,6 +379,7 @@ type
     procedure lmTestUDRFunctionClick(Sender: TObject);
     procedure lmTestPackageUDRFunctionClick(Sender: TObject);
     procedure lmTestUDRProcedureClick(Sender: TObject);
+    procedure lmTransConfigClick(Sender: TObject);
     procedure lmUserPermManagementClick(Sender: TObject);
     procedure lmViewDomainClick(Sender: TObject);
     procedure lmDisplayViewClick(Sender: TObject);
@@ -3293,29 +3291,6 @@ begin
   end;
 end;
 
-procedure TfmMain.lmIBSQLEditorClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  AGenName: string;
-  dbIndex: Integer;
-  Rec: TDatabaseRec;
-  IBSQL: TIBSQL;
-begin
-  SelNode:= tvMain.Selected;
-
-  if (SelNode = nil) or (SelNode.Parent = nil) then
-    exit;
-
-  dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
-  Rec := RegisteredDatabases[dbIndex];
-
-  IBSQL := TIBSQL.Create(self);
-  IBSQL.Database := Rec.IBDatabase;
-  IBSQL.Transaction := Rec.IBDatabase.DefaultTransaction;
-
-  EditSQL(IBSQL);
-end;
-
 {procedure TfmMain.lmImportTableClick(Sender: TObject);
 var fmImportTable: TfmImportTable;
     SelNode: TTreeNode;
@@ -5399,6 +5374,54 @@ begin
   CallRoutine(rtUDRProc);
 end;
 
+procedure TfmMain.lmTransConfigClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  dbIndex: Integer;
+  Rec: TDatabaseRec;
+  IBTransactionEditorForm: TIBTransactionEditorForm;
+begin
+  try
+    SelNode:= tvMain.Selected;
+
+    if (SelNode = nil) or (SelNode.Parent = nil) then
+      exit;
+
+    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+    Rec := RegisteredDatabases[dbIndex];
+
+    IBTransactionEditorForm := TIBTransactionEditorForm.Create(Application);
+
+    if IBTransactionEditorForm.EditTransaction(Rec.IBTransaction) then
+      //;
+  finally
+    IBTransactionEditorForm.Free;
+    fmReg.SaveRegistrations;
+  end;
+end;
+
+
+{procedure TfmMain.lmTransConfigClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  dbIndex: Integer;
+  Rec: TDatabaseRec;
+begin
+  try
+    SelNode:= tvMain.Selected;
+
+    if (SelNode = nil) or (SelNode.Parent = nil) then
+      exit;
+
+    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
+    Rec := RegisteredDatabases[dbIndex];
+
+    EditIBtransaction(Rec.IBTransaction);
+  finally
+
+  end;
+end;}
+
 procedure TfmMain.lmTestPackageUDRFunctionClick(Sender: TObject);
 begin
   CallRoutine(rtPackageUDRFunc);
@@ -5415,69 +5438,6 @@ begin
 end;
 
 (**********  View Domain info ************)
-{procedure TfmMain.lmViewDomainClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  ADomainName: string;
-  CheckConstraint: string;
-  CharacterSet: string;
-  Collation: string;
-  DomainType: string;
-  DomainSize: Integer;
-  ADomainForm: TFmViewDomain;
-  DefaultValue: string;
-  ATab: TTabSheet;
-  dbIndex: Integer;
-  Title: string;
-begin
-  SelNode:= tvMain.Selected;
-  if (SelNode <> nil) and (SelNode.Parent <> nil) then
-  begin
-    ADomainName:= SelNode.Text;
-    Title:= SelNode.Parent.Parent.Text + ': Domain: ' + ADomainName;
-    ADomainForm:= TfmViewDomain(FindCustomForm(Title, TfmViewDomain));
-    if ADomainForm  = nil then
-    begin
-      ADomainForm:= TfmViewDomain.Create(Application);
-      ATab:= TTabSheet.Create(self);
-      ATab.Parent:= PageControl1;
-      ADomainForm.Parent:= ATab;
-      ADomainForm.Left:= 0;
-      ADomainForm.Top:= 0;
-      ADomainForm.BorderStyle:= bsNone;
-      ADomainForm.Align:= alClient;
-      PageControl1.ActivePage:= ATab;
-    end
-    else
-      ATab:= ADomainForm.Parent as TTabSheet;
-    PageControl1.ActivePage:= ATab;
-
-    dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
-    dmSysTables.GetDomainInfo(dbIndex, ADomainName, DomainType, DomainSize, DefaultValue, CheckConstraint, CharacterSet, Collation);
-    ATab.Tag:= dbIndex;
-    if Pos('default', LowerCase(DefaultValue)) = 1 then
-      DefaultValue:= Trim(Copy(DefaultValue, 8, Length(DefaultValue)));
-    if (Pos('CHAR', DomainType) > 0) or
-      (Pos('CSTRING', DomainType) >0) then
-      DomainType:= DomainType + '(' + IntToStr(DomainSize) + ')';
-
-    // Fill ViewDomain form
-    with ADomainForm do
-    begin
-      Caption:= Title;
-      ATab.Caption:= Caption;
-      edName.Caption:= ADomainName;
-      laType.Caption:= DomainType;
-      laSize.Caption:= IntToStr(DomainSize);
-      laDefault.Caption:= DefaultValue;
-      laCheckConstraint.Caption:= CheckConstraint;
-      laCharacterSet.Caption:= CharacterSet;
-      laCollation.Caption:= Collation;
-    end;
-    ADomainForm.Show;
-  end;
-end; }
-
 procedure TfmMain.lmViewDomainClick(Sender: TObject);
 var
   SelNode: TTreeNode;

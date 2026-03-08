@@ -38,6 +38,7 @@ type
     laSourceDatabase: TLabel;
     SynSQLSyn1: TSynSQLSyn;
     syScript: TSynEdit;
+    procedure CancelCopy(Sender: TObject);
     procedure bbCopyClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure cbDestDatabaseChange(Sender: TObject);
@@ -49,6 +50,7 @@ type
   private
     FNodeInfos: TPNodeInfos;
     FSourceIndex: Integer;
+
     { private declarations }
   public
     { public declarations }
@@ -117,92 +119,98 @@ begin
   Parent.Free;
 end;
 
+procedure TfmCopyTable.CancelCopy(Sender: TObject);
+begin
+  {Cancelled := True;
+  if Assigned(ProgressLabel) then
+    ProgressLabel.Caption := 'Cancelling...';
+  Application.ProcessMessages;}
+end;
+
 procedure TfmCopyTable.bbCopyClick(Sender: TObject);
 var
-  i: Integer;
-  Statement: string;
-  Values: string;
+  i, Num: Integer;
+  Statement, Values: string;
   SQLTarget: TIBQuery;
-  Num: Integer;
 begin
-  Statement:= 'insert into ' + cbDestTable.Text + ' (';
   dmSysTables.sqQuery.Close;
   dmSysTables.Init(FSourceIndex);
-  dmSysTables.sqQuery.SQL.Text:= syScript.Lines.Text;
-  dmSysTables.sqQuery.Open;
-  Values:= '';
 
-  // Get field names
-  with dmSysTables.sqQuery do
-  for i:= 0 to Fields.Count - 1 do
+  dmSysTables.sqQuery.SQL.Text := syScript.Lines.Text;
+  dmSysTables.sqQuery.Open;
+
+  if dmSysTables.sqQuery.IsEmpty then
   begin
-    Statement:= Statement + Fields[i].FieldName + ',';
-    Values:= Values + ':' + Fields[i].FieldName + ',';
-    Next;
+    ShowMessage('No records found');
+    Exit;
   end;
+
+  Statement := 'INSERT INTO ' + cbDestTable.Text + ' (';
+  Values := '';
+
+  { Feldliste erzeugen }
+  for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
+  begin
+    if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
+      Continue;
+
+    Statement := Statement + dmSysTables.sqQuery.Fields[i].FieldName + ',';
+    Values := Values + ':' + dmSysTables.sqQuery.Fields[i].FieldName + ',';
+  end;
+
   Delete(Statement, Length(Statement), 1);
   Delete(Values, Length(Values), 1);
-  Statement:= Statement + ') Values (' + Values + ')';
 
-  // Enter password if it is not saved
-  with RegisteredDatabases[cbDestDatabase.ItemIndex] do
-  begin
-    if RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.Password = '' then
-    //if RegisteredDatabases[cbDestDatabase.ItemIndex].IBConnection.Password = '' then
+  Statement := Statement + ') VALUES (' + Values + ')';
+
+  SQLTarget := TIBQuery.Create(nil);
+
+  try
+    SQLTarget.Database := RegisteredDatabases[cbDestDatabase.ItemIndex].IBDatabase;
+    SQLTarget.Transaction := RegisteredDatabases[cbDestDatabase.ItemIndex].IBTransaction;
+    SQLTarget.SQL.Text := Statement;
+
+    if not SQLTarget.Transaction.InTransaction then
+      SQLTarget.Transaction.StartTransaction;
+
+    SQLTarget.Prepare;
+
+    Num := 0;
+
+    dmSysTables.sqQuery.First;
+
+    while not dmSysTables.sqQuery.EOF do
     begin
-      if fmEnterPass.ShowModal = mrOk then
+      for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
       begin
-        if fmReg.TestConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
-          RegRec.Charset, RegRec.FireBirdClientLibPath, RegRec.SQLDialect, RegRec.Port, Regrec.ServerName, RegRec.OverwriteLoadedClientLib) then
-          with fmMain do
-          begin
-            RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
-            RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.Password:= fmEnterPass.edPassword.Text;
-            RegisteredDatabases[cbDestDatabase.ItemIndex].RegRec.Role:= fmEnterPass.cbRole.Text;
-          end
-          else
-          begin
-            Exit;
-          end;
-      end
+        if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
+          Continue;
+
+        SQLTarget.ParamByName(dmSysTables.sqQuery.Fields[i].FieldName).Value :=
+          dmSysTables.sqQuery.Fields[i].Value;
+      end;
+
+      SQLTarget.ExecSQL;
+
+      Inc(Num);
+      dmSysTables.sqQuery.Next;
     end;
 
-    SQLTarget:= TIBQuery.Create(nil);
-    try
-      SQLTarget.DataBase:= IBDatabase;
-      SQLTarget.Transaction:= IBTransaction;
-      SQLTarget.SQL.Text:= Statement;
+    SQLTarget.Transaction.Commit;
 
-      // Start copy
-      try
-        dmSysTables.sqQuery.First;
-        Num:= 0;
-        with dmSysTables.sqQuery do
-        while not EOF do
-        begin
-          for i:= 0 to Fields.Count - 1 do
-            SQLTarget.Params.ParamByName(Fields[i].FieldName).Value:= Fields[i].Value;
-          SQLTarget.ExecSQL;
-          Inc(Num);
-          Next;
-        end;
-        IBTransaction.Commit;
-        ShowMessage(IntToStr(Num) + ' record(s) has been copied' + LineEnding + 'Don''t forget to set the Generator to the new value, ' +
-          'if it exists');
-        dmSysTables.sqQuery.Close;
-        Close;
-      except
-        on E: Exception do
-        begin
-          MessageDlg('Error while copy: ' + e.Message, mtError, [mbOk], 0);
-          IBTransaction.Rollback;
-        end;
-      end;
-    finally
-      SQLTarget.Free;
+    ShowMessage(IntToStr(Num) + ' record(s) copied');
+
+  except
+    on E: Exception do
+    begin
+      if SQLTarget.Transaction.InTransaction then
+        SQLTarget.Transaction.Rollback;
+
+      MessageDlg('Error while copy: ' + E.Message, mtError, [mbOK], 0);
     end;
   end;
 
+  SQLTarget.Free;
   dmSysTables.sqQuery.Close;
 end;
 

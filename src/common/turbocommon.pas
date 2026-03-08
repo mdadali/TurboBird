@@ -212,18 +212,20 @@ type
   end;
 
 
+
+  TTxFlags = set of (
+    txReadOnly,
+    txWait,
+    txRecVersion,
+    txAutoCommit,
+    txReadConsistency
+  );
+
   TTransactionConfigRecord = packed record
-    TxIsolation: Byte;           // 0=ReadCommitted,1=ReadCommittedRecVer,2=RepeatableRead,3=Serializable
-    TxAccessMode: Boolean;       // True=ReadWrite, False=ReadOnly
-    TxWaitMode: Boolean;         // True=Wait, False=NoWait
-    TxAutoCommit: Boolean;
-    TxTimeout: LongInt;          // ms
-    StatementTimeout: LongInt;   // ms
-    LockTimeout: LongInt;        // ms
-    ReadConsistency: Boolean;
-    CommitRetaining: Boolean;
-    ForceAutoCommitOnDDL: Boolean;
-    TxName: string[50];          // optional Label / Alias
+    Isolation: Byte;
+    Flags: TTxFlags;
+    LockTimeout: Integer;
+    TxName: string[50];
   end;
 
   TRegisteredDatabase = packed record
@@ -280,7 +282,7 @@ type
     IBTransaction: TIBTransaction;
     IBQuery: TIBQuery;
     IBDatabaseInfo: TIBDatabaseInfo;
-    TxConfig: TTransactionConfigRecord; // NEU: alle Transaction-Parameter
+    TxConfig: TTransactionConfigRecord;
   end;
 
   TPNodeInfos = ^TNodeInfos;

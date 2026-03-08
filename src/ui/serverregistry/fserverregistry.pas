@@ -58,6 +58,7 @@ type
     btnClientLib: TButton;
     chkSavePassword: TCheckBox;
     GroupBox1: TGroupBox;
+    IBXServerProperties1: TIBXServerProperties;
     Image1: TImage;
     Label1: TLabel;
     Label10: TLabel;
@@ -242,7 +243,11 @@ begin
 
   cbServerName.SetFocus;
 
-  edtPort.Enabled := (UpperCase(cbProtocol.Items[cbProtocol.ItemIndex]) <> 'LOCAL');
+  edtPort.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] <> 'Local');
+  edtRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
+  if not edtRootPath.Enabled then
+    edtRootPath.Text := '';
+  btnOpenRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
 
   if cbServerName.Items.Count = 0 then
     exit;
@@ -897,7 +902,7 @@ begin
   Rec.ClientLibraryPath := edtClientLibraryPath.Text;
   Rec.ConfigFilePath    := edtConfigFilePath.Text;
   Rec.LoadRegisteredClientLib := cboxLoadRegisteredClientLib.Checked;
-  Rec.IsEmbedded              :=  (cbProtocol.ItemIndex = 1); //ptEmbedded
+  Rec.IsEmbedded              :=  (LowerCase(Trim(cbProtocol.Text)) = 'local');
 
   Rec.ConnectTimeoutMS := StrToInt(edtConnectionTimeout.Text);
   Rec.RetryCount       := StrToInt(edtRetryCount.Text);

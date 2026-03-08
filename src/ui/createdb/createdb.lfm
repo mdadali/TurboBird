@@ -1,7 +1,7 @@
 object fmCreateDB: TfmCreateDB
-  Left = 565
+  Left = 629
   Height = 614
-  Top = 134
+  Top = 253
   Width = 710
   BorderStyle = bsSingle
   Caption = 'Create new Firebird Database'
@@ -222,7 +222,7 @@ object fmCreateDB: TfmCreateDB
     object Label1: TLabel
       Left = 24
       Height = 20
-      Top = 16
+      Top = 20
       Width = 23
       Caption = 'File'
       ParentColor = False
@@ -246,7 +246,7 @@ object fmCreateDB: TfmCreateDB
     object Label4: TLabel
       Left = 24
       Height = 20
-      Top = 64
+      Top = 68
       Width = 52
       Caption = 'Charset'
       ParentColor = False
@@ -262,7 +262,7 @@ object fmCreateDB: TfmCreateDB
     object Label9: TLabel
       Left = 408
       Height = 20
-      Top = 64
+      Top = 68
       Width = 76
       Caption = 'SQL Dialect'
       ParentColor = False
@@ -286,7 +286,7 @@ object fmCreateDB: TfmCreateDB
     object Label10: TLabel
       Left = 24
       Height = 20
-      Top = 114
+      Top = 116
       Width = 59
       Caption = 'Pagesize'
       ParentColor = False
@@ -311,7 +311,7 @@ object fmCreateDB: TfmCreateDB
     object Label11: TLabel
       Left = 408
       Height = 20
-      Top = 114
+      Top = 116
       Width = 100
       Caption = 'Sweep Interval'
       ParentColor = False
@@ -363,7 +363,7 @@ object fmCreateDB: TfmCreateDB
       object Label5: TLabel
         Left = 24
         Height = 20
-        Top = 8
+        Top = 12
         Width = 40
         Caption = 'Name'
         ParentColor = False
@@ -373,6 +373,7 @@ object fmCreateDB: TfmCreateDB
         Height = 32
         Top = 8
         Width = 593
+        Enabled = False
         ItemHeight = 0
         OnChange = cmbBoxServersChange
         Style = csOwnerDrawFixed
@@ -381,17 +382,9 @@ object fmCreateDB: TfmCreateDB
       object Label6: TLabel
         Left = 24
         Height = 20
-        Top = 56
+        Top = 60
         Width = 50
         Caption = 'Version'
-        ParentColor = False
-      end
-      object Label7: TLabel
-        Left = 416
-        Height = 20
-        Top = 56
-        Width = 32
-        Caption = 'Type'
         ParentColor = False
       end
       object edtServerVersion: TEdit
@@ -399,14 +392,27 @@ object fmCreateDB: TfmCreateDB
         Height = 30
         Top = 56
         Width = 286
+        ReadOnly = True
         TabOrder = 1
       end
+      object Label7: TLabel
+        Left = 424
+        Height = 20
+        Top = 60
+        Width = 32
+        Caption = 'Type'
+        ParentColor = False
+        Visible = False
+      end
       object edtServerType: TEdit
-        Left = 472
+        Left = 480
         Height = 30
         Top = 56
-        Width = 216
+        Width = 201
+        ReadOnly = True
         TabOrder = 2
+        Text = 'N/A'
+        Visible = False
       end
     end
   end
@@ -423,7 +429,7 @@ object fmCreateDB: TfmCreateDB
     object Label2: TLabel
       Left = 24
       Height = 20
-      Top = 18
+      Top = 20
       Width = 73
       Caption = 'User name'
       ParentColor = False
@@ -438,7 +444,7 @@ object fmCreateDB: TfmCreateDB
     object Label3: TLabel
       Left = 320
       Height = 20
-      Top = 16
+      Top = 20
       Width = 64
       Caption = 'Password'
       ParentColor = False
@@ -455,7 +461,7 @@ object fmCreateDB: TfmCreateDB
     object Label8: TLabel
       Left = 24
       Height = 20
-      Top = 64
+      Top = 68
       Width = 29
       Caption = 'Role'
       ParentColor = False

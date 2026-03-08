@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 543
+  Left = 415
   Height = 706
-  Top = 5
+  Top = 0
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70843,6 +70843,11 @@ object fmServerRegistry: TfmServerRegistry
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Left = 576
+    Top = 285
+  end
+  object IBXServerProperties1: TIBXServerProperties
+    TraceFlags = []
+    Left = 605
     Top = 285
   end
 end

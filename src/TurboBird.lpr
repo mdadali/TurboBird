@@ -33,7 +33,7 @@ uses
 fCheckDBIntegrity, fsqlmonitor,
   fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
   uArrayFormTest, floginservicemanager, fserverregistry,
-  ftransactionconfig, tb_netutils,
+  tb_netutils,
 
   //DBAdmin
   MainFormUnit,
@@ -54,9 +54,9 @@ fCheckDBIntegrity, fsqlmonitor,
 
   //End-DBAdmin
 
-  fsimpleobjextractor,
-  fClipboardExport, datamodulesystem, fservers, fActivityMonitor,
-edit_tabledata_new, foreign_key_table, ibsqleditor;
+  fsimpleobjextractor, fClipboardExport, datamodulesystem, fservers,
+  fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
+  IBTransactionEdit, IBTransactionEditor;
 
 const
   Major = 1;
@@ -145,8 +145,6 @@ begin
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
   //Application.CreateForm(TfmCopyTable, fmCopyTable);
 
-  //Application.CreateForm(TDataModuleIBX, DataModuleIBX);
-  Application.CreateForm(TfmTransactionConfig, fmTransactionConfig);
 
   //Application.CreateForm(TfrmActivityMonitor, frmActivityMonitor);
   //Application.CreateForm(TfrmLoginServiceManager, frmLoginServiceManager);

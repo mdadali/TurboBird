@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 397
+  Left = 1005
   Height = 612
-  Top = 581
+  Top = 181
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
@@ -6380,8 +6380,8 @@ object fmMain: TfmMain
   end
   object MainMenu1: TMainMenu
     Images = ImageList1
-    Left = 56
-    Top = 251
+    Left = 264
+    Top = 480
     object mnFile: TMenuItem
       Caption = '&File'
       object lmServers: TMenuItem
@@ -7575,8 +7575,8 @@ object fmMain: TfmMain
   object pmDatabase: TPopupMenu
     Images = ImageList1
     OnPopup = pmDatabasePopup
-    Left = 56
-    Top = 336
+    Left = 152
+    Top = 472
     object lmServerRegistry: TMenuItem
       Tag = -2
       Caption = 'Server Registry'
@@ -8023,9 +8023,9 @@ object fmMain: TfmMain
         Caption = 'Activity Monitor'
         OnClick = lmActivityMonitorClick
       end
-      object lmIBSQLEditor: TMenuItem
-        Caption = 'IBSQLEditor '
-        OnClick = lmIBSQLEditorClick
+      object lmTransConfig: TMenuItem
+        Caption = 'Transaction Config'
+        OnClick = lmTransConfigClick
       end
     end
     object lmOpenQuery: TMenuItem
@@ -9085,14 +9085,14 @@ object fmMain: TfmMain
         Name = 'Reserved'
         DataType = ftInteger
       end>
-    Left = 184
-    Top = 337
+    Left = 104
+    Top = 360
   end
   object toolbarImages: TImageList
     Height = 32
     Width = 32
-    Left = 184
-    Top = 248
+    Left = 264
+    Top = 304
     Bitmap = {
       4C7A0D0000002000000020000000AE3D00000000000078DAEDBD055855D9F73E
       7EB1759CCFE898638C8E313AB618638FDD858ADD89DDDD8EDD410888A2889474
@@ -9596,8 +9596,8 @@ object fmMain: TfmMain
     Font.Name = 'Ubuntu'
     MinFontSize = 0
     MaxFontSize = 0
-    Left = 504
-    Top = 96
+    Left = 392
+    Top = 320
   end
   object ImageList2: TImageList
     DrawingStyle = dsFocus
@@ -9744,8 +9744,8 @@ object fmMain: TfmMain
     DataSetCloseAction = dcDiscardChanges
     TZTextOption = tzOffset
     DefaultTZDate = 43831
-    Left = 648
-    Top = 96
+    Left = 104
+    Top = 264
   end
   object CurrentIBConnection: TIBDatabase
     Connected = False
@@ -9756,38 +9756,14 @@ object fmMain: TfmMain
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 648
-    Top = 232
+    Left = 104
+    Top = 104
   end
   object CurrentIBTransaction: TIBTransaction
     TransactionName = '{E7A93331-169C-407D-B805-831FABAB8845}'
     Active = False
     DefaultDatabase = CurrentIBConnection
-    Left = 80
-    Top = 152
-  end
-  object IBExtract1: TIBExtract
-    ShowSystem = False
-    AlwaysQuoteIdentifiers = False
-    CaseSensitiveObjectNames = False
-    Left = 504
-    Top = 232
-  end
-  object IBXScript1: TIBXScript
-    IgnoreGrants = False
-    IgnoreCreateDatabase = False
-    ShowAffectedRows = False
-    ShowPerformanceStats = False
-    Left = 760
-    Top = 96
-  end
-  object IBSQLMain: TIBSQL
-    CaseSensitiveParameterNames = False
-    GenerateParamNames = False
-    UniqueParamNames = False
-    ParamCheck = True
-    Scrollable = False
-    Left = 234
-    Top = 136
+    Left = 104
+    Top = 184
   end
 end
