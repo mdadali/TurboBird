@@ -1,7 +1,7 @@
 object fmTransactionConfig: TfmTransactionConfig
-  Left = 598
+  Left = 540
   Height = 366
-  Top = 202
+  Top = 149
   Width = 486
   Caption = 'Transaction configuration'
   ClientHeight = 366
@@ -45,7 +45,7 @@ object fmTransactionConfig: TfmTransactionConfig
     Left = 160
     Height = 22
     Top = 64
-    Width = 99
+    Width = 98
     Caption = 'Read/Write'
     Checked = True
     State = cbChecked
@@ -55,7 +55,7 @@ object fmTransactionConfig: TfmTransactionConfig
     Left = 160
     Height = 22
     Top = 104
-    Width = 114
+    Width = 113
     Caption = 'Wait for locks'
     Checked = True
     State = cbChecked
@@ -81,7 +81,7 @@ object fmTransactionConfig: TfmTransactionConfig
     Left = 160
     Height = 22
     Top = 144
-    Width = 107
+    Width = 106
     Caption = 'AutoCommit'
     TabOrder = 3
   end

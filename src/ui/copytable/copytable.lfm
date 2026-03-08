@@ -1,7 +1,7 @@
 object fmCopyTable: TfmCopyTable
-  Left = -78
+  Left = 455
   Height = 480
-  Top = 378
+  Top = 247
   Width = 767
   Caption = 'Copy Table'
   ClientHeight = 480
@@ -13,17 +13,17 @@ object fmCopyTable: TfmCopyTable
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 9
-    Height = 19
+    Height = 20
     Top = 19
-    Width = 103
+    Width = 113
     Caption = 'Source Database'
     ParentColor = False
   end
   object Label2: TLabel
     Left = 9
-    Height = 19
+    Height = 20
     Top = 40
-    Width = 78
+    Width = 86
     Caption = 'Soruce Table'
     ParentColor = False
   end
@@ -39,23 +39,23 @@ object fmCopyTable: TfmCopyTable
   end
   object Label3: TLabel
     Left = 9
-    Height = 19
+    Height = 20
     Top = 72
-    Width = 132
+    Width = 144
     Caption = 'Destination Database'
     ParentColor = False
   end
   object Label4: TLabel
     Left = 16
-    Height = 19
+    Height = 20
     Top = 128
-    Width = 106
+    Width = 117
     Caption = 'Destination Table'
     ParentColor = False
   end
   object cbSourceTable: TComboBox
     Left = 183
-    Height = 35
+    Height = 32
     Top = 40
     Width = 217
     ItemHeight = 0
@@ -65,7 +65,7 @@ object fmCopyTable: TfmCopyTable
   end
   object cbDestDatabase: TComboBox
     Left = 183
-    Height = 35
+    Height = 32
     Top = 72
     Width = 217
     ItemHeight = 0
@@ -75,7 +75,7 @@ object fmCopyTable: TfmCopyTable
   end
   object cbDestTable: TComboBox
     Left = 183
-    Height = 35
+    Height = 32
     Top = 128
     Width = 217
     ItemHeight = 0
@@ -249,9 +249,9 @@ object fmCopyTable: TfmCopyTable
   end
   object Label5: TLabel
     Left = 9
-    Height = 19
+    Height = 20
     Top = 184
-    Width = 216
+    Width = 237
     Caption = 'select statement from Source Table'
     ParentColor = False
   end

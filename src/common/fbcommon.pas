@@ -247,7 +247,6 @@ begin
       try
         ServicesConnection := AServiceConn;
         FBVersionString := VersionInfo.ServerVersion;
-
         // Grobe Extraktion der Versionsnummern
         FBVersionMajor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 1, 1), 0);
         FBVersionMinor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 3, 1), 0);

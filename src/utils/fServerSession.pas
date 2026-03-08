@@ -265,7 +265,7 @@ begin
   FClientLibraryPath   := AClientLibraryPath;
   FConfigFilePath      := AConfigFilePath;
   FBVersionMajor       := VersionMajor;
-  self.FBVersionMinor  := VersionMinor;
+  FBVersionMinor       := VersionMinor;
   FLoadRegisteredClientLib := ALoadRegisteredClientLib;
   FIsEmbedded          := AIsEmbedded;
 
