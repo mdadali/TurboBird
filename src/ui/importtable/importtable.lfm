@@ -1,7 +1,7 @@
 object fmImportTable: TfmImportTable
-  Left = 382
+  Left = 363
   Height = 429
-  Top = 181
+  Top = 129
   Width = 792
   ActiveControl = SourcePanel
   Caption = 'Import'
@@ -337,13 +337,24 @@ object fmImportTable: TfmImportTable
       TabOrder = 0
     end
     object btnClose: TButton
-      Left = 208
+      Left = 500
       Height = 40
       Top = 16
       Width = 115
       Caption = 'Close'
       OnClick = btnCloseClick
       TabOrder = 1
+    end
+    object btnCancelImport: TButton
+      Left = 200
+      Height = 40
+      Top = 16
+      Width = 160
+      Anchors = [akLeft, akBottom]
+      Caption = 'Cancel Import '
+      Enabled = False
+      OnClick = btnCancelImportClick
+      TabOrder = 2
     end
   end
   object dlgSourceOpen: TOpenDialog

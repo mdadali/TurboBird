@@ -22,6 +22,7 @@ type
     btnPrepare: TButton;
     btnSourceFileOpen: TButton;
     btnClose: TButton;
+    btnCancelImport: TButton;
     cbDestField: TComboBox;
     cbSourceField: TComboBox;
     chkSkipFirstRow: TCheckBox;
@@ -40,6 +41,7 @@ type
     SourcePanel: TPanel;
     procedure bbImportClick(Sender: TObject);
     procedure btnAddMappingClick(Sender: TObject);
+    procedure btnCancelImportClick(Sender: TObject);
     procedure btnDeleteMappingClick(Sender: TObject);
     procedure btnPrepareClick(Sender: TObject);
     procedure btnSourceFileOpenClick(Sender: TObject);
@@ -57,6 +59,8 @@ type
     FDestDB: string; //destination database
     FDestTable: string; //destination table
     FDestIndex: Integer; //index of destination database
+
+    FCancelled: boolean;
     // Load source and destination fields in mapping comboboxes
     procedure LoadMappingCombos;
     // Opens destination table query
@@ -117,6 +121,7 @@ end;
 
 procedure TfmImportTable.FormCreate(Sender: TObject);
 begin
+  FCancelled := false;
   FImporter:=TFileImport.Create;
 end;
 
@@ -266,6 +271,16 @@ procedure TfmImportTable.btnAddMappingClick(Sender: TObject);
 begin
   if FImporter.AddMapping(cbSourceField.Text, cbDestField.Text, ftString, ftString, '') then
     UpdateMappingGrid;
+end;
+
+procedure TfmImportTable.btnCancelImportClick(Sender: TObject);
+begin
+  FCancelled := true;
+  bbImport.Enabled := true;
+  btnClose.Enabled := true;
+  btnCancelImport.Enabled := false;
+
+  Application.ProcessMessages;
 end;
 
 procedure TfmImportTable.btnDeleteMappingClick(Sender: TObject);
@@ -429,19 +444,20 @@ var
   ProgressForm : TForm;
   ProgressBar  : TProgressBar;
   ProgressLabel: TLabel;
-  CancelButton : TButton;
   lblStart     : TLabel;
   lblEnd       : TLabel;
   lblElapsed   : TLabel;
 
-  Cancelled: Boolean;
   StartTime, EndTime: TDateTime;
 begin
+  FCancelled := false;
+
   Screen.Cursor := crHourGlass;
   btnClose.Enabled := False;
   bbImport.Enabled := False;
+  btnCancelImport.Enabled := true;
 
-  Cancelled := False;
+  Application.ProcessMessages;
 
   // ==========================
   // Progress Form erzeugen
@@ -449,6 +465,7 @@ begin
 
   ProgressForm := TForm.Create(nil);
   try
+    ProgressForm.FormStyle := fsStayOnTop;
     ProgressForm.Caption := 'Import running...';
     ProgressForm.Width := 500;
     ProgressForm.Height := 200;
@@ -473,22 +490,6 @@ begin
     ProgressBar.Min := 0;
     ProgressBar.Max := 100;
     ProgressBar.Position := 0;
-
-    // Cancel Button
-    CancelButton := TButton.Create(ProgressForm);
-    CancelButton.Parent := ProgressForm;
-    CancelButton.Caption := 'Cancel';
-    CancelButton.Left := 190;
-    CancelButton.Top := 75;
-    CancelButton.Width := 100;
-    CancelButton.ModalResult := mrNone;
-
-    {CancelButton.OnClick :=
-      procedure(Sender: TObject)
-      begin
-        Cancelled := True;
-        ProgressLabel.Caption := 'Cancelling...';
-      end;}
 
     // Start/End/Elapsed Labels
     lblStart := TLabel.Create(ProgressForm);
@@ -562,7 +563,7 @@ begin
     try
       while FImporter.ReadRow do
       begin
-        if Cancelled then
+        if FCancelled then
           raise Exception.Create('Import cancelled by user.');
 
         for i := 0 to FImporter.MappingCount - 1 do
@@ -623,7 +624,9 @@ begin
     ProgressForm.Free;
     btnClose.Enabled := True;
     bbImport.Enabled := True;
+    btnCancelImport.Enabled := false;
     Screen.Cursor := crDefault;
+    Application.ProcessMessages;
   end;
 end;
 
