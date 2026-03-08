@@ -474,13 +474,16 @@ begin
 
      if result then
      begin
-       FErrorStr :=  'Embedded Connection Succesful';
-       FErrorCode := seNone;
 
        FFBVersionMajor  := major;
        FFBVersionMinor  := minor;
        FFBVersionString := verstr;
        FIsEmbedded := true;
+
+       FErrorStr := 'Embedded Connection successful!' + sLineBreak +
+                     'Server version: ' + FFBVersionString;
+
+       FErrorCode := seNone;
 
        FConnected := Result;
      end;

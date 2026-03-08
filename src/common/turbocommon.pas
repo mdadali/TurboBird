@@ -249,7 +249,9 @@ type
     ServerVersionString: string[50];  //LI-V6.3.3.1683 Firebird 5.0
     ServerVersionMinor: word;
 
-    TxConfig: TTransactionConfigRecord;  // HIER HIN
+    IsEmbedded: boolean;
+
+    TxConfig: TTransactionConfigRecord;
 
     Reserved: array [0 .. 40] of Byte;
   end;
@@ -431,6 +433,9 @@ var
 
 
 
+function IBXProtocolToString(AProtocol: TProtocol): string;
+function StringToIBXProtocol(const AValue: string): TProtocol;
+
 //TransactionConfig
 procedure ExtractTransactionConfig(Tx: TIBTransaction; out Config: TTransactionConfigRecord);
 procedure ApplyTransactionConfig(const Config: TTransactionConfigRecord; Tx: TIBTransaction);
@@ -579,6 +584,43 @@ implementation
 
 uses Reg;
 
+function IBXProtocolToString(AProtocol: TProtocol): string;
+begin
+  case AProtocol of
+    TCP:       Result := 'TCP';
+    SPX:       Result := 'SPX';
+    NamedPipe: Result := 'NamedPipe';
+    Local:     Result := 'Local';
+    inet:      Result := 'inet';
+    inet4:     Result := 'inet4';
+    inet6:     Result := 'inet6';
+    wnet:      Result := 'wnet';
+    xnet:      Result := 'xnet';
+  end;
+end;
+
+function StringToIBXProtocol(const AValue: string): TProtocol;
+var
+  P: TProtocolAll;
+begin
+  if SameText(AValue,'TCP') then P := TCP
+  else if SameText(AValue,'SPX') then P := SPX
+  else if SameText(AValue,'NamedPipe') then P := NamedPipe
+  else if SameText(AValue,'Local') then P := Local
+  else if SameText(AValue,'inet') then P := inet
+  else if SameText(AValue,'inet4') then P := inet4
+  else if SameText(AValue,'inet6') then P := inet6
+  else if SameText(AValue,'wnet') then P := wnet
+  else if SameText(AValue,'xnet') then P := xnet
+  else
+    P := unknownProtocol;
+
+  if P = unknownProtocol then
+    raise Exception.Create('Unknown IBX protocol: ' + AValue);
+
+  Result := TProtocol(P);
+
+end;
 //TransactionConfig
 function HasParam(P: TStrings; const S: string): Boolean;
 var
