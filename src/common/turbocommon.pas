@@ -236,28 +236,6 @@ type
     Role: string[100];
     Charset: string[40];
     SQLDialect: string[1];
-
-    {
-    ODSMinor: word;
-    ODSMajor: word;
-    ConnectString: string[255];
-    DBOwner: string[100];
-    DateDBCreated: DateTime;
-    PageSize: integer;
-    //PageAllocated,
-    //PageUsed,
-    //PageAvailable,
-    NumberOfBuffers: bigInt;
-    //CurrentMemory: Bigint;
-    MaxMemory: BigInt;
-    LingerDelay: bigint; //seconds
-    SweepIntervall: bigint; //transactions
-    ReadOnly: boolean;
-    Online: boolean;
-    SynchronousDiskWrites: boolean;
-    ShadowDatabase: boolean;
-    SpaceReservedForBackupRecords: boolean;}
-
     Deleted: Boolean;
     SavePassword: Boolean;
     LastOpened: TDateTime;
@@ -271,6 +249,8 @@ type
     ServerVersionString: string[50];  //LI-V6.3.3.1683 Firebird 5.0
     ServerVersionMinor: word;
 
+    TxConfig: TTransactionConfigRecord;  // HIER HIN
+
     Reserved: array [0 .. 40] of Byte;
   end;
 
@@ -282,7 +262,6 @@ type
     IBTransaction: TIBTransaction;
     IBQuery: TIBQuery;
     IBDatabaseInfo: TIBDatabaseInfo;
-    TxConfig: TTransactionConfigRecord;
   end;
 
   TPNodeInfos = ^TNodeInfos;
@@ -439,13 +418,26 @@ var
 
     //Theme
     AllowIniOverrides: boolean;
-    //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+    //Transaction Defaults aus INI ====
+      DefTxIsolation: Byte;           // 0=read_committed,1=read_committed+rec_version,2=concurrency,3=consistency
+      DefTxFlags: TTxFlags;           // txReadOnly, txWait, txRecVersion, txAutoCommit, txReadConsistency
+      DefTxLockTimeout: Integer;      // ms
+      DefTxName: string[50];          // optionaler Label / Alias
+
+
+      //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+
+//TransactionConfig
+procedure ExtractTransactionConfig(Tx: TIBTransaction; out Config: TTransactionConfigRecord);
+procedure ApplyTransactionConfig(const Config: TTransactionConfigRecord; Tx: TIBTransaction);
 
 
 function IsFilterScopeNode(ANode: TTreeNode): Boolean;
-
 function MatchesFilter(const AText, AFilter: string): Boolean;
-
 
 function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
 function  IsObjectNameQuoted(const AStr: string): Boolean;
@@ -587,7 +579,138 @@ implementation
 
 uses Reg;
 
+//TransactionConfig
+function HasParam(P: TStrings; const S: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := 0 to P.Count - 1 do
+    if SameText(Trim(P[i]), S) then
+      Exit(True);
+end;
 
+procedure ExtractTransactionConfig(
+  Tx: TIBTransaction;
+  out Config: TTransactionConfigRecord);
+var
+  P: TStrings;
+begin
+  FillChar(Config, SizeOf(Config), 0);
+
+  if Tx = nil then
+    Exit;
+
+  P := Tx.Params;
+
+  { Isolation }
+
+  if HasParam(P,'consistency') then
+    Config.Isolation := 3
+  else
+  if HasParam(P,'concurrency') then
+    Config.Isolation := 2
+  else
+  if HasParam(P,'read_committed') then
+    Config.Isolation := 1
+  else
+    Config.Isolation := 0;
+
+  { Access }
+
+  if HasParam(P,'read') then
+    Include(Config.Flags, txReadOnly);
+
+  { Wait }
+
+  if HasParam(P,'wait') then
+    Include(Config.Flags, txWait);
+
+  { Record Version }
+
+  if HasParam(P,'rec_version') then
+    Include(Config.Flags, txRecVersion);
+
+  { Autocommit }
+
+  if HasParam(P,'autocommit') then
+    Include(Config.Flags, txAutoCommit);
+
+  { Firebird 4 }
+
+  if HasParam(P,'read_consistency') then
+    Include(Config.Flags, txReadConsistency);
+
+  { Lock Timeout }
+
+  Config.LockTimeout :=
+    StrToIntDef(P.Values['lock_timeout'],0);
+
+end;
+
+procedure ApplyTransactionConfig(
+  const Config: TTransactionConfigRecord;
+  Tx: TIBTransaction);
+var
+  P: TStrings;
+begin
+  if Tx = nil then
+    Exit;
+
+  if Tx.Active then
+    Tx.Commit;
+
+  P := Tx.Params;
+  P.Clear;
+
+  { Isolation }
+
+  case Config.Isolation of
+    0,1: P.Add('read_committed');
+    2: P.Add('concurrency');
+    3: P.Add('consistency');
+  else
+    P.Add('read_committed');
+  end;
+
+  { Record Version }
+
+  if txRecVersion in Config.Flags then
+    P.Add('rec_version')
+  else
+    P.Add('no_rec_version');
+
+  { Access }
+
+  if txReadOnly in Config.Flags then
+    P.Add('read')
+  else
+    P.Add('write');
+
+  { Wait }
+
+  if txWait in Config.Flags then
+    P.Add('wait')
+  else
+    P.Add('nowait');
+
+  { Autocommit }
+
+  if txAutoCommit in Config.Flags then
+    P.Add('autocommit');
+
+  { Firebird 4 }
+
+  if txReadConsistency in Config.Flags then
+    P.Add('read_consistency');
+
+  { Lock Timeout }
+
+  if Config.LockTimeout > 0 then
+    P.Add('lock_timeout=' + IntToStr(Config.LockTimeout));
+end;
+
+//TreeView Filter
 function IsFilterScopeNode(ANode: TTreeNode): Boolean;
 var
   NI: TPNodeInfos;
@@ -1718,6 +1841,30 @@ begin
   QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
   QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
   QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
+
+  //TransactionConfig-Defaults
+  DefTxFlags := [];
+  DefTxIsolation := fIniFile.ReadInteger('TransactionDefaults','Isolation',1);
+
+  if fIniFile.ReadBool('TransactionDefaults','ReadOnly',False) then
+    Include(DefTxFlags, txReadOnly);
+
+  if fIniFile.ReadBool('TransactionDefaults','Wait',True) then
+    Include(DefTxFlags, txWait);
+
+  if fIniFile.ReadBool('TransactionDefaults','RecVersion',True) then
+    Include(DefTxFlags, txRecVersion);
+
+  if fIniFile.ReadBool('TransactionDefaults','AutoCommit',False) then
+    Include(DefTxFlags, txAutoCommit);
+
+  if fIniFile.ReadBool('TransactionDefaults','ReadConsistency',False) then
+    Include(DefTxFlags, txReadConsistency);
+
+  DefTxLockTimeout := fIniFile.ReadInteger('TransactionDefaults','LockTimeout',0);
+
+  DefTxName := fIniFile.ReadString('TransactionDefaults','TxName','Default');
+
 end;
 
 procedure WriteIniFile;
@@ -1781,6 +1928,16 @@ begin
   fIniFile.WriteInteger('QueryWindow',  'FontSize', QWEditorFontSize);
   fIniFile.WriteString('QueryWindow',  'FontColor', ColorToString(QWEditorFontColor));
   fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
+
+  //Transaction-Default config
+  fIniFile.WriteInteger('TransactionDefaults', 'Isolation', DefTxIsolation);
+  fIniFile.WriteBool('TransactionDefaults', 'ReadOnly', txReadOnly in DefTxFlags);
+  fIniFile.WriteBool('TransactionDefaults', 'Wait', txWait in DefTxFlags);
+  fIniFile.WriteBool('TransactionDefaults', 'RecVersion', txRecVersion in DefTxFlags);
+  fIniFile.WriteBool('TransactionDefaults', 'AutoCommit', txAutoCommit in DefTxFlags);
+  fIniFile.WriteBool('TransactionDefaults', 'ReadConsistency', txReadConsistency in DefTxFlags);
+  fIniFile.WriteInteger('TransactionDefaults', 'LockTimeout', DefTxLockTimeout);
+  fIniFile.WriteString('TransactionDefaults', 'TxName', DefTxName);
 end;
 
 

@@ -453,7 +453,7 @@ begin
   Result := False;
 end;
 
- function TServerSession.ConnectEmbeddedIBX: boolean;
+function TServerSession.ConnectEmbeddedIBX: boolean;
  var
    TempDBFile: string;
    IBLDBSupport1: TIBLocalDBSupport;
@@ -465,15 +465,23 @@ end;
    ServerRec: TServerRecord;
    major, minor: integer;
    verstr: string;
- begin
+begin
    Result := False;
    try
      ServerRec := BuildServerRecordFromSession(Self, true);
      Result := TestEmbeddedConnection(ServerRec, major, minor, verstr);
+
+
      if result then
      begin
        FErrorStr :=  'Embedded Connection Succesful';
        FErrorCode := seNone;
+
+       FFBVersionMajor  := major;
+       FFBVersionMinor  := minor;
+       FFBVersionString := verstr;
+       FIsEmbedded := true;
+
        FConnected := Result;
      end;
    except
@@ -486,8 +494,7 @@ end;
      end;
    end;
 
- end;
-
+end;
 
 procedure TServerSession.FillIBXServicesConnectionData;
 begin

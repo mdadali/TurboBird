@@ -1,7 +1,7 @@
 object fmCreateDB: TfmCreateDB
-  Left = 629
+  Left = 620
   Height = 614
-  Top = 253
+  Top = 84
   Width = 710
   BorderStyle = bsSingle
   Caption = 'Create new Firebird Database'
@@ -290,6 +290,7 @@ object fmCreateDB: TfmCreateDB
       Width = 59
       Caption = 'Pagesize'
       ParentColor = False
+      Visible = False
     end
     object comboxPageSize: TComboBox
       Left = 100
@@ -307,6 +308,7 @@ object fmCreateDB: TfmCreateDB
       Style = csDropDownList
       TabOrder = 4
       Text = '16384'
+      Visible = False
     end
     object Label11: TLabel
       Left = 408
@@ -315,6 +317,7 @@ object fmCreateDB: TfmCreateDB
       Width = 100
       Caption = 'Sweep Interval'
       ParentColor = False
+      Visible = False
     end
     object edtSweepInterval: TEdit
       Left = 533
@@ -323,6 +326,7 @@ object fmCreateDB: TfmCreateDB
       Width = 97
       TabOrder = 5
       Text = '20000'
+      Visible = False
     end
     object chkboxForcedWrites: TCheckBox
       Left = 24
@@ -331,6 +335,7 @@ object fmCreateDB: TfmCreateDB
       Width = 115
       Caption = 'Forced Writes'
       TabOrder = 6
+      Visible = False
     end
     object chkboxReserveSpace: TCheckBox
       Left = 240
@@ -339,6 +344,7 @@ object fmCreateDB: TfmCreateDB
       Width = 120
       Caption = 'Reserve Space'
       TabOrder = 7
+      Visible = False
     end
   end
   object pnlTop: TPanel

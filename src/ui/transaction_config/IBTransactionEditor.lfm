@@ -1,13 +1,15 @@
 object IBTransactionEditorForm: TIBTransactionEditorForm
-  Left = 420
+  Left = 396
   Height = 310
-  Top = 140
-  Width = 440
+  Top = 199
+  Width = 520
   BorderStyle = bsDialog
   Caption = 'Transaction Editor'
   ClientHeight = 310
-  ClientWidth = 440
+  ClientWidth = 520
+  OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object GroupIsolation: TGroupBox
@@ -20,13 +22,14 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     ClientWidth = 146
     TabOrder = 0
     object rbConcurrency: TRadioButton
-      Left = 10
+      Left = 8
       Height = 22
-      Top = 20
+      Top = 16
       Width = 86
       Caption = 'Snapshot'
       Checked = True
       TabOrder = 0
+      TabStop = True
     end
     object rbReadCommitted: TRadioButton
       Left = 10
@@ -62,6 +65,7 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       Caption = 'Read'
       Checked = True
       TabOrder = 0
+      TabStop = True
     end
     object rbWrite: TRadioButton
       Left = 10
@@ -89,6 +93,7 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       Caption = 'rec_version'
       Checked = True
       TabOrder = 0
+      TabStop = True
     end
     object rbNoRecVersion: TRadioButton
       Left = 10
@@ -116,6 +121,7 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       Caption = 'Wait'
       Checked = True
       TabOrder = 0
+      TabStop = True
     end
     object rbNoWait: TRadioButton
       Left = 90
@@ -150,22 +156,52 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     TabOrder = 4
   end
   object btnOK: TButton
-    Left = 250
+    Left = 310
     Height = 30
-    Top = 260
+    Top = 256
     Width = 80
+    Anchors = [akLeft, akBottom]
     Caption = 'OK'
     ModalResult = 1
     OnClick = btnOKClick
     TabOrder = 5
   end
   object btnCancel: TButton
-    Left = 340
+    Left = 400
     Height = 30
-    Top = 260
+    Top = 256
     Width = 80
+    Anchors = [akLeft, akBottom]
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 6
+  end
+  object btnSaveAsDefault: TButton
+    Left = 162
+    Height = 30
+    Top = 256
+    Width = 128
+    Anchors = [akLeft, akBottom]
+    Caption = 'Save as Default'
+    OnClick = btnSaveAsDefaultClick
+    TabOrder = 7
+  end
+  object btnLoadPresets: TButton
+    Left = 32
+    Height = 30
+    Top = 256
+    Width = 112
+    Anchors = [akLeft, akBottom]
+    Caption = 'Load Presets '
+    OnClick = btnLoadPresetsClick
+    TabOrder = 8
+  end
+  object cbReadConsistency: TCheckBox
+    Left = 312
+    Height = 22
+    Top = 192
+    Width = 193
+    Caption = 'Read Consistency  (FB 4+)'
+    TabOrder = 9
   end
 end

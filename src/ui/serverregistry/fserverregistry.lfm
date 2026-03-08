@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 415
+  Left = 530
   Height = 706
-  Top = 0
+  Top = 78
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70757,6 +70757,7 @@ object fmServerRegistry: TfmServerRegistry
       Caption = 'Register'
       Color = clForm
       Default = True
+      Enabled = False
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         2000000000000009000064000000640000000000000000000000FFFFFF00FFFF
