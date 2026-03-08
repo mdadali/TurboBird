@@ -582,9 +582,12 @@ begin
     self.edtVersionMajor.Text := IntToStr(FServerSession.FBVersionMajor);
     self.edtVersionMinor.Text := IntToStr(FServerSession.FBVersionMinor);
     self.edtVersionString.Text := FServerSession.FBVersionString;
+
+    bbReg.Enabled := true;
     MessageDlg(FServerSession.ErrorStr, mtInformation, [mbOK], 0);
   end else
   begin
+    bbReg.Enabled := false;
     MessageDlg(FServerSession.ErrorStr, mtError, [mbOK], 0);
   end;
 end;

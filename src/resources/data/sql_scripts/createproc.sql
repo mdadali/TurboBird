@@ -2,7 +2,7 @@
 
 /*Case 1. No statement terminator - also tests ignoring reserved words in comments*/
 
-Create Procedure MyProc1
+Create or alter Procedure MyProc1
 As
   Declare THECOUNTRY VarChar(32);
 Begin
@@ -15,7 +15,7 @@ End
 
 /*Case 2. ';' as statement terminator*/
 
-Create Procedure MyProc2
+Create or alter Procedure MyProc2
 As
 Begin
   Update COUNTRY SET COUNTRY = 'None' Where COUNTRY = '';
@@ -24,7 +24,7 @@ End;
 /*Case 3. '^' as statement terminator*/
 
 set term ^;
-Create Procedure MyProc3
+Create or alter Procedure MyProc3
 As
 Begin
   Update COUNTRY SET COUNTRY = 'None' Where COUNTRY = '';

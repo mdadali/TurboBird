@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1704"/>
+      <BuildNr Value="1709"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -643,7 +643,7 @@
         <PackageName Value="LCL"/>
       </Item25>
     </RequiredPackages>
-    <Units Count="107">
+    <Units Count="106">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1293,13 +1293,6 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit105>
-      <Unit106>
-        <Filename Value="ui/ibx_design/IBTransactionEdit.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="IBTransactionEditForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit106>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

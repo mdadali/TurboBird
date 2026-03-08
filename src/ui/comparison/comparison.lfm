@@ -148,7 +148,7 @@ object fmComparison: TfmComparison
       Left = 11
       Height = 22
       Top = 4
-      Width = 67
+      Width = 66
       Caption = 'Tables'
       TabOrder = 0
     end
@@ -156,7 +156,7 @@ object fmComparison: TfmComparison
       Left = 11
       Height = 22
       Top = 32
-      Width = 99
+      Width = 98
       Caption = 'Generators'
       TabOrder = 1
     end
@@ -164,7 +164,7 @@ object fmComparison: TfmComparison
       Left = 151
       Height = 22
       Top = 4
-      Width = 80
+      Width = 79
       Caption = 'Triggers'
       TabOrder = 2
     end
@@ -172,7 +172,7 @@ object fmComparison: TfmComparison
       Left = 151
       Height = 22
       Top = 34
-      Width = 62
+      Width = 61
       Caption = 'Views'
       TabOrder = 3
     end
@@ -180,7 +180,7 @@ object fmComparison: TfmComparison
       Left = 262
       Height = 22
       Top = 4
-      Width = 108
+      Width = 107
       Caption = 'Stored Procs'
       TabOrder = 4
     end
@@ -189,7 +189,7 @@ object fmComparison: TfmComparison
       Height = 22
       Hint = 'User Defined Functions'
       Top = 32
-      Width = 58
+      Width = 57
       Caption = 'UDFs'
       ParentShowHint = False
       ShowHint = True
@@ -199,7 +199,7 @@ object fmComparison: TfmComparison
       Left = 390
       Height = 22
       Top = 4
-      Width = 83
+      Width = 82
       Caption = 'Domains'
       TabOrder = 6
     end
@@ -207,7 +207,7 @@ object fmComparison: TfmComparison
       Left = 390
       Height = 22
       Top = 34
-      Width = 60
+      Width = 59
       Caption = 'Roles'
       TabOrder = 7
     end
@@ -215,7 +215,7 @@ object fmComparison: TfmComparison
       Left = 11
       Height = 22
       Top = 61
-      Width = 96
+      Width = 95
       Caption = 'Exceptions'
       TabOrder = 8
     end
@@ -259,7 +259,7 @@ object fmComparison: TfmComparison
       Left = 11
       Height = 22
       Top = 1
-      Width = 157
+      Width = 156
       Caption = 'Ignore fields length'
       TabOrder = 0
     end
@@ -268,7 +268,7 @@ object fmComparison: TfmComparison
       Height = 22
       Hint = 'Check objects present in source but removed in target database'
       Top = 22
-      Width = 179
+      Width = 178
       Caption = 'Check removed objects'
       ParentShowHint = False
       ShowHint = True

@@ -51,6 +51,8 @@ type
     procedure laScriptClick(Sender: TObject);
   private
     FDBIndex: Integer;
+    FNodeInfos: TPNodeInfos;
+
     FDiffCount: Integer;
     FDBObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches turbocmmon.dbObjects
     FDBExistingObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches turbocmmon.dbObjects
@@ -76,8 +78,6 @@ type
 
     FQueryWindow: TfmQueryWindow;
     FCanceled: Boolean;
-
-    FNodeInfos: TPNodeInfos;
 
     procedure CheckRemovedDBObjects;
     procedure DisplayStatus(AStatus: string);
@@ -2008,7 +2008,9 @@ var
   i: Integer;
   Servername: string;
 begin
+  FDBIndex:= dbIndex;
   FNodeInfos := ANodeInfos;
+
   bbCancel.Enabled:= False;
   cxTables.Checked:= True;
   cxGenerators.Checked:= True;
@@ -2023,7 +2025,7 @@ begin
 
   laScript.Enabled:= False;
   laComparedDatabase.Caption:= '[]';
-  FDBIndex:= dbIndex;
+
   bbStart.Enabled:= False;
   with RegisteredDatabases[dbIndex].RegRec do
     laDatabase.Caption:= Title + ' (' + DatabaseName + ')';

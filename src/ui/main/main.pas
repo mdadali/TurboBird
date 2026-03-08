@@ -5378,28 +5378,31 @@ procedure TfmMain.lmTransConfigClick(Sender: TObject);
 var
   SelNode: TTreeNode;
   dbIndex: Integer;
-  Rec: TDatabaseRec;
   IBTransactionEditorForm: TIBTransactionEditorForm;
 begin
+  SelNode := tvMain.Selected;
+
+  if (SelNode = nil) or (SelNode.Parent = nil) then
+    Exit;
+
+  dbIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
+
+  IBTransactionEditorForm := TIBTransactionEditorForm.Create(Application);
   try
-    SelNode:= tvMain.Selected;
+    IBTransactionEditorForm.Init(dbIndex, nil);
+    if IBTransactionEditorForm.EditTransaction then
+    begin
+      ExtractTransactionConfig(
+        RegisteredDatabases[dbIndex].IBTransaction,
+        RegisteredDatabases[dbIndex].RegRec.TxConfig);
 
-    if (SelNode = nil) or (SelNode.Parent = nil) then
-      exit;
+      fmReg.SaveRegistrations;
+    end;
 
-    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
-    Rec := RegisteredDatabases[dbIndex];
-
-    IBTransactionEditorForm := TIBTransactionEditorForm.Create(Application);
-
-    if IBTransactionEditorForm.EditTransaction(Rec.IBTransaction) then
-      //;
   finally
     IBTransactionEditorForm.Free;
-    fmReg.SaveRegistrations;
   end;
 end;
-
 
 {procedure TfmMain.lmTransConfigClick(Sender: TObject);
 var
@@ -7379,7 +7382,10 @@ begin
 
   fmReg.RefreshServerCombobox;
 
-  if tvMain.Selected = nil then
+  if (tvMain.Selected <> nil) and (tvMain.Selected.Level > 0) then
+    tvMain.Selected := GetAncestorAtLevel(tvMain.Selected, 0);
+
+  if (tvMain.Selected = nil) then
     ServerRec := GetServerRecordFromFileByIndex(0)
   else
     ServerRec := GetServerRecordFromFileByName(tvMain.Selected.Text);
@@ -9352,6 +9358,7 @@ begin
             IBTransaction:= TIBTransaction.Create(nil);
             IBTransaction.DefaultDatabase := IBDatabase;
             IBDatabase.DefaultTransaction := IBTransaction;
+            ApplyTransactionConfig(RegRec.TxConfig, IBTransaction);
 
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;

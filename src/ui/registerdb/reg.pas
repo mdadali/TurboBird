@@ -253,6 +253,90 @@ begin
   end;
 end; }
 
+{function TfmReg.RegisterDatabase(
+  Title, DatabaseName, UserName, Password, Charset, Role: string;
+  SavePassword: Boolean;
+  FBClient: string; SQLDialect: string; Port: string; ServerName: string;
+  OverwriteLoadedClientLib: boolean;
+  ConnectOnApplicationStart: boolean
+): Boolean;
+var
+  Rec: TRegisteredDatabase;
+  F: file of TRegisteredDatabase;
+  FileName: string;
+  ServerRec: TServerRecord;
+begin
+  Result := False;
+
+  try
+    // Server-Infos laden (wie bisher)
+    ServerRec := GetServerRecordFromFileByName(
+      cboxServers.Items[cboxServers.ItemIndex]
+    );
+
+    FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+    AssignFile(F, FileName);
+
+    if FileExists(FileName) then
+    begin
+      FileMode := 2;
+      Reset(F);
+      Seek(F, System.FileSize(F));
+    end
+    else
+      Rewrite(F);
+
+    // Record füllen
+    FillChar(Rec, SizeOf(Rec), 0);
+
+    Rec.Title := Title;
+    Rec.DatabaseName := DatabaseName;
+    Rec.UserName := UserName;
+
+    if SavePassword then
+      Rec.Password := Password
+    else
+      Rec.Password := '';
+
+    Rec.Charset := Charset;
+    Rec.Role := Role;
+    Rec.SavePassword := SavePassword;
+    Rec.Deleted := False;
+    Rec.LastOpened := Now;
+
+    Rec.FireBirdClientLibPath := FBClient;
+    Rec.SQLDialect := SQLDialect;
+    Rec.Port := Port;
+    Rec.ServerName := ServerName;
+    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
+    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
+
+    // Server-Version übernehmen
+    Rec.ServerVersionString := ServerRec.VersionString;
+    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
+    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
+
+    // Schreiben
+    Write(F, Rec);
+    CloseFile(F);
+
+    Result := True;
+
+  except
+    on E: Exception do
+    begin
+      try
+        CloseFile(F);
+      except
+      end;
+
+      ShowMessage('Error registering database:' + LineEnding + E.Message);
+      Result := False;
+    end;
+  end;
+end;}
+
 function TfmReg.RegisterDatabase(
   Title, DatabaseName, UserName, Password, Charset, Role: string;
   SavePassword: Boolean;
@@ -316,6 +400,11 @@ begin
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
+
+    Rec.TxConfig.Isolation    := DefTxIsolation;
+    Rec.TxConfig.Flags        := DefTxFlags;
+    Rec.TxConfig.LockTimeout  := DefTxLockTimeout;
+    Rec.TxConfig.TxName       := DefTxName;
 
     // Schreiben
     Write(F, Rec);
@@ -480,22 +569,24 @@ var
   i: Integer;
 begin
   try
-    //Sort;
-    FileName:= GetConfigurationDirectory + DatabasesRegFile;
+    FileName := GetConfigurationDirectory + DatabasesRegFile;
 
     AssignFile(F, FileName);
-    FileMode:= 2;
+    FileMode := 2;
     Rewrite(F);
 
-    for i:= 0 to High(RegisteredDatabases) do
-      Write(F, RegisteredDatabases[i].OrigRegRec);
-    CloseFile(F);
-    Result:= True;
-  except
-    on E: Exception do
+    for i := 0 to High(RegisteredDatabases) do
     begin
-      Result:= False;
+      RegisteredDatabases[i].OrigRegRec :=
+        RegisteredDatabases[i].RegRec;
+
+      Write(F, RegisteredDatabases[i].OrigRegRec);
     end;
+
+    CloseFile(F);
+    Result := True;
+  except
+    Result := False;
   end;
 end;
 
