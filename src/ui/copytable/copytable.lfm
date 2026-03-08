@@ -1,7 +1,7 @@
 object fmCopyTable: TfmCopyTable
-  Left = 455
+  Left = 471
   Height = 480
-  Top = 247
+  Top = 67
   Width = 767
   Caption = 'Copy Table'
   ClientHeight = 480
@@ -882,15 +882,26 @@ object fmCopyTable: TfmCopyTable
       end
     end
   end
-  object Button1: TButton
-    Left = 144
+  object btnClose: TButton
+    Left = 600
     Height = 40
     Top = 440
     Width = 115
     Anchors = [akLeft, akBottom]
     Caption = 'Close'
-    OnClick = Button1Click
+    OnClick = btnCloseClick
     TabOrder = 5
+  end
+  object btnCancelCopy: TButton
+    Left = 200
+    Height = 40
+    Top = 440
+    Width = 136
+    Anchors = [akLeft, akBottom]
+    Caption = 'Cancel Copy'
+    Enabled = False
+    OnClick = btnCancelCopyClick
+    TabOrder = 6
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'

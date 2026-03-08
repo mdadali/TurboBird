@@ -1,31 +1,31 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmCopyTable','FORMDATA',[
-  'TPF0'#12'TfmCopyTable'#11'fmCopyTable'#4'Left'#3#199#1#6'Height'#3#224#1#3'T'
-  +'op'#3#247#0#5'Width'#3#255#2#7'Caption'#6#10'Copy Table'#12'ClientHeight'#3
-  +#224#1#11'ClientWidth'#3#255#2#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'Fo'
-  +'rmCreate'#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVe'
-  +'rsion'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#9#6'Height'#2#20#3'Top'
-  +#2#19#5'Width'#2'q'#7'Caption'#6#15'Source Database'#11'ParentColor'#8#0#0#6
-  +'TLabel'#6'Label2'#4'Left'#2#9#6'Height'#2#20#3'Top'#2'('#5'Width'#2'V'#7'Ca'
-  +'ption'#6#12'Soruce Table'#11'ParentColor'#8#0#0#6'TLabel'#16'laSourceDataba'
-  +'se'#4'Left'#3#183#0#6'Height'#2#19#3'Top'#2#16#5'Width'#2'o'#7'Caption'#6#15
-  +'Source Database'#10'Font.Style'#11#6'fsBold'#0#11'ParentColor'#8#10'ParentF'
-  +'ont'#8#0#0#6'TLabel'#6'Label3'#4'Left'#2#9#6'Height'#2#20#3'Top'#2'H'#5'Wid'
-  +'th'#3#144#0#7'Caption'#6#20'Destination Database'#11'ParentColor'#8#0#0#6'T'
-  +'Label'#6'Label4'#4'Left'#2#16#6'Height'#2#20#3'Top'#3#128#0#5'Width'#2'u'#7
-  +'Caption'#6#17'Destination Table'#11'ParentColor'#8#0#0#9'TComboBox'#13'cbSo'
-  +'urceTable'#4'Left'#3#183#0#6'Height'#2' '#3'Top'#2'('#5'Width'#3#217#0#10'I'
-  +'temHeight'#2#0#8'OnChange'#7#19'cbSourceTableChange'#5'Style'#7#14'csDropDo'
-  +'wnList'#8'TabOrder'#2#0#0#0#9'TComboBox'#14'cbDestDatabase'#4'Left'#3#183#0
-  +#6'Height'#2' '#3'Top'#2'H'#5'Width'#3#217#0#10'ItemHeight'#2#0#8'OnChange'#7
-  +#20'cbDestDatabaseChange'#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#1#0#0#9
-  +'TComboBox'#11'cbDestTable'#4'Left'#3#183#0#6'Height'#2' '#3'Top'#3#128#0#5
-  +'Width'#3#217#0#10'ItemHeight'#2#0#5'Style'#7#14'csDropDownList'#8'TabOrder'
-  +#2#2#0#0#6'TLabel'#10'laDatabase'#4'Left'#3#188#0#6'Height'#2#16#3'Top'#2'p'
-  +#5'Width'#2'o'#7'Caption'#6#20'Destination Database'#11'Font.Height'#2#245#11
-  +'ParentColor'#8#10'ParentFont'#8#0#0#7'TBitBtn'#6'bbCopy'#4'Left'#2#16#6'Hei'
-  +'ght'#2'('#3'Top'#3#184#1#5'Width'#2's'#7'Anchors'#11#6'akLeft'#8'akBottom'#0
+  'TPF0'#12'TfmCopyTable'#11'fmCopyTable'#4'Left'#3#215#1#6'Height'#3#224#1#3'T'
+  +'op'#2'C'#5'Width'#3#255#2#7'Caption'#6#10'Copy Table'#12'ClientHeight'#3#224
+  +#1#11'ClientWidth'#3#255#2#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCr'
+  +'eate'#6'OnShow'#7#8'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersio'
+  +'n'#6#7'2.2.6.0'#0#6'TLabel'#6'Label1'#4'Left'#2#9#6'Height'#2#20#3'Top'#2#19
+  +#5'Width'#2'q'#7'Caption'#6#15'Source Database'#11'ParentColor'#8#0#0#6'TLab'
+  +'el'#6'Label2'#4'Left'#2#9#6'Height'#2#20#3'Top'#2'('#5'Width'#2'V'#7'Captio'
+  +'n'#6#12'Soruce Table'#11'ParentColor'#8#0#0#6'TLabel'#16'laSourceDatabase'#4
+  +'Left'#3#183#0#6'Height'#2#19#3'Top'#2#16#5'Width'#2'o'#7'Caption'#6#15'Sour'
+  +'ce Database'#10'Font.Style'#11#6'fsBold'#0#11'ParentColor'#8#10'ParentFont'
+  +#8#0#0#6'TLabel'#6'Label3'#4'Left'#2#9#6'Height'#2#20#3'Top'#2'H'#5'Width'#3
+  +#144#0#7'Caption'#6#20'Destination Database'#11'ParentColor'#8#0#0#6'TLabel'
+  +#6'Label4'#4'Left'#2#16#6'Height'#2#20#3'Top'#3#128#0#5'Width'#2'u'#7'Captio'
+  +'n'#6#17'Destination Table'#11'ParentColor'#8#0#0#9'TComboBox'#13'cbSourceTa'
+  +'ble'#4'Left'#3#183#0#6'Height'#2' '#3'Top'#2'('#5'Width'#3#217#0#10'ItemHei'
+  +'ght'#2#0#8'OnChange'#7#19'cbSourceTableChange'#5'Style'#7#14'csDropDownList'
+  +#8'TabOrder'#2#0#0#0#9'TComboBox'#14'cbDestDatabase'#4'Left'#3#183#0#6'Heigh'
+  +'t'#2' '#3'Top'#2'H'#5'Width'#3#217#0#10'ItemHeight'#2#0#8'OnChange'#7#20'cb'
+  +'DestDatabaseChange'#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#1#0#0#9'TCo'
+  +'mboBox'#11'cbDestTable'#4'Left'#3#183#0#6'Height'#2' '#3'Top'#3#128#0#5'Wid'
+  +'th'#3#217#0#10'ItemHeight'#2#0#5'Style'#7#14'csDropDownList'#8'TabOrder'#2#2
+  +#0#0#6'TLabel'#10'laDatabase'#4'Left'#3#188#0#6'Height'#2#16#3'Top'#2'p'#5'W'
+  +'idth'#2'o'#7'Caption'#6#20'Destination Database'#11'Font.Height'#2#245#11'P'
+  +'arentColor'#8#10'ParentFont'#8#0#0#7'TBitBtn'#6'bbCopy'#4'Left'#2#16#6'Heig'
+  +'ht'#2'('#3'Top'#3#184#1#5'Width'#2's'#7'Anchors'#11#6'akLeft'#8'akBottom'#0
   +#7'Caption'#6#4'Copy'#10'Glyph.Data'#10':'#16#0#0'6'#16#0#0'BM6'#16#0#0#0#0#0
   +#0'6'#0#0#0'('#0#0#0' '#0#0#0' '#0#0#0#1#0' '#0#0#0#0#0#0#16#0#0'd'#0#0#0'd'
   +#0#0#0#0#0#0#0#0#0#0#0#255#255#255#0#255#255#255#0#255#255#255#0'}}~'#0'}}~'
@@ -363,9 +363,12 @@ LazarusResources.Add('TfmCopyTable','FORMDATA',[
   +'ckCount'#7#5'ccAny'#8'ClickDir'#7#6'cdDown'#7'Command'#7#17'emcCodeFoldExpa'
   +'nd'#0#1#9'ShiftMask'#11#6'ssCtrl'#0#10'ClickCount'#7#5'ccAny'#8'ClickDir'#7
   +#6'cdDown'#7'Command'#7#17'emcCodeFoldExpand'#6'Option'#2#1#0#0#0#0#0#0#7'TB'
-  +'utton'#7'Button1'#4'Left'#3#144#0#6'Height'#2'('#3'Top'#3#184#1#5'Width'#2
+  +'utton'#8'btnClose'#4'Left'#3'X'#2#6'Height'#2'('#3'Top'#3#184#1#5'Width'#2
   +'s'#7'Anchors'#11#6'akLeft'#8'akBottom'#0#7'Caption'#6#5'Close'#7'OnClick'#7
-  +#12'Button1Click'#8'TabOrder'#2#5#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'#13'Defau'
+  +#13'btnCloseClick'#8'TabOrder'#2#5#0#0#7'TButton'#13'btnCancelCopy'#4'Left'#3
+  +#200#0#6'Height'#2'('#3'Top'#3#184#1#5'Width'#3#136#0#7'Anchors'#11#6'akLeft'
+  +#8'akBottom'#0#7'Caption'#6#11'Cancel Copy'#7'Enabled'#8#7'OnClick'#7#18'btn'
+  +'CancelCopyClick'#8'TabOrder'#2#6#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'#13'Defau'
   +'ltFilter'#6#23'SQL Files (*.sql)|*.sql'#7'Enabled'#8#23'CommentAttri.Foregr'
   +'ound'#7#6'clTeal'#26'IdentifierAttri.Foreground'#4'1'#26#255#0#22'NumberAtt'
   +'ri.Foreground'#4'644'#0#22'StringAttri.Foreground'#4#161#16#16#0#22'SymbolA'
