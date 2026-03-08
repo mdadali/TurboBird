@@ -24,7 +24,8 @@ type
 
   TfmCopyTable = class(TForm)
     bbCopy: TBitBtn;
-    Button1: TButton;
+    btnCancelCopy: TButton;
+    btnClose: TButton;
     cbSourceTable: TComboBox;
     cbDestDatabase: TComboBox;
     cbDestTable: TComboBox;
@@ -38,9 +39,10 @@ type
     laSourceDatabase: TLabel;
     SynSQLSyn1: TSynSQLSyn;
     syScript: TSynEdit;
+    procedure btnCancelCopyClick(Sender: TObject);
+    procedure btnCloseClick(Sender: TObject);
     procedure CancelCopy(Sender: TObject);
     procedure bbCopyClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure cbDestDatabaseChange(Sender: TObject);
     procedure cbSourceTableChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -51,6 +53,7 @@ type
     FNodeInfos: TPNodeInfos;
     FSourceIndex: Integer;
 
+    FCancelled: boolean;
     { private declarations }
   public
     { public declarations }
@@ -106,6 +109,7 @@ end;
 
 procedure TfmCopyTable.FormCreate(Sender: TObject);
 begin
+  FCancelled := false;
 end;
 
 procedure TfmCopyTable.FormShow(Sender: TObject);
@@ -127,97 +131,219 @@ begin
   Application.ProcessMessages;}
 end;
 
+procedure TfmCopyTable.btnCancelCopyClick(Sender: TObject);
+begin
+  FCancelled := true;
+  bbCopy.Enabled := True;
+  btnClose.Enabled := True;
+  btnCancelCopy.Enabled := False;
+
+  Application.ProcessMessages;
+end;
+
+procedure TfmCopyTable.btnCloseClick(Sender: TObject);
+begin
+  Close;
+  Parent.Free;
+end;
+
 procedure TfmCopyTable.bbCopyClick(Sender: TObject);
 var
   i, Num: Integer;
   Statement, Values: string;
   SQLTarget: TIBQuery;
+
+  ProgressForm : TForm;
+  ProgressBar  : TProgressBar;
+  ProgressLabel: TLabel;
+  lblStart     : TLabel;
+  lblEnd       : TLabel;
+  lblElapsed   : TLabel;
+
+  StartTime, EndTime: TDateTime;
 begin
-  dmSysTables.sqQuery.Close;
-  dmSysTables.Init(FSourceIndex);
+  Screen.Cursor := crHourGlass;
 
-  dmSysTables.sqQuery.SQL.Text := syScript.Lines.Text;
-  dmSysTables.sqQuery.Open;
+  bbCopy.Enabled   := False;
+  btnClose.Enabled := False;;
+  btnCancelCopy.Enabled := True;
 
-  if dmSysTables.sqQuery.IsEmpty then
-  begin
-    ShowMessage('No records found');
-    Exit;
-  end;
+  FCancelled := False;
 
-  Statement := 'INSERT INTO ' + cbDestTable.Text + ' (';
-  Values := '';
-
-  { Feldliste erzeugen }
-  for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
-  begin
-    if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
-      Continue;
-
-    Statement := Statement + dmSysTables.sqQuery.Fields[i].FieldName + ',';
-    Values := Values + ':' + dmSysTables.sqQuery.Fields[i].FieldName + ',';
-  end;
-
-  Delete(Statement, Length(Statement), 1);
-  Delete(Values, Length(Values), 1);
-
-  Statement := Statement + ') VALUES (' + Values + ')';
-
-  SQLTarget := TIBQuery.Create(nil);
-
+  ProgressForm := TForm.Create(nil);
   try
-    SQLTarget.Database := RegisteredDatabases[cbDestDatabase.ItemIndex].IBDatabase;
-    SQLTarget.Transaction := RegisteredDatabases[cbDestDatabase.ItemIndex].IBTransaction;
-    SQLTarget.SQL.Text := Statement;
+    ProgressForm.FormStyle := fsStayOnTop;
+    ProgressForm.Caption := 'Copy running...';
+    ProgressForm.Width := 500;
+    ProgressForm.Height := 200;
+    ProgressForm.Position := poScreenCenter;
+    ProgressForm.BorderStyle := bsDialog;
 
-    if not SQLTarget.Transaction.InTransaction then
-      SQLTarget.Transaction.StartTransaction;
+    ProgressLabel := TLabel.Create(ProgressForm);
+    ProgressLabel.Parent := ProgressForm;
+    ProgressLabel.Left := 16;
+    ProgressLabel.Top := 16;
+    ProgressLabel.Caption := 'Preparing copy...';
 
-    SQLTarget.Prepare;
+    ProgressBar := TProgressBar.Create(ProgressForm);
+    ProgressBar.Parent := ProgressForm;
+    ProgressBar.Left := 16;
+    ProgressBar.Top := 45;
+    ProgressBar.Width := 460;
+    ProgressBar.Height := 20;
+    ProgressBar.Min := 0;
+    ProgressBar.Max := 100;
 
-    Num := 0;
+    lblStart := TLabel.Create(ProgressForm);
+    lblStart.Parent := ProgressForm;
+    lblStart.Left := 16;
+    lblStart.Top := 110;
 
-    dmSysTables.sqQuery.First;
+    lblEnd := TLabel.Create(ProgressForm);
+    lblEnd.Parent := ProgressForm;
+    lblEnd.Left := 16;
+    lblEnd.Top := 130;
 
-    while not dmSysTables.sqQuery.EOF do
+    lblElapsed := TLabel.Create(ProgressForm);
+    lblElapsed.Parent := ProgressForm;
+    lblElapsed.Left := 16;
+    lblElapsed.Top := 150;
+
+    ProgressForm.Show;
+    ProgressForm.Update;
+    Application.ProcessMessages;
+
+    StartTime := Now;
+    lblStart.Caption := 'Start: ' + FormatDateTime('hh:nn:ss', StartTime);
+
+    dmSysTables.sqQuery.Close;
+    dmSysTables.Init(FSourceIndex);
+    dmSysTables.sqQuery.SQL.Text := syScript.Lines.Text;
+    dmSysTables.sqQuery.Open;
+
+    if dmSysTables.sqQuery.IsEmpty then
     begin
-      for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
-      begin
-        if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
-          Continue;
+      ShowMessage('No records found');
+      Exit;
+    end;
 
-        SQLTarget.ParamByName(dmSysTables.sqQuery.Fields[i].FieldName).Value :=
-          dmSysTables.sqQuery.Fields[i].Value;
+    Statement := 'INSERT INTO ' + cbDestTable.Text + ' (';
+    Values := '';
+
+    for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
+    begin
+      if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
+        Continue;
+
+      Statement := Statement + dmSysTables.sqQuery.Fields[i].FieldName + ',';
+      Values := Values + ':' + dmSysTables.sqQuery.Fields[i].FieldName + ',';
+    end;
+
+    Delete(Statement, Length(Statement), 1);
+    Delete(Values, Length(Values), 1);
+
+    Statement := Statement + ') VALUES (' + Values + ')';
+
+    SQLTarget := TIBQuery.Create(nil);
+
+    try
+      SQLTarget.Database :=
+        RegisteredDatabases[cbDestDatabase.ItemIndex].IBDatabase;
+
+      SQLTarget.Transaction :=
+        RegisteredDatabases[cbDestDatabase.ItemIndex].IBTransaction;
+
+      SQLTarget.SQL.Text := Statement;
+
+      if not SQLTarget.Transaction.InTransaction then
+        SQLTarget.Transaction.StartTransaction;
+
+      SQLTarget.Prepare;
+
+      Num := 0;
+      dmSysTables.sqQuery.First;
+
+      while not dmSysTables.sqQuery.EOF do
+      begin
+        if FCancelled then
+          raise Exception.Create('Copy cancelled by user.');
+
+        for i := 0 to dmSysTables.sqQuery.Fields.Count - 1 do
+        begin
+          if Pos('RDB$', UpperCase(dmSysTables.sqQuery.Fields[i].FieldName)) = 1 then
+            Continue;
+
+          SQLTarget.ParamByName(dmSysTables.sqQuery.Fields[i].FieldName).Value :=
+            dmSysTables.sqQuery.Fields[i].Value;
+        end;
+
+        SQLTarget.ExecSQL;
+        Inc(Num);
+
+        if (Num mod 1000) = 0 then
+        begin
+          SQLTarget.Transaction.CommitRetaining;
+
+          ProgressBar.Position :=
+            (ProgressBar.Position + 1) mod ProgressBar.Max;
+
+          ProgressLabel.Caption :=
+            Format('Copied %d records...', [Num]);
+
+          lblElapsed.Caption := 'Elapsed: ' +
+            FormatDateTime('nn:ss', Now - StartTime);
+
+          Application.ProcessMessages;
+        end;
+
+        dmSysTables.sqQuery.Next;
       end;
 
-      SQLTarget.ExecSQL;
+      SQLTarget.Transaction.Commit;
 
-      Inc(Num);
-      dmSysTables.sqQuery.Next;
+      EndTime := Now;
+
+      lblEnd.Caption := 'End: ' + FormatDateTime('hh:nn:ss', EndTime);
+      lblElapsed.Caption :=
+        'Elapsed: ' + FormatDateTime('hh:nn:ss', EndTime - StartTime);
+
+      ProgressBar.Position := ProgressBar.Max;
+
+      ProgressLabel.Caption :=
+        Format('Finished. %d records copied.', [Num]);
+
+      Sleep(500);
+
+      MessageDlg(
+        IntToStr(Num) + ' record(s) copied.' + LineEnding +
+        'Don''t forget to adjust the generator if necessary.',
+        mtInformation,[mbOK],0);
+
+    except
+      on E: Exception do
+      begin
+        if SQLTarget.Transaction.InTransaction then
+          SQLTarget.Transaction.Rollback;
+
+        MessageDlg('Error while copy: ' + E.Message, mtError, [mbOK], 0);
+      end;
     end;
 
-    SQLTarget.Transaction.Commit;
+    SQLTarget.Free;
 
-    ShowMessage(IntToStr(Num) + ' record(s) copied');
+  finally
+    ProgressForm.Free;
 
-  except
-    on E: Exception do
-    begin
-      if SQLTarget.Transaction.InTransaction then
-        SQLTarget.Transaction.Rollback;
+    bbCopy.Enabled := True;
+    btnClose.Enabled := True;
+    btnCancelCopy.Enabled := False;
 
-      MessageDlg('Error while copy: ' + E.Message, mtError, [mbOK], 0);
-    end;
+    Screen.Cursor := crDefault;
+
+    FCancelled := False;
+
+    Application.ProcessMessages;
   end;
-
-  SQLTarget.Free;
-  dmSysTables.sqQuery.Close;
-end;
-
-procedure TfmCopyTable.Button1Click(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 procedure TfmCopyTable.Init(SourceIndex: Integer; ATableName: string; ANodeInfos: TPNodeInfos);
