@@ -71084,7 +71084,7 @@ object fmReg: TfmReg
       TabOrder = 7
     end
     object edRole: TEdit
-      Left = 76
+      Left = 72
       Height = 30
       Top = 360
       Width = 93

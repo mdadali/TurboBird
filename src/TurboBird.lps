@@ -5,7 +5,7 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="143">
+    <Units Count="144">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -195,10 +195,11 @@
       <Unit24>
         <Filename Value="common\fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="236"/>
-        <CursorPos X="35" Y="246"/>
+        <CursorPos X="41" Y="246"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
@@ -277,7 +278,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="7359"/>
+        <TopLine Value="7377"/>
         <CursorPos X="39" Y="7410"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -298,9 +299,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="33"/>
-        <CursorPos X="29" Y="42"/>
+        <CursorPos X="35" Y="44"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit32>
@@ -311,10 +312,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="186"/>
-        <CursorPos X="3" Y="189"/>
+        <TopLine Value="119"/>
+        <CursorPos X="69" Y="137"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -466,11 +466,11 @@
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="978"/>
-        <CursorPos Y="1006"/>
+        <TopLine Value="580"/>
+        <CursorPos X="37" Y="588"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 X="5" Y="1069" ID="4"/>
+          <Item0 X="5" Y="1111" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit46>
@@ -596,10 +596,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Comparison"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="68" Y="16"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit57>
       <Unit58>
         <Filename Value="utils\fileimport.pas"/>
@@ -836,9 +835,10 @@
       <Unit81>
         <Filename Value="utils\fServerSession.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="465"/>
-        <CursorPos X="45" Y="480"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="469"/>
+        <CursorPos Y="487"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit81>
@@ -866,11 +866,12 @@
         <ComponentName Value="fmServerRegistry"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
-        <TopLine Value="568"/>
-        <CursorPos X="3" Y="567"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="474"/>
+        <CursorPos X="35" Y="480"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit84>
       <Unit85>
         <Filename Value="common\fmetaquerys.pas"/>
@@ -1052,7 +1053,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="34" Y="79"/>
-        <UsageCount Value="150"/>
+        <UsageCount Value="153"/>
       </Unit102>
       <Unit103>
         <Filename Value="ui\forign_key_table\foreign_key_table.pas"/>
@@ -1062,7 +1063,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="24"/>
-        <UsageCount Value="138"/>
+        <UsageCount Value="141"/>
       </Unit103>
       <Unit104>
         <Filename Value="ui\ibx_design\ibsqleditor.pas"/>
@@ -1073,7 +1074,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="74"/>
         <CursorPos X="8" Y="74"/>
-        <UsageCount Value="71"/>
+        <UsageCount Value="74"/>
       </Unit104>
       <Unit105>
         <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
@@ -1081,10 +1082,10 @@
         <ComponentName Value="IBTransactionEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="305"/>
         <CursorPos X="3" Y="335"/>
-        <UsageCount Value="56"/>
+        <UsageCount Value="59"/>
         <Loaded Value="True"/>
       </Unit105>
       <Unit106>
@@ -1376,6 +1377,14 @@
         <CursorPos X="13" Y="231"/>
         <UsageCount Value="9"/>
       </Unit142>
+      <Unit143>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\IB.pas"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="1263"/>
+        <CursorPos X="14" Y="1279"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit143>
     </Units>
     <OtherDefines Count="3">
       <Define0 Value="DEBUG"/>
@@ -1384,120 +1393,120 @@
     </OtherDefines>
     <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="967" TopLine="954"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5392" Column="46" TopLine="5373"/>
       </Position1>
       <Position2>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="968" TopLine="954"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="7410" Column="39" TopLine="7396"/>
       </Position2>
       <Position3>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="969" TopLine="954"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="112" Column="43" TopLine="101"/>
       </Position3>
       <Position4>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="970" TopLine="954"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="408" Column="47" TopLine="385"/>
       </Position4>
       <Position5>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="971" TopLine="954"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="348" Column="3" TopLine="330"/>
       </Position5>
       <Position6>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="974" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="66" Column="25" TopLine="59"/>
       </Position6>
       <Position7>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="976" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="117" Column="25" TopLine="89"/>
       </Position7>
       <Position8>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="979" TopLine="967"/>
+        <Caret Line="238" Column="8" TopLine="228"/>
       </Position8>
       <Position9>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="980" TopLine="967"/>
+        <Caret Line="240" Column="9" TopLine="228"/>
       </Position9>
       <Position10>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="981" TopLine="967"/>
+        <Caret Line="307" Column="19" TopLine="279"/>
       </Position10>
       <Position11>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="983" TopLine="967"/>
+        <Caret Line="3063" Column="27" TopLine="3060"/>
       </Position11>
       <Position12>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="984" TopLine="967"/>
+        <Caret Line="3064" Column="53" TopLine="3058"/>
       </Position12>
       <Position13>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="986" TopLine="967"/>
+        <Caret Line="469" Column="19" TopLine="460"/>
       </Position13>
       <Position14>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="987" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="195" Column="39" TopLine="242"/>
       </Position14>
       <Position15>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="988" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="126" Column="15" TopLine="124"/>
       </Position15>
       <Position16>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="974" Column="18" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="339" Column="27" TopLine="335"/>
       </Position16>
       <Position17>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="992" TopLine="967"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="77" Column="28" TopLine="61"/>
       </Position17>
       <Position18>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1003" TopLine="977"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="127" Column="6" TopLine="122"/>
       </Position18>
       <Position19>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1004" TopLine="977"/>
+        <Caret Line="437" Column="30" TopLine="427"/>
       </Position19>
       <Position20>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1006" TopLine="978"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="137" Column="69" TopLine="119"/>
       </Position20>
       <Position21>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="473" TopLine="454"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="596" Column="24" TopLine="577"/>
       </Position21>
       <Position22>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="475" TopLine="454"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="622" Column="3" TopLine="601"/>
       </Position22>
       <Position23>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="476" TopLine="464"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="568" Column="52" TopLine="567"/>
       </Position23>
       <Position24>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="477" TopLine="464"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="491" Column="31" TopLine="474"/>
       </Position24>
       <Position25>
         <Filename Value="ui\serverregistry\fserverregistry.pas"/>
-        <Caret Line="587" Column="23" TopLine="571"/>
+        <Caret Line="542" Column="31" TopLine="514"/>
       </Position25>
       <Position26>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="470" Column="48" TopLine="451"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="491" Column="31" TopLine="474"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="5392" Column="46" TopLine="5373"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="542" Column="31" TopLine="514"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="7410" Column="39" TopLine="7396"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="491" Column="31" TopLine="474"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="112" Column="43" TopLine="101"/>
+        <Filename Value="utils\fServerSession.pas"/>
+        <Caret Line="474" Column="72" TopLine="471"/>
       </Position29>
     </JumpHistory>
     <RunParams>

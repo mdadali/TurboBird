@@ -122,11 +122,21 @@ begin
 end;
 
 procedure TfmReg.bbTestClick(Sender: TObject);
+var Rec: TServerRecord;
+    ConnMessage: string;
 begin
+  Rec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
   if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text, edtFBClient.Text,
                      cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
                      chkboxOverwriteServerClientLib.Checked) then
-    ShowMessage('Connected successfully');
+  begin
+    if Rec.IsEmbedded then
+      ConnMessage := 'Embedded connection established successfully'
+    else
+      ConnMessage := IBXProtocolToString(Rec.Protocol) + ' connection established successfully';
+
+    ShowMessage(ConnMessage);
+  end;
 end;
 
 procedure TfmReg.btBrowseDBClick(Sender: TObject);
@@ -134,7 +144,7 @@ var Rec: TServerRecord;
 begin
   if OpenDialog1.Execute then
   begin
-    Rec := GetServerRecordFromFileByName(cboxServers.Text);
+    Rec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
     edDatabaseName.Text:=  OpenDialog1.FileName;
     if not Rec.IsEmbedded then
     begin
@@ -188,154 +198,6 @@ procedure TfmReg.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
 end;
-
-{function TfmReg.RegisterDatabase(Title, DatabaseName, UserName, Password, Charset, Role: string; SavePassword: Boolean;
-             FBClient: string; SQLDialect: string; Port: string; ServerName: string;
-             OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
-var
-  Rec: TRegisteredDatabase;
-  F: file of TRegisteredDatabase;
-  EmptyIndex: Integer;
-  FileName: string;
-  ServerRec: TServerRecord;
-begin
-  try
-    ServerRec := GetServerRecordFromFileByName(cboxServers.Items[cboxServers.ItemIndex]);
-    FileName:= GetConfigurationDirectory + DatabasesRegFile;
-
-    AssignFile(F, FileName);
-    if FileExists(FileName) then
-    begin
-      EmptyIndex:= GetEmptyRec;
-      FileMode:= 2;
-
-      Reset(F);
-      if EmptyIndex <> -1 then
-        Seek(F, EmptyIndex)
-      else
-        Seek(F, System.FileSize(F));
-    end
-    else
-      Rewrite(F);
-
-    Rec.Title:= Title;
-    Rec.DatabaseName:= DatabaseName;
-    Rec.UserName:= UserName;
-    if SavePassword then
-      Rec.Password:= Password
-    else
-      Rec.Password:= '';
-    Rec.Charset:= Charset;
-    Rec.Role:= Role;
-    Rec.SavePassword:= SavePassword;
-    Rec.Deleted:= False;
-    Rec.LastOpened:= Now;
-    Rec.FireBirdClientLibPath := FBClient;
-    Rec.SQLDialect :=  SQLDialect;
-    Rec.Port := Port;
-    Rec.ServerName := ServerName;
-    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
-    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-
-    Rec.ServerVersionString := ServerRec.VersionString;
-    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
-    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-
-    Write(F, Rec);
-    CloseFile(F);
-    Result:= True;
-  except
-    on E: Exception do
-    begin
-      Result:= False;
-      ShowMessage('Error: ' + e.Message);
-    end;
-  end;
-end; }
-
-{function TfmReg.RegisterDatabase(
-  Title, DatabaseName, UserName, Password, Charset, Role: string;
-  SavePassword: Boolean;
-  FBClient: string; SQLDialect: string; Port: string; ServerName: string;
-  OverwriteLoadedClientLib: boolean;
-  ConnectOnApplicationStart: boolean
-): Boolean;
-var
-  Rec: TRegisteredDatabase;
-  F: file of TRegisteredDatabase;
-  FileName: string;
-  ServerRec: TServerRecord;
-begin
-  Result := False;
-
-  try
-    // Server-Infos laden (wie bisher)
-    ServerRec := GetServerRecordFromFileByName(
-      cboxServers.Items[cboxServers.ItemIndex]
-    );
-
-    FileName := GetConfigurationDirectory + DatabasesRegFile;
-
-    AssignFile(F, FileName);
-
-    if FileExists(FileName) then
-    begin
-      FileMode := 2;
-      Reset(F);
-      Seek(F, System.FileSize(F));
-    end
-    else
-      Rewrite(F);
-
-    // Record füllen
-    FillChar(Rec, SizeOf(Rec), 0);
-
-    Rec.Title := Title;
-    Rec.DatabaseName := DatabaseName;
-    Rec.UserName := UserName;
-
-    if SavePassword then
-      Rec.Password := Password
-    else
-      Rec.Password := '';
-
-    Rec.Charset := Charset;
-    Rec.Role := Role;
-    Rec.SavePassword := SavePassword;
-    Rec.Deleted := False;
-    Rec.LastOpened := Now;
-
-    Rec.FireBirdClientLibPath := FBClient;
-    Rec.SQLDialect := SQLDialect;
-    Rec.Port := Port;
-    Rec.ServerName := ServerName;
-    Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
-    Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-
-    // Server-Version übernehmen
-    Rec.ServerVersionString := ServerRec.VersionString;
-    Rec.ServerVersionMajor  := ServerRec.VersionMajor;
-    Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-
-    // Schreiben
-    Write(F, Rec);
-    CloseFile(F);
-
-    Result := True;
-
-  except
-    on E: Exception do
-    begin
-      try
-        CloseFile(F);
-      except
-      end;
-
-      ShowMessage('Error registering database:' + LineEnding + E.Message);
-      Result := False;
-    end;
-  end;
-end;}
 
 function TfmReg.RegisterDatabase(
   Title, DatabaseName, UserName, Password, Charset, Role: string;
@@ -400,6 +262,8 @@ begin
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
+
+    Rec.IsEmbedded := ServerRec.IsEmbedded;
 
     Rec.TxConfig.Isolation    := DefTxIsolation;
     Rec.TxConfig.Flags        := DefTxFlags;
@@ -467,6 +331,8 @@ begin
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
+
+    Rec.IsEmbedded := ServerRec.IsEmbedded;
 
     Write(F, Rec);
     CloseFile(F);

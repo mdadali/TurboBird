@@ -251,7 +251,7 @@ begin
         FBVersionMajor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 1, 1), 0);
         FBVersionMinor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 3, 1), 0);
 
-        ErrMessage := 'Connection successful!' + sLineBreak +
+        ErrMessage := IBXProtocolToString(AServiceConn.Protocol) + ' Connection successful!' + sLineBreak +
                       'Server version: ' + FBVersionString;
       finally
         Free;

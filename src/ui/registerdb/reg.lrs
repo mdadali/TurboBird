@@ -96426,7 +96426,7 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#3#139#0#8'EchoMode'#7#10'emPassword'#12'PasswordChar'#6#1'-'#8'TabOrder'#2#6
   +#0#0#9'TCheckBox'#14'cxSavePassword'#4'Left'#3#184#0#6'Height'#2#22#3'Top'#3
   +'p'#1#5'Width'#2'z'#7'Caption'#6#13'Save Password'#8'TabOrder'#2#7#0#0#5'TEd'
-  +'it'#6'edRole'#4'Left'#2'L'#6'Height'#2#30#3'Top'#3'h'#1#5'Width'#2']'#8'Tab'
+  +'it'#6'edRole'#4'Left'#2'H'#6'Height'#2#30#3'Top'#3'h'#1#5'Width'#2']'#8'Tab'
   +'Order'#2#8#0#0#6'TLabel'#7'Label10'#4'Left'#2#16#6'Height'#2#20#3'Top'#2#8#5
   +'Width'#2'+'#7'Caption'#6#6'Server'#11'ParentColor'#8#0#0#9'TComboBox'#11'cb'
   +'oxServers'#4'Left'#2#16#6'Height'#2' '#3'Top'#2'('#5'Width'#3#152#1#10'Item'
