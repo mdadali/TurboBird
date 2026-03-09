@@ -463,14 +463,13 @@ function TServerSession.ConnectEmbeddedIBX: boolean;
    Version: TStringList;
    ImplementationVersion: string;
    ServerRec: TServerRecord;
-   major, minor: integer;
+   major, minor: word;
    verstr: string;
 begin
    Result := False;
    try
      ServerRec := BuildServerRecordFromSession(Self, true);
      Result := TestEmbeddedConnection(ServerRec, major, minor, verstr);
-
 
      if result then
      begin
