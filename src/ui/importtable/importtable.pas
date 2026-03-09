@@ -198,6 +198,7 @@ end;}
 
 procedure TfmImportTable.OpenDestinationTable;
 var
+  ServerRec: TServerRecord;
   ServerName: string;
 begin
   // Enter password if it is not saved
@@ -205,11 +206,12 @@ begin
   begin
     // Prüfen, ob Passwort für Client/Server leer ist
     ServerName := GetServerName(RegRec.DatabaseName);
-    if ((ServerName <> '') and (ServerName <> 'localhost')) and (RegRec.Password = '') then
+    ServerRec := GetServerRecordFromFileByName(ServerName);
+    if ((ServerName <> '') and (ServerRec.Protocol <> Local)) and (RegRec.Password = '') then
     begin
       if fmEnterPass.ShowModal = mrOk then
       begin
-        if fmReg.TestConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+        if fmReg.TestDBConnection(RegRec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
           RegRec.Charset, RegRec.FireBirdClientLibPath, RegRec.SQLDialect, RegRec.Port, RegRec.ServerName, RegRec.OverwriteLoadedClientLib) then
         begin
           RegisteredDatabases[FDestIndex].RegRec.UserName := fmEnterPass.edUser.Text;
@@ -439,7 +441,7 @@ var
   i: Integer;
   Num: Integer;
   ServerName: string;
-
+  ServerRec: TServerRecord;
   // Progress Form Komponenten
   ProgressForm : TForm;
   ProgressBar  : TProgressBar;
@@ -525,13 +527,13 @@ begin
     with RegisteredDatabases[FDestIndex] do
     begin
       ServerName := GetServerName(RegRec.DatabaseName);
-
-      if ((ServerName <> '') and (ServerName <> 'localhost')) and
+      ServerRec := GetServerRecordFromFileByName(ServerName);
+      if ((ServerName <> '') and (ServerRec.Protocol <> Local)) and
          (RegRec.Password = '') then
       begin
         if fmEnterPass.ShowModal <> mrOk then Exit;
 
-        if not fmReg.TestConnection(
+        if not fmReg.TestDBConnection(
           RegRec.DatabaseName,
           fmEnterPass.edUser.Text,
           fmEnterPass.edPassword.Text,

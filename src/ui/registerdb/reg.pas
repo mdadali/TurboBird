@@ -74,7 +74,7 @@ type
       SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
       OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
 
-    function TestConnection(DatabaseName, UserName, Password, Charset: string;
+    function TestDBConnection(DatabaseName, UserName, Password, Charset: string;
                 FBClient: string; SQLDialect: string; Port: string; ServerName: string;
                 OverwriteLoadedClientLib: boolean): Boolean;
     function GetEmptyRec: Integer;
@@ -126,7 +126,7 @@ var Rec: TServerRecord;
     ConnMessage: string;
 begin
   Rec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
-  if TestConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text, edtFBClient.Text,
+  if TestDBConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text, edtFBClient.Text,
                      cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
                      chkboxOverwriteServerClientLib.Checked) then
   begin
@@ -346,7 +346,7 @@ begin
   end;
 end;
 
-function TfmReg.TestConnection(DatabaseName, UserName, Password, Charset: string; FBClient: string;
+function TfmReg.TestDBConnection(DatabaseName, UserName, Password, Charset: string; FBClient: string;
                                  SQLDialect: string; Port: string; ServerName: string;
                                  OverwriteLoadedClientLib: boolean): Boolean;
 

@@ -501,7 +501,6 @@ type
     function  GetODSVersion(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
     function  GetServerLoginDlg(AserverName: string): TfrmLoginServiceManager;
     function  ConnectToServiceManager(ServerSession: TServerSession): boolean;
-    function  ConnectEmbedded(ServerSession: TServerSession): Boolean;
 
     procedure OnIBConnectionLogin(Database: TIBDatabase; LoginParams: TStrings);
 
@@ -4470,7 +4469,7 @@ begin
     end;
     if fmEnterPass.ShowModal = mrOk then
     begin
-      if fmReg.TestConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+      if fmReg.TestDBConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
         Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
           RegisteredDatabases[dbIndex].RegRec.Password:= fmEnterPass.edPassword.Text
         else
@@ -7698,9 +7697,10 @@ begin
   ObjectType := TPNodeInfos(SelNode.Data)^.ObjectType;
 
   case  ObjectType of
+    tvotServer:
+      Filter:= -2;
     tvotSystemTableRoot: Filter := 100;
     tvotSystemTable: Filter:= 7;
-    tvotServer: Filter:= -2;
     tvotDatabase: Filter:= 0;
 
     tvotTableRoot: Filter := 11;
@@ -8187,71 +8187,6 @@ begin
   Result := ServerSession.Connected;
 end;
 
-function TfmMain.ConnectEmbedded(ServerSession: TServerSession): Boolean;
-var
-  fmServerRegistry: TfmServerRegistry;
-  ServerRecord: TServerRecord;
-  mr: TModalResult;
-  SavePwd: Boolean;
-  ODSMajor,
-  ODSMinor: integer;
-  ODSMajorMinorStr: string;
-  ServerVersion: string;
-begin
-  Result := False;
-
-  //ServerSession.Connected := false;
-
-  //ServerRecord := GetServerRecordFromFileByName(ServerSession.ServerName);
-  //ApplyServerRecordToSession(ServerRecord,  ServerSession);
-
-
-
-    if not ServerSession.Connected then
-    begin
-      ServerRecord := GetServerRecordFromFileByName(ServerSession.ServerName);
-      ApplyServerRecordToSession(ServerRecord,  ServerSession);
-
-      ServerSession.Connected := TestEmbeddedConnection(ServerRecord, ODSMajor, ODSMinor, ServerVersion);
-      if (not ServerSession.Connected) then
-      begin
-      // falls fehlgeschlagen -> interaktives Login
-        fmServerRegistry := TfmServerRegistry.Create(self);
-        fmServerRegistry.init(ServerSession);
-        try
-          repeat
-            mr := fmServerRegistry.ShowModal;
-
-            if mr = mrCancel then
-              Exit(False);
-
-            SavePwd := fmServerRegistry.chkSavePassword.Checked;
-            ServerSession.UserName := fmServerRegistry.edtUserName.Text;
-            ServerSession.Password := fmServerRegistry.edtPassword.Text;
-
-            ServerSession.Connected := TestEmbeddedConnection(ServerRecord, ODSMajor, ODSMinor, ServerVersion);
-
-            if not ServerSession.Connected then
-              ShowMessage('Embedded Connection failed. Please try again.');
-
-          until ServerSession.Connected;
-
-        finally
-          fmServerRegistry.Free;
-        end;
-      end;
-      // Versionsinfo übernehmen
-      //ODSMajorMinorStr := ODSVersionToFBVersion(ODSMajor, ODSMinor);
-      //ServerSession.FBVersionMajor := StrToInt(ODSMajorMinorStr[1]);
-      //ServerSession.FBVersionMinor := StrToInt(ODSMajorMinorStr[3]);
-      //fbcommon.FBVersionMajor  := StrToInt(ODSMajorMinorStr[1]);
-      //fbcommon.FBVersionMinor  := StrToInt(ODSMajorMinorStr[3]);
-      //fbcommon.FBVersionString := ''; //ServerSession.FBVersionString;
-    end;
-
-  Result := ServerSession.Connected;
-end;
-
 procedure TfmMain.CreateIntelliSenseCache(Data: PtrInt);
 var Node: TTreeNode;
     NodeInfo: TPNodeInfos;
@@ -8503,7 +8438,6 @@ begin
     Rec.ServerVersionMajor := ServerSession.FBVersionMajor;
     Rec.ServerVersionMinor := ServerSession.FBVersionMinor;
     Rec.ServerVersionString := ServerSession.FBVersionString;
-
 
     if (Node.Items[0].Text = 'Loading...') then
     begin

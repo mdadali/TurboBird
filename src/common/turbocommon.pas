@@ -469,7 +469,9 @@ function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boo
 function LoadClientLibIBX(ALib: string): boolean;
 function SetInitialClientLib: boolean;
 
-function TestEmbeddedConnection(AServerRec: TServerRecord; out ODSMajor: Integer; out ODSMinor: integer; out ServerVersion: string): boolean;
+function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: word;
+                                                           out AFBVersionMinor: word;
+                                                           out AFBServerVersion: string): boolean;
 
 function  CloseDB(dbIndex: integer): boolean;
 
@@ -995,13 +997,42 @@ begin
     Result := StrToIntDef(Copy(VerStr, P + 1, MaxInt), 0);
 end;
 
-function TestEmbeddedConnection(AServerRec: TServerRecord; out ODSMajor: Integer; out ODSMinor: integer; out ServerVersion: string): boolean;
+procedure ParseFBVersion(AFBVersionString: string; out AFBVersionMajor: word; out AFBVersionMinor: word);
+var
+  S: string;
+  DotPos: Integer;
+  MajorStr, MinorStr: string;
+begin
+  AFBVersionMajor := 0;
+  AFBVersionMinor := 0;
+
+  S := AFBVersionString;
+  if Pos('Firebird', S) > 0 then
+    S := Trim(Copy(S, Pos('Firebird', S) + Length('Firebird'), MaxInt));
+
+  DotPos := Pos('.', S);
+  if DotPos > 0 then
+  begin
+    MajorStr := Copy(S, 1, DotPos-1);
+    MinorStr := Copy(S, DotPos+1, MaxInt);
+    AFBVersionMajor := StrToIntDef(MajorStr, 0);
+    AFBVersionMinor := StrToIntDef(MinorStr, 0);
+  end
+  else
+    AFBVersionMajor := StrToIntDef(S, 0);
+end;
+
+function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: word;
+                                                           out AFBVersionMinor: word;
+                                                           out AFBServerVersion: string): boolean;
 var tmpDB: TIBDatabase;
     tmpDbInfo: TIBDatabaseInfo;
     dbFile: string;
 begin
   result := false;
-  dbFile := ExtractFilePath(Application.ExeName) + TmpDir + '/embedded_test.fdb';
+
+  dbFile := ExpandFileName(ExtractFilePath(Application.ExeName) +
+            TmpDir + DirectorySeparator + 'embedded_test.fdb');
 
   tmpDB := TIBDatabase.Create(nil);
   try
@@ -1025,18 +1056,17 @@ begin
       tmpDbInfo := TIBDatabaseInfo.Create(nil);
       tmpDbInfo.Database := tmpDB;
 
-      ServerVersion := tmpDbInfo.FirebirdVersion;
-      ODSMajor := tmpDbInfo.ODSMajorVersion;
-      ODSMinor := tmpDbInfo.ODSMinorVersion;
+      AFBServerVersion := tmpDbInfo.FirebirdVersion;
+      ParseFBVersion(AFBServerVersion, AFBVersionMajor, AFBVersionMinor);
 
       tmpDB.Close;
-      //ReadODSFromFile(tmpDB.DatabaseName, ODSMajor, ODSMinor);
       result := true;
     except
       on E: Exception do
       begin
-        ODSMajor := 0;
-        ODSMinor := 0;
+        AFBVersionMajor := 0;
+        AFBVersionMinor := 0;
+        AFBServerVersion := 'Unknown';
         ShowMessage('Embedded Connection failed:' + sLineBreak + E.Message);
       end;
     end;
@@ -3116,7 +3146,7 @@ begin
   if (ForceConnectDialog or (Result=false)) and
     (fmEnterPass.ShowModal = mrOk) then
   begin
-    if fmReg.TestConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+    if fmReg.TestDBConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
       Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
     begin
       RegisteredDatabases[dbIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
