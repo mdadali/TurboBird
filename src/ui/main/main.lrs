@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#185#1#6'Height'#3'd'#2#3'Top'#3' '#1#5
+  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#179#1#6'Height'#3'd'#2#3'Top'#3'K'#1#5
   +'Width'#3#138#3#7'Caption'#6#28'TurboBird Admin for Firebird'#12'ClientHeigh'
   +'t'#3'L'#2#11'ClientWidth'#3#138#3#5'Color'#7#6'clForm'#8'DragMode'#7#11'dmA'
   +'utomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10#239#182#2#0#235#182#2#0#0#0
@@ -10332,43 +10332,43 @@ LazarusResources.Add('TfmMain','FORMDATA',[
   +'ck'#0#0#0#9'TMenuItem'#11'lmDropTable'#3'Tag'#2#1#7'Caption'#6#10'Drop Tabl'
   +'e'#10'ImageIndex'#2'1'#7'OnClick'#7#16'lmDropTableClick'#0#0#9'TMenuItem'#10
   +'Separator2'#7'Caption'#6#1'-'#0#0#9'TMenuItem'#10'Separator6'#3'Tag'#2#12#7
-  +'Caption'#6#1'-'#0#0#9'TMenuItem'#8'lmNewGen'#3'Tag'#2#12#7'Caption'#6#20'Cr'
-  +'eate New Generator'#10'ImageIndex'#2#6#7'OnClick'#7#13'lmNewGenClick'#0#0#9
+  +'Caption'#6#1'-'#0#0#9'TMenuItem'#8'lmNewGen'#3'Tag'#2#12#7'Caption'#6#19'Cr'
+  +'eate new Sequence'#10'ImageIndex'#2#6#7'OnClick'#7#13'lmNewGenClick'#0#0#9
   +'TMenuItem'#10'Separator7'#3'Tag'#2#2#7'Caption'#6#1'-'#0#0#9'TMenuItem'#9'l'
-  +'mViewGen'#3'Tag'#2#2#7'Caption'#6#14'View Generator'#10'ImageIndex'#2#6#7'O'
-  +'nClick'#7#14'lmViewGenClick'#0#0#9'TMenuItem'#8'lmSetGen'#3'Tag'#2#2#7'Capt'
-  +'ion'#6#19'Set Generator Value'#10'ImageIndex'#2#6#7'OnClick'#7#13'lmSetGenC'
-  +'lick'#0#0#9'TMenuItem'#15'lmCreateAutoInc'#3'Tag'#2#2#7'Caption'#6#29'Creat'
-  +'e Auto increment Trigger'#10'ImageIndex'#2#7#7'OnClick'#7#20'lmCreateAutoIn'
-  +'cClick'#0#0#9'TMenuItem'#17'lmGetIncrementGen'#3'Tag'#2#2#7'Caption'#6#17'G'
-  +'et increment SQL'#10'ImageIndex'#2#6#7'OnClick'#7#22'lmGetIncrementGenClick'
-  +#0#0#9'TMenuItem'#15'lmDropGenerator'#3'Tag'#2#2#7'Caption'#6#14'Drop Genera'
-  +'tor'#10'ImageIndex'#2'1'#7'OnClick'#7#20'lmDropGeneratorClick'#0#0#9'TMenuI'
-  +'tem'#10'Separator9'#3'Tag'#2#4#7'Caption'#6#1'-'#0#0#9'TMenuItem'#14'lmDisp'
-  +'lay1000V'#3'Tag'#2#4#7'Caption'#6#9'View Data'#7'OnClick'#7#19'lmDisplay100'
-  +'0VClick'#0#0#9'TMenuItem'#10'Separator8'#3'Tag'#2#14#7'Caption'#6#1'-'#0#0#9
-  +'TMenuItem'#12'lmCreateView'#3'Tag'#2#14#7'Caption'#6#15'Create New View'#10
-  +'ImageIndex'#2#10#7'OnClick'#7#17'lmCreateViewClick'#0#0#9'TMenuItem'#13'lmD'
-  +'isplayView'#3'Tag'#2#4#7'Caption'#6#16'Display View DDL'#7'OnClick'#7#18'lm'
-  +'DisplayViewClick'#0#0#9'TMenuItem'#10'lmEditView'#3'Tag'#2#4#7'Caption'#6#9
-  +'Edit View'#10'ImageIndex'#2#10#7'OnClick'#7#15'lmEditViewClick'#0#0#9'TMenu'
-  +'Item'#10'lmDropView'#3'Tag'#2#4#7'Caption'#6#9'Drop View'#10'ImageIndex'#2
-  +'1'#7'OnClick'#7#15'lmDropViewClick'#0#0#9'TMenuItem'#18'lmCreateStoredProc'
-  +#3'Tag'#2#15#7'Caption'#6#13'New Procedure'#10'ImageIndex'#2#12#7'OnClick'#7
-  +#23'lmCreateStoredProcClick'#0#0#9'TMenuItem'#21'lmViewStoredProcedure'#3'Ta'
-  +'g'#2#5#7'Caption'#6#21'View Stored Procedure'#10'ImageIndex'#2#12#7'OnClick'
-  +#7#26'lmViewStoredProcedureClick'#0#0#9'TMenuItem'#10'lmEditProc'#3'Tag'#2#5
-  +#7'Caption'#6#21'Edit Stored Procedure'#10'ImageIndex'#2#12#7'OnClick'#7#15
-  +'lmEditProcClick'#0#0#9'TMenuItem'#15'lmCallStoreProc'#3'Tag'#2#5#7'Caption'
-  +#6#14'Call procedure'#10'ImageIndex'#2#12#7'OnClick'#7#20'lmCallStoreProcCli'
-  +'ck'#0#0#9'TMenuItem'#21'lmDropStoredProcedure'#3'Tag'#2#5#7'Caption'#6#21'D'
-  +'rop Stored Procedure'#10'ImageIndex'#2'1'#7'OnClick'#7#26'lmDropStoredProce'
-  +'dureClick'#0#0#9'TMenuItem'#15'lmCreateTrigger'#3'Tag'#2#13#7'Caption'#6#18
-  +'Create New Trigger'#10'ImageIndex'#2#8#7'OnClick'#7#20'lmCreateTriggerClick'
-  +#0#0#9'TMenuItem'#13'lmViewTrigger'#3'Tag'#2#3#7'Caption'#6#12'View Trigger'
-  +#10'ImageIndex'#2#8#7'OnClick'#7#18'lmViewTriggerClick'#0#0#9'TMenuItem'#13
-  +'lmEditTrigger'#3'Tag'#2#3#7'Caption'#6#12'Edit Trigger'#10'ImageIndex'#2#8#7
-  +'OnClick'#7#18'lmEditTriggerClick'#0#0#9'TMenuItem'#14'lmActivateTrig'#3'Tag'
+  +'mViewGen'#3'Tag'#2#2#7'Caption'#6#13'View Sequence'#10'ImageIndex'#2#6#7'On'
+  +'Click'#7#14'lmViewGenClick'#0#0#9'TMenuItem'#8'lmSetGen'#3'Tag'#2#2#7'Capti'
+  +'on'#6#18'Set Sequence Value'#10'ImageIndex'#2#6#7'OnClick'#7#13'lmSetGenCli'
+  +'ck'#0#0#9'TMenuItem'#15'lmCreateAutoInc'#3'Tag'#2#2#7'Caption'#6#29'Create '
+  +'Auto increment Trigger'#10'ImageIndex'#2#7#7'OnClick'#7#20'lmCreateAutoIncC'
+  +'lick'#0#0#9'TMenuItem'#17'lmGetIncrementGen'#3'Tag'#2#2#7'Caption'#6#17'Get'
+  +' increment SQL'#10'ImageIndex'#2#6#7'OnClick'#7#22'lmGetIncrementGenClick'#0
+  +#0#9'TMenuItem'#15'lmDropGenerator'#3'Tag'#2#2#7'Caption'#6#13'Drop Sequence'
+  +#10'ImageIndex'#2'1'#7'OnClick'#7#20'lmDropGeneratorClick'#0#0#9'TMenuItem'
+  +#10'Separator9'#3'Tag'#2#4#7'Caption'#6#1'-'#0#0#9'TMenuItem'#14'lmDisplay10'
+  +'00V'#3'Tag'#2#4#7'Caption'#6#9'View Data'#7'OnClick'#7#19'lmDisplay1000VCli'
+  +'ck'#0#0#9'TMenuItem'#10'Separator8'#3'Tag'#2#14#7'Caption'#6#1'-'#0#0#9'TMe'
+  +'nuItem'#12'lmCreateView'#3'Tag'#2#14#7'Caption'#6#15'Create New View'#10'Im'
+  +'ageIndex'#2#10#7'OnClick'#7#17'lmCreateViewClick'#0#0#9'TMenuItem'#13'lmDis'
+  +'playView'#3'Tag'#2#4#7'Caption'#6#16'Display View DDL'#7'OnClick'#7#18'lmDi'
+  +'splayViewClick'#0#0#9'TMenuItem'#10'lmEditView'#3'Tag'#2#4#7'Caption'#6#9'E'
+  +'dit View'#10'ImageIndex'#2#10#7'OnClick'#7#15'lmEditViewClick'#0#0#9'TMenuI'
+  +'tem'#10'lmDropView'#3'Tag'#2#4#7'Caption'#6#9'Drop View'#10'ImageIndex'#2'1'
+  +#7'OnClick'#7#15'lmDropViewClick'#0#0#9'TMenuItem'#18'lmCreateStoredProc'#3
+  +'Tag'#2#15#7'Caption'#6#13'New Procedure'#10'ImageIndex'#2#12#7'OnClick'#7#23
+  +'lmCreateStoredProcClick'#0#0#9'TMenuItem'#21'lmViewStoredProcedure'#3'Tag'#2
+  +#5#7'Caption'#6#21'View Stored Procedure'#10'ImageIndex'#2#12#7'OnClick'#7#26
+  +'lmViewStoredProcedureClick'#0#0#9'TMenuItem'#10'lmEditProc'#3'Tag'#2#5#7'Ca'
+  +'ption'#6#21'Edit Stored Procedure'#10'ImageIndex'#2#12#7'OnClick'#7#15'lmEd'
+  +'itProcClick'#0#0#9'TMenuItem'#15'lmCallStoreProc'#3'Tag'#2#5#7'Caption'#6#14
+  +'Call procedure'#10'ImageIndex'#2#12#7'OnClick'#7#20'lmCallStoreProcClick'#0
+  +#0#9'TMenuItem'#21'lmDropStoredProcedure'#3'Tag'#2#5#7'Caption'#6#21'Drop St'
+  +'ored Procedure'#10'ImageIndex'#2'1'#7'OnClick'#7#26'lmDropStoredProcedureCl'
+  +'ick'#0#0#9'TMenuItem'#15'lmCreateTrigger'#3'Tag'#2#13#7'Caption'#6#18'Creat'
+  +'e New Trigger'#10'ImageIndex'#2#8#7'OnClick'#7#20'lmCreateTriggerClick'#0#0
+  +#9'TMenuItem'#13'lmViewTrigger'#3'Tag'#2#3#7'Caption'#6#12'View Trigger'#10
+  +'ImageIndex'#2#8#7'OnClick'#7#18'lmViewTriggerClick'#0#0#9'TMenuItem'#13'lmE'
+  +'ditTrigger'#3'Tag'#2#3#7'Caption'#6#12'Edit Trigger'#10'ImageIndex'#2#8#7'O'
+  +'nClick'#7#18'lmEditTriggerClick'#0#0#9'TMenuItem'#14'lmActivateTrig'#3'Tag'
   ,#2#3#7'Caption'#6#16'Activate Trigger'#10'ImageIndex'#2#8#7'OnClick'#7#19'lm'
   +'ActivateTrigClick'#0#0#9'TMenuItem'#14'lmDeactiveTrig'#3'Tag'#2#3#7'Caption'
   +#6#18'DeActivate Trigger'#10'ImageIndex'#2#8#7'OnClick'#7#19'lmDeactiveTrigC'

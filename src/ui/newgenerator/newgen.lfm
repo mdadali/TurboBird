@@ -5,7 +5,7 @@ object fmNewGen: TfmNewGen
   Width = 414
   ActiveControl = edGenName
   BorderStyle = bsSingle
-  Caption = 'Create New Generator'
+  Caption = 'Create new Sequence'
   ClientHeight = 223
   ClientWidth = 414
   OnShow = FormShow
@@ -13,15 +13,15 @@ object fmNewGen: TfmNewGen
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 5
-    Height = 19
+    Height = 20
     Top = 8
-    Width = 105
-    Caption = 'Generator Name'
+    Width = 110
+    Caption = 'Sequence Name'
     ParentColor = False
   end
   object edGenName: TEdit
     Left = 128
-    Height = 31
+    Height = 30
     Top = 8
     Width = 256
     TabOrder = 0
@@ -86,10 +86,10 @@ object fmNewGen: TfmNewGen
   end
   object cxTrigger: TCheckBox
     Left = 5
-    Height = 21
+    Height = 22
     Top = 40
-    Width = 301
-    Caption = 'Create Auto increment Trigger for generator'
+    Width = 321
+    Caption = 'Create Auto increment Trigger for Sequence'
     OnChange = cxTriggerChange
     TabOrder = 3
   end
@@ -99,30 +99,30 @@ object fmNewGen: TfmNewGen
     Top = 72
     Width = 409
     Anchors = [akTop, akLeft, akRight, akBottom]
-    Caption = 'Trigger for generator'
-    ClientHeight = 69
-    ClientWidth = 407
+    Caption = 'Trigger for Sequence'
+    ClientHeight = 67
+    ClientWidth = 405
     Enabled = False
     TabOrder = 4
     object Label2: TLabel
       Left = 6
-      Height = 19
+      Height = 20
       Top = 7
-      Width = 52
+      Width = 58
       Caption = 'On table'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 9
-      Height = 19
+      Height = 20
       Top = 40
-      Width = 29
+      Width = 32
       Caption = 'Field'
       ParentColor = False
     end
     object cbTables: TComboBox
       Left = 86
-      Height = 35
+      Height = 32
       Top = 7
       Width = 299
       ItemHeight = 0
@@ -132,7 +132,7 @@ object fmNewGen: TfmNewGen
     end
     object cbFields: TComboBox
       Left = 86
-      Height = 35
+      Height = 32
       Top = 40
       Width = 298
       ItemHeight = 0

@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 530
+  Left = 479
   Height = 706
-  Top = 42
+  Top = 26
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70366,6 +70366,7 @@ object fmServerRegistry: TfmServerRegistry
       Top = 61
       Width = 92
       ItemHeight = 0
+      ItemIndex = 0
       Items.Strings = (
         'TCP'
         'SPX'
@@ -70380,6 +70381,7 @@ object fmServerRegistry: TfmServerRegistry
       OnChange = cbProtocolChange
       Style = csOwnerDrawFixed
       TabOrder = 3
+      Text = 'TCP'
     end
     object Label5: TLabel
       Left = 20

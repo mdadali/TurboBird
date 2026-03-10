@@ -162,8 +162,6 @@ begin
   SetLength(FFieldsLoaded, 0);
 end;
 
-{ ---------------- Public API ---------------- }
-
 constructor TUnIntelliSenseCache.Create(
   ASimpleObjExtractor: TSimpleObjExtractor);
 begin

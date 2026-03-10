@@ -528,6 +528,8 @@ end;
 
 procedure TServerSession.Disconnect;
 begin
+  if not Assigned(IBXServicesConnection) then
+    exit;
   if IBXServicesConnection.Connected then
     IBXServicesConnection.Connected := false;
 

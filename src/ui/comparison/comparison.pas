@@ -54,9 +54,9 @@ type
     FNodeInfos: TPNodeInfos;
 
     FDiffCount: Integer;
-    FDBObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches turbocmmon.dbObjects
-    FDBExistingObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches turbocmmon.dbObjects
-    FDBRemovedObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches turbocmmon.dbObjects
+    FDBObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches fbcommon.dbObjects
+    FDBExistingObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches fbcommon.dbObjects
+    FDBRemovedObjectsList: array [0 .. NumObjects - 1] of TStringList; //matches fbcommon.dbObjects
     FMissingFieldsList: TStringList;
 
     FExistFieldsList: TStringList;

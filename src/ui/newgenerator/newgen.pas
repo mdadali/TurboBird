@@ -59,7 +59,7 @@ begin
     Valid:= True;
     List:= TStringList.Create;
     try
-      List.Add('create generator ' + edGenName.Text + ';');
+      List.Add('create sequence ' + edGenName.Text + ';');
       if cxTrigger.Checked then
       begin
         Valid:= False;
@@ -67,7 +67,7 @@ begin
           MessageDlg('You should select a table and a field', mtError, [mbOk], 0)
         else
         if Trim(edGenName.Text) = '' then
-          MessageDlg('You should enter generator name', mtError, [mbOK], 0)
+          MessageDlg('You should enter Sequence name', mtError, [mbOK], 0)
         else
         begin
           List.Add('CREATE TRIGGER ' + Trim(edGenName.Text) + ' FOR ' + cbTables.Text);
@@ -80,14 +80,14 @@ begin
         end;
       end;
       dbIndex := TPNodeInfos(fmMain.tvMain.Selected.Data)^.dbIndex;
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'New Generator#' + IntToStr(dbIndex) + ':' + edGenName.Text, List.Text);
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'New Sequence#' + IntToStr(dbIndex) + ':' + edGenName.Text, List.Text);
       Close;
     finally
       List.Free;
     end;
   end
   else
-    MessageDlg('You should write Generator name', mtError, [mbOK], 0);
+    MessageDlg('You should write Sequence name', mtError, [mbOK], 0);
 end;
 
 procedure TfmNewGen.cbTablesChange(Sender: TObject);

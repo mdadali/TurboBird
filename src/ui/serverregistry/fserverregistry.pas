@@ -218,7 +218,7 @@ begin
   FServerSession := AServerSession;
   if FServerSession = nil then
   begin
-    //CreateServerSession(FServerSession, '');
+    CreateServerSession(FServerSession, '');
     FSelectedServer := '';
     FIsNewServer := true;
     cbServerName.ItemIndex := -1;
@@ -675,7 +675,7 @@ begin
            ) <> mrYes then
           Exit;
 
-        // 🔹 Alle DB-ChildNodes still als gelöscht markieren
+        // Alle DB-ChildNodes still als gelöscht markieren
         MarkAllServerDatabasesDeleted(Node.Text);
       end;
       Break;
@@ -683,12 +683,16 @@ begin
     Node := Node.GetNextSibling;
   end;
 
-  // 🔹 Sicherstellen, dass Datei konsistent bleibt
+  // Sicherstellen, dass Datei konsistent bleibt
   RemoveDeletedDBRegistrationsFromFile;
 
   // Server wirklich löschen
   DeleteServer(ServerName);
-  FServerSession.Disconnect;
+
+  init(nil);
+  if Assigned(FServerSession) then
+    if FServerSession.Connected then
+      FServerSession.Disconnect;
 
   // Server auch aus TreeView entfernen
   Node := turbocommon.MainTreeView.Items.GetFirstNode;

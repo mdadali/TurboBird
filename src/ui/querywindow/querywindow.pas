@@ -150,6 +150,7 @@ type
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     tbIBSQL: TToolButton;
+    ToolButton6: TToolButton;
     procedure bbRunClick(Sender: TObject);
     procedure cxAutoCommitMouseEnter(Sender: TObject);
     procedure cxAutoCommitMouseLeave(Sender: TObject);
@@ -1176,7 +1177,6 @@ begin
   Application.OnShowHint := nil;
 end;
 
-
 { Run current SQL, auto-detect type }
 procedure TfmQueryWindow.tbRunClick(Sender: TObject);
 begin
@@ -1251,16 +1251,8 @@ var
 begin
   dbIndex := TPNodeInfos(fmMain.tvMain.Selected.Data)^.dbIndex;
 
-  FDbConnection := TIBDatabase.Create(nil);
-  FTransaction  := TIBTransaction.Create(nil);
-  FDbConnection.DefaultTransaction := FTransaction;
-
-
-  FDbConnection.Params.clear;
-  FDbConnection.DatabaseName := RegisteredDatabases[dbIndex].RegRec.DatabaseName;
-  FDbConnection.Params.Add('user_name=' + RegisteredDatabases[dbIndex].RegRec.UserName);
-  FDbConnection.Params.Add('password=' + RegisteredDatabases[dbIndex].RegRec.Password);
-  FDbConnection.LoginPrompt := false;
+  FDbConnection := RegisteredDatabases[dbIndex].IBDatabase;
+  FTransaction  := RegisteredDatabases[dbIndex].IBTransaction;
 
   meuqb := TOQBuilderDialog.Create(nil);
   VisualQueryEngine := TOQBEngineIBX.Create(nil);
@@ -1275,6 +1267,7 @@ begin
   except
     raise;
   end;
+
   if not FTransaction.InTransaction then
     FTransaction.StartTransaction;
 
@@ -1285,12 +1278,6 @@ begin
 
   meuqb.Free;
   VisualQueryEngine.Free;
-  if FTransaction.InTransaction then
-    FTransaction.Rollback;
-  FTransaction.Free;
-  if FDbConnection.Connected then
-    FDbConnection.Connected := false;
-  FDbConnection.Free;
 end;
 
 procedure TfmQueryWindow.tbSaveMouseEnter(Sender: TObject);

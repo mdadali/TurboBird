@@ -1,7 +1,7 @@
 object IBTransactionEditorForm: TIBTransactionEditorForm
-  Left = 396
+  Left = 357
   Height = 310
-  Top = 199
+  Top = 180
   Width = 520
   BorderStyle = bsDialog
   Caption = 'Transaction Editor'
@@ -86,9 +86,9 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     ClientWidth = 126
     TabOrder = 2
     object rbRecVersion: TRadioButton
-      Left = 10
+      Left = 8
       Height = 22
-      Top = 30
+      Top = 24
       Width = 99
       Caption = 'rec_version'
       Checked = True
@@ -96,7 +96,7 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       TabStop = True
     end
     object rbNoRecVersion: TRadioButton
-      Left = 10
+      Left = 8
       Height = 22
       Top = 55
       Width = 122
@@ -148,12 +148,13 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     end
   end
   object cbAutocommit: TCheckBox
-    Left = 310
+    Left = 320
     Height = 22
-    Top = 150
+    Top = 216
     Width = 104
     Caption = 'Autocommit'
     TabOrder = 4
+    Visible = False
   end
   object btnOK: TButton
     Left = 310
@@ -197,9 +198,9 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     TabOrder = 8
   end
   object cbReadConsistency: TCheckBox
-    Left = 312
+    Left = 320
     Height = 22
-    Top = 192
+    Top = 176
     Width = 193
     Caption = 'Read Consistency  (FB 4+)'
     TabOrder = 9

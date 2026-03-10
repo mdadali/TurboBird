@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 262
+  Left = 283
   Height = 613
-  Top = 152
+  Top = 155
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 613
@@ -71075,7 +71075,7 @@ object fmQueryWindow: TfmQueryWindow
       Style = tbsDivider
     end
     object tbMenu: TToolButton
-      Left = 382
+      Left = 462
       Hint = 'Menu'
       Top = 2
       AutoSize = True
@@ -71111,14 +71111,14 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object ToolButton1: TToolButton
-      Left = 490
+      Left = 454
       Height = 32
       Top = 2
       Caption = 'ToolButton1'
       Style = tbsSeparator
     end
     object cxAutoCommit: TCheckBox
-      Left = 498
+      Left = 530
       Height = 22
       Hint = 'Auto Commit ON/OFF'
       Top = 2
@@ -71131,7 +71131,7 @@ object fmQueryWindow: TfmQueryWindow
       TabOrder = 0
     end
     object tbQueryDesign: TToolButton
-      Left = 418
+      Left = 382
       Hint = 'Query Designer'
       Top = 2
       Caption = 'tbQueryDesign'
@@ -71179,12 +71179,18 @@ object fmQueryWindow: TfmQueryWindow
       OnClick = ToolButton4Click
     end
     object tbIBSQL: TToolButton
-      Left = 454
+      Left = 418
       Hint = 'IBX SQLBuilder'
       Top = 2
       Caption = 'tbIBSQL'
       ImageIndex = 14
       OnClick = tbIBSQLClick
+    end
+    object ToolButton6: TToolButton
+      Left = 498
+      Top = 2
+      Caption = 'ToolButton6'
+      Enabled = False
     end
   end
   object OpenDialog1: TOpenDialog
