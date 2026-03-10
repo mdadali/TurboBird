@@ -16,10 +16,17 @@ type
   { TIBTransactionEditorForm }
 
   TIBTransactionEditorForm = class(TForm)
-    btnSaveAsDefault: TButton;
+    btnCancel: TButton;
     btnLoadPresets: TButton;
+    btnOK: TButton;
+    btnSaveAsDefault: TButton;
     cbReadConsistency: TCheckBox;
     GroupIsolation: TGroupBox;
+    Panel1: TPanel;
+    RadioButton1: TRadioButton;
+    RadioButton2: TRadioButton;
+    RadioButton3: TRadioButton;
+    RadioButton4: TRadioButton;
     rbConcurrency: TRadioButton;
     rbReadCommitted: TRadioButton;
     rbConsistency: TRadioButton;
@@ -40,8 +47,6 @@ type
 
     cbAutocommit: TCheckBox;
 
-    btnOK: TButton;
-    btnCancel: TButton;
 
     procedure btnLoadPresetsClick(Sender: TObject);
     procedure btnSaveAsDefaultClick(Sender: TObject);
@@ -173,9 +178,9 @@ begin
     Title := 'Select Transaction Preset';
 
     InitialDir :=
-      IncludeTrailingPathDelimiter(GetAppConfigDir(False)) +
+      IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) +
       'data' + DirectorySeparator +
-      'transaction_presets';
+      'transaction_presets' + DirectorySeparator;
 
     if Execute then
     begin
