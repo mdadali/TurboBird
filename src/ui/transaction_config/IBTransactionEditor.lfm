@@ -1,35 +1,33 @@
 object IBTransactionEditorForm: TIBTransactionEditorForm
-  Left = 357
-  Height = 310
-  Top = 180
-  Width = 520
+  Left = 350
+  Height = 390
+  Top = 154
+  Width = 557
   BorderStyle = bsDialog
   Caption = 'Transaction Editor'
-  ClientHeight = 310
-  ClientWidth = 520
+  ClientHeight = 390
+  ClientWidth = 557
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object GroupIsolation: TGroupBox
-    Left = 10
-    Height = 110
-    Top = 10
-    Width = 150
+    Left = 24
+    Height = 152
+    Top = 16
+    Width = 182
     Caption = 'Isolation'
-    ClientHeight = 88
-    ClientWidth = 146
+    ClientHeight = 130
+    ClientWidth = 178
     TabOrder = 0
     object rbConcurrency: TRadioButton
-      Left = 8
+      Left = 10
       Height = 22
       Top = 16
       Width = 86
       Caption = 'Snapshot'
-      Checked = True
       TabOrder = 0
-      TabStop = True
     end
     object rbReadCommitted: TRadioButton
       Left = 10
@@ -37,58 +35,76 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       Top = 45
       Width = 135
       Caption = 'Read Committed'
+      Checked = True
       TabOrder = 1
+      TabStop = True
     end
     object rbConsistency: TRadioButton
       Left = 10
       Height = 22
-      Top = 70
+      Top = 72
       Width = 117
       Caption = 'Table Stability'
       TabOrder = 2
     end
+    object RadioButton1: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 104
+      Width = 72
+      Caption = 'Default'
+      TabOrder = 3
+    end
   end
   object GroupAccess: TGroupBox
-    Left = 170
-    Height = 110
-    Top = 10
+    Left = 224
+    Height = 152
+    Top = 16
     Width = 120
     Caption = 'Access'
-    ClientHeight = 88
+    ClientHeight = 130
     ClientWidth = 116
     TabOrder = 1
     object rbRead: TRadioButton
-      Left = 10
+      Left = 12
       Height = 22
-      Top = 30
+      Top = 16
       Width = 57
       Caption = 'Read'
-      Checked = True
       TabOrder = 0
-      TabStop = True
     end
     object rbWrite: TRadioButton
-      Left = 10
+      Left = 12
       Height = 22
-      Top = 55
+      Top = 45
       Width = 59
       Caption = 'Write'
+      Checked = True
       TabOrder = 1
+      TabStop = True
+    end
+    object RadioButton2: TRadioButton
+      Left = 12
+      Height = 22
+      Top = 72
+      Width = 72
+      Caption = 'Default'
+      TabOrder = 2
     end
   end
   object GroupRecordVersion: TGroupBox
-    Left = 300
-    Height = 110
-    Top = 10
+    Left = 384
+    Height = 152
+    Top = 16
     Width = 130
     Caption = 'Record Version'
-    ClientHeight = 88
+    ClientHeight = 130
     ClientWidth = 126
     TabOrder = 2
     object rbRecVersion: TRadioButton
       Left = 8
       Height = 22
-      Top = 24
+      Top = 16
       Width = 99
       Caption = 'rec_version'
       Checked = True
@@ -98,25 +114,33 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
     object rbNoRecVersion: TRadioButton
       Left = 8
       Height = 22
-      Top = 55
+      Top = 45
       Width = 122
       Caption = 'no_rec_version'
       TabOrder = 1
     end
+    object RadioButton3: TRadioButton
+      Left = 8
+      Height = 22
+      Top = 72
+      Width = 72
+      Caption = 'Default'
+      TabOrder = 2
+    end
   end
   object GroupLocking: TGroupBox
-    Left = 10
-    Height = 100
-    Top = 130
-    Width = 280
+    Left = 24
+    Height = 112
+    Top = 184
+    Width = 336
     Caption = 'Locking'
-    ClientHeight = 78
-    ClientWidth = 276
+    ClientHeight = 90
+    ClientWidth = 332
     TabOrder = 3
     object rbWait: TRadioButton
       Left = 10
       Height = 22
-      Top = 25
+      Top = 16
       Width = 53
       Caption = 'Wait'
       Checked = True
@@ -124,85 +148,104 @@ object IBTransactionEditorForm: TIBTransactionEditorForm
       TabStop = True
     end
     object rbNoWait: TRadioButton
-      Left = 90
+      Left = 10
       Height = 22
-      Top = 25
+      Top = 40
       Width = 72
       Caption = 'NoWait'
       TabOrder = 1
     end
     object lblTimeout: TLabel
-      Left = 10
+      Left = 144
       Height = 20
-      Top = 60
+      Top = 16
       Width = 88
       Caption = 'Lock Timeout'
       ParentColor = False
     end
     object edtTimeout: TEdit
-      Left = 110
+      Left = 248
       Height = 30
-      Top = 55
+      Top = 12
       Width = 60
       TabOrder = 2
+      Text = '30'
+    end
+    object RadioButton4: TRadioButton
+      Left = 10
+      Height = 22
+      Top = 68
+      Width = 72
+      Caption = 'Default'
+      TabOrder = 3
     end
   end
   object cbAutocommit: TCheckBox
-    Left = 320
+    Left = 256
     Height = 22
-    Top = 216
+    Top = 312
     Width = 104
     Caption = 'Autocommit'
     TabOrder = 4
     Visible = False
   end
-  object btnOK: TButton
-    Left = 310
-    Height = 30
-    Top = 256
-    Width = 80
-    Anchors = [akLeft, akBottom]
-    Caption = 'OK'
-    ModalResult = 1
-    OnClick = btnOKClick
-    TabOrder = 5
-  end
-  object btnCancel: TButton
-    Left = 400
-    Height = 30
-    Top = 256
-    Width = 80
-    Anchors = [akLeft, akBottom]
-    Caption = 'Cancel'
-    ModalResult = 2
-    TabOrder = 6
-  end
-  object btnSaveAsDefault: TButton
-    Left = 162
-    Height = 30
-    Top = 256
-    Width = 128
-    Anchors = [akLeft, akBottom]
-    Caption = 'Save as Default'
-    OnClick = btnSaveAsDefaultClick
-    TabOrder = 7
-  end
-  object btnLoadPresets: TButton
-    Left = 32
-    Height = 30
-    Top = 256
-    Width = 112
-    Anchors = [akLeft, akBottom]
-    Caption = 'Load Presets '
-    OnClick = btnLoadPresetsClick
-    TabOrder = 8
-  end
   object cbReadConsistency: TCheckBox
-    Left = 320
+    Left = 32
     Height = 22
-    Top = 176
+    Top = 312
     Width = 193
     Caption = 'Read Consistency  (FB 4+)'
-    TabOrder = 9
+    TabOrder = 5
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 42
+    Top = 348
+    Width = 557
+    Align = alBottom
+    ClientHeight = 42
+    ClientWidth = 557
+    TabOrder = 6
+    object btnLoadPresets: TButton
+      Left = 16
+      Height = 30
+      Top = 8
+      Width = 128
+      Anchors = [akLeft, akBottom]
+      Caption = 'Load Presets '
+      OnClick = btnLoadPresetsClick
+      TabOrder = 0
+    end
+    object btnSaveAsDefault: TButton
+      Left = 162
+      Height = 30
+      Top = 8
+      Width = 128
+      Anchors = [akLeft, akBottom]
+      Caption = 'Save as Default'
+      OnClick = btnSaveAsDefaultClick
+      TabOrder = 1
+    end
+    object btnOK: TButton
+      Left = 336
+      Height = 30
+      Top = 8
+      Width = 80
+      Anchors = [akLeft, akBottom]
+      Caption = 'OK'
+      ModalResult = 1
+      OnClick = btnOKClick
+      TabOrder = 2
+    end
+    object btnCancel: TButton
+      Left = 436
+      Height = 30
+      Top = 8
+      Width = 80
+      Anchors = [akLeft, akBottom]
+      Caption = 'Cancel'
+      ModalResult = 2
+      TabOrder = 3
+    end
   end
 end
