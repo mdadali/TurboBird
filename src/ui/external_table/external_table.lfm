@@ -1,0 +1,250 @@
+object frmExternalTable: TfrmExternalTable
+  Left = 444
+  Height = 532
+  Top = 58
+  Width = 635
+  Caption = 'External Table Manager'
+  ClientHeight = 532
+  ClientWidth = 635
+  OnClose = FormClose
+  OnShow = FormShow
+  LCLVersion = '2.2.6.0'
+  object lblSourceTable: TLabel
+    Left = 56
+    Height = 20
+    Top = 72
+    Width = 86
+    Caption = 'Source Table'
+    ParentColor = False
+  end
+  object lblExternalTableName: TLabel
+    Left = 56
+    Height = 20
+    Top = 112
+    Width = 139
+    Caption = 'External Table Name'
+    ParentColor = False
+  end
+  object edtExternalTableName: TEdit
+    Left = 208
+    Height = 30
+    Top = 112
+    Width = 300
+    TabOrder = 0
+  end
+  object lblExternalFile: TLabel
+    Left = 56
+    Height = 20
+    Top = 152
+    Width = 82
+    Caption = 'External File'
+    ParentColor = False
+  end
+  object edtExternalFile: TEdit
+    Left = 208
+    Height = 30
+    Top = 152
+    Width = 264
+    TabOrder = 1
+    Text = '/opt/firebird/examples/empbuild/country_ext.csv'
+  end
+  object gbFormat: TGroupBox
+    Left = 56
+    Height = 70
+    Top = 229
+    Width = 430
+    Caption = 'Output Format'
+    ClientHeight = 48
+    ClientWidth = 426
+    TabOrder = 2
+    object rbBinary: TRadioButton
+      Left = 16
+      Height = 22
+      Top = 24
+      Width = 66
+      Caption = 'Binary'
+      TabOrder = 1
+    end
+    object rbFixedText: TRadioButton
+      Left = 140
+      Height = 22
+      Top = 24
+      Width = 89
+      Caption = 'Fixed Text'
+      TabOrder = 0
+    end
+    object rbCSV: TRadioButton
+      Left = 280
+      Height = 22
+      Top = 24
+      Width = 48
+      Caption = 'CSV'
+      Checked = True
+      TabOrder = 2
+      TabStop = True
+    end
+  end
+  object chkExportData: TCheckBox
+    Left = 64
+    Height = 22
+    Top = 432
+    Width = 157
+    Caption = 'Export existing data'
+    Checked = True
+    State = cbChecked
+    TabOrder = 3
+  end
+  object chkCreateView: TCheckBox
+    Left = 248
+    Height = 22
+    Top = 432
+    Width = 101
+    Caption = 'Create view'
+    TabOrder = 4
+  end
+  object comboxTables: TComboBox
+    Left = 208
+    Height = 32
+    Top = 72
+    Width = 300
+    ItemHeight = 0
+    OnChange = comboxTablesChange
+    Style = csDropDownList
+    TabOrder = 5
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 482
+    Width = 635
+    Align = alBottom
+    ClientHeight = 50
+    ClientWidth = 635
+    TabOrder = 6
+    object btnExecute: TButton
+      Left = 360
+      Height = 43
+      Top = 7
+      Width = 80
+      Caption = 'Execute'
+      OnClick = btnExecuteClick
+      TabOrder = 0
+    end
+    object btnCancel: TButton
+      Left = 464
+      Height = 43
+      Top = 7
+      Width = 80
+      Caption = 'Cancel'
+      OnClick = btnCancelClick
+      TabOrder = 1
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 635
+    Align = alTop
+    TabOrder = 7
+  end
+  object btnOpenExternalFile: TButton
+    Left = 480
+    Height = 25
+    Top = 152
+    Width = 28
+    Caption = '...'
+    OnClick = btnOpenExternalFileClick
+    TabOrder = 8
+  end
+  object GroupBox1: TGroupBox
+    Left = 72
+    Height = 72
+    Top = 320
+    Width = 457
+    Caption = 'CSV Options'
+    ClientHeight = 50
+    ClientWidth = 453
+    TabOrder = 9
+    object chkBoxOutputHeader: TCheckBox
+      Left = 16
+      Height = 22
+      Top = 16
+      Width = 124
+      Caption = 'Output Header'
+      TabOrder = 0
+    end
+    object edtCSVQuote: TEdit
+      Left = 215
+      Height = 30
+      Top = 8
+      Width = 80
+      TabOrder = 1
+      Text = '"'
+    end
+    object edtCSVSeparator: TEdit
+      Left = 352
+      Height = 30
+      Top = 8
+      Width = 80
+      TabOrder = 2
+      Text = ','
+    end
+  end
+  object IBQuery1: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDatabase1
+    Transaction = IBTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 48
+    Top = 8
+  end
+  object IBDatabase1: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransaction1
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 167
+    Top = 6
+  end
+  object IBTransaction1: TIBTransaction
+    TransactionName = '{892379DA-8E91-4A63-B89E-150D57A96DA3}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Left = 272
+    Top = 8
+  end
+  object IBDatabaseInfo1: TIBDatabaseInfo
+    Database = IBDatabase1
+    Left = 408
+    Top = 8
+  end
+  object IBExtract1: TIBExtract
+    Database = IBDatabase1
+    Transaction = IBTransaction1
+    ShowSystem = False
+    AlwaysQuoteIdentifiers = False
+    IncludeMetaDataComments = False
+    CaseSensitiveObjectNames = True
+    Left = 528
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 545
+    Top = 163
+  end
+end

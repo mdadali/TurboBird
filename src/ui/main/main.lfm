@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 818
+  Left = 526
   Height = 612
-  Top = 424
+  Top = 87
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
@@ -8491,6 +8491,11 @@ object fmMain: TfmMain
         891E45B8BE2B24D7E0451FDBE44E20D3DB340BE6F00A1FD1D800
       }
       OnClick = lmNewTableClick
+    end
+    object lmExternalTable: TMenuItem
+      Tag = 11
+      Caption = 'External Table...'
+      OnClick = lmExternalTableClick
     end
     object lmTableManage: TMenuItem
       Tag = 1
