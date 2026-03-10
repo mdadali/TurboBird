@@ -80,8 +80,9 @@ uses
   edit_tabledata_new,
 
   ibsqleditor,
-  IBTransactionEdit,  //orig
-  IBTransactionEditor //new
+  //IBTransactionEdit,  //orig
+  IBTransactionEditor, //new
+  external_table
   ;
 
 {$i turbocommon.inc}
@@ -122,6 +123,7 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
+    lmExternalTable: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -315,6 +317,7 @@ type
     procedure lmEditFieldClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
     procedure lmEditTableDataNewClick(Sender: TObject);
+    procedure lmExternalTableClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -2914,6 +2917,16 @@ begin
   ATableName := GetClearNodeText(ATableName);
   EditWindow.Init(NodeInfos, dbIndex, ATableName);
   EditWindow.Show;
+end;
+
+procedure TfmMain.lmExternalTableClick(Sender: TObject);
+var frmExternalTable: TfrmExternalTable;
+    dbIndex: integer;
+begin
+  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+  frmExternalTable := TfrmExternalTable.Create(Application);
+  frmExternalTable.Init(dbIndex, nil);
+  frmExternalTable.ShowModal;
 end;
 
 procedure TfmMain.ExtractTableMetaData(Quoted: boolean);
