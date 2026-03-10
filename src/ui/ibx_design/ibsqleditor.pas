@@ -33,7 +33,9 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynEdit, LResources, Forms, Controls, Graphics,
   Dialogs, StdCtrls, ComCtrls, ibinsertsqleditor, IBSQLEditFrame,
-  IBDatabase, IBSQL, IB, db;
+  IBDatabase, IBSQL, IB, db,
+
+  turbocommon;
 
 type
 
@@ -43,6 +45,8 @@ type
     IncludePrimaryKeys: TCheckBox;
     SelectProcedure: TLabel;
     TabControl1: TTabControl;
+    procedure FormCreate(Sender: TObject);
+    procedure FormMouseEnter(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure GenerateBtnClick(Sender: TObject);
     procedure TabControl1Change(Sender: TObject);
@@ -128,6 +132,18 @@ procedure TIBSQLEditorForm.FormShow(Sender: TObject);
 begin
   inherited;
   SetupFlags;
+end;
+
+procedure TIBSQLEditorForm.FormMouseEnter(Sender: TObject);
+begin
+   Application.OnShowHint := nil;
+end;
+
+procedure TIBSQLEditorForm.FormCreate(Sender: TObject);
+begin
+  IBSQLEditFrame1.SQLText.Color     := turbocommon.QWEditorBackgroundColor;
+  IBSQLEditFrame1.SQLText.Font.Name := turbocommon.QWEditorFontName;
+  IBSQLEditFrame1.SQLText.Font.Size := turbocommon.QWEditorFontSize;
 end;
 
 procedure TIBSQLEditorForm.GenerateBtnClick(Sender: TObject);

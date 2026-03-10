@@ -5,7 +5,7 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="143">
+    <Units Count="141">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -195,9 +195,9 @@
       <Unit24>
         <Filename Value="common\fbcommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="693"/>
-        <CursorPos X="28" Y="706"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="138"/>
+        <CursorPos X="51" Y="154"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit24>
@@ -266,11 +266,10 @@
         <ComponentName Value="fmImportTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="528"/>
         <CursorPos X="37" Y="544"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="ui\main\main.pas"/>
@@ -279,8 +278,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="4455"/>
-        <CursorPos X="32" Y="4483"/>
+        <TopLine Value="5145"/>
+        <CursorPos Y="5148"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -288,7 +287,7 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="5104" ID="3"/>
+          <Item0 Y="5053" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -300,9 +299,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="33"/>
-        <CursorPos X="15" Y="50"/>
+        <CursorPos X="38" Y="46"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit32>
@@ -313,12 +312,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="208"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="195"/>
         <CursorPos X="62" Y="214"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit33>
       <Unit34>
         <Filename Value="ui\querywindow\querywindow.pas"/>
@@ -327,10 +324,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1316"/>
-        <CursorPos X="28" Y="1329"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1170"/>
+        <CursorPos X="31" Y="1180"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit34>
       <Unit35>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -376,8 +374,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewGen"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="59"/>
-        <CursorPos X="43" Y="72"/>
+        <TopLine Value="2"/>
+        <CursorPos X="44" Y="17"/>
         <UsageCount Value="200"/>
       </Unit38>
       <Unit39>
@@ -388,7 +386,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewGen"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="34" Y="10"/>
+        <TopLine Value="99"/>
+        <CursorPos X="73" Y="111"/>
         <UsageCount Value="200"/>
       </Unit39>
       <Unit40>
@@ -466,13 +465,12 @@
       <Unit46>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="1043"/>
-        <CursorPos Y="1060"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1210"/>
+        <CursorPos X="40" Y="1219"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 X="5" Y="1141" ID="4"/>
+          <Item0 Y="1164" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit46>
@@ -599,7 +597,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Comparison"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="68" Y="16"/>
+        <TopLine Value="41"/>
+        <CursorPos X="19" Y="53"/>
         <UsageCount Value="201"/>
       </Unit57>
       <Unit58>
@@ -837,9 +836,9 @@
       <Unit81>
         <Filename Value="utils\fServerSession.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
-        <TopLine Value="461"/>
-        <CursorPos X="37" Y="475"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="519"/>
+        <CursorPos Y="533"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit81>
@@ -867,11 +866,13 @@
         <ComponentName Value="fmServerRegistry"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="467"/>
-        <CursorPos X="35" Y="480"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="212"/>
+        <CursorPos X="15" Y="131"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit84>
       <Unit85>
         <Filename Value="common\fmetaquerys.pas"/>
@@ -990,8 +991,8 @@
         <Filename Value="utils\fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="959"/>
-        <CursorPos X="58" Y="964"/>
+        <TopLine Value="133"/>
+        <CursorPos X="3" Y="19"/>
         <UsageCount Value="200"/>
       </Unit96>
       <Unit97>
@@ -999,8 +1000,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="61"/>
-        <CursorPos X="15" Y="65"/>
+        <TopLine Value="225"/>
+        <CursorPos X="35" Y="235"/>
         <UsageCount Value="200"/>
       </Unit97>
       <Unit98>
@@ -1053,7 +1054,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="34" Y="79"/>
-        <UsageCount Value="160"/>
+        <UsageCount Value="189"/>
       </Unit102>
       <Unit103>
         <Filename Value="ui\forign_key_table\foreign_key_table.pas"/>
@@ -1063,7 +1064,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="24"/>
-        <UsageCount Value="148"/>
+        <UsageCount Value="177"/>
       </Unit103>
       <Unit104>
         <Filename Value="ui\ibx_design\ibsqleditor.pas"/>
@@ -1072,9 +1073,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos X="8" Y="74"/>
-        <UsageCount Value="81"/>
+        <TopLine Value="142"/>
+        <CursorPos X="103" Y="148"/>
+        <UsageCount Value="110"/>
       </Unit104>
       <Unit105>
         <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
@@ -1082,10 +1083,10 @@
         <ComponentName Value="IBTransactionEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="60"/>
-        <CursorPos Y="77"/>
-        <UsageCount Value="66"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="302"/>
+        <CursorPos X="28" Y="311"/>
+        <UsageCount Value="95"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit105>
@@ -1097,7 +1098,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="88"/>
         <CursorPos X="47" Y="122"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="40"/>
       </Unit106>
       <Unit107>
         <Filename Value="ui\transconfig\ftransactionconfig.pas"/>
@@ -1107,7 +1108,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="21"/>
         <CursorPos X="71" Y="29"/>
-        <UsageCount Value="200"/>
+        <UsageCount Value="198"/>
       </Unit107>
       <Unit108>
         <Filename Value="datamodules\dmibx.pas"/>
@@ -1116,7 +1117,7 @@
         <ResourceBaseClass Value="DataModule"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="37" Y="24"/>
-        <UsageCount Value="158"/>
+        <UsageCount Value="156"/>
       </Unit108>
       <Unit109>
         <Filename Value="ui\blobeditor\fblobedit.pas"/>
@@ -1125,7 +1126,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="42" Y="6"/>
-        <UsageCount Value="165"/>
+        <UsageCount Value="163"/>
       </Unit109>
       <Unit110>
         <Filename Value="ui\backuprestore\backuprestore.pas"/>
@@ -1136,21 +1137,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="28" Y="64"/>
-        <UsageCount Value="135"/>
+        <UsageCount Value="133"/>
       </Unit110>
       <Unit111>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBExtract.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="4326"/>
         <CursorPos X="55" Y="4341"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit111>
       <Unit112>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="444"/>
         <CursorPos Y="508"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="8"/>
       </Unit112>
       <Unit113>
         <Filename Value="ui\neweditfield\backup\neweditfield.pas"/>
@@ -1158,14 +1159,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="212"/>
         <CursorPos X="55" Y="229"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="3"/>
       </Unit113>
       <Unit114>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1010"/>
         <CursorPos X="56" Y="1032"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit114>
       <Unit115>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\grids.pas"/>
@@ -1173,14 +1174,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1772"/>
         <CursorPos X="14" Y="1790"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="3"/>
       </Unit115>
       <Unit116>
         <Filename Value="ui\activitymonitor\factivitymonitor.lfm"/>
         <HasResources Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="16" Y="8"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit116>
       <Unit117>
@@ -1188,7 +1189,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="321"/>
         <CursorPos Y="342"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="13"/>
       </Unit117>
       <Unit118>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\htmlview.pas"/>
@@ -1196,21 +1197,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="560"/>
         <CursorPos X="14" Y="571"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="10"/>
       </Unit118>
       <Unit119>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\HtmlGlobals.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="106"/>
         <CursorPos X="3" Y="91"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="10"/>
       </Unit119>
       <Unit120>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32callback.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="271"/>
         <CursorPos X="5" Y="286"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit120>
       <Unit121>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32int.pp"/>
@@ -1218,122 +1219,109 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="264"/>
         <CursorPos X="5" Y="267"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit121>
       <Unit122>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\objpas\sysutils\sysutilh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="240"/>
         <CursorPos X="33" Y="249"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit122>
       <Unit123>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\win\wininc\func.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="4"/>
         <CursorPos X="10" Y="222"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit123>
       <Unit124>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="124"/>
         <CursorPos X="47" Y="143"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit124>
       <Unit125>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\win\wininc\struct.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="211"/>
         <CursorPos X="22" Y="224"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit125>
       <Unit126>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\inc\typshrdh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="130"/>
         <CursorPos X="31" Y="150"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit126>
       <Unit127>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\lcl.pas"/>
         <UnitName Value="LCL"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="3" Y="11"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit127>
       <Unit128>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\ATSynEdit\atsynedit\atsynedit_adapter_ime_gtk2.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="139"/>
         <CursorPos X="39" Y="170"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="4"/>
       </Unit128>
       <Unit129>
-        <Filename Value="version.inc"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="14" Y="6"/>
-        <UsageCount Value="1"/>
-      </Unit129>
-      <Unit130>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="488"/>
         <CursorPos X="40" Y="501"/>
-        <UsageCount Value="2"/>
-      </Unit130>
-      <Unit131>
+        <UsageCount Value="10"/>
+      </Unit129>
+      <Unit130>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBCustomDataSet.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="561"/>
         <CursorPos X="30" Y="582"/>
-        <UsageCount Value="15"/>
-      </Unit131>
-      <Unit132>
-        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\rtl\objpas\sysutils\sysstrh.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="72"/>
-        <CursorPos X="15" Y="85"/>
-        <UsageCount Value="1"/>
-      </Unit132>
-      <Unit133>
+        <UsageCount Value="13"/>
+      </Unit130>
+      <Unit131>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBBufferedCursors.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2347"/>
-        <CursorPos Y="2361"/>
-        <UsageCount Value="7"/>
-      </Unit133>
-      <Unit134>
+        <CursorPos X="30" Y="2361"/>
+        <UsageCount Value="8"/>
+      </Unit131>
+      <Unit132>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\Rx\rxdb\rxdbgrid.pas"/>
         <UnitName Value="RxDBGrid"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="7512"/>
-        <CursorPos Y="7526"/>
-        <UsageCount Value="1"/>
-      </Unit134>
-      <Unit135>
+        <TopLine Value="4169"/>
+        <CursorPos X="44" Y="4184"/>
+        <UsageCount Value="10"/>
+      </Unit132>
+      <Unit133>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBTable.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="48"/>
         <CursorPos X="55" Y="55"/>
-        <UsageCount Value="9"/>
-      </Unit135>
-      <Unit136>
+        <UsageCount Value="7"/>
+      </Unit133>
+      <Unit134>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\db.pas"/>
         <UnitName Value="DB"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1355"/>
         <CursorPos X="3" Y="1372"/>
-        <UsageCount Value="16"/>
-      </Unit136>
-      <Unit137>
+        <UsageCount Value="14"/>
+      </Unit134>
+      <Unit135>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\dataset.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1082"/>
         <CursorPos X="64" Y="1082"/>
-        <UsageCount Value="15"/>
-      </Unit137>
-      <Unit138>
+        <UsageCount Value="13"/>
+      </Unit135>
+      <Unit136>
         <Filename Value="ui\ibx_design\ibselectsqleditor.pas"/>
         <ComponentName Value="IBSelectSQLEditorForm"/>
         <HasResources Value="True"/>
@@ -1341,9 +1329,9 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="32"/>
         <CursorPos X="5" Y="45"/>
-        <UsageCount Value="21"/>
-      </Unit138>
-      <Unit139>
+        <UsageCount Value="19"/>
+      </Unit136>
+      <Unit137>
         <Filename Value="ui\ibx_design\IBSQLEditFrame.pas"/>
         <ComponentName Value="IBSQLEditFrame"/>
         <HasResources Value="True"/>
@@ -1351,155 +1339,155 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="492"/>
         <CursorPos X="40" Y="500"/>
-        <UsageCount Value="9"/>
-      </Unit139>
-      <Unit140>
+        <UsageCount Value="7"/>
+      </Unit137>
+      <Unit138>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBDatabaseInfo.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="330"/>
         <CursorPos X="31" Y="358"/>
-        <UsageCount Value="6"/>
-      </Unit140>
-      <Unit141>
+        <UsageCount Value="4"/>
+      </Unit138>
+      <Unit139>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBXServices.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="214"/>
         <CursorPos X="13" Y="231"/>
-        <UsageCount Value="8"/>
-      </Unit141>
-      <Unit142>
+        <UsageCount Value="6"/>
+      </Unit139>
+      <Unit140>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\IB.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1263"/>
         <CursorPos X="14" Y="1279"/>
-        <UsageCount Value="13"/>
-      </Unit142>
+        <UsageCount Value="11"/>
+      </Unit140>
     </Units>
     <OtherDefines Count="3">
       <Define0 Value="DEBUG"/>
       <Define1 Value="UseCThreads"/>
       <Define2 Value="WITH_GTK2_IM"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="129" TopLine="112"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5148" TopLine="5141"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="130" TopLine="112"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5149" TopLine="5141"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="129" TopLine="112"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5150" TopLine="5141"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="130" TopLine="112"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5147" Column="36" TopLine="5141"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="129" TopLine="112"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="5148" TopLine="5145"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="130" TopLine="112"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="246" TopLine="235"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="129" TopLine="112"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="247" TopLine="235"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="133" TopLine="112"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="248" TopLine="235"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="134" TopLine="112"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="249" TopLine="235"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="138" TopLine="112"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="250" TopLine="235"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
-        <Caret Line="77" TopLine="60"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="245" Column="36" TopLine="235"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="109" Column="16" TopLine="94"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="692" TopLine="686"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="262" TopLine="250"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="693" TopLine="686"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="263" TopLine="250"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="697" TopLine="686"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="264" TopLine="250"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="692" TopLine="686"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="262" TopLine="250"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="693" TopLine="686"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="263" TopLine="250"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="694" TopLine="686"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\registerdb\reg.pas"/>
-        <Caret Line="264" TopLine="250"/>
+        <Filename Value="utils\fServerSession.pas"/>
+        <Caret Line="531" TopLine="519"/>
       </Position18>
       <Position19>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="457" Column="79" TopLine="469"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="692" TopLine="686"/>
       </Position19>
       <Position20>
         <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="477" TopLine="470"/>
+        <Caret Line="531" TopLine="519"/>
       </Position20>
       <Position21>
         <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="478" TopLine="470"/>
+        <Caret Line="533" TopLine="519"/>
       </Position21>
       <Position22>
         <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="479" TopLine="470"/>
+        <Caret Line="536" TopLine="519"/>
       </Position22>
       <Position23>
         <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="480" TopLine="470"/>
+        <Caret Line="537" TopLine="519"/>
       </Position23>
       <Position24>
-        <Filename Value="utils\fServerSession.pas"/>
-        <Caret Line="472" Column="26" TopLine="461"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="692" TopLine="686"/>
       </Position24>
       <Position25>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="3137" Column="22" TopLine="3134"/>
+        <Filename Value="utils\fServerSession.pas"/>
+        <Caret Line="531" TopLine="519"/>
       </Position25>
       <Position26>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="472" Column="32" TopLine="455"/>
+        <Filename Value="utils\fServerSession.pas"/>
+        <Caret Line="533" TopLine="519"/>
       </Position26>
       <Position27>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1039" Column="53" TopLine="1028"/>
+        <Filename Value="utils\fServerSession.pas"/>
+        <Caret Line="531" TopLine="519"/>
       </Position27>
       <Position28>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1063" Column="20" TopLine="1043"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="692" TopLine="686"/>
       </Position28>
       <Position29>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1060" TopLine="1043"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="221" Column="35" TopLine="238"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\createdb\createdb.pas"/>
-        <Caret Line="50" Column="15" TopLine="33"/>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <Caret Line="694" Column="34" TopLine="685"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -1515,13 +1503,6 @@
         <WatchKind Value="wpkWrite"/>
         <Source Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\firebird\FirebirdOOAPI.pas"/>
         <Line Value="21496"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="common\turbocommon.pas"/>
-        <Line Value="1060"/>
       </Item>
     </BreakPoints>
     <Watches>

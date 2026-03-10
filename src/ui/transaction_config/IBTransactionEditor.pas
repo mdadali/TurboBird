@@ -321,8 +321,8 @@ begin
   if Trim(edtTimeout.Text) <> '' then
     FTransaction.Params.Add('lock_timeout=' + Trim(edtTimeout.Text));
 
-  if cbAutocommit.Checked then
-    FTransaction.Params.Add('autocommit');
+  //if cbAutocommit.Checked then
+    //FTransaction.Params.Add('autocommit');
 end;
 
 procedure TIBTransactionEditorForm.btnOKClick(Sender: TObject);

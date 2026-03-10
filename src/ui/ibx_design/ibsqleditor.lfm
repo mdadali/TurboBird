@@ -1,11 +1,13 @@
 inherited IBSQLEditorForm: TIBSQLEditorForm
-  Left = 791
+  Left = 437
   Height = 555
-  Top = 331
+  Top = 100
   Width = 786
   Caption = 'IBSQL Editor'
   ClientHeight = 555
   ClientWidth = 786
+  OnCreate = FormCreate
+  OnMouseEnter = FormMouseEnter
   OnShow = FormShow
   inherited Button1: TButton
     Left = 586
@@ -93,8 +95,9 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
       end
       inherited ProcedureNames: TIBLookupComboEditBox
         Left = 10
-        Height = 30
+        Height = 32
         Top = 72
+        Style = csDropDownList
       end
       inherited InputProcGrid: TIBDynamicGrid
         Left = 8
@@ -133,7 +136,8 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
         Width = 99
       end
       inherited PackageNames: TIBLookupComboEditBox
-        Height = 30
+        Height = 32
+        Style = csDropDownList
       end
       object SelectProcedure: TLabel[8]
         Left = 10

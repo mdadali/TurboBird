@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 441
+  Left = 435
   Height = 612
-  Top = 288
+  Top = 331
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 588
@@ -8594,7 +8594,7 @@ object fmMain: TfmMain
     end
     object lmNewGen: TMenuItem
       Tag = 12
-      Caption = 'Create New Generator'
+      Caption = 'Create new Sequence'
       ImageIndex = 6
       OnClick = lmNewGenClick
     end
@@ -8604,13 +8604,13 @@ object fmMain: TfmMain
     end
     object lmViewGen: TMenuItem
       Tag = 2
-      Caption = 'View Generator'
+      Caption = 'View Sequence'
       ImageIndex = 6
       OnClick = lmViewGenClick
     end
     object lmSetGen: TMenuItem
       Tag = 2
-      Caption = 'Set Generator Value'
+      Caption = 'Set Sequence Value'
       ImageIndex = 6
       OnClick = lmSetGenClick
     end
@@ -8628,7 +8628,7 @@ object fmMain: TfmMain
     end
     object lmDropGenerator: TMenuItem
       Tag = 2
-      Caption = 'Drop Generator'
+      Caption = 'Drop Sequence'
       ImageIndex = 49
       OnClick = lmDropGeneratorClick
     end

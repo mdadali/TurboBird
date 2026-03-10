@@ -1,9 +1,9 @@
 object fmViewGen: TfmViewGen
-  Left = 383
+  Left = 422
   Height = 104
-  Top = 147
+  Top = 176
   Width = 615
-  Caption = 'fmViewGen'
+  Caption = 'View Sequence'
   ClientHeight = 104
   ClientWidth = 615
   KeyPreview = True
@@ -66,22 +66,22 @@ object fmViewGen: TfmViewGen
     Top = 0
     Width = 615
     Align = alClient
-    ClientHeight = 102
-    ClientWidth = 613
+    ClientHeight = 100
+    ClientWidth = 611
     TabOrder = 0
     object Label1: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 15
-      Width = 65
-      Caption = 'Generator'
+      Width = 66
+      Caption = 'Sequence'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 56
-      Width = 85
+      Width = 93
       Caption = 'Current Value'
       ParentColor = False
     end
@@ -89,7 +89,7 @@ object fmViewGen: TfmViewGen
       Left = 120
       Height = 32
       Top = 8
-      Width = 207
+      Width = 205
       Anchors = [akTop, akLeft, akRight]
       AutoSize = False
       AutoSelect = False

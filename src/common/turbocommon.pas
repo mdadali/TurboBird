@@ -475,10 +475,7 @@ function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: 
 
 function  CloseDB(dbIndex: integer): boolean;
 
-function DeleteDBRegistrationFromFile(const ATitle: string): Boolean;
-//Remove from RegisteredDatabases array!
-procedure UnregisterDatabaseByTitle(const ATitle: string);
-
+function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: string): Boolean;
 
 procedure MarkAllServerDatabasesDeleted(const ServerName: string);
 procedure MarkAllDatabasesDeleted;
@@ -506,7 +503,7 @@ function GetServerNodeByServerName(const AServerName: string): TTreeNode;
 function GetServerListFromTreeView: TStringList;
 function GetServerAndPortListFromTreeView: TStringList;
 
-
+function FindNodeByDBIndex(ADBIndex: Word): TTreeNode;
 function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
 function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
 
@@ -585,6 +582,40 @@ function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
 implementation
 
 uses Reg;
+
+
+function FindNodeByDBIndex(ADBIndex: Word): TTreeNode;
+var
+  i, j: Integer;
+  ServerNode, ChildNode: TTreeNode;
+  NodeInfo: TPNodeInfos;
+begin
+  Result := nil;
+
+  // Level 0 Nodes (Server) durchsuchen
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    ServerNode := MainTreeView.Items[i];
+    if ServerNode.Level <> 0 then
+      Continue; // nur Server Nodes
+
+    // Level 1 Nodes (DB) prüfen
+    ChildNode := ServerNode.getFirstChild;
+    while ChildNode <> nil do
+    begin
+      if Assigned(ChildNode.Data) then
+      begin
+        NodeInfo := TPNodeInfos(ChildNode.Data);
+        if NodeInfo^.dbIndex = ADBIndex then
+        begin
+          Result := ChildNode;
+          Exit;
+        end;
+      end;
+      ChildNode := ChildNode.getNextSibling;
+    end;
+  end;
+end;
 
 function IBXProtocolToString(AProtocol: TProtocol): string;
 begin
@@ -1130,85 +1161,52 @@ begin
   end;
 end;
 
-function DeleteDBRegistrationFromFile(const ATitle: string): Boolean;
+function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: string): Boolean;
 var
   F: file of TRegisteredDatabase;
   Rec: TRegisteredDatabase;
   FileName: string;
-  Found: Boolean;
-  i: Integer;
+  CmpTitle: string;
+  CmpServer: string;
 begin
   Result := False;
   FileName := GetConfigurationDirectory + DatabasesRegFile;
 
-  // Datei prüfen
   if not FileExists(FileName) then
     Exit;
 
+  // Vergleichswerte vorbereiten (nur einmal!)
+  CmpTitle := Trim(ATitle);
+  CmpServer := Trim(AServerName);
+
+  AssignFile(F, FileName);
+  FileMode := 2; // read/write
+
   try
-    AssignFile(F, FileName);
-    FileMode := 2; // read/write
     Reset(F);
 
-    Found := False;
-    i := 0;
-
-    // Durchsuchen aller Datensätze
     while not Eof(F) do
     begin
-      Seek(F, i);
       Read(F, Rec);
 
-      // Vergleich: gleiche Bezeichnung und nicht bereits gelöscht
-      if (not Rec.Deleted) and SameText(Trim(Rec.Title), Trim(ATitle)) then
+      if (not Rec.Deleted) and
+         SameText(Rec.Title, CmpTitle) and
+         SameText(Rec.ServerName, CmpServer) then
       begin
         Rec.Deleted := True;
-        Seek(F, i);
+
+        Seek(F, FilePos(F) - 1);
         Write(F, Rec);
-        Found := True;
-        Break;
+
+        Result := True;
+        Exit;
       end;
-
-      Inc(i);
     end;
 
-    Result := Found;
   finally
-    try
-      CloseFile(F);
-    except
-      // Fehler beim Schließen ignorieren oder loggen
-    end;
+    CloseFile(F);
   end;
 end;
-
-procedure UnregisterDatabaseByTitle(const ATitle: string);
-var
-  i, foundIndex: Integer;
-begin
-  foundIndex := -1;
-
-  // 1. Array nach Title durchsuchen
-  for i := 0 to High(RegisteredDatabases) do
-  begin
-    if SameText(RegisteredDatabases[i].RegRec.Title, ATitle) then
-    begin
-      foundIndex := i;
-      Break;
-    end;
-  end;
-
-  if foundIndex = -1 then Exit; // nicht gefunden
-
-  // 2. Aus Datei löschen
-  DeleteDBRegistrationFromFile(ATitle);
-
-  // 3. Aus Array entfernen
-  for i := foundIndex to High(RegisteredDatabases) - 1 do
-    RegisteredDatabases[i] := RegisteredDatabases[i + 1];
-  SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
-end;
-
 
 procedure MarkAllServerDatabasesDeleted(const ServerName: string);
 var
