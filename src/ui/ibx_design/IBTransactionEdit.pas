@@ -41,17 +41,23 @@ type
   { TIBTransactionEditForm }
 
   TIBTransactionEditForm = class(TForm)
+    btnLoadFromFile: TButton;
+    btnSaveToFile: TButton;
     GroupBox1: TGroupBox;
     Cancelbtn: TButton;
     OKBtn: TButton;
+    OpenDialog1: TOpenDialog;
     rbOtherButton: TRadioButton;
     rbSnapShot: TRadioButton;
     rbReadCommitted: TRadioButton;
     rbReadOnlyTableStability: TRadioButton;
     rbReadWriteTableStability: TRadioButton;
+    SaveDialog1: TSaveDialog;
     TransactionParams: TMemo;
     Panel1: TPanel;
     Label1: TLabel;
+    procedure btnLoadFromFileClick(Sender: TObject);
+    procedure btnSaveToFileClick(Sender: TObject);
     procedure OKBtnClick(Sender: TObject);
     procedure rbSnapShotClick(Sender: TObject);
     procedure rbReadCommittedClick(Sender: TObject);
@@ -215,15 +221,65 @@ begin
       mbOkCancel, 0) <> mrOk then
       Exit;
 
-    Transaction.Commit; // ✔️ statt Rollback
+    Transaction.Commit; //
   end;
 
   ModalResult := mrOk;
 end;
 
+procedure TIBTransactionEditForm.btnLoadFromFileClick(Sender: TObject);
+var
+  SL: TStringList;
+begin
+  if not OpenDialog1.Execute then
+    Exit;
+
+  SL := TStringList.Create;
+  try
+    try
+      SL.LoadFromFile(OpenDialog1.FileName);
+      TransactionParams.Lines.Assign(SL);
+      ParseParams;
+    except
+      on E: Exception do
+        MessageDlg('Fehler beim Laden der Datei: ' + E.Message,
+          mtError, [mbOK], 0);
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure TIBTransactionEditForm.btnSaveToFileClick(Sender: TObject);
+begin
+  if not SaveDialog1.Execute then
+    Exit;
+
+  try
+    TransactionParams.Lines.SaveToFile(SaveDialog1.FileName);
+  except
+    on E: Exception do
+      MessageDlg('Fehler beim Speichern: ' + E.Message,
+        mtError, [mbOK], 0);
+  end;
+end;
+
 procedure TIBTransactionEditForm.FormCreate(Sender: TObject);
 begin
 //  HelpContext := hcDIBTransactionEdit;
+
+  OpenDialog1.InitialDir :=
+      IncludeTrailingPathDelimiter(
+        ExtractFilePath(Application.ExeName)
+      ) + 'data' + PathDelim +
+        'transaction_presets';
+
+  SaveDialog1.InitialDir :=
+      IncludeTrailingPathDelimiter(
+        ExtractFilePath(Application.ExeName)
+      ) + 'data' + PathDelim +
+        'transaction_presets';
+
 end;
 
 procedure TIBTransactionEditForm.HelpBtnClick(Sender: TObject);

@@ -71079,7 +71079,7 @@ object fmReg: TfmReg
       Left = 184
       Height = 22
       Top = 368
-      Width = 122
+      Width = 123
       Caption = 'Save Password'
       TabOrder = 7
     end
@@ -71111,7 +71111,7 @@ object fmReg: TfmReg
       Left = 320
       Height = 22
       Top = 370
-      Width = 149
+      Width = 150
       Caption = 'ConnectDBOnStart'
       TabOrder = 10
       Visible = False
@@ -71163,7 +71163,7 @@ object fmReg: TfmReg
       Left = 144
       Height = 22
       Top = 64
-      Width = 169
+      Width = 170
       Caption = 'Use own client library'
       TabOrder = 3
     end

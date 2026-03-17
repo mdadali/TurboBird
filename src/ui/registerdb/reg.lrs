@@ -96425,14 +96425,14 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +'TEdit'#10'edPassword'#4'Left'#3#184#0#6'Height'#2#30#3'Top'#3'@'#1#5'Width'
   +#3#139#0#8'EchoMode'#7#10'emPassword'#12'PasswordChar'#6#1'-'#8'TabOrder'#2#6
   +#0#0#9'TCheckBox'#14'cxSavePassword'#4'Left'#3#184#0#6'Height'#2#22#3'Top'#3
-  +'p'#1#5'Width'#2'z'#7'Caption'#6#13'Save Password'#8'TabOrder'#2#7#0#0#5'TEd'
+  +'p'#1#5'Width'#2'{'#7'Caption'#6#13'Save Password'#8'TabOrder'#2#7#0#0#5'TEd'
   +'it'#6'edRole'#4'Left'#2'H'#6'Height'#2#30#3'Top'#3'h'#1#5'Width'#2']'#8'Tab'
   +'Order'#2#8#0#0#6'TLabel'#7'Label10'#4'Left'#2#16#6'Height'#2#20#3'Top'#2#8#5
   +'Width'#2'+'#7'Caption'#6#6'Server'#11'ParentColor'#8#0#0#9'TComboBox'#11'cb'
   +'oxServers'#4'Left'#2#16#6'Height'#2' '#3'Top'#2'('#5'Width'#3#152#1#10'Item'
   +'Height'#2#0#5'Style'#7#16'csOwnerDrawFixed'#8'TabOrder'#2#9#0#0#9'TCheckBox'
   +#22'chkBoxConnectDBOnStart'#4'Left'#3'@'#1#6'Height'#2#22#3'Top'#3'r'#1#5'Wi'
-  +'dth'#3#149#0#7'Caption'#6#16'ConnectDBOnStart'#8'TabOrder'#2#10#7'Visible'#8
+  +'dth'#3#150#0#7'Caption'#6#16'ConnectDBOnStart'#8'TabOrder'#2#10#7'Visible'#8
   +#0#0#0#9'TGroupBox'#9'GroupBox2'#4'Left'#2#16#6'Height'#3#128#0#3'Top'#3#240
   +#1#5'Width'#3#224#1#7'Caption'#6#23'Firebird Client library'#12'ClientHeight'
   +#2'j'#11'ClientWidth'#3#220#1#8'TabOrder'#2#2#0#7'TButton'#15'btnBrowseClien'
@@ -96443,7 +96443,7 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#3'Top'#2#16#5'Width'#3#152#1#8'ReadOnly'#9#8'TabOrder'#2#2#0#0#6'TLabel'#6
   +'Label8'#4'Left'#2#8#6'Height'#2#20#3'Top'#2'@'#5'Width'#2#27#7'Caption'#6#4
   +'Port'#11'ParentColor'#8#0#0#9'TCheckBox'#30'chkboxOverwriteServerClientLib'
-  +#4'Left'#3#144#0#6'Height'#2#22#3'Top'#2'@'#5'Width'#3#169#0#7'Caption'#6#22
+  +#4'Left'#3#144#0#6'Height'#2#22#3'Top'#2'@'#5'Width'#3#170#0#7'Caption'#6#22
   +'Use own client library'#8'TabOrder'#2#3#0#0#0#11'TOpenDialog'#11'OpenDialog'
   +'1'#10'DefaultExt'#6#4'.fdb'#6'Filter'#6'%Firebird Database|*.fdb|All Files|'
   +'*.*'#4'Left'#3'('#2#3'Top'#3#176#0#0#0#11'TOpenDialog'#16'OpenDialogClient'

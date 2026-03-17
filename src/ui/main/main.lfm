@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 827
+  Left = 456
   Height = 612
-  Top = 110
+  Top = 98
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 586
@@ -6442,6 +6442,10 @@ object fmMain: TfmMain
         Caption = 'CSV Editor'
         OnClick = mnCSVEditorClick
       end
+      object mnBulkClone: TMenuItem
+        Caption = 'Bulk Clone'
+        OnClick = mnBulkCloneClick
+      end
     end
   end
   object ImageList1: TImageList
@@ -8498,11 +8502,6 @@ object fmMain: TfmMain
         891E45B8BE2B24D7E0451FDBE44E20D3DB340BE6F00A1FD1D800
       }
       OnClick = lmNewTableClick
-    end
-    object lmBulkCloneTable: TMenuItem
-      Tag = 11
-      Caption = 'Bulk Clone...'
-      OnClick = lmBulkCloneTableClick
     end
     object lmTableManage: TMenuItem
       Tag = 1

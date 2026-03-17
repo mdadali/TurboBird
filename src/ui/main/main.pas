@@ -123,7 +123,7 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
-    lmBulkCloneTable: TMenuItem;
+    mnBulkClone: TMenuItem;
     mnCSVEditor: TMenuItem;
     mnTools: TMenuItem;
     pnlLeft: TPanel;
@@ -319,7 +319,6 @@ type
     procedure lmEditFieldClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
     procedure lmEditTableDataNewClick(Sender: TObject);
-    procedure lmBulkCloneTableClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -396,6 +395,7 @@ type
     procedure lmViewUDFClick(Sender: TObject);
     procedure lmDropTableClick(Sender: TObject);
     procedure lmRecalculateStatisticsClick(Sender: TObject);
+    procedure mnBulkCloneClick(Sender: TObject);
     procedure mnCSVEditorClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
     procedure mnExitClick(Sender: TObject);
@@ -518,6 +518,8 @@ type
 var
   fmMain: TfmMain;
 
+  DefaultTransactionFile: string;
+
   FClickedTabIndex: Integer;
   NoDragTab: Integer;  // -1 = no exclusion, otherwise excluded tab index
   FExcludeTabs: array of Integer; // list of excluded tab indexes
@@ -542,6 +544,12 @@ procedure TfmMain.FormCreate(Sender: TObject);
 var htmlPath: string;
 begin
   turbocommon.MainTreeView := tvMain;
+
+  DefaultTransactionFile :=
+      IncludeTrailingPathDelimiter(
+        ExtractFilePath(Application.ExeName)
+      ) + 'data' + PathDelim +
+        'transaction_presets' +  PathDelim + DefTxFileName;   ;
 
   {$IFNDEF DEBUG}
   // Do not log to debug server if built as release instead of debug
@@ -2924,16 +2932,6 @@ begin
   ATableName := GetClearNodeText(ATableName);
   EditWindow.Init(NodeInfos, dbIndex, ATableName);
   EditWindow.Show;
-end;
-
-procedure TfmMain.lmBulkCloneTableClick(Sender: TObject);
-var frmBulkClone: TfrmBulkClone;
-    dbIndex: integer;
-begin
-  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-  frmBulkClone := TfrmBulkClone.Create(Application);
-  frmBulkClone.Init(nil);
-  frmBulkClone.ShowModal;
 end;
 
 procedure TfmMain.ExtractTableMetaData(Quoted: boolean);
@@ -7240,6 +7238,16 @@ begin
     ShowMessage('Error recalculating index statistics: '+Message);
 end;
 
+procedure TfmMain.mnBulkCloneClick(Sender: TObject);
+var frmBulkClone: TfrmBulkClone;
+    dbIndex: integer;
+begin
+  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+  frmBulkClone := TfrmBulkClone.Create(Application);
+  frmBulkClone.Init(nil);
+  frmBulkClone.ShowModal;
+end;
+
 procedure TfmMain.mnCSVEditorClick(Sender: TObject);
 var frmCSVEditor: TfrmCSVEditor;
 begin
@@ -9033,7 +9041,14 @@ begin
             IBTransaction:= TIBTransaction.Create(nil);
             IBTransaction.DefaultDatabase := IBDatabase;
             IBDatabase.DefaultTransaction := IBTransaction;
-            IBTransaction.Params.Text :=  RegRec.TxConfig;
+
+            if RegRec.TxConfig <> '' then
+              IBTransaction.Params.Text :=  RegRec.TxConfig
+            else begin
+              IBTransaction.Params.LoadFromFile(DefaultTransactionFile);
+              RegRec.TxConfig := IBTransaction.Params.Text;
+            end;
+
 
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;
