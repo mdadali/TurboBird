@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 526
+  Left = 827
   Height = 612
-  Top = 87
+  Top = 110
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 588
+  ClientHeight = 586
   ClientWidth = 906
   Color = clForm
   DragMode = dmAutomatic
@@ -5582,7 +5582,7 @@ object fmMain: TfmMain
   WindowState = wsMaximized
   object Splitter1: TSplitter
     Left = 360
-    Height = 511
+    Height = 509
     Top = 34
     Width = 14
     Beveled = True
@@ -5590,7 +5590,7 @@ object fmMain: TfmMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 24
-    Top = 564
+    Top = 562
     Width = 906
     Panels = <    
       item
@@ -5680,7 +5680,7 @@ object fmMain: TfmMain
   end
   object PageControl1: TPageControl
     Left = 377
-    Height = 504
+    Height = 502
     Top = 37
     Width = 526
     ActivePage = tsMain
@@ -5706,8 +5706,8 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 466
-      ClientWidth = 520
+      ClientHeight = 468
+      ClientWidth = 522
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
@@ -5715,7 +5715,7 @@ object fmMain: TfmMain
         Left = 704
         Height = 82
         Top = 64
-        Width = 194
+        Width = 196
         Anchors = [akTop, akLeft, akRight]
         Picture.Data = {
           0A544A706567496D6167655F420000FFD8FFE000104A46494600010101006000
@@ -6254,9 +6254,9 @@ object fmMain: TfmMain
       end
       object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 466
+        Height = 468
         Top = 0
-        Width = 520
+        Width = 522
         BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
@@ -6274,7 +6274,7 @@ object fmMain: TfmMain
   object Panel1: TPanel
     Left = 0
     Height = 19
-    Top = 545
+    Top = 543
     Width = 906
     Align = alBottom
     ClientHeight = 19
@@ -6283,7 +6283,7 @@ object fmMain: TfmMain
     TabOrder = 4
     object Memo1: TMemo
       Left = 1
-      Height = 35
+      Height = 32
       Top = 1
       Width = 904
       Align = alClient
@@ -6292,7 +6292,7 @@ object fmMain: TfmMain
   end
   object Button1: TButton
     Left = 0
-    Height = 511
+    Height = 509
     Top = 34
     Width = 27
     Align = alLeft
@@ -6302,17 +6302,17 @@ object fmMain: TfmMain
   end
   object pnlLeft: TPanel
     Left = 27
-    Height = 511
+    Height = 509
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 511
+    ClientHeight = 509
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 6
     object tvMain: TTreeView
       Left = 1
-      Height = 454
+      Height = 452
       Top = 56
       Width = 331
       Align = alClient
@@ -6360,9 +6360,9 @@ object fmMain: TfmMain
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
-        Height = 21
+        Height = 22
         Top = 5
-        Width = 21
+        Width = 22
         Checked = True
         OnChange = CheckBoxFilterChange
         State = cbChecked
@@ -6434,6 +6434,13 @@ object fmMain: TfmMain
         Caption = 'About'
         ImageIndex = 113
         OnClick = mnAboutClick
+      end
+    end
+    object mnTools: TMenuItem
+      Caption = 'BuildinTools'
+      object mnCSVEditor: TMenuItem
+        Caption = 'CSV Editor'
+        OnClick = mnCSVEditorClick
       end
     end
   end
@@ -8492,10 +8499,10 @@ object fmMain: TfmMain
       }
       OnClick = lmNewTableClick
     end
-    object lmExternalTable: TMenuItem
+    object lmBulkCloneTable: TMenuItem
       Tag = 11
-      Caption = 'External Table...'
-      OnClick = lmExternalTableClick
+      Caption = 'Bulk Clone...'
+      OnClick = lmBulkCloneTableClick
     end
     object lmTableManage: TMenuItem
       Tag = 1

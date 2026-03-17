@@ -165,7 +165,8 @@ var
 begin
   if (cbUsers.Text <> '') and (cbTables.Text <> '') then
   begin;
-    Permissions := dmSysTables.GetObjectUserPermission(FDBIndex, cbTables.Text, cbUsers.Text, ObjType);
+    Permissions := dmSysTables.GetObjectUserPermission(FDBIndex,
+                       MakeObjectNameQuoted(cbTables.Text), MakeCaseSensitiveAuto(cbUsers.Text), ObjType);
     cxAll.Checked:= False;
     cxAllGrant.Checked:= False;
 
@@ -311,7 +312,7 @@ begin
     Command:= 'revoke ';
   end;
 
-  Line:= Command +  OptionName + ' on ' + ATableName + ToFrom + cbUsers.Text;
+  Line:= Command +  OptionName + ' on ' + ATableName + ToFrom + MakeCaseSensitiveAuto(cbUsers.Text);
   if Grant and WithGrant then
       Line:= Line + ' with grant option';
   Line:= Line + ';';
@@ -319,19 +320,19 @@ begin
   if (Grant) and (not WithGrant) then
   begin
     if FOldTableSelectGrant and not cxSelectGrant.Checked and (LowerCase(OptionName) = 'select') then
-      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR SELECT ON ' + ATableName + ' FROM ' + cbUsers.Text + ';';
+      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR SELECT ON ' + ATableName + ' FROM ' + MakeCaseSensitiveAuto(cbUsers.Text) + ';';
 
     if FOldTableUpdateGrant and not cxUpdateGrant.Checked and (LowerCase(OptionName) = 'update') then
-      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR Update ON ' + ATableName + ' FROM ' + cbUsers.Text + ';';
+      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR Update ON ' + ATableName + ' FROM ' + MakeCaseSensitiveAuto(cbUsers.Text) + ';';
 
     if FOldTableReferencesGrant and not cxReferencesGrant.Checked and (LowerCase(OptionName) = 'references') then
-      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR References ON ' + ATableName + ' FROM ' + cbUsers.Text + ';';
+      Line:= Line + LineEnding + 'REVOKE GRANT OPTION FOR References ON ' + ATableName + ' FROM ' + MakeCaseSensitiveAuto(cbUsers.Text) + ';';
 
     if FOldTableDeleteGrant and not cxDeleteGrant.Checked and (LowerCase(OptionName) = 'delete') then
-      Line:= Line +LineEnding +  'REVOKE GRANT OPTION FOR Delete ON ' + ATableName + ' FROM ' + cbUsers.Text + ';';
+      Line:= Line +LineEnding +  'REVOKE GRANT OPTION FOR Delete ON ' + ATableName + ' FROM ' + MakeCaseSensitiveAuto(cbUsers.Text) + ';';
 
     if FOldTableInsertGrant and not cxInsertGrant.Checked and (LowerCase(OptionName) = 'insert') then
-      Line:= Line  +LineEnding +  'REVOKE GRANT OPTION FOR Insert ON ' + ATableName + ' FROM ' + cbUsers.Text + ';';
+      Line:= Line  +LineEnding +  'REVOKE GRANT OPTION FOR Insert ON ' + ATableName + ' FROM ' + MakeCaseSensitiveAuto(cbUsers.Text) + ';';
   end;
 
   List.Add(Line);
@@ -346,17 +347,17 @@ begin
     List:= TStringList.Create;
     try
       if cxAll.Checked then
-        ComposeTablePermissionSQL(cbTables.Text, 'All', cxAll.Checked, cxAllGrant.Checked, List)
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'All', cxAll.Checked, cxAllGrant.Checked, List)
       else
       begin
-        ComposeTablePermissionSQL(cbTables.Text, 'Select', cxSelect.Checked, cxSelectGrant.Checked, List);
-        ComposeTablePermissionSQL(cbTables.Text, 'Insert', cxInsert.Checked, cxInsertGrant.Checked, List);
-        ComposeTablePermissionSQL(cbTables.Text, 'Update', cxUpdate.Checked, cxUpdateGrant.Checked, List);
-        ComposeTablePermissionSQL(cbTables.Text, 'Delete', cxDelete.Checked, cxDeleteGrant.Checked, List);
-        ComposeTablePermissionSQL(cbTables.Text, 'References', cxReferences.Checked, cxReferencesGrant.Checked, List);
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'Select', cxSelect.Checked, cxSelectGrant.Checked, List);
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'Insert', cxInsert.Checked, cxInsertGrant.Checked, List);
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'Update', cxUpdate.Checked, cxUpdateGrant.Checked, List);
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'Delete', cxDelete.Checked, cxDeleteGrant.Checked, List);
+        ComposeTablePermissionSQL(MakeObjectNameQuoted(cbTables.Text), 'References', cxReferences.Checked, cxReferencesGrant.Checked, List);
       end;
 
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit Permission for: ' + cbTables.Text, List.Text, FOnCommitProcedure);
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit Permission for: ' + MakeObjectNameQuoted(cbTables.Text), List.Text, FOnCommitProcedure);
     finally
       List.Free;
     end;
@@ -590,10 +591,10 @@ begin
   cbUsers.ItemIndex := cbUsers.Items.IndexOf(AUserName);
   cbTables.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otTables, Count);
   cbViews.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otViews, Count);
-  cbTables.Text:= ATableName;
+  cbTables.Text := MakeObjectNameQuoted(ATableName);
+
   cbProcUsers.ItemIndex := cbProcUsers.Items.IndexOf(AUserName);
   cbViewsUsers.ItemIndex := cbViewsUsers.Items.IndexOf(AUserName);
-
 
   // Update table permissions
   UpdatePermissions;

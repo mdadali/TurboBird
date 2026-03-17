@@ -1,0 +1,120 @@
+The InterBase On-Disk Structure - by Conference Speaker
+Abstract: Understanding how InterBase stores data offers some hints for efficient database design. Beyond that, it may explain why there is no simple answer to a simple question like "How big is my database going to be".
+This is the technical paper from a talk given at the 10th Annual Inprise & Borland Developer's Conference
+By Ann Ward Harrison
+
+InterBase Software--then known as Groton Database Systems--was born in Ann Harrison's spare room. Ann was the first junior programmer for the company and worked on nearly every component between version 0 and 3.3. For seven years, she endured database architecture discussions over dinner, breakfast, lunch, in the car, and often at work. Since InterBase left her to move to California, she's kept in touch, most recently through the InterBase listserve. Ann lives with her husband and three Siamese cats in Manchester-by-the-Sea, Massachusetts.
+
+Overview
+
+Understanding how InterBase stores data offers some hints for efficient database design. Beyond that, it may explain why there is no simple answer to a simple question like "How big is my database going to be".
+
+This presentation has been prepared from memory, without access to sources. For that reason, it may include some errors and omit some significant new features. The author has no connection with Inprise or borland.com, does not pretend to speak for them, and has no insight into their plans.
+
+Page structure
+
+An InterBase database consists of one or more file system files. Each file is made up of fixed length pages; every file in a database has the same page size. Regardless of what a page contains, its length is the same as every other page in the database. Each page has a small amount of fixed information at the beginning that identifies the page type. Early versions also had a checksum, but the computation of the checksum was expensive for large page sizes, so it was dropped, although space for it may remain.
+
+The page types include:
+
+Header page
+Pointer page
+Transaction inventory page
+Space inventory page
+Generator page
+Index root page
+Index page
+Data page
+
+Header page
+
+The header page is the first block of the first file in the database. When InterBase connects to a database, it reads the first 1024 bytes of the file. The header page layout puts critical information about the database, including the On Disk Structure (ODS) version number and the page size in the first 1024 bytes.
+
+Once InterBase has established that the file is an InterBase database and that the ODS version is compatible with the server software, it re-reads the header page using the correct page size and collects the other information on the page. That information includes the names and page ranges of secondary database files, the next available transaction and the oldest interesting transaction.
+
+The next step is to find the core system tables and start building the internal image of the database.
+
+Pointer pages
+
+The header page also contains the location of the first pointer page for the rdb$pages table. Rdb$pages is the system table that allows InterBase to locate critical pages, including the data pages for tables. The system reads the first pointer page and uses it to locate the first data page of rdb$pages. From there it can find the data and index pages of the other system tables.
+
+A pointer page has a simple header that includes the page type and the page number of the next pointer page for this table. The rest of the page is filled with an array of four byte numbers which are the page numbers of the data pages that make up that particular table. There is an ordered collection of pointer pages for every table. The first two parts of the db_key of an InterBase row are the sequence number of the pointer page and the offset on the pointer page which identify the data page on which the row resides.
+
+Doubling the page size more than doubles the number of page numbers that a pointer page can hold.
+
+Transaction inventory page
+
+The rdb$pages relation also tracks page types other than data pages, including the transaction inventory pages (TIPs). Like the pointer pages, the transaction inventory pages consist of a simple header that includes the page type and the page number of the next TIP. The remainder of the page is an array of two bit entities that correspond to the states of transactions in the system. A zero indicates that the transaction has not been started, is active, or has died without committing or rolling back. A one indicates that the transaction has committed (or is it rolled back?). A two indicate that the transaction has rolled back (or is that committed?  it makes very little difference). A three indicates that the transaction is in "limbo", the indeterminate state that exists in the middle of a two-phase commit.
+
+To find the state of a transaction, InterBase uses the transaction id as an index into the array of transactions and looks at the state of the matching bytes. The algorithm is more complex because it factors in page headers. If one transaction checks on the state of another and realizes that the other is marked as active (0) but is in fact dead  transaction death was checked through the lock table  the first transaction changes the others state from active to rolled back.
+
+Space inventory page
+
+The last of the "housekeeping" pages is the space inventory page. Space inventory pages indicate whether a page is allocated, and if allocated, whether or not it is full, or almost full.
+
+If I remember correctly, the next page after the header page is a space inventory page. Like all pages, the space inventory page starts with a header that indicates the page type. The rest of the page is an array of bit clusters that correspond to pages in the database. Every page, regardless of type, is included in a space inventory page (except the header page?). Space inventory pages do not include a pointer to the next space inventory page, nor are they listed in the rdb$pages relation. They occur at fixed intervals, so InterBase computes the location of the next one from the page size of the database and the length of the header.
+
+When a page is added to a table or index, InterBase changes its state on the space inventory page. The "orphan page" error occurs when the server stops in the middle of allocating a new page. The space inventory page is written out, marking the page as allocated, but the new page does not get written, leaving it an "orphan".
+
+
+Generator page
+
+Generator pages are the last of the boring pages. A generator page has a header and an array of four byte entities that represent the state of generators. The generator id is an index into that array  again mediated by page numbers. Rdb$pages lists generator pages.
+
+Index root page
+
+Every table, including those without any indexes, has an index root page. The index root page identifies the top of each index defined for that table. If memory serves  and sometimes it doesnt  the description of the index key is read from rdb$indices and rdb$index_segments. The entry on the index root page includes the selectivity of the index.
+
+In the first versions of InterBase, all index descriptions for a table had to fit on a single index root page. That limitation may have been lifted. While it was in effect, you could put more indexes on tables if you used a larger page size.
+
+The internal structure of the index root page must not be very memorable, because I dont remember it at all.
+
+Index pages
+
+The header of an index page includes the page type and the page number of the next page at the same level, so one can traverse a level from left to right without bouncing up to the next higher level. Index pages are also called buckets, for reasons that no one remembers.
+
+Indexes are called tree-structured, although if theyre trees, theyre upside down, with the root at the top and the leaves at the bottom. The index root page points to the top page of the index. It contains entries that point to the next level of index pages. Entries on those pages point to still lower pages. Within a level, each page points to the next page to the right. Because of the requirement for careful write, there are no equivalent pointers going from right to left.
+
+When an index page fills, it splits, leaving half the entries on the old page and moving half to the new page. That algorithm has interesting behavior characteristics depending on the order of data being entered into the index, but its as good a guess as any. A pointer to the new page is added to the next page up the tree, the page that formerly pointed to the page that split. If adding an entry to that page causes it to split, that split is also propagated up. If the page at the top of the tree splits, it creates a new top level node and changes the index root page to point to the new top of the tree.
+
+At the bottom level, index entries consist of a prefix, a key, and a row number. At upper levels, they consist of a prefix, a key, and the page number of the page that starts with that key value. If a page starts with the same value as its predecessor, the value moved to the next level up is the first non-duplicate value. If the whole page is full of duplicates, it is not included in the upper levels.
+
+Dates and numbers are manipulated into a format that sorts bytewise from left to right. All numbers in a key are represented as double precision floating point. The leading length indicator is stripped from varchar values. If a key column is defined with a character type that does not sort correctly bytewise, it is reworked to a format that does. That process can add to the length of the key.
+
+The key values stored are compressed. Any character string that ends in trailing spaces has its spaces removed. Theres a special sub-type of character for byte strings  columns defined as character by intended to hold arbitrary binary value for which trailing "blanks" are significant values (0x20) and should not be suppressed. Because the segments of a key are variable length, pad bytes are added to distinguish the different segments.
+
+The most import compression is prefix compression. Within an index page, the first entry appears with only suffix compression. Subsequent entries omit the part of the key that duplicates the preceding key value. The header includes the number of bytes dropped from the beginning of the key. Thus a string of keys like this:
+
+aaaa aaab aabc aabd abcd bcde bcde
+
+would be stored like this:
+
+0 aaaa 3 b 2 bc 3 d 1 bcd 0 bcde 4
+
+By the time a column value has been transformed into an index key, it is a string of bytes that sort in the desired order, so the compression is simple.
+
+Data pages
+
+Data pages contain data: current rows, fragmented rows, fragments, back versions, deltas, blobs, and blob related structures. A data page header contains the page type, the relation id, and the page number of the next page in the table, among other things. Unlike other pages, data pages have a significant structure at the bottom, called the row index. The last part of the db_key of a row is an offset in the array of row indexes at the bottom of the page. That index contains the actual location on page and the length of the stored row.
+
+Rows are stored from the end of the header toward the bottom of the page. Index entries are stored from the bottom up. When the two meet, the page is full. When space is reserved (the default mode), a page will be filled to a certain point, leaving room for new versions to be created on the same page.
+
+The index must contain the length of the stored row, even though all rows on page are from the same table, and thus, in theory, the same length. The reason is that rows are compressed before being stored. The compression is a very simple run-length encoding, designed to catch the common case of null columns and trailing spaces.
+
+The index contains the offset so the row can move around on page without affecting its primary identity  its db_key. When InterBase discovers that a page has been fragmented because some rows have been removed, it slides all the remaining data together to make a single large space rather than a bunch of small fragments. This is a normal part of the database housekeeping.
+
+And the data row itself, what does it look like? First, theres a fixed length header portion, which includes the transaction id of the transaction that created the row version, and the format version for this row. If there is an older version, the header contains a pointer to it. The header also identifies the row type: a normal row, a fragmented row, a fragment, or a blob. Small blobs are often stored on page with the row that they belong to. If the row is fragmented, the header is extended with a fragment pointer.
+
+The final bit of housekeeping added to the row is a variable length array of bits (allocated eight at a time) that represent the null flags for the columns in the row.
+
+Finally, the data appears. Columns appear in order by the rdb$field_id value in the rdb$relation_fields row that describes them. If the order defined by rdb$position value is different, a higher level mechanism rearranges them in the desired order. A higher level function will also look at the row format version and use it to find the appropriate format in rdb$formats. All rows will be translated into the most recent format while being moved from the page to the record cache. Unless the row is updated, it will not be rewritten, even if its format is old.
+
+If the row is a back version, its primary version will contain a flag that indicates whether or not it is a delta. A delta is a set of differences that can be applied to the primary row to create its back version. Its format is much like run length encoding, with bytes indicating the number of replacement characters and then the number of retained characters.
+
+Rows are not fragmented when stored unless the compressed data is longer than a page. When a row is modified, its compressed length can increase, and if there is not room on page for the larger row, it will be fragmented. Fragmentation is a significant performance issue, because reading a fragmented row requires fetching at least two pages. Writing a fragmented row may require four or more page writes because the "careful write" strategy requires that specific changes to pages be written in a specific order.
+
+And what about blobs? That is another large topic and I am not going to address it except to say that blob pages are a special subset of data pages that are not included in the pointer page. A blob that does not fit on page with its row will be stored by itself on one or more blob pages. No effort is made to use space left over on a blob page.
+
+Summary
+
+Those are the page types and the principal data structures stored in an InterBase database. Now that you know all about them, can you tell me how much space your 50,000-row table will take if it includes two indexes and no blobs?

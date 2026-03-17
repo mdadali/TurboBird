@@ -224,7 +224,7 @@ type
   TTransactionConfigRecord = packed record
     Isolation: Byte;
     Flags: TTxFlags;
-    LockTimeout: Integer;
+    LockTimeout: string[6];
     TxName: string[50];
   end;
 
@@ -251,7 +251,7 @@ type
 
     IsEmbedded: boolean;
 
-    TxConfig: TTransactionConfigRecord;
+    TxConfig: string[255];
 
     Reserved: array [0 .. 40] of Byte;
   end;
@@ -409,6 +409,7 @@ var
     MainTreeViewFontStyle: TFontStyles;
     MainTreeViewFontSize: word;
     MainTreeViewFontColor: TColor;
+    AutoFilter: boolean;
 
     //QueryWindow
     QWShowNavigator: boolean;
@@ -423,23 +424,31 @@ var
 
 
     //Transaction Defaults aus INI ====
-      DefTxIsolation: Byte;           // 0=read_committed,1=read_committed+rec_version,2=concurrency,3=consistency
-      DefTxFlags: TTxFlags;           // txReadOnly, txWait, txRecVersion, txAutoCommit, txReadConsistency
-      DefTxLockTimeout: Integer;      // ms
-      DefTxName: string[50];          // optionaler Label / Alias
+    DefTxIsolation: Byte;           // 0=read_committed,1=read_committed+rec_version,2=concurrency,3=consistency
+    DefTxFlags: TTxFlags;           // txReadOnly, txWait, txRecVersion, txAutoCommit, txReadConsistency
+    DefTxLockTimeout: string;      // ms
+    DefTxName: string[50];          // optionaler Label / Alias
 
 
-      //end-Ini.File////////////////////////////////////////////////////////////////
+    //BulkExport
+    DefaultBatchSize: integer;
+
+    //CSV Editor
+    CSVDefaultFieldLength: integer;
+    CSVDelimiter: char;
+    CSVLineEnding: string;
+    CSVQuoteChar: char;
+    CSVFirstLineAsFieldNames,
+    CSVIgnoreOuterWhitespace,
+    CSVQuoteOuterWhitespace: boolean;
+
+
+    //end-Ini.File////////////////////////////////////////////////////////////////
 
 
 
 function IBXProtocolToString(AProtocol: TProtocol): string;
 function StringToIBXProtocol(const AValue: string): TProtocol;
-
-//TransactionConfig
-procedure ExtractTransactionConfig(Tx: TIBTransaction; out Config: TTransactionConfigRecord);
-procedure ApplyTransactionConfig(const Config: TTransactionConfigRecord; Tx: TIBTransaction);
-
 
 function IsFilterScopeNode(ANode: TTreeNode): Boolean;
 function MatchesFilter(const AText, AFilter: string): Boolean;
@@ -480,6 +489,8 @@ function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: s
 procedure MarkAllServerDatabasesDeleted(const ServerName: string);
 procedure MarkAllDatabasesDeleted;
 procedure RemoveDeletedDBRegistrationsFromFile;
+
+function GetDBRecByServerAndDBName(const AServerName, ADBName: string): TDatabaseRec;
 
 function IsValidPortNr(AStr: string): boolean;
 function ServerNameContainPortNr(AServerName: string): boolean;
@@ -663,126 +674,6 @@ begin
   for i := 0 to P.Count - 1 do
     if SameText(Trim(P[i]), S) then
       Exit(True);
-end;
-
-procedure ExtractTransactionConfig(
-  Tx: TIBTransaction;
-  out Config: TTransactionConfigRecord);
-var
-  P: TStrings;
-begin
-  FillChar(Config, SizeOf(Config), 0);
-
-  if Tx = nil then
-    Exit;
-
-  P := Tx.Params;
-
-  { Isolation }
-
-  if HasParam(P,'consistency') then
-    Config.Isolation := 3
-  else
-  if HasParam(P,'concurrency') then
-    Config.Isolation := 2
-  else
-  if HasParam(P,'read_committed') then
-    Config.Isolation := 1
-  else
-    Config.Isolation := 0;
-
-  { Access }
-
-  if HasParam(P,'read') then
-    Include(Config.Flags, txReadOnly);
-
-  { Wait }
-
-  if HasParam(P,'wait') then
-    Include(Config.Flags, txWait);
-
-  { Record Version }
-
-  if HasParam(P,'rec_version') then
-    Include(Config.Flags, txRecVersion);
-
-  { Autocommit }
-
-  if HasParam(P,'autocommit') then
-    Include(Config.Flags, txAutoCommit);
-
-  { Firebird 4 }
-
-  if HasParam(P,'read_consistency') then
-    Include(Config.Flags, txReadConsistency);
-
-  { Lock Timeout }
-
-  Config.LockTimeout :=
-    StrToIntDef(P.Values['lock_timeout'],0);
-
-end;
-
-procedure ApplyTransactionConfig(
-  const Config: TTransactionConfigRecord;
-  Tx: TIBTransaction);
-var
-  P: TStrings;
-begin
-  if Tx = nil then
-    Exit;
-
-  if Tx.Active then
-    Tx.Commit;
-
-  P := Tx.Params;
-  P.Clear;
-
-  { Isolation }
-
-  case Config.Isolation of
-    0,1: P.Add('read_committed');
-    2: P.Add('concurrency');
-    3: P.Add('consistency');
-  else
-    P.Add('read_committed');
-  end;
-
-  { Record Version }
-
-  if txRecVersion in Config.Flags then
-    P.Add('rec_version')
-  else
-    P.Add('no_rec_version');
-
-  { Access }
-
-  if txReadOnly in Config.Flags then
-    P.Add('read')
-  else
-    P.Add('write');
-
-  { Wait }
-
-  if txWait in Config.Flags then
-    P.Add('wait')
-  else
-    P.Add('nowait');
-
-  { Autocommit }
-
-  if txAutoCommit in Config.Flags then
-    P.Add('autocommit');
-
-  { Firebird 4 }
-
-  if txReadConsistency in Config.Flags then
-    P.Add('read_consistency');
-
-  { Lock Timeout }
-
-  if Config.LockTimeout > 0 then
-    P.Add('lock_timeout=' + IntToStr(Config.LockTimeout));
 end;
 
 //TreeView Filter
@@ -1359,6 +1250,23 @@ begin
   end;
 end;
 
+function GetDBRecByServerAndDBName(const AServerName, ADBName: string): TDatabaseRec;
+var
+  i: Integer;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if (RegisteredDatabases[i].RegRec.ServerName = AServerName) and
+       (RegisteredDatabases[i].RegRec.Title = ADBName) then
+    begin
+      Result := RegisteredDatabases[i];
+      Exit;
+    end;
+  end;
+end;
+
 procedure SetupTransaction(DBRec: TDatabaseRec; TRRec: TTransactionConfigRecord);
 begin
   with DBRec do
@@ -1849,6 +1757,7 @@ begin
 end;
 
 procedure ReadIniFile;
+var TempStr: string;
 begin
   Language  := fIniFile.ReadString('UI',  'Language', 'eng');
   InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
@@ -1903,6 +1812,7 @@ begin
   MainTreeViewFontStyle       :=  StrToFontStyles(fIniFile.Readstring('MainTreeView',  'FontStyle', 'fsNormal'));
   MainTreeViewFontSize        :=  fIniFile.ReadInteger('MainTreeView',  'FontSize', 14);
   MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  AutoFilter                  :=  fIniFile.ReadBool('MainTreeView',  'AutoFilter', false);
 
   //QueryWindow
   QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
@@ -1914,30 +1824,61 @@ begin
 
   //TransactionConfig-Defaults
   DefTxFlags := [];
-  DefTxIsolation := fIniFile.ReadInteger('TransactionDefaults','Isolation',1);
+  // TransactionConfig-Defaults
+  DefTxFlags := [];
 
-  if fIniFile.ReadBool('TransactionDefaults','ReadOnly',False) then
+  DefTxIsolation := fIniFile.ReadInteger('TransactionDefaults','Isolation',1);
+  // 1 = ReadCommitted (empfohlen)
+
+  if fIniFile.ReadBool('TransactionDefaults','ReadOnly', False) then
     Include(DefTxFlags, txReadOnly);
 
-  if fIniFile.ReadBool('TransactionDefaults','Wait',True) then
+  if fIniFile.ReadBool('TransactionDefaults','Wait', True) then
     Include(DefTxFlags, txWait);
 
-  if fIniFile.ReadBool('TransactionDefaults','RecVersion',True) then
+  if fIniFile.ReadBool('TransactionDefaults','RecVersion', True) then
     Include(DefTxFlags, txRecVersion);
 
-  if fIniFile.ReadBool('TransactionDefaults','AutoCommit',False) then
+  if fIniFile.ReadBool('TransactionDefaults','AutoCommit', False) then
     Include(DefTxFlags, txAutoCommit);
 
-  if fIniFile.ReadBool('TransactionDefaults','ReadConsistency',False) then
+  if fIniFile.ReadBool('TransactionDefaults','ReadConsistency', True) then
     Include(DefTxFlags, txReadConsistency);
 
-  DefTxLockTimeout := fIniFile.ReadInteger('TransactionDefaults','LockTimeout',0);
+  DefTxLockTimeout := fIniFile.ReadString('TransactionDefaults','LockTimeout', '5000');
 
   DefTxName := fIniFile.ReadString('TransactionDefaults','TxName','Default');
 
+
+  //BulkExport
+  DefaultBatchSize := fIniFile.ReadInteger('BulkExport','DefaultBatchSize', 500000);
+
+  // CSV Editor
+  CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
+  CSVDelimiter := TempStr[1];
+
+  {TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','CRLF');
+
+  case UpperCase(TempStr) of
+    'CRLF': CSVLineEnding := #13#10;
+    'LF':   CSVLineEnding := #10;
+    'CR':   CSVLineEnding := #13;
+  else
+    CSVLineEnding := LineEnding;  // Fallback
+  end;}
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
+  CSVQuoteChar := TempStr[1];
+
+  CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
+  CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
+  CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
 end;
 
 procedure WriteIniFile;
+var TempStr : string;
 begin
   fIniFile.WriteString('UI', 'Language', Language);
 
@@ -1990,6 +1931,7 @@ begin
   fIniFile.WriteString('MainTreeView',  'FontStyle', FontStylesToStr(MainTreeViewFontStyle));
   fIniFile.WriteInteger('MainTreeView',  'FontSize', MainTreeViewFontSize);
   fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
+  fIniFile.WriteBool('MainTreeView',  'AutoFilter', AutoFilter);
 
   //QueryWindow
   fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
@@ -2006,8 +1948,32 @@ begin
   fIniFile.WriteBool('TransactionDefaults', 'RecVersion', txRecVersion in DefTxFlags);
   fIniFile.WriteBool('TransactionDefaults', 'AutoCommit', txAutoCommit in DefTxFlags);
   fIniFile.WriteBool('TransactionDefaults', 'ReadConsistency', txReadConsistency in DefTxFlags);
-  fIniFile.WriteInteger('TransactionDefaults', 'LockTimeout', DefTxLockTimeout);
+  fIniFile.WriteString('TransactionDefaults', 'LockTimeout', DefTxLockTimeout);
   fIniFile.WriteString('TransactionDefaults', 'TxName', DefTxName);
+
+  //BulkExport
+  fIniFile.WriteInteger('BulkExport', 'DefaultBatchSize', DefaultBatchSize);
+
+
+    // CSV Editor
+    fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
+
+    fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
+
+    {// LineEnding zurück in Text umwandeln
+    case CSVLineEnding of
+      #13#10: TempStr := 'CRLF';
+      #10:    TempStr := 'LF';
+      #13:    TempStr := 'CR';
+    else
+      TempStr := 'CRLF';
+    end;
+    fIniFile.WriteString('CSVEditor','CSVLineEnding',TempStr);}
+
+    fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
+    fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
+    fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
+    fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
 end;
 
 

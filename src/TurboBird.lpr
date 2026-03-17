@@ -56,7 +56,7 @@ fCheckDBIntegrity, fsqlmonitor,
 
   fsimpleobjextractor, fClipboardExport, datamodulesystem, fservers,
   fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
-  IBTransactionEditor, external_table;
+  IBTransactionEdit, bulk_clone, fCSVEditor;
 
 const
   Major = 1;

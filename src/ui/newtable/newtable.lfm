@@ -1,12 +1,12 @@
 object fmNewTable: TfmNewTable
-  Left = 557
+  Left = 339
   Height = 634
-  Top = 48
-  Width = 589
+  Top = 114
+  Width = 1023
   ActiveControl = edNewTable
   Caption = 'New Table'
   ClientHeight = 634
-  ClientWidth = 589
+  ClientWidth = 1023
   KeyPreview = True
   OnClose = FormClose
   OnKeyDown = FormKeyDown
@@ -27,7 +27,7 @@ object fmNewTable: TfmNewTable
     Left = 8
     Height = 30
     Top = 32
-    Width = 238
+    Width = 344
     OnKeyUp = edNewTableKeyUp
     TabOrder = 0
   end
@@ -35,7 +35,7 @@ object fmNewTable: TfmNewTable
     Left = 0
     Height = 414
     Top = 66
-    Width = 586
+    Width = 1020
     Anchors = [akTop, akLeft, akRight, akBottom]
     ColCount = 6
     Columns = <    
@@ -138,10 +138,11 @@ object fmNewTable: TfmNewTable
     Visible = False
   end
   object Image1: TImage
-    Left = 448
+    Left = 920
     Height = 63
-    Top = 0
+    Top = -1
     Width = 64
+    Anchors = [akTop, akRight]
     Picture.Data = {
       1754506F727461626C654E6574776F726B47726170686963A30E000089504E47
       0D0A1A0A0000000D4948445200000040000000400806000000AA6971DE000000
@@ -267,10 +268,10 @@ object fmNewTable: TfmNewTable
     Left = 0
     Height = 50
     Top = 584
-    Width = 589
+    Width = 1023
     Align = alBottom
     ClientHeight = 50
-    ClientWidth = 589
+    ClientWidth = 1023
     TabOrder = 6
     object bbScript: TBitBtn
       Left = 24

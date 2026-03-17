@@ -1,0 +1,206 @@
+object Form1: TForm1
+  Left = 391
+  Height = 362
+  Top = 137
+  Width = 561
+  ActiveControl = jvCSVEdit1
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = bsSingle
+  Caption = 'Form1'
+  ClientHeight = 362
+  ClientWidth = 561
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 32
+    Height = 20
+    Top = 16
+    Width = 108
+    Caption = 'Customer Detail'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 32
+    Height = 20
+    Top = 208
+    Width = 31
+    Caption = 'Item'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    Left = 32
+    Height = 20
+    Top = 257
+    Width = 63
+    Caption = 'Sale Date'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 32
+    Height = 20
+    Top = 305
+    Width = 33
+    Caption = 'Price'
+    ParentColor = False
+  end
+  object jvCSVLabel1: TjvCSVLabel
+    Left = 163
+    Height = 20
+    Top = 226
+    Width = 41
+    Caption = '[Item]'
+    ParentColor = False
+    CSVDataBase = CSVBase
+    CSVField = 'Item'
+  end
+  object jvCSVEdit1: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 32
+    Width = 208
+    TabOrder = 0
+    Text = '[Name]'
+    CSVDataBase = CSVBase
+    CSVField = 'Name'
+  end
+  object jvCSVEdit2: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 56
+    Width = 208
+    TabOrder = 1
+    Text = '[Addr]'
+    CSVDataBase = CSVBase
+    CSVField = 'Addr'
+  end
+  object jvCSVEdit3: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 80
+    Width = 208
+    TabOrder = 2
+    Text = '[Suburb]'
+    CSVDataBase = CSVBase
+    CSVField = 'Suburb'
+  end
+  object jvCSVEdit4: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 104
+    Width = 80
+    TabOrder = 3
+    Text = '[PostCode]'
+    CSVDataBase = CSVBase
+    CSVField = 'PostCode'
+  end
+  object jvCSVEdit5: TjvCSVEdit
+    Left = 160
+    Height = 30
+    Top = 105
+    Width = 80
+    CharCase = ecUppercase
+    TabOrder = 4
+    Text = '[STATE]'
+    CSVDataBase = CSVBase
+    CSVField = 'State'
+  end
+  object jvCSVEdit6: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 128
+    Width = 103
+    TabOrder = 5
+    Text = '[Phone]'
+    CSVDataBase = CSVBase
+    CSVField = 'Phone'
+  end
+  object jvCSVEdit7: TjvCSVEdit
+    Left = 137
+    Height = 30
+    Top = 128
+    Width = 103
+    TabOrder = 6
+    Text = '[Mobile]'
+    CSVDataBase = CSVBase
+    CSVField = 'Mobile'
+  end
+  object jvCSVNavigator1: TjvCSVNavigator
+    Left = 27
+    Height = 24
+    Top = 179
+    Width = 221
+    CSVDataBase = CSVBase
+  end
+  object jvCSVComboBox1: TjvCSVComboBox
+    Left = 32
+    Height = 30
+    Top = 224
+    Width = 100
+    ItemHeight = 0
+    Items.Strings = (
+      'WIDGET0'
+      'WIDGET1'
+      'WIDGET2'
+      'WIDGET3'
+      'WIDGET4'
+      'WIDGET5'
+      'WIDGET6'
+      'WIDGET7'
+      'WIDGET8'
+      'WIDGET9'
+    )
+    TabOrder = 8
+    Text = '[Item]'
+    CSVDataBase = CSVBase
+    CSVField = 'Item'
+  end
+  object jvCSVEdit8: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 272
+    Width = 80
+    TabOrder = 9
+    Text = '[DateSold]'
+    CSVDataBase = CSVBase
+    CSVField = 'DateSold'
+  end
+  object jvCSVCheckBox1: TjvCSVCheckBox
+    Left = 32
+    Height = 22
+    Top = 152
+    Width = 87
+    Caption = 'Married ?'
+    TabOrder = 10
+    CSVDataBase = CSVBase
+    CSVField = 'Married'
+  end
+  object jvCSVEdit9: TjvCSVEdit
+    Left = 32
+    Height = 30
+    Top = 320
+    Width = 80
+    TabOrder = 11
+    Text = '[Price]'
+    CSVDataBase = CSVBase
+    CSVField = 'Price'
+  end
+  object CSVBase: TjvCSVBase
+    CSVFileName = 'example.csv'
+    CSVFieldNames.Strings = (
+      'Name'
+      'Addr'
+      'Suburb'
+      'PostCode'
+      'State'
+      'Phone'
+      'Mobile'
+      'Married'
+      'Item'
+      'DateSold'
+      'Price'
+    )
+    Left = 368
+    Top = 56
+  end
+end

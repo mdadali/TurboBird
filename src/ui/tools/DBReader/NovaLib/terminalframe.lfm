@@ -1,0 +1,276 @@
+object FrameTerminal: TFrameTerminal
+  Left = 0
+  Height = 467
+  Top = 0
+  Width = 615
+  ClientHeight = 467
+  ClientWidth = 615
+  Font.Height = -13
+  ParentFont = False
+  TabOrder = 0
+  DesignLeft = 307
+  DesignTop = 224
+  object rvTerm: TRichView
+    Left = 0
+    Height = 433
+    Top = 34
+    Width = 615
+    TabStop = True
+    TabOrder = 0
+    Align = alClient
+    Tracking = True
+    VScrollVisible = True
+    OnKeyPress = rvTermKeyPress
+    FirstJumpNo = 0
+    Options = []
+    Style = RVStyle1
+    MaxTextWidth = 0
+    MinTextWidth = 0
+    LeftMargin = 5
+    RightMargin = 5
+    BackgroundStyle = bsNoBitmap
+    Delimiters = ' .;,:(){}"'
+    AllowSelection = True
+    SingleClick = False
+  end
+  object panTerminalTop: TPanel
+    Left = 0
+    Height = 34
+    Top = 0
+    Width = 615
+    Align = alTop
+    ClientHeight = 34
+    ClientWidth = 615
+    TabOrder = 1
+    object Button1: TButton
+      Left = 528
+      Height = 25
+      Top = 4
+      Width = 75
+      Action = actTermClear
+      Anchors = [akTop, akRight]
+      TabOrder = 0
+    end
+    object cbTermAutoscroll: TCheckBox
+      Left = 400
+      Height = 21
+      Top = 6
+      Width = 108
+      Anchors = [akTop, akRight]
+      Caption = 'автопрокрутка'
+      OnChange = cbTermAutoscrollChange
+      TabOrder = 1
+    end
+    object chkLogToFile: TCheckBox
+      Left = 16
+      Height = 21
+      Top = 6
+      Width = 105
+      Caption = 'запись в файл'
+      OnChange = chkLogToFileChange
+      TabOrder = 2
+    end
+    object cbShowTx: TCheckBox
+      Left = 153
+      Height = 21
+      Top = 6
+      Width = 90
+      Caption = 'показать Tx'
+      TabOrder = 3
+    end
+  end
+  object RVStyle1: TRVStyle
+    TextStyles = <    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 4449177
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clBlue
+        Style = [fsBold]
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clNavy
+        Style = [fsBold]
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clMaroon
+        Style = [fsItalic]
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clGreen
+        Style = [fsUnderline]
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clGreen
+        Style = [fsUnderline]
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clWindowText
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clWindowText
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clWindowText
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Arial'
+        Size = 10
+        Color = clWindowText
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 7895
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 108382
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 44495
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 11762242
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 9332105
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 11183872
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 14212827
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = clWindowText
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 3555829
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 4449177
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 6351613
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 14266243
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 12031164
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 15263031
+        Style = []
+      end    
+      item
+        CharSet = DEFAULT_CHARSET
+        FontName = 'Courier New'
+        Size = 10
+        Color = 15790577
+        Style = []
+      end>
+    JumpCursor = 101
+    Color = clBlack
+    HoverColor = clNone
+    FullRedraw = False
+    SelColor = clHighlight
+    SelTextColor = clHighlightText
+    Left = 107
+    Top = 90
+  end
+  object alTerm: TActionList
+    Left = 330
+    Top = 144
+    object actTermClear: TAction
+      Caption = 'Очистить'
+      OnExecute = actTermClearExecute
+    end
+  end
+end

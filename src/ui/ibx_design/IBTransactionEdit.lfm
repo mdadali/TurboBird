@@ -1,7 +1,7 @@
 object IBTransactionEditForm: TIBTransactionEditForm
-  Left = 299
+  Left = 574
   Height = 201
-  Top = 232
+  Top = 243
   Width = 396
   ActiveControl = rbSnapShot
   BorderStyle = bsDialog
@@ -37,7 +37,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Left = 8
       Height = 22
       Top = 18
-      Width = 86
+      Width = 87
       Caption = '&Snapshot'
       Checked = True
       OnClick = rbSnapShotClick
@@ -48,7 +48,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Left = 8
       Height = 22
       Top = 42
-      Width = 135
+      Width = 136
       Caption = 'Read &Committed'
       OnClick = rbReadCommittedClick
       TabOrder = 1
@@ -57,7 +57,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Left = 7
       Height = 22
       Top = 66
-      Width = 191
+      Width = 192
       Caption = '&Read-Only Table Stability'
       OnClick = rbReadOnlyTableStabilityClick
       TabOrder = 2
@@ -66,7 +66,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Left = 7
       Height = 22
       Top = 90
-      Width = 200
+      Width = 201
       Caption = 'Read-&Write Table Stability '
       OnClick = rbReadWriteTableStabilityClick
       TabOrder = 3
@@ -89,7 +89,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Left = 7
       Height = 22
       Top = 114
-      Width = 102
+      Width = 103
       Caption = 'Unspecified'
       TabOrder = 5
     end

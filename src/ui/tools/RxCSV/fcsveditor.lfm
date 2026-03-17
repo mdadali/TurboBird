@@ -1,0 +1,296 @@
+object frmCSVEditor: TfrmCSVEditor
+  Left = 481
+  Height = 575
+  Top = 84
+  Width = 843
+  Caption = 'Turbobird - CSVE ditor'
+  ClientHeight = 575
+  ClientWidth = 843
+  OnClose = FormClose
+  OnCreate = FormCreate
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 843
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 843
+    TabOrder = 0
+    object DBNavigator1: TDBNavigator
+      Left = 151
+      Height = 48
+      Top = 1
+      Width = 691
+      Align = alClient
+      BevelOuter = bvNone
+      ChildSizing.EnlargeHorizontal = crsScaleChilds
+      ChildSizing.EnlargeVertical = crsScaleChilds
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 100
+      ClientHeight = 48
+      ClientWidth = 691
+      DataSource = DataSource1
+      OnClick = DBNavigator1Click
+      Options = []
+      TabOrder = 0
+    end
+    object btnOpenFile: TButton
+      Left = 1
+      Height = 48
+      Top = 1
+      Width = 75
+      Align = alLeft
+      Caption = 'Open'
+      OnClick = btnOpenFileClick
+      TabOrder = 1
+    end
+    object btnSaveFileAs: TButton
+      Left = 76
+      Height = 48
+      Top = 1
+      Width = 75
+      Align = alLeft
+      Caption = 'Save As'
+      Enabled = False
+      OnClick = btnSaveFileAsClick
+      TabOrder = 2
+    end
+  end
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 525
+    Top = 50
+    Width = 843
+    ActivePage = tsGrid
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 1
+    object tsGrid: TTabSheet
+      Caption = 'Grid View'
+      ClientHeight = 491
+      ClientWidth = 839
+      object RxDBGrid1: TRxDBGrid
+        Left = 0
+        Height = 491
+        Top = 0
+        Width = 839
+        ColumnDefValues.BlobText = '(blob)'
+        TitleButtons = True
+        AutoSort = True
+        KeyStrokes = <        
+          item
+            Command = rxgcShowFindDlg
+            ShortCut = 16454
+            Enabled = True
+          end        
+          item
+            Command = rxgcShowColumnsDlg
+            ShortCut = 16471
+            Enabled = True
+          end        
+          item
+            Command = rxgcShowFilterDlg
+            ShortCut = 16468
+            Enabled = True
+          end        
+          item
+            Command = rxgcShowSortDlg
+            ShortCut = 16467
+            Enabled = True
+          end        
+          item
+            Command = rxgcShowQuickFilter
+            ShortCut = 16465
+            Enabled = True
+          end        
+          item
+            Command = rxgcHideQuickFilter
+            ShortCut = 16456
+            Enabled = True
+          end        
+          item
+            Command = rxgcSelectAll
+            ShortCut = 16449
+            Enabled = True
+          end        
+          item
+            Command = rxgcDeSelectAll
+            ShortCut = 16429
+            Enabled = True
+          end        
+          item
+            Command = rxgcInvertSelection
+            ShortCut = 16426
+            Enabled = True
+          end        
+          item
+            Command = rxgcOptimizeColumnsWidth
+            ShortCut = 16427
+            Enabled = True
+          end        
+          item
+            Command = rxgcCopyCellValue
+            ShortCut = 16451
+            Enabled = True
+          end>
+        FooterOptions.DrawFullLine = False
+        SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+        SearchOptions.FromStart = False
+        OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgDblClickOptimizeColWidth, rdgAllowQuickSearch, rdgAllowQuickFilter, rdgAllowFilterForm, rdgAllowSortForm, rdgAllowToolMenu, rdgCaseInsensitiveSort]
+        Align = alClient
+        Color = clWindow
+        DrawFullLine = False
+        FocusColor = clRed
+        SelectedColor = clHighlight
+        DataSource = DataSource1
+        Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgHeaderPushedLook]
+        TabOrder = 0
+      end
+    end
+    object tsDetail: TTabSheet
+      Caption = 'Detail View'
+      ClientHeight = 491
+      ClientWidth = 839
+      TabVisible = False
+      object ScrollBox1: TScrollBox
+        Left = 0
+        Height = 491
+        Top = 0
+        Width = 839
+        HorzScrollBar.Page = 1
+        VertScrollBar.Page = 1
+        Align = alClient
+        TabOrder = 0
+      end
+    end
+    object tsCSVSettings: TTabSheet
+      Caption = 'CSV Settings'
+      ClientHeight = 491
+      ClientWidth = 839
+      object Label1: TLabel
+        Left = 56
+        Height = 20
+        Top = 40
+        Width = 136
+        Caption = 'Default Field Length'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 56
+        Height = 20
+        Top = 88
+        Width = 62
+        Caption = 'Delimiter'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 56
+        Height = 20
+        Top = 184
+        Width = 77
+        Caption = 'Quote Char'
+        ParentColor = False
+      end
+      object Label6: TLabel
+        Left = 56
+        Height = 20
+        Top = 136
+        Width = 80
+        Caption = 'Line Ending'
+        ParentColor = False
+      end
+      object chkBoxIgnoreOuterWhiteSpace: TCheckBox
+        Left = 400
+        Height = 22
+        Top = 88
+        Width = 193
+        Caption = 'Ignore outer Whiteppace'
+        TabOrder = 0
+      end
+      object chkBoxFirstLineAsFieldName: TCheckBox
+        Left = 400
+        Height = 22
+        Top = 40
+        Width = 178
+        Caption = 'First Line as Fieldname'
+        TabOrder = 1
+      end
+      object chkBoxQuoteOuterWhiteSpace: TCheckBox
+        Left = 400
+        Height = 22
+        Top = 134
+        Width = 187
+        Caption = 'Quote outer Whitespace'
+        TabOrder = 2
+      end
+      object edtDefaultFieldLength: TEdit
+        Left = 272
+        Height = 30
+        Top = 40
+        Width = 48
+        MaxLength = 1024
+        NumbersOnly = True
+        TabOrder = 3
+        Text = '255'
+      end
+      object edtDelimiter: TEdit
+        Left = 272
+        Height = 30
+        Top = 88
+        Width = 24
+        MaxLength = 1
+        TabOrder = 4
+        Text = ','
+      end
+      object edtLineEnding: TEdit
+        Left = 272
+        Height = 30
+        Top = 136
+        Width = 40
+        TabOrder = 5
+        Text = #10
+      end
+      object edtQuoteChar: TEdit
+        Left = 272
+        Height = 30
+        Top = 184
+        Width = 24
+        TabOrder = 6
+        Text = '"'
+      end
+    end
+  end
+  object DataSource1: TDataSource
+    DataSet = CSVDataset1
+    Left = 640
+    Top = 296
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 656
+    Top = 200
+  end
+  object CSVDataset1: TCSVDataset
+    FieldDefs = <>
+    AutoCalcFields = False
+    AfterDelete = CSVDataset1AfterDelete
+    BeforePost = CSVDataset1BeforePost
+    CSVOptions.FirstLineAsFieldNames = True
+    CSVOptions.DefaultFieldLength = 255
+    CSVOptions.Delimiter = ','
+    CSVOptions.QuoteChar = '"'
+    CSVOptions.LineEnding = #10
+    CSVOptions.IgnoreOuterWhitespace = False
+    CSVOptions.QuoteOuterWhitespace = True
+    Left = 656
+    Top = 152
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 688
+    Top = 384
+  end
+end
