@@ -80,9 +80,9 @@ uses
   edit_tabledata_new,
 
   ibsqleditor,
-  //IBTransactionEdit,  //orig
-  IBTransactionEditor, //new
-  external_table
+  IBTransactionEdit,  //orig
+  bulk_clone,
+  fCSVEditor
   ;
 
 {$i turbocommon.inc}
@@ -123,7 +123,9 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
-    lmExternalTable: TMenuItem;
+    lmBulkCloneTable: TMenuItem;
+    mnCSVEditor: TMenuItem;
+    mnTools: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
@@ -317,7 +319,7 @@ type
     procedure lmEditFieldClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
     procedure lmEditTableDataNewClick(Sender: TObject);
-    procedure lmExternalTableClick(Sender: TObject);
+    procedure lmBulkCloneTableClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -394,6 +396,7 @@ type
     procedure lmViewUDFClick(Sender: TObject);
     procedure lmDropTableClick(Sender: TObject);
     procedure lmRecalculateStatisticsClick(Sender: TObject);
+    procedure mnCSVEditorClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
     procedure mnExitClick(Sender: TObject);
     procedure mnCreateDBClick(Sender: TObject);
@@ -1410,7 +1413,7 @@ begin
   try
     SelNode := tvMain.Selected;
     dbIndex := TPNodeInfos(SelNode.Parent.Data)^.dbIndex;
-    Init(dbIndex);
+    //Init(dbIndex);
 
 
     edUserName.Clear;
@@ -1419,12 +1422,16 @@ begin
     if ShowModal = mrOK then
     begin
       // Create user
-      dmSysTables.Init(dbIndex);
+      if RegisteredDatabases[dbIndex].IBQuery.Active then
+        RegisteredDatabases[dbIndex].IBQuery.Close;
+      RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'CREATE USER "' + edUserName.Text + '" PASSWORD ' + QuotedStr(edPassword.Text);
+      RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
+      {dmSysTables.Init(dbIndex);
       dmSysTables.sqQuery.Close;
       dmSysTables.sqQuery.SQL.Text := 'CREATE USER "' + edUserName.Text + '" PASSWORD ' + QuotedStr(edPassword.Text);
       if not dmSysTables.sqQuery.Transaction.InTransaction then
         dmSysTables.sqQuery.Transaction.StartTransaction;
-      dmSysTables.sqQuery.ExecSQL;
+      dmSysTables.sqQuery.ExecSQL;}
 
       DummyCreated := False;
       DummyJustCreated := False;
@@ -1456,9 +1463,9 @@ begin
         // Dummy-Rolle zuweisen
         if DummyCreated then
         begin
-          dmSysTables.sqQuery.Close;
-          dmSysTables.sqQuery.SQL.Text := 'GRANT DUMMYROLE TO "' + edUserName.Text + '"';
-          dmSysTables.sqQuery.ExecSQL;
+          RegisteredDatabases[dbIndex].IBQuery.Close;
+          RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'GRANT DUMMYROLE TO "' + edUserName.Text + '"';
+          RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
 
           if DummyJustCreated then
             ShowMessage('A Dummy role has been created and automatically assigned to the new user because you are working with Firebird version < 3. ' +
@@ -1472,12 +1479,12 @@ begin
       // Grant role, falls ausgewählt
       if cxGrantRole.Checked and (Trim(cbRoles.Text) <> '') then
       begin
-        dmSysTables.sqQuery.Close;
-        dmSysTables.sqQuery.SQL.Text := 'GRANT "' + cbRoles.Text + '" TO "' + edUserName.Text + '"';
-        dmSysTables.sqQuery.ExecSQL;
+        RegisteredDatabases[dbIndex].IBQuery.Close;
+        RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'GRANT "' + cbRoles.Text + '" TO "' + edUserName.Text + '"';
+        RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
       end;
 
-      dmSysTables.stTrans.CommitRetaining;
+      RegisteredDatabases[dbIndex].IBTransaction.CommitRetaining;
 
       MessageDlg('New user (' + edUserName.Text + ') has been created successfully', mtInformation, [mbOk], 0);
 
@@ -2745,8 +2752,8 @@ begin
   DepStr := GetUserDeps(Rec.IBDatabase, tvMain.Selected.Text);
   if  DepStr = '' then
   begin
-    TmpQueryStr := 'DROP User ' + tvMain.Selected.Text;
-    ShowCompleteQueryWindow(dbIndex, 'Drop User ' + tvMain.Selected.Text, TmpQueryStr, nil);
+    TmpQueryStr := 'DROP User ' + MakeCaseSensitiveAuto(tvMain.Selected.Text);
+    ShowCompleteQueryWindow(dbIndex, 'Drop User ' + MakeCaseSensitiveAuto(tvMain.Selected.Text), TmpQueryStr, nil);
   end else
   begin
     if MessageDlg(
@@ -2755,8 +2762,8 @@ begin
             'Do you want to delete the User anyway?', [tvMain.Selected.Text, DepStr]),
      mtWarning, [mbYes, mbCancel], 0) = mrYes then
      begin
-       TmpQueryStr := 'DROP User ' + tvMain.Selected.Text;
-       ShowCompleteQueryWindow(dbIndex, 'Drop User#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
+       TmpQueryStr := 'DROP User ' + MakeCaseSensitiveAuto(tvMain.Selected.Text);
+       ShowCompleteQueryWindow(dbIndex, 'Drop User#' + IntToStr(dbIndex) + ':' + MakeCaseSensitiveAuto(tvMain.Selected.Text), TmpQueryStr, nil);
      end;
   end;
 end;
@@ -2919,14 +2926,14 @@ begin
   EditWindow.Show;
 end;
 
-procedure TfmMain.lmExternalTableClick(Sender: TObject);
-var frmExternalTable: TfrmExternalTable;
+procedure TfmMain.lmBulkCloneTableClick(Sender: TObject);
+var frmBulkClone: TfrmBulkClone;
     dbIndex: integer;
 begin
   dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-  frmExternalTable := TfrmExternalTable.Create(Application);
-  frmExternalTable.Init(dbIndex, nil);
-  frmExternalTable.ShowModal;
+  frmBulkClone := TfrmBulkClone.Create(Application);
+  frmBulkClone.Init(nil);
+  frmBulkClone.ShowModal;
 end;
 
 procedure TfmMain.ExtractTableMetaData(Quoted: boolean);
@@ -5339,7 +5346,8 @@ procedure TfmMain.lmTransConfigClick(Sender: TObject);
 var
   SelNode: TTreeNode;
   dbIndex: Integer;
-  IBTransactionEditorForm: TIBTransactionEditorForm;
+  WasInTransaction: Boolean;
+  IBTrans: TIBTransaction;
 begin
   SelNode := tvMain.Selected;
 
@@ -5347,44 +5355,43 @@ begin
     Exit;
 
   dbIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
+  IBTrans := RegisteredDatabases[dbIndex].IBTransaction;
 
-  IBTransactionEditorForm := TIBTransactionEditorForm.Create(Application);
+  if not Assigned(IBTrans) then
+    Exit;
+
+  // optional: sauberer als Event aufzurufen
+  lmDisconnectClick(nil);
+
+  WasInTransaction := IBTrans.InTransaction;
+
   try
-    IBTransactionEditorForm.Init(dbIndex, nil);
-    if IBTransactionEditorForm.EditTransaction then
+    // bewusst entscheiden: committen wir wirklich automatisch?
+    if WasInTransaction then
+      IBTrans.Commit;
+
+    IBTrans.Params.Text := RegisteredDatabases[dbIndex].RegRec.TxConfig;
+
+    if EditIBtransaction(IBTrans) then
     begin
-      ExtractTransactionConfig(
-        RegisteredDatabases[dbIndex].IBTransaction,
-        RegisteredDatabases[dbIndex].RegRec.TxConfig);
+      // Parameter speichern (Achtung: max. 255 Zeichen!)
+      RegisteredDatabases[dbIndex].RegRec.TxConfig := IBTrans.Params.Text;
+
+      // System-Transaction zurücksetzen
+      if dmSysTables.stTrans.InTransaction then
+        dmSysTables.stTrans.Rollback;
+
+      dmSysTables.stTrans.Params.Assign(IBTrans.Params);
 
       fmReg.SaveRegistrations;
     end;
 
   finally
-    IBTransactionEditorForm.Free;
+    // ursprünglichen Zustand wiederherstellen
+    if WasInTransaction and not IBTrans.InTransaction then
+      IBTrans.StartTransaction;
   end;
 end;
-
-{procedure TfmMain.lmTransConfigClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  dbIndex: Integer;
-  Rec: TDatabaseRec;
-begin
-  try
-    SelNode:= tvMain.Selected;
-
-    if (SelNode = nil) or (SelNode.Parent = nil) then
-      exit;
-
-    dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
-    Rec := RegisteredDatabases[dbIndex];
-
-    EditIBtransaction(Rec.IBTransaction);
-  finally
-
-  end;
-end;}
 
 procedure TfmMain.lmTestPackageUDRFunctionClick(Sender: TObject);
 begin
@@ -7233,42 +7240,12 @@ begin
     ShowMessage('Error recalculating index statistics: '+Message);
 end;
 
-{procedure TfmMain.mnEditorFontClick(Sender: TObject);
-var
-  i, j: Integer;
-  page: TTabSheet;
-  c: TControl;
-  queryWin: TfmQueryWindow;
-  syn: TSynEdit;
+procedure TfmMain.mnCSVEditorClick(Sender: TObject);
+var frmCSVEditor: TfrmCSVEditor;
 begin
-  editorFontDialog.Font.Size  := turbocommon.QWEditorFontSize;
-  editorFontDialog.Font.Name  := turbocommon.QWEditorFontName;
-  editorFontDialog.Font.Style := turbocommon.QWEditorFontStyle;
-
-  if not editorFontDialog.Execute then
-    exit;
-
-  for i := 0 to PageControl1.PageCount - 1 do
-  begin
-    page := PageControl1.Pages[i];
-    // Suche alle Controls in der Page
-    for j := 0 to page.ControlCount - 1 do
-    begin
-      c := page.Controls[j];
-
-      if c is TfmQueryWindow then
-      begin
-        queryWin := TfmQueryWindow(c);
-        syn := queryWin.meQuery;
-        syn.Font := editorFontDialog.Font;
-      end;
-    end;
-  end;
-
-  turbocommon.QWEditorFontSize := editorFontDialog.Font.Size;
-  turbocommon.QWEditorFontName := editorFontDialog.Font.Name;
-  turbocommon.QWEditorFontStyle := editorFontDialog.Font.Style;
-end;}
+  frmCSVEditor := TfrmCSVEditor.Create(self);
+  frmCSVEditor.ShowModal;
+end;
 
 procedure TfmMain.mnEditorFontClick(Sender: TObject);
 var
@@ -8121,47 +8098,6 @@ begin
     NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
 end;
 
-{procedure TfmMain.ApplyFilterToAllNodes;
-var
-  Node: TTreeNode;
-  NI: TPNodeInfos;
-  FilterText: string;
-begin
-  FilterText := Trim(edtFilter.Text);
-
-  tvMain.BeginUpdate;
-  try
-    Node := tvMain.Items.GetFirstNode;
-    while Node <> nil do
-    begin
-      NI := Node.Data;
-
-      if (NI <> nil) then
-      begin
-        if CheckBoxFilter.Checked
-           and not IsFilterScopeNode(Node)  //RootNodes
-           and (NI^.ObjectType <> tvotServer)
-           and (NI^.ObjectType <> tvotDatabase)
-           and (NI^.ObjectType <> tvotQueryWindow) then
-        begin
-          //NI^.Visible := MatchesFilter(Node.Text, FilterText);
-          //Node.Visible := NI^.Visible;
-          Node.Visible := MatchesFilter(Node.Text, FilterText);
-        end
-        else
-        begin
-          //NI^.Visible := True;
-          Node.Visible := True;
-        end;
-      end;
-
-      Node := Node.GetNext;
-    end;
-  finally
-    tvMain.EndUpdate;
-  end;
-end;}
-
 procedure TfmMain.CheckBoxFilterChange(Sender: TObject);
 begin
   //if (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
@@ -8170,8 +8106,11 @@ end;
 
 procedure TfmMain.edtFilterChange(Sender: TObject);
 begin
-  //if CheckBoxFilter.Checked and (edtFilter.Text <> '') and (edtFilter.Text <> ' ') then
-  if CheckBoxFilter.Checked then
+  if CheckBoxFilter.Checked and
+       (edtFilter.Text <> '') and
+       (edtFilter.Text <> ' ') and
+        AutoFilter then
+
     ApplyFilterToAllNodes;
 end;
 
@@ -9094,7 +9033,7 @@ begin
             IBTransaction:= TIBTransaction.Create(nil);
             IBTransaction.DefaultDatabase := IBDatabase;
             IBDatabase.DefaultTransaction := IBTransaction;
-            ApplyTransactionConfig(RegRec.TxConfig, IBTransaction);
+            IBTransaction.Params.Text :=  RegRec.TxConfig;
 
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;

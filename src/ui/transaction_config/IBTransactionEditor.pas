@@ -134,10 +134,11 @@ begin
     Exclude(DefTxFlags, txRecVersion); // no_rec_version überschreibt rec_version
 
   // === Autocommit ===
-  if cbAutocommit.Checked then
+  {if cbAutocommit.Checked then
     Include(DefTxFlags, txAutoCommit)
   else
     Exclude(DefTxFlags, txAutoCommit);
+  }
 
   // === ReadConsistency (FB 4+) ===
   if cbReadConsistency.Checked then
@@ -146,7 +147,10 @@ begin
     Exclude(DefTxFlags, txReadConsistency);
 
   // === Lock Timeout ===
-  DefTxLockTimeout := StrToIntDef(edtTimeout.Text, 0);
+  if StrToIntDef(edtTimeout.Text, 0) > 0 then
+    DefTxLockTimeout := edtTimeout.Text
+  else
+    DefTxLockTimeout := '';
 
   // === Default Tx Name ===
   DefTxName := 'DEFAULT_TRANSACTION'; // optional: aus Editfeld setzen
@@ -169,7 +173,7 @@ var
   Ini: TIniFile;
   Isolation: Integer;
   Flags: TTxFlags;
-  LockTimeout: Integer;
+  LockTimeout: string;
   TxName: string;
 begin
   with TOpenDialog.Create(Self) do
@@ -205,7 +209,7 @@ begin
           Include(Flags, txReadConsistency);
 
         // === LockTimeout ===
-        LockTimeout := Ini.ReadInteger('Transaction', 'LockTimeout', 0);
+        LockTimeout := Ini.ReadString('Transaction', 'LockTimeout', '0');
 
         // === TxName ===
         TxName := Ini.ReadString('Transaction', 'TxName', 'PRESET_TX');
@@ -252,7 +256,10 @@ begin
         cbReadConsistency.Checked := txReadConsistency in Flags;
 
         // LockTimeout
-        edtTimeout.Text := IntToStr(LockTimeout);
+        if StrToIntDef(LockTimeout, 0) > 0 then
+          edtTimeout.Text := LockTimeout
+        else
+          edtTimeout.Text := '0';
 
         ShowMessage('Preset loaded: ' + TxName);
 
@@ -284,7 +291,10 @@ begin
   rbWait.Checked := P.IndexOf('wait') >= 0;
   rbNoWait.Checked := P.IndexOf('nowait') >= 0;
 
-  edtTimeout.Text := P.Values['lock_timeout'];
+  if P.Values['lock_timeout'] = '' then
+    edtTimeout.Text := '0'
+  else
+    edtTimeout.Text := P.Values['lock_timeout'];
 
   cbAutocommit.Checked := P.IndexOf('autocommit') >= 0;
 end;
@@ -323,8 +333,13 @@ begin
   if rbNoWait.Checked then
     FTransaction.Params.Add('nowait');
 
-  if Trim(edtTimeout.Text) <> '' then
-    FTransaction.Params.Add('lock_timeout=' + Trim(edtTimeout.Text));
+  if StrToIntDef(Trim(edtTimeout.Text), 0) > 0 then
+    FTransaction.Params.Add('lock_timeout=' + Trim(edtTimeout.Text))
+  else;
+    //ShowMessage(FTransaction.Params.Text);
+    //FTransaction.Params.Delete(FTransaction.Params.IndexOf('lock_timeout'));
+   //FTransaction.Params.Add('lock_timeout=' + '');
+
 
   //if cbAutocommit.Checked then
     //FTransaction.Params.Add('autocommit');

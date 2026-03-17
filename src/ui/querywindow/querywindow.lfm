@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 283
+  Left = 571
   Height = 613
-  Top = 155
+  Top = 135
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 613
@@ -71122,7 +71122,7 @@ object fmQueryWindow: TfmQueryWindow
       Height = 22
       Hint = 'Auto Commit ON/OFF'
       Top = 2
-      Width = 110
+      Width = 111
       Caption = 'Auto Commit'
       Checked = True
       OnMouseEnter = cxAutoCommitMouseEnter
@@ -72668,6 +72668,7 @@ object fmQueryWindow: TfmQueryWindow
     Connected = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
+    DefaultTransaction = FSQLTrans
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False

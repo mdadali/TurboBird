@@ -97,12 +97,17 @@ end;
 
 function TIBtransactionEditForm.Edit: Boolean;
 begin
-  TransactionParams.Lines := Transaction.Params;
-  ParseParams;
   Result := False;
+
+  if not Assigned(Transaction) then
+    Exit;
+
+  TransactionParams.Lines.Assign(Transaction.Params);
+  ParseParams;
+
   if ShowModal = mrOk then
   begin
-    Transaction.Params := TransactionParams.Lines;
+    Transaction.Params.Assign(TransactionParams.Lines);
     Result := True;
   end;
 end;
@@ -117,14 +122,20 @@ var
   I: Integer;
   st: string;
   Value: TTransactionParams;
-
+  HasUnknown: Boolean;
+  HasWrite: Boolean;
 begin
   Value := [];
+  HasUnknown := False;
+  HasWrite := False;
+
+  // 🔍 Parameter einlesen
   for I := 0 to TransactionParams.Lines.Count - 1 do
   begin
     st := LowerCase(Trim(TransactionParams.Lines[I]));
     if st = '' then
       continue;
+
     if st = 'concurrency' then
       Include(Value, concurrency)
     else if st = 'read_committed' then
@@ -136,25 +147,54 @@ begin
     else if st = 'read' then
       Include(Value, read)
     else if st = 'write' then
-      Include(Value, write)
+    begin
+      Include(Value, write);
+      HasWrite := True;
+    end
     else if st = 'consistency' then
       Include(Value, consistency)
-    else begin
-      Value := [];
-      break;
-    end;
+    else
+      HasUnknown := True;
   end;
+
   ClearParamSelection;
-  if Value = [concurrency, nowait] then
-    rbSnapShot.Checked := True
-  else if Value = [read_committed, rec_version, nowait] then
-    rbReadCommitted.Checked := True
-  else if Value = [read, consistency] then
-    rbReadOnlyTableStability.Checked := True
-  else if Value = [write, consistency] then
-    rbReadWriteTableStability.Checked := True
-  else
-    rbOtherButton.Checked := true
+
+  // ❗ unbekannte Parameter → Other
+  if HasUnknown then
+  begin
+    rbOtherButton.Checked := True;
+    Exit;
+  end;
+
+  // 🔥 Firebird-robuste Erkennung
+
+  // Snapshot (Concurrency)
+  if (concurrency in Value) and (nowait in Value) then
+  begin
+    rbSnapShot.Checked := True;
+    Exit;
+  end;
+
+  // Read Committed (rec_version optional!)
+  if (read_committed in Value) then
+  begin
+    rbReadCommitted.Checked := True;
+    Exit;
+  end;
+
+  // Table Stability
+  if (consistency in Value) then
+  begin
+    if HasWrite then
+      rbReadWriteTableStability.Checked := True
+    else
+      rbReadOnlyTableStability.Checked := True;
+
+    Exit;
+  end;
+
+  // fallback
+  rbOtherButton.Checked := True;
 end;
 
 procedure TIBTransactionEditForm.ClearParamSelection;
@@ -168,12 +208,16 @@ end;
 procedure TIBTransactionEditForm.OKBtnClick(Sender: TObject);
 begin
   ModalResult := mrNone;
-  if Transaction.Active then
+
+  if Assigned(Transaction) and Transaction.Active then
   begin
-    if MessageDlg(SCommitTransaction, mtConfirmation,
-      mbOkCancel, 0) <> mrOk then Exit;
-    Transaction.Rollback;
+    if MessageDlg('Commit current transaction?', mtConfirmation,
+      mbOkCancel, 0) <> mrOk then
+      Exit;
+
+    Transaction.Commit; // ✔️ statt Rollback
   end;
+
   ModalResult := mrOk;
 end;
 
@@ -189,14 +233,14 @@ end;
 
 procedure TIBTransactionEditForm.rbSnapShotClick(Sender: TObject);
 begin
-  TransactionParams.clear;
+  TransactionParams.Lines.clear;
   TransactionParams.Lines.Add('concurrency'); { do not localize }
   TransactionParams.Lines.Add('nowait'); { do not localize }
 end;
 
 procedure TIBTransactionEditForm.rbReadCommittedClick(Sender: TObject);
 begin
-  TransactionParams.clear;
+  TransactionParams.Lines.clear;
   TransactionParams.Lines.Add('read_committed'); { do not localize }
   TransactionParams.Lines.Add('rec_version'); { do not localize }
   TransactionParams.Lines.Add('nowait'); { do not localize }
@@ -204,14 +248,14 @@ end;
 
 procedure TIBTransactionEditForm.rbReadOnlyTableStabilityClick(Sender: TObject);
 begin
-  TransactionParams.clear;
+  TransactionParams.Lines.clear;
   TransactionParams.Lines.Add('read'); { do not localize }
   TransactionParams.Lines.Add('consistency'); { do not localize }
 end;
 
 procedure TIBTransactionEditForm.rbReadWriteTableStabilityClick(Sender: TObject);
 begin
-  TransactionParams.clear;
+  TransactionParams.Lines.clear;
   TransactionParams.Lines.Add('write'); { do not localize }
   TransactionParams.Lines.Add('consistency'); { do not localize }
 end;

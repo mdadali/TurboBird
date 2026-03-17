@@ -1,0 +1,450 @@
+object frmBulkClone: TfrmBulkClone
+  Left = 882
+  Height = 588
+  Top = 356
+  Width = 1059
+  Caption = 'Clone Table → External & Bulk Export'
+  ClientHeight = 588
+  ClientWidth = 1059
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object gbFormat: TGroupBox
+    Left = 0
+    Height = 106
+    Top = 360
+    Width = 1059
+    Align = alClient
+    Caption = 'Output Format'
+    ClientHeight = 84
+    ClientWidth = 1055
+    TabOrder = 0
+    object rbBinary: TRadioButton
+      Left = 17
+      Height = 22
+      Top = 40
+      Width = 67
+      Caption = 'Binary'
+      Checked = True
+      TabOrder = 1
+      TabStop = True
+    end
+    object rbFixedText: TRadioButton
+      Left = 112
+      Height = 22
+      Top = 8
+      Width = 90
+      Caption = 'Fixed Text'
+      TabOrder = 0
+    end
+    object rbCSV: TRadioButton
+      Left = 17
+      Height = 22
+      Top = 8
+      Width = 49
+      Caption = 'CSV'
+      TabOrder = 2
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 50
+    Top = 538
+    Width = 1059
+    Align = alBottom
+    ClientHeight = 50
+    ClientWidth = 1059
+    TabOrder = 1
+    object btnExecute: TButton
+      Left = 340
+      Height = 43
+      Top = 2
+      Width = 80
+      Caption = 'Execute'
+      Enabled = False
+      OnClick = btnExecuteClick
+      TabOrder = 0
+    end
+    object btnCancel: TButton
+      Left = 464
+      Height = 43
+      Top = 2
+      Width = 80
+      Caption = 'Close'
+      OnClick = btnCancelClick
+      TabOrder = 1
+    end
+  end
+  object pnlTop: TPanel
+    Left = 0
+    Height = 32
+    Top = 0
+    Width = 1059
+    Align = alTop
+    TabOrder = 2
+  end
+  object GroupBox1: TGroupBox
+    Left = 0
+    Height = 72
+    Top = 466
+    Width = 1059
+    Align = alBottom
+    Caption = 'CSV Options'
+    ClientHeight = 50
+    ClientWidth = 1055
+    TabOrder = 3
+    object chkBoxOutputHeader: TCheckBox
+      Left = 16
+      Height = 22
+      Top = 12
+      Width = 125
+      Caption = 'Output Header'
+      TabOrder = 0
+    end
+    object edtCSVQuote: TEdit
+      Left = 288
+      Height = 30
+      Top = 8
+      Width = 32
+      TabOrder = 1
+      Text = '"'
+    end
+    object edtCSVSeparator: TEdit
+      Left = 512
+      Height = 30
+      Top = 8
+      Width = 30
+      TabOrder = 2
+      Text = ','
+    end
+    object Label2: TLabel
+      Left = 230
+      Height = 20
+      Top = 12
+      Width = 41
+      Caption = 'Quote'
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 436
+      Height = 20
+      Top = 12
+      Width = 62
+      Caption = 'Delimiter'
+      ParentColor = False
+    end
+  end
+  object Panel3: TPanel
+    Left = 0
+    Height = 72
+    Top = 216
+    Width = 1059
+    Align = alTop
+    ClientHeight = 72
+    ClientWidth = 1059
+    TabOrder = 4
+    object grBoxExternals: TGroupBox
+      Left = 1
+      Height = 70
+      Top = 1
+      Width = 1057
+      Align = alClient
+      Caption = 'Externals'
+      ClientHeight = 48
+      ClientWidth = 1053
+      TabOrder = 0
+      object btnOpenExternalFile: TButton
+        Left = 572
+        Height = 25
+        Top = 186
+        Width = 28
+        Caption = '...'
+        OnClick = btnOpenExternalFileClick
+        TabOrder = 0
+      end
+      object lblExternalFile: TLabel
+        Left = 455
+        Height = 20
+        Top = 12
+        Width = 82
+        Caption = 'External File'
+        ParentColor = False
+      end
+      object edtExternalFile: TEdit
+        Left = 552
+        Height = 30
+        Top = 8
+        Width = 458
+        TabOrder = 1
+        Text = '/opt/firebird/examples/empbuild/country_ext.csv'
+      end
+      object edtExternalTableName: TEdit
+        Left = 120
+        Height = 30
+        Top = 8
+        Width = 320
+        TabOrder = 2
+      end
+      object lblExternalTableName: TLabel
+        Left = 17
+        Height = 20
+        Top = 12
+        Width = 80
+        Caption = 'Table Name'
+        ParentColor = False
+      end
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 0
+    Height = 72
+    Top = 288
+    Width = 1059
+    Align = alTop
+    Caption = 'Export Options'
+    ClientHeight = 50
+    ClientWidth = 1055
+    TabOrder = 5
+    object chkExportData: TCheckBox
+      Left = 17
+      Height = 22
+      Top = 12
+      Width = 158
+      Caption = 'Export existing data'
+      Checked = True
+      State = cbChecked
+      TabOrder = 0
+    end
+    object Label1: TLabel
+      Left = 248
+      Height = 20
+      Top = 14
+      Width = 117
+      Caption = 'Default Batchsize'
+      ParentColor = False
+    end
+    object edtDefaultBatchSize: TEdit
+      Left = 380
+      Height = 30
+      Top = 10
+      Width = 112
+      MaxLength = 8
+      NumbersOnly = True
+      TabOrder = 1
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 184
+    Top = 32
+    Width = 1059
+    Align = alTop
+    ClientHeight = 184
+    ClientWidth = 1059
+    TabOrder = 6
+    object grBoxSource: TGroupBox
+      Left = 1
+      Height = 182
+      Top = 1
+      Width = 503
+      Align = alLeft
+      Caption = 'Source'
+      ClientHeight = 160
+      ClientWidth = 499
+      TabOrder = 0
+      object lbSourceTable: TLabel
+        Left = 17
+        Height = 20
+        Top = 112
+        Width = 86
+        Caption = 'Source Table'
+        ParentColor = False
+      end
+      object comboxSourceTables: TComboBox
+        Left = 120
+        Height = 32
+        Top = 108
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceTablesChange
+        Style = csDropDownList
+        TabOrder = 0
+      end
+      object comboxSourceServer: TComboBox
+        Left = 120
+        Height = 32
+        Top = 8
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceServerChange
+        Style = csDropDownList
+        TabOrder = 1
+      end
+      object comboxSourceDB: TComboBox
+        Left = 120
+        Height = 32
+        Top = 58
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceDBChange
+        Style = csDropDownList
+        TabOrder = 2
+      end
+      object Label6: TLabel
+        Left = 17
+        Height = 20
+        Top = 63
+        Width = 63
+        Caption = 'Database'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 17
+        Height = 20
+        Top = 12
+        Width = 43
+        Caption = 'Server'
+        ParentColor = False
+      end
+    end
+    object Destination: TGroupBox
+      Left = 504
+      Height = 182
+      Top = 1
+      Width = 554
+      Align = alClient
+      Caption = 'Destination'
+      ClientHeight = 160
+      ClientWidth = 550
+      TabOrder = 1
+      object Label4: TLabel
+        Left = 17
+        Height = 20
+        Top = 12
+        Width = 43
+        Caption = 'Server'
+        ParentColor = False
+      end
+      object comboxDestServer: TComboBox
+        Left = 120
+        Height = 32
+        Top = 8
+        Width = 382
+        ItemHeight = 0
+        OnChange = comboxDestServerChange
+        Style = csDropDownList
+        TabOrder = 0
+      end
+      object Label5: TLabel
+        Left = 17
+        Height = 20
+        Top = 62
+        Width = 63
+        Caption = 'Database'
+        ParentColor = False
+      end
+      object comboxDestDB: TComboBox
+        Left = 120
+        Height = 32
+        Top = 58
+        Width = 384
+        ItemHeight = 0
+        OnChange = comboxDestDBChange
+        Style = csDropDownList
+        TabOrder = 1
+      end
+    end
+  end
+  object IBQuerySource: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDBSource
+    Transaction = IBTransSource
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 176
+    Top = 128
+  end
+  object IBDBSource: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransSource
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 176
+    Top = 56
+  end
+  object IBTransSource: TIBTransaction
+    TransactionName = '{892379DA-8E91-4A63-B89E-150D57A96DA3}'
+    Active = False
+    DefaultDatabase = IBDBSource
+    Left = 184
+    Top = 192
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 760
+    Top = 392
+  end
+  object IBXScript1: TIBXScript
+    Database = IBDBSource
+    IgnoreGrants = False
+    IgnoreCreateDatabase = False
+    Transaction = IBTransSource
+    ShowAffectedRows = False
+    ShowPerformanceStats = False
+    Left = 304
+    Top = 56
+  end
+  object IBDBDest: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransDest
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 719
+    Top = 49
+  end
+  object IBQueryDest: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDBDest
+    Transaction = IBTransDest
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 721
+    Top = 112
+  end
+  object IBTransDest: TIBTransaction
+    TransactionName = '{850AF12D-03D3-4368-AC47-97A5DD513BDE}'
+    Active = False
+    DefaultDatabase = IBDBDest
+    Left = 721
+    Top = 184
+  end
+end
