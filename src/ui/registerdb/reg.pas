@@ -265,12 +265,6 @@ begin
 
     Rec.IsEmbedded := ServerRec.IsEmbedded;
 
-    {Rec.TxConfig.Isolation    := DefTxIsolation;
-    Rec.TxConfig.Flags        := DefTxFlags;
-    Rec.TxConfig.LockTimeout  := DefTxLockTimeout;
-    Rec.TxConfig.TxName       := DefTxName;
-    }
-    // Schreiben
     Write(F, Rec);
     CloseFile(F);
 

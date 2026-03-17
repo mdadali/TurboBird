@@ -1,7 +1,7 @@
 object IBTransactionEditForm: TIBTransactionEditForm
-  Left = 574
+  Left = 340
   Height = 201
-  Top = 243
+  Top = 255
   Width = 396
   ActiveControl = rbSnapShot
   BorderStyle = bsDialog
@@ -106,7 +106,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
     ClientWidth = 386
     TabOrder = 1
     object Cancelbtn: TButton
-      Left = 189
+      Left = 288
       Height = 25
       Top = 8
       Width = 74
@@ -116,7 +116,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
       TabOrder = 1
     end
     object OKBtn: TButton
-      Left = 104
+      Left = 200
       Height = 25
       Top = 8
       Width = 75
@@ -125,5 +125,31 @@ object IBTransactionEditForm: TIBTransactionEditForm
       OnClick = OKBtnClick
       TabOrder = 0
     end
+    object btnLoadFromFile: TButton
+      Left = 9
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'Load'
+      OnClick = btnLoadFromFileClick
+      TabOrder = 2
+    end
+    object btnSaveToFile: TButton
+      Left = 96
+      Height = 25
+      Top = 8
+      Width = 75
+      Caption = 'Save'
+      OnClick = btnSaveToFileClick
+      TabOrder = 3
+    end
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 304
+    Top = 96
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 344
+    Top = 8
   end
 end

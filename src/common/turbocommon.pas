@@ -423,11 +423,8 @@ var
     AllowIniOverrides: boolean;
 
 
-    //Transaction Defaults aus INI ====
-    DefTxIsolation: Byte;           // 0=read_committed,1=read_committed+rec_version,2=concurrency,3=consistency
-    DefTxFlags: TTxFlags;           // txReadOnly, txWait, txRecVersion, txAutoCommit, txReadConsistency
-    DefTxLockTimeout: string;      // ms
-    DefTxName: string[50];          // optionaler Label / Alias
+    //Transaction Defaults (txt file) ====
+    DefTxFileName: string[255];          // optionaler Label / Alias
 
 
     //BulkExport
@@ -446,6 +443,8 @@ var
     //end-Ini.File////////////////////////////////////////////////////////////////
 
 
+procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
+procedure LoadTxConfigFromFile(const FileName: string; Params: TStrings);
 
 function IBXProtocolToString(AProtocol: TProtocol): string;
 function StringToIBXProtocol(const AValue: string): TProtocol;
@@ -594,6 +593,34 @@ implementation
 
 uses Reg;
 
+procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
+var
+  SL: TStringList;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Assign(Params);
+    SL.SaveToFile(FileName);
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure LoadTxConfigFromFile(const FileName: string; Params: TStrings);
+var
+  SL: TStringList;
+begin
+  if not FileExists(FileName) then
+    Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile(FileName);
+    Params.Assign(SL);
+  finally
+    SL.Free;
+  end;
+end;
 
 function FindNodeByDBIndex(ADBIndex: Word): TTreeNode;
 var
@@ -1823,31 +1850,7 @@ begin
   QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
 
   //TransactionConfig-Defaults
-  DefTxFlags := [];
-  // TransactionConfig-Defaults
-  DefTxFlags := [];
-
-  DefTxIsolation := fIniFile.ReadInteger('TransactionDefaults','Isolation',1);
-  // 1 = ReadCommitted (empfohlen)
-
-  if fIniFile.ReadBool('TransactionDefaults','ReadOnly', False) then
-    Include(DefTxFlags, txReadOnly);
-
-  if fIniFile.ReadBool('TransactionDefaults','Wait', True) then
-    Include(DefTxFlags, txWait);
-
-  if fIniFile.ReadBool('TransactionDefaults','RecVersion', True) then
-    Include(DefTxFlags, txRecVersion);
-
-  if fIniFile.ReadBool('TransactionDefaults','AutoCommit', False) then
-    Include(DefTxFlags, txAutoCommit);
-
-  if fIniFile.ReadBool('TransactionDefaults','ReadConsistency', True) then
-    Include(DefTxFlags, txReadConsistency);
-
-  DefTxLockTimeout := fIniFile.ReadString('TransactionDefaults','LockTimeout', '5000');
-
-  DefTxName := fIniFile.ReadString('TransactionDefaults','TxName','Default');
+  DefTxFileName := fIniFile.ReadString('TransactionDefaults','TxFileName','read_committed.txt');
 
 
   //BulkExport
@@ -1942,14 +1945,7 @@ begin
   fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
 
   //Transaction-Default config
-  fIniFile.WriteInteger('TransactionDefaults', 'Isolation', DefTxIsolation);
-  fIniFile.WriteBool('TransactionDefaults', 'ReadOnly', txReadOnly in DefTxFlags);
-  fIniFile.WriteBool('TransactionDefaults', 'Wait', txWait in DefTxFlags);
-  fIniFile.WriteBool('TransactionDefaults', 'RecVersion', txRecVersion in DefTxFlags);
-  fIniFile.WriteBool('TransactionDefaults', 'AutoCommit', txAutoCommit in DefTxFlags);
-  fIniFile.WriteBool('TransactionDefaults', 'ReadConsistency', txReadConsistency in DefTxFlags);
-  fIniFile.WriteString('TransactionDefaults', 'LockTimeout', DefTxLockTimeout);
-  fIniFile.WriteString('TransactionDefaults', 'TxName', DefTxName);
+  fIniFile.WriteString('TransactionDefaults', 'TxFileName', DefTxFileName);
 
   //BulkExport
   fIniFile.WriteInteger('BulkExport', 'DefaultBatchSize', DefaultBatchSize);
