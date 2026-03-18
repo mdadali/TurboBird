@@ -2007,7 +2007,6 @@ begin
     frmThemeSelector.btnApplyClick(ATab);
 end;
 
-
 (***************  Execute Query   ******************)
 //{$IFDEF ___DEBUG}
 procedure TfmQueryWindow.ExecuteQuery;  //without TQueryThread
@@ -2020,18 +2019,11 @@ var
   Affected: Integer;
   fQueryType: TQueryTypes;
   FSQLQuery: TIBQuery;
+  FSQLTrans_Local: TIBTransaction;
   dbIndex: word;
 begin
   if not FIBConnection.Connected then
     FIBConnection.Connected := true;
-
-  FSQLQuery := TIBQuery.Create(Self);
-  FSQLQuery.Database := FIBConnection;
-  FSQLQuery.Transaction := FIBConnection.DefaultTransaction;
-
-  if not FSQLQuery.Transaction.InTransaction then
-    FSQLQuery.Transaction.StartTransaction;
-
 
   //if not  FSQLTrans.InTransaction then
     //FSQLTrans.StartTransaction;
@@ -2064,10 +2056,19 @@ begin
         begin
           FTab := nil;
           try
+            FSQLQuery := TIBQuery.Create(Self);
+            FSQLTrans_Local := TIBTransaction.Create(nil);
+            FSQLTrans_Local.DefaultDatabase := FIBConnection;
+            FSQLTrans_Local.Params.Assign(FIBConnection.DefaultTransaction.Params);
+            FSQLTrans_Local.StartTransaction;
+
+            FSQLQuery.DataBase := FIBConnection;
+            FSQLQuery.Transaction := FSQLTrans_Local;
+
+
             if cxAutoCommit.Checked then
               if FSQLTrans.InTransaction then
                 FSQLTrans.CommitRetaining;
-
             FTab := CreateResultTab(qtSelectable, FSQLQuery, FSQLScript, FResultMemo);
             FTab.ImageIndex := 6;
 
@@ -2076,14 +2077,10 @@ begin
             FSQLQuery.SQL.Text := FQueryPart;
 
             // Open dataset synchronously
+            if not FSQLTrans_Local.InTransaction then
+              FSQLTrans_Local.StartTransaction;
+            FSQLQuery.Transaction := FSQLTrans_Local;
             FTab.Caption := 'Running...';
-
-            if FSQLQuery.Transaction.InTransaction then
-              FSQLQuery.Transaction.Commit;
-            FSQLQuery.Transaction.StartTransaction;
-
-            //FSQLQuery.Transaction.Params.Assign(FIBConnection.DefaultTransaction.Params);
-
             FSQLQuery.Open;
             FTab.Caption := 'Query Result';
             FTab.ImageIndex := 0;
@@ -2116,11 +2113,6 @@ begin
             if IsDDL then
             begin
               // Execute DDL synchronously
-              if FSQLQuery.Transaction.InTransaction then
-                FSQLQuery.Transaction.Commit;
-
-              FSQLQuery.Transaction.Params.Assign(FIBConnection.DefaultTransaction.Params);
-
               FSQLQuery.SQL.Text := FQueryPart;
               FSQLQuery.ExecSQL;
               if cxAutoCommit.Checked then
@@ -2130,16 +2122,9 @@ begin
             else
             begin
               // Execute DML synchronously
+              FSQLQuery.Transaction.Params.Assign(FIBConnection.DefaultTransaction.Params);
               FSQLQuery.SQL.Text := FQueryPart;
               FTab.Caption := 'Running...';
-              if FSQLQuery.Transaction.InTransaction then
-                FSQLQuery.Transaction.Commit;
-
-              FSQLQuery.Transaction.Params.Assign(FIBConnection.DefaultTransaction.Params);
-
-              if not FSQLQuery.Transaction.InTransaction then
-                FSQLQuery.Transaction.StartTransaction;
-
               FSQLQuery.ExecSQL;
               if cxAutoCommit.Checked then
                 FSQLTrans.CommitRetaining;
