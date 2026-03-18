@@ -270,7 +270,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="5314"/>
+        <TopLine Value="5359"/>
         <CursorPos Y="5394"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -317,10 +317,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="1313"/>
         <CursorPos X="42" Y="1325"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit33>
       <Unit34>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -457,13 +458,14 @@
       <Unit45>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="405"/>
         <CursorPos X="26" Y="420"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="1082" ID="4"/>
         </Bookmarks>
+        <Loaded Value="True"/>
       </Unit45>
       <Unit46>
         <Filename Value="libs\topologicalsort.pas"/>
@@ -1069,10 +1071,11 @@
         <ComponentName Value="frmBulkClone"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="194"/>
         <CursorPos Y="208"/>
-        <UsageCount Value="182"/>
+        <UsageCount Value="181"/>
+        <Loaded Value="True"/>
       </Unit104>
       <Unit105>
         <Filename Value="ui\ibx_design\IBTransactionEdit.pas"/>
@@ -1083,7 +1086,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="295"/>
         <CursorPos X="45" Y="303"/>
-        <UsageCount Value="78"/>
+        <UsageCount Value="77"/>
       </Unit105>
       <Unit106>
         <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
@@ -1092,11 +1095,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fCSVEditor"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="331"/>
-        <CursorPos X="86" Y="344"/>
-        <UsageCount Value="51"/>
+        <TopLine Value="358"/>
+        <CursorPos X="84" Y="367"/>
+        <UsageCount Value="50"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit106>
@@ -1106,7 +1108,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="139"/>
         <CursorPos X="86" Y="144"/>
-        <UsageCount Value="27"/>
+        <UsageCount Value="25"/>
       </Unit107>
       <Unit108>
         <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
@@ -1310,10 +1312,12 @@
       <Unit134>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\db.pas"/>
         <UnitName Value="DB"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="105"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="102"/>
         <CursorPos X="25" Y="119"/>
         <UsageCount Value="13"/>
+        <Loaded Value="True"/>
       </Unit134>
       <Unit135>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\dataset.inc"/>
@@ -1406,12 +1410,12 @@
         <UsageCount Value="9"/>
       </Unit146>
       <Unit147>
-        <Filename Value="ui\tools\RxCSV\fcsveditor.lfm"/>
-        <HasResources Value="True"/>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\export\fpdbexport.pp"/>
+        <UnitName Value="fpDBExport"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="48" Y="4"/>
+        <TopLine Value="19"/>
+        <CursorPos X="23" Y="37"/>
         <UsageCount Value="10"/>
-        <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit147>
     </Units>
     <OtherDefines Count="3">
@@ -1419,7 +1423,104 @@
       <Define1 Value="UseCThreads"/>
       <Define2 Value="WITH_GTK2_IM"/>
     </OtherDefines>
-    <JumpHistory HistoryIndex="-1"/>
+    <JumpHistory Count="24" HistoryIndex="23">
+      <Position1>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="277" Column="31" TopLine="263"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="240" Column="34" TopLine="236"/>
+      </Position2>
+      <Position3>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2547" Column="55" TopLine="2542"/>
+      </Position3>
+      <Position4>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="28" Column="14" TopLine="10"/>
+      </Position4>
+      <Position5>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="245" Column="5" TopLine="242"/>
+      </Position5>
+      <Position6>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="38" Column="20" TopLine="20"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="259" Column="82" TopLine="249"/>
+      </Position7>
+      <Position8>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="228" Column="33" TopLine="212"/>
+      </Position8>
+      <Position9>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="256" Column="55" TopLine="245"/>
+      </Position9>
+      <Position10>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="71" Column="26" TopLine="62"/>
+      </Position10>
+      <Position11>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="261" Column="44" TopLine="242"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="164" Column="37" TopLine="164"/>
+      </Position12>
+      <Position13>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1959" Column="55" TopLine="1949"/>
+      </Position13>
+      <Position14>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="121" Column="61" TopLine="118"/>
+      </Position14>
+      <Position15>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="126" Column="52" TopLine="107"/>
+      </Position15>
+      <Position16>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="295" Column="24" TopLine="269"/>
+      </Position16>
+      <Position17>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="321" Column="30" TopLine="308"/>
+      </Position17>
+      <Position18>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="258" Column="93" TopLine="258"/>
+      </Position18>
+      <Position19>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="259" Column="93" TopLine="259"/>
+      </Position19>
+      <Position20>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="260" Column="93" TopLine="260"/>
+      </Position20>
+      <Position21>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="261" Column="93" TopLine="261"/>
+      </Position21>
+      <Position22>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="321" Column="22" TopLine="305"/>
+      </Position22>
+      <Position23>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="8" Column="87"/>
+      </Position23>
+      <Position24>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="367" Column="84" TopLine="358"/>
+      </Position24>
+    </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode="default"/>

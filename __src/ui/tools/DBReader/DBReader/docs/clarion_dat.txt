@@ -1,0 +1,723 @@
+
+
+
+
+
+
+
+
+
+
+
+
+                          BULLETIN #117
+
+                       CLARION DATA FILES
+
+
+
+
+                            Overview
+
+    This bulletin explains the format of Clarion data files.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                       Clarion Data Files
+
+This technical bulletin explains the format of data files created by the Clarion Professional Developer and the Clarion Personal Developer (Version 2 and above).  It will only cover data files; key and index files are covered in Clarion Technical Bulletin #118.  Use this information carefully because an erroneous change to a data file will make your file unreadable.  Due to the risks of data integrity, encryption is not covered in this bulletin. 
+
+A file defined with Clarion contains a lot of information on data such as fields, keys, indexes, pictures, arrays, etc.  When the file is first created, you will have a .DAT file and optionally one or more .K??, .I??, and .MEM files (where ?? is a two digit number).  The .DAT file also contains information on keys, fields and their layouts, and many fields that allow Professional Developer to efficiently use the space on your disk.
+
+First, let us discuss the .DAT file.  This file consists of several sections (some sections are optional):
+
+	1)	The file header
+	2)	Field description
+	3)	Key and index descriptors
+	4)	Picture descriptors
+	5)	Array descriptors
+	6)	Data
+
+The file header and field descriptors are always in the file-the other sections exist only if they are needed.  If there is no data in the file, section 6 is optional.
+
+Now let us look at each section individually.  To simplify matters, the picture and array descriptors will be explained later in the bulletin.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1)		THE FILE HEADER
+
+The file header consists of 23 fields that instruct the Professional Developer what items to search for in the rest of the .DAT file.  The following example is a C structure that defines the file header:
+
+			struct {
+					unsigned filesig;	/* file signature */
+					unsigned sfatr;			/* file attribute and status */
+					unsigned char numbkeys;/* number of keys in file */
+					unsigned long numrecs;/* number of records in file */
+					unsigned long numdels;/* number of deleted records */
+					unsigned numflds;	/* number of fields */
+					unsigned numpics;	/* number of pictures */
+					unsigned nummars;	/* number of array descriptors */
+					unsigned reclen;		/* record length (including record header) */
+					unsigned long offset;/* start of data area */
+					unsigned long logoef;/* logical end of file */
+					unsigned long logbof;/* logical beginning of file */
+					unsigned long freerec;/* first usable deleted record */
+					unsigned char recname[12];/* record name without prefix */
+					unsigned char memnam[12];/* memo name without prefix */
+					unsigned char filpre[3];/* file name prefix */
+					unsigned char recpre[3];/* record name prefix */
+					unsigned memolen;	/* size of memo */
+					unsigned memowid;	/* column width of memo */
+					unsigned long reserved;/* reserved */
+					unsigned long chgtime;/* time of last change */
+					unsigned long chgdate;/* date of last change */
+					unsigned reserved2;/* reserved */
+			{;
+
+When looking at a dump of a .DAT file, remember that fields marked "unsigned" (otherwise known as "unsigned int") use 2 bytes, "unsigned char" fields use 1 byte, and "unsigned long" fields use 4 bytes.  Due to the way the Intel CPUs store their data, bytes of unsigned longs and unsigned ints are  reversed on disk. 
+
+Almost all of the fields in the header are numbers or strings.  One exception is a bit-map.  The file attribute field (sfatr) is a 2-byte field.  Currently, only the lower 8 bits are used.  Depending on what is currently happening to the file, the following bits are either turned on or off.   Bit 0 is the low order bit and bit 15 is the high order bit.  
+
+
+
+
+
+
+
+
+
+
+
+If a bit is turned on, the corresponding condition is true for the file:
+
+	bit 0 - file is locked
+	bit 1 - file is owned
+	bit 2 - records are encrypted
+	bit 3 - memo file exists
+	bit 4 - file is compressed
+	bit 5 - reclaim deleted records
+	bit 6 - file is read only
+	bit 7 - file may be created
+
+
+2)	THE FIELD DESCRIPTORS
+
+Field descriptors follow the file header.  There are as many field descriptor entries as there are fields in the file.  Each field descriptor consists of 8 fields.  They are defined as follows:
+
+struct {
+		unsigned char fldtype;/* type of field */
+		unsigned fldname[16];/* name of field */
+		unsigned foffset;/* offset into record */
+		unsigned length;	/* length of field */
+		unsigned char decsig;/* significance for decimals */
+		unsigned char decdec;/* number of decimal places */
+		unsigned arrnum;	/* array number */
+		unsigned picnum;	/* picture number */
+};
+
+
+The "fldtype" field defines the field type.  The following types are currently used.
+
+	1 - LONG
+	2 - REAL
+	3 - STRING
+	4 - STRING WITH PICTURE TOKEN
+	5 - BYTE
+	6 - SHORT
+	7 - GROUP
+	8 - DECIMAL
+
+
+3)			KEY AND INDEX DESCRIPTORS
+
+If any keys are defined for the file, key descriptors follow field descriptors.  Like the field descriptors, one key descriptor corresponds to each key/index defined.  Key descriptors are divided into two parts: keysects and keyparts.
+
+
+
+They are defined below:
+
+		struct {
+				unsigned char numcomps;/* number of components for key */
+				char keynams[16];	/* name of this key */
+				unsigned char comptype;/* type of composite */
+				unsigned char complen;/* length of composite */
+		} KEYSECT;
+		struct {
+				unsigned char fldtype;/* type of field */
+				unsigned fldnum;		/* field number */
+				unsigned elmoff;		/* record offset of this element */
+				unsigned char elmlen;/* length of element */
+		} KEYPART;
+
+There is exactly one KEYSECT for each key/index defined and one KEYPART for each field component in a key or index.
+
+
+4 & 5)PICTURE AND ARRAY DESCRIPTORS
+
+Picture and array descriptors will be discussed later in the bulletin.
+
+
+6)			DATA
+
+Each record of data is preceded by a header.  This header is defined as follows:
+
+			struct {
+					unsigned char rhd;/* record header type and status */
+					unsigned long rptr;/* pointer for next deleted record or memo if active */
+			};
+
+"rhd" is a bit field that tells Professional Developer the status of the record:
+
+	bit 0 - new record
+	bit 1 - old record
+	bit 2 - revised record
+	bit 4 - deleted record
+	bit 6 - record held
+
+The header is followed by fields that have been defined for  records.
+
+
+
+
+
+
+
+
+
+The previous discussion contained quite a bit of information, but not every section was explained completely.  To simplify matters, we will look at an actual Clarion data file.  For this example, we will use a simple file.  Taken from the Professional Developer's EXAMPLES subdirectory, it is a small file called PHONEBK.  It is defined as follows:
+
+			FILE, PRE(PHN), RECLAIM, CREATE
+					PHN:BY_NAMEKEY(PHN:NAME),DUP,NOCASE
+					PHN:BY_COMPANYKEY(PHN:COMPANY),DUP,NOCASE
+					RECORD				RECORD
+					NAME								STRING(30)
+					COMPANY					STRING(30)
+					ADDRESS					STRING(30)
+					CITY								STRING(28)
+					STATE							STRING(2)
+					ZIP									STRING(6)
+					PHONE							STRING(11)
+															. .
+
+To summarize the file, six fields are simple strings, deleted records are reclaimed by the system, two keys are defined, and both keys are case-sensitive and allow duplicates.  This file has no memo fields, is not encrypted, and has no composite keys.  Now we will look at each section of the file. Since this file only has two records, a dump of the entire file is shown below:
+
+00000: 43 33 A0 00 02 02 00 00 00 00 00 00 00 07 00 00|C3..............|
+00010: 00 00 00 89 00 44 01 00 00 02 00 00 00 01 00 00|.....D..........|
+00020: 00 00 00 00 00 52 45 43 4F 52 44 20 20 20 20 20|.....RECORD     |
+00030: 20 20 20 20 20 20 20 20 20 20 20 20 20 50 48 4E|             PHN|
+00040: 20 20 20 00 00 00 00 00 00 00 00 9B E4 4F 00 1C|   ..........O..|
+00050: 0D 01 00 00 00 03 50 48 4E 3A 4E 41 4D 45 20 20|......PHN:NAME  |
+00060: 20 20 20 20 20 20 00 00 1E 00 00 00 00 00 00 00|      ..........|
+00070: 03 50 48 4E 3A 43 4F 4D 50 41 4E 59 20 20 20 20|.PHN:COMPANY    |
+00080: 20 1E 00 1E 00 00 00 00 00 00 00 03 50 48 4E 3A| ...........PHN:|
+00090: 41 44 44 52 45 53 53 20 20 20 20 20 3C 00 1E 00|ADDRESS     <...|
+000A0: 00 00 00 00 00 00 03 50 48 4E 3A 43 49 54 59 20|.......PHN:CITY |
+000B0: 20 20 20 20 20 20 20 5A 00 1C 00 00 00 00 00 00|       Z........|
+000C0: 00 03 50 48 4E 3A 53 54 41 54 45 20 20 20 20 20|..PHN:STATE     |
+000D0: 20 20 76 00 02 00 00 00 00 00 00 00 03 50 48 4E|  v..........PHN|
+000E0: 3A 5A 49 50 20 20 20 20 20 20 20 20 20 78 00 06|:ZIP         x..|
+000F0: 00 00 00 00 00 00 00 08 50 48 4E 3A 50 48 4F 4E|........PHN:PHON|
+00100: 45 20 20 20 20 20 20 20 7E 00 06 00 0B 00 00 00|E       ~.......|
+00110: 00 00 01 50 48 4E 3A 42 59 5F 4E 41 4D 45 20 20|...PHN:BY_NAME  |
+00120: 20 20 20 70 1E 03 01 00 00 00 1E 01 50 48 4E 3A|   p........PHN:|
+00130: 42 59 5F 43 4F 4D 50 41 4E 59 20 20 70 1E 03 02|BY_COMPANY  p...|
+00140: 00 1E 00 1E 01 00 00 00 00 4D 61 72 6B 20 45 2E|.........Mark E.|
+00150: 20 44 61 76 69 64 73 6F 6E 20 20 20 20 20 20 20| Davidson       |
+00160: 20 20 20 20 20 20 20 43 6C 61 72 69 6F 6E 20 53|       Clarion S|
+00170: 6F 66 74 77 61 72 65 20 20 20 20 20 20 20 20 20|oftware         |
+00180: 20 20 20 20 20 31 35 30 20 45 2E 20 53 61 6D 70|     150 E. Samp|
+00190: 6C 65 20 52 6F 61 64 2C 20 53 75 69 74 65 20 32|le Road, Suite 2|
+001A0: 30 30 20 50 6F 6D 70 61 6E 6F 20 42 65 61 63 68|00 Pompano Beach|
+001B0: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 46|               F|
+001C0: 4C 33 33 30 36 34 20 00 30 57 85 45 55 01 00 00|L33064 .OW.EU...|
+001D0: 00 00 52 61 79 20 50 69 64 67 65 20 20 20 20 20|..Ray Pidge     |
+001E0: 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20|                |
+001F0: 50 72 6F 78 69 6D 69 74 79 20 54 65 63 68 6E 6F|Proximity Techno|
+00200: 6C 6F 67 79 20 20 20 20 20 20 20 20 20 20 35 35|logy          35|
+00210: 31 31 20 4E 45 20 32 32 6E 64 20 41 76 65 6E 75|11 NE 22nd Avenu|
+00220: 65 20 20 20 20 20 20 20 20 20 20 20 46 6F 72 74|e           Fort|
+00230: 20 4C 61 75 64 65 72 64 61 6C 65 20 20 20 20 20| Lauderdale     |
+00240: 20 20 20 20 20 20 20 20 46 4C 33 33 30 36 33 20|        FL33063 |
+00250: 00 30 55 66 35 11                              |.OUf5. |
+The first section is the file header.  Below is a break down of the file header by field.  Preceding each field name is the offset in hexadecimal for this file with the assumption that the file starts at offset 0000.  If you are using Scanner to view the file, add one to each offset as Scanner starts the file at offset 0001.
+
+(0000) filesig
+The file's signature (43 33).  Professional Developer Version 2 created the file.  Since bytes are stored in a reverse order (due to the Intel architecture), this value is actually hex 3343.
+
+(0002) sfatr
+The file's attributes (A0 00).  This is a bit-field, so it is converted to binary.  Hex 00A0 = 10100000 (the top byte is not used).  Bits 7 and 5 are turned on.  Referring to the discussion of the sfatr field, this definition means "file may be created" and "reclaim deleted records."
+
+(0004) numbkeys
+The number of keys (02).  This file has two key fields.
+
+(0005) numrecs
+The number of records (02 00 00 00).  This file has two records.
+
+(0009) numdels
+The number of deleted records (00 00 00 00).  This file has no deleted records.
+
+(000D) numflds
+The number of fields defined (07 00).  This file has a total of 7 fields.
+
+(000F) numpics
+The number of pictures (00 00).  Since the file has no pictures defined, it does not have a picture description section.
+
+(0011) numarrs
+The number of arrays (00 00).  Since the file has no arrays defined, it does not have an array description section.
+
+(0013) reclen
+The record length, including the header (89 00).  Hex 0089 equals 137 decimal.  Our fields use 132 bytes (30 + 30 + 30 + 28 + 2 + 6 + 6).  Clarion's record header adds 5 bytes to this total.  Note: the DECIMAL(11,0) field uses 6 bytes.
+
+(0015) offset
+The beginning of the data area (44 01 00 00).  The data begins 0144 hex bytes into the file.
+
+
+(0019) logeof
+The logical end-of-file (02 00 00 00).  This file logically ends at record 2.
+
+(001D) logbof
+The logical beginning-of-file (01 00 00 00).  This file logically begins at record 1.
+
+(0021) freerec
+The first usable deleted record (00 00 00 00).  Since the file has no deleted records, this field is zero.
+
+(0025) recnam
+The record name without the prefix (52 45 43 4F 52 44 20 20 20 20 20 20 = "RECORD").  The strings are padded with spaces and have no terminating NULL to indicate end-of-string.
+
+(0031) memnam
+The memo name without the prefix (20 20 20 20 20 20 20 20 20 20 20 20).  Since no memo is defined for the file, this field is all blanks.
+
+(003D) filpre
+The file name prefix (50 48 4E = "PHN").
+
+(0040) recpre
+The record prefix (20 20 20).  Since there is no record prefix, this field is all blanks.
+
+(0043) memolen
+The size of the memo file (00 00).  Since the file has no memo field, this field has a value of 0.
+
+(0045) memowid
+The column width of the memo file (00 00).
+
+(0047) reserved1
+This field is reserved (00 00 00 00).
+
+(004B) chgtime
+The time of the last change to the file (9B E4 4F 00) was 02:32 PM.  This time is stored in an "absolute" format, and is explained below.
+
+(004F) chgdate
+The date of the last change to the file (1C 0D 01 00) was 08/11/89.  This date is also stored in an "absolute" format.  See below.
+
+(0053) reserved2
+This field is also reserved (00 00).  
+
+Field descriptors are explained next.  There is one entry for each field in the file.  Here is a breakdown of the first field descriptor:
+
+(0055) fldtype
+The field type (03).  This field type is a STRING.
+
+(0056) fldname
+The field name (50 48 4E 3A 4E 41 4D 45 20 20 20 20 20 20 20 20 = "PHN:NAME").  This name includes the prefix and is padded with spaces.
+
+(0066) foffset
+The offset into each record for the field (00 00).  Since this is the first field in each record, it has an affect of 0 (i.e. it is at the beginning of each record).  
+
+(0068) length
+The field length (1E 00).  This is the length of the field (in bytes).  Since hex 1E = 30 decimal, the field is 30 bytes long.
+
+(006A) decsig
+The number of decimal places in the field (00).  Since it is not a numeric field, this field is 0.
+
+(006B) decdec
+The significance for decimals (00).  Since it is not a numeric field, this field is 0.
+
+(006C) arrnum
+The array number for the field (00 00).  Since it is not defined as an array, this field is 0.
+
+(006E) picnum
+The picture number for the field (00 00).  Since no picture number is associated with the field, it is 0.
+
+This entry is followed by fields 2 through 7.  These field are similar to field 1 with the exception that the fldname, foffset and length fields may have different values.  Field 7 is a DECIMAL, its fldtype is 08 and its length is 6 bytes-which is its actual length in the file. 
+
+Key descriptors follow field descriptors.  As in field descriptors, only one key descriptor for each key is defined for a file.  In this example, there are two key descriptors.  
+
+
+
+
+
+
+Here is the breakdown of the first key descriptor (remember that key descriptors are broken into two sections, KEYSECTs and KEYPARTs):
+
+(0112) numcomps
+The number of components for the key (01).  Since this key is not a component key (it is composed of only one field), this field has a value of 1.
+
+(0113) keynams
+The key name (50 48 4E 3A 42 59 5F 4E 41 4D 45 20 20 20 20 20 = "PHN:BY_NAME").  This is the name of the key, as defined by Professional Developer.  It is padded with spaces.
+
+(0123) comptyp
+The type of the composite key (70).  This bitfield directs Professional Developer that this is a key file (not an index file), duplicate entries are allowed, and case does not matter in keys.  Since this field is only useful when you are processing keys, it will be skipped.  For specific information, see Clarion Technical Bulletin #118 on key/index files.  
+
+(0124) complen
+The length of the composite key (1E).  The length of the key is Hex 1E = 30 decimal.
+
+(0125) fldtype
+The type of field this key is based on (03).  Since the field uses the same values as the fldtype in the field descriptor, it is a STRING.
+
+(0126) fldnum
+The field number this key is based on (01 00).  This key is based on field #1 in the file.
+
+(0128) elmoff
+The offset into the record for the field this key is based on (00 00).  Since the key is based on the first field in each record, the offset is 0.
+
+(012A) elmlen
+The length of the element in the file this key is based on (1E).
+
+The descriptor for key number 2 follows the key descriptor.  It is similar with the exception of the keynams, fldnum, and elmoff fields.
+
+
+
+
+
+
+The data section is explained next.  However, Clarion's file system has added 5 bytes to the front of your records.  For this first record, the header looks like this:
+
+(0144) rhd	
+The record header type and status (01).  From the previous discussion of the header, 01 (binary 00000001) means "new record."  Generally, do not be concerned with this field unless it is set to "deleted record" or "locked record."
+
+(0145) rptr
+The pointer to the memo (00 00 00 00).  Since the file has no memos, this field is set to 0.  If this record were deleted, the field would point to the next deleted record.
+
+The record header for record 2 is exactly the same as record 1.  Each field is stored with no separators between them.  STRINGs are padded with spaces out to their maximum defined length.  DECIMALs are stored in a packed BCD-like format, with two digits per byte.  Since the DECIMAL field was defined as DECIMAL(11), it use 6 bytes (2 digits per byte, with a half byte of padding because 11 is not divided into 2 evenly).  The DECIMAL file is displayed for the first record: 00 30 57 85 45 55 = 305-785-4555.  Even though it will fit in 5 bytes, use 6 bytes because it directed Clarion was told it would use 11 digits.  However, since separators are removed in the number, use a picture to display it correctly.
+
+This is a fairly simple example to understand.  But, what about key files?  Unfortunately, even simple key files are difficult to explain.  Clarion products use a modified version of a B+ tree, named after the creator, R. Bayer.  Instead explaining the complexity of key files, we will cover the basics.
+
+
+KEY AND INDEX FILES
+
+Key and Index files are read and written in blocks of 512 bytes.  A key file has a 512 byte header that contains information about the key file structure.  Following the header is a series of 512 byte nodes that allows programs to process a data file in key order.  Although the key file header occupies 512 bytes, currently only 35 bytes are used.  
+
+
+
+
+
+
+
+
+
+The header of a key is laid out below:
+
+			struct {
+					unsigned long root;/* number of root node */
+					unsigned long numkent;/* number of key entries */
+					unsigned long numnode;/* number of nodes for this index */
+					unsigned long lastnod;/* node number of last node */
+					unsigned long keyeof;/* record # of end of file */
+					unsigned long keybof;/* record # of beginning of file */
+					unsigned long unused;/* first unused node of file */
+					unsigned char keytyp;/* type of key */
+					unsigned char keynode;/* # of keys per node */
+					unsigned char numcmps;/* # of components of key */
+					unsigned keylen;/* total length of key entry */
+					unsigned numlvls;/* number of levels */
+					char cvoid[477];/* reserved space */
+			};
+
+
+Do not attempt to change key files.  If you are interested in key files layout, refer to Clarion Technical Bulletin #118 on key/index files.
+
+Another difficult aspect of understanding key files is Clarion's method of storing the actual key.  Keys are kept in a truly "sortable" order involving a lot of byte and bit flipping.  If you want to read a data base in a certain order, use Sorter to sort the file before reading it.
+
+
+DATES AND TIMES IN THE HEADER
+As mentioned previously, dates and times in the header are stored in an "absolute" format.  Below an absolute date and time (in Clarion) is converted to a more easily readable number.  Given an absolute time (abstim):
+
+			IF abstime < 1 OR abstime > 8640000
+			THEN
+					STOP	! abstime is invalid
+			ELSE
+					abstime = abstime - 1
+					hour = abstime / 360000
+					abstime = abstime % 360000
+					minute = abstime / 6000
+					abstime = abstime % 6000
+					seconds = abstime / 100
+					hundreds = abstime % 100
+					.
+
+The above algorithm assumes integer arithmetic; abstime is stored in a "long integer" field, that occupies 4 bytes.  
+
+
+
+
+
+
+Now we will take the time from the header.  The "time of last change" for the file is hex 9B E4 4F 00.  Since the order of the bytes must be reversed (bytes are stored low-byte, then high byte; in a long integer, the bytes are also flipped), the hex value is 00 4F E4 9B.  Follow these steps:
+
+	1.Use the hex value 00 4F E4 9B. 
+	2.Convert it to decimal.  The value is 5235867.
+	3.Divide 5235867 / 360000 = 14 with a remainder of 195867.  14 is the hour.
+	4.Divide 195867 / 6000 = 32 with a remainder of 3867.  32 is the minute.
+	5.Divide 3867 / 100 = 38 with a remainder of 67.  38 is the seconds and 67 is the hundredths of seconds.
+
+The time is 14:32:38.67 or 2:32 PM as the last time change for the file.
+
+Dates are more involved.  Given an absolute date (absday):
+
+		IF absday <= 3 OR absday > 109211
+		THEN
+				STOP! absday is invalid
+		ELSE
+				IF absday > 36527
+				THEN
+						absday = absday - 3
+				ELSE
+						absday = absday - 4
+						.
+				year = (1801 + (4* (absday / 1461)))
+				absday = absday % 1461
+				IF absday != 1460
+				THEN
+						year = year + (absday / 365)
+						day = absday % 365
+				ELSE
+						year = year + 3
+						day = 365
+						.
+				IF year < 100
+				THEN
+						year = year + 1900
+						.
+				IF year % 4 = 0 AND year != 1900
+				THEN
+						number_of_days_in_February = 29
+				ELSE
+						number_of_days_in_February = 28
+						.
+				LOOP i = 1 TO 12 BY 1
+						day = day - number_of_days_in_month_i
+						IF day < 0
+						THEN
+								day = day + number_of_days_in_month_i + 1
+								BREAK
+						.
+				month = i
+		end if
+
+The 'number_of_days_in_month_i' is a nonsense variable equal to the number of days in a particular month i, with i running from 1 (January) to 12 (December).  Let us review the file header example.  The date for this file is a "long integer," stored on disk as hexadecimal 1C 0D 01 00.  When the byte order is reversed, the hex value is 00 01 0D 1C.  Follow these steps:
+
+	1.Use the hex value 00 01 0D 1C.
+	2.Convert it to decimal. The value is 68892.
+	3.Since 68892 is > 36527, subtract 3. The value is 68889.
+	4.Compute (1801 + (4 * (68889 / 1461))).  The result is 1989.  1989 is the year.
+	5.Compute 68889 % 1461.  The result is 222.
+	6.Since 222 is != 1460, compute 222 / 365 and the result is 0.  Add 0 to 1989 (the year).
+	7.Compute 222 % 365. The result, 222, is the day.
+	8.Since 1989 % 4 is != 0, the date is not in a leap year and it means that February has 28 days.
+	9.Start the loop from 1 to 12, subtracting the number of days in each month from 'day' until 'day' drops below 0 (the value of i in the far right column is the current value of the loop variable).
+
+				January: day = day - 31, or 191 (i = 1).
+				February: day = day - 28, or 163 (i = 2).
+				March: day = day - 31, or 132 (i = 3).
+				April: day = day - 30, or 102 (i = 4).
+				May: day = day - 31, or 71 (i = 5).
+				June: day = day - 30, or 41 (i = 6).
+				July: day = day - 31, or 10 (i = 7).
+				August: day = day - 31, or -21 (i = 8).
+
+	10.Compute day = day + 31 + 1. The result is 11.  This is the actual day of the month.  Since the loop terminated at i = 8, we know that 8 is the month number.  As a result, our date is 08/11/89.
+
+To simplify the discussion, composite keys, picture descriptors, array descriptors, and memo fields were not included.  We will look at each section to see how they affect the file layout.
+
+
+COMPOSITE KEYS
+As discussed previously, key descriptors are made up of two parts: KEYSECTs and KEYPARTs.  The file example had both.  When a composite key is used, only one KEYSECT is in the key descriptors, but there is one KEYPART for each field that makes up the component key.  For example, if you have a key composed of the PHN:NAME and PHN:COMPANY fields, your key descriptor would have three elements (instead of two).  You still have a KEYSECT, but the "numcomps" field has a value of 2. 
+
+The "complen" field is equal to the sum of the lengths of the PHN:NAME and PHN:COMPANY fields.
+
+Next, you have two KEYPARTs - one for the NAME field and one for the COMPANY field.  The only difficulty with handling composite keys is that in order to build your key, you must read more than one field from each record. 
+
+
+PICTURE DESCRIPTORS
+If a picture is assigned to a field in your database, then a picture descriptor is created for the field.  Picture descriptors follow the key descriptors in your file.  The following is an example of their layout:
+
+					struct {
+								unsigned piclen;
+								char    picstr[256];
+					};
+
+Since "picstr" (like other strings in data files) is not null-terminated, "piclen" contains the actual length of the picture.  If a picture descriptor has been created, the number associated with it is placed in the "picnum" field of the field descriptor associated with the picture.  Picture descriptor numbering starts at 1.  If you are reading the field descriptors and the "picnum" field is not zero, remember to search for the picture descriptor,  because it takes space in the file before the actual data records occur.
+
+
+ARRAY DESCRIPTORS
+
+			struct {
+					unsigned numdim;/* dims for current field */
+					unsigned totdim;/* total number of dims for field */
+					unsigned elmsiz;/* total size of current field */
+					struct {
+							unsigned maxdim;/* number of dims for array part */
+							unsigned lendim;/* length of field */
+					} ARRPART[sizeof(ARRPART)*totdim];
+			} ARRDESC;
+
+Array descriptors are not as complicated as they appear.  Each array descriptor consists of the "numdim," "totdim," and the "elmsiz" fields, followed by one or more "ARRPART" structures.  There is one "ARRPART" for each dimension in the array.
+
+
+
+
+
+
+
+
+Let use a simple case.   A single array causes one array descriptor to be created.  Assuming the allocation STRING(10),DIM(3), the following array descriptor would be created:
+
+			struct {
+					unsigned numdim = 1;
+					unsigned totdim = 1;
+					unsigned elmsiz = 30;
+					struct {
+							unsigned maxdim = 3;
+							unsigned lendim = 10;
+					};
+			};
+
+"numdim" and "totdim" explain if the descriptor is part of another array.  If they are equal, the array descriptor stands alone.  "elmsiz" is the total size of the elements of this array, "maxdim" is the highest value allowed as the dimension, and "lendim" is the length of each dimension.  This array has 3 "elements" that use 10 bytes, giving an element size of 30.  Since this array only has one dimension (3), there is only one ARRPART structure   Now let us add a group specifier:
+
+		GROUP,DIM(5)
+				STRING(10),DIM(3)
+
+Two array descriptors are created; one for the group and one for the array.  Because the group has a dimension, an array descriptor is created for the group.  The array descriptor for the group will look like this:
+
+			struct {
+					unsigned numdim = 1;
+					unsigned totdim = 1;
+					unsigned elmsiz = 150;   /*5 * 30 */
+					struct {
+							unsigned maxdim = 5;
+							unsigned lendim = 30;
+					};
+			};
+
+Since the group has one dimension (5) with each element using 30 bytes, the total length is 150 bytes.  This is a second array descriptor for the string: 
+
+			struct {
+					unsigned numdim = 1;
+					unsigned totdim = 2;
+					unsigned elmsiz = 30;
+					struct {
+							unsigned maxdim = 5;
+							unsigned lendim = 30;
+					};
+					struct {
+							unsigned maxdim = 3;
+							unsigned lendim = 10;
+					};
+			};
+This array descriptor has two ARRPARTs; one covers the array of 5 (the group) while the second one covers the array of strings.  Let us make the example more complicated:
+
+			GROUP,DIM(5)
+					STRINGS(10),DIM(3,6)
+
+We still have only two array descriptors.  Again, the first one is for the group:
+
+			struct {
+					unsigned numdim = 1;
+					unsigned totdim = 1;
+					unsigned elmsiz = 900;/* 3 * 6 * 10 * 5 */
+					struct {
+							unsigned maxdim = 5;
+							unsigned lendim = 180;/* 3 * 6 * 10 */
+					};
+			};
+
+Now the array descriptor for the strings:
+
+			struct {
+					unsigned numdim = 2;
+					unsigned totdim = 3;
+					unsigned elmsiz = 180; /* 3 * 6 * 10 */
+					struct {
+							unsigned maxdim = 5;
+							unsigned lendim = 180;
+					};
+					struct {
+							unsigned maxdim = 3;
+							unsigned lendim - 60;
+					};
+					struct };
+							unsigned maxdim = 6;
+							unsigned lendim - 10;
+					};
+			};
+
+Array descriptors, like picture descriptors, are numbered.  The array descriptors occur following the picture descriptors.  If an array descriptor has been created for a field, the number assigned to it will be in the "arrnum" field of the corresponding field descriptor.
+
+
+MEMO FIELDS
+Memo fields are unique because they are stored in a separate file from your data.  If there is a memo file associated with a data base, the "memnam" field of the data base header has name of the memo field and "memolen" and "memowid" fields have the length and width of the memo field.
+
+If a record in the data base has a memo associated with it, the "rptr" field in the header, occurring prior to each record, will have a value.  With this value, calculate the offset needed to go into the memo file to read the memo.  
+Given "rptr", the following formula yields the offset:
+
+    offset - ((rptr - 1) * 256) + 6
+
+The memo file consists of a 6 byte header, followed by 256 byte memo blocks.  The header appears below:
+
+									struct {
+											unsigned memsig = 0x334D;/* memo file signature */
+											unsigned long firstdel;/* first deleted memo block */
+									};
+
+Memo blocks appear below:
+
+									struct {
+											unsigned long nxtblk;/* next block for this memo */
+											char       memo[252];/* memo text */
+									};
+
+Read the memo file in 256 byte chunks, take the value of "rptr" and calculate the offset into the memo file.  Go to the offset and read 256 bytes.  The first four bytes will either point to the next 256 byte chunk or be zero, indicating that there are no more blocks for the memo.  The remaining 252 bytes are plain text.
+
+
+CONCLUSION
+Using this technical bulletin, you should be able to read most any data base, unless it is encrypted or compressed.  This format contains many parts that serve a specific purpose to help you accomplish your goals.

@@ -1,0 +1,1553 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <PathDelim Value="\"/>
+    <Version Value="12"/>
+    <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
+    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <Units Count="148">
+      <Unit0>
+        <Filename Value="TurboBird.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <TopLine Value="43"/>
+        <CursorPos X="34" Y="56"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="turbocommon.inc"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="196"/>
+        <CursorPos X="37" Y="64"/>
+        <UsageCount Value="200"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="getdeclarations\udb_udr_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="32" Y="6"/>
+        <UsageCount Value="200"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="getdeclarations\udb_firebird_struct_helper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="50" Y="12"/>
+        <UsageCount Value="200"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="getdeclarations\udb_udf_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="83"/>
+        <CursorPos X="31" Y="95"/>
+        <UsageCount Value="200"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="getdeclarations\udb_udr_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="112"/>
+        <CursorPos X="31" Y="124"/>
+        <UsageCount Value="221"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="getdeclarations\udb_firebird_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="22" Y="8"/>
+        <UsageCount Value="218"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="getdeclarations\udb_firebird_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="235"/>
+        <CursorPos X="3" Y="251"/>
+        <UsageCount Value="218"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="getdeclarations\udb_package_firebird_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="15"/>
+        <CursorPos Y="25"/>
+        <UsageCount Value="200"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="getdeclarations\udb_package_firebird_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="124"/>
+        <CursorPos X="31" Y="136"/>
+        <UsageCount Value="200"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="getdeclarations\udb_package_udr_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="118"/>
+        <CursorPos X="54" Y="130"/>
+        <UsageCount Value="200"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="getdeclarations\fetch_package.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="22" Y="9"/>
+        <UsageCount Value="203"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="getdeclarations\udb_package_udr_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="125"/>
+        <CursorPos X="31" Y="137"/>
+        <UsageCount Value="201"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="classes\cdbfbfunction.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cDBFBFunction"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="16" Y="11"/>
+        <UsageCount Value="200"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="deps\package_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="26"/>
+        <CursorPos Y="37"/>
+        <UsageCount Value="200"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="deps\fb_func_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="34" Y="13"/>
+        <UsageCount Value="200"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="deps\udf_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="23"/>
+        <CursorPos X="11" Y="36"/>
+        <UsageCount Value="200"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="deps\udr_func_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="32"/>
+        <CursorPos X="32" Y="42"/>
+        <UsageCount Value="200"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="deps\udr_proc_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="32" Y="42"/>
+        <UsageCount Value="200"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="deps\domain_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="48" Y="32"/>
+        <UsageCount Value="200"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="deps\role_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="26"/>
+        <CursorPos X="53" Y="34"/>
+        <UsageCount Value="200"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="deps\exception_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="16"/>
+        <CursorPos X="31" Y="31"/>
+        <UsageCount Value="200"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="deps\user_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="20"/>
+        <CursorPos X="16" Y="33"/>
+        <UsageCount Value="200"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="common\fbcommon.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="138"/>
+        <CursorPos X="51" Y="154"/>
+        <UsageCount Value="200"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmEditTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="418"/>
+        <CursorPos X="15" Y="431"/>
+        <UsageCount Value="200"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="ui\about\about.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmAbout"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="About"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="67" Y="54"/>
+        <UsageCount Value="200"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="ui\newtable\newtable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewTable"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="5"/>
+        <CursorPos X="18" Y="5"/>
+        <UsageCount Value="200"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="ui\tablemanage\tablemanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmTableManage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="TableManage"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="101"/>
+        <CursorPos X="32" Y="112"/>
+        <UsageCount Value="200"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="ui\copytable\copytable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCopyTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CopyTable"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="101"/>
+        <CursorPos X="23" Y="111"/>
+        <UsageCount Value="200"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="ui\importtable\importtable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmImportTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="426"/>
+        <CursorPos Y="625"/>
+        <UsageCount Value="200"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="ui\main\main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="5359"/>
+        <CursorPos Y="5394"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <CursorPos X="93" Y="11"/>
+        </ExtraEditor1>
+        <UsageCount Value="200"/>
+        <Bookmarks Count="1">
+          <Item0 Y="5071" ID="3"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="ui\createdb\createdb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateDB"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateDb"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="27"/>
+        <CursorPos X="40" Y="33"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmReg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Reg"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="97"/>
+        <CursorPos X="59" Y="104"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmQueryWindow"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="QueryWindow"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1313"/>
+        <CursorPos X="42" Y="1325"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="ui\viewview\viewview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewView"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewView"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="46"/>
+        <CursorPos X="55" Y="58"/>
+        <UsageCount Value="200"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="ui\viewtrigger\viewtrigger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewTrigger"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewTrigger"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="57"/>
+        <CursorPos Y="70"/>
+        <UsageCount Value="200"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="ui\viewstoredprocedure\viewsproc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewSProc"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewSProc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="46"/>
+        <CursorPos X="63" Y="55"/>
+        <UsageCount Value="200"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="ui\viewgenerator\viewgen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewGen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewGen"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
+        <CursorPos X="44" Y="17"/>
+        <UsageCount Value="200"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="ui\newgenerator\newgen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewGen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewGen"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="99"/>
+        <CursorPos X="73" Y="111"/>
+        <UsageCount Value="200"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="ui\enterpassword\enterpass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmEnterPass"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EnterPass"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="33"/>
+        <CursorPos X="41" Y="44"/>
+        <UsageCount Value="200"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="ui\createtrigger\createtrigger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateTrigger"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateTrigger"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2"/>
+        <CursorPos X="17" Y="10"/>
+        <UsageCount Value="200"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="ui\callprocedure\callproc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCallProc"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CallProc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="121" Y="46"/>
+        <UsageCount Value="200"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="ui\udfinfo\udfinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmUDFInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UDFInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="52"/>
+        <CursorPos X="3" Y="69"/>
+        <UsageCount Value="200"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="ui\viewdomain\viewdomain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewDomain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewDomain"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos X="38" Y="82"/>
+        <UsageCount Value="200"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="ui\newdomain\newdomain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewDomain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewDomain"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="42"/>
+        <CursorPos X="51" Y="53"/>
+        <UsageCount Value="200"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="common\turbocommon.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="405"/>
+        <CursorPos X="26" Y="420"/>
+        <UsageCount Value="200"/>
+        <Bookmarks Count="1">
+          <Item0 Y="1082" ID="4"/>
+        </Bookmarks>
+        <Loaded Value="True"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="libs\topologicalsort.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="200"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="ui\newconstraint\newconstraint.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewConstraint"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewConstraint"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="98"/>
+        <CursorPos X="17" Y="119"/>
+        <UsageCount Value="201"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="ui\neweditfield\neweditfield.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewEditField"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewEditField"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="142"/>
+        <CursorPos X="20" Y="164"/>
+        <UsageCount Value="201"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="ui\calender\calen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCalen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Calen"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="43" Y="63"/>
+        <UsageCount Value="201"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="ui\userpermissions\userpermissions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmUserPermissions"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UserPermissions"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="12"/>
+        <CursorPos X="17" Y="20"/>
+        <UsageCount Value="201"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="ui\permissionmanage\permissionmanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmPermissionManage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="PermissionManage"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="35" Y="586"/>
+        <UsageCount Value="201"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="ui\sqlhistory\sqlhistory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmSQLHistory"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SQLHistory"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="163"/>
+        <CursorPos X="37" Y="178"/>
+        <UsageCount Value="201"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="ui\createuser\createuser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateUser"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateUser"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="21"/>
+        <CursorPos X="65" Y="24"/>
+        <UsageCount Value="201"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="ui\changepassword\changepass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmChangePass"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ChangePass"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="8"/>
+        <CursorPos X="21" Y="9"/>
+        <UsageCount Value="201"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="ui\dbinfo\dbinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmDBInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="dbInfo"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="344"/>
+        <CursorPos X="17" Y="368"/>
+        <UsageCount Value="201"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="ui\comparison\comparison.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmComparison"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Comparison"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos X="19" Y="53"/>
+        <UsageCount Value="201"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="utils\fileimport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="62"/>
+        <CursorPos X="20" Y="69"/>
+        <UsageCount Value="201"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="utils\scriptdb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Scriptdb"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="357"/>
+        <CursorPos X="35" Y="370"/>
+        <UsageCount Value="201"/>
+        <Bookmarks Count="1">
+          <Item0 Y="283" ID="1"/>
+        </Bookmarks>
+      </Unit58>
+      <Unit59>
+        <Filename Value="utils\csvdocument.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CsvDocument"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="164"/>
+        <CursorPos X="49" Y="169"/>
+        <UsageCount Value="201"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="utils\unitfirebirdservices.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="UnitFirebirdServices"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="22" Y="10"/>
+        <UsageCount Value="201"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="ui\setfirebirdclient\fsetfbclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmSetFBClient"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fSetFBClient"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="12" Y="14"/>
+        <UsageCount Value="201"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="ui\firebirdconfig\ffirebirdconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmFirebirdConfig"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fFirebirdConfig"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="553"/>
+        <CursorPos X="23" Y="564"/>
+        <UsageCount Value="201"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="ui\updatechecker\updatechecker.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmUpdateChecker"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UpdateChecker"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="17" Y="12"/>
+        <UsageCount Value="201"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="ui\executer\ftestfunction.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmTestFunction"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fTestFunction"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="290"/>
+        <CursorPos X="34" Y="304"/>
+        <UsageCount Value="201"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="datamodules\systables.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmSysTables"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <UnitName Value="SysTables"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="411"/>
+        <CursorPos X="69" Y="419"/>
+        <ExtraEditorCount Value="1"/>
+        <ExtraEditor1>
+          <EditorIndex Value="-1"/>
+          <CursorPos X="56" Y="8"/>
+        </ExtraEditor1>
+        <UsageCount Value="201"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="ui\openquerybuilder\QBEIBX.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="75"/>
+        <CursorPos X="20" Y="93"/>
+        <UsageCount Value="211"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="ui\openquerybuilder\QBuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2715"/>
+        <CursorPos X="3" Y="2736"/>
+        <UsageCount Value="211"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="ui\openquerybuilder\QBDirFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBDirForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="16"/>
+        <CursorPos X="17" Y="36"/>
+        <UsageCount Value="201"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="ui\openquerybuilder\QBLnkFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBLinkForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="17" Y="36"/>
+        <UsageCount Value="201"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="common\checkdbintegrity.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckDBIntegrity"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="49" Y="28"/>
+        <UsageCount Value="200"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCheckDBIntegrity"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fCheckDBIntegrity"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="114"/>
+        <CursorPos X="40" Y="121"/>
+        <UsageCount Value="201"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="utils\dbcharsetmigrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DBCharsetMigrator"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="19"/>
+        <CursorPos X="54" Y="22"/>
+        <UsageCount Value="200"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmSQLMonitor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="17" Y="9"/>
+        <UsageCount Value="200"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="utils\data_exporters\fdataexportersintrf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="7" Y="11"/>
+        <UsageCount Value="202"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="utils\data_exporters\fmarkdowntableexport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fMarkDownTableExport"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="6" Y="10"/>
+        <UsageCount Value="202"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="utils\data_exporters\fhtmlexport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="6" Y="10"/>
+        <UsageCount Value="201"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="utils\data_exporters\fpcstdexporters.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="6" Y="6"/>
+        <UsageCount Value="201"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="utils\ibarrayhelper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IBArrayHelper"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="40" Y="12"/>
+        <UsageCount Value="200"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="tests\arraytests\uarrayformtest.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmArrayTest"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uArrayFormTest"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="53"/>
+        <CursorPos X="3" Y="55"/>
+        <UsageCount Value="200"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="utils\fServerSession.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="519"/>
+        <CursorPos Y="531"/>
+        <UsageCount Value="200"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="utils\fbfeaturechecker.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="66"/>
+        <CursorPos X="33" Y="72"/>
+        <UsageCount Value="200"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="ui\loginservicemanager\floginservicemanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmLoginServiceManager"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="17" Y="9"/>
+        <UsageCount Value="201"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="ui\serverregistry\fserverregistry.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmServerRegistry"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="721"/>
+        <CursorPos X="20" Y="704"/>
+        <UsageCount Value="200"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="common\fmetaquerys.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="272"/>
+        <CursorPos Y="285"/>
+        <UsageCount Value="200"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmThemeSelector"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="183"/>
+        <CursorPos X="10" Y="204"/>
+        <UsageCount Value="200"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="utils\tb_netutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="37"/>
+        <CursorPos X="51" Y="57"/>
+        <UsageCount Value="200"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="ui\DBAdmin\MainFormUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="957"/>
+        <CursorPos X="3" Y="959"/>
+        <UsageCount Value="205"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="ui\DBAdmin\DataModule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBDataModule"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="765"/>
+        <CursorPos X="44" Y="790"/>
+        <UsageCount Value="205"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="ui\DBAdmin\dlg\DBLoginDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBLoginDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="51"/>
+        <CursorPos X="38" Y="61"/>
+        <UsageCount Value="205"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="ui\DBAdmin\dlg\BackupDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="BackupDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="51"/>
+        <CursorPos X="62" Y="66"/>
+        <UsageCount Value="200"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="ui\DBAdmin\dlg\RestoreDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RestoreDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="282"/>
+        <CursorPos X="25" Y="295"/>
+        <UsageCount Value="200"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="ui\scriptengine\fscriptengine.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmScriptEngine"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fScriptEngine"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="158"/>
+        <CursorPos X="15" Y="164"/>
+        <UsageCount Value="297092"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="ui\scriptengine\selectsqlresultsunit_ext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SelectSQLResultsExt"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7"/>
+        <CursorPos X="3" Y="75"/>
+        <UsageCount Value="297087"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="utils\data_exporters\fclipboardexport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fClipboardExport"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="21" Y="14"/>
+        <UsageCount Value="297045"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="utils\fsimpleobjextractor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="133"/>
+        <CursorPos X="3" Y="19"/>
+        <UsageCount Value="200"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="common\cunintellisensecache.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cUnIntelliSenseCache"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="225"/>
+        <CursorPos X="35" Y="235"/>
+        <UsageCount Value="200"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="utils\cselectsqlparserext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cSelectSQLParserExt"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="50" Y="68"/>
+        <UsageCount Value="200"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="datamodules\datamodulesystem.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmSystem"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="28" Y="35"/>
+        <UsageCount Value="202"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="ui\servers\fservers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmServers"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="5" Y="19"/>
+        <UsageCount Value="200"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="ui\activitymonitor\factivitymonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmActivityMonitor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fActivityMonitor"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="467"/>
+        <CursorPos Y="271"/>
+        <UsageCount Value="200"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmEditTableDataNew"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="65"/>
+        <CursorPos X="34" Y="79"/>
+        <UsageCount Value="200"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="ui\forign_key_table\foreign_key_table.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmForeignKeyTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="24"/>
+        <UsageCount Value="200"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="ui\ibx_design\ibsqleditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="IBSQLEditorForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="143"/>
+        <CursorPos Y="148"/>
+        <UsageCount Value="201"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmBulkClone"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="194"/>
+        <CursorPos Y="208"/>
+        <UsageCount Value="182"/>
+        <Loaded Value="True"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="ui\ibx_design\IBTransactionEdit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="IBTransactionEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="295"/>
+        <CursorPos X="45" Y="303"/>
+        <UsageCount Value="78"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCSVEditor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fCSVEditor"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="358"/>
+        <CursorPos X="71" Y="378"/>
+        <UsageCount Value="51"/>
+        <Loaded Value="True"/>
+      </Unit106>
+      <Unit107>
+        <Filename Value="utils\uGenSQLFromCSVDataset.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="139"/>
+        <CursorPos X="86" Y="144"/>
+        <UsageCount Value="26"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
+        <ComponentName Value="IBTransactionEditorForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="239"/>
+        <CursorPos X="45" Y="253"/>
+        <UsageCount Value="197"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="getdeclarations\udb_package_fetcher.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="22" Y="8"/>
+        <UsageCount Value="187"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="ui\transconfig\ftransactionconfig.pas"/>
+        <ComponentName Value="fmTransactionConfig"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="21"/>
+        <CursorPos X="71" Y="29"/>
+        <UsageCount Value="184"/>
+      </Unit110>
+      <Unit111>
+        <Filename Value="datamodules\dmibx.pas"/>
+        <ComponentName Value="DataModuleIBX"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="37" Y="24"/>
+        <UsageCount Value="142"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="ui\blobeditor\fblobedit.pas"/>
+        <ComponentName Value="frmBlobEdit"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="42" Y="6"/>
+        <UsageCount Value="149"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="ui\backuprestore\backuprestore.pas"/>
+        <ComponentName Value="fmBackupRestore"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="BackupRestore"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="55"/>
+        <CursorPos X="28" Y="64"/>
+        <UsageCount Value="119"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBExtract.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4326"/>
+        <CursorPos X="55" Y="4341"/>
+        <UsageCount Value="10"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="444"/>
+        <CursorPos Y="508"/>
+        <UsageCount Value="4"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1010"/>
+        <CursorPos X="56" Y="1032"/>
+        <UsageCount Value="10"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="ui\activitymonitor\factivitymonitor.lfm"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="16" Y="8"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBTransaction.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="321"/>
+        <CursorPos Y="342"/>
+        <UsageCount Value="9"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\htmlview.pas"/>
+        <UnitName Value="HtmlView"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="560"/>
+        <CursorPos X="14" Y="571"/>
+        <UsageCount Value="6"/>
+      </Unit119>
+      <Unit120>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\HtmlViewer\source\HtmlGlobals.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="106"/>
+        <CursorPos X="3" Y="91"/>
+        <UsageCount Value="6"/>
+      </Unit120>
+      <Unit121>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32callback.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="271"/>
+        <CursorPos X="5" Y="286"/>
+        <UsageCount Value="10"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32int.pp"/>
+        <UnitName Value="Win32Int"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="264"/>
+        <CursorPos X="5" Y="267"/>
+        <UsageCount Value="10"/>
+      </Unit122>
+      <Unit123>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\objpas\sysutils\sysutilh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="240"/>
+        <CursorPos X="33" Y="249"/>
+        <UsageCount Value="10"/>
+      </Unit123>
+      <Unit124>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\win\wininc\func.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="10" Y="222"/>
+        <UsageCount Value="10"/>
+      </Unit124>
+      <Unit125>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="124"/>
+        <CursorPos X="47" Y="143"/>
+        <UsageCount Value="10"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\win\wininc\struct.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="211"/>
+        <CursorPos X="22" Y="224"/>
+        <UsageCount Value="10"/>
+      </Unit126>
+      <Unit127>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\fpcsrc\rtl\inc\typshrdh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="130"/>
+        <CursorPos X="31" Y="150"/>
+        <UsageCount Value="10"/>
+      </Unit127>
+      <Unit128>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\lazarus\lcl\interfaces\lcl.pas"/>
+        <UnitName Value="LCL"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="11"/>
+        <UsageCount Value="10"/>
+      </Unit128>
+      <Unit129>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\ATSynEdit\atsynedit\atsynedit_adapter_ime_gtk2.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="139"/>
+        <CursorPos X="39" Y="170"/>
+        <UsageCount Value="10"/>
+      </Unit129>
+      <Unit130>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="479"/>
+        <CursorPos Y="508"/>
+        <UsageCount Value="36"/>
+      </Unit130>
+      <Unit131>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="561"/>
+        <CursorPos X="30" Y="582"/>
+        <UsageCount Value="9"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBBufferedCursors.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2347"/>
+        <CursorPos X="30" Y="2361"/>
+        <UsageCount Value="4"/>
+      </Unit132>
+      <Unit133>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\Rx\rxdb\rxdbgrid.pas"/>
+        <UnitName Value="RxDBGrid"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4170"/>
+        <CursorPos X="40" Y="4176"/>
+        <UsageCount Value="10"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\db.pas"/>
+        <UnitName Value="DB"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="105"/>
+        <CursorPos X="25" Y="119"/>
+        <UsageCount Value="13"/>
+      </Unit134>
+      <Unit135>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\dataset.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1082"/>
+        <CursorPos X="64" Y="1082"/>
+        <UsageCount Value="9"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="ui\ibx_design\ibselectsqleditor.pas"/>
+        <ComponentName Value="IBSelectSQLEditorForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="32"/>
+        <CursorPos X="5" Y="45"/>
+        <UsageCount Value="5"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBDatabaseInfo.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="330"/>
+        <CursorPos X="31" Y="358"/>
+        <UsageCount Value="10"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBXServices.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="214"/>
+        <CursorPos X="13" Y="231"/>
+        <UsageCount Value="2"/>
+      </Unit138>
+      <Unit139>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\ibxscript.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="626"/>
+        <CursorPos Y="644"/>
+        <UsageCount Value="15"/>
+      </Unit139>
+      <Unit140>
+        <Filename Value="ui\bulk_clone\__bulk_clone.pas__"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="754"/>
+        <CursorPos Y="784"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit140>
+      <Unit141>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\ATBinHex\atbinhex\atbinhex.pas"/>
+        <UnitName Value="ATBinHex"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2644"/>
+        <CursorPos X="40" Y="2652"/>
+        <UsageCount Value="10"/>
+      </Unit141>
+      <Unit142>
+        <Filename Value="ui\bulk_clone\new\bulk_clone.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="133"/>
+        <CursorPos Y="171"/>
+        <UsageCount Value="20"/>
+      </Unit142>
+      <Unit143>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBDatabase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1883"/>
+        <CursorPos Y="1901"/>
+        <UsageCount Value="9"/>
+      </Unit143>
+      <Unit144>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBMessages.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="382"/>
+        <CursorPos Y="410"/>
+        <UsageCount Value="13"/>
+      </Unit144>
+      <Unit145>
+        <Filename Value="ui\ibx_design\IBTransactionEdit.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="120"/>
+        <CursorPos X="25" Y="132"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\csvdataset.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="357"/>
+        <CursorPos X="30" Y="367"/>
+        <UsageCount Value="9"/>
+      </Unit146>
+      <Unit147>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\export\fpdbexport.pp"/>
+        <UnitName Value="fpDBExport"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <CursorPos X="61" Y="4"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit147>
+    </Units>
+    <OtherDefines Count="3">
+      <Define0 Value="DEBUG"/>
+      <Define1 Value="UseCThreads"/>
+      <Define2 Value="WITH_GTK2_IM"/>
+    </OtherDefines>
+    <JumpHistory Count="25" HistoryIndex="24">
+      <Position1>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2547" Column="55" TopLine="2542"/>
+      </Position1>
+      <Position2>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="28" Column="14" TopLine="10"/>
+      </Position2>
+      <Position3>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="245" Column="5" TopLine="242"/>
+      </Position3>
+      <Position4>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="38" Column="20" TopLine="20"/>
+      </Position4>
+      <Position5>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="259" Column="82" TopLine="249"/>
+      </Position5>
+      <Position6>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="228" Column="33" TopLine="212"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="256" Column="55" TopLine="245"/>
+      </Position7>
+      <Position8>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="71" Column="26" TopLine="62"/>
+      </Position8>
+      <Position9>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="261" Column="44" TopLine="242"/>
+      </Position9>
+      <Position10>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="164" Column="37" TopLine="164"/>
+      </Position10>
+      <Position11>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1959" Column="55" TopLine="1949"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="121" Column="61" TopLine="118"/>
+      </Position12>
+      <Position13>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="126" Column="52" TopLine="107"/>
+      </Position13>
+      <Position14>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="295" Column="24" TopLine="269"/>
+      </Position14>
+      <Position15>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="321" Column="30" TopLine="308"/>
+      </Position15>
+      <Position16>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="258" Column="93" TopLine="258"/>
+      </Position16>
+      <Position17>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="259" Column="93" TopLine="259"/>
+      </Position17>
+      <Position18>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="260" Column="93" TopLine="260"/>
+      </Position18>
+      <Position19>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="261" Column="93" TopLine="261"/>
+      </Position19>
+      <Position20>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="321" Column="22" TopLine="305"/>
+      </Position20>
+      <Position21>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="8" Column="87"/>
+      </Position21>
+      <Position22>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="367" Column="74" TopLine="361"/>
+      </Position22>
+      <Position23>
+        <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
+        <Caret Line="378" Column="71" TopLine="358"/>
+      </Position23>
+      <Position24>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\export\fpdbexport.pp"/>
+        <Caret Line="49" Column="40" TopLine="41"/>
+      </Position24>
+      <Position25>
+        <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\export\fpdbexport.pp"/>
+        <Caret Line="11" Column="49"/>
+      </Position25>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode="default"/>
+    </RunParams>
+  </ProjectSession>
+  <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\firebird\FirebirdOOAPI.pas"/>
+        <Line Value="21496"/>
+      </Item>
+    </BreakPoints>
+    <Watches>
+      <Item>
+        <Expression Value="N.text"/>
+      </Item>
+      <Item>
+        <Expression Value="N.Data"/>
+      </Item>
+      <Item>
+        <Expression Value="N"/>
+      </Item>
+    </Watches>
+  </Debugging>
+</CONFIG>
