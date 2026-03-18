@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <BuildModes Active="x86_64-win64-win-release"/>
     <Units Count="144">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -1076,7 +1076,7 @@
         <EditorIndex Value="5"/>
         <TopLine Value="194"/>
         <CursorPos Y="208"/>
-        <UsageCount Value="166"/>
+        <UsageCount Value="167"/>
         <Loaded Value="True"/>
       </Unit104>
       <Unit105>
@@ -1088,7 +1088,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="267"/>
         <CursorPos X="17" Y="278"/>
-        <UsageCount Value="62"/>
+        <UsageCount Value="63"/>
       </Unit105>
       <Unit106>
         <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
@@ -1100,7 +1100,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="157"/>
         <CursorPos X="41" Y="173"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="36"/>
       </Unit106>
       <Unit107>
         <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
@@ -1385,11 +1385,6 @@
         <UsageCount Value="14"/>
       </Unit143>
     </Units>
-    <OtherDefines Count="3">
-      <Define0 Value="DEBUG"/>
-      <Define1 Value="UseCThreads"/>
-      <Define2 Value="WITH_GTK2_IM"/>
-    </OtherDefines>
     <JumpHistory Count="14" HistoryIndex="13">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
