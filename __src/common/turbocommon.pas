@@ -1,0 +1,3295 @@
+unit turbocommon;
+
+{ Non-GUI common code for TurboBird that do not depend on a database connection.
+SysTables covers functionality for which a db connection is required. }
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+
+  Forms,Graphics,  Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
+  Controls,
+  AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
+  LCLType, LCLVersion, versiontypes, versionresource,
+  interfaces, LCLPlatformDef,
+  DB,  RegExpr,
+
+  fpstdexports,
+  fpDataExporter,
+
+  IB,
+  IBDatabase,
+  IBDatabaseInfo,
+  IBQuery,
+  IBCustomDataSet,
+  IBTable,
+
+  Variants,
+
+  fbcommon,
+  fSetFBClient,
+  fServerSession,
+
+  SysTables,
+  EnterPass,
+  fsimpleobjextractor,
+  cUnIntelliSenseCache;
+
+{$I version.inc}
+{$I turbocommon.inc}
+
+type
+  TCommitKind = (tctCommit, tctCommitRetaining);
+
+  // Types of objects in database
+  // Note: the order and count must match the array below
+  // Also, do not assign values to the individual enums; code depends
+  // on them starting with 0 and being contiguous
+
+  TTreeViewObjectType = (
+  tvotNone,
+  tvotServerAlias,
+  tvotServerInfo,
+  tvotServer,
+  tvotEmbeddedServer,
+
+  tvotDatabase,
+
+  tvotSearchFiter,
+
+  tvotQueryWindow,
+
+  tvotTableRoot,
+  tvotTable,
+  tvotTableField,
+
+  tvotGeneratorRoot,
+  tvotGenerator,
+
+  //triggers
+
+  tvotTriggerRoot,
+  tvotTrigger,
+
+  tvotTableTriggerRoot,
+  tvotTableTrigger,
+
+
+  tvotDBTriggerRoot,
+  tvotDBTrigger,
+
+  tvotDDLTriggerRoot,
+  tvotDDLTrigger,
+
+  tvotUDRTriggerRoot,
+  tvotUDRTrigger,
+
+  tvotUDRTableTriggerRoot,
+  tvotUDRTableTrigger,
+
+  tvotUDRDBTriggerRoot,
+  tvotUDRDBTrigger,
+
+  tvotUDRDDLTriggerRoot,
+  tvotUDRDDLTrigger,
+
+  tvotViewRoot,
+  tvotView,
+
+  tvotDomainRoot, {excludes system domains}
+  tvotDomain,
+  tvotRoleRoot,
+  tvotRole,
+  tvotExceptionRoot,
+  tvotException,
+  tvotUserRoot,
+  tvotUser,
+
+  tvotConstraintRoot,
+  tvotConstraint,
+  tvotIndexRoot,
+  tvotIndex,
+
+  tvotPrimaryKeyRoot,
+  tvotPrimaryKey,
+  tvotForeignKeyRoot,
+  tvotForeignKey,
+  tvotUniqueConstraintRoot,
+  tvotUniqueConstraint,
+  tvotCheckConstraintRoot,
+  tvotCheckConstraint,
+  tvotNotNullConstraintRoot,
+  tvotNotNullConstraint,
+
+  tvotProcedureRoot,
+  tvotProcedure,
+  tvotFunctionRoot,
+  tvotFunction,
+  tvotUDRoot,
+  tvotUDFRoot,
+  tvotUDF,
+  tvotUDRRoot,
+  tvotUDRFunctionRoot,
+  tvotUDRFunction,
+  tvotUDRProcedureRoot,
+  tvotUDRProcedure,
+
+  tvotPackageRoot,
+  tvotPackage,
+  tvotPackageUDFFunctionRoot,
+  tvotPackageUDFFunction,
+  tvotPackageFunctionRoot,
+  tvotPackageFunction,
+  tvotPackageProcedureRoot,
+  tvotPackageProcedure,
+  tvotPackageUDRFunctionRoot,
+  tvotPackageUDRFunction,
+  tvotPackageUDRProcedureRoot,
+  tvotPackageUDRProcedure,
+  tvotPackageTriggerRoot,
+  tvotPackageTrigger,
+  tvotPackageUDRTriggerRoot,
+  tvotPackageUDRTrigger,
+
+  tvotDatabaseRoot,
+  tvotBLOBFilterRoot,
+  tvotBLOBFilter,
+  tvotCommentRoot,
+  tvotComment,
+  tvotDataRoot,
+  tvotData,
+
+  tvotSystemObjectRoot,
+  tvotSystemTableRoot,
+  tvotSystemTable,
+  tvotSystemDomainRoot,
+  tvotSystemDomain,
+  tvotSystemGeneratorRoot,
+  tvotSystemGenerator,
+  tvotSystemTriggerRoot,
+  tvotSystemTrigger,
+  tvotSystemConstraintRoot,
+  tvotSystemConstraint,
+  tvotSystemIndexRoot,
+  tvotSystemIndex,
+  tvotSystemRoleRoot,
+  tvotSystemRole,
+  tvotSystemUserRoot,
+  tvotSystemUser,
+  tvotSystemExceptionRoot,
+  tvotSystemException
+  );
+
+
+type
+  TServerRecord = packed record
+    ServerName: string[127];
+    ServerAlias: string[127];
+
+    VersionMajor: word;
+    VersionString: string[50];
+    VersionMinor: word;
+
+    UserName: string[63];
+    Password: string[63];
+    Role: string[63];
+    Protocol: TProtocol;
+    Port: string[10];
+    Charset: string[31];
+    RootPath: string[255];
+    ClientLibraryPath: string[255];
+    ConfigFilePath: string[255];
+    LoadRegisteredClientLib: boolean;
+    IsEmbedded: Boolean;
+
+    // Neue Felder:
+    ConnectTimeoutMS: LongInt;   // Timeout beim Verbindungsaufbau (Millisekunden)
+    RetryCount: SmallInt;        // Anzahl Wiederholversuche
+    QueryTimeoutMS: LongInt;     // Timeout für lange Operationen (optional)
+
+    Reserved: array[0..30] of Byte; // (etwas verkleinert)
+  end;
+
+
+
+  TTxFlags = set of (
+    txReadOnly,
+    txWait,
+    txRecVersion,
+    txAutoCommit,
+    txReadConsistency
+  );
+
+  TTransactionConfigRecord = packed record
+    Isolation: Byte;
+    Flags: TTxFlags;
+    LockTimeout: string[6];
+    TxName: string[50];
+  end;
+
+  TRegisteredDatabase = packed record
+    Title: string[30];
+    DatabaseName: string[200];
+    UserName: string[100];
+    Password: string[100];
+    Role: string[100];
+    Charset: string[40];
+    SQLDialect: string[1];
+    Deleted: Boolean;
+    SavePassword: Boolean;
+    LastOpened: TDateTime;
+    ServerName: string[255];
+    FireBirdClientLibPath: string[255];
+    OverwriteLoadedClientLib: boolean;
+    Port: string[10];
+    ConnectOnApplicationStart: boolean;
+
+    ServerVersionMajor: word;
+    ServerVersionString: string[50];  //LI-V6.3.3.1683 Firebird 5.0
+    ServerVersionMinor: word;
+
+    IsEmbedded: boolean;
+
+    TxConfig: string[255];
+
+    Reserved: array [0 .. 40] of Byte;
+  end;
+
+  TDatabaseRec = record
+    Index: Integer;    // for sort
+    RegRec: TRegisteredDatabase;
+    OrigRegRec: TRegisteredDatabase;
+    IBDatabase: TIBDatabase;
+    IBTransaction: TIBTransaction;
+    IBQuery: TIBQuery;
+    IBDatabaseInfo: TIBDatabaseInfo;
+  end;
+
+  TPNodeInfos = ^TNodeInfos;
+  TNodeInfos = record
+    dbIndex: integer;
+    ObjectType: TTreeViewObjectType;
+    Refreshable: boolean;
+    PopupMenuTag: integer; //reserve
+    ImageIndex: Integer;   //reserve
+    ViewForm,
+    EditorForm,
+    NewForm,
+    ExecuteForm: TForm;
+    SimpleObjExtractor: TSimpleObjExtractor;
+    UnIntelliSenseCache: TUnIntelliSenseCache;
+    ServerSession: TServerSession;
+    Visible: boolean;
+  end;
+
+type
+  TForeignKeyInfo = record
+    ConstraintName: string;
+    ForeignTable: string;
+    ForeignFields: string;   // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
+    MasterTable: string;
+    MasterFields: string;    // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
+  end;
+
+  TForeignKeyInfoArray = array of TForeignKeyInfo;
+
+
+  //search
+  TDBField = (
+   dbfTitle,
+   dbfDatabaseName,
+   dbfUserName,
+   dbfPassword,
+   dbfCharset,
+   dbfRole,
+   dbfLastOpened,
+   dbfDeleted,
+   dbfSavePassword
+  );
+
+  TDBSearchResult = record
+     Index: Integer;
+     Rec: TRegisteredDatabase;
+   end;
+
+  TDBCheckResult = record
+    Title: string;
+    DBName: string;
+    DateTimeChecked: TDateTime;
+    CharsetIssues: TStringList;
+    LengthIssues: TStringList;
+    NotNullIssues: TStringList;
+    DataTypeIssues: TStringList;
+    PKIssues: TStringList;
+    FKIssues: TStringList;
+    ViewsIssues: TStringList;
+    IndexUniqueIssues: TStringList;
+    TriggerDefaultIssues: TStringList;
+  end;
+
+
+const
+  InitialServiceUser = 'service';
+  InitialServiceUserPwd = 'service_pwd';
+
+  DatabasesRegFile = 'databases.reg';
+  ServersRegFile   = 'servers.reg';
+  ThemesIniFile    = 'theme.ini';
+  TmpDir = 'temp';
+
+var
+    MainTreeView: TTreeView;
+
+    fIniFileName: string;
+    fIniFile: TInifile;
+
+    RegisteredServers: array of TServerRecord;
+    RegisteredDatabases: array of TDatabaseRec;
+
+    MultiVersionConnection: string;
+
+    InitialFBClientLibPath: string;
+    InitialFBClient: IFirebirdLibrary;
+
+    FB25, FB30, FB40, FB50, FB60: IFirebirdLibrary;
+
+    //for Lazy-load & IntelliSense
+    MetaDataChanged: boolean;  //Tables and Fields
+
+    //Ini.File////////////////////////////////////////////////////////////////
+    //UserInterface
+    Language: string;
+
+    //Backup options
+    CloseDBBeforeBackup: boolean;
+
+    //Restore options
+    DefaultPageSize,
+    DefaultNumBuffers: integer;
+    RegisterDBAfterRestore: boolean;
+    DefaultSegmentSize: string;
+    DefaultSegmentUnit: string;
+
+
+    //Scriper
+    EchoInput: boolean;
+    StopOnFirstError: boolean;
+    AutoDDL: boolean;
+    IgnoreCreateDatabase: boolean;
+    IgnoreGrants: boolean;
+    ShowAffectedRows: boolean;
+    ShowPerformanceStats: boolean;
+
+    //Export to Clipboard
+    MaxExportRows: integer;
+
+    //MetaData
+    AlwaysQuoteIdentifiers: boolean;
+    CaseSensitiveObjectNames: boolean;
+    ShowSystem: boolean;
+
+    //MetaDataTableExtract
+    ExtractDomains,
+    ExtractIndex,
+    ExtractForeign,
+    ExtractCheck,
+    ExtractTrigger,
+    ExtractGrant,
+    ExtractData: boolean;
+
+    //IntelliSense
+    ReloadCacheOnNodeExpand: boolean;
+
+
+    //MainTreeView
+    MainTreeViewAlwaysRefresh: boolean;
+    MainTreeViewColor: TColor;
+    MainTreeViewFontName: string;
+    MainTreeViewFontStyle: TFontStyles;
+    MainTreeViewFontSize: word;
+    MainTreeViewFontColor: TColor;
+    AutoFilter: boolean;
+
+    //QueryWindow
+    QWShowNavigator: boolean;
+    QWEditorBackgroundColor: TColor;
+    QWEditorFontName: string;
+    QWEditorFontSize: word;
+    QWEditorFontColor: TColor;
+    QWEditorFontStyle: TFontStyles;
+
+    //Theme
+    AllowIniOverrides: boolean;
+
+
+    //Transaction Defaults (txt file) ====
+    DefTxFileName: string[255];          // optionaler Label / Alias
+
+
+    //BulkExport
+    DefaultBatchSize: integer;
+
+    //CSV Editor
+    CSVDefaultFieldLength: integer;
+    CSVDelimiter: char;
+    CSVLineEnding: string;
+    CSVQuoteChar: char;
+    CSVFirstLineAsFieldNames,
+    CSVIgnoreOuterWhitespace,
+    CSVQuoteOuterWhitespace: boolean;
+
+
+    //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
+procedure LoadTxConfigFromFile(const FileName: string; Params: TStrings);
+
+function IBXProtocolToString(AProtocol: TProtocol): string;
+function StringToIBXProtocol(const AValue: string): TProtocol;
+
+function IsFilterScopeNode(ANode: TTreeNode): Boolean;
+function MatchesFilter(const AText, AFilter: string): Boolean;
+
+function  IsObjectNameCaseSensitive(AObjectName: string): boolean;
+function  IsObjectNameQuoted(const AStr: string): Boolean;
+function  MakeObjectNameQuoted(AObjectName: string): string;
+function  MakeCaseSensitiveAuto(const AObjectName: string): string;
+
+procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
+function  StripQuotes(const S: string): string;
+
+function NeedsCommit(Q: TIBQuery): Boolean;
+
+function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
+
+function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
+
+function GetDBFileNameFromConnectionString(AConnStr: string): string;
+
+function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
+function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
+function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
+
+function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
+
+function LoadClientLibIBX(ALib: string): boolean;
+function SetInitialClientLib: boolean;
+
+function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: word;
+                                                           out AFBVersionMinor: word;
+                                                           out AFBServerVersion: string): boolean;
+
+function  CloseDB(dbIndex: integer): boolean;
+
+function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: string): Boolean;
+
+procedure MarkAllServerDatabasesDeleted(const ServerName: string);
+procedure MarkAllDatabasesDeleted;
+procedure RemoveDeletedDBRegistrationsFromFile;
+
+function GetDBRecByServerAndDBName(const AServerName, ADBName: string): TDatabaseRec;
+
+function IsValidPortNr(AStr: string): boolean;
+function ServerNameContainPortNr(AServerName: string): boolean;
+function GetPortNrFromServerName(AServerName: string): string;
+function GetHostFromServerName(AServerName: string): string;
+
+procedure AssignIBDatabase(const Source, Target: TIBDatabase);
+function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
+
+function GetServerName(DBName: string): string;
+
+function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
+function GetFirstServerRecordFromFile: TServerRecord;
+function GetServerRecordFromFileByIndex(AIdx: Integer): TServerRecord;
+
+procedure SaveServerDataToFile(const Rec: TServerRecord);
+procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
+function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
+
+function GetServerNodeByServerName(const AServerName: string): TTreeNode;
+function GetServerListFromTreeView: TStringList;
+function GetServerAndPortListFromTreeView: TStringList;
+
+function FindNodeByDBIndex(ADBIndex: Word): TTreeNode;
+function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
+function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
+
+function GetServerNameFromConnString(ADBIndex: word): string;
+function GetDBNameFromConnString(ADBIndex: word): string;
+
+function GetConfigurationDirectory: string;
+procedure ReadIniFile;
+procedure WriteIniFile;
+function FirstRun: boolean;
+procedure ExtractResources;
+function ExtractVersionFromName(const Name: string): string;
+function GetProgramVersion: string;
+function GetLazarusVersion: string;
+function GetFPCVersion: string;
+function ReadOSReleaseFile: string;
+function ReadFileToString(const AFileName: string): string;
+function GetOSInfo: string;
+function GetLCLWidgetSet: string;
+function GetProgramBuildDate: string;
+function GetProgramBuildTime: string;
+
+function ExtractDefaultValue(const DefaultSource: string): string;
+function IsValidUUIDHex(const S: string): Boolean;
+function CreateUUIDHexLiteral: string;
+function IsSizedTypeName(const ATypeName: string): Boolean;
+function GetNameFromSizedTypeName(const ATypeName: string): string;
+function GetSizeFromSizedTypeName(const ATypeName: string): string;
+procedure GetPrecisionAndScaleFromSizedTypeName(const ATypeName: string; out Precision, Scale: string);
+function ExtractObjectName(const Input: string): string; // Tables(11) -> Tables
+function FormatNodeCaptionnWithCount(const Text: string; Count: Integer): string;
+function GetClearNodeText(const ANodeText: string): string;
+function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
+function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
+
+function FBObjectToStr(AType: TObjectType): string;
+function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
+function FBTypeToTreeViewType(AType: TObjectType): TTreeViewObjectType;
+function TreeViewTypeToFBType(AType: TTreeViewObjectType): TObjectType;
+
+
+// Retrieve available collations for specified Characterset into Collations
+function GetCollations(const Characterset: string; var Collations: TStringList): boolean;
+
+// Given field retrieval query in FieldQuery, return field type and size.
+// Includes support for field types that are domains and arrays
+procedure GetFieldType(FieldQuery: TIBQuery; var FieldType: string; var FieldSize: integer);
+
+// Returns field type DDL given a RDB$FIELD_TYPE value as well
+// as subtype/length/scale (use -1 for empty/unknown values)
+function GetFBTypeName(Index: Integer;
+  SubType: integer = -1; FieldLength: integer = -1;
+  Precision: integer = -1; Scale: integer = -1; CharacterSet: string = ''; CharacterLengt: integer = -1
+): string;
+// Tries to guess if an RDB$RELATION_FIELDS.RDB$FIELD_SOURCE domain name for a column is system-generated.
+function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
+
+// Tries to guess if an index name is a system generated primary key index
+function IsPrimaryIndexSystemGenerated(IndexName: string): boolean;
+
+// Given TIBConnection parameters, sets transaction isolation level
+procedure SetTransactionIsolation(Params: TStrings);
+
+
+function AdjustColorByBrightness(AColor: TColor): TColor;    function ColorRValue(AColor: TColor): Byte;
+function ColorGValue(AColor: TColor): Byte;
+function ColorBValue(AColor: TColor): Byte;
+
+function StrToFontStyles(const S: string): TFontStyles;
+function FontStylesToStr(AStyles: TFontStyles): string;
+
+//Arrays
+function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
+
+
+implementation
+
+uses Reg;
+
+procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
+var
+  SL: TStringList;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Assign(Params);
+    SL.SaveToFile(FileName);
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure LoadTxConfigFromFile(const FileName: string; Params: TStrings);
+var
+  SL: TStringList;
+begin
+  if not FileExists(FileName) then
+    Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile(FileName);
+    Params.Assign(SL);
+  finally
+    SL.Free;
+  end;
+end;
+
+function FindNodeByDBIndex(ADBIndex: Word): TTreeNode;
+var
+  i, j: Integer;
+  ServerNode, ChildNode: TTreeNode;
+  NodeInfo: TPNodeInfos;
+begin
+  Result := nil;
+
+  // Level 0 Nodes (Server) durchsuchen
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    ServerNode := MainTreeView.Items[i];
+    if ServerNode.Level <> 0 then
+      Continue; // nur Server Nodes
+
+    // Level 1 Nodes (DB) prüfen
+    ChildNode := ServerNode.getFirstChild;
+    while ChildNode <> nil do
+    begin
+      if Assigned(ChildNode.Data) then
+      begin
+        NodeInfo := TPNodeInfos(ChildNode.Data);
+        if NodeInfo^.dbIndex = ADBIndex then
+        begin
+          Result := ChildNode;
+          Exit;
+        end;
+      end;
+      ChildNode := ChildNode.getNextSibling;
+    end;
+  end;
+end;
+
+function IBXProtocolToString(AProtocol: TProtocol): string;
+begin
+  case AProtocol of
+    TCP:       Result := 'TCP';
+    SPX:       Result := 'SPX';
+    NamedPipe: Result := 'NamedPipe';
+    Local:     Result := 'Local';
+    inet:      Result := 'inet';
+    inet4:     Result := 'inet4';
+    inet6:     Result := 'inet6';
+    wnet:      Result := 'wnet';
+    xnet:      Result := 'xnet';
+  end;
+end;
+
+function StringToIBXProtocol(const AValue: string): TProtocol;
+var
+  P: TProtocolAll;
+begin
+  if SameText(AValue,'TCP') then P := TCP
+  else if SameText(AValue,'SPX') then P := SPX
+  else if SameText(AValue,'NamedPipe') then P := NamedPipe
+  else if SameText(AValue,'Local') then P := Local
+  else if SameText(AValue,'inet') then P := inet
+  else if SameText(AValue,'inet4') then P := inet4
+  else if SameText(AValue,'inet6') then P := inet6
+  else if SameText(AValue,'wnet') then P := wnet
+  else if SameText(AValue,'xnet') then P := xnet
+  else
+    P := unknownProtocol;
+
+  if P = unknownProtocol then
+    raise Exception.Create('Unknown IBX protocol: ' + AValue);
+
+  Result := TProtocol(P);
+
+end;
+//TransactionConfig
+function HasParam(P: TStrings; const S: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := False;
+  for i := 0 to P.Count - 1 do
+    if SameText(Trim(P[i]), S) then
+      Exit(True);
+end;
+
+//TreeView Filter
+function IsFilterScopeNode(ANode: TTreeNode): Boolean;
+var
+  NI: TPNodeInfos;
+begin
+  Result := False;
+  if (ANode = nil) or (ANode.Data = nil) then Exit;
+
+  NI := TPNodeInfos(ANode.Data);
+
+  case NI^.ObjectType of
+    tvotServer,
+    tvotDatabase,
+    tvotQueryWindow,
+
+    tvotTableRoot,
+    tvotGeneratorRoot,
+    tvotViewRoot,
+    tvotUDFRoot,
+    tvotProcedureRoot,
+    tvotFunctionRoot,
+    tvotDomainRoot,
+    tvotUserRoot,
+    tvotRoleRoot,
+    tvotExceptionRoot,
+
+    tvotTriggerRoot,
+    tvotTableTriggerRoot,
+    tvotDBTriggerRoot,
+    tvotDDLTriggerRoot,
+
+    tvotUDRRoot,
+    tvotUDRTriggerRoot,
+    tvotUDRTableTriggerRoot,
+    tvotUDRDBTriggerRoot,
+    tvotUDRDDLTriggerRoot,
+
+    tvotPackage,
+    tvotPackageRoot,
+    //tvotPackageUDFFunctionRoot,
+    tvotPackageFunctionRoot,
+    tvotPackageProcedureRoot,
+    tvotPackageUDRFunctionRoot,
+    tvotPackageUDRProcedureRoot,
+    //tvotPackageTriggerRoot,
+    //tvotPackageUDRTriggerRoot,
+
+    tvotSystemObjectRoot,
+    tvotSystemTableRoot:
+      Result := true;
+  end;
+end;
+
+function IsObjectNameCaseSensitive(AObjectName: string): boolean;
+begin
+  result := (AObjectName <> AnsiUpperCase(AObjectName));
+end;
+
+function IsObjectNameQuoted(const AStr: string): Boolean;
+var
+  S: string;
+begin
+  S := Trim(AStr);
+
+  Result :=
+    (Length(S) >= 2) and
+    (S[1] = '"') and
+    (S[Length(S)] = '"');
+end;
+
+function MakeObjectNameQuoted(AObjectName: string): string;
+begin
+  result := '"' + AObjectName + '"';
+end;
+
+function MakeCaseSensitiveAuto(const AObjectName: string): string;
+var
+  S: string;
+begin
+  S := Trim(AObjectName);
+
+  if S = '' then
+    Exit(S);
+
+  // Bereits quoted → nichts ändern
+  if IsObjectNameQuoted(S) then
+    Exit(S);
+
+  // Nur wenn NICHT komplett uppercase → quoten
+  if IsObjectNameCaseSensitive(S) then
+    Result := '"' + S + '"'
+  else
+    Result := S;  // Nur Uppercase → kein Quote nötig
+end;
+
+procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
+var i: integer;
+begin
+  for i := 0 to AObjectList.Count - 1 do
+    if IsObjectNameCaseSensitive(AObjectList[i]) then
+      AObjectList[i] := MakeObjectNameQuoted(AObjectList[i]);
+end;
+
+{  TIBSQLStatementTypes =
+                 (SQLUnknown, SQLSelect, SQLInsert,
+                  SQLUpdate, SQLDelete, SQLDDL,
+                  SQLGetSegment, SQLPutSegment,
+                  SQLExecProcedure, SQLStartTransaction,
+                  SQLCommit, SQLRollback,
+                  SQLSelectForUpdate, SQLSetGenerator,
+                  SQLSavePoint);
+}
+function NeedsCommit(Q: TIBQuery): Boolean;
+begin
+  Result := False;
+
+  if not Assigned(Q) then
+    Exit;
+
+  case Q.StatementType of
+    SQLInsert,
+    SQLUpdate,
+    SQLDelete,
+    SQLDDL,
+    SQLSetGenerator,
+    SQLSavePoint:
+      Result := True;
+  else
+    Result := False;
+  end;
+end;
+
+function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
+begin
+  // Falls kein Port angegeben ist, nimm Standardport 3050
+  if Trim(APort) = '' then
+    APort := '3050';
+
+  // Wenn Servername leer → lokale Verbindung
+  if Trim(AServerName) = '' then
+    Result := ADBFileName
+  else
+    Result := AServerName + '/' + APort + ':' + ADBFileName;
+end;
+
+function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
+var
+  ServerRecord: TServerRecord;
+  ServerSession: TServerSession;
+begin
+  Result := False;
+  ErrorStr := '';
+
+  try
+    ServerRecord := GetServerRecordFromFileByName(AServerName);
+    ServerSession := TServerSession.Create(
+      AServerName, '', '', '', '', TCP, '', '', '', '', '', 0, 0, False, False, 0, 0, 0
+    );
+
+    ApplyServerRecordToSession(ServerRecord, ServerSession);
+
+    if not ServerSession.Connected then
+      if not ServerSession.IBXConnect then
+      begin
+        ErrorStr := ServerSession.ErrorStr;
+        Exit;
+      end;
+
+    Result := True;
+
+  finally
+    ServerSession.Disconnect;
+    ServerSession.Free;
+  end;
+end;
+
+function GetDBFileNameFromConnectionString(AConnStr: string): string;
+var
+  p: Integer;
+  s: string;
+begin
+  s := Trim(AConnStr);
+
+  // Windows-Pfad hat "C:\", das darf NICHT getrennt werden.
+  // Also: Wenn an Position 2 ein ':' steht, ist es ein lokaler Windows-Pfad.
+  if (Length(s) >= 2) and (s[2] = ':') and
+     ((s[1] in ['A'..'Z']) or (s[1] in ['a'..'z'])) then
+  begin
+    Exit(s);  // reiner Windows-Pfad
+  end;
+
+  // Embedded / absolute Linux path
+  // z.B. "/opt/firebird/data/test.fdb"
+  if (Length(s) > 0) and (s[1] = '/') then
+  begin
+    Exit(s);
+  end;
+
+  // Ansonsten: Firebird-typische ConnStrings
+  // host[:port]:<filename>
+  // Wir suchen die LETZTE ':' – danach kommt der Pfad
+  p := LastDelimiter(':', s);
+
+  if p > 0 then
+    Result := Copy(s, p + 1, Length(s))
+  else
+    Result := s; // Falls kein ':' vorhanden ist (selten)
+end;
+
+
+function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
+begin
+  result := ADB.FirebirdAPI.GetImplementationVersion;
+end;
+
+function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromIBDB(ADB);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, 1, P - 1), 0);
+end;
+
+function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
+var
+  VerStr: string;
+  P: Integer;
+begin
+  VerStr := GetSeverImplemetationVersionFromIBDB(ADB);
+  P := Pos('.', VerStr);
+
+  if P = 0 then
+    Result := 0
+  else
+    Result := StrToIntDef(Copy(VerStr, P + 1, MaxInt), 0);
+end;
+
+procedure ParseFBVersion(AFBVersionString: string; out AFBVersionMajor: word; out AFBVersionMinor: word);
+var
+  S: string;
+  DotPos: Integer;
+  MajorStr, MinorStr: string;
+begin
+  AFBVersionMajor := 0;
+  AFBVersionMinor := 0;
+
+  S := AFBVersionString;
+  if Pos('Firebird', S) > 0 then
+    S := Trim(Copy(S, Pos('Firebird', S) + Length('Firebird'), MaxInt));
+
+  DotPos := Pos('.', S);
+  if DotPos > 0 then
+  begin
+    MajorStr := Copy(S, 1, DotPos-1);
+    MinorStr := Copy(S, DotPos+1, MaxInt);
+    AFBVersionMajor := StrToIntDef(MajorStr, 0);
+    AFBVersionMinor := StrToIntDef(MinorStr, 0);
+  end
+  else
+    AFBVersionMajor := StrToIntDef(S, 0);
+end;
+
+function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: word;
+                                                           out AFBVersionMinor: word;
+                                                           out AFBServerVersion: string): boolean;
+var tmpDB: TIBDatabase;
+    tmpDbInfo: TIBDatabaseInfo;
+    dbFile: string;
+begin
+  result := false;
+
+  dbFile := ExpandFileName(ExtractFilePath(Application.ExeName) +
+            TmpDir + DirectorySeparator + 'embedded_test.fdb');
+
+  tmpDB := TIBDatabase.Create(nil);
+  try
+    tmpDB.FirebirdLibraryPathName := AServerRec.ClientLibraryPath;
+    tmpDB.Params.Values['User_Name'] := AServerRec.UserName;
+    tmpDB.Params.Values['Password'] :=  AServerRec.Password;
+    tmpDB.LoginPrompt := false;
+    try
+      if tmpDB.Connected then
+        tmpDB.Connected := false;
+
+      if FileExists(dbFile) then
+
+        DeleteFile(PChar(dbFile));
+
+      //tmpDB.CreateIfNotExists := true;
+      tmpDB.DatabaseName :=  dbFile;
+      tmpDB.CreateDatabase;
+      tmpDB.Open;
+
+      tmpDbInfo := TIBDatabaseInfo.Create(nil);
+      tmpDbInfo.Database := tmpDB;
+
+      AFBServerVersion := tmpDbInfo.FirebirdVersion;
+      ParseFBVersion(AFBServerVersion, AFBVersionMajor, AFBVersionMinor);
+
+      tmpDB.Close;
+      result := true;
+    except
+      on E: Exception do
+      begin
+        AFBVersionMajor := 0;
+        AFBVersionMinor := 0;
+        AFBServerVersion := 'Unknown';
+        ShowMessage('Embedded Connection failed:' + sLineBreak + E.Message);
+      end;
+    end;
+
+  finally
+    tmpDbInfo.Free;
+    tmpDB.Free;
+  end;
+end;
+
+function CloseDB(dbIndex: Integer): Boolean;
+begin
+  Result := False;
+
+  // Sicherheits-Checks
+  if (dbIndex < Low(RegisteredDatabases)) or (dbIndex > High(RegisteredDatabases)) then
+    Exit;
+
+  with RegisteredDatabases[dbIndex] do
+  begin
+    try
+      // Query schließen
+      if Assigned(IBQuery) and IBQuery.Active then
+      begin
+        try
+          IBQuery.Close;
+        except
+          // silent
+        end;
+      end;
+
+      // Transaktion: Commit → Rollback bei Fehler
+      if Assigned(IBTransaction) and IBTransaction.InTransaction then
+      begin
+        try
+          IBTransaction.Commit;
+        except
+          try
+            IBTransaction.Rollback;
+          except
+            // silent – wenn Rollback auch fehlschlägt
+          end;
+        end;
+      end;
+
+      // Datenbankverbindung schließen
+      if Assigned(IBDatabase) and IBDatabase.Connected then
+      begin
+        try
+          IBDatabase.Connected := False;
+        except
+          // silent
+        end;
+      end;
+
+      Result := True;
+    except
+      // silent: nichts anzeigen, kein raise
+      Result := False;
+    end;
+  end;
+end;
+
+function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: string): Boolean;
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  CmpTitle: string;
+  CmpServer: string;
+begin
+  Result := False;
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  if not FileExists(FileName) then
+    Exit;
+
+  // Vergleichswerte vorbereiten (nur einmal!)
+  CmpTitle := Trim(ATitle);
+  CmpServer := Trim(AServerName);
+
+  AssignFile(F, FileName);
+  FileMode := 2; // read/write
+
+  try
+    Reset(F);
+
+    while not Eof(F) do
+    begin
+      Read(F, Rec);
+
+      if (not Rec.Deleted) and
+         SameText(Rec.Title, CmpTitle) and
+         SameText(Rec.ServerName, CmpServer) then
+      begin
+        Rec.Deleted := True;
+
+        Seek(F, FilePos(F) - 1);
+        Write(F, Rec);
+
+        Result := True;
+        Exit;
+      end;
+    end;
+
+  finally
+    CloseFile(F);
+  end;
+end;
+
+procedure MarkAllServerDatabasesDeleted(const ServerName: string);
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  i: Integer;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  // Datei vorhanden?
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 2; // read/write
+    Reset(F);
+
+    try
+      for i := 0 to FileSize(F) - 1 do
+      begin
+        try
+          Seek(F, i);
+          Read(F, Rec);
+
+          if (not Rec.Deleted) and SameText(Trim(Rec.ServerName), Trim(ServerName)) then
+          begin
+            Rec.Deleted := True;
+            Seek(F, i);
+            Write(F, Rec);
+          end;
+        except
+          // silent – ignoriert fehlerhafte Datensätze
+        end;
+      end;
+    finally
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+    end;
+  except
+    // silent – kein raise, kein Dialog
+  end;
+end;
+
+procedure MarkAllDatabasesDeleted;
+var
+  F: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName: string;
+  i: Integer;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 2; // read/write
+    Reset(F);
+
+    try
+      for i := 0 to FileSize(F) - 1 do
+      begin
+        try
+          Seek(F, i);
+          Read(F, Rec);
+
+          if not Rec.Deleted then
+          begin
+            Rec.Deleted := True;
+            Seek(F, i);
+            Write(F, Rec);
+          end;
+        except
+          // silent – fehlerhafte Records überspringen
+        end;
+      end;
+    finally
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+    end;
+  except
+    // silent – keine Meldungen, keine Exceptions
+  end;
+end;
+
+procedure RemoveDeletedDBRegistrationsFromFile;
+var
+  F, TempF: file of TRegisteredDatabase;
+  Rec: TRegisteredDatabase;
+  FileName, TempName: string;
+begin
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+  TempName := GetConfigurationDirectory + 'turbobird.tmp';
+
+  // Falls Datei nicht existiert → nichts tun
+  if not FileExists(FileName) then
+    Exit;
+
+  try
+    AssignFile(F, FileName);
+    FileMode := 0; // read-only
+    Reset(F);
+
+    AssignFile(TempF, TempName);
+    Rewrite(TempF);
+
+    try
+      while not Eof(F) do
+      begin
+        try
+          Read(F, Rec);
+          if not Rec.Deleted then
+            Write(TempF, Rec);  // Nur gültige Datensätze behalten
+        except
+          // silent – überspringt fehlerhafte Einträge
+        end;
+      end;
+    finally
+      // Dateien schließen, egal was passiert
+      try
+        CloseFile(F);
+      except
+        // silent
+      end;
+      try
+        CloseFile(TempF);
+      except
+        // silent
+      end;
+    end;
+
+    // Alte Datei ersetzen
+    try
+      DeleteFile(PChar(FileName));
+      RenameFile(TempName, PChar(FileName));
+    except
+      // silent – z. B. falls Datei gesperrt oder Berechtigung fehlt
+    end;
+  except
+    // silent – keine Exceptions oder Dialoge
+  end;
+end;
+
+function GetDBRecByServerAndDBName(const AServerName, ADBName: string): TDatabaseRec;
+var
+  i: Integer;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if (RegisteredDatabases[i].RegRec.ServerName = AServerName) and
+       (RegisteredDatabases[i].RegRec.Title = ADBName) then
+    begin
+      Result := RegisteredDatabases[i];
+      Exit;
+    end;
+  end;
+end;
+
+procedure SetupTransaction(DBRec: TDatabaseRec; TRRec: TTransactionConfigRecord);
+begin
+  with DBRec do
+  begin
+{    // Transaktion erstellen, falls noch nil
+    if SQLTrans = nil then
+      SQLTrans := TIBTransaction.Create(nil);
+
+    // Verbindung koppeln
+    if IBConnection <> nil then
+      IBConnection.DefaultTransaction := SQLTrans;
+
+    // Isolation-Level
+    case TRRec.TxIsolation of
+      0: SQLTrans.Isolation := xiReadCommitted;
+      1: SQLTrans.Isolation := xiReadCommittedRecVersion;
+      2: SQLTrans.Isolation := xiRepeatableRead;
+      3: SQLTrans.Isolation := xiSerializable;
+    end;
+
+    SQLTrans.ReadOnly := not TRRec.TxAccessMode;
+
+    if TRRec.TxWaitMode then
+      SQLTrans.Options := SQLTrans.Options + [toWait]
+    else
+      SQLTrans.Options := SQLTrans.Options - [toWait];
+    }
+  end;
+end;
+
+
+function IsValidPortNr(AStr: string): boolean;
+var
+  PortNum: Integer;
+begin
+  Result := False;
+  if TryStrToInt(Trim(AStr), PortNum) then
+    Result := (PortNum >= 1) and (PortNum <= 65535);
+end;
+
+function ServerNameContainPortNr(AServerName: string): boolean;
+var
+  SlashPos: Integer;
+  PortStr: string;
+begin
+  Result := False;
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+  begin
+    PortStr := Copy(AServerName, SlashPos+1, MaxInt);
+    Result := IsValidPortNr(PortStr);
+  end;
+end;
+
+function GetPortNrFromServerName(AServerName: string): string;
+var
+  SlashPos: Integer;
+  PortStr: string;
+begin
+  Result := '';
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+  begin
+    PortStr := Copy(AServerName, SlashPos+1, MaxInt);
+    if IsValidPortNr(PortStr) then
+      Result := Trim(PortStr);
+  end;
+end;
+
+function GetHostFromServerName(AServerName: string): string;
+var
+  SlashPos: Integer;
+begin
+  SlashPos := Pos('/', AServerName);
+  if SlashPos > 0 then
+    Result := Trim(Copy(AServerName, 1, SlashPos-1))
+  else
+    Result := Trim(AServerName);
+end;
+
+
+(*  Get server name from database string  *)
+Function GetServerName(DBName: string): string;
+begin
+  if Pos(':', DBName) > 2 then
+    Result:= Copy(DBName, 1, Pos(':', DBName) - 1)
+  else
+    Result:= 'localhost';
+end;
+
+procedure AssignIBDatabase(const Source, Target: TIBDatabase);
+begin
+  if not Assigned(Source) or not Assigned(Target) then
+    Exit;
+
+  // Wichtig: erst schließen
+  if Target.Connected then
+    Target.Close;
+
+  // Basis-Einstellungen
+  Target.DatabaseName   := Source.DatabaseName;
+  Target.FirebirdLibraryPathName := Source.FirebirdLibraryPathName;
+  Target.Params.Assign(Source.Params);
+  Target.LoginPrompt    := Source.LoginPrompt;
+  Target.SQLDialect     := Source.SQLDialect;
+  //Target.DefaultTransaction := Source.DefaultTransaction; // Achtung: nur Referenz, keine Kopie!
+
+  // Provider-Flags und Misc
+  Target.TraceFlags     := Source.TraceFlags;
+  //Target.SQLRoleName    := Source.SQLRoleName;
+
+  // In IBX gibt es "IdleTimer", "AllowStreamedConnected" usw. -> falls vorhanden:
+  Target.IdleTimer      := Source.IdleTimer;
+  Target.AllowStreamedConnected := Source.AllowStreamedConnected;
+
+  // Events nicht übernehmen (da meist fenster-/threadabhängig)
+  {Target.BeforeConnect  := Source.BeforeConnect;
+  Target.AfterConnect   := Source.AfterConnect;
+  Target.BeforeDisconnect := Source.BeforeDisconnect;
+  Target.AfterDisconnect  := Source.AfterDisconnect;
+  Target.OnLogin        := Source.OnLogin;}
+end;
+
+function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
+begin
+  Result := False;
+
+  if (not Assigned(DB1)) or (not Assigned(DB2)) then
+    Exit;
+
+  // Direkt identisch? -> sofort true
+  if DB1 = DB2 then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // Vergleich wichtiger Properties
+  Result :=
+    (DB1.DatabaseName      = DB2.DatabaseName) and
+    (DB1.LoginPrompt       = DB2.LoginPrompt) and
+    (DB1.SQLDialect        = DB2.SQLDialect) and
+    (DB1.Params.Text       = DB2.Params.Text) and
+    (DB1.FirebirdLibraryPathName = DB2.FirebirdLibraryPathName);
+
+  // Optional: DefaultTransaction prüfen
+  {if Result then
+  begin
+    if Assigned(DB1.DefaultTransaction) and Assigned(DB2.DefaultTransaction) then
+      Result := DB1.DefaultTransaction.Params.Text = DB2.DefaultTransaction.Params.Text
+    else if Assigned(DB1.DefaultTransaction) xor Assigned(DB2.DefaultTransaction) then
+      Result := False;
+  end;}
+end;
+
+function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  found: Boolean;
+  fileName: string;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  found := False;
+  fileName := getConfigurationDirectory + ServersRegFile;
+
+  if not FileExists(fileName) then
+    Exit; // nichts vorhanden → leer zurück
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    while fs.Position < fs.Size do
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+      if SameText(Trim(rec.ServerName), Trim(AServerName)) then
+      begin
+        Result := rec;
+        found := True;
+        Break;
+      end;
+    end;
+  finally
+    fs.Free;
+  end;
+
+  if not found then
+    FillChar(Result, SizeOf(Result), 0); // leer zurück wenn nicht gefunden
+end;
+
+function GetFirstServerRecordFromFile: TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  fileName := getConfigurationDirectory + ServersRegFile;
+
+  if not FileExists(fileName) then
+    Exit; // keine Datei vorhanden → leer zurück
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    if fs.Size >= SizeOf(TServerRecord) then
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+      Result := rec;
+    end
+    else
+      FillChar(Result, SizeOf(Result), 0); // Datei leer oder defekt
+  finally
+    fs.Free;
+  end;
+end;
+
+function GetServerRecordFromFileByIndex(AIdx: Integer): TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+  offset: Int64;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+  fileName := getConfigurationDirectory + ServersRegFile;
+
+  if (AIdx < 0) or (not FileExists(fileName)) then
+    Exit; // ungültiger Index oder Datei nicht vorhanden
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    // Prüfen, ob der Index in der Datei liegt
+    if fs.Size < (AIdx + 1) * SizeOf(TServerRecord) then
+      Exit; // Index außerhalb des gültigen Bereichs
+
+    // Direkt an die Position springen
+    offset := AIdx * SizeOf(TServerRecord);
+    fs.Position := offset;
+
+    // Record lesen
+    fs.ReadBuffer(rec, SizeOf(TServerRecord));
+    Result := rec;
+  finally
+    fs.Free;
+  end;
+end;
+
+procedure SaveServerDataToFile(const Rec: TServerRecord);
+var
+  tmpList: TMemoryStream;
+  oldRec: TServerRecord;
+  found: Boolean;
+  regFile: string;
+begin
+  regFile := GetConfigurationDirectory + ServersRegFile;
+
+  tmpList := TMemoryStream.Create;
+  try
+    if FileExists(regFile) then
+      tmpList.LoadFromFile(regFile);
+
+    tmpList.Position := 0;
+    found := False;
+
+    // prüfen ob schon ein Datensatz für diesen Server existiert
+    while tmpList.Position < tmpList.Size do
+    begin
+      tmpList.ReadBuffer(oldRec, SizeOf(oldRec));
+      if Trim(oldRec.ServerName) = Trim(Rec.ServerName) then
+      begin
+        // überschreiben
+        tmpList.Position := tmpList.Position - SizeOf(oldRec);
+        tmpList.WriteBuffer(Rec, SizeOf(Rec));
+        found := True;
+        Break;
+      end;
+    end;
+
+    // falls nicht gefunden → neuen Datensatz anhängen
+    if not found then
+    begin
+      tmpList.Position := tmpList.Size;
+      tmpList.WriteBuffer(Rec, SizeOf(Rec));
+    end;
+
+    tmpList.SaveToFile(regFile);
+  finally
+    tmpList.Free;
+  end;
+end;
+
+procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
+begin
+  // nur wenn Record gültig (ServerName nicht leer)
+  if Trim(Rec.ServerName) = '' then
+    Exit;
+
+  //Session.ServerName          := Rec.ServerName;
+  Session.ServerAlias         := Rec.ServerAlias;
+
+  {Session.FBVersionString     := Rec.VersionString;
+  Session.FBVersionMajor      := Rec.VersionMajor;
+  Session.FBVersionMinor      := Rec.VersionMinor;}
+
+  Session.UserName            := Rec.UserName;
+  Session.Password            := Rec.Password;
+  Session.Role                := Rec.Role;
+  Session.Protocol            := Rec.Protocol;
+  Session.Charset             := Rec.Charset;
+  Session.Port                := Rec.Port;
+  Session.RootPath            := Rec.RootPath;
+  Session.ClientLibraryPath   := Rec.ClientLibraryPath;
+  Session.ConfigFilePath      := Rec.ConfigFilePath;
+  Session.LoadRegisteredClientLib := Rec.LoadRegisteredClientLib;
+  Session.IsEmbedded              := Rec.IsEmbedded;
+
+  Session.ConnectTimeout    := Rec.ConnectTimeoutMS;
+  Session.RetryConnectCount := Rec.RetryCount;
+  Session.QueryTimeout      := Rec.QueryTimeoutMS;
+end;
+
+function BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
+var Rec: TServerRecord;
+begin
+  FillChar(Rec, SizeOf(Rec), 0);
+
+  Rec.ServerName   := Session.ServerName;
+  Rec.ServerAlias  := Session.ServerAlias;
+
+  Rec.VersionString := Session.FBVersionString;
+  Rec.VersionMajor  := Session.FBVersionMajor;
+  Rec.VersionMinor  := Session.FBVersionMinor;
+
+  Rec.UserName     := Session.UserName;
+  if SavePwd then
+    Rec.Password := Session.Password
+  else
+   Rec.Password := '';
+  Rec.Role         := Session.Role;
+  Rec.Protocol     := Session.Protocol;
+  Rec.Charset := Session.Charset;
+  Rec.Port :=     Session.Port;
+  Rec.IsEmbedded := (Rec.Protocol = local);
+
+  Rec.RootPath := Session.RootPath;
+  Rec.ClientLibraryPath   := Session.ClientLibraryPath;
+  Rec.ConfigFilePath      := Session.ConfigFilePath;
+  Rec.LoadRegisteredClientLib := Session.LoadRegisteredClientLib;
+  Rec.IsEmbedded              := Session.IsEmbedded;
+
+  Rec.ConnectTimeoutMS := Session.ConnectTimeout;
+  Rec.RetryCount       := Session.RetryConnectCount;
+  Rec.QueryTimeoutMS   := Session.QueryTimeout;
+
+  Result := Rec;
+end;
+
+function GetServerNodeByServerName(const AServerName: string): TTreeNode;
+var
+  Node: TTreeNode;
+begin
+  Result := nil;
+
+  Node := MainTreeView.Items.GetFirstNode;
+
+  while Node <> nil do
+  begin
+    if SameText(Node.Text, AServerName) then
+    begin
+      Result := Node;
+      Exit;
+    end;
+
+    Node := Node.GetNextSibling;  // nur Level 0 durchsuchen
+  end;
+end;
+
+function GetServerListFromTreeView: TStringList;
+var
+  i: Integer;
+  Node: TTreeNode;
+begin
+  result := nil;
+  if MainTreeView.Items.Count = 0 then
+    exit;
+  Result := TStringList.Create;
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    Node := MainTreeView.Items[i];
+    if (Node.Level = 0) and (Trim(Node.Text) <> '') then
+      Result.Add(Node.Text);
+  end;
+end;
+
+function GetServerAndPortListFromTreeView: TStringList;
+var
+  i: Integer;
+  Node: TTreeNode;
+  Port: string;
+  hstr: string;
+begin
+  result := nil;
+  if MainTreeView.Items.Count = 0 then
+    exit;
+  Result := TStringList.Create;
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    Node := MainTreeView.Items[i];
+    if (Node.Level = 0) and (Trim(Node.Text) <> '') then
+    begin
+      hStr := Node.Text;
+      if not TPNodeInfos(Node.Data)^.ServerSession.IsEmbedded   then
+        hStr := hStr + '/' + TPNodeInfos(Node.Data)^.ServerSession.Port;
+      Result.Add(hStr);
+    end;
+  end;
+end;
+
+function GetAncestorAtLevel(ANode: TTreeNode; ALevel: Integer): TTreeNode;
+begin
+  Result := nil;
+
+  // Kein Knoten übergeben -> raus
+  if ANode = nil then
+    Exit;
+
+  // Ungültiges Level -> raus
+  if ALevel < 0 then
+    Exit;
+
+  // Wenn das gewünschte Level höher ist als der aktuelle Node.Level
+  // -> kann niemals erreicht werden
+  if ALevel > ANode.Level then
+    Exit;
+
+  // Jetzt hochlaufen, bis Level erreicht oder kein Parent mehr
+  while (ANode.Level > ALevel) and (ANode.Parent <> nil) do
+    ANode := ANode.Parent;
+
+  // Nur zurückgeben, wenn wirklich erreicht
+  if ANode.Level = ALevel then
+    Result := ANode;
+end;
+
+function GetAncestorNodeText(ANode: TTreeNode; ALevel: Integer): string;
+var
+  Ancestor: TTreeNode;
+begin
+  Ancestor := GetAncestorAtLevel(ANode, ALevel);
+  if Assigned(Ancestor) then
+    Result := Trim(Ancestor.Text)
+  else
+    Result := '';
+end;
+
+function GetServerNameFromConnString(ADBIndex: word): string;
+var DBName: string;
+begin
+  DBName := RegisteredDatabases[ADBIndex].RegRec.DatabaseName;
+  if Pos(':', DBName) > 2 then
+    Result:= Copy(DBName, 1, Pos(':', DBName) - 1)
+  else
+    Result:= 'localhost';
+end;
+
+function GetDBNameFromConnString(ADBIndex: Word): string;
+var
+  DBName: string;
+  P: Integer;
+begin
+  DBName := RegisteredDatabases[ADBIndex].RegRec.DatabaseName;
+
+  P := Pos(':', DBName);
+  if P > 2 then
+    // alles nach dem Doppelpunkt
+    Result := Copy(DBName, P + 1, Length(DBName) - P)
+  else
+    // kein Server angegeben → kompletter String ist DB-Pfad
+    Result := DBName;
+end;
+
+function GetConfigurationDirectory: string;
+var ConfigDir: string;
+begin
+  ConfigDir := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName) + 'data' + PathDelim + 'config');
+  if not DirectoryExists(ConfigDir) then
+      CreateDir(ConfigDir);
+  Result:= ConfigDir;
+end;
+
+procedure ReadIniFile;
+var TempStr: string;
+begin
+  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
+  InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
+
+  //Backup
+  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
+
+  //Restore
+  DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
+  DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
+  RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
+  DefaultSegmentSize     := fIniFile.ReadString('Restore',  'DefaultSegmentSize', '64');
+  DefaultSegmentUnit     := fIniFile.ReadString('Restore',  'DefaultSegmentUnit', 'MB');
+
+  //Scripter
+  EchoInput := fIniFile.ReadBool('Scripter',  'EchoInput', true);
+  StopOnFirstError := fIniFile.ReadBool('Scripter',  'StopOnFirstError', false);
+  AutoDDL := fIniFile.ReadBool('Scripter',  'AutoDDL', true);
+  IgnoreCreateDatabase := fIniFile.ReadBool('Scripter',  'IgnoreCreateDatabase', false);
+  IgnoreGrants := fIniFile.ReadBool('Scripter',  'IgnoreGrants', false);
+  ShowAffectedRows := fIniFile.ReadBool('Scripter',  'ShowAffectedRows', true);
+  ShowPerformanceStats := fIniFile.ReadBool('Scripter',  'ShowPerformanceStats', true);
+
+  //ClipboardExport
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport',  'MaxExportRows', 200);
+
+  //MetaData
+  AlwaysQuoteIdentifiers   := fIniFile.ReadBool('MetaData',  'AlwaysQuoteIdentifiers', true);
+  CaseSensitiveObjectNames := fIniFile.ReadBool('MetaData',  'CaseSensitiveObjectNames', true);
+  ShowSystem               := fIniFile.ReadBool('MetaData',  'ShowSystem', false);
+
+  //IntelliSense
+  ReloadCacheOnNodeExpand := fIniFile.ReadBool('IntelliSense',  'ReloadCacheOnNodeExpand', false);
+
+  //MetaDataTableExtract
+  ExtractDomains := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractDomains', true);
+  ExtractIndex   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractIndex', true);
+  ExtractForeign := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractForeign', true);
+  ExtractCheck   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractCheck', true);
+  ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
+  ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
+  ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', true);
+
+
+  //Theme
+  AllowIniOverrides           :=  fIniFile.ReadBool('UI',  'AllowIniOverrides', true);
+
+  //MainTreeView
+  MainTreeViewAlwaysRefresh   :=  fIniFile.ReadBool('MainTreeView',  'AlwaysRefresh', false);
+  MainTreeViewColor           :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  MainTreeViewFontName        :=  fIniFile.Readstring('MainTreeView',  'FontName', 'Arial');
+  MainTreeViewFontStyle       :=  StrToFontStyles(fIniFile.Readstring('MainTreeView',  'FontStyle', 'fsNormal'));
+  MainTreeViewFontSize        :=  fIniFile.ReadInteger('MainTreeView',  'FontSize', 14);
+  MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  AutoFilter                  :=  fIniFile.ReadBool('MainTreeView',  'AutoFilter', false);
+
+  //QueryWindow
+  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clSilver'));
+  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
+  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
+  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
+  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
+
+  //TransactionConfig-Defaults
+  DefTxFileName := fIniFile.ReadString('TransactionDefaults','TxFileName','read_committed.txt');
+
+
+  //BulkExport
+  DefaultBatchSize := fIniFile.ReadInteger('BulkExport','DefaultBatchSize', 500000);
+
+  // CSV Editor
+  CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
+  CSVDelimiter := TempStr[1];
+
+  {TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','CRLF');
+
+  case UpperCase(TempStr) of
+    'CRLF': CSVLineEnding := #13#10;
+    'LF':   CSVLineEnding := #10;
+    'CR':   CSVLineEnding := #13;
+  else
+    CSVLineEnding := LineEnding;  // Fallback
+  end;}
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
+  CSVQuoteChar := TempStr[1];
+
+  CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
+  CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
+  CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
+end;
+
+procedure WriteIniFile;
+var TempStr : string;
+begin
+  fIniFile.WriteString('UI', 'Language', Language);
+
+  //Backup
+  fIniFile.WriteBool('Backup',  'CloseDBBeforeBackup', CloseDBBeforeBackup);
+
+  //Restore
+  fIniFile.WriteInteger('Restore', 'DefaultPageSize', DefaultPageSize);
+  fIniFile.WriteInteger('Restore', 'DefaultNumBuffers', DefaultNumBuffers);
+  fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
+  fIniFile.WriteString('Restore',  'DefaultSegmentSize', DefaultSegmentSize);
+  fIniFile.WriteString('Restore',  'DefaultSegmentUnit', DefaultSegmentUnit);
+
+  //Scripter
+  fIniFile.WriteBool('Scripter',  'EchoInput', EchoInput);
+  fIniFile.WriteBool('Scripter',  'StopOnFirstError', StopOnFirstError);
+  fIniFile.WriteBool('Scripter',  'AutoDDL', AutoDDL);
+  fIniFile.WriteBool('Scripter',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
+  fIniFile.WriteBool('Scripter',  'IgnoreGrants', IgnoreGrants);
+  fIniFile.WriteBool('Scripter',  'ShowAffectedRows', ShowAffectedRows);
+  fIniFile.WriteBool('Scripter',  'ShowPerformanceStats', ShowPerformanceStats);
+
+  //ClipboardExport
+  fIniFile.WriteInteger('ClipboardExport',  'MaxExportRows', MaxExportRows);
+
+  //MetaData
+  fIniFile.WriteBool('MetaData',  'AlwaysQuoteIdentifiers', AlwaysQuoteIdentifiers);
+  fIniFile.WriteBool('MetaData',  'CaseSensitiveObjectNames', CaseSensitiveObjectNames);
+  fIniFile.WriteBool('MetaData',  'ShowSystem', ShowSystem);
+
+  //IntelliSense
+  fIniFile.WriteBool('IntelliSense',  'ReloadCacheOnNodeExpand', ReloadCacheOnNodeExpand);
+
+
+  //MetaDataTableExtract
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractDomains', ExtractDomains);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractIndex', ExtractIndex);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractForeign', ExtractForeign);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractCheck', ExtractCheck);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractTrigger', ExtractTrigger);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractGrant', ExtractGrant);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractData', ExtractData);
+
+  //Theme
+  fIniFile.WriteBool('UI',  'AllowIniOverrides', AllowIniOverrides);
+
+  //MainTreeView
+  fIniFile.WriteBool('MainTreeView',  'AlwaysRefresh', MainTreeViewAlwaysRefresh);
+  fIniFile.WriteString('MainTreeView',  'FontName', MainTreeViewFontName);
+  fIniFile.WriteString('MainTreeView',  'FontStyle', FontStylesToStr(MainTreeViewFontStyle));
+  fIniFile.WriteInteger('MainTreeView',  'FontSize', MainTreeViewFontSize);
+  fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
+  fIniFile.WriteBool('MainTreeView',  'AutoFilter', AutoFilter);
+
+  //QueryWindow
+  fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
+  fIniFile.WriteString('QueryWindow',  'BackgroundColor', ColorToString(QWEditorBackgroundColor));
+  fIniFile.WriteString('QueryWindow',  'FontName', QWEditorFontName);
+  fIniFile.WriteInteger('QueryWindow',  'FontSize', QWEditorFontSize);
+  fIniFile.WriteString('QueryWindow',  'FontColor', ColorToString(QWEditorFontColor));
+  fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
+
+  //Transaction-Default config
+  fIniFile.WriteString('TransactionDefaults', 'TxFileName', DefTxFileName);
+
+  //BulkExport
+  fIniFile.WriteInteger('BulkExport', 'DefaultBatchSize', DefaultBatchSize);
+
+
+    // CSV Editor
+    fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
+
+    fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
+
+    {// LineEnding zurück in Text umwandeln
+    case CSVLineEnding of
+      #13#10: TempStr := 'CRLF';
+      #10:    TempStr := 'LF';
+      #13:    TempStr := 'CR';
+    else
+      TempStr := 'CRLF';
+    end;
+    fIniFile.WriteString('CSVEditor','CSVLineEnding',TempStr);}
+
+    fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
+    fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
+    fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
+    fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
+end;
+
+
+function FirstRun: boolean;
+var DataDirectory: string;
+begin
+  {$IFDEF WINDOWS}
+  DataDirectory := ExtractFilePath(Application.ExeName) + '\data';
+  {$ELSE}
+  DataDirectory := ExtractFilePath(Application.ExeName) + '/data';
+ {$ENDIF}
+  result := not DirectoryExists(DataDirectory);
+end;
+
+procedure ExtractResources;
+var
+  DataStream: TResourceStream;
+  MemoryStream: TMemoryStream;
+  AbUnZipper: TAbUnZipper;
+begin
+  AbUnZipper := TAbUnZipper.Create(nil);
+  if FirstRun then
+  begin
+    DataStream := TResourceStream.Create(HInstance, 'DATA', RT_RCDATA);
+    MemoryStream := TMemoryStream.Create;
+    try
+      // Load the ZIP file from the resource into memory
+      MemoryStream.LoadFromStream(DataStream);
+      MemoryStream.Position := 0;
+
+      // Extract the contents of the ZIP file to the target directory.
+      AbUnZipper.Stream := MemoryStream;
+      AbUnZipper.ExtractOptions := [eoCreateDirs, eoRestorePath]; // Create directories
+      AbUnZipper.BaseDirectory := ExtractFilePath(Application.ExeName);
+      AbUnZipper.ExtractFiles('*.*');
+    finally
+      MemoryStream.Free;
+      DataStream.Free;
+      AbUnZipper.Free;
+    end;
+  end;
+end;
+
+
+function ExtractVersionFromName(const Name: string): string;
+var
+  Parts: TStringArray;
+  CleanName: string;
+begin
+  Result := '';
+  CleanName := Name;
+
+  // Entferne .zip oder .exe.zip oder .exe
+  if EndsText('.exe.zip', CleanName) then
+    Delete(CleanName, Length(CleanName) - 7 + 1, 8)
+  else if EndsText('.zip', CleanName) then
+    Delete(CleanName, Length(CleanName) - 3 + 1, 4)
+  else if EndsText('.exe', CleanName) then
+    Delete(CleanName, Length(CleanName) - 3 + 1, 4);
+
+  Parts := SplitString(CleanName, '-v');
+  if Length(Parts) <> 2 then Exit;
+
+  Result := Parts[1];
+
+  // Entferne ggf. einen Punkt am Ende
+  if EndsText('.', Result) then
+    Delete(Result, Length(Result), 1);
+
+  // Entferne ggf. noch .exe, falls es doch drin blieb
+  Result := StringReplace(Result, '.exe', '', [rfIgnoreCase]);
+end;
+
+function GetProgramVersion: string;
+var
+  vr: TVersionResource;
+  rs: TResourceStream;
+begin
+  Result := 'unknow';
+  vr := TVersionResource.Create;
+  try
+    rs := TResourceStream.CreateFromID(HINSTANCE, 1, PChar(RT_VERSION));
+    try
+      vr.SetCustomRawDataStream(rs);
+      Result := Format('%d.%d.%d.%d', [vr.FixedInfo.FileVersion[0],
+                                       vr.FixedInfo.FileVersion[1],
+                                       vr.FixedInfo.FileVersion[2],
+                                       vr.FixedInfo.FileVersion[3]]);
+    finally
+      rs.Free;
+    end;
+  finally
+    vr.Free;
+  end;
+end;
+
+function GetLazarusVersion: string;
+begin
+  result := lcl_version;
+end;
+
+function GetFPCVersion: string;
+begin
+  Result := {$I %FPCVERSION%};
+end;
+
+function ReadFileToString(const AFileName: string): string;
+var
+  FileStream: TFileStream;
+  StringStream: TStringStream;
+begin
+  if not FileExists(AFileName) then
+    raise Exception.CreateFmt('File "%s" not found!', [AFileName]);
+
+  FileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    StringStream := TStringStream.Create('');
+    try
+      StringStream.CopyFrom(FileStream, FileStream.Size);
+      Result := StringStream.DataString;
+    finally
+      StringStream.Free;
+    end;
+  finally
+    FileStream.Free;
+  end;
+end;
+
+function ReadOSReleaseFile: string;
+var
+  OSReleaseFile: TextFile;
+  Line, OSVersion: string;
+begin
+  OSVersion := 'Unknown Linux Version';
+  if FileExists('/etc/os-release') then
+  begin
+    AssignFile(OSReleaseFile, '/etc/os-release');
+    try
+      Reset(OSReleaseFile);
+      while not EOF(OSReleaseFile) do
+      begin
+        ReadLn(OSReleaseFile, Line);
+        if Pos('PRETTY_NAME=', Line) = 1 then
+        begin
+          OSVersion := Copy(Line, Pos('=', Line) + 1, Length(Line));
+          OSVersion := StringReplace(OSVersion, '"', '', [rfReplaceAll]);
+          Break;
+        end;
+      end;
+    finally
+      CloseFile(OSReleaseFile);
+    end;
+  end
+  else if FileExists('/proc/version') then
+  begin
+    // Fallback: read from /proc/version, if /etc/os-release don't exists
+    OSVersion := Trim(StringReplace(ReadFileToString('/proc/version'), 'Linux version ', '', []));
+  end;
+  Result := OSVersion;
+end;
+
+function GetOSInfo: string;
+var OSName, OSType, OSVersion: string; Buffer: array[0..255] of Char;
+begin
+  // Betriebssystem bestimmen
+  {$IFDEF WINDOWS}
+  OSName := 'Windows';
+  if GetEnvironmentVariable('OS', Buffer, SizeOf(Buffer)) > 0 then
+    OSVersion := Buffer
+  else
+    OSVersion := 'unknow';
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+  OSName := 'Linux';
+  OSVersion := ReadOSReleaseFile;
+  {$ENDIF}
+
+  {$IFDEF DARWIN}
+  OSName := 'Mac OS';
+  OSVersion := GetEnvironmentVariable('OSTYPE'); // Alternativ mit `uname -r` die Mac-Version auslesen
+  {$ENDIF}
+
+  // 32-Bit or 64-Bit
+  {$IFDEF CPU32}
+  OSType := '32-bit';
+  {$ENDIF}
+  {$IFDEF CPU64}
+  OSType := '64-bit';
+  {$ENDIF}
+
+  //Result := Format('OS: %s' + sLineBreak +
+  //                 '%s' + sLineBreak +
+  //                 'Architecture: %s', [OSName, OSVersion, OSType]);
+
+  Result := Format('%s' + sLineBreak +
+                   '%s' + sLineBreak +
+                   'Architecture: %s', [OSName, OSVersion, OSType]);
+end;
+
+function GetLCLWidgetSet: string;
+begin
+  {$IFDEF LCLQT}
+  Result := 'Qt4';
+  {$ENDIF}
+
+  {$IFDEF LCLQT5}
+  Result := 'Qt5';
+  {$ENDIF}
+
+  {$IFDEF LCLQT6}
+  Result := 'Qt6';
+  {$ENDIF}
+
+  {$IFDEF LCLGTK2}
+  Result := 'GTK2';
+  {$ENDIF}
+
+  {$IFDEF LCLGTK3}
+  Result := 'GTK3';
+  {$ENDIF}
+
+  {$IFDEF LCLCOCOA}
+  Result := 'Cocoa (Mac OS)';
+  {$ENDIF}
+
+  {$IFDEF LCLCARBON}
+  Result := 'Carbon (Mac OS)';
+  {$ENDIF}
+
+  {$IFDEF MSWINDOWS}
+  Result := 'Windows';
+  {$ENDIF}
+
+  if Result = '' then
+    Result := 'unknow Widgetset';
+end;
+
+function GetProgramBuildDate: string;
+begin
+  result := CompileDate;
+end;
+
+function GetProgramBuildTime: string;
+begin
+  result := CompileTime;
+end;
+
+function StripQuotes(const S: string): string;
+begin
+  if (Length(S) >= 2) and (S[1] = '''') and (S[Length(S)] = '''') then
+    Result := Copy(S, 2, Length(S) - 2)
+  else
+    Result := S;
+end;
+
+function ExtractDefaultValue(const DefaultSource: string): string;
+var
+  Src: string;
+begin
+  Src := Trim(DefaultSource);
+  if AnsiStartsText('DEFAULT', Src) then
+  begin
+    // Entferne das 'DEFAULT'-Keyword (case-insensitive)
+    Result := Trim(Copy(Src, 8, Length(Src)));
+  end
+  else
+    Result := Src;
+end;
+
+function IsValidUUIDHex(const S: string): Boolean;
+var
+  i: Integer;
+begin
+  Result := (Length(S) = 35) and
+            (Copy(S, 1, 2) = 'x''') and
+            (Copy(S, 35, 1) = '''');
+  if Result then
+    for i := 3 to 34 do
+      if not (UpCase(S[i]) in ['0'..'9', 'A'..'F']) then
+        Exit(False);
+end;
+
+function CreateUUIDHexLiteral: string;
+var
+  GUID: TGUID;
+  UUIDBytes: array[0..15] of Byte;
+  i: Integer;
+begin
+  CreateGUID(GUID);
+  Move(GUID.D1, UUIDBytes[0], 16);  // GUID in Byte-Array kopieren
+
+  Result := 'x''';
+  for i := 0 to 15 do
+    Result := Result + IntToHex(UUIDBytes[i], 2);
+  Result := Result + '''';
+end;
+
+function IsSizedTypeName(const ATypeName: string): Boolean;
+var
+  S: string;
+  LParen, RParen, I, CommaPos: Integer;
+  Params, CleanParams, P, Sc: string;
+  DummyInt1, DummyInt2: Integer;
+begin
+  S := Trim(ATypeName);
+  LParen := Pos('(', S);
+  RParen := Pos(')', S);
+  Result := False;
+
+  if (LParen > 0) and (RParen > LParen) then
+  begin
+    Params := Copy(S, LParen + 1, RParen - LParen - 1);
+
+    // Alle Leerzeichen entfernen
+    CleanParams := '';
+    for I := 1 to Length(Params) do
+      if not (Params[I] in [' ', #9, #13, #10]) then
+        CleanParams := CleanParams + Params[I];
+
+    CommaPos := Pos(',', CleanParams);
+
+    if CommaPos = 0 then
+    begin
+      Result := TryStrToInt(CleanParams, DummyInt1);
+    end
+    else if CommaPos > 1 then
+    begin
+      P := Copy(CleanParams, 1, CommaPos - 1);
+      Sc := Copy(CleanParams, CommaPos + 1, Length(CleanParams) - CommaPos);
+      Result := TryStrToInt(P, DummyInt1) and TryStrToInt(Sc, DummyInt2);
+    end;
+  end;
+end;
+
+function GetNameFromSizedTypeName(const ATypeName: string): string;
+var
+  LParen: Integer;
+begin
+  Result := Trim(ATypeName);
+  LParen := Pos('(', Result);
+  if LParen > 0 then
+    Result := Trim(Copy(Result, 1, LParen - 1));
+end;
+
+function GetSizeFromSizedTypeName(const ATypeName: string): string;
+var
+  Precision, Scale: string;
+begin
+  GetPrecisionAndScaleFromSizedTypeName(ATypeName, Precision, Scale);
+  Result := Precision;
+end;
+
+procedure GetPrecisionAndScaleFromSizedTypeName(const ATypeName: string;
+  out Precision, Scale: string);
+var
+  S: string;
+  LParen, RParen, CommaPos: Integer;
+  Params: string;
+begin
+  Precision := '';
+  Scale := '';
+  S := Trim(ATypeName);
+  LParen := Pos('(', S);
+  RParen := Pos(')', S);
+  if (LParen > 0) and (RParen > LParen) then
+  begin
+    Params := Trim(Copy(S, LParen + 1, RParen - LParen - 1));
+    CommaPos := Pos(',', Params);
+    if CommaPos = 0 then
+    begin
+      Precision := Trim(Params);
+      Scale := '0';
+    end
+    else
+    begin
+      Precision := Trim(Copy(Params, 1, CommaPos - 1));
+      Scale := Trim(Copy(Params, CommaPos + 1, MaxInt));
+    end;
+  end;
+end;
+
+
+function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
+begin
+  case AObjectType of
+    tvotFunction:            Result := tvotFunctionRoot;
+    tvotProcedure:           Result := tvotProcedureRoot;
+    tvotUDF:                 Result := tvotUDFRoot;
+    tvotUDRFunction:         Result := tvotUDRFunctionRoot;
+    tvotUDRProcedure:        Result := tvotUDRProcedureRoot;
+    tvotPackageFunction:     Result := tvotPackageFunctionRoot;
+    tvotPackageProcedure:    Result := tvotPackageProcedureRoot;
+    tvotPackageUDRFunction:  Result := tvotPackageUDRFunctionRoot;
+    tvotPackageUDRProcedure: Result := tvotPackageUDRProcedureRoot;
+    tvotTable:               Result := tvotTableRoot;
+    tvotView:                Result := tvotViewRoot;
+    tvotSystemTable:         Result := tvotSystemTableRoot;
+  else
+    Result := tvotNone;
+  end;
+end;
+
+function FBObjectToStr(AType: TObjectType): string;
+begin
+  case AType of
+    // --- Allgemein ---
+    otNone:                  Result := 'None';
+
+    // --- User-Objekte ---
+    otTables:                Result := 'Table';
+    otTableFields:           Result := 'Table Field';
+    otViews:                 Result := 'View';
+    otGenerators:            Result := 'Generator';
+    otSequences:             Result := 'Sequence';
+
+    otTriggers:              Result := 'Trigger';
+    otTableTriggers:         Result := 'Table Trigger';
+    otDBTriggers:            Result := 'Database Trigger';
+    otDDLTriggers:           Result := 'DDL Trigger';
+
+    otUDF:                   Result := 'User-Defined Function';
+    otRoles:                 Result := 'Role';
+    otUsers:                 Result := 'User';
+    otDomains:               Result := 'Domain';
+    otIndexes:               Result := 'Index';
+    otExceptions:            Result := 'Exception';
+
+    otConstraints:           Result := 'Constraint';
+    otPrimaryKeys:           Result := 'Primary Key';
+    otForeignKeys:           Result := 'Foreign Key';
+    otUniqueConstraints:     Result := 'Unique Constraint';
+    otCheckConstraints:      Result := 'Check Constraint';
+    otNotNullConstraints:    Result := 'Not Null Constraint';
+
+    otFunctions:             Result := 'Function';
+    otProcedures:            Result := 'Procedure';
+
+    // --- UDR / Package ---
+    otUDRFunctions:          Result := 'UDR Function';
+    otUDRProcedures:         Result := 'UDR Procedure';
+    otUDRTriggers:           Result := 'UDR Trigger';
+    otPackages:              Result := 'Package';
+    otPackageFunctions:      Result := 'Package Function';
+    otPackageProcedures:     Result := 'Package Procedure';
+    otPackageUDFFunctions:   Result := 'Package UDF Function';
+    otPackageUDRFunctions:   Result := 'Package UDR Function';
+    otPackageUDRProcedures:  Result := 'Package UDR Procedure';
+    otPackageUDRTriggers:    Result := 'Package UDR Trigger';
+
+    // --- Datenbank / Metadaten ---
+    otDatabase:              Result := 'Database';
+    otBLOBFilters:           Result := 'BLOB Filter';
+    otComments:              Result := 'Comment';
+    otData:                  Result := 'Data';
+
+    // --- System-Objekte ---
+    otSystemTables:          Result := 'System Table';
+    otSystemDomains:         Result := 'System Domain';
+    otSystemGenerators:      Result := 'System Generator';
+    otSystemTriggers:        Result := 'System Trigger';
+    otSystemConstraints:     Result := 'System Constraint';
+    otSystemIndexes:         Result := 'System Index';
+    otSystemRoles:           Result := 'System Role';
+    otSystemUsers:           Result := 'System User';
+    otSystemExceptions:      Result := 'System Exception';
+  else
+    Result := 'Unknown';
+  end;
+end;
+
+function FBTypeToTreeViewType(AType: TObjectType): TTreeViewObjectType;
+begin
+  case AType of
+    otNone:                  Result := tvotNone;
+
+    // --- Tables / Views ---
+    otTables:                Result := tvotTable;
+    otTableFields:           Result := tvotTableField;
+    otViews:                 Result := tvotView;
+
+    // --- Generators / Sequences ---
+    otGenerators,
+    otSequences:             Result := tvotGenerator;
+
+    // --- Triggers ---
+    otTriggers:              Result := tvotTrigger;
+    otTableTriggers:         Result := tvotTableTrigger;
+    otDBTriggers:            Result := tvotDBTrigger;
+    otDDLTriggers:           Result := tvotDDLTrigger;
+
+    // --- Security / Types ---
+    otDomains:               Result := tvotDomain;
+    otRoles:                 Result := tvotRole;
+    otUsers:                 Result := tvotUser;
+    otExceptions:            Result := tvotException;
+
+    // --- Indexes / Constraints ---
+    otIndexes:               Result := tvotIndex;
+    otConstraints:           Result := tvotConstraint;
+    otPrimaryKeys:           Result := tvotPrimaryKey;
+    otForeignKeys:           Result := tvotForeignKey;
+    otUniqueConstraints:     Result := tvotUniqueConstraint;
+    otCheckConstraints:      Result := tvotCheckConstraint;
+    otNotNullConstraints:    Result := tvotNotNullConstraint;
+
+    // --- Procedures / Functions ---
+    otProcedures:            Result := tvotProcedure;
+    otFunctions:             Result := tvotFunction;
+    otUDF:                   Result := tvotUDF;
+
+    // --- UDR ---
+    otUDRFunctions:          Result := tvotUDRFunction;
+    otUDRProcedures:         Result := tvotUDRProcedure;
+    otUDRTriggers:           Result := tvotUDRTrigger;
+
+    // --- Packages ---
+    otPackages:              Result := tvotPackage;
+    otPackageFunctions:      Result := tvotPackageFunction;
+    otPackageProcedures:     Result := tvotPackageProcedure;
+    otPackageUDFFunctions:   Result := tvotPackageUDFFunction;
+    otPackageUDRFunctions:   Result := tvotPackageUDRFunction;
+    otPackageUDRProcedures:  Result := tvotPackageUDRProcedure;
+    otPackageUDRTriggers:    Result := tvotPackageUDRTrigger;
+
+    // --- Database / Metadata ---
+    otDatabase:              Result := tvotDatabase;
+    otBLOBFilters:           Result := tvotBLOBFilter;
+    otComments:              Result := tvotComment;
+    otData:                  Result := tvotData;
+
+    // --- System Objects ---
+    otSystemTables:          Result := tvotSystemTable;
+    otSystemDomains:         Result := tvotSystemDomain;
+    otSystemGenerators:      Result := tvotSystemGenerator;
+    otSystemTriggers:        Result := tvotSystemTrigger;
+    otSystemConstraints:     Result := tvotSystemConstraint;
+    otSystemIndexes:         Result := tvotSystemIndex;
+    otSystemRoles:           Result := tvotSystemRole;
+    otSystemUsers:           Result := tvotSystemUser;
+    otSystemExceptions:      Result := tvotSystemException;
+  else
+    Result := tvotNone;
+  end;
+end;
+
+function TreeViewTypeToFBType(AType: TTreeViewObjectType): TObjectType;
+begin
+  case AType of
+    tvotNone:                    Result := otNone;
+
+    // --- Tables / Views ---
+    tvotTable:                   Result := otTables;
+    tvotTableField:              Result := otTableFields;
+    tvotView:                    Result := otViews;
+
+    // --- Generators ---
+    tvotGenerator:               Result := otGenerators;
+
+    // --- Triggers ---
+    tvotTrigger:                 Result := otTriggers;
+    tvotTableTrigger:            Result := otTableTriggers;
+    tvotDBTrigger:               Result := otDBTriggers;
+    tvotDDLTrigger:              Result := otDDLTriggers;
+
+    // --- Security / Types ---
+    tvotDomain:                  Result := otDomains;
+    tvotRole:                    Result := otRoles;
+    tvotUser:                    Result := otUsers;
+    tvotException:               Result := otExceptions;
+
+    // --- Indexes / Constraints ---
+    tvotIndex:                   Result := otIndexes;
+    tvotConstraint:              Result := otConstraints;
+    tvotPrimaryKey:              Result := otPrimaryKeys;
+    tvotForeignKey:              Result := otForeignKeys;
+    tvotUniqueConstraint:        Result := otUniqueConstraints;
+    tvotCheckConstraint:         Result := otCheckConstraints;
+    tvotNotNullConstraint:       Result := otNotNullConstraints;
+
+    // --- Procedures / Functions ---
+    tvotProcedure:               Result := otProcedures;
+    tvotFunction:                Result := otFunctions;
+    tvotUDF:                     Result := otUDF;
+
+    // --- UDR ---
+    tvotUDRFunction:             Result := otUDRFunctions;
+    tvotUDRProcedure:            Result := otUDRProcedures;
+    tvotUDRTrigger:              Result := otUDRTriggers;
+
+    // --- Packages ---
+    tvotPackage:                 Result := otPackages;
+    tvotPackageFunction:         Result := otPackageFunctions;
+    tvotPackageProcedure:        Result := otPackageProcedures;
+    tvotPackageUDFFunction:      Result := otPackageUDFFunctions;
+    tvotPackageUDRFunction:      Result := otPackageUDRFunctions;
+    tvotPackageUDRProcedure:     Result := otPackageUDRProcedures;
+    tvotPackageUDRTrigger:       Result := otPackageUDRTriggers;
+
+    // --- Database / Metadata ---
+    tvotDatabase:                Result := otDatabase;
+    tvotBLOBFilter:              Result := otBLOBFilters;
+    tvotComment:                 Result := otComments;
+    tvotData:                    Result := otData;
+
+    // --- System Objects ---
+    tvotSystemTable:             Result := otSystemTables;
+    tvotSystemDomain:            Result := otSystemDomains;
+    tvotSystemGenerator:         Result := otSystemGenerators;
+    tvotSystemTrigger:           Result := otSystemTriggers;
+    tvotSystemConstraint:        Result := otSystemConstraints;
+    tvotSystemIndex:             Result := otSystemIndexes;
+    tvotSystemRole:              Result := otSystemRoles;
+    tvotSystemUser:              Result := otSystemUsers;
+    tvotSystemException:         Result := otSystemExceptions;
+  else
+    Result := otNone;
+  end;
+end;
+
+function TreeViewObjectToStr(AType: TTreeViewObjectType): string;
+begin
+  case AType of
+    // --- Allgemein ---
+    tvotNone:                  Result := 'None';
+    tvotServer:                Result := 'Server';
+    tvotDatabase:              Result := 'Database';
+    tvotQueryWindow:           Result := 'Query Window';
+
+    // --- Tables ---
+    tvotTableRoot:             Result := 'Tables';
+    tvotTable:                 Result := 'Table';
+    tvotTableField:            Result := 'Table Field';
+
+    // --- Generators / Sequences ---
+    tvotGeneratorRoot:         Result := 'Generators';
+    tvotGenerator:             Result := 'Generator';
+
+    // --- Triggers ---
+    tvotTriggerRoot:           Result := 'Triggers';
+    tvotTrigger:               Result := 'Trigger';
+    tvotTableTriggerRoot:      Result := 'Table Triggers';
+    tvotTableTrigger:          Result := 'Table Trigger';
+    tvotDBTriggerRoot:         Result := 'Database Triggers';
+    tvotDBTrigger:             Result := 'Database Trigger';
+    tvotDDLTriggerRoot:        Result := 'DDL Triggers';
+    tvotDDLTrigger:            Result := 'DDL Trigger';
+
+    // --- Views ---
+    tvotViewRoot:              Result := 'Views';
+    tvotView:                  Result := 'View';
+
+    // --- Domains ---
+    tvotDomainRoot:            Result := 'Domains';
+    tvotDomain:                Result := 'Domain';
+
+    // --- Roles / Users ---
+    tvotRoleRoot:              Result := 'Roles';
+    tvotRole:                  Result := 'Role';
+    tvotUserRoot:              Result := 'Users';
+    tvotUser:                  Result := 'User';
+
+    // --- Exceptions ---
+    tvotExceptionRoot:         Result := 'Exceptions';
+    tvotException:             Result := 'Exception';
+
+    // --- Indexes / Constraints ---
+    tvotIndexRoot:             Result := 'Indexes';
+    tvotIndex:                 Result := 'Index';
+    tvotConstraintRoot:        Result := 'Constraints';
+    tvotConstraint:            Result := 'Constraint';
+    tvotPrimaryKeyRoot:        Result := 'Primary Keys';
+    tvotPrimaryKey:            Result := 'Primary Key';
+    tvotForeignKeyRoot:        Result := 'Foreign Keys';
+    tvotForeignKey:            Result := 'Foreign Key';
+    tvotUniqueConstraintRoot:  Result := 'Unique Constraints';
+    tvotUniqueConstraint:      Result := 'Unique Constraint';
+    tvotCheckConstraintRoot:   Result := 'Check Constraints';
+    tvotCheckConstraint:       Result := 'Check Constraint';
+    tvotNotNullConstraintRoot: Result := 'Not Null Constraints';
+    tvotNotNullConstraint:     Result := 'Not Null Constraint';
+
+    // --- Stored Procedures / Functions ---
+    tvotProcedureRoot:         Result := 'Stored Procedures';
+    tvotProcedure:             Result := 'Stored Procedure';
+    tvotFunctionRoot:          Result := 'Functions';
+    tvotFunction:              Result := 'Function';
+
+    // --- UDR / UDF ---
+    tvotUDRoot:                Result := 'UD Objects';
+    tvotUDFRoot:               Result := 'UDFs';
+    tvotUDF:                   Result := 'UDF Function';
+
+    tvotUDRRoot:               Result := 'UDRs';
+    tvotUDRFunctionRoot:       Result := 'UDR Functions';
+    tvotUDRFunction:           Result := 'UDR Function';
+    tvotUDRProcedureRoot:      Result := 'UDR Procedures';
+    tvotUDRProcedure:          Result := 'UDR Procedure';
+    tvotUDRTriggerRoot:        Result := 'UDR Triggers';
+    tvotUDRTrigger:            Result := 'UDR Trigger';
+
+    // --- Packages ---
+    tvotPackageRoot:           Result := 'Packages';
+    tvotPackage:               Result := 'Package';
+    tvotPackageFunctionRoot:   Result := 'Package Functions';
+    tvotPackageFunction:       Result := 'Package Function';
+    tvotPackageProcedureRoot:  Result := 'Package Procedures';
+    tvotPackageProcedure:      Result := 'Package Procedure';
+    tvotPackageUDFFunctionRoot:Result := 'Package UDF Functions';
+    tvotPackageUDFFunction:    Result := 'Package UDF Function';
+    tvotPackageUDRFunctionRoot:Result := 'Package UDR Functions';
+    tvotPackageUDRFunction:    Result := 'Package UDR Function';
+    tvotPackageUDRProcedureRoot:Result := 'Package UDR Procedures';
+    tvotPackageUDRProcedure:   Result := 'Package UDR Procedure';
+    tvotPackageUDRTriggerRoot: Result := 'Package UDR Triggers';
+    tvotPackageUDRTrigger:     Result := 'Package UDR Trigger';
+
+    // --- Database / Metadata ---
+    tvotDatabaseRoot:          Result := 'Database';
+    tvotBLOBFilterRoot:        Result := 'BLOB Filters';
+    tvotBLOBFilter:            Result := 'BLOB Filter';
+    tvotCommentRoot:           Result := 'Comments';
+    tvotComment:               Result := 'Comment';
+    tvotDataRoot:              Result := 'Data';
+    tvotData:                  Result := 'Data';
+
+    // --- System Objects ---
+    tvotSystemTableRoot:       Result := 'System Tables';
+    tvotSystemTable:           Result := 'System Table';
+    tvotSystemDomainRoot:      Result := 'System Domains';
+    tvotSystemDomain:          Result := 'System Domain';
+    tvotSystemGeneratorRoot:   Result := 'System Generators';
+    tvotSystemGenerator:       Result := 'System Generator';
+    tvotSystemTriggerRoot:     Result := 'System Triggers';
+    tvotSystemTrigger:         Result := 'System Trigger';
+    tvotSystemConstraintRoot:  Result := 'System Constraints';
+    tvotSystemConstraint:      Result := 'System Constraint';
+    tvotSystemIndexRoot:       Result := 'System Indexes';
+    tvotSystemIndex:           Result := 'System Index';
+    tvotSystemRoleRoot:        Result := 'System Roles';
+    tvotSystemRole:            Result := 'System Role';
+    tvotSystemUserRoot:        Result := 'System Users';
+    tvotSystemUser:            Result := 'System User';
+    tvotSystemExceptionRoot:   Result := 'System Exceptions';
+    tvotSystemException:       Result := 'System Exception';
+  else
+    Result := 'Unknown';
+  end;
+end;
+
+
+function RoutineTypeToTreeViewObjectType(RT: TRoutineType): TTreeViewObjectType;
+begin
+  case RT of
+    rtUDF:              Result := tvotUDF;
+    rtFBFunc:           Result := tvotFunction;
+    rtFBProc:           Result := tvotProcedure;
+    rtUDRFunc:          Result := tvotUDRFunction;
+    rtUDRProc:          Result := tvotUDRProcedure;
+    rtPackageFBFunc:    Result := tvotPackageFunction;
+    rtPackageFBProc:    Result := tvotPackageProcedure;
+    rtPackageUDRFunc:   Result := tvotPackageUDRFunction;
+    rtPackageUDRProc:   Result := tvotPackageUDRProcedure;
+    else                Result := tvotNone; // fallback
+  end;
+end;
+
+function ExtractObjectName(const Input: string): string;
+var
+  PosOpenParen: Integer;
+begin
+  PosOpenParen := Pos('(', Input);
+  if PosOpenParen > 1 then
+    Result := Trim(Copy(Input, 1, PosOpenParen - 1))
+  else
+    Result := Trim(Input);
+end;
+
+function GetClearNodeText(const ANodeText: string): string;
+var
+  s: string;
+  pParen, pBracket, pSpace, pMin: Integer;
+begin
+  s := Trim(ANodeText);
+
+  // Erste Position von ( oder [ oder Leerzeichen suchen
+  pParen  := Pos('(', s);
+  pBracket:= Pos('[', s);
+  pSpace  := Pos(' ', s);
+
+  // kleinstes >0 nehmen
+  pMin := 0;
+  if (pParen > 0) and ((pMin = 0) or (pParen < pMin)) then pMin := pParen;
+  if (pBracket > 0) and ((pMin = 0) or (pBracket < pMin)) then pMin := pBracket;
+  if (pSpace > 0) and ((pMin = 0) or (pSpace < pMin)) then pMin := pSpace;
+
+  if pMin > 0 then
+    Result := Trim(Copy(s, 1, pMin - 1))
+  else
+    Result := s;
+end;
+
+function FormatNodeCaptionnWithCount(const Text: string; Count: Integer): string;
+var
+  BaseText: string;
+  StartPos, EndPos, ExistingCount, Total: Integer;
+begin
+  if Count < 0 then
+  begin
+    ShowMessage('Warning: Negative number ignored: ' + IntToStr(Count));
+    Result := Text;
+    Exit;
+  end;
+
+  StartPos := Pos('(', Text);
+  EndPos := Pos(')', Text);
+
+  if (StartPos > 0) and (EndPos > StartPos) then
+  begin
+    BaseText := Copy(Text, 1, StartPos - 1);
+    ExistingCount := StrToIntDef(Copy(Text, StartPos + 1, EndPos - StartPos - 1), 0);
+    Total := ExistingCount + Count;
+
+    if Total > 0 then
+      Result := BaseText + '(' + IntToStr(Total) + ')'
+    else
+      Result := BaseText;
+  end
+  else
+  begin
+    if Count > 0 then
+      Result := Text + '(' + IntToStr(Count) + ')'
+    else
+      Result := Text;
+  end;
+end;
+
+function GetCollations(const Characterset: string; var Collations: TStringList): boolean;
+var
+  i: integer;
+begin
+  result:= false;
+  Collations.Clear;
+  Collations.BeginUpdate;
+  for i:= low(FBCollations) to high(FBCollations) do
+  begin
+    if FBCollations[i,1]=Characterset then
+    begin
+      Collations.Add(FBCollations[i,0]);
+    end;
+  end;
+  Collations.EndUpdate;
+  result:= true;
+end;
+
+procedure SetTransactionIsolation(Params: TStrings);
+begin
+  Params.Clear;
+  // typische Firebird-Transaktionseinstellungen:
+  Params.Add('read_committed');
+  Params.Add('rec_version');
+  Params.Add('nowait');
+end;
+
+procedure GetFieldType(FieldQuery: TIBQuery; var FieldType: string; var FieldSize: integer);
+// Requires FieldQuery to be the correct field retrieval query.
+// todo: migrate field retrieval query to systables if not already done
+begin
+  FieldType:= '';
+  FieldSize:= 0;
+
+  if (FieldQuery.FieldByName('field_source').IsNull) or
+    (trim(FieldQuery.FieldByName('field_source').AsString)='') or
+    (IsFieldDomainSystemGenerated(trim(FieldQuery.FieldByname('field_source').AsString))) then
+  begin
+    // Field type is not based on a domain but a standard SQL type
+    FieldType:= GetFBTypeName(FieldQuery.FieldByName('field_type_int').AsInteger,
+      FieldQuery.FieldByName('field_sub_type').AsInteger,
+      FieldQuery.FieldByName('field_length').AsInteger,
+      FieldQuery.FieldByName('field_precision').AsInteger,
+      FieldQuery.FieldByName('field_scale').AsInteger,
+      FieldQuery.FieldByName('field_charset').Asstring,
+      FieldQuery.FieldByName('characterlength').AsInteger);
+    // Array should really be [lowerbound:upperbound] (if dimension is 0)
+    // but for now don't bother as arrays are not supported anyway
+    // Assume 0 dimension, 1 lower bound; just fill in upper bound
+    if not(FieldQuery.FieldByName('array_upper_bound').IsNull) then
+      FieldType := FieldType +
+        ' [' +
+        FieldQuery.FieldByName('array_upper_bound').AsString +
+        ']';
+    if FieldQuery.FieldByName('field_type_int').AsInteger = VarCharType then
+      FieldSize:= FieldQuery.FieldByName('characterlength').AsInteger
+    else
+      FieldSize:= FieldQuery.FieldByName('field_length').AsInteger;
+  end
+  else
+  begin
+    // Field is based on a domain
+    FieldType:= trim(FieldQuery.FieldByName('field_source').AsString);
+  end;
+end;
+
+(**************  Get Firebird Type name  *****************)
+function GetFBTypeName(Index: Integer;
+  SubType: integer = -1; FieldLength: integer = -1;
+  Precision: integer = -1; Scale: integer = -1;
+  CharacterSet: string = ''; CharacterLengt: integer = -1
+): string;
+begin
+  case Index of
+    7  : Result := 'SMALLINT';   // SHORT
+    8  : Result := 'INTEGER';    // LONG
+    9  : Result := 'QUAD';       // alt, historisch
+    10 : Result := 'FLOAT';
+    11 : Result := 'D_FLOAT';    // deprecated
+    12 : Result := 'DATE';
+    13 : Result := 'TIME';
+    14 : Result := 'CHAR';       // Hier Länge in Klammern anhängen
+    16 : Result := 'BIGINT';     // INT64 oder DECIMAL/NUMERIC abhängig von SubType
+    23 : Result := 'BOOLEAN';    // Firebird 3+
+    27 : Result := 'DOUBLE PRECISION';
+    35 : Result := 'TIMESTAMP';
+    37 : Result := 'VARCHAR';    // VarCharType
+    40 : Result := 'CSTRING';    // nur für UDFs
+    45 : Result := 'BLOB_ID';    // interner Blob-Identifier
+    261: Result := 'BLOB';       // BlobType
+
+    // Firebird 4.0 / 5.0 neue Typen
+    24: Result := 'DECFLOAT(16)';
+    25: Result := 'DECFLOAT(34)';
+    26: Result := 'INT128';
+    28: Result := 'TIME WITH TIME ZONE';
+    29: Result := 'TIMESTAMP WITH TIME ZONE';
+
+  else
+    Result := 'UNKNOWN_TYPE. CODE = ' + IntToStr(Index);
+  end;
+
+  // Längenangabe bei CHAR und VARCHAR
+  if Index in [14, 37] then
+  begin
+    if FieldLength > 0 then
+      //Result := Result + '(' + IntToStr(FieldLength) + ')';
+      Result := Result + '(' + IntToStr(CharacterLengt) + ')';
+  end;
+
+  // Numerische Typen mit SubType (NUMERIC/DECIMAL)
+  if Index in [7, 8, 16] then
+  begin
+    if SubType = 0 then
+    begin
+      // Normale Integer-Typen
+      case Index of
+        7: Result := 'SMALLINT';
+        8: Result := 'INTEGER';
+        16: Result := 'BIGINT';
+      end;
+    end
+    else
+    begin
+      // NUMERIC oder DECIMAL mit Präzision und Scale
+      if SubType = 1 then
+        Result := 'NUMERIC('
+      else if SubType = 2 then
+        Result := 'DECIMAL('
+      else
+        Result := 'UNKNOWN_NUMERIC(';
+
+      if Precision < 0 then
+        Precision := 2; // Default-Wert
+
+      Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
+    end;
+  end;
+
+  if (Index = 14) and (CharacterLengt = 63) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
+      Result := 'UUID';
+end;
+
+function IsFieldDomainSystemGenerated(FieldSource: string): boolean;
+begin
+  // Unfortunately there does not seem to be a way to search the system tables to find out
+  // if the constraint name is system-generated
+  result:= (pos('RDB$',uppercase(Trim(FieldSource)))=1);
+end;
+
+function IsPrimaryIndexSystemGenerated(IndexName: string): boolean;
+begin
+  result:= (pos('RDB$PRIMARY',uppercase(Trim(IndexName)))=1);
+end;
+
+procedure CheckInitialIniFile;
+begin
+  {$IFDEF MSWINDOWS}
+    {$IFDEF WIN64}
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files\Firebird\fbclient.dl');
+      fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files\Firebird\firebird.conf');
+    {$ELSE} // 32-Bit
+      fIniFile.WriteString('FireBird', 'ClientLib', 'C:\Program Files (x86)\Firebird\fbclient.dl');
+      fIniFile.WriteString('FireBird', 'ConfPath',  'C:\Program Files (x86)\Firebird\firebird.conf');
+    {$ENDIF}
+  {$ENDIF}
+
+  {$IFDEF LINUX}
+  fIniFile.WriteString('FireBird', 'ClientLib', '/opt/firebird/lib/libfbclient.s');
+  fIniFile.WriteString('FireBird', 'ConfPath',  '/opt/firebird/firebird.conf');
+  {$ENDIF}
+end;
+
+
+function ColorRValue(AColor: TColor): Byte;
+begin
+  Result := Red(ColorToRGB(AColor));
+end;
+
+function ColorGValue(AColor: TColor): Byte;
+begin
+  Result := Green(ColorToRGB(AColor));
+end;
+
+function ColorBValue(AColor: TColor): Byte;
+begin
+  Result := Blue(ColorToRGB(AColor));
+end;
+
+function AdjustColorByBrightness(AColor: TColor): TColor;
+var
+  R, G, B: Byte;
+  Brightness: Double;
+  RGBColor: TColor;
+begin
+  // Stelle sicher, dass Systemfarben in echte RGB-Werte umgewandelt werden
+  RGBColor := ColorToRGB(AColor);
+
+  // RGB-Komponenten extrahieren
+  R := ColorRValue(RGBColor);
+  G := ColorGValue(RGBColor);
+  B := ColorBValue(RGBColor);
+
+  // Helligkeit berechnen (mit Gewichtung für menschliches Auge)
+  Brightness := 0.299 * R + 0.587 * G + 0.114 * B;
+
+  // Rückgabe: bei heller Farbe → Schwarz, sonst → Weiß
+  if Brightness > 180 then
+    Result := clBlack
+  else
+    Result := clWhite;
+end;
+
+function SetInitialClientLib: boolean;
+var  frmSetFBClient: TfrmSetFBClient;
+begin
+  frmSetFBClient := TfrmSetFBClient.Create(nil);
+    try
+      if frmSetFBClient.ShowModal = mrOK then
+      begin
+        // Benutzer hat neuen Pfad ausgewählt → erneut versuchen
+        if FileExists(InitialFBClientLibPath) then
+        begin
+          InitialFBClient := LoadFBLibrary(InitialFBClientLibPath);
+
+          try
+            InitialFBClient.GetFirebirdAPI;     // ← Testen
+            fIniFile.WriteString('FireBird', 'InitialFBClientLib', InitialFBClientLibPath);
+            Result := True;
+          except
+            on E: Exception do
+            begin
+              MessageDlg('Fehler beim Laden der ausgewählten Client Library:' + LineEnding +
+                         InitialFBClientLibPath + LineEnding + LineEnding +
+                         E.Message, mtError, [mbOK], 0);
+            end;
+          end;
+
+        end else
+        begin
+          MessageDlg('Die ausgewählte Datei existiert nicht:' + LineEnding +
+                      InitialFBClientLibPath, mtError, [mbOK], 0);
+        end;
+      end;
+    finally
+      frmSetFBClient.Free;
+    end;
+end;
+
+function LoadClientLibIBX(ALib: string): boolean;
+var frmSetFBClient: TfrmSetFBClient;
+begin
+  Result := False;
+  if FileExists(ALib) then
+  begin
+    InitialFBClient := LoadFBLibrary(ALib);
+
+    try
+      InitialFBClient.GetFirebirdAPI;  // ← HIER Fehler falls Library nicht geladen werden konnte
+      Result := True;           // Erfolg!
+      Exit;
+    except
+      on E: Exception do
+      begin
+        MessageDlg('Error loading the Firebird client library:' + LineEnding +
+                   ALib + LineEnding + LineEnding +
+                   E.Message, mtError, [mbOK], 0);
+      end;
+    end;
+  end;
+end;
+
+Function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
+var
+  Rec: TRegisteredDatabase;
+  Count: Integer;
+begin
+  Result:= False;
+  Rec:= RegisteredDatabases[dbIndex].RegRec;
+  fmEnterPass.laDatabase.Caption:= Rec.Title;
+  fmEnterPass.edUser.Text:= Rec.UserName;
+  fmEnterPass.edPassword.Clear;
+  fmEnterPass.cbRole.Clear;
+  // Use may have saved an empty password, which is valid for embedded dbs
+  // So check SavePassword instead of Password itself.
+  if (ForceConnectDialog=false) and Rec.SavePassword then
+  try
+    fmEnterPass.cbRole.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
+    fmEnterPass.cbRole.ItemIndex:= -1;
+    fmEnterPass.cbRole.Text:= '';
+    Result:= True; //this works, no need to go through a retry attempt below
+  except
+    // We don't particularly care which error occurred; we're trying again below.
+    Result:= False;
+  end;
+  // Only show form if connection failed before
+  if (ForceConnectDialog or (Result=false)) and
+    (fmEnterPass.ShowModal = mrOk) then
+  begin
+    if fmReg.TestDBConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
+      Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
+    begin
+      RegisteredDatabases[dbIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
+      RegisteredDatabases[dbIndex].RegRec.Password:= fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].RegRec.Role:= fmEnterPass.cbRole.Text;
+
+      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['user_name'] := fmEnterPass.edUser.Text;
+      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['password']  := fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := false;
+      Result:= True;
+    end;
+  end;
+end;
+
+function StrToFontStyles(const S: string): TFontStyles;var
+  Parts: TStringList;
+  I: Integer;
+begin
+  Result := [];
+  Parts := TStringList.Create;
+  try
+    Parts.Delimiter := ',';
+    Parts.StrictDelimiter := True;
+    Parts.DelimitedText := S;
+
+    for I := 0 to Parts.Count - 1 do
+      case LowerCase(Trim(Parts[I])) of
+        'bold':       Include(Result, fsBold);
+        'italic':     Include(Result, fsItalic);
+        'underline':  Include(Result, fsUnderline);
+        'strikeout':  Include(Result, fsStrikeOut);
+      end;
+  finally
+    Parts.Free;
+  end;
+end;
+
+function FontStylesToStr(AStyles: TFontStyles): string;
+var
+  L: TStringList;
+begin
+  L := TStringList.Create;
+  try
+    if fsBold in AStyles then
+      L.Add('Bold');
+    if fsItalic in AStyles then
+      L.Add('Italic');
+    if fsUnderline in AStyles then
+      L.Add('Underline');
+    if fsStrikeOut in AStyles then
+      L.Add('StrikeOut');
+
+    Result := L.CommaText;
+  finally
+    L.Free;
+  end;
+end;
+
+function MatchesFilter(const AText, AFilter: string): Boolean;
+var
+  Text, Filter: string;
+begin
+  if AFilter = '' then
+    Exit(True);
+
+  Text   := AnsiLowerCase(AText);
+  Filter := AnsiLowerCase(AFilter);
+
+  // *abc*
+  if (Filter[1] = '*') and (Filter[Length(Filter)] = '*') then
+    Exit(Pos(Copy(Filter, 2, Length(Filter)-2), Text) > 0);
+
+  // *abc
+  if Filter[1] = '*' then
+    Exit(EndsText(Copy(Filter, 2, MaxInt), Text));
+
+  // abc*
+  if Filter[Length(Filter)] = '*' then
+    Exit(StartsText(Copy(Filter, 1, Length(Filter)-1), Text));
+
+  // exakt
+  Result := Text = Filter;
+end;
+
+
+function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
+var
+  MetaQuery, DimQuery: TIBQuery;
+  TableName, FieldName, TypeName: string;
+  FieldType, FieldSubType, Dimensions, FieldLength: Integer;
+  DimStr: string;
+begin
+  Result := '';
+  FieldName := Field.FieldName;
+
+  // Wir brauchen den Tabellen-Namen
+  if Field.DataSet is TIBTable then
+    TableName := TIBTable(Field.DataSet).TableName
+  else
+    Exit;
+
+  MetaQuery := TIBQuery.Create(nil);
+  DimQuery := TIBQuery.Create(nil);
+  try
+    MetaQuery.Database := DB;
+    DimQuery.Database := DB;
+
+    // 1. Feldmetadaten holen
+    MetaQuery.SQL.Text :=
+      'SELECT f.RDB$FIELD_NAME AS TYPENAME, f.RDB$FIELD_TYPE, f.RDB$FIELD_SUB_TYPE, ' +
+      'f.RDB$DIMENSIONS, f.RDB$FIELD_LENGTH ' +
+      'FROM RDB$RELATION_FIELDS rf ' +
+      'JOIN RDB$FIELDS f ON rf.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
+      'WHERE rf.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(TableName)) +
+      ' AND rf.RDB$FIELD_NAME = ' + QuotedStr(UpperCase(FieldName));
+    MetaQuery.Open;
+    if MetaQuery.EOF then Exit;
+
+    TypeName := Trim(MetaQuery.FieldByName('TYPENAME').AsString);
+    FieldType := MetaQuery.FieldByName('RDB$FIELD_TYPE').AsInteger;
+    FieldSubType := MetaQuery.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
+    Dimensions := MetaQuery.FieldByName('RDB$DIMENSIONS').AsInteger;
+    FieldLength := MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger; // <-- jetzt verfügbar
+
+    // 2. Dimensionen abfragen
+    DimQuery.SQL.Text :=
+      'SELECT RDB$LOWER_BOUND, RDB$UPPER_BOUND ' +
+      'FROM RDB$FIELD_DIMENSIONS ' +
+      'WHERE RDB$FIELD_NAME = ' + QuotedStr(TypeName) +
+      ' ORDER BY RDB$DIMENSION';
+    DimQuery.Open;
+
+    DimStr := '';
+    while not DimQuery.EOF do
+    begin
+      if DimStr <> '' then DimStr := DimStr + ' x ';
+      DimStr := DimStr + Format('%d..%d', [
+        DimQuery.FieldByName('RDB$LOWER_BOUND').AsInteger,
+        DimQuery.FieldByName('RDB$UPPER_BOUND').AsInteger
+      ]);
+      DimQuery.Next;
+    end;
+
+    // 3. Datentyp bestimmen
+    case FieldType of
+      7: Result := Format('Array[%s] of SMALLINT', [DimStr]);       // SMALLINT
+      8: Result := Format('Array[%s] of INTEGER', [DimStr]);        // INTEGER
+      10: Result := Format('Array[%s] of FLOAT', [DimStr]);         // FLOAT
+      12: Result := Format('Array[%s] of DATE', [DimStr]);          // DATE/TIME
+      14: Result := Format('Array[%s] of CHAR', [DimStr]);          // CHAR
+      37: // VARCHAR
+        begin
+          // Länge ermitteln
+          Result := Format('Array[%s] of VARCHAR(%d)', [DimStr, MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger]);
+        end;
+      261: Result := Format('Array[%s] of BLOB', [DimStr]);         // BLOB
+      else Result := Format('Array[%s] of UNKNOWN', [DimStr]);
+    end;
+
+  finally
+    MetaQuery.Free;
+    DimQuery.Free;
+  end;
+end;
+
+
+initialization
+  MetaDataChanged := false;
+
+  fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
+  fIniFile     := TIniFile.Create(fIniFileName);
+
+  if FirstRun then
+    ExtractResources;
+
+  ReadIniFile;
+
+
+  //if not LoadClientLibIBX(InitialFBClientLibPath) then
+    //SetInitialClientLib;
+
+finalization
+  WriteIniFile;
+  fIniFile.Free;
+  fIniFile := nil;
+end.

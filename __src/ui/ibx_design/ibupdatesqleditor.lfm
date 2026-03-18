@@ -1,0 +1,445 @@
+object IBUpdateSQLEditorForm: TIBUpdateSQLEditorForm
+  Left = 442
+  Height = 410
+  Top = 421
+  Width = 662
+  ActiveControl = PageControl
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'UpdateSQL Editor'
+  ClientHeight = 410
+  ClientWidth = 662
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '1.8.1.0'
+  object PageControl: TPageControl
+    Left = 8
+    Height = 352
+    Top = 8
+    Width = 641
+    ActivePage = FieldsPage
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabIndex = 0
+    TabOrder = 0
+    object FieldsPage: TTabSheet
+      Caption = 'Options'
+      ClientHeight = 320
+      ClientWidth = 635
+      object GroupBox1: TGroupBox
+        Left = 8
+        Height = 315
+        Top = 4
+        Width = 617
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        Caption = ' SQL Generation '
+        ClientHeight = 300
+        ClientWidth = 615
+        TabOrder = 0
+        object Label1: TLabel
+          Left = 12
+          Height = 14
+          Top = 18
+          Width = 73
+          Caption = 'Table &Name:'
+          ParentColor = False
+        end
+        object Label3: TLabel
+          Left = 288
+          Height = 14
+          Top = 16
+          Width = 62
+          Caption = '&Key Fields:'
+          ParentColor = False
+        end
+        object Label4: TLabel
+          Left = 458
+          Height = 14
+          Top = 18
+          Width = 110
+          Caption = 'Updateable &Fields:'
+          ParentColor = False
+        end
+        object GenerateButton: TButton
+          Left = 9
+          Height = 25
+          Top = 83
+          Width = 168
+          Caption = '&Generate SQL'
+          OnClick = GenerateButtonClick
+          TabOrder = 0
+        end
+        object QuoteFields: TCheckBox
+          Left = 9
+          Height = 22
+          Top = 160
+          Width = 125
+          Caption = '&Quote Identifiers'
+          TabOrder = 1
+        end
+        object IncludePrimaryKeys: TCheckBox
+          Left = 9
+          Height = 22
+          Top = 192
+          Width = 241
+          Caption = 'Include Primary keys in Update SQL'
+          TabOrder = 2
+        end
+        object GenerateParams: TCheckBox
+          Left = 9
+          Height = 22
+          Top = 128
+          Width = 171
+          Caption = 'Allow DSQL Placeholders'
+          TabOrder = 3
+        end
+        object SelectTableNames: TIBLookupComboEditBox
+          Left = 12
+          Height = 27
+          Top = 32
+          Width = 209
+          KeyField = 'RDB$RELATION_ID'
+          ListField = 'RDB$RELATION_NAME'
+          ListFieldIndex = 0
+          LookupCache = False
+          ScrollListDataset = True
+          TabOrder = 4
+          AutoInsert = False
+          AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+          ItemHeight = 0
+        end
+        object IncludeSysTables: TCheckBox
+          Left = 13
+          Height = 22
+          Top = 59
+          Width = 158
+          Caption = 'Include System Tables'
+          OnChange = IncludeSysTablesChange
+          TabOrder = 5
+        end
+        object PrimaryKeysGrid: TIBDynamicGrid
+          Left = 288
+          Height = 61
+          Top = 35
+          Width = 144
+          Color = clWindow
+          Columns = <          
+            item
+              ButtonStyle = cbsCheckboxColumn
+              Title.Caption = 'SELECTED'
+              Width = 30
+              FieldName = 'SELECTED'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Caption = 'COLUMNNAME'
+              Width = 64
+              FieldName = 'COLUMNNAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          FixedCols = 0
+          Options = [dgEditing, dgColumnResize, dgColumnMove, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+          Scrollbars = ssAutoVertical
+          TabOrder = 6
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object FieldNamesGrid: TIBDynamicGrid
+          Left = 458
+          Height = 216
+          Top = 32
+          Width = 144
+          Color = clWindow
+          Columns = <          
+            item
+              ButtonStyle = cbsCheckboxColumn
+              Title.Caption = 'SELECTED'
+              Width = 30
+              FieldName = 'SELECTED'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Caption = 'COLUMNNAME'
+              Width = 64
+              FieldName = 'COLUMNNAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = IBSQLEditFrame.FieldsSource
+          FixedCols = 0
+          Options = [dgEditing, dgColumnResize, dgColumnMove, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+          Scrollbars = ssAutoVertical
+          TabOrder = 7
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object SelectSelectAll: TCheckBox
+          Left = 456
+          Height = 22
+          Top = 248
+          Width = 134
+          Caption = 'Select/Deselect All'
+          OnClick = SelectSelectAllClick
+          TabOrder = 8
+        end
+        object Label5: TLabel
+          Left = 288
+          Height = 14
+          Top = 104
+          Width = 138
+          Caption = '&Computed By Columns'
+          ParentColor = False
+        end
+        object Label6: TLabel
+          Left = 289
+          Height = 14
+          Top = 176
+          Width = 103
+          Caption = '&Identity Columns'
+          ParentColor = False
+        end
+        object ReadOnlyGrid: TIBDynamicGrid
+          Left = 289
+          Height = 48
+          Top = 119
+          Width = 143
+          Color = clWindow
+          Columns = <          
+            item
+              ButtonStyle = cbsCheckboxColumn
+              Title.Caption = 'SELECTED'
+              Width = 30
+              FieldName = 'SELECTED'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Caption = 'COLUMNNAME'
+              Width = 64
+              FieldName = 'COLUMNNAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          FixedCols = 0
+          Options = [dgEditing, dgColumnResize, dgColumnMove, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+          Scrollbars = ssAutoVertical
+          TabOrder = 9
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+        object IdentityGrid: TIBDynamicGrid
+          Left = 288
+          Height = 56
+          Top = 192
+          Width = 143
+          Color = clWindow
+          Columns = <          
+            item
+              ButtonStyle = cbsCheckboxColumn
+              Title.Caption = 'SELECTED'
+              Width = 30
+              FieldName = 'SELECTED'
+              AutoSizeColumn = False
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end          
+            item
+              Title.Caption = 'COLUMNNAME'
+              Width = 64
+              FieldName = 'COLUMNNAME'
+              AutoSizeColumn = True
+              InitialSortColumn = False
+              DBLookupProperties.ItemHeight = 0
+              DBLookupProperties.ItemWidth = 0
+              DBLookupProperties.AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+            end>
+          DataSource = IBSQLEditFrame.IdentityColsSource
+          FixedCols = 0
+          Options = [dgEditing, dgColumnResize, dgColumnMove, dgRowLines, dgConfirmDelete, dgCancelOnExit, dgDisableDelete, dgDisableInsert]
+          Scrollbars = ssAutoVertical
+          TabOrder = 10
+          ExpandEditorPanelBelowRow = False
+          Descending = False
+          EditorBorderStyle = bsSingle
+          DefaultPositionAtEnd = False
+        end
+      end
+    end
+    object SQLPage: TTabSheet
+      Caption = 'SQL'
+      ClientHeight = 320
+      ClientWidth = 635
+      OnShow = SQLPageShow
+      object Label2: TLabel
+        Left = 10
+        Height = 14
+        Top = 81
+        Width = 56
+        Caption = 'S&QL Text:'
+        ParentColor = False
+      end
+      object StatementType: TRadioGroup
+        Left = 10
+        Height = 49
+        Top = 9
+        Width = 266
+        AutoFill = True
+        AutoSize = True
+        Caption = 'Statement Type'
+        ChildSizing.LeftRightSpacing = 6
+        ChildSizing.TopBottomSpacing = 6
+        ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+        ChildSizing.EnlargeVertical = crsHomogenousChildResize
+        ChildSizing.ShrinkHorizontal = crsScaleChilds
+        ChildSizing.ShrinkVertical = crsScaleChilds
+        ChildSizing.Layout = cclLeftToRightThenTopToBottom
+        ChildSizing.ControlsPerLine = 5
+        ClientHeight = 34
+        ClientWidth = 264
+        Columns = 5
+        ItemIndex = 0
+        Items.Strings = (
+          '&Modify'
+          '&Insert'
+          '&Delete'
+          '&Refresh'
+        )
+        OnClick = StatementTypeClick
+        TabOrder = 0
+      end
+      object TestBtn: TButton
+        Left = 539
+        Height = 25
+        Top = 31
+        Width = 75
+        Anchors = [akTop, akRight]
+        Caption = 'Test'
+        OnClick = TestBtnClick
+        TabOrder = 1
+      end
+      inline IBSQLEditFrame1: TIBSQLEditFrame
+        Left = 12
+        Height = 217
+        Top = 95
+        Width = 616
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        ClientHeight = 217
+        ClientWidth = 616
+        TabOrder = 2
+        inherited SQLText: TSynEdit
+          Height = 191
+          Width = 616
+          OnChange = SQLMemoChange
+        end
+        inherited ToolBar1: TToolBar
+          Width = 616
+          inherited ToolButton3: TToolButton
+            Height = 8
+          end
+          inherited ToolButton7: TToolButton
+            Height = 8
+          end
+        end
+        inherited FieldNameList: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$RELATION_NAME'
+              ParamType = ptInput
+            end>
+        end
+        inherited PrimaryKeys: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$RELATION_NAME'
+              ParamType = ptInput
+            end>
+        end
+        inherited ProcInputParams: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$PROCEDURE_NAME'
+              ParamType = ptInput
+            end>
+        end
+        inherited ProcOutputParams: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$PROCEDURE_NAME'
+              ParamType = ptInput
+            end>
+        end
+        inherited IdentityCols: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$RELATION_NAME'
+              ParamType = ptInput
+            end>
+        end
+        inherited ReadOnlyFields: TIBQuery
+          ParamData = <          
+            item
+              DataType = ftUnknown
+              Name = 'RDB$RELATION_NAME'
+              ParamType = ptInput
+            end>
+        end
+      end
+    end
+  end
+  object OkButton: TButton
+    Left = 480
+    Height = 25
+    Top = 376
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Caption = '&OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object CancelButton: TButton
+    Left = 573
+    Height = 25
+    Top = 376
+    Width = 75
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end

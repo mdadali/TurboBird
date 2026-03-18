@@ -1,0 +1,239 @@
+object ExecuteSQLScriptDlg: TExecuteSQLScriptDlg
+  Left = 1118
+  Height = 349
+  Top = 222
+  Width = 473
+  BorderStyle = bsDialog
+  Caption = 'Execute SQL Script'
+  ClientHeight = 349
+  ClientWidth = 473
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '1.8.3.0'
+  object PageControl1: TPageControl
+    Left = 10
+    Height = 308
+    Top = 0
+    Width = 454
+    ActivePage = SelectTab
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ShowTabs = False
+    TabIndex = 0
+    TabOrder = 0
+    object SelectTab: TTabSheet
+      Caption = 'SelectTab'
+      ClientHeight = 302
+      ClientWidth = 448
+      object Label2: TLabel
+        Left = 12
+        Height = 14
+        Top = 7
+        Width = 39
+        Caption = 'Server'
+        ParentColor = False
+      end
+      object ServerName: TEdit
+        Left = 12
+        Height = 24
+        Top = 24
+        Width = 180
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object Label1: TLabel
+        Left = 12
+        Height = 14
+        Top = 56
+        Width = 95
+        Caption = 'Database Name'
+        ParentColor = False
+      end
+      object DBName: TEdit
+        Left = 12
+        Height = 24
+        Top = 72
+        Width = 296
+        ReadOnly = True
+        TabOrder = 1
+      end
+      object Label3: TLabel
+        Left = 12
+        Height = 14
+        Top = 104
+        Width = 65
+        Caption = 'Source File'
+        ParentColor = False
+      end
+      object SourceFileName: TEdit
+        Left = 12
+        Height = 24
+        Top = 120
+        Width = 388
+        TabOrder = 2
+      end
+      object SpeedButton1: TSpeedButton
+        Left = 408
+        Height = 25
+        Top = 119
+        Width = 25
+        Glyph.Data = {
+          36040000424D3604000000000000360000002800000010000000100000000100
+          2000000000000004000064000000640000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          00002D88D8FF2D87D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88D8FF2D88
+          D8FF2D88D8FF2D88D8FF2D87D8FF2D88D8FF2C86D8FF0000000000000000338E
+          D9FFDCF0FAFFA7DDF4FF9EDBF4FF96DAF3FF8ED8F3FF86D7F3FF7FD4F2FF79D3
+          F2FF72D2F1FF6CD0F1FF69CFF1FFC2EAF8FF338ED9FF00000000000000003594
+          DAFFEFFAFEFFA1E9F9FF91E5F8FF81E1F7FF72DEF6FF63DAF5FF54D7F4FF47D3
+          F3FF39D0F2FF2ECDF1FF26CBF0FFCAF2FBFF3594DAFF0000000000000000369A
+          DAFFF2FAFDFFB3EDFAFFA4E9F9FF95E6F8FF85E2F7FF76DEF6FF65DBF5FF57D7
+          F4FF49D4F3FF3BD1F2FF30CEF1FFCCF2FBFF3598DAFF000000000000000036A1
+          DAFFF6FCFEFFC8F2FCFFB9EFFBFFACECFAFF9CE8F9FF8BE3F7FF7CE0F6FF6CDC
+          F6FF5DD9F5FF4FD6F4FF44D3F3FFD0F3FCFF359FDAFF000000000000000037A6
+          DAFFFEFFFFFFF8FDFFFFF6FDFFFFF5FCFFFFF3FCFEFFD8F6FCFF94E6F8FF85E3
+          F7FF76DFF6FF68DBF5FF5CD8F4FFD7F4FCFF35A4DAFF000000000000000035AB
+          DAFFE8F6FBFF94D4EFFF88CEEEFF73C1E9FFC9E9F6FFF2FCFEFFF3FCFEFFF2FC
+          FEFFF0FCFEFFEFFBFEFFEEFBFEFFFEFFFFFF36ABDAFF000000000000000036AA
+          DAFFF1FAFDFF94DEF5FF93DCF4FF81D5F2FF6ACAEDFF6CCBEAFF85D3EFFF80D2
+          EFFF7AD0EFFF76CFEEFF72CFEEFFE9F7FBFF34AEDAFF000000000000000035AF
+          DAFFF7FCFEFF8EE4F8FF91DEF5FF9FE0F5FFACE1F6FFEFFBFEFFF4FDFEFFF3FC
+          FEFFF1FCFEFFEFFBFEFFEEFBFEFFFAFDFFFF36AFDAFF000000000000000036B3
+          DAFFFDFEFEFFFEFFFFFFFEFEFFFFFDFEFFFFFEFFFFFFEAF7FBFF6BC7E4FF6BC7
+          E3FF6BC7E3FF6BC7E3FF79CDE6FF74CAE5FF00000000000000000000000034B4
+          D9FF5EC2E1FF60C3E2FF60C3E2FF60C3E2FF5FC3E2FF3CB6DBFF000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000000000000000
+          0000000000000000000000000000000000000000000000000000
+        }
+        OnClick = SpeedButton1Click
+      end
+      object AutoDDL: TCheckBox
+        Left = 16
+        Height = 22
+        Top = 155
+        Width = 77
+        Caption = 'AutoDDL'
+        Checked = True
+        State = cbChecked
+        TabOrder = 3
+      end
+      object StopOnFirstError: TCheckBox
+        Left = 16
+        Height = 22
+        Top = 184
+        Width = 134
+        Caption = 'Stop on First Error'
+        Checked = True
+        State = cbChecked
+        TabOrder = 4
+      end
+      object ShowPerformanceStats: TCheckBox
+        Left = 16
+        Height = 22
+        Top = 214
+        Width = 196
+        Caption = 'Show Performance Statistics'
+        TabOrder = 5
+      end
+      object IgnoreGrants: TCheckBox
+        Left = 16
+        Height = 22
+        Top = 274
+        Width = 175
+        Caption = 'Ignore Grant Statements'
+        TabOrder = 6
+      end
+      object ShowAffectedRows: TCheckBox
+        Left = 16
+        Height = 22
+        Top = 244
+        Width = 145
+        Caption = 'Show Affected Rows'
+        TabOrder = 7
+      end
+    end
+    object ReportTab: TTabSheet
+      Caption = 'ReportTab'
+      ClientHeight = 302
+      ClientWidth = 448
+      object Report: TMemo
+        Left = 0
+        Height = 189
+        Top = 0
+        Width = 351
+        Align = alClient
+        Lines.Strings = (
+          'Report'
+        )
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+  end
+  object Button2: TButton
+    Left = 247
+    Height = 25
+    Top = 316
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object Button1: TButton
+    Left = 152
+    Height = 25
+    Top = 316
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 2
+  end
+  object IBXScript1: TIBXScript
+    Database = DBDataModule.IBDatabase1
+    IgnoreGrants = False
+    IgnoreCreateDatabase = True
+    Transaction = IBTransaction1
+    ShowAffectedRows = False
+    ShowPerformanceStats = False
+    GetParamValue = IBXScript1GetParamValue
+    OnOutputLog = IBXScript1ErrorLog
+    OnErrorLog = IBXScript1ErrorLog
+    OnSelectSQL = IBXScript1SelectSQL
+    left = 264
+    top = 17
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.sql'
+    Filter = 'SQL Scripts (*.sql)|*.sql|All Files (*.*)|*.*'
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 376
+    top = 17
+  end
+  object IBTransaction1: TIBTransaction
+    Active = False
+    DefaultDatabase = DBDataModule.IBDatabase1
+    Params.Strings = (
+      'concurrency'
+      'nowait'
+    )
+    left = 378
+    top = 77
+  end
+  object OpenPictureDialog1: TOpenPictureDialog
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 368
+    top = 166
+  end
+end

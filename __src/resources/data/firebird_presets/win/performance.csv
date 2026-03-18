@@ -1,0 +1,9 @@
+ID;Name;ActiveValue;FileValue;DefaultValue;Source;Config_is_set
+1;TempCacheLimit;;16777216;8388608;;True
+8;DefaultDbCachePages;;1024;256;;True
+30;BugcheckAbort;;false;false;;True
+33;GCPolicy;;mixed;cooperative;;True
+35;DatabaseGrowthIncrement;;268435456;134217728;;True
+36;FileSystemCacheThreshold;;131072;65536;;True
+40;FileSystemCacheSize;;67108864;0;;True
+60;ClientBatchBuffer;;262144;131072;;True

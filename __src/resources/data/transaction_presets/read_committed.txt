@@ -1,0 +1,3 @@
+read_committed
+rec_version
+nowait

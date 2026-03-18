@@ -1,0 +1,361 @@
+object IBDatabaseEditForm: TIBDatabaseEditForm
+  Left = 880
+  Height = 517
+  Top = 142
+  Width = 462
+  BorderStyle = bsDialog
+  BorderWidth = 5
+  Caption = 'Database Connection Editor'
+  ClientHeight = 517
+  ClientWidth = 462
+  HelpFile = 'ibx.hlp'
+  OnCreate = FormCreate
+  ParentFont = True
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object Panel1: TPanel
+    Left = 5
+    Height = 36
+    Top = 476
+    Width = 452
+    Align = alBottom
+    BevelOuter = bvNone
+    ClientHeight = 36
+    ClientWidth = 452
+    TabOrder = 1
+    object OKBtn: TButton
+      Left = 83
+      Height = 30
+      Top = 6
+      Width = 75
+      Caption = '&OK'
+      Default = True
+      OnClick = OKBtnClick
+      TabOrder = 0
+    end
+    object CancelBtn: TButton
+      Left = 164
+      Height = 30
+      Top = 7
+      Width = 74
+      Cancel = True
+      Caption = 'Cancel'
+      ModalResult = 2
+      TabOrder = 1
+    end
+    object Test: TButton
+      Left = 244
+      Height = 30
+      Top = 6
+      Width = 75
+      Caption = '&Test'
+      OnClick = TestClick
+      TabOrder = 2
+    end
+  end
+  object GroupBox1: TGroupBox
+    Left = 5
+    Height = 316
+    Top = 160
+    Width = 452
+    Caption = 'Database Parameters'
+    ClientHeight = 294
+    ClientWidth = 448
+    TabOrder = 0
+    object Label2: TLabel
+      Left = 24
+      Height = 20
+      Top = 9
+      Width = 79
+      Caption = '&User Name:'
+      FocusControl = UserName
+      ParentColor = False
+    end
+    object Label3: TLabel
+      Left = 24
+      Height = 20
+      Top = 65
+      Width = 68
+      Caption = 'Pass&word:'
+      FocusControl = Password
+      ParentColor = False
+    end
+    object Label4: TLabel
+      Left = 24
+      Height = 20
+      Top = 121
+      Width = 59
+      Caption = 'S&QLRole:'
+      FocusControl = SQLRole
+      ParentColor = False
+    end
+    object Label5: TLabel
+      Left = 249
+      Height = 20
+      Top = 9
+      Width = 59
+      Caption = 'Se&ttings:'
+      FocusControl = DatabaseParams
+      ParentColor = False
+    end
+    object Label6: TLabel
+      Left = 24
+      Height = 20
+      Top = 177
+      Width = 95
+      Caption = '&Character Set:'
+      FocusControl = CharacterSet
+      ParentColor = False
+    end
+    object UserName: TEdit
+      Left = 24
+      Height = 30
+      Top = 27
+      Width = 137
+      OnEditingDone = UserNameEditingDone
+      TabOrder = 0
+    end
+    object Password: TEdit
+      Left = 24
+      Height = 30
+      Top = 83
+      Width = 137
+      OnEditingDone = PasswordEditingDone
+      TabOrder = 1
+    end
+    object SQLRole: TEdit
+      Left = 24
+      Height = 30
+      Top = 139
+      Width = 134
+      OnEditingDone = SQLRoleEditingDone
+      TabOrder = 2
+    end
+    object DatabaseParams: TMemo
+      Left = 249
+      Height = 80
+      Top = 27
+      Width = 183
+      OnEditingDone = DatabaseParamsEditingDone
+      ScrollBars = ssAutoVertical
+      TabOrder = 5
+    end
+    object LoginPrompt: TCheckBox
+      Left = 24
+      Height = 22
+      Top = 235
+      Width = 113
+      Caption = 'Lo&gin Prompt'
+      TabOrder = 4
+    end
+    object CharacterSet: TComboBox
+      Left = 24
+      Height = 30
+      Top = 195
+      Width = 134
+      ItemHeight = 0
+      Items.Strings = (
+        'ASCII'
+        'BIG_5'
+        'CP943C'
+        'CYRL'
+        'DOS437'
+        'DOS737'
+        'DOS775'
+        'DOS850'
+        'DOS852'
+        'DOS857'
+        'DOS858'
+        'DOS860'
+        'DOS861'
+        'DOS862'
+        'DOS863'
+        'DOS864'
+        'DOS865'
+        'DOS866'
+        'DOS869'
+        'EUCJ_0208'
+        'GB18030'
+        'GBK'
+        'GB_2312'
+        'ISO8859_1'
+        'ISO8859_13'
+        'ISO8859_2'
+        'ISO8859_3'
+        'ISO8859_4'
+        'ISO8859_5'
+        'ISO8859_6'
+        'ISO8859_7'
+        'ISO8859_8'
+        'ISO8859_9'
+        'KOI8R'
+        'KOI8U'
+        'KSC_5601'
+        'NEXT'
+        'NONE'
+        'OCTETS'
+        'SJIS_0208'
+        'TIS620'
+        'UNICODE_FSS'
+        'UTF8'
+        'WIN1250'
+        'WIN1251'
+        'WIN1252'
+        'WIN1253'
+        'WIN1254'
+        'WIN1255'
+        'WIN1256'
+        'WIN1257'
+        'WIN1258'
+      )
+      OnChange = CharacterSetChange
+      TabOrder = 3
+    end
+    object UseSystemDefaultCS: TCheckBox
+      Left = 24
+      Height = 22
+      Top = 264
+      Width = 248
+      Caption = 'Use System Default Character Set'
+      OnChange = UseSystemDefaultCSChange
+      TabOrder = 6
+    end
+    object Label10: TLabel
+      Left = 249
+      Height = 20
+      Top = 121
+      Width = 140
+      Caption = 'Config File Overrides'
+      ParentColor = False
+    end
+    object ConfigOverrides: TMemo
+      Left = 249
+      Height = 86
+      Top = 136
+      Width = 182
+      OnEditingDone = ConfigOverridesEditingDone
+      TabOrder = 7
+    end
+    object UseWireCompression: TCheckBox
+      Left = 249
+      Height = 22
+      Top = 235
+      Width = 175
+      Caption = 'Use Wire Compression'
+      OnEditingDone = UseWireCompressionEditingDone
+      TabOrder = 8
+    end
+  end
+  object Label7: TLabel
+    Left = 24
+    Height = 20
+    Top = 56
+    Width = 47
+    Caption = '&Server:'
+    FocusControl = ServerName
+    ParentColor = False
+  end
+  object ServerName: TEdit
+    Left = 24
+    Height = 30
+    Top = 74
+    Width = 144
+    TabOrder = 2
+  end
+  object Label8: TLabel
+    Left = 209
+    Height = 20
+    Top = 56
+    Width = 58
+    Caption = '&Protocol:'
+    FocusControl = Protocol
+    ParentColor = False
+  end
+  object Protocol: TComboBox
+    Left = 209
+    Height = 30
+    Top = 74
+    Width = 120
+    ItemHeight = 0
+    ItemIndex = 4
+    Items.Strings = (
+      'TCP'
+      'NamedPipe'
+      'SPX'
+      'Local'
+      'inet'
+      'inet4'
+      'inet6'
+      'wnet'
+      'xnet'
+    )
+    OnCloseUp = ProtocolCloseUp
+    TabOrder = 3
+    Text = 'inet'
+  end
+  object Label9: TLabel
+    Left = 357
+    Height = 20
+    Top = 56
+    Width = 54
+    Caption = 'Port No.'
+    ParentColor = False
+  end
+  object PortNo: TEdit
+    Left = 357
+    Height = 30
+    Top = 77
+    Width = 48
+    TabOrder = 4
+  end
+  object Label1: TLabel
+    Left = 24
+    Height = 20
+    Top = 106
+    Width = 67
+    Caption = '&Database:'
+    FocusControl = DatabasePath
+    ParentColor = False
+  end
+  object DatabasePath: TEdit
+    Left = 24
+    Height = 30
+    Top = 124
+    Width = 328
+    TabOrder = 5
+  end
+  object Browse: TButton
+    Left = 357
+    Height = 30
+    Top = 120
+    Width = 75
+    Caption = '&Browse'
+    OnClick = BrowseClick
+    TabOrder = 6
+  end
+  object ConnectionTypeBtn: TRadioGroup
+    Left = 24
+    Height = 41
+    Top = 10
+    Width = 408
+    AutoFill = True
+    Caption = 'Connection'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 19
+    ClientWidth = 404
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'Local'
+      'Remote'
+    )
+    OnSelectionChanged = ConnectionTypeBtnSelectionChanged
+    TabOrder = 7
+  end
+end

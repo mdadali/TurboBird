@@ -1,0 +1,100 @@
+object IBEventsEditor: TIBEventsEditor
+  Left = 283
+  Height = 357
+  Top = 266
+  Width = 335
+  ActiveControl = Panel1
+  BorderStyle = bsDialog
+  Caption = 'EventAlerter Events'
+  ClientHeight = 357
+  ClientWidth = 335
+  Font.Color = clBlack
+  Font.Height = -11
+  Font.Name = 'Default'
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '0.9.30'
+  object Panel1: TPanel
+    Left = 0
+    Height = 357
+    Top = 0
+    Width = 335
+    Align = alClient
+    BevelOuter = bvNone
+    BorderWidth = 4
+    ClientHeight = 357
+    ClientWidth = 335
+    TabOrder = 0
+    object Panel2: TPanel
+      Left = 16
+      Height = 297
+      Top = 8
+      Width = 305
+      BevelInner = bvRaised
+      BevelOuter = bvLowered
+      ClientHeight = 297
+      ClientWidth = 305
+      TabOrder = 0
+      object RequestedEvents: TLabel
+        Left = 10
+        Height = 16
+        Top = 16
+        Width = 109
+        Caption = 'Requested Events'
+        Font.Color = clBlack
+        Font.Height = -12
+        Font.Name = 'Default'
+        ParentColor = False
+        ParentFont = False
+      end
+      object cEvents: TStringGrid
+        Left = 10
+        Height = 256
+        Top = 32
+        Width = 278
+        ColCount = 2
+        DefaultRowHeight = 20
+        FixedRows = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goRowSizing, goColSizing, goEditing, goTabs, goAlwaysShowEditor]
+        RowCount = 15
+        ScrollBars = ssVertical
+        TabOrder = 0
+        TitleFont.Color = clBlack
+        TitleFont.Height = -11
+        TitleFont.Name = 'Default'
+        ColWidths = (
+          27
+          227
+        )
+      end
+    end
+    object bOK: TButton
+      Left = 168
+      Height = 30
+      Top = 320
+      Width = 75
+      Caption = '&OK'
+      Default = True
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = 'Default'
+      ModalResult = 1
+      ParentFont = False
+      TabOrder = 1
+    end
+    object bCancel: TButton
+      Left = 248
+      Height = 30
+      Top = 320
+      Width = 75
+      Cancel = True
+      Caption = 'Cancel'
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = 'Default'
+      ModalResult = 2
+      ParentFont = False
+      TabOrder = 2
+    end
+  end
+end

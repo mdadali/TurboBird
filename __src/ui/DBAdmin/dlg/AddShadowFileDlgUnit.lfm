@@ -1,0 +1,92 @@
+object AddShadowFileDlg: TAddShadowFileDlg
+  Left = 496
+  Height = 129
+  Top = 305
+  Width = 383
+  BorderStyle = bsDialog
+  Caption = 'Add Shadow File'
+  ClientHeight = 129
+  ClientWidth = 383
+  OnClose = FormClose
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '1.8.3.0'
+  object Bevel1: TBevel
+    Left = 8
+    Height = 112
+    Top = 8
+    Width = 288
+  end
+  object Button1: TButton
+    Left = 304
+    Height = 29
+    Top = 8
+    Width = 75
+    Caption = 'OK'
+    Default = True
+    ModalResult = 1
+    TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 304
+    Height = 29
+    Top = 45
+    Width = 75
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 1
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 14
+    Top = 24
+    Width = 58
+    Caption = 'File Name'
+    FocusControl = FileName
+    ParentColor = False
+  end
+  object FileName: TEdit
+    Left = 16
+    Height = 24
+    Top = 40
+    Width = 273
+    TabOrder = 2
+    Text = 'FileName'
+  end
+  object InPagesBtn: TRadioButton
+    Left = 152
+    Height = 22
+    Top = 82
+    Width = 58
+    Caption = '&Pages'
+    Checked = True
+    TabOrder = 3
+    TabStop = True
+  end
+  object RadioButton2: TRadioButton
+    Left = 232
+    Height = 22
+    Top = 82
+    Width = 48
+    Caption = 'MBs'
+    TabOrder = 4
+  end
+  object Label3: TLabel
+    Left = 16
+    Height = 14
+    Top = 86
+    Width = 43
+    Caption = 'Length'
+    ParentColor = False
+  end
+  object FileLength: TEdit
+    Left = 65
+    Height = 24
+    Top = 80
+    Width = 80
+    NumbersOnly = True
+    TabOrder = 5
+    Text = 'FileLength'
+  end
+end

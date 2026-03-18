@@ -1,0 +1,1382 @@
+object IBSQLEditFrame: TIBSQLEditFrame
+  Left = 0
+  Height = 585
+  Top = 0
+  Width = 789
+  ClientHeight = 585
+  ClientWidth = 789
+  LCLVersion = '2.2.6.0'
+  TabOrder = 0
+  DesignLeft = 960
+  DesignTop = 147
+  inline SQLText: TSynEdit
+    Left = 0
+    Height = 559
+    Top = 26
+    Width = 789
+    Align = alClient
+    Font.Height = -12
+    Font.Name = 'DejaVu Sans Mono'
+    Font.Pitch = fpFixed
+    Font.Quality = fqNonAntialiased
+    ParentColor = False
+    ParentFont = False
+    PopupMenu = PopupMenu1
+    TabOrder = 0
+    Gutter.Width = 55
+    Gutter.MouseActions = <>
+    RightGutter.Width = 0
+    RightGutter.MouseActions = <>
+    Highlighter = SynSQLSyn1
+    Keystrokes = <    
+      item
+        Command = ecUp
+        ShortCut = 38
+      end    
+      item
+        Command = ecSelUp
+        ShortCut = 8230
+      end    
+      item
+        Command = ecScrollUp
+        ShortCut = 16422
+      end    
+      item
+        Command = ecDown
+        ShortCut = 40
+      end    
+      item
+        Command = ecSelDown
+        ShortCut = 8232
+      end    
+      item
+        Command = ecScrollDown
+        ShortCut = 16424
+      end    
+      item
+        Command = ecLeft
+        ShortCut = 37
+      end    
+      item
+        Command = ecSelLeft
+        ShortCut = 8229
+      end    
+      item
+        Command = ecWordLeft
+        ShortCut = 16421
+      end    
+      item
+        Command = ecSelWordLeft
+        ShortCut = 24613
+      end    
+      item
+        Command = ecRight
+        ShortCut = 39
+      end    
+      item
+        Command = ecSelRight
+        ShortCut = 8231
+      end    
+      item
+        Command = ecWordRight
+        ShortCut = 16423
+      end    
+      item
+        Command = ecSelWordRight
+        ShortCut = 24615
+      end    
+      item
+        Command = ecPageDown
+        ShortCut = 34
+      end    
+      item
+        Command = ecSelPageDown
+        ShortCut = 8226
+      end    
+      item
+        Command = ecPageBottom
+        ShortCut = 16418
+      end    
+      item
+        Command = ecSelPageBottom
+        ShortCut = 24610
+      end    
+      item
+        Command = ecPageUp
+        ShortCut = 33
+      end    
+      item
+        Command = ecSelPageUp
+        ShortCut = 8225
+      end    
+      item
+        Command = ecPageTop
+        ShortCut = 16417
+      end    
+      item
+        Command = ecSelPageTop
+        ShortCut = 24609
+      end    
+      item
+        Command = ecLineStart
+        ShortCut = 36
+      end    
+      item
+        Command = ecSelLineStart
+        ShortCut = 8228
+      end    
+      item
+        Command = ecEditorTop
+        ShortCut = 16420
+      end    
+      item
+        Command = ecSelEditorTop
+        ShortCut = 24612
+      end    
+      item
+        Command = ecLineEnd
+        ShortCut = 35
+      end    
+      item
+        Command = ecSelLineEnd
+        ShortCut = 8227
+      end    
+      item
+        Command = ecEditorBottom
+        ShortCut = 16419
+      end    
+      item
+        Command = ecSelEditorBottom
+        ShortCut = 24611
+      end    
+      item
+        Command = ecToggleMode
+        ShortCut = 45
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16429
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 8237
+      end    
+      item
+        Command = ecDeleteChar
+        ShortCut = 46
+      end    
+      item
+        Command = ecCut
+        ShortCut = 8238
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8
+      end    
+      item
+        Command = ecDeleteLastChar
+        ShortCut = 8200
+      end    
+      item
+        Command = ecDeleteLastWord
+        ShortCut = 16392
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 32776
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 40968
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 13
+      end    
+      item
+        Command = ecSelectAll
+        ShortCut = 16449
+      end    
+      item
+        Command = ecCopy
+        ShortCut = 16451
+      end    
+      item
+        Command = ecBlockIndent
+        ShortCut = 24649
+      end    
+      item
+        Command = ecLineBreak
+        ShortCut = 16461
+      end    
+      item
+        Command = ecInsertLine
+        ShortCut = 16462
+      end    
+      item
+        Command = ecDeleteWord
+        ShortCut = 16468
+      end    
+      item
+        Command = ecBlockUnindent
+        ShortCut = 24661
+      end    
+      item
+        Command = ecPaste
+        ShortCut = 16470
+      end    
+      item
+        Command = ecCut
+        ShortCut = 16472
+      end    
+      item
+        Command = ecDeleteLine
+        ShortCut = 16473
+      end    
+      item
+        Command = ecDeleteEOL
+        ShortCut = 24665
+      end    
+      item
+        Command = ecUndo
+        ShortCut = 16474
+      end    
+      item
+        Command = ecRedo
+        ShortCut = 24666
+      end    
+      item
+        Command = ecGotoMarker0
+        ShortCut = 16432
+      end    
+      item
+        Command = ecGotoMarker1
+        ShortCut = 16433
+      end    
+      item
+        Command = ecGotoMarker2
+        ShortCut = 16434
+      end    
+      item
+        Command = ecGotoMarker3
+        ShortCut = 16435
+      end    
+      item
+        Command = ecGotoMarker4
+        ShortCut = 16436
+      end    
+      item
+        Command = ecGotoMarker5
+        ShortCut = 16437
+      end    
+      item
+        Command = ecGotoMarker6
+        ShortCut = 16438
+      end    
+      item
+        Command = ecGotoMarker7
+        ShortCut = 16439
+      end    
+      item
+        Command = ecGotoMarker8
+        ShortCut = 16440
+      end    
+      item
+        Command = ecGotoMarker9
+        ShortCut = 16441
+      end    
+      item
+        Command = ecSetMarker0
+        ShortCut = 24624
+      end    
+      item
+        Command = ecSetMarker1
+        ShortCut = 24625
+      end    
+      item
+        Command = ecSetMarker2
+        ShortCut = 24626
+      end    
+      item
+        Command = ecSetMarker3
+        ShortCut = 24627
+      end    
+      item
+        Command = ecSetMarker4
+        ShortCut = 24628
+      end    
+      item
+        Command = ecSetMarker5
+        ShortCut = 24629
+      end    
+      item
+        Command = ecSetMarker6
+        ShortCut = 24630
+      end    
+      item
+        Command = ecSetMarker7
+        ShortCut = 24631
+      end    
+      item
+        Command = ecSetMarker8
+        ShortCut = 24632
+      end    
+      item
+        Command = ecSetMarker9
+        ShortCut = 24633
+      end    
+      item
+        Command = EcFoldLevel1
+        ShortCut = 41009
+      end    
+      item
+        Command = EcFoldLevel2
+        ShortCut = 41010
+      end    
+      item
+        Command = EcFoldLevel3
+        ShortCut = 41011
+      end    
+      item
+        Command = EcFoldLevel4
+        ShortCut = 41012
+      end    
+      item
+        Command = EcFoldLevel5
+        ShortCut = 41013
+      end    
+      item
+        Command = EcFoldLevel6
+        ShortCut = 41014
+      end    
+      item
+        Command = EcFoldLevel7
+        ShortCut = 41015
+      end    
+      item
+        Command = EcFoldLevel8
+        ShortCut = 41016
+      end    
+      item
+        Command = EcFoldLevel9
+        ShortCut = 41017
+      end    
+      item
+        Command = EcFoldLevel0
+        ShortCut = 41008
+      end    
+      item
+        Command = EcFoldCurrent
+        ShortCut = 41005
+      end    
+      item
+        Command = EcUnFoldCurrent
+        ShortCut = 41003
+      end    
+      item
+        Command = EcToggleMarkupWord
+        ShortCut = 32845
+      end    
+      item
+        Command = ecNormalSelect
+        ShortCut = 24654
+      end    
+      item
+        Command = ecColumnSelect
+        ShortCut = 24643
+      end    
+      item
+        Command = ecLineSelect
+        ShortCut = 24652
+      end    
+      item
+        Command = ecTab
+        ShortCut = 9
+      end    
+      item
+        Command = ecShiftTab
+        ShortCut = 8201
+      end    
+      item
+        Command = ecMatchBracket
+        ShortCut = 24642
+      end    
+      item
+        Command = ecColSelUp
+        ShortCut = 40998
+      end    
+      item
+        Command = ecColSelDown
+        ShortCut = 41000
+      end    
+      item
+        Command = ecColSelLeft
+        ShortCut = 40997
+      end    
+      item
+        Command = ecColSelRight
+        ShortCut = 40999
+      end    
+      item
+        Command = ecColSelPageDown
+        ShortCut = 40994
+      end    
+      item
+        Command = ecColSelPageBottom
+        ShortCut = 57378
+      end    
+      item
+        Command = ecColSelPageUp
+        ShortCut = 40993
+      end    
+      item
+        Command = ecColSelPageTop
+        ShortCut = 57377
+      end    
+      item
+        Command = ecColSelLineStart
+        ShortCut = 40996
+      end    
+      item
+        Command = ecColSelLineEnd
+        ShortCut = 40995
+      end    
+      item
+        Command = ecColSelEditorTop
+        ShortCut = 57380
+      end    
+      item
+        Command = ecColSelEditorBottom
+        ShortCut = 57379
+      end>
+    MouseActions = <>
+    MouseTextActions = <>
+    MouseSelActions = <>
+    Lines.Strings = (
+      'SQLText'
+    )
+    VisibleSpecialChars = [vscSpace, vscTabAtLast]
+    ScrollBars = ssAutoBoth
+    SelectedColor.BackPriority = 50
+    SelectedColor.ForePriority = 50
+    SelectedColor.FramePriority = 50
+    SelectedColor.BoldPriority = 50
+    SelectedColor.ItalicPriority = 50
+    SelectedColor.UnderlinePriority = 50
+    SelectedColor.StrikeOutPriority = 50
+    BracketHighlightStyle = sbhsBoth
+    BracketMatchColor.Background = clNone
+    BracketMatchColor.Foreground = clNone
+    BracketMatchColor.Style = [fsBold]
+    FoldedCodeColor.Background = clNone
+    FoldedCodeColor.Foreground = clGray
+    FoldedCodeColor.FrameColor = clGray
+    MouseLinkColor.Background = clNone
+    MouseLinkColor.Foreground = clBlue
+    LineHighlightColor.Background = clNone
+    LineHighlightColor.Foreground = clNone
+    inline SynLeftGutterPartList1: TSynGutterPartList
+      object SynGutterMarks1: TSynGutterMarks
+        Width = 24
+        MouseActions = <>
+      end
+      object SynGutterLineNumber1: TSynGutterLineNumber
+        Width = 15
+        MouseActions = <>
+        MarkupInfo.Background = clBtnFace
+        MarkupInfo.Foreground = clNone
+        DigitCount = 2
+        ShowOnlyLineNumbersMultiplesOf = 1
+        ZeroStart = False
+        LeadingZeros = False
+      end
+      object SynGutterChanges1: TSynGutterChanges
+        Width = 4
+        MouseActions = <>
+        ModifiedColor = 59900
+        SavedColor = clGreen
+      end
+      object SynGutterSeparator1: TSynGutterSeparator
+        Width = 2
+        MouseActions = <>
+        MarkupInfo.Background = clWhite
+        MarkupInfo.Foreground = clGray
+      end
+      object SynGutterCodeFolding1: TSynGutterCodeFolding
+        MouseActions = <>
+        MarkupInfo.Background = clNone
+        MarkupInfo.Foreground = clGray
+        MouseActionsExpanded = <>
+        MouseActionsCollapsed = <>
+      end
+    end
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 789
+    Caption = 'ToolBar1'
+    EdgeBorders = [ebLeft, ebTop, ebRight]
+    Images = BtnImages
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+    object ToolButtonOpen: TToolButton
+      Left = 3
+      Top = 2
+      Action = LoadFromFile
+    end
+    object ToolButtonSave: TToolButton
+      Left = 26
+      Top = 2
+      Action = SaveToFile
+    end
+    object ToolButton3: TToolButton
+      Left = 49
+      Height = 8
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsSeparator
+    end
+    object ToolButton4: TToolButton
+      Left = 57
+      Top = 2
+      Action = Cut
+    end
+    object ToolButton5: TToolButton
+      Left = 80
+      Top = 2
+      Action = CopyText
+    end
+    object ToolButton6: TToolButton
+      Left = 103
+      Top = 2
+      Action = Paste
+    end
+    object ToolButton7: TToolButton
+      Left = 126
+      Height = 8
+      Top = 2
+      Caption = 'ToolButton7'
+      Style = tbsSeparator
+    end
+    object ToolButton8: TToolButton
+      Left = 134
+      Top = 2
+      Action = Clear
+    end
+    object ToolButton9: TToolButton
+      Left = 157
+      Top = 2
+      Action = WrapText
+    end
+    object ToolButton10: TToolButton
+      Left = 180
+      Top = 2
+      Action = Undo
+    end
+    object ToolButton11: TToolButton
+      Left = 203
+      Top = 2
+      Action = Redo
+    end
+    object ToolButton12: TToolButton
+      Left = 226
+      Top = 2
+      Action = Rollback
+      ShowCaption = False
+    end
+    object ToolButton13: TToolButton
+      Left = 249
+      Top = 2
+      Action = Commit
+      ShowCaption = False
+    end
+    object PrevBtn: TToolButton
+      Left = 272
+      Top = 2
+      Action = PreviousScript
+    end
+    object NextBtn: TToolButton
+      Left = 295
+      Top = 2
+      Action = NextScript
+    end
+  end
+  object SynSQLSyn1: TSynSQLSyn
+    DefaultFilter = 'SQL Files (*.sql)|*.sql'
+    Enabled = False
+    KeyAttri.Foreground = clBlue
+    NumberAttri.Foreground = clRed
+    SQLDialect = sqlInterbase6
+    Left = 40
+    Top = 120
+  end
+  object ActionList1: TActionList
+    Images = BtnImages
+    Left = 128
+    Top = 64
+    object Cut: TAction
+      Caption = 'Cut'
+      Hint = 'Cut'
+      ImageIndex = 4
+      OnExecute = CutExecute
+      OnUpdate = CutUpdate
+    end
+    object CopyText: TAction
+      Caption = 'Copy'
+      Hint = 'Copy'
+      ImageIndex = 3
+      OnExecute = CopyTextExecute
+      OnUpdate = CutUpdate
+    end
+    object Paste: TAction
+      Caption = 'Paste'
+      Hint = 'Paste'
+      ImageIndex = 5
+      OnExecute = PasteExecute
+      OnUpdate = PasteUpdate
+    end
+    object SelectAll: TAction
+      Caption = 'Select All'
+      Hint = 'Select All'
+      ImageIndex = 6
+      OnExecute = SelectAllExecute
+      OnUpdate = SelectAllUpdate
+    end
+    object Clear: TAction
+      Caption = 'Clear'
+      Hint = 'Clear'
+      ImageIndex = 2
+      OnExecute = ClearExecute
+      OnUpdate = SelectAllUpdate
+    end
+    object WrapText: TAction
+      Caption = 'Wrap Text'
+      Hint = 'Wrap Text'
+      ImageIndex = 9
+      OnExecute = WrapTextExecute
+      OnUpdate = WrapTextUpdate
+    end
+    object LoadFromFile: TAction
+      Caption = 'Load From File'
+      Hint = 'Load From File'
+      ImageIndex = 0
+      OnExecute = LoadFromFileExecute
+    end
+    object SaveToFile: TAction
+      Caption = 'Save To File'
+      Hint = 'Save To File'
+      ImageIndex = 1
+      OnExecute = SaveToFileExecute
+      OnUpdate = SelectAllUpdate
+    end
+    object Undo: TAction
+      Caption = 'Undo'
+      Hint = 'Undo'
+      ImageIndex = 8
+      OnExecute = UndoExecute
+      OnUpdate = UndoUpdate
+    end
+    object Redo: TAction
+      Caption = 'Redo'
+      Hint = 'Redo'
+      ImageIndex = 7
+      OnExecute = RedoExecute
+      OnUpdate = RedoUpdate
+    end
+    object Commit: TAction
+      Caption = 'Commit'
+      Hint = 'Commit'
+      ImageIndex = 11
+      Visible = False
+    end
+    object Rollback: TAction
+      Caption = 'Rollback'
+      Hint = 'Rollback'
+      ImageIndex = 10
+      Visible = False
+    end
+    object PreviousScript: TAction
+      Caption = 'Previous Script'
+      Hint = 'Previous Script'
+      ImageIndex = 12
+      Visible = False
+    end
+    object NextScript: TAction
+      Caption = 'Next Script'
+      Hint = 'Next Script'
+      ImageIndex = 13
+      Visible = False
+    end
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 40
+    Top = 64
+    object MenuItem1: TMenuItem
+      Action = Cut
+    end
+    object MenuItem2: TMenuItem
+      Action = CopyText
+    end
+    object MenuItem3: TMenuItem
+      Action = Paste
+    end
+    object MenuItem4: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem8: TMenuItem
+      Action = WrapText
+    end
+    object MenuItem9: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem5: TMenuItem
+      Action = SelectAll
+    end
+    object MenuItem6: TMenuItem
+      Caption = '-'
+    end
+    object MenuItem7: TMenuItem
+      Action = Clear
+    end
+  end
+  object BtnImages: TImageList
+    Left = 32
+    Top = 176
+    Bitmap = {
+      4C7A0E0000001000000010000000E41600000000000078DAED9B07585447BBC7
+      0FB020468388058D440D62018DD1B42F768D0D04B16BEC25D1A8545140450494
+      DE3B080848EF4D8A2245292A52547AEFBDD7A5EC2EEF9D39B8ABE2826C6EBE27
+      F7BBF79EE7F93FA7CCFB9B77E69D72660E0B41B03FCCAC2CC1CCCA8294A9A505
+      9858988191B929189A1A83818911E8191982AEA1011063F1D696303434446A70
+      7010060606804AA5424F4F0F747676425B5B1BDC35D01F97A7D168A4987960BE
+      B7B797C5DFD1D71B9BB762CF63FF5D5D5DD0DEDE0E3A7ABAE3F01663FA67F2DA
+      BA7740C6BAFCF20187CA8133EEB570C6BD8614BEC73163D61F6B74FD31AF7557
+      87B48DABA2C38B2680E78D00290D008F2BE96062694EFA64C6AEBFBF9FF4DDDD
+      DDCDAAFFED3BDA80FDBE44EC2BA4B46618C907C9D8DC8C6498EAEBEB63D5BDA3
+      A383E4357546F8846A3A9C25CB5ECB4635701ACBAD1A4EDDAF82132E1570D8B1
+      1CAEF957C32D1D2D32DD26A50B2C923AC9F263A5E27ABCABCBB37A80841A3AC4
+      9653E1617E3B0465D680E5E312308FA9815BDA5A64DEF2FE0D1055360449EFEC
+      9FBE53621D407CED30C456D220AAB81742725AC0EF55155CF52B8584EC06C4DF
+      8653A85CE71ED4407CD500C4550D92B68F911E21C5540C4174F9003C2CEE83D0
+      DC0EF0CBAC078FE76570CAA50CEA1A9A4003F1479D2A4023BC0EA20B3B20B2B0
+      13220ABA200C29347F44C1791D1098DD0ABE19887D51017671C570D42C85F48D
+      B5CFAE1CEC13AA2038AB1602B3EAC03FB38EB4C5F249AF03EF57B5E0F9B20ADC
+      53CBE0FEB322B81E5044F619663F43D74D389EC79DDFEBD8683995A37296C1D1
+      7B65206B53DE871801E26F3ABCCEFF08478FF6702CCCFD5D7C2B1A0B9CEAFFF9
+      BF8FFFABFABBF9E8F8D83135517EAC7CFE17F387FE3BF10380098B72D45C92FF
+      B46D2ECF314B06FF291B034E589E63D667A69C73ECDD62FA044EFA1703EF712B
+      EA4459E2B8B500DF499B8E23DE79F0CD911BB0D52605F84FDB454F94E73B61AD
+      27AE11D6AFF0A8114EFB17C11767EC7A29BF596CFE1C373DA9E091407CCEC949
+      E7EC3A8FFB15817C4C03CC55F4E8C5F97D8ECDC8C8E09D9D54084BD32BA842CF
+      F2E187A7E5B0D2F8F120FF29BBA784B636F7E7F8272985262F538AC0A7A819AE
+      365261734113083DCD1F9EF638471519708DC5893CAF993C2BB53870416A51FF
+      DDAC2A7A465A19E43D2F86F0BC7AB854D20A82C905C3D3920A6EB063BF8C2B98
+      3133A5286F75766D9F621B0D543A18A0D24A0387CA4E48CDA88482D422904D29
+      F224121329A359A1972502882D585FD03878A6810A4AED74923F53D333920FD2
+      EAD4A241C1C4D782ECCA3C33B528FDE7DCFAFE63B5BD2053DE4EDA2B21DFFB8A
+      5A59FC8C94A201763CF29BF0DD9B1A2A6617A5578032F28DB5B7A40D0E16B7C3
+      E97AEAB8BC6072E1C0F6E2569C4E3F54DD4DB2DFBDAD81AD6FEBE14465176C44
+      B15740F1989E5C30881A96F7937E9252B41EF595FE59A94543B80CDFBEAEEE9B
+      9352DCBFF5751D9C47BEBF466D80F345EDF26AAC76134CCD5F209894AF89EA52
+      87CE7DF39F170F6ECCAA81A335DD80DA0BD6E6350C4C4F2ED498487F174AC95B
+      3E33A5D065467251076A6F1AE6B10452F27F196DEBE6EDA9E7ECE14A7372BF0F
+      F7DC5CC0D1D519EC5D9CC0CEF91ED83A3982CD3D7BB071B4A3D93BDF63DBE71D
+      EE3BD3600287998D158D1D8FF3C7476D633DD43535407D7323D4B73441C33BE1
+      7B7C189A9B003BDEC2D69A4C6F6C6D062F1F1FF0F6F5011FBFF76A696F23D375
+      8D0CD8F2C69666647A5B673BB477754267771774F574B384EFF1A185D6FAEC78
+      7DB417C247674F17040405426070100407074370483079EEA3F691E91ADA9A6C
+      63AA63A04BA6F7F4F5425F3F1506D07A7F08ED39E8743AB9F7C0F7F850D3B8C1
+      36A69A680FC0E4B1BFD0D050080B0F07068341E6313834C2ABA85F631BD3EB9A
+      1AE435AE6B2FCA838ACAD03F3840FAC5672ADA3BE0434145996D4CD534AE4FA8
+      FD155494D8C6545DF3869EB2EA551ACE5FFE8A12C8292BC0652579B8A4200717
+      E52FC39F7297E022BA3645FB19763165D7261CC6F4139E9398B2E33989293B7E
+      A23145B1623BA62612D33FE52FD314AE289163DAC8C234D9D0D45469A2EF53B4
+      FFBF61686E9AC81AC38EF6430FA3A3068D4C4C7EFF1CAB676CAC14F5F8D180B5
+      A3FD208B77B0EF1B1AA2417864C4808199F191315953E30BD18F1FF5E336B4B2
+      B3E9618D6173D386A6D656D42E431012113EA06F6C2C339A3534363E15191335
+      80FB41634B0B185998D7B0780BF394B4CCACE1BAC666B28D82C24206F48C8CB6
+      B2FC9A181E8E888E1AC0F9D73636415A662603EDAF9F32D3EF1A1B2FB276B0EF
+      292EAF808A9A3AB27D034282A8BA86866BF58D8C6423222307FAFB07A0BCBA16
+      0A4BCB71D97B11B3F8A3BA99989C70F5F0E82D2A2D23F3E8427B753B27C7210F
+      5F2F5A37BAC66C7E710938B9B9527179D8C547D7C4708FB5BD5D4FE69BB7C30F
+      BCBDA0A8A4185C3D1E804FA03F2E33DDCADEB647DF587FD7B86D6B60206A6261
+      568B620A659515505A510EF8DAD4CAA214A52D64BB3E23BCB77073FB95707179
+      D3B004A7FB0C5BD90682838B33AAC33DB0B07182A953BD1868B50A58C8B60A9D
+      A5DEB1FBA74C09EEDBB8B10CF6EEED847DFB3A61D5AA9CE12FA6F880EA4D8BFC
+      5B3AA6955F7EE90BE7CF570E1F3CD80DFBF777C3E6CD95202010DA8BF238C2C3
+      E31F2B2F5F031212E9037C7CFED4C99303870E1CE8060AC5AF1FE5BD80203CE6
+      5378FD06F0333E3E3F3A0F8FEFE0B2652FFBD7AF2F06C4C67371F95077EF6E05
+      5E5EDF4194DF4F148AF730BEC7CF99F543D7BD32322D80D3B00D2FAFDF20D386
+      8727200D975D54F4691F1F9F0F7DF1E224EA9A35B90C94B71793E7E6F6775FB3
+      269B2E2EFE9C3A6992FF20B2E9DBB0A114E5E7FF82207C5466CD7A4CDDBEBD01
+      F6EC6987F5EBCBE18B2F82FAB09FF7F1F5FC1ED5AB6FCD9A12C07EB76E6D8099
+      3363A8A87E4A04914841F1B4E1E6F6E9C0E5E1E60E788BEC377FDA469E1B5099
+      D2B8B87CBBB8B97D9B10634C10013C6CDFA976369AA6961683C61666F8DBDFA0
+      858DCDB5B1FACB26CB24BD0DA689B4B52609B0C6381E7E318A030D347FB6A277
+      44776F0F79D6B8AB03ABEF46C3AA3B51B0522712566A47D25669479273CF2F86
+      7134E7F466F07EDB4ECAF1C91BB8A2A60AE9AF33E165663A79C6F7F839D3C629
+      BD0996DD0C21E7BEEF7563C867971E56C3A5882AF8FDF265C8CECB83DA864696
+      DEE6E6C2B94B97C8746C87EDBF51F527E7DE155A11E0F9B66D84473A7A45130E
+      1C39F4898E5DB9CDB2C1F622CA5E24BFF466083C78F39E3FE79B03DA9E31E0E4
+      E106E3ADA9AC1CED01BFFF7139DC325BE06278254B0EAEF761A26B2A11656FB8
+      9FD10C7F8655B0C4C99A6AB69C3B38BD6A820BA1652C71B2A69A7EC1191CD31A
+      E17C48294B9CACA9A69E7500BBE7F5F04750094B9CACA9F84E5A83756A1D9C0B
+      2C628993F73FF7510BB048AE81B301852C71F2FEC7BCE9B32A38E39FCF1227EF
+      7FB497A6694517837142254B6AB76EC244DFFFFCA76CF5701EB81C4C6D92BF0B
+      8AD7AEC278EFFF0BF29719CCF77F68F443A9B098C8EA90C87008460A7A180641
+      11A11038222ABA8EF00F0BDE36D61C80EC6BF1381F1E1EFE44F89D59D7500F61
+      D10FA9DE817E6CF79DDE41FEA46D378A575B670734B5B5401DEAA355F5B55059
+      5703F9858564EC6313E3A96E3E9EAAA3F907BE5E245FFE320C4A9F8740496A30
+      1425074241923FE43DF583B80007325E7494876F50401F1A931B3EE45DD058C5
+      3C66C3350F40A0AA14A930749D9BE80B0E7F6E06B38BBB20E081032A4BC1B0A3
+      AB4BF8A83D1030108FFD62EEB59B0A297C9D93E803D9F15E90FEC80D5E3C7481
+      C2E222B0B4B71DB4B0B366CDBD682D84780614A704913E47FB67DEE724F890E5
+      44EF623A1A63FC4CDEDCC68AC517A27A1726059075CF7FE687EAEFFB81FC48DE
+      C0D4988ED6102C1EADFF583CD3173BE17C317FC7508FAEA3AFCBE2758D0D48BE
+      04F145A402C973311B61FEB6AE0EFD968E168BD7D2BB43C6AFF45DFC3E14BBE3
+      A6D62DBAFAAD9B2C1ECF0338DFB217A1A4CA5F84917D010B465E7E2CE143F5E6
+      75BA8ABA2AFFFBF5F60D92AF480B1FD33F93C5075A5BD315559459FC15B56B24
+      5FF52A02E92154A76345424D46245BFF72CA8A743416593C2A4B7D6B5BDB98E3
+      9CF977282C7CC82B2B36FF71E902EB1BD065457959C5ABCA75689F4447E39BFE
+      A7FC25FA0539A4CB17E968DCD32F29CA637F749C8ECADDF8C7C50BFB38F976F7
+      3F41939CF7C8F1DD93ADE67392D59FC8F7B34FBE013AC9963B173C8213F126C0
+      776FB72BA779F03AC858FDF6D800DA067B009FF91C655879A096E59A64B54B92
+      CF5A2A9CCF7A170309C6924C9416E451EBC8339FD52E57CCF29AEEC85EEC7116
+      CEA6DB81656B3CD8753E1B57013D9910D3990382D67B8062B055729ECB313853
+      E50EDF3FBC025F9AC900AFFEB631B5CAFB32D8362790675EBDADCE943B5BC257
+      26A88268D079E0D5D9E233597BB308DBF8E96CD15FE47606AE54FB033E235BB2
+      FE148D8D434BB26F01BFE14EE0BDB9E1FB31E3A7B1B15A22580EE6D81F021E8D
+      0D8825C8D851D4D6850B459C0501F743C0ABB6D68750FB175BFFBCEAEBE578D4
+      D69553D4D65B315992575D2339C5440A44DF5E87191E476192C626A05C5B9B4C
+      B9BACE80E7DA5A6942FD8769E37E5B26082E8AEADA6C01536958F0480E5696E9
+      C1AA4A83E4EFAAF40D56551A4A8B66A84FFBECF769328F3592289F70E49BF191
+      7F857F09FCA78DB57F4284367013EEC956847B4A393ACBFD05D6F5F28B32E8A5
+      3100E551CD11EB9AE47AE17909D0D01C8ECF84EB53FD09F3F7E29C7F4BCC8336
+      E4179F897B4FC61303299C708C93647EC317708E855CEA1084760F81514BFFB8
+      D26BEA8323E91530DF371908DBA86C9C076119E2FA73E84B08EBA0023E1316A1
+      636A927D242C8BCA22BF8BCFF048400B8710493C8609137F5731FF6770A7BE1B
+      F09930F2B7625B57A36011C2D8DF4728E425CC8DCF07741D3E12439487AEB7EB
+      2CF727201E9D05849E57F998F1D2F3FC9ECB2204286F9AB0DDD0FB76407968BB
+      A2B9DDB59AD0B92FC7BEAD9C4550BACF54BF64981E9B0BE83A7CFCB6F512206E
+      BB48135AF70D082D97648A8127CC0E4C851545ED30C5360CF12E92E3F1DBCADA
+      A7ED6CA04B4BD60F1AEC6C184ADE5EDB0FDF3E2B0441FB70C43A67A3899F6B5C
+      FFEAF7A67DE81F8981148EFD7E8EFDBF24D51BEAA14A57AF0067520E65F25BB7
+      6F8398845878181B83F62EA1E015E807F73DDDD17EDB11ED912DC9FD245A7382
+      FAAD1BA074ED0A5C90BB089861F2A28B4443670B0B0327FA4A4424F4EFABBF1A
+      E7F557F9B8FE23FBB650F0417B29376F0FF29B8395832DB917BF6BA8071A3AB7
+      E1DA0D35723F88D67F1FD57FA1E83F5BFFABEA9CD75F6154FDDD7D3CC1CDC703
+      9C1FB892ED8EF65780F735770DF5C9DF29A1353F2822EE4FB4FF3DFDC7D98FEA
+      BF60E1C27FB4FEFFA46494777EA49F64576F105EB4C28D32E970199AC0E804A1
+      46A74C3A542EBCE85BF71F77AFDE28A3BCE313066BEBB98D3384E6898711C41D
+      20BE2C00625E33EA585D28B8AD40085701F1C51BC069425F898761DB51EC6CFE
+      A93F1410023140AC6A07E2975E207EEA0062357A47ACAC0562793910E24540CC
+      7F0D047F10F04FFDB1F0D7731B85312BADB8831098B5349E1046EFD7B50340FC
+      DC87FC5281983A841687682D40A123DFE87E761D10DF207E3E7A474EF1018159
+      CBE231FBDDF6E57B89694623EC6AC44E461C41672FDE1E20E6A421C5A105F10D
+      58B96DF95EA1791211C4AA7A545EC4F20FC0DCAF86C0D39301A74E616690D4D1
+      A334888A62C08A15286F9E4E2066C602312D08668848847309EC6F21EB3B0FE5
+      4DF481AAEAC8B725B4140145C521387F7E08188C917DE09DBB43A40D31391B08
+      C120E0E2DDD24C08AB8CC48A1F89E884AF16764069E5106BEF88F3C1477EC910
+      087F3D624370A3984EF541F5D93B4CCC511D26E3CCD582D2462422DA008DCDEF
+      FF04D5D044436C032B9D201A51191EA0BAEC01AE59679AC936A22011235254EA
+      62F9651ED76F74B3D20902B5279F33705136B70889FE2B9C6C5F8132F2F9A1C3
+      CD2CE64D7617E417F6B0EE0F1D6A1E61B99E23DFF6287ECBC3711B10F3BD50BB
+      A2F500918F625643DA6665B583D08CD7307BCE6BC8C9ED249F1D3C887DA0351A
+      372A3BA180DB6F0FEA035C02F356C7130B5381104A072EAE34F8F1A714983C19
+      F9205E939A3C39154445D1BA884847BE83D0D91804662F89C3FD07F7C15FCF6E
+      10E69FB9B188F8EA1110D31351D9D0FA8C481DA578E4D7032FA250FF5D5980FB
+      FC876300F5E799D3517F20046EA372A0B5C99768CDC61F8CE21480DAC91DE569
+      8BD8DF41689E58E8D6DF3F1E3FEFB583F8417AD52661B1650F2853369713943D
+      748247864EE15F57262CBAD80D8DEDF5ECB9F7DAA6BD5F6C75C01543B1E77AE9
+      0B72CC5BB0F0357E86D3C6E2A4552429C8C6E8EB422B9A489135B0134EC336D8
+      76342BF1E456044A878908DB7E98C7F7FE4A46F30B2C80136106B3DBB5F6892D
+      C831A52DC83383CF49B2CCE3FD3D6230FBA38FBCE137D9C6F039D936BF20FBA0
+      66DD13D633CC4A2468A48BBE3100A67ECCB5820FEF1721B9B6A4B3C68041E513
+      561A6697BED06E11CBD405AC63C59E30384C07D7A634589AA50F4BB2F4C0B725
+      6B641E40D22B8F01A62D1666C553345B96A4EB00965D5522CBCFCBEE4A78D49E
+      FF6E0E1986DB25E1C0B4630AB32BA3AFA62F7B791B9852CBF7873EDA002B1FFA
+      3003AE1704C287364C6176CDFD738612A937E143C9A69B43697703D0187450C9
+      F582D1E94C6176A7C66EB11589AAB415CFD4E043FD9CA40187D32C60F4739610
+      8359DC07D6399E345A99A0029C0833ACFE7B6527E5178FB311AB63156022C2B6
+      98F9680CA0FB0DB6BF19FD107991F643CC25602B94866D46B31F4AF286B4D826
+      ABC3866B3C4FA5FF1C78B6050B5FE367386DB4FDBFEBF8F6BB95338E9F3AA974
+      ECD4895D7F81FD3A3B3FB7147FF3EFE8EC8483470EEFE3805D985D905741FE9D
+      06FFBDA5BF1F54AFAB6B4C8495575410CBCECBA9C61CFEBD3C56F4E347E58B97
+      2E11FE1C1B1814B4F84D6E762DF6D7D9D545FECE3E2C32A2586CF16291CFB15A
+      3ADA12AF73B21B7A913FFC1D18FF3E372024385F5266D78A88E8A8D4D417CF7B
+      1555942F7C232A3ADD2F282035FE6942EFEF17CF5FC0EC814307E7A7BE7AD988
+      7DD6373692F14236D5A28B16094BC948ABE0FF17686E6DC165A1DED1D355E97A
+      778F6CA8985FB2640997ABE70307FC5B81AA9A6AF26F356515E570E68F73F23B
+      A476EE48487EC678F53A136C9DECD336FDBA79476C421C232D2B03FFED308D59
+      7E090909C2D4D2DCF24DCE5B28292B85CAAA2A28292D8143478FA8FCBA63DBCE
+      2DDBB65E9BBF70C10C6CBB6EC3869D6BD7AFBB364F4464C64741D8BC99403E8D
+      32B23249FF553535508CCA24BD47569D93BE73F0B7C3FAAF3233A0BAAE16C5A3
+      01FFBD06C4974BEC9920CE85C423B94BEAEEAB8C74686A698696B656D8B069A3
+      E6BBB4F10E1EA449485391BE428CA1938B73AFFACDEBB9D385A6AF46CF262371
+      73500EEE77797213FFA1C7F1D32777A2F1AFB0FCDB1533396511278BFB349E03
+      D232D34B978A2F9BCF09AF6966721D8F453C96F15C90949A52B168B1D83713E5
+      C525C4856313E28B7BDFCD03389FD8F8B8EA0567172E99681E8B972C9E1B181A
+      5C88FF5F07D7059727EA5174FDF11327967D68A7676C782EA720AFE7495242EA
+      320971210D6DCD7319AFB37AC2A322537748EE14BFFFC02DAF05CF0B48B83CA1
+      11614D3B25259733F9CCB76F7AC9DF085556C29EFDFBAE3D7FF592BCC7BFDF91
+      92DE754D64FED7B3ACEC6C2AF1DC80E7085C967BCE4ECD2BD15C89F9B0E8872F
+      DEE6E5425C522243668FAC947780DF8B37B93910131FCBD82EB9436ADFC103E7
+      F3F2F319786EC073C4EBECB770EEFC1FCE73E6CC21FBE692654B67ECDEBB4755
+      5A763739D72F12139BB1434A52759BE48E5D7BF7EFBB8CD8E1CAEA2A726EC0E3
+      EAC4A993F673E7CEFDDC782264F7EE55CA2F2880AADA1AF277486988BDAC2067
+      252828F85976C5CA6FA5F30BF3C93900CF05D8AFA4B494F144C7DFD6EDDB345A
+      5A5BC939201DCD273BA5240DDE8DC589CC039305D19857BF713DCFF9BE0B75E3
+      E64D26784E7837374CE2604C7F380770FD3BC6E87F01221EE75D
+    }
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.sql'
+    Filter = 'SQL Files (*.sql)|*.sql|All Files|*.*'
+    Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 128
+    Top = 124
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '.sql'
+    Filter = 'SQL Files (*.sql)|*.sql|All Files|*.*'
+    Options = [ofOverwritePrompt, ofEnableSizing, ofViewDetail]
+    Left = 128
+    Top = 184
+  end
+  object UserTableSource: TDataSource
+    DataSet = UserTables
+    Left = 241
+    Top = 56
+  end
+  object UserTables: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    AfterOpen = UserTablesAfterOpen
+    BeforeClose = UserTablesBeforeClose
+    BeforeOpen = UserTablesBeforeOpen
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select trim(RDB$RELATION_NAME) as RDB$RELATION_NAME,'
+      'RDB$RELATION_ID  From RDB$RELATIONS'
+      'order by 1'
+      ''
+    )
+    Params = <>
+    SQLFiltered = True
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 346
+    Top = 52
+  end
+  object FieldsSource: TDataSource
+    DataSet = FieldNameList
+    Left = 241
+    Top = 122
+  end
+  object FieldNameList: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BeforeOpen = FieldNameListBeforeOpen
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserTableSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(RF.RDB$FIELD_NAME) as ColumnName,'
+      '1 as Selected,'
+      'case When B.RDB$COMPUTED_SOURCE is NULL then 0 else 1 end as ReadOnly'
+      ' FROM RDB$RELATION_FIELDS RF'
+      'JOIN RDB$FIELDS B On B.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE'
+      'Where RF.RDB$RELATION_NAME = :RDB$RELATION_NAME'
+      'order by RF.RDB$FIELD_POSITION asc'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate1
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 346
+    Top = 124
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object PrimaryKeySource: TDataSource
+    DataSet = PrimaryKeys
+    Left = 232
+    Top = 200
+  end
+  object PrimaryKeys: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserTableSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(S.RDB$FIELD_NAME) as ColumnName,'
+      '1 as Selected From'
+      '(Select RDB$INDEX_NAME,RDB$FIELD_NAME FROM RDB$INDEX_SEGMENTS Order by RDB$FIELD_POSITION ASC) S'
+      'JOIN RDB$RELATION_CONSTRAINTS C On C.RDB$INDEX_NAME = S.RDB$INDEX_NAME'
+      'Where C.RDB$CONSTRAINT_TYPE = ''PRIMARY KEY'' and RDB$RELATION_NAME = :RDB$RELATION_NAME'
+      ''
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate2
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 337
+    Top = 200
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object UserProcSource: TDataSource
+    DataSet = UserProcedures
+    Left = 241
+    Top = 264
+  end
+  object UserProcedures: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    AfterOpen = UserProceduresAfterOpen
+    BeforeClose = UserProceduresBeforeClose
+    BeforeOpen = UserProceduresBeforeOpen
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(RDB$PROCEDURE_NAME) as '
+      'RDB$PROCEDURE_NAME, RDB$PROCEDURE_INPUTS,'
+      'RDB$PROCEDURE_OUTPUTS,RDB$PROCEDURE_TYPE From '
+      'RDB$PROCEDURES Where RDB$SYSTEM_FLAG = 0  Order by 1 asc'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 354
+    Top = 268
+  end
+  object ProcInputSource: TDataSource
+    DataSet = ProcInputParams
+    Left = 241
+    Top = 336
+  end
+  object ProcInputParams: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserProcSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(P.RDB$PARAMETER_NAME) as ColumnName,'
+      '1 as Selected From'
+      'RDB$PROCEDURE_PARAMETERS P'
+      'JOIN RDB$FIELDS F On'
+      'F.RDB$FIELD_NAME = P.RDB$FIELD_SOURCE'
+      'Where'
+      'P.RDB$SYSTEM_FLAG = 0 and P.RDB$PROCEDURE_NAME = '
+      ':RDB$PROCEDURE_NAME and P.RDB$PARAMETER_TYPE = 0'
+      'Order by'
+      'P.RDB$PARAMETER_NUMBER asc'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$PROCEDURE_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate3
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 354
+    Top = 336
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$PROCEDURE_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object ProcOutputSource: TDataSource
+    DataSet = ProcOutputParams
+    Left = 222
+    Top = 400
+  end
+  object IdentifyStatementSQL: TIBSQL
+    CaseSensitiveParameterNames = False
+    GenerateParamNames = False
+    UniqueParamNames = False
+    ParamCheck = True
+    Scrollable = False
+    Transaction = SQLTransaction
+    Left = 24
+    Top = 256
+  end
+  object ProcOutputParams: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserProcSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(P.RDB$PARAMETER_NAME) as ColumnName,'
+      '1 as Selected From'
+      'RDB$PROCEDURE_PARAMETERS P'
+      'JOIN RDB$FIELDS F On'
+      'F.RDB$FIELD_NAME = P.RDB$FIELD_SOURCE'
+      'Where'
+      'P.RDB$SYSTEM_FLAG = 0 and P.RDB$PROCEDURE_NAME = '
+      ':RDB$PROCEDURE_NAME and P.RDB$PARAMETER_TYPE = 1'
+      'Order by'
+      'P.RDB$PARAMETER_NUMBER asc'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$PROCEDURE_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate4
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 424
+    Top = 392
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$PROCEDURE_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object SQLTransaction: TIBTransaction
+    TransactionName = '{2CC66FED-3F5E-4680-9898-EA61A5CD64EE}'
+    Active = False
+    Params.Strings = (
+      'read'
+      'consistency'
+    )
+    Left = 137
+    Top = 248
+  end
+  object IBUpdate1: TIBUpdate
+    OnApplyUpdates = IBUpdate1ApplyUpdates
+    Left = 72
+    Top = 336
+  end
+  object IBUpdate2: TIBUpdate
+    OnApplyUpdates = IBUpdate1ApplyUpdates
+    Left = 88
+    Top = 336
+  end
+  object IBUpdate3: TIBUpdate
+    OnApplyUpdates = IBUpdate1ApplyUpdates
+    Left = 104
+    Top = 336
+  end
+  object IBUpdate4: TIBUpdate
+    OnApplyUpdates = IBUpdate1ApplyUpdates
+    Left = 120
+    Top = 336
+  end
+  object DatabaseInfo: TIBDatabaseInfo
+    Left = 449
+    Top = 64
+  end
+  object IdentityCols: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserTableSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(RDB$FIELD_NAME) as ColumnName,1 as'
+      'Selected From RDB$RELATION_FIELDS'
+      'Where'
+      'RDB$RELATION_NAME = :RDB$RELATION_NAME and '
+      'RDB$IDENTITY_TYPE is not null order by '
+      'RDB$FIELD_POSITION asc'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate5
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 536
+    Top = 128
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object IdentityColsSource: TDataSource
+    DataSet = IdentityCols
+    Left = 440
+    Top = 128
+  end
+  object IBUpdate5: TIBUpdate
+    Left = 137
+    Top = 336
+  end
+  object ReadOnlyFields: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    DataSource = UserTableSource
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select Trim(RF.RDB$FIELD_NAME) as ColumnName,'
+      '1 as Selected'
+      ' FROM RDB$RELATION_FIELDS RF'
+      'JOIN RDB$FIELDS B On B.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE'
+      'Where RF.RDB$RELATION_NAME = :RDB$RELATION_NAME'
+      '  and B.RDB$COMPUTED_SOURCE is not NULL'
+      'order by RF.RDB$FIELD_POSITION asc'
+    )
+    Params = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+    UpdateObject = IBUpdate6
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 544
+    Top = 203
+    ParamData = <    
+      item
+        DataType = ftUnknown
+        Name = 'RDB$RELATION_NAME'
+        ParamType = ptInput
+      end>
+  end
+  object IBUpdate6: TIBUpdate
+    Left = 151
+    Top = 336
+  end
+  object ReadOnlyFieldsSource: TDataSource
+    DataSet = ReadOnlyFields
+    Left = 432
+    Top = 208
+  end
+  object PackageNames: TIBQuery
+    AllowAutoActivateTransaction = False
+    Transaction = SQLTransaction
+    AfterScroll = PackageNamesAfterScroll
+    BeforeClose = PackageNamesBeforeClose
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    SQL.Strings = (
+      'Select distinct Trim(RDB$PACKAGE_NAME) as '
+      'RDB$PACKAGE_NAME,  1 as PACKAGE_NAME_TYPE from RDB$PROCEDURES Where'
+      'RDB$PACKAGE_NAME is not null'
+      'UNION'
+      'Select ''(no package)'',0 From RDB$DATABASE'
+      'order by 2 asc, 1 asc'
+    )
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 551
+    Top = 274
+  end
+  object PackageNameSource: TDataSource
+    DataSet = PackageNames
+    Left = 459
+    Top = 276
+  end
+end
