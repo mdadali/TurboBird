@@ -643,7 +643,7 @@
         <PackageName Value="LCL"/>
       </Item25>
     </RequiredPackages>
-    <Units Count="107">
+    <Units Count="108">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1304,6 +1304,10 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fCSVEditor"/>
       </Unit106>
+      <Unit107>
+        <Filename Value="utils/uGenSQLFromCSVDataset.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit107>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

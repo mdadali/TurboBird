@@ -54,9 +54,9 @@ fCheckDBIntegrity, fsqlmonitor,
 
   //End-DBAdmin
 
-  fsimpleobjextractor, fClipboardExport, datamodulesystem, fservers,
-  fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
-  IBTransactionEdit, bulk_clone, fCSVEditor;
+  fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
+  datamodulesystem, fservers, fActivityMonitor, edit_tabledata_new,
+  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fCSVEditor;
 
 const
   Major = 1;

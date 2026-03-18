@@ -5,8 +5,11 @@ unit fCSVEditor;
 interface
 
 uses
-  Classes, SysUtils, DB, csvdataset, Forms, Controls, Graphics, Dialogs,
-  DBCtrls, StdCtrls, ExtCtrls, ComCtrls, RxDBGrid;
+  Classes, SysUtils, DB, csvdataset, Forms, Controls, Graphics, Dialogs, Clipbrd,
+  DBCtrls, StdCtrls, ExtCtrls, ComCtrls, SynEdit, SynHighlighterSQL, RxDBGrid,
+
+  turbocommon,
+  uGenSQLFromCSVDataset;
 
 type
 
@@ -31,6 +34,8 @@ type
   TfrmCSVEditor = class(TForm)
     btnOpenFile: TButton;
     btnSaveFileAs: TButton;
+    btnCreateSQL: TButton;
+    btnCopySQL: TButton;
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
@@ -46,18 +51,23 @@ type
     Label5: TLabel;
     Label6: TLabel;
     OpenDialog1: TOpenDialog;
+    Panel2: TPanel;
     SaveDialog1: TSaveDialog;
     PageControl1: TPageControl;
     Panel1: TPanel;
     RxDBGrid1: TRxDBGrid;
     ScrollBox1: TScrollBox;
+    SynEdit1: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
+    tsSQL: TTabSheet;
     tsCSVSettings: TTabSheet;
     tsGrid: TTabSheet;
     tsDetail: TTabSheet;
+    procedure btnCopySQLClick(Sender: TObject);
+    procedure btnCreateSQLClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnSaveFileAsClick(Sender: TObject);
     procedure CSVDataset1AfterDelete(DataSet: TDataSet);
-    procedure CSVDataset1BeforePost(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -66,7 +76,7 @@ type
     procedure LoadCSVFile(const FileName: string);
     procedure SaveCSVFile(const FileName: string);
 
-    procedure SetCSVFromFormSettings;
+    procedure SetCSVSettingsFromForm;
     procedure ReadIni;
     procedure WriteIni;
   public
@@ -116,12 +126,35 @@ end;
 { TfrmCSVEditor }
 procedure  TfrmCSVEditor.ReadIni;
 begin
+  edtDefaultFieldLength.Text          := IntTostr(CSVDefaultFieldLength);
+  edtDelimiter.Text                   := CSVDelimiter;
+  //edtLineEnding.Text                := CSVLineEnding;
+  edtQuoteChar.Text                   := CSVQuoteChar;
+  chkBoxFirstLineAsFieldName.Checked  := CSVFirstLineAsFieldNames;
+  chkBoxIgnoreOuterWhiteSpace.Checked := CSVIgnoreOuterWhitespace;
+  chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
+end;
 
+procedure TfrmCSVEditor.SetCSVSettingsFromForm;
+begin
+  CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
+  CSVDataset1.CSVOptions.Delimiter  := edtDelimiter.Text[1];
+  CSVDataset1.CSVOptions.LineEnding := edtLineEnding.Text[1];
+  CSVDataset1.CSVOptions.QuoteChar  := edtQuoteChar.Text[1];
+  CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
+  CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
+  CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
 procedure TfrmCSVEditor.WriteIni;
 begin
-
+  CSVDefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
+  CSVDelimiter := edtDelimiter.Text[1];
+  //CSVLineEnding := edtLineEnding.Text[1];
+  CSVQuoteChar := edtQuoteChar.Text[1];
+  CSVFirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
+  CSVIgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
+  CSVQuoteOuterWhitespace := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
 procedure TfrmCSVEditor.LoadCSVFile(const FileName: string);
@@ -151,17 +184,6 @@ begin
 
 end;
 
-procedure TfrmCSVEditor.SetCSVFromFormSettings;
-begin
-  CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
-  CSVDataset1.CSVOptions.Delimiter  := edtDelimiter.Text[1];
-  CSVDataset1.CSVOptions.LineEnding := edtLineEnding.Text[1];
-  CSVDataset1.CSVOptions.QuoteChar  := edtQuoteChar.Text[1];
-  CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
-  CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
-  CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
-end;
-
 procedure TfrmCSVEditor.btnOpenFileClick(Sender: TObject);
 var
   WaitForm: TForm;
@@ -179,7 +201,7 @@ begin
     CSVDataset1.Fields.Clear;
   end;
 
-  SetCSVFromFormSettings;
+  SetCSVSettingsFromForm;
 
   DBNavigator1.DataSource := nil;
   RxDBGrid1.DataSource := nil;
@@ -221,6 +243,7 @@ begin
     RxDBGrid1.DataSource    := DataSource1;
     RxDBGrid1.OptimizeColumnsWidthAll;
 
+    btnCreateSQL.Enabled := true;
   finally
     WaitForm.Free;
   end;
@@ -247,6 +270,71 @@ begin
 
 end;
 
+procedure TfrmCSVEditor.btnCreateSQLClick(Sender: TObject);
+var
+  GenSQLFromCSVDataset: TGenSQLFromCSVDataset;
+  TempTableName: string;
+  TempFieldLength: Word;
+begin
+  //Dataset prüfen
+  if not CSVDataset1.Active then
+  begin
+    MessageDlg('Warning',
+      'Dataset is not active.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  if CSVDataset1.FieldCount = 0 then
+  begin
+    MessageDlg('Warning',
+      'Dataset has no fields.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  //Dateiname prüfen
+  if Trim(FFileName) = '' then
+  begin
+    MessageDlg('Warning',
+      'No file loaded.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  //Default Field Length absichern
+  TempFieldLength := CSVDataset1.CSVOptions.DefaultFieldLength;
+  if TempFieldLength = 0 then
+    TempFieldLength := 50;
+
+  //Tabellenname erzeugen
+  TempTableName := UpperCase(ChangeFileExt(ExtractFileName(FFileName), ''));
+
+  GenSQLFromCSVDataset := nil;
+
+  try
+    GenSQLFromCSVDataset := TGenSQLFromCSVDataset.Create(
+      CSVDataset1,
+      TempTableName,
+      TempFieldLength
+    );
+
+    //SQL Anzeige bewusst einfach lassen
+    SynEdit1.Lines.Text := GenSQLFromCSVDataset.SQL;
+    PageControl1.ActivePage := tsSQL;
+
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Error',
+        'Error generating SQL:'#13#10 + E.Message,
+        mtError, [mbOK], 0);
+    end;
+  end;
+
+  FreeAndNil(GenSQLFromCSVDataset);
+end;
+
 procedure TfrmCSVEditor.btnSaveFileAsClick(Sender: TObject);
 begin
   if SaveDialog1.Execute then
@@ -256,11 +344,6 @@ end;
 procedure TfrmCSVEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
 begin
   SaveCSVFile(FFileName);
-end;
-
-procedure TfrmCSVEditor.CSVDataset1BeforePost(DataSet: TDataSet);
-begin
-  // Hier nur Validierungen; kein ApplyUpdates!
 end;
 
 procedure TfrmCSVEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
@@ -286,6 +369,39 @@ end;
 procedure TfrmCSVEditor.FormCreate(Sender: TObject);
 begin
   ReadIni;
+
+  SynEdit1.Color      := QWEditorBackgroundColor;
+  SynEdit1.Font.Name  := QWEditorFontName;
+  SynEdit1.Font.Size  := QWEditorFontSize;
+  SynEdit1.Font.Color := QWEditorFontColor;
+end;
+
+procedure TfrmCSVEditor.btnCopySQLClick(Sender: TObject);
+begin
+  if Trim(SynEdit1.Lines.Text) = '' then
+  begin
+    MessageDlg('Warning',
+      'Nothing to copy.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  try
+    if SynEdit1.SelText <> '' then
+      Clipboard.AsText := SynEdit1.SelText
+    else
+      Clipboard.AsText := SynEdit1.Lines.Text;
+
+    MessageDlg('Info',
+      'SQL copied to clipboard.',
+      mtInformation, [mbOK], 0);
+
+  except
+    on E: Exception do
+      MessageDlg('Error',
+        'Failed to copy to clipboard:'#13#10 + E.Message,
+        mtError, [mbOK], 0);
+  end;
 end;
 
 end.
