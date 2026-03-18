@@ -1,7 +1,7 @@
 object IBTransactionEditForm: TIBTransactionEditForm
-  Left = 340
+  Left = 431
   Height = 201
-  Top = 255
+  Top = 256
   Width = 396
   ActiveControl = rbSnapShot
   BorderStyle = bsDialog

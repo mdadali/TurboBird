@@ -172,7 +172,7 @@ begin
     Exit;
   end;
 
-  // 🔥 Firebird-robuste Erkennung
+  //Firebird-robuste Erkennung
 
   // Snapshot (Concurrency)
   if (concurrency in Value) and (nowait in Value) then
@@ -221,7 +221,7 @@ begin
       mbOkCancel, 0) <> mrOk then
       Exit;
 
-    Transaction.Commit; //
+    Transaction.Commit;
   end;
 
   ModalResult := mrOk;
@@ -323,7 +323,7 @@ end;
 
 procedure TIBTransactionEditForm.TransactionParamsExit(Sender: TObject);
 begin
-  ParseParams;
+  //ParseParams;
 end;
 
 
