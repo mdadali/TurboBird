@@ -6444,6 +6444,7 @@ object fmMain: TfmMain
       end
       object mnBulkClone: TMenuItem
         Caption = 'Bulk Clone'
+        Visible = False
         OnClick = mnBulkCloneClick
       end
     end
@@ -7808,6 +7809,7 @@ object fmMain: TfmMain
       object lmDBAdmin: TMenuItem
         Caption = 'MWA DBAdmin'
         ImageIndex = 36
+        Visible = False
         OnClick = lmDBAdminClick
       end
       object lmScriptEngine: TMenuItem
