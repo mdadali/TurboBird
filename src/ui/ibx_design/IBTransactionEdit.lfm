@@ -1,7 +1,7 @@
 object IBTransactionEditForm: TIBTransactionEditForm
-  Left = 431
+  Left = 371
   Height = 201
-  Top = 256
+  Top = 240
   Width = 396
   ActiveControl = rbSnapShot
   BorderStyle = bsDialog
@@ -39,10 +39,8 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Top = 18
       Width = 87
       Caption = '&Snapshot'
-      Checked = True
       OnClick = rbSnapShotClick
       TabOrder = 0
-      TabStop = True
     end
     object rbReadCommitted: TRadioButton
       Left = 8
@@ -50,8 +48,10 @@ object IBTransactionEditForm: TIBTransactionEditForm
       Top = 42
       Width = 136
       Caption = 'Read &Committed'
+      Checked = True
       OnClick = rbReadCommittedClick
       TabOrder = 1
+      TabStop = True
     end
     object rbReadOnlyTableStability: TRadioButton
       Left = 7
@@ -149,7 +149,7 @@ object IBTransactionEditForm: TIBTransactionEditForm
     Top = 96
   end
   object SaveDialog1: TSaveDialog
-    Left = 344
-    Top = 8
+    Left = 328
+    Top = 24
   end
 end

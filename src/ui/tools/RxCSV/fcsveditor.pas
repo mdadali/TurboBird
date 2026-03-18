@@ -97,6 +97,7 @@ end;
 
 procedure TCSVLoadThread.LoadCSVInDataset;
 begin
+
   FOwner.CSVDataset1.LoadFromCSVFile(FFileName);
   FOwner.RxDBGrid1.OptimizeColumnsWidthAll;
 end;
@@ -171,6 +172,12 @@ var
   Hours, Minutes, Seconds: Integer;
 begin
   if not OpenDialog1.Execute then Exit;
+
+  if CSVDataset1.Active then
+  begin
+    CSVDataset1.Close;
+    CSVDataset1.Fields.Clear;
+  end;
 
   SetCSVFromFormSettings;
 

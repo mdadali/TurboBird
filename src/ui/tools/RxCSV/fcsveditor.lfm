@@ -3,7 +3,7 @@ object frmCSVEditor: TfrmCSVEditor
   Height = 575
   Top = 84
   Width = 843
-  Caption = 'Turbobird - CSVE ditor'
+  Caption = 'Turbobird - CSV Editor'
   ClientHeight = 575
   ClientWidth = 843
   OnClose = FormClose
