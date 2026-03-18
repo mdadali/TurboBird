@@ -4,6 +4,16 @@ Neuigkeiten für TurboBird
 *: behoben
 -: entfernt
 
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1270
+Build-Datum & -Zeit: 18.03.2026, 00:32:41
+
++Transaktionskonfiguration hinzugefügt
++Ein einfacher CSV-Editor hinzugefügt
++Designtime-SQL-Editor von IBX4Lazarus hinzugefügt
+Mehrere Bugs wurden behoben.
+
 ----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1268
 Build date & time: 26.02.2026, 16:11:12
