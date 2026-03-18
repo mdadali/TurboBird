@@ -1322,7 +1322,7 @@ begin
     IBSQL.Transaction := Rec.IBDatabase.DefaultTransaction;
 
     if EditSQL(IBSQL) then
-      meQuery.Text := IBSQL.SQL.Text;
+      meQuery.Text := IBSQL.SQL.Text + ';';
   finally
     IBSQL.Free;
   end;
