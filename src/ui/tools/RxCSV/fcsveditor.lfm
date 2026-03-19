@@ -1,11 +1,11 @@
 object frmCSVEditor: TfrmCSVEditor
-  Left = 431
+  Left = 379
   Height = 575
-  Top = 107
-  Width = 843
+  Top = 133
+  Width = 847
   Caption = 'Turbobird - CSV Editor'
   ClientHeight = 575
-  ClientWidth = 843
+  ClientWidth = 847
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -15,16 +15,16 @@ object frmCSVEditor: TfrmCSVEditor
     Left = 0
     Height = 50
     Top = 0
-    Width = 843
+    Width = 847
     Align = alTop
     ClientHeight = 50
-    ClientWidth = 843
+    ClientWidth = 847
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 226
+      Left = 301
       Height = 48
       Top = 1
-      Width = 616
+      Width = 545
       Align = alClient
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -34,7 +34,7 @@ object frmCSVEditor: TfrmCSVEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 616
+      ClientWidth = 545
       DataSource = DataSource1
       OnClick = DBNavigator1Click
       Options = []
@@ -44,17 +44,17 @@ object frmCSVEditor: TfrmCSVEditor
       Left = 1
       Height = 48
       Top = 1
-      Width = 75
+      Width = 100
       Align = alLeft
       Caption = 'Open'
       OnClick = btnOpenFileClick
       TabOrder = 1
     end
     object btnSaveFileAs: TButton
-      Left = 76
+      Left = 101
       Height = 48
       Top = 1
-      Width = 75
+      Width = 100
       Align = alLeft
       Caption = 'Save As'
       Enabled = False
@@ -62,10 +62,10 @@ object frmCSVEditor: TfrmCSVEditor
       TabOrder = 2
     end
     object btnCreateSQL: TButton
-      Left = 151
+      Left = 201
       Height = 48
       Top = 1
-      Width = 75
+      Width = 100
       Align = alLeft
       Caption = 'Create SQL'
       Enabled = False
@@ -77,20 +77,20 @@ object frmCSVEditor: TfrmCSVEditor
     Left = 0
     Height = 525
     Top = 50
-    Width = 843
-    ActivePage = tsSQL
+    Width = 847
+    ActivePage = tsCSVSettings
     Align = alClient
-    TabIndex = 3
+    TabIndex = 2
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
       ClientHeight = 491
-      ClientWidth = 839
+      ClientWidth = 843
       object RxDBGrid1: TRxDBGrid
         Left = 0
         Height = 491
         Top = 0
-        Width = 839
+        Width = 843
         ColumnDefValues.BlobText = '(blob)'
         TitleButtons = True
         AutoSort = True
@@ -167,13 +167,13 @@ object frmCSVEditor: TfrmCSVEditor
     object tsDetail: TTabSheet
       Caption = 'Detail View'
       ClientHeight = 491
-      ClientWidth = 839
+      ClientWidth = 843
       TabVisible = False
       object ScrollBox1: TScrollBox
         Left = 0
         Height = 491
         Top = 0
-        Width = 839
+        Width = 843
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
@@ -183,7 +183,7 @@ object frmCSVEditor: TfrmCSVEditor
     object tsCSVSettings: TTabSheet
       Caption = 'CSV Settings'
       ClientHeight = 491
-      ClientWidth = 839
+      ClientWidth = 843
       object Label1: TLabel
         Left = 56
         Height = 20
@@ -279,12 +279,12 @@ object frmCSVEditor: TfrmCSVEditor
     object tsSQL: TTabSheet
       Caption = 'SQL'
       ClientHeight = 491
-      ClientWidth = 839
+      ClientWidth = 843
       inline SynEdit1: TSynEdit
         Left = 0
         Height = 441
         Top = 0
-        Width = 839
+        Width = 843
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -781,11 +781,11 @@ object frmCSVEditor: TfrmCSVEditor
         Left = 0
         Height = 50
         Top = 441
-        Width = 839
+        Width = 843
         Align = alBottom
         Caption = 'Panel2'
         ClientHeight = 50
-        ClientWidth = 839
+        ClientWidth = 843
         TabOrder = 1
         object btnCopySQL: TButton
           Left = 40

@@ -3,7 +3,7 @@ unit DbGridForm;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DB, Grids, DBGrids, DBReaderBase;
 
 type
@@ -19,8 +19,8 @@ type
     property DataSet: TDbReaderDataSet read FDataSet;
   end;
 
-var
-  FormDbGrid: TFormDbGrid;
+//var
+  //FormDbGrid: TFormDbGrid;
 
 implementation
 
