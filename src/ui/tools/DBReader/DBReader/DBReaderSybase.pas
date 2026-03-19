@@ -1,5 +1,5 @@
 unit DBReaderSybase;
-
+{$mode DELPHI}
 (*
 Sybase/Watcom database file reader
 

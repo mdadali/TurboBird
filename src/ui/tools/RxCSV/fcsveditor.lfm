@@ -1,13 +1,14 @@
 object frmCSVEditor: TfrmCSVEditor
-  Left = 398
+  Left = 431
   Height = 575
-  Top = 127
+  Top = 107
   Width = 843
   Caption = 'Turbobird - CSV Editor'
   ClientHeight = 575
   ClientWidth = 843
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object Panel1: TPanel

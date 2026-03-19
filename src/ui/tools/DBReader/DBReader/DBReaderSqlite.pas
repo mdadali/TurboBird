@@ -1,5 +1,5 @@
 unit DBReaderSqlite;
-
+{$mode DELPHI}
 (*
 Sqlite database file reader
 

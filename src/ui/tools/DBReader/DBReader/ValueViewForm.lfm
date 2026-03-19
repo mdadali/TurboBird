@@ -1,7 +1,7 @@
 object FormRawValue: TFormRawValue
-  Left = 318
+  Left = 213
   Height = 300
-  Top = 127
+  Top = 286
   Width = 515
   Caption = 'Raw value'
   ClientHeight = 300
@@ -86,18 +86,18 @@ object FormRawValue: TFormRawValue
     end
     object chkFullRaw: TCheckBox
       Left = 348
-      Height = 21
+      Height = 22
       Top = 26
-      Width = 75
+      Width = 76
       Caption = 'Full RAW'
       OnClick = chkFullRawClick
       TabOrder = 0
     end
     object chkValue: TCheckBox
       Left = 236
-      Height = 21
+      Height = 22
       Top = 26
-      Width = 56
+      Width = 57
       Caption = 'Value'
       OnClick = chkValueClick
       TabOrder = 1

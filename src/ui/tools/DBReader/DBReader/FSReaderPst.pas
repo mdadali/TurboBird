@@ -1,5 +1,5 @@
 unit FSReaderPst;
-
+{$mode DELPHI}
 (*
 MS Outlook Personal Folders File (.pst) reader
 

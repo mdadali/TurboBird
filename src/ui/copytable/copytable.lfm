@@ -1,7 +1,7 @@
 object fmCopyTable: TfmCopyTable
-  Left = 471
+  Left = 1019
   Height = 480
-  Top = 67
+  Top = 179
   Width = 767
   Caption = 'Copy Table'
   ClientHeight = 480

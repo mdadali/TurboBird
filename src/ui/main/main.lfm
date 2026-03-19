@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 596
+  Left = 456
   Height = 612
-  Top = 257
+  Top = 136
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 586
@@ -6446,6 +6446,10 @@ object fmMain: TfmMain
         Caption = 'Bulk Clone'
         Visible = False
         OnClick = mnBulkCloneClick
+      end
+      object mnDBReader: TMenuItem
+        Caption = 'DBReader'
+        OnClick = mnDBReaderClick
       end
     end
   end

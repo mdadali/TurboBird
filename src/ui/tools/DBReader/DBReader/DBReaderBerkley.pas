@@ -1,4 +1,5 @@
 unit DBReaderBerkley;
+{$mode DELPHI}
 
 (*
 Berkley database file reader (not tested!)

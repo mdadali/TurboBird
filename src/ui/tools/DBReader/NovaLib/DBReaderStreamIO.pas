@@ -6,7 +6,7 @@
         Current revision 1.0<BR>
         Last modified       4 Januar 2001<P>                           }
 {======================================================================}
-Unit StreamIO;
+Unit DBReaderStreamIO.pas;
 
 Interface
 Uses classes;

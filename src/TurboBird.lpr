@@ -51,12 +51,12 @@ fCheckDBIntegrity, fsqlmonitor,
   NewUserDlgUnit,
   ChgPasswordDlgUnit,
   ExecuteSQLScriptDlgUnit,
-
   //End-DBAdmin
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, fservers, fActivityMonitor, edit_tabledata_new,
-  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fCSVEditor;
+  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fCSVEditor,
+  db_reader;
 
 const
   Major = 1;

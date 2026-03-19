@@ -1,5 +1,5 @@
 unit DBReaderFirebird;
-
+{$mode DELPHI}
 (*
 Interbase/FireBird (GDB, FDB) database file reader
 

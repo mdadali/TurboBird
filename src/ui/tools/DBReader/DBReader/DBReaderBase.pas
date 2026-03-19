@@ -632,7 +632,97 @@ begin
   Result := False;
 end;
 
+//maurog
+function SafeVarToInt(const V: Variant; Default: Integer = 0): Integer;
+begin
+  if VarIsNull(V) then
+    Result := Default
+  else
+    Result := V;
+end;
+
+function SafeVarToBool(const V: Variant; Default: Boolean = False): Boolean;
+begin
+  if VarIsNull(V) then
+    Result := Default
+  else
+    Result := V;
+end;
+
+function SafeVarToFloat(const V: Variant; Default: Double = 0): Double;
+begin
+  if VarIsNull(V) then
+    Result := Default
+  else
+    Result := V;
+end;
+
+function SafeVarToCurr(const V: Variant; Default: Currency = 0): Currency;
+begin
+  if VarIsNull(V) then
+    Result := Default
+  else
+    Result := V;
+end;
+
+function SafeVarToDateTime(const V: Variant; Default: TDateTime = 0): TDateTime;
+begin
+  if VarIsNull(V) then
+    Result := Default
+  else
+    Result := V;
+end;
+
 function TDbReaderDataSet.GetFieldData(Field: TField; Buffer: Pointer): Boolean;
+var
+  RecItem: TDbRowItem;
+  n: Integer;
+  V: Variant;
+  s: string;
+begin
+  Result := False;
+  if not Assigned(FRowsList) or (Length(FRowsList.FieldsDef) < Field.FieldNo) then
+    Exit;
+
+  RecItem := FRowsList.GetItem(PRecordBuffer(ActiveBuffer)^.RecordNum-1);
+  n := Field.FieldNo-1;
+
+  V := RecItem.Values[n];
+
+  // Strings
+  if VarIsNull(V) then
+    s := ''
+  else
+    s := VarToStr(V);
+
+  Result := True;
+
+  case FRowsList.FieldsDef[n].FieldType of
+    ftString, ftWideString, ftFixedChar, ftFixedWideChar, ftMemo:
+      StrLCopy(Buffer, PChar(s), Length(s));
+    ftSmallint:
+      PSmallInt(Buffer)^ := SafeVarToInt(V, 0);
+    ftInteger:
+      PInteger(Buffer)^ := SafeVarToInt(V, 0);
+    ftWord:
+      PWord(Buffer)^ := SafeVarToInt(V, 0);
+    ftBoolean:
+      PBoolean(Buffer)^ := SafeVarToBool(V, False);
+    ftFloat:
+      PDouble(Buffer)^ := SafeVarToFloat(V, 0);
+    ftCurrency:
+      PCurrency(Buffer)^ := SafeVarToCurr(V, 0);
+    ftDate:
+      PDate(Buffer)^ := SafeVarToDateTime(V, 0);
+    ftTime, ftDateTime:
+      PDateTime(Buffer)^ := SafeVarToDateTime(V, 0);
+    {todo: blobs}
+  else
+    Result := False;
+  end;
+end;
+
+{function TDbReaderDataSet.GetFieldData(Field: TField; Buffer: Pointer): Boolean;
 var
   RecItem: TDbRowItem;
   n: Integer;
@@ -663,10 +753,10 @@ begin
     ftTime: PDateTime(Buffer)^ := RecItem.Values[n];
     ftDateTime: PDateTime(Buffer)^ := RecItem.Values[n];
     {todo: blobs}
-  else
+  {else
     Result := False;
   end;
-end;
+end;}
 
 function TDbReaderDataSet.GetRecNo: Integer;
 begin

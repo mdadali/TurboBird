@@ -9,6 +9,7 @@ uses
   DBCtrls, StdCtrls, ExtCtrls, ComCtrls, SynEdit, SynHighlighterSQL, RxDBGrid,
 
   turbocommon,
+  uthemeselector,
   uGenSQLFromCSVDataset;
 
 type
@@ -71,6 +72,7 @@ type
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FFileName: string;
     procedure LoadCSVFile(const FileName: string);
@@ -374,6 +376,11 @@ begin
   SynEdit1.Font.Name  := QWEditorFontName;
   SynEdit1.Font.Size  := QWEditorFontSize;
   SynEdit1.Font.Color := QWEditorFontColor;
+end;
+
+procedure TfrmCSVEditor.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmCSVEditor.btnCopySQLClick(Sender: TObject);

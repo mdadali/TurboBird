@@ -19,14 +19,17 @@ uses
   {$else}
   Messages,
   {$endif}
-  SysUtils, Variants, Classes, Graphics, Controls, Forms,  Menus,
-  Dialogs, StdCtrls, ComCtrls, ExtCtrls, Grids, ValueViewForm, DB, RFUtils,
-  DBReaderBase, DBReaderFirebird, DBReaderBerkley, DBReaderMidas, DBReaderParadox,
-  DBReaderDbf, FSReaderMtf, DBReaderMdf, DBReaderMdb, DBReaderEdb, DBReaderInno,
-  DBReaderSqlite, DBReaderSybase, DBReaderDbisam, DBReaderTps, DBReaderRaima,
-  DBReaderClarion,
+  SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, Dialogs,
+  StdCtrls, ComCtrls, ExtCtrls, Grids, DBCtrls, DBGrids, SynEdit,
+  SynHighlighterSQL, ValueViewForm, DB, RFUtils, DBReaderBase, DBReaderFirebird,
+  DBReaderBerkley, DBReaderMidas, DBReaderParadox, DBReaderDbf, FSReaderMtf,
+  DBReaderMdf, DBReaderMdb, DBReaderEdb, DBReaderInno, DBReaderSqlite,
+  DBReaderSybase, DBReaderDbisam, DBReaderTps, DBReaderRaima, DBReaderClarion,
   {$ifdef ENABLE_GSR}DBReaderGsr,{$endif}
-  FSReaderBase, FSReaderPst;
+  FSReaderBase, FSReaderPst,
+
+  turbocommon,
+  uthemeselector;
 
 type
   TMyTreeNode = class(TTreeNode)
@@ -37,10 +40,15 @@ type
 
   TGridMode = (gmTable, gmRecord);
 
+  { TfrmDBReader }
+
   TfrmDBReader = class(TForm)
     memoLog: TMemo;
     panLeft: TPanel;
     spl1: TSplitter;
+    SynEdit1: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
+    TabSheet1: TTabSheet;
     tvMain: TTreeView;
     pgcMain: TPageControl;
     tsLog: TTabSheet;
@@ -60,6 +68,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure dgItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
       State: TGridDrawState);
+    procedure FormShow(Sender: TObject);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure btnFileSelectClick(Sender: TObject);
     procedure dgItemsDblClick(Sender: TObject);
@@ -71,6 +80,7 @@ type
     procedure dgItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
+
     FLogStream: TStream;
     FSettings: TStringList;
     FDBReader: TDBReader;  // DataBase reader
@@ -110,16 +120,132 @@ type
     { Public declarations }
     MaxRows: Integer;
     procedure OpenDB(AFileName: string);
+
+    procedure GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings; InsertData: Boolean);
   end;
 
-var
-  frmDBReader: TfrmDBReader;
+//var
+  //frmDBReader: TfrmDBReader;
 
 implementation
 
 {$R *.lfm}
 
 { TfrmDBReader }
+
+procedure TfrmDBReader.GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings; InsertData: Boolean);
+var
+  i, j, k: Integer;
+  Table: TDbRowsList;
+  Field: TDbFieldDefRec;
+  SqlType, FieldValue: string;
+  DbName: string;
+  Row: TDbRowItem;
+
+  FieldNames: string;
+  f: Integer;
+
+begin
+  Lines.Clear;
+
+  //Datenbankname aus Dateiname
+  DbName := ExtractFileName(FileName);
+  DbName := ChangeFileExt(DbName, ''); // ohne Extension
+  Lines.Add('CREATE DATABASE ' + DbName + ';');
+  Lines.Add('');
+
+  //Tabellen
+  for i := 0 to FDBReader.GetTablesCount()-1 do
+  begin
+    Table := FDBReader.GetTableByIndex(i);
+
+    if Table.IsSystem then Continue;
+    if not Assigned(Table) then Continue;
+
+    // optional: alle Zeilen laden
+    if InsertData then
+      FDBReader.ReadTable(Table.TableName, MaxInt, Table);
+
+    Lines.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Table.TableName) + ' (');
+
+    for j := 0 to Length(Table.FieldsDef)-1 do
+    begin
+      Field := Table.FieldsDef[j];
+
+      // Feldtyp auf SQL-Typ mappen
+      case Field.FieldType of
+        ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo:
+          SqlType := 'VARCHAR(' + IntToStr(Field.Size) + ')';
+        ftSmallint, ftInteger: SqlType := 'INTEGER';
+        ftLargeint: SqlType := 'BIGINT';
+        ftFloat: SqlType := 'DOUBLE';
+        ftCurrency: SqlType := 'DECIMAL(18,2)';
+        ftDate: SqlType := 'DATE';
+        ftTime: SqlType := 'TIME';
+        ftDateTime, ftTimeStamp: SqlType := 'DATETIME';
+        ftBoolean: SqlType := 'BOOLEAN';
+        ftBytes, ftVarBytes, ftBlob: SqlType := 'BLOB';
+      else
+        SqlType := 'TEXT';
+      end;
+
+      // Komma setzen, außer beim letzten Feld
+      if j < Length(Table.FieldsDef)-1 then
+        Lines.Add('  ' + MakeCaseSensitiveAuto(Field.Name) + ' ' + SqlType + ',')
+      else
+        Lines.Add('  ' + MakeCaseSensitiveAuto(Field.Name) + ' ' + SqlType);
+    end;
+
+    Lines.Add(');');
+    Lines.Add('');
+
+    //INSERT INTO Statements (optional)
+    if InsertData and (Table.Count > 0) then
+    begin
+      // Feldnamen zusammenbauen
+      FieldNames := '';
+      for f := 0 to Length(Table.FieldsDef)-1 do
+      begin
+        if f > 0 then
+          FieldNames := FieldNames + ', ';
+        FieldNames := FieldNames + MakeCaseSensitiveAuto(Table.FieldsDef[f].Name);
+      end;
+
+      for k := 0 to Table.Count-1 do
+      begin
+        Row := Table.GetItem(k);
+        FieldValue := '';
+        for j := 0 to Length(Table.FieldsDef)-1 do
+        begin
+          if j > 0 then FieldValue := FieldValue + ', ';
+
+          // NULL prüfen
+          if VarIsNull(Row.Values[j]) then
+            FieldValue := FieldValue + 'NULL'
+          else
+          begin
+            case Table.FieldsDef[j].FieldType of
+              ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo:
+                FieldValue := FieldValue + QuotedStr(VarToStr(Row.Values[j]));
+              ftDate, ftTime, ftDateTime, ftTimeStamp:
+                FieldValue := FieldValue + QuotedStr(FormatDateTime('yyyy-mm-dd hh:nn:ss', Row.Values[j]));
+              ftBoolean:
+                if Row.Values[j] then
+                  FieldValue := FieldValue + '1'
+                else
+                  FieldValue := FieldValue + '0';
+            else
+              FieldValue := FieldValue + VarToStr(Row.Values[j]);
+            end;
+          end;
+        end;
+
+        Lines.Add('INSERT INTO ' + MakeCaseSensitiveAuto(Table.TableName) + ' (' + FieldNames + ') VALUES (' + FieldValue + ');');
+      end;
+      Lines.Add('');
+    end;
+  end;
+end;
 
 function TfrmDBReader.AddTreeNode(AParent: TTreeNode; AName, ATableName, AFileName: string): TMyTreeNode;
 begin
@@ -172,12 +298,27 @@ begin
 end;
 
 procedure TfrmDBReader.btnFileSelectClick(Sender: TObject);
+var SQLLines: TStringList;
 begin
   if OpenDialog.Execute then
   begin
-    OpenDB(OpenDialog.FileName);
+    try
+      OpenDB(OpenDialog.FileName);
+
+      SQLLines := TStringList.Create;
+      try
+        GenerateSQLSchemaFromDBReader(FDBReader, FDbFileName, SQLLines, true);
+        SynEdit1.Lines.Assign(SQLLines);
+      finally
+        SQLLines.Free;
+      end;
+
+    finally
+      //
+    end;
   end;
 end;
+
 
 procedure TfrmDBReader.dgItemsDblClick(Sender: TObject);
 begin
@@ -314,6 +455,11 @@ begin
   {$else}
   c.TextRect(Rect, s, tf);
   {$endif}
+end;
+
+procedure TfrmDBReader.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmDBReader.dgItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);

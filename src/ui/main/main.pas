@@ -82,7 +82,8 @@ uses
   ibsqleditor,
   IBTransactionEdit,  //orig
   bulk_clone,
-  fCSVEditor
+  fCSVEditor,
+  db_reader
   ;
 
 {$i turbocommon.inc}
@@ -123,6 +124,7 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
+    mnDBReader: TMenuItem;
     mnBulkClone: TMenuItem;
     mnCSVEditor: TMenuItem;
     mnTools: TMenuItem;
@@ -397,6 +399,7 @@ type
     procedure lmRecalculateStatisticsClick(Sender: TObject);
     procedure mnBulkCloneClick(Sender: TObject);
     procedure mnCSVEditorClick(Sender: TObject);
+    procedure mnDBReaderClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
     procedure mnExitClick(Sender: TObject);
     procedure mnCreateDBClick(Sender: TObject);
@@ -5372,7 +5375,7 @@ begin
 
     if EditIBtransaction(IBTrans) then
     begin
-      // Parameter speichern (Achtung: max. 255 Zeichen!)
+      // Parameter speichern (max. 255 Zeichen!)
       RegisteredDatabases[dbIndex].RegRec.TxConfig := IBTrans.Params.Text;
 
       // System-Transaction zurücksetzen
@@ -7253,6 +7256,14 @@ var frmCSVEditor: TfrmCSVEditor;
 begin
   frmCSVEditor := TfrmCSVEditor.Create(self);
   frmCSVEditor.ShowModal;
+end;
+
+procedure TfmMain.mnDBReaderClick(Sender: TObject);
+var frmDBReader: TfrmDBReader;
+begin
+  frmDBReader := TfrmDBReader.Create(self);
+  frmDBReader.ShowModal;
+  FreeAndNil(frmDBReader);
 end;
 
 procedure TfmMain.mnEditorFontClick(Sender: TObject);
