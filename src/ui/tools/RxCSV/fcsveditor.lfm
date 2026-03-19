@@ -78,9 +78,9 @@ object frmCSVEditor: TfrmCSVEditor
     Height = 525
     Top = 50
     Width = 843
-    ActivePage = tsGrid
+    ActivePage = tsSQL
     Align = alClient
-    TabIndex = 0
+    TabIndex = 3
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -801,12 +801,12 @@ object frmCSVEditor: TfrmCSVEditor
   end
   object DataSource1: TDataSource
     DataSet = CSVDataset1
-    Left = 664
-    Top = 296
+    Left = 776
+    Top = 408
   end
   object OpenDialog1: TOpenDialog
-    Left = 648
-    Top = 224
+    Left = 520
+    Top = 448
   end
   object CSVDataset1: TCSVDataset
     FieldDefs = <>
@@ -819,8 +819,8 @@ object frmCSVEditor: TfrmCSVEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    Left = 656
-    Top = 152
+    Left = 376
+    Top = 424
   end
   object SaveDialog1: TSaveDialog
     Left = 664

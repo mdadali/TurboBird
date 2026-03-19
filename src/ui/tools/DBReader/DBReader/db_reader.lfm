@@ -1,7 +1,7 @@
 object frmDBReader: TfrmDBReader
-  Left = 447
+  Left = 427
   Height = 575
-  Top = 109
+  Top = 134
   Width = 844
   Caption = 'Database file reader'
   ClientHeight = 575
@@ -147,14 +147,14 @@ object frmDBReader: TfrmDBReader
         WordWrap = False
       end
     end
-    object TabSheet1: TTabSheet
-      Caption = 'TabSheet1'
+    object tsSchema: TTabSheet
+      Caption = 'Schema'
       ClientHeight = 543
       ClientWidth = 651
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 543
-        Top = 0
+        Height = 493
+        Top = 50
         Width = 651
         Align = alClient
         Font.Height = -13
@@ -593,9 +593,6 @@ object frmDBReader: TfrmDBReader
         MouseActions = <>
         MouseTextActions = <>
         MouseSelActions = <>
-        Lines.Strings = (
-          'SynEdit1'
-        )
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
         SelectedColor.BackPriority = 50
         SelectedColor.ForePriority = 50
@@ -651,6 +648,184 @@ object frmDBReader: TfrmDBReader
           end
         end
       end
+      object pnlSchemaTop: TPanel
+        Left = 0
+        Height = 50
+        Top = 0
+        Width = 651
+        Align = alTop
+        ClientHeight = 50
+        ClientWidth = 651
+        TabOrder = 1
+        object btnGenSchema: TButton
+          Left = 24
+          Height = 25
+          Top = 8
+          Width = 75
+          Caption = 'Generate'
+          OnClick = btnGenSchemaClick
+          TabOrder = 0
+        end
+        object btnCopySchema: TButton
+          Left = 128
+          Height = 25
+          Top = 8
+          Width = 75
+          Caption = 'Copy'
+          OnClick = btnCopySchemaClick
+          TabOrder = 1
+        end
+      end
+    end
+    object tsSettings: TTabSheet
+      Caption = 'Settings'
+      ClientHeight = 543
+      ClientWidth = 651
+      object grBoxCSVExport: TGroupBox
+        Left = 0
+        Height = 264
+        Top = 0
+        Width = 651
+        Align = alTop
+        Caption = 'CSV Options'
+        ClientHeight = 244
+        ClientWidth = 647
+        TabOrder = 0
+        object Label1: TLabel
+          Left = 24
+          Height = 18
+          Top = 24
+          Width = 120
+          Caption = 'Default Field Length'
+          ParentColor = False
+        end
+        object Label2: TLabel
+          Left = 24
+          Height = 18
+          Top = 72
+          Width = 54
+          Caption = 'Delimiter'
+          ParentColor = False
+        end
+        object Label5: TLabel
+          Left = 24
+          Height = 18
+          Top = 168
+          Width = 69
+          Caption = 'Quote Char'
+          ParentColor = False
+        end
+        object Label6: TLabel
+          Left = 24
+          Height = 18
+          Top = 120
+          Width = 70
+          Caption = 'Line Ending'
+          ParentColor = False
+        end
+        object chkBoxIgnoreOuterWhiteSpace: TCheckBox
+          Left = 368
+          Height = 22
+          Top = 72
+          Width = 174
+          Caption = 'Ignore outer Whiteppace'
+          TabOrder = 0
+        end
+        object chkBoxFirstLineAsFieldName: TCheckBox
+          Left = 368
+          Height = 22
+          Top = 24
+          Width = 159
+          Caption = 'First Line as Fieldname'
+          TabOrder = 1
+        end
+        object chkBoxQuoteOuterWhiteSpace: TCheckBox
+          Left = 368
+          Height = 22
+          Top = 118
+          Width = 170
+          Caption = 'Quote outer Whitespace'
+          TabOrder = 2
+        end
+        object edtDefaultFieldLength: TEdit
+          Left = 240
+          Height = 28
+          Top = 24
+          Width = 48
+          MaxLength = 1024
+          NumbersOnly = True
+          TabOrder = 3
+          Text = '255'
+        end
+        object edtDelimiter: TEdit
+          Left = 240
+          Height = 28
+          Top = 72
+          Width = 24
+          MaxLength = 1
+          TabOrder = 4
+          Text = ','
+        end
+        object edtLineEnding: TEdit
+          Left = 240
+          Height = 28
+          Top = 120
+          Width = 40
+          TabOrder = 5
+          Text = #10
+        end
+        object edtQuoteChar: TEdit
+          Left = 240
+          Height = 28
+          Top = 168
+          Width = 24
+          TabOrder = 6
+          Text = '"'
+        end
+      end
+      object grBoxSchemaOptions: TGroupBox
+        Left = 0
+        Height = 279
+        Top = 264
+        Width = 651
+        Align = alClient
+        Caption = 'Schema Options'
+        ClientHeight = 259
+        ClientWidth = 647
+        TabOrder = 1
+        object chkBoxInsertData: TCheckBox
+          Left = 24
+          Height = 22
+          Top = 32
+          Width = 90
+          Caption = 'Insert Data'
+          TabOrder = 0
+        end
+        object chkBoxEmptyTables: TCheckBox
+          Left = 168
+          Height = 22
+          Top = 32
+          Width = 103
+          Caption = 'Empty Tables'
+          TabOrder = 1
+        end
+        object chkBoxGhostTables: TCheckBox
+          Left = 312
+          Height = 22
+          Top = 32
+          Width = 100
+          Caption = 'Ghost Tables'
+          TabOrder = 2
+        end
+        object chkBoxsystemTables: TCheckBox
+          Left = 464
+          Height = 22
+          Top = 32
+          Width = 108
+          Caption = 'System Tables'
+          TabOrder = 3
+        end
+      end
     end
   end
   object ProgressBar: TProgressBar
@@ -665,8 +840,8 @@ object frmDBReader: TfrmDBReader
     Visible = False
   end
   object pmGrid: TPopupMenu
-    Left = 372
-    Top = 172
+    Left = 712
+    Top = 448
     object miExporttoCSV: TMenuItem
       Caption = 'Export to CSV'
       OnClick = miExporttoCSVClick
@@ -683,14 +858,14 @@ object frmDBReader: TfrmDBReader
   end
   object OpenDialog: TOpenDialog
     Filter = 'Database files|*.gdb;*.fdb;*.cds;*.db;*.gsr;*.dbf;*.mdf;*.bak;*.mdb;*.accdb;*.pst;*.edb;*.ibd;*.sqlite;*.db3;*.dat;*.tps;*.dbd|Interbase/Firebird files (*.gdb, *.fdb)|*.gdb;*.fdb|Midas/DataSnap files (*.cds)|*.cds|Paradox files (*.db)|*.db|Mapsoft GSR files (*.gsr)|*.gsr|dBase/FoxPro (*.dbf)|*.dbf|MS SQL (*.mdf, *.bak)|*.mdf;*.bak|MS Access/Jet (*.mdb, *.accdb)|*.mdb;*.accdb|MS Outlook (*.pst)|*.pst|MS Exchange (*.edb)|*.edb|MySQL InnoDB (*.ibd)|*.ibd|SQLite (*.sqlite, *.db3)|*.sqlite;*.db3|DBISAM (*.dat)|*.dat|Clarion/TopSpeed (*.tps)|*.tps|RaimaDB (*.*)|*.dbd|All files (*.*)|*.*'
-    Left = 552
-    Top = 176
+    Left = 728
+    Top = 256
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlSybase
-    Left = 685
-    Top = 318
+    Left = 808
+    Top = 360
   end
 end
