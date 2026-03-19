@@ -538,9 +538,12 @@ begin
     11: Result := 'Real';
     12: Result := 'Double';
     13: Result := 'DFloat';
+    //maurog
     14: Result := 'SqlDate';
     15: Result := 'SqlTime';
-    16: Result := 'Timestamp';  // DATETIME
+    //14: Result := 'DATE';
+    //15: Result := 'TIME';
+    16: Result := 'TIMESTAMP';  // DATETIME
     17: // BLOB
     begin
       case ASubType of

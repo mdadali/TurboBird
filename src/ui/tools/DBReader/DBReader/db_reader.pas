@@ -19,7 +19,7 @@ uses
   {$else}
   Messages,
   {$endif}
-  SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, Dialogs,
+  SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, Dialogs, Clipbrd,
   StdCtrls, ComCtrls, ExtCtrls, Grids, DBCtrls, DBGrids, SynEdit,
   SynHighlighterSQL, ValueViewForm, DB, RFUtils, DBReaderBase, DBReaderFirebird,
   DBReaderBerkley, DBReaderMidas, DBReaderParadox, DBReaderDbf, FSReaderMtf,
@@ -43,12 +43,33 @@ type
   { TfrmDBReader }
 
   TfrmDBReader = class(TForm)
+    btnGenSchema: TButton;
+    btnCopySchema: TButton;
+    chkBoxsystemTables: TCheckBox;
+    chkBoxGhostTables: TCheckBox;
+    chkBoxEmptyTables: TCheckBox;
+    chkBoxInsertData: TCheckBox;
+    chkBoxFirstLineAsFieldName: TCheckBox;
+    chkBoxIgnoreOuterWhiteSpace: TCheckBox;
+    chkBoxQuoteOuterWhiteSpace: TCheckBox;
+    edtDefaultFieldLength: TEdit;
+    edtDelimiter: TEdit;
+    edtLineEnding: TEdit;
+    edtQuoteChar: TEdit;
+    grBoxCSVExport: TGroupBox;
+    grBoxSchemaOptions: TGroupBox;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
     memoLog: TMemo;
+    pnlSchemaTop: TPanel;
     panLeft: TPanel;
     spl1: TSplitter;
     SynEdit1: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
-    TabSheet1: TTabSheet;
+    tsSettings: TTabSheet;
+    tsSchema: TTabSheet;
     tvMain: TTreeView;
     pgcMain: TPageControl;
     tsLog: TTabSheet;
@@ -65,6 +86,8 @@ type
     miShowAsHex: TMenuItem;
     ProgressBar: TProgressBar;
     OpenDialog: TOpenDialog;
+    procedure btnCopySchemaClick(Sender: TObject);
+    procedure btnGenSchemaClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure dgItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
       State: TGridDrawState);
@@ -121,7 +144,8 @@ type
     MaxRows: Integer;
     procedure OpenDB(AFileName: string);
 
-    procedure GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings; InsertData: Boolean);
+    procedure GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings;
+                                            InsertData, EmptyTables, GhostTables, SystemTables: Boolean);
   end;
 
 //var
@@ -133,7 +157,10 @@ implementation
 
 { TfrmDBReader }
 
-procedure TfrmDBReader.GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings; InsertData: Boolean);
+//firebird version berücksichtigen
+//und zuerst tabellen generieren und danach die daten hinzufügen
+{procedure TfrmDBReader.GenerateSQLSchemaFromDBReader(FDBReader: TDBReader; const FileName: string; Lines: TStrings;
+                                        InsertData, EmptyTables, GhostTables, SystemTables: Boolean);
 var
   i, j, k: Integer;
   Table: TDbRowsList;
@@ -144,14 +171,13 @@ var
 
   FieldNames: string;
   f: Integer;
-
 begin
   Lines.Clear;
 
   //Datenbankname aus Dateiname
   DbName := ExtractFileName(FileName);
-  DbName := ChangeFileExt(DbName, ''); // ohne Extension
-  Lines.Add('CREATE DATABASE ' + DbName + ';');
+  DbName := Trim(ChangeFileExt(DbName, '')); // ohne Extension
+  Lines.Add('--CREATE DATABASE ' + DbName + ';');
   Lines.Add('');
 
   //Tabellen
@@ -159,14 +185,17 @@ begin
   begin
     Table := FDBReader.GetTableByIndex(i);
 
-    if Table.IsSystem then Continue;
     if not Assigned(Table) then Continue;
+
+    if Table.IsEmpty  and (not EmptyTables)  then Continue;
+    if Table.IsGhost  and (not GhostTables)  then Continue;
+    if Table.IsSystem and (not SystemTables) then Continue;
 
     // optional: alle Zeilen laden
     if InsertData then
       FDBReader.ReadTable(Table.TableName, MaxInt, Table);
 
-    Lines.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Table.TableName) + ' (');
+    Lines.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Trim(Table.TableName)) + ' (');
 
     for j := 0 to Length(Table.FieldsDef)-1 do
     begin
@@ -182,7 +211,7 @@ begin
         ftCurrency: SqlType := 'DECIMAL(18,2)';
         ftDate: SqlType := 'DATE';
         ftTime: SqlType := 'TIME';
-        ftDateTime, ftTimeStamp: SqlType := 'DATETIME';
+        ftDateTime, ftTimeStamp: SqlType := 'TIMESTAMP';
         ftBoolean: SqlType := 'BOOLEAN';
         ftBytes, ftVarBytes, ftBlob: SqlType := 'BLOB';
       else
@@ -245,6 +274,152 @@ begin
       Lines.Add('');
     end;
   end;
+end;}
+
+procedure TfrmDBReader.GenerateSQLSchemaFromDBReader(
+  FDBReader: TDBReader;
+  const FileName: string;
+  Lines: TStrings;
+  InsertData, EmptyTables, GhostTables, SystemTables: Boolean);
+var
+  i, j, k, f: Integer;
+  Table: TDbRowsList;
+  Field: TDbFieldDefRec;
+  SqlType, FieldValue: string;
+  DbName: string;
+  Row: TDbRowItem;
+  FieldNames: string;
+
+  // Hilfsfunktion: SQL-Typ Mapping
+  function MapFieldTypeToSQL(const Field: TDbFieldDefRec): string;
+  begin
+    case Field.FieldType of
+      ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo:
+        Result := 'VARCHAR(' + IntToStr(Field.Size) + ')';
+      ftSmallint, ftInteger: Result := 'INTEGER';
+      ftLargeint: Result := 'BIGINT';
+      ftFloat: Result := 'DOUBLE';
+      ftCurrency: Result := 'DECIMAL(18,2)';
+      ftDate: Result := 'DATE';
+      ftTime: Result := 'TIME';
+
+      ftDateTime, ftTimeStamp: Result := 'TIMESTAMP';
+      ftBoolean: Result := 'BOOLEAN';
+      ftBytes, ftVarBytes, ftBlob: Result := 'BLOB';
+    else
+      if Field.TypeName = 'SqlDate' then result := 'DATE'
+      else if Field.TypeName = 'SqlTime' then result := 'TIME'
+      else
+      Result := 'TEXT';
+    end;
+  end;
+
+begin
+  Lines.Clear;
+
+  // Datenbankname
+  DbName := Trim(ChangeFileExt(ExtractFileName(FileName), ''));
+  Lines.Add('--CREATE DATABASE ' + DbName + ';');
+  Lines.Add('');
+
+  // =========================
+  // PHASE 1: CREATE TABLE
+  // =========================
+  for i := 0 to FDBReader.GetTablesCount - 1 do
+  begin
+    Table := FDBReader.GetTableByIndex(i);
+    if not Assigned(Table) then Continue;
+
+    if Table.IsEmpty  and (not EmptyTables)  then Continue;
+    if Table.IsGhost  and (not GhostTables)  then Continue;
+    if Table.IsSystem and (not SystemTables) then Continue;
+
+    Lines.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Trim(Table.TableName)) + ' (');
+
+    for j := 0 to Length(Table.FieldsDef) - 1 do
+    begin
+      Field := Table.FieldsDef[j];
+      SqlType := MapFieldTypeToSQL(Field);
+
+      if j < Length(Table.FieldsDef) - 1 then
+        Lines.Add('  ' + MakeCaseSensitiveAuto(Field.Name) + ' ' + SqlType + ',')
+      else
+        Lines.Add('  ' + MakeCaseSensitiveAuto(Field.Name) + ' ' + SqlType);
+    end;
+
+    Lines.Add(');');
+    Lines.Add('');
+  end;
+
+  // =========================
+  // PHASE 2: INSERT DATA
+  // =========================
+  if not InsertData then Exit;
+
+  for i := 0 to FDBReader.GetTablesCount - 1 do
+  begin
+    Table := FDBReader.GetTableByIndex(i);
+    if not Assigned(Table) then Continue;
+
+    if Table.IsEmpty  and (not EmptyTables)  then Continue;
+    if Table.IsGhost  and (not GhostTables)  then Continue;
+    if Table.IsSystem and (not SystemTables) then Continue;
+
+    // Daten laden
+    FDBReader.ReadTable(Table.TableName, MaxInt, Table);
+    if Table.Count = 0 then Continue;
+
+    // Feldnamen vorbereiten
+    FieldNames := '';
+    for f := 0 to Length(Table.FieldsDef) - 1 do
+    begin
+      if f > 0 then
+        FieldNames := FieldNames + ', ';
+      FieldNames := FieldNames + MakeCaseSensitiveAuto(Table.FieldsDef[f].Name);
+    end;
+
+    // Daten schreiben
+    for k := 0 to Table.Count - 1 do
+    begin
+      Row := Table.GetItem(k);
+      FieldValue := '';
+
+      for j := 0 to Length(Table.FieldsDef) - 1 do
+      begin
+        if j > 0 then FieldValue := FieldValue + ', ';
+
+        if VarIsNull(Row.Values[j]) then
+          FieldValue := FieldValue + 'NULL'
+        else
+        begin
+          case Table.FieldsDef[j].FieldType of
+            ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo:
+              FieldValue := FieldValue + QuotedStr(VarToStr(Row.Values[j]));
+
+            ftDate, ftTime, ftDateTime, ftTimeStamp:
+              FieldValue := FieldValue + QuotedStr(
+                FormatDateTime('yyyy-mm-dd hh:nn:ss', Row.Values[j])
+              );
+
+            ftBoolean:
+              if Row.Values[j] then
+                FieldValue := FieldValue + '1'
+              else
+                FieldValue := FieldValue + '0';
+          else
+            FieldValue := FieldValue + VarToStr(Row.Values[j]);
+          end;
+        end;
+      end;
+
+      Lines.Add(
+        'INSERT INTO ' + MakeCaseSensitiveAuto(Table.TableName) +
+        ' (' + FieldNames + ') VALUES (' + FieldValue + ');'
+      );
+    end;
+
+    Lines.Add('');
+  end;
 end;
 
 function TfrmDBReader.AddTreeNode(AParent: TTreeNode; AName, ATableName, AFileName: string): TMyTreeNode;
@@ -298,21 +473,11 @@ begin
 end;
 
 procedure TfrmDBReader.btnFileSelectClick(Sender: TObject);
-var SQLLines: TStringList;
 begin
   if OpenDialog.Execute then
   begin
     try
       OpenDB(OpenDialog.FileName);
-
-      SQLLines := TStringList.Create;
-      try
-        GenerateSQLSchemaFromDBReader(FDBReader, FDbFileName, SQLLines, true);
-        SynEdit1.Lines.Assign(SQLLines);
-      finally
-        SQLLines.Free;
-      end;
-
     finally
       //
     end;
@@ -719,6 +884,49 @@ begin
   begin
     s := ExpandFileName(ParamStr(1));
     OpenDB(s);
+  end;
+end;
+
+procedure TfrmDBReader.btnGenSchemaClick(Sender: TObject);
+var SQLLines: TStringList;
+begin
+  SQLLines := TStringList.Create;
+  Screen.Cursor := crSQLWait;
+  try
+    GenerateSQLSchemaFromDBReader(FDBReader, FDbFileName, SQLLines, chkBoxInsertData.Checked,
+                                  chkBoxEmptyTables.Checked, chkBoxGhostTables.Checked, chkBoxSystemTables.Checked);
+    SynEdit1.Lines.Assign(SQLLines);
+  finally
+    Screen.Cursor := crDefault;
+    SQLLines.Free;
+  end;
+end;
+
+procedure TfrmDBReader.btnCopySchemaClick(Sender: TObject);
+begin
+  if Trim(SynEdit1.Lines.Text) = '' then
+  begin
+    MessageDlg('Warning',
+      'Nothing to copy.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  try
+    if SynEdit1.SelText <> '' then
+      Clipboard.AsText := SynEdit1.SelText
+    else
+      Clipboard.AsText := SynEdit1.Lines.Text;
+
+    MessageDlg('Info',
+      'SQL copied to clipboard.',
+      mtInformation, [mbOK], 0);
+
+  except
+    on E: Exception do
+      MessageDlg('Error',
+        'Failed to copy to clipboard:'#13#10 + E.Message,
+        mtError, [mbOK], 0);
   end;
 end;
 
