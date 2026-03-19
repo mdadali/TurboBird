@@ -28,6 +28,7 @@ uses
   {$ifdef ENABLE_GSR}DBReaderGsr,{$endif}
   FSReaderBase, FSReaderPst,
 
+  DbGridForm,
   turbocommon,
   uthemeselector;
 
@@ -43,8 +44,10 @@ type
   { TfrmDBReader }
 
   TfrmDBReader = class(TForm)
-    btnGenSchema: TButton;
     btnCopySchema: TButton;
+    btnFileSelect: TButton;
+    btnGenSchema: TButton;
+    chkBoxTabDelimiter: TCheckBox;
     chkBoxsystemTables: TCheckBox;
     chkBoxGhostTables: TCheckBox;
     chkBoxEmptyTables: TCheckBox;
@@ -58,14 +61,22 @@ type
     edtQuoteChar: TEdit;
     grBoxCSVExport: TGroupBox;
     grBoxSchemaOptions: TGroupBox;
+    GroupBox1: TGroupBox;
+    grBoxSchema: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    lbFileName: TLabel;
     memoLog: TMemo;
-    pnlSchemaTop: TPanel;
+    pnlTop: TPanel;
+    Panel2: TPanel;
+    panFile: TPanel;
     panLeft: TPanel;
+    ProgressBar: TProgressBar;
+    SaveDialog: TSaveDialog;
     spl1: TSplitter;
+    StatusBar1: TStatusBar;
     SynEdit1: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     tsSettings: TTabSheet;
@@ -75,16 +86,12 @@ type
     tsLog: TTabSheet;
     tsGrid: TTabSheet;
     dgItems: TDrawGrid;
-    panFile: TPanel;
-    lbFileName: TLabel;
-    btnFileSelect: TButton;
     tsTableInfo: TTabSheet;
     memoInfo: TMemo;
     pmGrid: TPopupMenu;
     miExporttoCSV: TMenuItem;
     miDBGrid1: TMenuItem;
     miShowAsHex: TMenuItem;
-    ProgressBar: TProgressBar;
     OpenDialog: TOpenDialog;
     procedure btnCopySchemaClick(Sender: TObject);
     procedure btnGenSchemaClick(Sender: TObject);
@@ -92,6 +99,7 @@ type
     procedure dgItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
       State: TGridDrawState);
     procedure FormShow(Sender: TObject);
+    procedure pgcMainChange(Sender: TObject);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure btnFileSelectClick(Sender: TObject);
     procedure dgItemsDblClick(Sender: TObject);
@@ -625,6 +633,16 @@ end;
 procedure TfrmDBReader.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+
+  SynEdit1.Color      := QWEditorBackgroundColor;
+  SynEdit1.Font.Name  := QWEditorFontName;
+  SynEdit1.Font.Size  := QWEditorFontSize;
+  SynEdit1.Font.Color := QWEditorFontColor;
+end;
+
+procedure TfrmDBReader.pgcMainChange(Sender: TObject);
+begin
+  grBoxSchema.Visible := (pgcMain.ActivePage = tsSchema);
 end;
 
 procedure TfrmDBReader.dgItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -641,31 +659,24 @@ end;
 
 procedure TfrmDBReader.ExportGridToCSV;
 var
-  dlg: TSaveDialog;
   sFileName: string;
   fs: TFileStream;
   i, ii: Integer;
   s, ss, sSeparator: string;
   TmpRow: TDbRowItem;
+  QuoteChar: char;
 begin
-  // select filename
-  sFileName := '';
-  sSeparator := #09; // TAB
-  dlg := TSaveDialog.Create(Self);
-  try
-    dlg.DefaultExt := '.csv';
-    dlg.FileName := FTableName + '.csv';
-    dlg.Filter := 'CSV|*.csv';
-    //if dlg.Execute(Self.Handle) then
-    if dlg.Execute() then
-    begin
-      sFileName := dlg.FileName;
-    end;
-  finally
-    dlg.Free();
-  end;
-  if sFileName = '' then
-    Exit;
+  QuoteChar := edtQuoteChar.Text[1];
+
+  if chkBoxTabDelimiter.Checked then
+    sSeparator := #09 // TAB
+  else
+   sSeparator := edtDelimiter.Text[1];
+
+   if SaveDialog.Execute then
+     sFileName := SaveDialog.FileName
+   else
+     Exit;
 
   // export to stream
   fs := TFileStream.Create(sFileName, fmCreate);
@@ -893,9 +904,14 @@ begin
   SQLLines := TStringList.Create;
   Screen.Cursor := crSQLWait;
   try
-    GenerateSQLSchemaFromDBReader(FDBReader, FDbFileName, SQLLines, chkBoxInsertData.Checked,
+    try
+      GenerateSQLSchemaFromDBReader(FDBReader, FDbFileName, SQLLines, chkBoxInsertData.Checked,
                                   chkBoxEmptyTables.Checked, chkBoxGhostTables.Checked, chkBoxSystemTables.Checked);
-    SynEdit1.Lines.Assign(SQLLines);
+      SynEdit1.Lines.Assign(SQLLines);
+      btnCopySchema.Enabled := true;
+    except
+      btnCopySchema.Enabled := false;
+    end;
   finally
     Screen.Cursor := crDefault;
     SQLLines.Free;
@@ -1335,12 +1351,13 @@ begin
 end;
 
 procedure TfrmDBReader.TestDbGrid;
+var FormDbGrid: TFormDbGrid;
 begin
-{
+  FormDbGrid := TFormDbGrid.Create(self);
+  FDBReader.ReadTable(FTableName, MaxInt, FRowsList);
   FormDbGrid.DataSet.AssignRowsList(FRowsList);
-  FormDbGrid.dbgr.Columns.RebuildColumns();
-  FormDbGrid.Show();
-}
+  FormDbGrid.ShowModal;
+  FormDbGrid.Free;
 end;
 
 procedure TfrmDBReader.tvMainChange(Sender: TObject; Node: TTreeNode);

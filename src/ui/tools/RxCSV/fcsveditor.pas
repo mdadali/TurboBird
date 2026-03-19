@@ -10,7 +10,11 @@ uses
 
   turbocommon,
   uthemeselector,
-  uGenSQLFromCSVDataset;
+  uGenSQLFromCSVDataset,
+
+  fpdataexporter,
+  frmBaseConfigExport,
+  ;
 
 type
 
@@ -140,9 +144,22 @@ end;
 procedure TfrmCSVEditor.SetCSVSettingsFromForm;
 begin
   CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
-  CSVDataset1.CSVOptions.Delimiter  := edtDelimiter.Text[1];
-  CSVDataset1.CSVOptions.LineEnding := edtLineEnding.Text[1];
-  CSVDataset1.CSVOptions.QuoteChar  := edtQuoteChar.Text[1];
+
+  if edtDelimiter.Text <> '' then
+    CSVDataset1.CSVOptions.Delimiter  := edtDelimiter.Text[1]
+  else
+   CSVDataset1.CSVOptions.Delimiter := ' ';
+
+  if edtLineEnding.Text <> '' then
+    CSVDataset1.CSVOptions.LineEnding := edtLineEnding.Text[1]
+  else
+    CSVDataset1.CSVOptions.LineEnding := ' ';
+
+  if edtQuoteChar.Text <> '' then
+    CSVDataset1.CSVOptions.QuoteChar  := edtQuoteChar.Text[1]
+  else
+    CSVDataset1.CSVOptions.QuoteChar:= '"';
+
   CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
   CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
@@ -371,16 +388,16 @@ end;
 procedure TfrmCSVEditor.FormCreate(Sender: TObject);
 begin
   ReadIni;
-
-  SynEdit1.Color      := QWEditorBackgroundColor;
-  SynEdit1.Font.Name  := QWEditorFontName;
-  SynEdit1.Font.Size  := QWEditorFontSize;
-  SynEdit1.Font.Color := QWEditorFontColor;
 end;
 
 procedure TfrmCSVEditor.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+
+  SynEdit1.Color      := QWEditorBackgroundColor;
+  SynEdit1.Font.Name  := QWEditorFontName;
+  SynEdit1.Font.Size  := QWEditorFontSize;
+  SynEdit1.Font.Color := QWEditorFontColor;
 end;
 
 procedure TfrmCSVEditor.btnCopySQLClick(Sender: TObject);

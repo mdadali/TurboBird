@@ -17,23 +17,21 @@ uses
   cmem,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim,
-  indylaz, rxnew, memdslaz, datetimectrls,
-  runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
-  ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, About,
-  CreateTrigger, fedittabledata, CallProc, UDFInfo, ViewDomain, NewDomain,
-  SysTables, NewConstraint, NewEditField, Calen, Scriptdb, UserPermissions,
-  TableManage, CreateUser, ChangePass, PermissionManage,
-  SQLHistory, CopyTable, dynlibs, dbInfo, sysutils, Comparison,
-  topologicalsort, turbocommon, importtable, fileimport,
-  csvdocument, fServerSession, uthemeselector, lazdbexport,
-  udb_firebird_struct_helper, udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib,
-  fbcommon, fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX,
-  QBuilder, QBDirFrm, QBLnkFrm,
-fCheckDBIntegrity, fsqlmonitor,
-  fdataexportersintrf, fMarkDownTableExport, fhtmlexport, fpcstdexporters,
-  uArrayFormTest, floginservicemanager, fserverregistry,
-  tb_netutils,
+  Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
+  rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
+  QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
+  EnterPass, About, CreateTrigger, fedittabledata, CallProc, UDFInfo,
+  ViewDomain, NewDomain, SysTables, NewConstraint, NewEditField, Calen,
+  Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
+  PermissionManage, SQLHistory, CopyTable, dynlibs, dbInfo, sysutils,
+  Comparison, topologicalsort, turbocommon, importtable, fileimport,
+  csvdocument, fServerSession, uthemeselector, lazdbexport, frmBaseConfigExport,
+  fpdataexporter, udb_firebird_struct_helper, udb_udf_Fetcher,
+  udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction, fSetFBClient,
+  fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm, QBLnkFrm,
+  fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf, fMarkDownTableExport,
+  fhtmlexport, fpcstdexporters, uArrayFormTest, floginservicemanager,
+  fserverregistry, tb_netutils,
 
   //DBAdmin
   MainFormUnit,
@@ -56,7 +54,7 @@ fCheckDBIntegrity, fsqlmonitor,
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, fservers, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fCSVEditor,
-  db_reader;
+  db_reader, DbGridForm;
 
 const
   Major = 1;
