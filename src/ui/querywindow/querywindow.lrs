@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#202#0#6'Height'#3'e'#2#3
-  +'Top'#3#135#0#5'Width'#3'7'#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#11#1#6'Height'#3'e'#2#3
+  +'Top'#3'k'#1#5'Width'#3'7'#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'
   +#3'e'#2#11'ClientWidth'#3'7'#4#5'Color'#7#6'clForm'#9'Icon.Data'#10#127'O"'#0
   +'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0#22#0#0#0#137'PNG'#13#10#26#10#0#0
   +#0#13'IHDR'#0#0#4#0#0#0#4#0#8#6#0#0#0#127#29'+'#131#0'"O,IDATx'#156#236#189
@@ -95867,7 +95867,7 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'MenuItem'#11'lmFindAgain'#7'Caption'#6#10'Find Again'#7'OnClick'#7#16'lmFin'
   +'dAgainClick'#0#0#0#11'TFindDialog'#11'FindDialog1'#6'OnFind'#7#15'FindDialo'
   +'g1Find'#4'Left'#3#192#0#3'Top'#3#168#0#0#0#10'TPopupMenu'#5'pmTab'#4'Left'#3
-  +'x'#1#3'Top'#3#216#1#0#9'TMenuItem'#9'MenuItem5'#7'Caption'#6#1'-'#0#0#9'TMe'
+  +'h'#1#3'Top'#3#160#1#0#9'TMenuItem'#9'MenuItem5'#7'Caption'#6#1'-'#0#0#9'TMe'
   +'nuItem'#5'lmRun'#7'Caption'#6#16'Run Query (Auto)'#8'ShortCut'#2't'#7'OnCli'
   +'ck'#7#10'lmRunClick'#0#0#9'TMenuItem'#11'lmRunSelect'#7'Caption'#6#21'Run Q'
   +'uery (As Select)'#7'OnClick'#7#16'lmRunSelectClick'#0#0#9'TMenuItem'#9'lmRu'
@@ -95875,8 +95875,8 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +'ck'#0#0#9'TMenuItem'#11'lmRunScript'#7'Caption'#6#21'Run Query (As Script)'
   ,#7'OnClick'#7#16'lmRunScriptClick'#0#0#9'TMenuItem'#10'MenuItem10'#7'Caption'
   +#6#1'-'#0#0#9'TMenuItem'#10'lmCloseTab'#7'Caption'#6#9'Close Tab'#7'OnClick'
-  +#7#15'lmCloseTabClick'#0#0#0#9'TMainMenu'#9'MainMenu1'#4'Left'#3'0'#1#3'Top'
-  +#3#152#1#0#9'TMenuItem'#9'MenuItem3'#7'Caption'#6#3'Run'#8'ShortCut'#2't'#7
+  +#7#15'lmCloseTabClick'#0#0#0#9'TMainMenu'#9'MainMenu1'#4'Left'#3#16#1#3'Top'
+  +#3#160#1#0#9'TMenuItem'#9'MenuItem3'#7'Caption'#6#3'Run'#8'ShortCut'#2't'#7
   +'Visible'#8#7'OnClick'#7#10'bbRunClick'#0#0#0#10'TImageList'#6'imTabs'#4'Lef'
   +'t'#3#208#2#3'Top'#2#127#6'Bitmap'#10'7'#16#0#0'Lz'#7#0#0#0#16#0#0#0#16#0#0#0
   +'!'#16#0#0#0#0#0#0'x'#218#221'Xw|UU'#182'>!'#132#4#17#153#135#242#28#5'|'#148
@@ -96585,7 +96585,7 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +')'#159#23#161#204#235'}D'#191#211'@'#212#7'4'#146#234#7#154#136#206#249'&'
   +#252#177#198#178#218'y'#29'}_/'#30#243#215#151#158#7#168#169#222#255#3#247'G'
   +#191'L'#0#0#10'TPopupMenu'#6'pmGrid'#7'OnPopup'#7#11'pmGridPopup'#4'Left'#3
-  +#176#1#3'Top'#3#136#1#0#9'TMenuItem'#10'lmCopyCell'#7'Caption'#6#10'Copy fie'
+  +#184#1#3'Top'#3#152#1#0#9'TMenuItem'#10'lmCopyCell'#7'Caption'#6#10'Copy fie'
   +'ld'#7'Visible'#8#7'OnClick'#7#15'lmCopyCellClick'#0#0#9'TMenuItem'#10'Separ'
   +'ator2'#7'Caption'#6#1'-'#7'Visible'#8#0#0#9'TMenuItem'#15'lmExportDataSet'#7
   +'Caption'#6#12'Export to...'#0#9'TMenuItem'#18'lmStdExportFormats'#7'Caption'

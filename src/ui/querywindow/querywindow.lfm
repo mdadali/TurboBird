@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 202
+  Left = 267
   Height = 613
-  Top = 135
+  Top = 363
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 613
@@ -71271,8 +71271,8 @@ object fmQueryWindow: TfmQueryWindow
     Top = 168
   end
   object pmTab: TPopupMenu
-    Left = 376
-    Top = 472
+    Left = 360
+    Top = 416
     object MenuItem5: TMenuItem
       Caption = '-'
     end
@@ -71302,8 +71302,8 @@ object fmQueryWindow: TfmQueryWindow
     end
   end
   object MainMenu1: TMainMenu
-    Left = 304
-    Top = 408
+    Left = 272
+    Top = 416
     object MenuItem3: TMenuItem
       Caption = 'Run'
       ShortCut = 116
@@ -71841,8 +71841,8 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pmGrid: TPopupMenu
     OnPopup = pmGridPopup
-    Left = 432
-    Top = 392
+    Left = 440
+    Top = 408
     object lmCopyCell: TMenuItem
       Caption = 'Copy field'
       Visible = False

@@ -5,15 +5,16 @@ unit fCSVEditor;
 interface
 
 uses
-  Classes, SysUtils, DB, csvdataset, Forms, Controls, Graphics, Dialogs, Clipbrd,
-  DBCtrls, StdCtrls, ExtCtrls, ComCtrls, SynEdit, SynHighlighterSQL, RxDBGrid,
+  Classes, SysUtils, DB, csvdataset, Forms, Controls, Graphics, Dialogs,
+  Clipbrd, DBCtrls, StdCtrls, ExtCtrls, ComCtrls, Menus, SynEdit,
+  SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf, RxDBGridPrintGrid,
+  RxDBGridExportSpreadSheet,
 
   turbocommon,
   uthemeselector,
   uGenSQLFromCSVDataset,
 
-  fpdataexporter,
-  frmBaseConfigExport,
+  fdataexportersintrf
   ;
 
 type
@@ -55,13 +56,27 @@ type
     Label2: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    lmExportDataAsHtml: TMenuItem;
+    lmExportDataAsMarkDownTable: TMenuItem;
+    lmExportDataAsPDF: TMenuItem;
+    lmExportDataAsSpreadSheet: TMenuItem;
+    lmExportDataSet: TMenuItem;
+    lmExportToClipboard: TMenuItem;
+    lmPrintData: TMenuItem;
+    lmStdExportFormats: TMenuItem;
     OpenDialog1: TOpenDialog;
     Panel2: TPanel;
+    pmGrid: TPopupMenu;
+    RxDBGridExportPDF1: TRxDBGridExportPDF;
+    RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
+    RxDBGridPrint1: TRxDBGridPrint;
     SaveDialog1: TSaveDialog;
     PageControl1: TPageControl;
     Panel1: TPanel;
     RxDBGrid1: TRxDBGrid;
     ScrollBox1: TScrollBox;
+    Separator1: TMenuItem;
+    Separator2: TMenuItem;
     SynEdit1: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     tsSQL: TTabSheet;
@@ -77,6 +92,13 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure lmExportDataAsHtmlClick(Sender: TObject);
+    procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
+    procedure lmExportDataAsPDFClick(Sender: TObject);
+    procedure lmExportDataAsSpreadSheetClick(Sender: TObject);
+    procedure lmExportToClipboardClick(Sender: TObject);
+    procedure lmPrintDataClick(Sender: TObject);
+    procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FFileName: string;
     procedure LoadCSVFile(const FileName: string);
@@ -354,12 +376,6 @@ begin
   FreeAndNil(GenSQLFromCSVDataset);
 end;
 
-procedure TfrmCSVEditor.btnSaveFileAsClick(Sender: TObject);
-begin
-  if SaveDialog1.Execute then
-    SaveCSVFile(SaveDialog1.FileName);
-end;
-
 procedure TfrmCSVEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
 begin
   SaveCSVFile(FFileName);
@@ -398,6 +414,130 @@ begin
   SynEdit1.Font.Name  := QWEditorFontName;
   SynEdit1.Font.Size  := QWEditorFontSize;
   SynEdit1.Font.Color := QWEditorFontColor;
+end;
+
+procedure TfrmCSVEditor.btnSaveFileAsClick(Sender: TObject);
+begin
+  if SaveDialog1.Execute then
+    SaveCSVFile(SaveDialog1.FileName);
+end;
+
+procedure TfrmCSVEditor.lmStdExportFormatsClick(Sender: TObject);
+begin
+  if CSVDataset1.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+
+  ExportStdFormat(CSVDataset1);
+end;
+
+procedure TfrmCSVEditor.lmExportDataAsHtmlClick(Sender: TObject);
+begin
+  if CSVDataset1.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+  ExportDataHtml(CSVDataset1);
+end;
+
+procedure TfrmCSVEditor.lmExportDataAsMarkDownTableClick(Sender: TObject);
+begin
+  if CSVDataset1.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+  ExportDataMarkDownTable(CSVDataset1);
+end;
+
+procedure TfrmCSVEditor.lmExportDataAsPDFClick(Sender: TObject);
+begin
+  try
+    RxDBGridExportPDF1.Execute;
+  except
+    raise;
+  end;
+end;
+
+procedure TfrmCSVEditor.lmExportDataAsSpreadSheetClick(Sender: TObject);
+begin
+  RxDBGridExportSpreadSheet1.Execute;
+end;
+
+procedure TfrmCSVEditor.lmPrintDataClick(Sender: TObject);
+begin
+   RxDBGridPrint1.Execute;
+end;
+
+
+{ Copy query result to Clipboard }
+
+procedure TfrmCSVEditor.lmExportToClipboardClick(Sender: TObject);
+var
+  MaxExportRows, RowCount, CopiedRows: Integer;
+  MsgText: string;
+begin
+  if CSVDataset1.IsEmpty then
+  begin
+    MessageDlg('DataSet has no records!', mtError, [mbOK], 0);
+    CSVDataset1.EnableControls;
+    Exit;
+  end;
+
+  // --- Max rows load from INI---
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport', 'MaxExportRows', -1);
+  if MaxExportRows <= 0 then
+  begin
+    if MaxExportRows = -1 then
+    begin
+      MaxExportRows := 200;
+      fIniFile.WriteInteger('ClipboardExport', 'MaxExportRows', MaxExportRows);
+      MessageDlg('No valid MaxExportRows entry found in turbobird.ini. Default 200 has been set.', mtWarning, [mbOK], 0);
+    end
+    else
+    begin
+      MessageDlg('MaxExportRows is set to 0 in turbobird.ini. ' +
+                 'Exporting very large tables may cause program or system crash!', mtWarning, [mbOK], 0);
+    end;
+  end;
+
+  RowCount := CSVDataset1.RecordCount;
+
+  if (MaxExportRows > 0) and (RowCount > MaxExportRows) then
+  begin
+    MessageDlg(
+      'The result contains ' + IntToStr(RowCount) + ' rows, which exceeds the export limit of ' +
+      IntToStr(MaxExportRows) + ' rows.'#13#10 +
+      'Only the first ' + IntToStr(MaxExportRows) + ' rows will be copied to the clipboard.'#13#10#13#10 +
+      'You can change this limit in turbobird.ini under [ClipboardExport].',
+      mtWarning, [mbOK], 0
+    );
+  end;
+
+  if MaxExportRows = 0 then
+    CopiedRows := RowCount
+  else if RowCount > MaxExportRows then
+    CopiedRows := MaxExportRows
+  else
+    CopiedRows := RowCount;
+
+  // --- Export ---
+  try
+    CSVDataset1.DisableControls;
+    ExportDataToClipboard(CSVDataset1, MaxExportRows);
+
+    MsgText := 'Successfully copied ' + IntToStr(CopiedRows) + ' records to the clipboard.';
+    if MaxExportRows = 0 then
+      MsgText := MsgText + ' (Warning: no export limit set in turbobird.ini! Large tables may cause program/system crash.)';
+
+    MessageDlg(MsgText, mtInformation, [mbOK], 0);
+  finally
+    CSVDataset1.First;
+    CSVDataset1.EnableControls;
+  end;
 end;
 
 procedure TfrmCSVEditor.btnCopySQLClick(Sender: TObject);
