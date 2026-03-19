@@ -236,6 +236,7 @@ var
 begin
   if not OpenDialog1.Execute then Exit;
 
+  SynEdit1.Lines.Clear;
   if CSVDataset1.Active then
   begin
     CSVDataset1.Close;
