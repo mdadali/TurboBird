@@ -222,10 +222,6 @@
         <IsPartOfProject Value="True"/>
       </Unit>
       <Unit>
-        <Filename Value="RFUtils.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit>
-      <Unit>
         <Filename Value="DBReaderDbisam.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit>

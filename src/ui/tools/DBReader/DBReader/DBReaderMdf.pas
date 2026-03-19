@@ -1,5 +1,5 @@
 unit DBReaderMdf;
-
+{$mode DELPHI}
 (*
 MS SQL Master Data File (.mdf) reader
 
