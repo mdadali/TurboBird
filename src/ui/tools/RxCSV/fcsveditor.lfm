@@ -1,7 +1,7 @@
 object frmCSVEditor: TfrmCSVEditor
-  Left = 379
+  Left = 344
   Height = 575
-  Top = 133
+  Top = 131
   Width = 847
   Caption = 'Turbobird - CSV Editor'
   ClientHeight = 575
@@ -78,9 +78,9 @@ object frmCSVEditor: TfrmCSVEditor
     Height = 525
     Top = 50
     Width = 847
-    ActivePage = tsCSVSettings
+    ActivePage = tsGrid
     Align = alClient
-    TabIndex = 2
+    TabIndex = 0
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -161,6 +161,7 @@ object frmCSVEditor: TfrmCSVEditor
         SelectedColor = clHighlight
         DataSource = DataSource1
         Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgHeaderPushedLook]
+        PopupMenu = pmGrid
         TabOrder = 0
       end
     end
@@ -801,12 +802,12 @@ object frmCSVEditor: TfrmCSVEditor
   end
   object DataSource1: TDataSource
     DataSet = CSVDataset1
-    Left = 776
-    Top = 408
+    Left = 760
+    Top = 392
   end
   object OpenDialog1: TOpenDialog
-    Left = 520
-    Top = 448
+    Left = 464
+    Top = 408
   end
   object CSVDataset1: TCSVDataset
     FieldDefs = <>
@@ -819,18 +820,87 @@ object frmCSVEditor: TfrmCSVEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    Left = 376
-    Top = 424
+    Left = 760
+    Top = 304
   end
   object SaveDialog1: TSaveDialog
-    Left = 664
-    Top = 392
+    Left = 576
+    Top = 400
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlSybase
-    Left = 671
-    Top = 474
+    Left = 280
+    Top = 440
+  end
+  object pmGrid: TPopupMenu
+    Left = 152
+    Top = 440
+    object Separator2: TMenuItem
+      Caption = '-'
+      Visible = False
+    end
+    object lmExportDataSet: TMenuItem
+      Caption = 'Export to...'
+      object lmStdExportFormats: TMenuItem
+        Caption = 'Standart Export Formats...'
+        OnClick = lmStdExportFormatsClick
+      end
+      object lmExportDataAsPDF: TMenuItem
+        Caption = 'PDF'
+        Visible = False
+        OnClick = lmExportDataAsPDFClick
+      end
+      object lmExportDataAsSpreadSheet: TMenuItem
+        Caption = 'Spreadsheet'
+        OnClick = lmExportDataAsSpreadSheetClick
+      end
+      object lmExportDataAsMarkDownTable: TMenuItem
+        Caption = 'Markdown Table'
+        OnClick = lmExportDataAsMarkDownTableClick
+      end
+      object lmExportDataAsHtml: TMenuItem
+        Caption = 'Html'
+        OnClick = lmExportDataAsHtmlClick
+      end
+      object lmExportToClipboard: TMenuItem
+        Caption = 'Clipboard'
+        OnClick = lmExportToClipboardClick
+      end
+      object Separator1: TMenuItem
+        Caption = '-'
+      end
+    end
+    object lmPrintData: TMenuItem
+      Caption = 'Print...'
+      OnClick = lmPrintDataClick
+    end
+  end
+  object RxDBGridPrint1: TRxDBGridPrint
+    RxDBGrid = RxDBGrid1
+    Caption = 'Print grid'
+    ShowSetupForm = True
+    Options = [rxpoShowTitle, rxpoShowFooter, rxpoShowGridColor, rxpoShowFooterColor, rxpoShowReportTitle]
+    ShowProgress = True
+    Left = 104
+    Top = 328
+  end
+  object RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet
+    RxDBGrid = RxDBGrid1
+    Caption = 'Export to speadsheet'
+    ShowSetupForm = True
+    Options = []
+    Left = 104
+    Top = 240
+  end
+  object RxDBGridExportPDF1: TRxDBGridExportPDF
+    Caption = 'Export to PDF file'
+    ShowSetupForm = True
+    Options = []
+    PdfOptions.Options = []
+    AuthorPdf = 'TurboBird'
+    Left = 104
+    Top = 152
   end
 end
