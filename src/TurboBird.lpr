@@ -25,7 +25,7 @@ uses
   Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
   PermissionManage, SQLHistory, CopyTable, dynlibs, dbInfo, sysutils,
   Comparison, topologicalsort, turbocommon, importtable, fileimport,
-  csvdocument, fServerSession, uthemeselector, lazdbexport,
+  csvdocument, fServerSession, uthemeselector, lazdbexport, sdflaz,
   udb_firebird_struct_helper,
   udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,

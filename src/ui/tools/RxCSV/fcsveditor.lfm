@@ -1,9 +1,9 @@
 object frmCSVEditor: TfrmCSVEditor
-  Left = 344
+  Left = 437
   Height = 575
-  Top = 131
+  Top = 137
   Width = 847
-  Caption = 'Turbobird - CSV Editor'
+  Caption = 'Turbobird - Data Editor'
   ClientHeight = 575
   ClientWidth = 847
   OnClose = FormClose
@@ -784,7 +784,6 @@ object frmCSVEditor: TfrmCSVEditor
         Top = 441
         Width = 843
         Align = alBottom
-        Caption = 'Panel2'
         ClientHeight = 50
         ClientWidth = 843
         TabOrder = 1
@@ -802,12 +801,12 @@ object frmCSVEditor: TfrmCSVEditor
   end
   object DataSource1: TDataSource
     DataSet = CSVDataset1
-    Left = 760
-    Top = 392
+    Left = 488
+    Top = 336
   end
   object OpenDialog1: TOpenDialog
-    Left = 464
-    Top = 408
+    Left = 288
+    Top = 128
   end
   object CSVDataset1: TCSVDataset
     FieldDefs = <>
@@ -820,12 +819,12 @@ object frmCSVEditor: TfrmCSVEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    Left = 760
-    Top = 304
+    Left = 720
+    Top = 112
   end
   object SaveDialog1: TSaveDialog
-    Left = 576
-    Top = 400
+    Left = 304
+    Top = 224
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
@@ -902,5 +901,35 @@ object frmCSVEditor: TfrmCSVEditor
     AuthorPdf = 'TurboBird'
     Left = 104
     Top = 152
+  end
+  object sWorksheetDataset1: TsWorksheetDataset
+    FieldDefs = <>
+    Left = 728
+    Top = 184
+  end
+  object SdfDataSet1: TSdfDataSet
+    FileMustExist = True
+    ReadOnly = False
+    FieldDefs = <>
+    AllowMultiLine = False
+    Delimiter = ','
+    FirstLineAsSchema = False
+    StripTrailingDelimiters = False
+    Left = 736
+    Top = 360
+  end
+  object FixedFormatDataSet1: TFixedFormatDataSet
+    FileMustExist = True
+    ReadOnly = False
+    FieldDefs = <>
+    Left = 744
+    Top = 456
+  end
+  object Dbf1: TDbf
+    IndexDefs = <>
+    TableLevel = 4
+    FilterOptions = []
+    Left = 728
+    Top = 264
   end
 end
