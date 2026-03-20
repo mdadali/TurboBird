@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#11#1#6'Height'#3'e'#2#3
-  +'Top'#3'k'#1#5'Width'#3'7'#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#132#0#6'Height'#3'e'#2#3
+  +'Top'#3#234#0#5'Width'#3'7'#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'
   +#3'e'#2#11'ClientWidth'#3'7'#4#5'Color'#7#6'clForm'#9'Icon.Data'#10#127'O"'#0
   +'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0#22#0#0#0#137'PNG'#13#10#26#10#0#0
   +#0#13'IHDR'#0#0#4#0#0#0#4#0#8#6#0#0#0#127#29'+'#131#0'"O,IDATx'#156#236#189
@@ -95778,84 +95778,84 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +' '#11'ButtonWidth'#2' '#7'Caption'#6#8'ToolBar1'#5'Color'#7#6'clForm'#6'Ima'
   +'ges'#7#13'toolbarImages'#11'ParentColor'#8#14'ParentShowHint'#8#8'ShowHint'
   +#9#8'TabOrder'#2#3#12'OnMouseEnter'#7#18'ToolBar1MouseEnter'#12'OnMouseLeave'
-  +#7#18'ToolBar1MouseLeave'#0#11'TToolButton'#5'tbNew'#4'Left'#2'%'#4'Hint'#6
+  +#7#18'ToolBar1MouseLeave'#0#11'TToolButton'#5'tbNew'#4'Left'#2'I'#4'Hint'#6
   +#25'Open New SQL Query Window'#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2#0#7
   +'OnClick'#7#10'tbNewClick'#12'OnMouseEnter'#7#15'tbNewMouseEnter'#12'OnMouse'
   +'Leave'#7#15'tbNewMouseLeave'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToo'
-  +'lButton'#6'tbOpen'#4'Left'#2#1#4'Hint'#6#13'Open SQL file'#3'Top'#2#2#8'Aut'
-  +'oSize'#9#7'Caption'#6#6'tbOpen'#10'ImageIndex'#2#1#7'OnClick'#7#11'tbOpenCl'
-  +'ick'#12'OnMouseEnter'#7#16'tbOpenMouseEnter'#14'ParentShowHint'#8#8'ShowHin'
-  +'t'#9#0#0#11'TToolButton'#6'tbSave'#4'Left'#2'I'#4'Hint'#6#16'Save SQL to fi'
-  +'le'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbSave'#10'ImageIndex'#2#2#7'On'
-  +'Click'#7#11'tbSaveClick'#12'OnMouseEnter'#7#16'tbSaveMouseEnter'#14'ParentS'
-  +'howHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#5'tbRun'#4'Left'#3#145#0#4'Hin'
-  +'t'#6#14'Run Query (F5)'#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2#5#7'OnCli'
-  +'ck'#7#10'tbRunClick'#12'OnMouseEnter'#7#15'tbRunMouseEnter'#14'ParentShowHi'
-  +'nt'#8#8'ShowHint'#9#0#0#11'TToolButton'#8'tbCommit'#4'Left'#3#222#0#4'Hint'
-  +#6#18'Commit Transaction'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#8'tbCommit'#7
-  +'Enabled'#8#10'ImageIndex'#2#4#7'OnClick'#7#13'tbCommitClick'#12'OnMouseEnte'
-  +'r'#7#18'tbCommitMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TTool'
-  +'Button'#10'tbRollback'#4'Left'#3'&'#1#4'Hint'#6#20'Rollback Transaction'#3
-  +'Top'#2#2#8'AutoSize'#9#7'Caption'#6#10'tbRollback'#10'ImageIndex'#2#7#7'OnC'
-  +'lick'#7#15'tbRollbackClick'#12'OnMouseEnter'#7#20'tbRollbackMouseEnter'#14
-  +'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton2'#4'Left'
-  +#3'J'#1#6'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton2'#5'Style'#7#12
-  +'tbsSeparator'#0#0#11'TToolButton'#11'ToolButton3'#4'Left'#3'v'#1#6'Height'#2
-  +' '#3'Top'#2#2#7'Caption'#6#11'ToolButton3'#5'Style'#7#12'tbsSeparator'#0#0
-  +#11'TToolButton'#9'tbHistory'#4'Left'#3'R'#1#4'Hint'#6#11'SQL History'#3'Top'
-  +#2#2#8'AutoSize'#9#7'Caption'#6#9'tbHistory'#10'ImageIndex'#2#8#7'OnClick'#7
-  +#14'tbHistoryClick'#12'OnMouseEnter'#7#19'tbHistoryMouseEnter'#14'ParentShow'
-  +'Hint'#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton5'#4'Left'#3#217#0#6
-  +'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton5'#5'Style'#7#10'tbsDivid'
-  +'er'#0#0#11'TToolButton'#6'tbMenu'#4'Left'#3#206#1#4'Hint'#6#4'Menu'#3'Top'#2
-  +#2#8'AutoSize'#9#7'Caption'#6#6'tbMenu'#10'ImageIndex'#2#9#7'OnClick'#7#11't'
-  ,'bMenuClick'#12'OnMouseEnter'#7#16'tbMenuMouseEnter'#14'ParentShowHint'#8#8
-  +'ShowHint'#9#0#0#11'TToolButton'#17'tbCommitRetaining'#4'Left'#3#181#0#4'Hin'
-  +'t'#6#16'Commit Retaining'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#17'tbCommit'
-  +'Retaining'#10'ImageIndex'#2#6#7'OnClick'#7#22'tbCommitRetainingClick'#12'On'
-  +'MouseEnter'#7#27'tbCommitRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHi'
-  +'nt'#9#0#0#11'TToolButton'#19'tbRollbackRetaining'#4'Left'#3#2#1#4'Hint'#6#18
-  +'Rollback Retaining'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#19'tbRollbackReta'
-  +'ining'#10'ImageIndex'#2#3#7'OnClick'#7#24'tbRollbackRetainingClick'#12'OnMo'
-  +'useEnter'#7#29'tbRollbackRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHi'
-  +'nt'#9#0#0#11'TToolButton'#11'ToolButton1'#4'Left'#3#198#1#6'Height'#2' '#3
-  +'Top'#2#2#7'Caption'#6#11'ToolButton1'#5'Style'#7#12'tbsSeparator'#0#0#9'TCh'
-  +'eckBox'#12'cxAutoCommit'#4'Left'#3#18#2#6'Height'#2#22#4'Hint'#6#18'Auto Co'
-  +'mmit ON/OFF'#3'Top'#2#2#5'Width'#2'o'#7'Caption'#6#11'Auto Commit'#7'Checke'
-  +'d'#9#12'OnMouseEnter'#7#22'cxAutoCommitMouseEnter'#12'OnMouseLeave'#7#22'cx'
-  +'AutoCommitMouseLeave'#5'State'#7#9'cbChecked'#8'TabOrder'#2#0#0#0#11'TToolB'
-  +'utton'#13'tbQueryDesign'#4'Left'#3'~'#1#4'Hint'#6#14'Query Designer'#3'Top'
-  +#2#2#7'Caption'#6#13'tbQueryDesign'#10'ImageIndex'#2#11#7'OnClick'#7#18'tbQu'
-  +'eryDesignClick'#12'OnMouseEnter'#7#23'tbQueryDesignMouseEnter'#14'ParentSho'
-  +'wHint'#8#8'ShowHint'#9#0#0#11'TRadioGroup'#13'rgScreenModes'#4'Left'#3#152#2
-  +#6'Height'#2' '#4'Hint'#6#12'Screen Modes'#3'Top'#2#0#5'Width'#3#185#0#5'Ali'
-  +'gn'#7#7'alRight'#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#8'AutoFill'
-  +#9#28'ChildSizing.LeftRightSpacing'#2#6#29'ChildSizing.EnlargeHorizontal'#7
-  +#24'crsHomogenousChildResize'#27'ChildSizing.EnlargeVertical'#7#24'crsHomoge'
-  +'nousChildResize'#28'ChildSizing.ShrinkHorizontal'#7#14'crsScaleChilds'#26'C'
-  +'hildSizing.ShrinkVertical'#7#14'crsScaleChilds'#18'ChildSizing.Layout'#7#29
-  +'cclLeftToRightThenTopToBottom'#27'ChildSizing.ControlsPerLine'#2#3#12'Clien'
-  +'tHeight'#2#28#11'ClientWidth'#3#181#0#7'Columns'#2#3#9'ItemIndex'#2#0#13'It'
-  +'ems.Strings'#1#6#3'NFS'#6#3'CFS'#6#3'RFS'#0#7'OnClick'#7#18'rgScreenModesCl'
-  +'ick'#12'OnMouseEnter'#7#23'rgScreenModesMouseEnter'#8'TabOrder'#2#1#0#0#11
-  +'TToolButton'#11'ToolButton4'#4'Left'#2'm'#4'Hint'#6#16'MWA ScriptEngine'#3
-  +'Top'#2#2#7'Caption'#6#11'ToolButton4'#10'ImageIndex'#2#12#7'OnClick'#7#16'T'
-  +'oolButton4Click'#0#0#11'TToolButton'#7'tbIBSQL'#4'Left'#3#162#1#4'Hint'#6#14
-  +'IBX SQLBuilder'#3'Top'#2#2#7'Caption'#6#7'tbIBSQL'#10'ImageIndex'#2#14#7'On'
-  +'Click'#7#12'tbIBSQLClick'#0#0#11'TToolButton'#11'ToolButton6'#4'Left'#3#242
-  +#1#3'Top'#2#2#7'Caption'#6#11'ToolButton6'#7'Enabled'#8#0#0#0#11'TOpenDialog'
-  +#11'OpenDialog1'#10'DefaultExt'#6#4'.sql'#6'Filter'#6#29'SQL Files|*.sql|All'
-  +' Files|*.*'#4'Left'#2'X'#3'Top'#2'P'#0#0#11'TSaveDialog'#11'SaveDialog1'#7
-  +'Options'#11#17'ofOverwritePrompt'#14'ofEnableSizing'#12'ofViewDetail'#0#4'L'
-  +'eft'#3#192#0#3'Top'#2'P'#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'#13'DefaultFilter'
-  +#6#23'SQL Files (*.sql)|*.sql'#7'Enabled'#8#23'CommentAttri.Foreground'#7#6
-  +'clTeal'#25'DefaultPackageAttri.Style'#11#0#26'IdentifierAttri.Foreground'#4
-  +'1'#26#255#0#22'NumberAttri.Foreground'#4'644'#0#22'StringAttri.Foreground'#4
-  +#161#16#16#0#22'SymbolAttri.Foreground'#4'b'#8#8#0#25'TableNameAttri.Foregro'
-  +'und'#7#6'clNavy'#20'TableNameAttri.Style'#11#6'fsBold'#0#10'SQLDialect'#7#13
-  +'sqlFirebird30'#4'Left'#3#224#2#3'Top'#3'P'#1#0#0#10'TPopupMenu'#6'pmMemo'#4
-  +'Left'#3' '#2#3'Top'#3#144#1#0#9'TMenuItem'#6'lmUndo'#7'Caption'#6#4'Undo'#7
-  +'OnClick'#7#11'lmUndoClick'#0#0#9'TMenuItem'#6'lmRedo'#7'Caption'#6#4'Redo'#7
+  +'lButton'#6'tbOpen'#4'Left'#2'%'#4'Hint'#6#13'Open SQL file'#3'Top'#2#2#8'Au'
+  +'toSize'#9#7'Caption'#6#6'tbOpen'#10'ImageIndex'#2#1#7'OnClick'#7#11'tbOpenC'
+  +'lick'#12'OnMouseEnter'#7#16'tbOpenMouseEnter'#14'ParentShowHint'#8#8'ShowHi'
+  +'nt'#9#0#0#11'TToolButton'#6'tbSave'#4'Left'#2'm'#4'Hint'#6#16'Save SQL to f'
+  +'ile'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#6'tbSave'#10'ImageIndex'#2#2#7'O'
+  +'nClick'#7#11'tbSaveClick'#12'OnMouseEnter'#7#16'tbSaveMouseEnter'#14'Parent'
+  +'ShowHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#5'tbRun'#4'Left'#2#1#4'Hint'#6
+  +#14'Run Query (F5)'#3'Top'#2#2#8'AutoSize'#9#10'ImageIndex'#2#5#7'OnClick'#7
+  +#10'tbRunClick'#12'OnMouseEnter'#7#15'tbRunMouseEnter'#14'ParentShowHint'#8#8
+  +'ShowHint'#9#0#0#11'TToolButton'#8'tbCommit'#4'Left'#3#222#0#4'Hint'#6#18'Co'
+  +'mmit Transaction'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#8'tbCommit'#7'Enabl'
+  +'ed'#8#10'ImageIndex'#2#4#7'OnClick'#7#13'tbCommitClick'#12'OnMouseEnter'#7
+  +#18'tbCommitMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9#0#0#11'TToolButto'
+  +'n'#10'tbRollback'#4'Left'#3'&'#1#4'Hint'#6#20'Rollback Transaction'#3'Top'#2
+  +#2#8'AutoSize'#9#7'Caption'#6#10'tbRollback'#10'ImageIndex'#2#7#7'OnClick'#7
+  +#15'tbRollbackClick'#12'OnMouseEnter'#7#20'tbRollbackMouseEnter'#14'ParentSh'
+  +'owHint'#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton2'#4'Left'#3'J'#1#6
+  +'Height'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton2'#5'Style'#7#12'tbsSepar'
+  +'ator'#0#0#11'TToolButton'#11'ToolButton3'#4'Left'#3'v'#1#6'Height'#2' '#3'T'
+  +'op'#2#2#7'Caption'#6#11'ToolButton3'#5'Style'#7#12'tbsSeparator'#0#0#11'TTo'
+  +'olButton'#9'tbHistory'#4'Left'#3'R'#1#4'Hint'#6#11'SQL History'#3'Top'#2#2#8
+  +'AutoSize'#9#7'Caption'#6#9'tbHistory'#10'ImageIndex'#2#8#7'OnClick'#7#14'tb'
+  +'HistoryClick'#12'OnMouseEnter'#7#19'tbHistoryMouseEnter'#14'ParentShowHint'
+  +#8#8'ShowHint'#9#0#0#11'TToolButton'#11'ToolButton5'#4'Left'#3#217#0#6'Heigh'
+  +'t'#2' '#3'Top'#2#2#7'Caption'#6#11'ToolButton5'#5'Style'#7#10'tbsDivider'#0
+  +#0#11'TToolButton'#6'tbMenu'#4'Left'#3#206#1#4'Hint'#6#4'Menu'#3'Top'#2#2#8
+  +'AutoSize'#9#7'Caption'#6#6'tbMenu'#10'ImageIndex'#2#9#7'OnClick'#7#11'tbMen'
+  ,'uClick'#12'OnMouseEnter'#7#16'tbMenuMouseEnter'#14'ParentShowHint'#8#8'Show'
+  +'Hint'#9#0#0#11'TToolButton'#17'tbCommitRetaining'#4'Left'#3#181#0#4'Hint'#6
+  +#16'Commit Retaining'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#17'tbCommitRetai'
+  +'ning'#10'ImageIndex'#2#6#7'OnClick'#7#22'tbCommitRetainingClick'#12'OnMouse'
+  +'Enter'#7#27'tbCommitRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9
+  +#0#0#11'TToolButton'#19'tbRollbackRetaining'#4'Left'#3#2#1#4'Hint'#6#18'Roll'
+  +'back Retaining'#3'Top'#2#2#8'AutoSize'#9#7'Caption'#6#19'tbRollbackRetainin'
+  +'g'#10'ImageIndex'#2#3#7'OnClick'#7#24'tbRollbackRetainingClick'#12'OnMouseE'
+  +'nter'#7#29'tbRollbackRetainingMouseEnter'#14'ParentShowHint'#8#8'ShowHint'#9
+  +#0#0#11'TToolButton'#11'ToolButton1'#4'Left'#3#198#1#6'Height'#2' '#3'Top'#2
+  +#2#7'Caption'#6#11'ToolButton1'#5'Style'#7#12'tbsSeparator'#0#0#9'TCheckBox'
+  +#12'cxAutoCommit'#4'Left'#3#18#2#6'Height'#2#22#4'Hint'#6#18'Auto Commit ON/'
+  +'OFF'#3'Top'#2#2#5'Width'#2'o'#7'Caption'#6#11'Auto Commit'#7'Checked'#9#12
+  +'OnMouseEnter'#7#22'cxAutoCommitMouseEnter'#12'OnMouseLeave'#7#22'cxAutoComm'
+  +'itMouseLeave'#5'State'#7#9'cbChecked'#8'TabOrder'#2#0#0#0#11'TToolButton'#13
+  +'tbQueryDesign'#4'Left'#3'~'#1#4'Hint'#6#14'Query Designer'#3'Top'#2#2#7'Cap'
+  +'tion'#6#13'tbQueryDesign'#10'ImageIndex'#2#11#7'OnClick'#7#18'tbQueryDesign'
+  +'Click'#12'OnMouseEnter'#7#23'tbQueryDesignMouseEnter'#14'ParentShowHint'#8#8
+  +'ShowHint'#9#0#0#11'TRadioGroup'#13'rgScreenModes'#4'Left'#3#152#2#6'Height'
+  +#2' '#4'Hint'#6#12'Screen Modes'#3'Top'#2#0#5'Width'#3#185#0#5'Align'#7#7'al'
+  +'Right'#7'Anchors'#11#5'akTop'#6'akLeft'#8'akBottom'#0#8'AutoFill'#9#28'Chil'
+  +'dSizing.LeftRightSpacing'#2#6#29'ChildSizing.EnlargeHorizontal'#7#24'crsHom'
+  +'ogenousChildResize'#27'ChildSizing.EnlargeVertical'#7#24'crsHomogenousChild'
+  +'Resize'#28'ChildSizing.ShrinkHorizontal'#7#14'crsScaleChilds'#26'ChildSizin'
+  +'g.ShrinkVertical'#7#14'crsScaleChilds'#18'ChildSizing.Layout'#7#29'cclLeftT'
+  +'oRightThenTopToBottom'#27'ChildSizing.ControlsPerLine'#2#3#12'ClientHeight'
+  +#2#28#11'ClientWidth'#3#181#0#7'Columns'#2#3#9'ItemIndex'#2#0#13'Items.Strin'
+  +'gs'#1#6#3'NFS'#6#3'CFS'#6#3'RFS'#0#7'OnClick'#7#18'rgScreenModesClick'#12'O'
+  +'nMouseEnter'#7#23'rgScreenModesMouseEnter'#8'TabOrder'#2#1#0#0#11'TToolButt'
+  +'on'#11'ToolButton4'#4'Left'#3#145#0#4'Hint'#6#16'MWA ScriptEngine'#3'Top'#2
+  +#2#7'Caption'#6#11'ToolButton4'#10'ImageIndex'#2#12#7'OnClick'#7#16'ToolButt'
+  +'on4Click'#0#0#11'TToolButton'#7'tbIBSQL'#4'Left'#3#162#1#4'Hint'#6#14'IBX S'
+  +'QLBuilder'#3'Top'#2#2#7'Caption'#6#7'tbIBSQL'#10'ImageIndex'#2#14#7'OnClick'
+  +#7#12'tbIBSQLClick'#0#0#11'TToolButton'#11'ToolButton6'#4'Left'#3#242#1#3'To'
+  +'p'#2#2#7'Caption'#6#11'ToolButton6'#7'Enabled'#8#0#0#0#11'TOpenDialog'#11'O'
+  +'penDialog1'#10'DefaultExt'#6#4'.sql'#6'Filter'#6#29'SQL Files|*.sql|All Fil'
+  +'es|*.*'#4'Left'#2'X'#3'Top'#2'P'#0#0#11'TSaveDialog'#11'SaveDialog1'#7'Opti'
+  +'ons'#11#17'ofOverwritePrompt'#14'ofEnableSizing'#12'ofViewDetail'#0#4'Left'
+  +#3#192#0#3'Top'#2'P'#0#0#10'TSynSQLSyn'#10'SynSQLSyn1'#13'DefaultFilter'#6#23
+  +'SQL Files (*.sql)|*.sql'#7'Enabled'#8#23'CommentAttri.Foreground'#7#6'clTea'
+  +'l'#25'DefaultPackageAttri.Style'#11#0#26'IdentifierAttri.Foreground'#4'1'#26
+  +#255#0#22'NumberAttri.Foreground'#4'644'#0#22'StringAttri.Foreground'#4#161
+  +#16#16#0#22'SymbolAttri.Foreground'#4'b'#8#8#0#25'TableNameAttri.Foreground'
+  +#7#6'clNavy'#20'TableNameAttri.Style'#11#6'fsBold'#0#10'SQLDialect'#7#13'sql'
+  +'Firebird30'#4'Left'#3#224#2#3'Top'#3'P'#1#0#0#10'TPopupMenu'#6'pmMemo'#4'Le'
+  +'ft'#3' '#2#3'Top'#3#144#1#0#9'TMenuItem'#6'lmUndo'#7'Caption'#6#4'Undo'#7'O'
+  +'nClick'#7#11'lmUndoClick'#0#0#9'TMenuItem'#6'lmRedo'#7'Caption'#6#4'Redo'#7
   +'OnClick'#7#11'lmRedoClick'#0#0#9'TMenuItem'#9'MenuItem1'#7'Caption'#6#1'-'#0
   +#0#9'TMenuItem'#6'lmCopy'#7'Caption'#6#4'Copy'#8'ShortCut'#3'C@'#7'OnClick'#7
   +#11'lmCopyClick'#0#0#9'TMenuItem'#5'lmCut'#7'Caption'#6#3'Cut'#8'ShortCut'#3

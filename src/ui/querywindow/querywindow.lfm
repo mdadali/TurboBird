@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 267
+  Left = 132
   Height = 613
-  Top = 363
+  Top = 234
   Width = 1079
   Caption = 'fmQueryWindow'
   ClientHeight = 613
@@ -70970,7 +70970,7 @@ object fmQueryWindow: TfmQueryWindow
     OnMouseEnter = ToolBar1MouseEnter
     OnMouseLeave = ToolBar1MouseLeave
     object tbNew: TToolButton
-      Left = 37
+      Left = 73
       Hint = 'Open New SQL Query Window'
       Top = 2
       AutoSize = True
@@ -70982,7 +70982,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbOpen: TToolButton
-      Left = 1
+      Left = 37
       Hint = 'Open SQL file'
       Top = 2
       AutoSize = True
@@ -70994,7 +70994,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbSave: TToolButton
-      Left = 73
+      Left = 109
       Hint = 'Save SQL to file'
       Top = 2
       AutoSize = True
@@ -71006,7 +71006,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbRun: TToolButton
-      Left = 145
+      Left = 1
       Hint = 'Run Query (F5)'
       Top = 2
       AutoSize = True
@@ -71171,7 +71171,7 @@ object fmQueryWindow: TfmQueryWindow
       TabOrder = 1
     end
     object ToolButton4: TToolButton
-      Left = 109
+      Left = 145
       Hint = 'MWA ScriptEngine'
       Top = 2
       Caption = 'ToolButton4'

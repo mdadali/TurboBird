@@ -5,10 +5,10 @@ unit fCSVEditor;
 interface
 
 uses
-  Classes, SysUtils, DB, csvdataset, Forms, Controls, Graphics, Dialogs,
-  Clipbrd, DBCtrls, StdCtrls, ExtCtrls, ComCtrls, Menus, SynEdit,
+  Classes, SysUtils, DB, csvdataset, SdfData, dbf, Forms, Controls, Graphics,
+  Dialogs, Clipbrd, DBCtrls, StdCtrls, ExtCtrls, ComCtrls, Menus, SynEdit,
   SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf, RxDBGridPrintGrid,
-  RxDBGridExportSpreadSheet,
+  RxDBGridExportSpreadSheet, fpsDataset,
 
   turbocommon,
   uthemeselector,
@@ -47,11 +47,13 @@ type
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
     CSVDataset1: TCSVDataset;
     DataSource1: TDataSource;
+    Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
     edtQuoteChar: TEdit;
     edtLineEnding: TEdit;
     edtDelimiter: TEdit;
     edtDefaultFieldLength: TEdit;
+    FixedFormatDataSet1: TFixedFormatDataSet;
     Label1: TLabel;
     Label2: TLabel;
     Label5: TLabel;
@@ -75,8 +77,10 @@ type
     Panel1: TPanel;
     RxDBGrid1: TRxDBGrid;
     ScrollBox1: TScrollBox;
+    SdfDataSet1: TSdfDataSet;
     Separator1: TMenuItem;
     Separator2: TMenuItem;
+    sWorksheetDataset1: TsWorksheetDataset;
     SynEdit1: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     tsSQL: TTabSheet;
@@ -101,10 +105,11 @@ type
     procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FFileName: string;
-    procedure LoadCSVFile(const FileName: string);
-    procedure SaveCSVFile(const FileName: string);
+    procedure LoadFile(const FileName: string);
+    procedure SaveFile(const FileName: string);
 
     procedure SetCSVSettingsFromForm;
+    procedure SelectDataSetByFileName(const AFileName: string);
     procedure ReadIni;
     procedure WriteIni;
   public
@@ -128,15 +133,41 @@ end;
 
 procedure TCSVLoadThread.CloseDataset;
 begin
-  if FOwner.CSVDataset1.Active then
-    FOwner.CSVDataset1.Close;
-  FOwner.CSVDataset1.Fields.Clear;
+  if FOwner.DataSource1.DataSet.Active then
+    FOwner.DataSource1.DataSet.Close;
+  FOwner.DataSource1.DataSet.Fields.Clear;
 end;
 
 procedure TCSVLoadThread.LoadCSVInDataset;
 begin
+  if FOwner.DataSource1.DataSet = FOwner.CSVDataset1 then
+    FOwner.CSVDataset1.LoadFromCSVFile(FFileName)
 
-  FOwner.CSVDataset1.LoadFromCSVFile(FFileName);
+  else if FOwner.DataSource1.DataSet = FOwner.sWorksheetDataset1 then
+  begin
+    FOwner.sWorksheetDataset1.FileName := FFileName;
+    //FOwner.sWorksheetDataset1.Open;
+  end
+
+  else if FOwner.DataSource1.DataSet = FOwner.Dbf1 then
+  begin
+    FOwner.Dbf1.FilePathFull := FFileName;
+    //FOwner.Dbf1.Open;
+  end
+
+  else if FOwner.DataSource1.DataSet = FOwner.SdfDataSet1 then
+  begin
+    FOwner.SdfDataSet1.FileName := FFileName;
+    //FOwner.SdfDataSet1.Open;
+  end
+
+  else if FOwner.DataSource1.DataSet = FOwner.FixedFormatDataSet1 then
+  begin
+    FOwner.FixedFormatDataSet1.FileName := FFileName;
+    //FOwner.FixedFormatDataSet1.Open;
+  end;
+
+  FOwner.DataSource1.DataSet.Open;
   FOwner.RxDBGrid1.OptimizeColumnsWidthAll;
 end;
 
@@ -198,31 +229,113 @@ begin
   CSVQuoteOuterWhitespace := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
-procedure TfrmCSVEditor.LoadCSVFile(const FileName: string);
+procedure TfrmCSVEditor.LoadFile(const FileName: string);
 begin
-  if CSVDataset1.Active then
+  if DataSource1.DataSet.Active then
   begin
-    CSVDataset1.Close;
-    CSVDataset1.Fields.Clear;
+    DataSource1.DataSet.Close;
+    DataSource1.DataSet.Fields.Clear;
   end;
 
   RxDBGrid1.BeginUpdate;
   CSVDataset1.LoadFromCSVFile(FileName);
+
+  if DataSource1.DataSet = CSVDataset1 then
+    CSVDataset1.LoadFromCSVFile(FileName)
+
+  else if DataSource1.DataSet = sWorksheetDataset1 then
+  begin
+    sWorksheetDataset1.FileName := FileName;
+    sWorksheetDataset1.SheetName := ChangeFileExt(ExtractFileName(FileName), '');;
+    sWorksheetDataset1.Open;
+  end
+
+  else if DataSource1.DataSet = Dbf1 then
+  begin
+    Dbf1.FilePathFull := FileName;
+    Dbf1.Open;
+  end
+
+  else if DataSource1.DataSet = SdfDataSet1 then
+  begin
+    SdfDataSet1.FileName := FileName;
+    SdfDataSet1.Open;
+  end
+
+  else if DataSource1.DataSet = FixedFormatDataSet1 then
+  begin
+    FixedFormatDataSet1.FileName := FileName;
+    FixedFormatDataSet1.Open;
+  end;
+
   RxDBGrid1.OptimizeColumnsWidthAll;
   RxDBGrid1.EndUpdate(True);
 end;
 
-procedure TfrmCSVEditor.SaveCSVFile(const FileName: string);
+procedure TfrmCSVEditor.SaveFile(const FileName: string);
 begin
-  if not CSVDataset1.Active then Exit;
+  if not DataSource1.DataSet.Active then Exit;
 
   try
-    CSVDataset1.SaveToCSVFile(FileName);
+    if DataSource1.DataSet = CSVDataSet1 then
+      CSVDataSet1.SaveToCSVFile(FileName)
+
+    else if DataSource1.DataSet = sWorksheetDataset1 then
+      sWorksheetDataset1.Flush     //SaveToFile(FileName)
+
+    else if DataSource1.DataSet = Dbf1 then
+    begin
+      Dbf1.FilePathFull := FileName;
+      Dbf1.Close;
+      Dbf1.Open; // ggf. nötig je nach Lib
+    end
+
+    else if DataSource1.DataSet = SdfDataSet1 then
+      SdfDataSet1.SaveFileAs(FileName)
+
+    else if DataSource1.DataSet = FixedFormatDataSet1 then
+      FixedFormatDataSet1.SaveFileAs(FileName)
+
+    else
+      raise Exception.Create('Unbekannter Dataset-Typ beim Speichern');
+
   except
     on E: Exception do
-      ShowMessage('Fehler beim Speichern der CSV: ' + E.Message);
+      ShowMessage('Fehler beim Speichern: ' + E.Message);
+  end;
+end;
+
+procedure TfrmCSVEditor.SelectDataSetByFileName(const AFileName: string);
+var
+  Ext: string;
+begin
+  Ext := LowerCase(ExtractFileExt(AFileName));
+
+  // Vorher schließen
+  if DataSource1.DataSet <> nil then
+  begin
+    if DataSource1.DataSet.Active then
+      DataSource1.DataSet.Close;
   end;
 
+  if (Ext = '.csv') then
+    DataSource1.DataSet := CSVDataSet1
+
+  else if (Ext = '.xlsx') or (Ext = '.xls') or (Ext = '.xml')
+          or (Ext = '.html') or (Ext = '.odt') then
+    DataSource1.DataSet := sWorksheetDataset1
+
+  else if (Ext = '.dbf') then
+    DataSource1.DataSet := Dbf1
+
+  else if (Ext = '.sdf') then
+    DataSource1.DataSet := SdfDataSet1
+
+  else if (Ext = '.txt') then
+    DataSource1.DataSet := FixedFormatDataSet1
+
+  else
+    raise Exception.Create('Unknown file extension: ' + Ext);
 end;
 
 procedure TfrmCSVEditor.btnOpenFileClick(Sender: TObject);
@@ -236,11 +349,14 @@ var
 begin
   if not OpenDialog1.Execute then Exit;
 
+  FFileName := OpenDialog1.FileName;
+  SelectDataSetByFileName(FFileName);
+
   SynEdit1.Lines.Clear;
-  if CSVDataset1.Active then
+  if DataSource1.DataSet.Active then
   begin
-    CSVDataset1.Close;
-    CSVDataset1.Fields.Clear;
+    DataSource1.DataSet.Close;
+    DataSource1.DataSet.Fields.Clear;
   end;
 
   SetCSVSettingsFromForm;
@@ -307,9 +423,10 @@ begin
     Format('%.2d:%.2d:%.2d', [Hours, Minutes, Seconds])
   );
 
-  FFileName := OpenDialog1.FileName;
-  btnSaveFileAs.Enabled := True;
+  //FFileName := OpenDialog1.FileName;
+  Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
 
+  btnSaveFileAs.Enabled := True;
 end;
 
 procedure TfrmCSVEditor.btnCreateSQLClick(Sender: TObject);
@@ -318,8 +435,9 @@ var
   TempTableName: string;
   TempFieldLength: Word;
 begin
+  TempFieldLength := 0;
   //Dataset prüfen
-  if not CSVDataset1.Active then
+  if not DataSource1.DataSet.Active then
   begin
     MessageDlg('Warning',
       'Dataset is not active.',
@@ -327,7 +445,7 @@ begin
     Exit;
   end;
 
-  if CSVDataset1.FieldCount = 0 then
+  if DataSource1.DataSet.FieldCount = 0 then
   begin
     MessageDlg('Warning',
       'Dataset has no fields.',
@@ -345,7 +463,7 @@ begin
   end;
 
   //Default Field Length absichern
-  TempFieldLength := CSVDataset1.CSVOptions.DefaultFieldLength;
+  //TempFieldLength := CSVDataset1.CSVOptions.DefaultFieldLength;
   if TempFieldLength = 0 then
     TempFieldLength := 50;
 
@@ -356,7 +474,7 @@ begin
 
   try
     GenSQLFromCSVDataset := TGenSQLFromCSVDataset.Create(
-      CSVDataset1,
+      DataSource1.DataSet,
       TempTableName,
       TempFieldLength
     );
@@ -379,19 +497,19 @@ end;
 
 procedure TfrmCSVEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
 begin
-  SaveCSVFile(FFileName);
+  SaveFile(FFileName);
 end;
 
 procedure TfrmCSVEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
 begin
   if Button = nbRefresh then
   begin
-    LoadCSVFile(FFileName);
+    LoadFile(FFileName);
     abort;
   end;
   if Button = nbPost then
   begin
-    SaveCSVFile(FFileName);
+    SaveFile(FFileName);
     //abort;
   end;
 end;
@@ -405,6 +523,26 @@ end;
 procedure TfrmCSVEditor.FormCreate(Sender: TObject);
 begin
   ReadIni;
+
+  OpenDialog1.Filter :=
+    'All supported files|*.csv;*.json;*.xml;*.html;*.htm;*.xls;*.xlsx;*.odt;*.dbf;*.sdf;*.txt;*.wiki;*.wikitable|' +
+
+    'CSV files (*.csv)|*.csv|' +
+    'JSON files (*.json)|*.json|' +
+    'XML files (*.xml)|*.xml|' +
+    'HTML files (*.html;*.htm)|*.html;*.htm|' +
+
+    'Excel files (*.xls;*.xlsx)|*.xls;*.xlsx|' +
+    'OpenDocument Text (*.odt)|*.odt|' +
+
+    'DBF files (*.dbf)|*.dbf|' +
+    'SDF files (*.sdf)|*.sdf|' +
+    'Text (Fixed Format) (*.txt)|*.txt|' +
+
+    'WikiTable (Pipes) (*.wiki)|*.wiki|' +
+    'WikiTable (MediaWiki) (*.wikitable)|*.wikitable|' +
+
+    'All files (*.*)|*.*';
 end;
 
 procedure TfrmCSVEditor.FormShow(Sender: TObject);
@@ -420,38 +558,38 @@ end;
 procedure TfrmCSVEditor.btnSaveFileAsClick(Sender: TObject);
 begin
   if SaveDialog1.Execute then
-    SaveCSVFile(SaveDialog1.FileName);
+    SaveFile(SaveDialog1.FileName);
 end;
 
 procedure TfrmCSVEditor.lmStdExportFormatsClick(Sender: TObject);
 begin
-  if CSVDataset1.IsEmpty then
+  if DataSource1.DataSet.IsEmpty then
   begin
     ShowMessage('DataSet has no records!');
     exit;
   end;
 
-  ExportStdFormat(CSVDataset1);
+  ExportStdFormat(DataSource1.DataSet);
 end;
 
 procedure TfrmCSVEditor.lmExportDataAsHtmlClick(Sender: TObject);
 begin
-  if CSVDataset1.IsEmpty then
+  if DataSource1.DataSet.IsEmpty then
   begin
     ShowMessage('DataSet has no records!');
     exit;
   end;
-  ExportDataHtml(CSVDataset1);
+  ExportDataHtml(DataSource1.DataSet);
 end;
 
 procedure TfrmCSVEditor.lmExportDataAsMarkDownTableClick(Sender: TObject);
 begin
-  if CSVDataset1.IsEmpty then
+  if DataSource1.DataSet.IsEmpty then
   begin
     ShowMessage('DataSet has no records!');
     exit;
   end;
-  ExportDataMarkDownTable(CSVDataset1);
+  ExportDataMarkDownTable(DataSource1.DataSet);
 end;
 
 procedure TfrmCSVEditor.lmExportDataAsPDFClick(Sender: TObject);
@@ -481,10 +619,10 @@ var
   MaxExportRows, RowCount, CopiedRows: Integer;
   MsgText: string;
 begin
-  if CSVDataset1.IsEmpty then
+  if DataSource1.DataSet.IsEmpty then
   begin
     MessageDlg('DataSet has no records!', mtError, [mbOK], 0);
-    CSVDataset1.EnableControls;
+    DataSource1.DataSet.EnableControls;
     Exit;
   end;
 
@@ -505,7 +643,7 @@ begin
     end;
   end;
 
-  RowCount := CSVDataset1.RecordCount;
+  RowCount := DataSource1.DataSet.RecordCount;
 
   if (MaxExportRows > 0) and (RowCount > MaxExportRows) then
   begin
@@ -527,8 +665,8 @@ begin
 
   // --- Export ---
   try
-    CSVDataset1.DisableControls;
-    ExportDataToClipboard(CSVDataset1, MaxExportRows);
+    DataSource1.DataSet.DisableControls;
+    ExportDataToClipboard(DataSource1.DataSet, MaxExportRows);
 
     MsgText := 'Successfully copied ' + IntToStr(CopiedRows) + ' records to the clipboard.';
     if MaxExportRows = 0 then
@@ -536,8 +674,8 @@ begin
 
     MessageDlg(MsgText, mtInformation, [mbOK], 0);
   finally
-    CSVDataset1.First;
-    CSVDataset1.EnableControls;
+    DataSource1.DataSet.First;
+    DataSource1.DataSet.EnableControls;
   end;
 end;
 
