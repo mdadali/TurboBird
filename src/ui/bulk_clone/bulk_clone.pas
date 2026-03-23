@@ -118,6 +118,7 @@ type
       TableName, FileName: string): Boolean;
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
 
+    function BuildFieldNameList(ATable: string): string;
   public
     procedure Init(ANodeInfos: TPNodeInfos);
     function GenerateSQL: string;
@@ -587,8 +588,17 @@ begin
               ' FROM ' + comboxSourceTables.Text;
           efBinary, efFixedText:
             IBQuerySource.SQL.Text :=
+              Format('INSERT INTO %s SELECT FIRST %d SKIP %d %s FROM %s',
+                     [
+                       edtExternalTableName.Text,
+                       toRow - fromRow,
+                       fromRow,
+                       BuildFieldNameList(comboxSourceTables.Text), // ❌ kein * mehr
+                       comboxSourceTables.Text
+                     ]);
+            {IBQuerySource.SQL.Text :=
               Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
-                     [edtExternalTableName.Text, toRow - fromRow, fromRow, comboxSourceTables.Text]);
+                     [edtExternalTableName.Text, toRow - fromRow, fromRow, comboxSourceTables.Text]);}
         end;
 
         IBQuerySource.ExecSQL;
@@ -615,13 +625,21 @@ begin
 
         IBQueryDest.Close;
 
-        //inser data from ext table to fb table
+        //insert data from ext table to fb table
         IBQueryDest.SQL.Text :=
+          Format('INSERT INTO %s SELECT FIRST %d SKIP %d %s FROM %s',
+                 [
+                   comboxSourceTables.Text,
+                   toRow - fromRow,
+                   fromRow,
+                   BuildFieldNameList(comboxSourceTables.Text), // ❌ kein * mehr
+                   edtExternalTableName.Text
+                 ]);
+        {IBQueryDest.SQL.Text :=
           Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
-                 [comboxSourceTables.Text, toRow - fromRow, fromRow, edtExternalTableName.Text]);
+                 [comboxSourceTables.Text, toRow - fromRow, fromRow, edtExternalTableName.Text]);}
 
         IBQueryDest.ExecSQL;
-        ShowMessage(IBQueryDest.SQL.Text);
         IBTransDest.CommitRetaining;
 
         ProgressBar.Position := toRow;
@@ -659,6 +677,43 @@ begin
 
   finally
     SQLBatch.Free;
+  end;
+end;
+
+function TfrmBulkClone.BuildFieldNameList(ATable: string): string;
+var
+  FieldName: string;
+  FieldType: Integer;
+  FieldDefs: TStringList;
+begin
+  FieldDefs := TStringList.Create;
+  try
+    IBQuerySource.Close;
+    IBQuerySource.SQL.Text :=
+      'SELECT RF.RDB$FIELD_NAME, F.RDB$FIELD_TYPE ' +
+      'FROM RDB$RELATION_FIELDS RF ' +
+      'JOIN RDB$FIELDS F ON RF.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME ' +
+      'WHERE RF.RDB$RELATION_NAME = :T ' +
+      'ORDER BY RF.RDB$FIELD_POSITION';
+    IBQuerySource.ParamByName('T').AsString := UpperCase(ATable);
+    IBQuerySource.Open;
+
+    while not IBQuerySource.EOF do
+    begin
+      FieldName := Trim(IBQuerySource.Fields[0].AsString);
+      FieldType := IBQuerySource.Fields[1].AsInteger;
+
+      // nur Typen unterstützen, die External Tables können
+      if FieldType in [7,8,16,10,27,12,13,14,35,37] then
+        FieldDefs.Add(FieldName);
+
+      IBQuerySource.Next;
+    end;
+    IBQuerySource.Close;
+
+    Result := FieldDefs.CommaText;
+  finally
+    FieldDefs.Free;
   end;
 end;
 
