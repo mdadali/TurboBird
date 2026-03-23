@@ -21,6 +21,7 @@ uses
   IB,
   IBDatabase,
   IBDatabaseInfo,
+  IBLocalDBSupport,
   IBQuery,
   IBCustomDataSet,
   IBTable,
@@ -264,6 +265,7 @@ type
     IBTransaction: TIBTransaction;
     IBQuery: TIBQuery;
     IBDatabaseInfo: TIBDatabaseInfo;
+    IBLocalDBSupport: TIBLocalDBSupport;
   end;
 
   TPNodeInfos = ^TNodeInfos;

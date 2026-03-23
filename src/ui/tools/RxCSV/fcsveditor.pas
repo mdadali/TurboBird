@@ -12,9 +12,11 @@ uses
 
   turbocommon,
   uthemeselector,
-  uGenSQLFromCSVDataset,
+  uGenSQLFromCSVDataset, c_json_dataset,
 
-  fdataexportersintrf
+  fdataexportersintrf,
+
+  fpsTypes
   ;
 
 type
@@ -54,6 +56,7 @@ type
     edtDelimiter: TEdit;
     edtDefaultFieldLength: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
+    JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
     Label2: TLabel;
     Label5: TLabel;
@@ -142,6 +145,9 @@ procedure TCSVLoadThread.LoadCSVInDataset;
 begin
   if FOwner.DataSource1.DataSet = FOwner.CSVDataset1 then
     FOwner.CSVDataset1.LoadFromCSVFile(FFileName)
+
+  else if FOwner.DataSource1.DataSet = FOwner.JSONDataset1 then
+    FOwner.JSONDataset1.LoadFromFile(FFileName)
 
   else if FOwner.DataSource1.DataSet = FOwner.sWorksheetDataset1 then
   begin
@@ -238,10 +244,12 @@ begin
   end;
 
   RxDBGrid1.BeginUpdate;
-  CSVDataset1.LoadFromCSVFile(FileName);
 
   if DataSource1.DataSet = CSVDataset1 then
     CSVDataset1.LoadFromCSVFile(FileName)
+
+  else if DataSource1.DataSet = JSONDataset1 then
+    JSONDataset1.LoadFromFile(FileName)
 
   else if DataSource1.DataSet = sWorksheetDataset1 then
   begin
@@ -272,6 +280,24 @@ begin
   RxDBGrid1.EndUpdate(True);
 end;
 
+procedure SaveJSONToFile(DataSet: TJSONDataSet; const FileName: string);
+var
+  JSONText: string;
+  SL: TStringList;
+begin
+  // 1. JSON aus dem Dataset erzeugen
+  JSONText := DataSet.SaveToJSON;
+
+  // 2. In Datei schreiben
+  SL := TStringList.Create;
+  try
+    SL.Text := JSONText;
+    SL.SaveToFile(FileName);
+  finally
+    SL.Free;
+  end;
+end;
+
 procedure TfrmCSVEditor.SaveFile(const FileName: string);
 begin
   if not DataSource1.DataSet.Active then Exit;
@@ -279,6 +305,11 @@ begin
   try
     if DataSource1.DataSet = CSVDataSet1 then
       CSVDataSet1.SaveToCSVFile(FileName)
+
+    else if DataSource1.DataSet = JSONDataSet1 then
+    begin
+      SaveJSONToFile(JSONDataSet1, FileName)
+    end
 
     else if DataSource1.DataSet = sWorksheetDataset1 then
       sWorksheetDataset1.Flush     //SaveToFile(FileName)
@@ -311,7 +342,6 @@ var
 begin
   Ext := LowerCase(ExtractFileExt(AFileName));
 
-  // Vorher schließen
   if DataSource1.DataSet <> nil then
   begin
     if DataSource1.DataSet.Active then
@@ -321,9 +351,36 @@ begin
   if (Ext = '.csv') then
     DataSource1.DataSet := CSVDataSet1
 
+  else if (Ext = '.json') then
+      DataSource1.DataSet := JSONDataSet1
+
   else if (Ext = '.xlsx') or (Ext = '.xls') or (Ext = '.xml')
-          or (Ext = '.html') or (Ext = '.odt') then
-    DataSource1.DataSet := sWorksheetDataset1
+       or (Ext = '.html') or (Ext = '.ods')
+       or (Ext = '.wiki') or (Ext = '.wikitable') then
+  begin
+    DataSource1.DataSet := sWorksheetDataset1;
+
+    if Ext = '.xlsx' then
+      sWorksheetDataset1.FileFormat := sfOOXML
+
+    else if Ext = '.xls' then
+      sWorksheetDataset1.FileFormat := sfExcel8
+
+    else if Ext = '.xml' then
+      sWorksheetDataset1.FileFormat := sfExcelXML
+
+    else if (Ext = '.html') or (Ext = '.htm') then
+      sWorksheetDataset1.FileFormat := sfHTML
+
+    else if Ext = '.odt' then
+      sWorksheetDataset1.FileFormat := sfOpenDocument
+
+    else if Ext = '.wiki' then
+      sWorksheetDataset1.FileFormat := sfWikiTable_Pipes
+
+    else if Ext = '.wikitable' then
+      sWorksheetDataset1.FileFormat := sfWikiTable_WikiMedia;
+  end
 
   else if (Ext = '.dbf') then
     DataSource1.DataSet := Dbf1
@@ -523,17 +580,16 @@ end;
 procedure TfrmCSVEditor.FormCreate(Sender: TObject);
 begin
   ReadIni;
-
   OpenDialog1.Filter :=
     'All supported files|*.csv;*.json;*.xml;*.html;*.htm;*.xls;*.xlsx;*.odt;*.dbf;*.sdf;*.txt;*.wiki;*.wikitable|' +
 
     'CSV files (*.csv)|*.csv|' +
     'JSON files (*.json)|*.json|' +
-    'XML files (*.xml)|*.xml|' +
+    'Excel-XML files (*.xml)|*.xml|' +
     'HTML files (*.html;*.htm)|*.html;*.htm|' +
 
     'Excel files (*.xls;*.xlsx)|*.xls;*.xlsx|' +
-    'OpenDocument Text (*.odt)|*.odt|' +
+    'OpenDocument Calc (*.ods)|*.ods|' +
 
     'DBF files (*.dbf)|*.dbf|' +
     'SDF files (*.sdf)|*.sdf|' +

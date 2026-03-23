@@ -92,7 +92,12 @@ implementation
 { TfmReg }
 
 procedure TfmReg.bbRegClick(Sender: TObject);
+var ServerRec: TServerRecord;
+    ServerRoot: string;
 begin
+  //ServerRec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
+  //ServerRoot := ServerRec.RootPath;
+
   if Trim(edTitle.Text) = '' then
   begin
     ShowMessage('You should fill all fields');
@@ -204,8 +209,7 @@ function TfmReg.RegisterDatabase(
   SavePassword: Boolean;
   FBClient: string; SQLDialect: string; Port: string; ServerName: string;
   OverwriteLoadedClientLib: boolean;
-  ConnectOnApplicationStart: boolean
-): Boolean;
+  ConnectOnApplicationStart: boolean): Boolean;
 var
   Rec: TRegisteredDatabase;
   F: file of TRegisteredDatabase;

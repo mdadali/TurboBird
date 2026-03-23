@@ -138,6 +138,8 @@ begin
   IBDatabase1.Params.Add('user_name=' + DBRec.RegRec.UserName);
   IBDatabase1.Params.Add('password=' + DBRec.RegRec.Password);
 
+  IBTransaction1.Params.Assign(IBDatabase1.DefaultTransaction.Params);
+
   IBDatabase1.Connected := true;
 
 end;

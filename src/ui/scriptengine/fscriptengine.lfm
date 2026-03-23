@@ -1,7 +1,7 @@
 object frmScriptEngine: TfrmScriptEngine
-  Left = 316
+  Left = 147
   Height = 564
-  Top = 134
+  Top = 78
   Width = 1031
   Caption = 'MWA Software IBX-Scripter'
   ClientHeight = 564
@@ -38,20 +38,20 @@ object frmScriptEngine: TfrmScriptEngine
       ParentColor = False
     end
     object chkBoxStopOnError: TCheckBox
-      Left = 686
+      Left = 685
       Height = 22
       Top = 16
-      Width = 148
+      Width = 149
       Anchors = [akTop, akRight]
       Caption = 'Stop On First Error'
       OnChange = chkBoxStopOnErrorChange
       TabOrder = 0
     end
     object chkBoxEchoInput: TCheckBox
-      Left = 874
+      Left = 873
       Height = 22
       Top = 16
-      Width = 96
+      Width = 97
       Anchors = [akTop, akRight]
       Caption = 'Echo Input'
       OnChange = chkBoxEchoInputChange

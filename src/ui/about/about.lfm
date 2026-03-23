@@ -1,5 +1,5 @@
 object fmAbout: TfmAbout
-  Left = 455
+  Left = 473
   Height = 618
   Top = 106
   Width = 641
@@ -70331,8 +70331,8 @@ object fmAbout: TfmAbout
     OnChange = PageControl1Change
     object TabSheet2: TTabSheet
       Caption = 'Info'
-      ClientHeight = 522
-      ClientWidth = 599
+      ClientHeight = 526
+      ClientWidth = 601
       ParentShowHint = False
       ShowHint = True
       object pnlMWA: TPanel
@@ -71323,9 +71323,9 @@ object fmAbout: TfmAbout
       end
       object GifAnim1: TGifAnim
         Cursor = crHandPoint
-        Left = 2
+        Left = 3
         Height = 72
-        Top = 196
+        Top = 198
         Width = 600
         Anchors = []
         AutoSize = False
@@ -71336,11 +71336,11 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 148
         Top = 38
-        Width = 599
+        Width = 601
         Align = alTop
         BevelOuter = bvNone
         ClientHeight = 148
-        ClientWidth = 599
+        ClientWidth = 601
         Color = clWhite
         Font.Color = 7303023
         ParentColor = False
@@ -122922,10 +122922,10 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 38
         Top = 0
-        Width = 599
+        Width = 601
         Align = alTop
         BevelOuter = bvNone
-        Caption = 'TurboBird - Firebird Admin Tool'
+        Caption = 'TurboBird  XT - Firebird Admin Tool'
         Color = clSilver
         Font.Height = -17
         Font.Style = [fsBold]
@@ -122936,11 +122936,11 @@ object fmAbout: TfmAbout
       object Panel2: TPanel
         Left = 0
         Height = 106
-        Top = 416
-        Width = 599
+        Top = 420
+        Width = 601
         Align = alBottom
         ClientHeight = 106
-        ClientWidth = 599
+        ClientWidth = 601
         TabOrder = 4
         object Label4: TLabel
           Left = 184
@@ -122988,13 +122988,13 @@ object fmAbout: TfmAbout
     end
     object TabSheet1: TTabSheet
       Caption = 'Credits'
-      ClientHeight = 522
-      ClientWidth = 599
+      ClientHeight = 526
+      ClientWidth = 601
       object SecretPanel1: TSecretPanel
         Left = 0
-        Height = 522
+        Height = 526
         Top = 0
-        Width = 599
+        Width = 601
         Cycled = True
         Lines.Strings = (
           'Thanks to the Community'

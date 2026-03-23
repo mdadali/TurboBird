@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmAbout','FORMDATA',[
-  'TPF0'#8'TfmAbout'#7'fmAbout'#4'Left'#3#199#1#6'Height'#3'j'#2#3'Top'#2'j'#5
+  'TPF0'#8'TfmAbout'#7'fmAbout'#4'Left'#3#217#1#6'Height'#3'j'#2#3'Top'#2'j'#5
   +'Width'#3#129#2#11'BorderIcons'#11#0#11'BorderStyle'#7#6'bsNone'#7'Caption'#6
   +#15'About Turbobird'#12'ClientHeight'#3'j'#2#11'ClientWidth'#3#129#2#5'Color'
   +#7#6'clForm'#9'Icon.Data'#10#127'O"'#0'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'e'
@@ -95640,7 +95640,7 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +'PageControl1'#4'Left'#2' '#6'Height'#3'0'#2#3'Top'#2#0#5'Width'#3']'#2#10'A'
   +'ctivePage'#7#9'TabSheet2'#8'TabIndex'#2#0#8'TabOrder'#2#1#8'OnChange'#7#18
   +'PageControl1Change'#0#9'TTabSheet'#9'TabSheet2'#7'Caption'#6#4'Info'#12'Cli'
-  +'entHeight'#3#10#2#11'ClientWidth'#3'W'#2#14'ParentShowHint'#8#8'ShowHint'#9
+  +'entHeight'#3#14#2#11'ClientWidth'#3'Y'#2#14'ParentShowHint'#8#8'ShowHint'#9
   +#0#6'TPanel'#6'pnlMWA'#4'Left'#2#0#6'Height'#2'U'#3'Top'#3'0'#1#5'Width'#3'W'
   +#2#10'BevelOuter'#7#6'bvNone'#10'BevelWidth'#2#2#7'Caption'#6#6'pnlMWA'#12'C'
   +'lientHeight'#2'U'#11'ClientWidth'#3'W'#2#5'Color'#7#7'clWhite'#11'ParentCol'
@@ -96919,11 +96919,11 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +'8p'#224#192#129#3#135#209'8p'#224#192#129#3#135#209'8p'#224#192#129#3#135
   +#209'8p'#224#192#129#3#7#246#241#255#1#175#251#179#175#164#207#255'e'#0#0#0#0
   +'IEND'#174'B`'#130#11'Transparent'#9#0#0#0#8'TGifAnim'#8'GifAnim1'#6'Cursor'
-  +#7#11'crHandPoint'#4'Left'#2#2#6'Height'#2'H'#3'Top'#3#196#0#5'Width'#3'X'#2
+  +#7#11'crHandPoint'#4'Left'#2#3#6'Height'#2'H'#3'Top'#3#198#0#5'Width'#3'X'#2
   +#7'Anchors'#11#0#8'AutoSize'#8#7'Animate'#8#7'OnClick'#7#13'GifAnim1Click'#0
   +#0#6'TPanel'#6'pnlTop'#4'Left'#2#0#6'Height'#3#148#0#3'Top'#2'&'#5'Width'#3
-  +'W'#2#5'Align'#7#5'alTop'#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#148#0
-  +#11'ClientWidth'#3'W'#2#5'Color'#7#7'clWhite'#10'Font.Color'#4'ooo'#0#11'Par'
+  +'Y'#2#5'Align'#7#5'alTop'#10'BevelOuter'#7#6'bvNone'#12'ClientHeight'#3#148#0
+  +#11'ClientWidth'#3'Y'#2#5'Color'#7#7'clWhite'#10'Font.Color'#4'ooo'#0#11'Par'
   +'entColor'#8#10'ParentFont'#8#8'TabOrder'#2#1#7'OnClick'#7#11'pnlTopClick'#0
   +#6'TLabel'#12'lbPgmVersion'#4'Left'#2'_'#6'Height'#2#20#3'Top'#2#15#5'Width'
   +#2'P'#7'Caption'#6#10'PgmVersion'#10'Font.Color'#4'ooo'#0#11'ParentColor'#8
@@ -165841,12 +165841,12 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +#6'7Powered by FPC/Lazarus and MWA Software'#226#128#153's IBX4Lazarus'#5'Co'
   +'lor'#7#8'clSilver'#11'Font.Height'#2#241#10'Font.Style'#11#6'fsBold'#0#11'P'
   +'arentColor'#8#10'ParentFont'#8#8'TabOrder'#2#2#0#0#6'TPanel'#8'pnlTitle'#4
-  +'Left'#2#0#6'Height'#2'&'#3'Top'#2#0#5'Width'#3'W'#2#5'Align'#7#5'alTop'#10
-  +'BevelOuter'#7#6'bvNone'#7'Caption'#6#31'TurboBird - Firebird Admin Tool'#5
+  +'Left'#2#0#6'Height'#2'&'#3'Top'#2#0#5'Width'#3'Y'#2#5'Align'#7#5'alTop'#10
+  +'BevelOuter'#7#6'bvNone'#7'Caption'#6'#TurboBird  XT - Firebird Admin Tool'#5
   +'Color'#7#8'clSilver'#11'Font.Height'#2#239#10'Font.Style'#11#6'fsBold'#0#11
   +'ParentColor'#8#10'ParentFont'#8#8'TabOrder'#2#3#0#0#6'TPanel'#6'Panel2'#4'L'
-  +'eft'#2#0#6'Height'#2'j'#3'Top'#3#160#1#5'Width'#3'W'#2#5'Align'#7#8'alBotto'
-  +'m'#12'ClientHeight'#2'j'#11'ClientWidth'#3'W'#2#8'TabOrder'#2#4#0#6'TLabel'
+  +'eft'#2#0#6'Height'#2'j'#3'Top'#3#164#1#5'Width'#3'Y'#2#5'Align'#7#8'alBotto'
+  +'m'#12'ClientHeight'#2'j'#11'ClientWidth'#3'Y'#2#8'TabOrder'#2#4#0#6'TLabel'
   +#6'Label4'#4'Left'#3#184#0#6'Height'#2#20#3'Top'#2#21#5'Width'#3#200#0#7'Cap'
   +'tion'#6#27'Developed By TurboBird team'#11'ParentColor'#8#0#0#6'TLabel'#9'l'
   +'aWebSite'#6'Cursor'#7#11'crHandPoint'#4'Left'#3#160#0#6'Height'#2#20#3'Top'
@@ -165859,9 +165859,9 @@ LazarusResources.Add('TfmAbout','FORMDATA',[
   +#0#6'Height'#2'('#3'Top'#2'@'#5'Width'#3'='#1#7'Caption'#6'CLicense: MIT Lic'
   +'ense'#10#10'Copyright (c) 2015-2026 by Motaz Abdel Azeem.'#10'Font.Color'#4
   +'ooo'#0#11'ParentColor'#8#10'ParentFont'#8#0#0#0#0#9'TTabSheet'#9'TabSheet1'
-  +#7'Caption'#6#7'Credits'#12'ClientHeight'#3#10#2#11'ClientWidth'#3'W'#2#0#12
-  +'TSecretPanel'#12'SecretPanel1'#4'Left'#2#0#6'Height'#3#10#2#3'Top'#2#0#5'Wi'
-  +'dth'#3'W'#2#6'Cycled'#9#13'Lines.Strings'#1#6#23'Thanks to the Community'#6
+  +#7'Caption'#6#7'Credits'#12'ClientHeight'#3#14#2#11'ClientWidth'#3'Y'#2#0#12
+  +'TSecretPanel'#12'SecretPanel1'#4'Left'#2#0#6'Height'#3#14#2#3'Top'#2#0#5'Wi'
+  +'dth'#3'Y'#2#6'Cycled'#9#13'Lines.Strings'#1#6#23'Thanks to the Community'#6
   +#0#6'9A heartfelt thanks to the open-source community for their'#6#19'tremen'
   +'dous support.'#6':Special thanks to Tony Whyman for his assistance with IBX'
   +','#6'>Piero Valagussa for providing the CADSys4 2D & 3D CAD Library,'#6'Aan'

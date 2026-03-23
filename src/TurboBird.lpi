@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1735"/>
+      <BuildNr Value="1737"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -564,93 +564,96 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="28">
+    <RequiredPackages Count="29">
       <Item1>
-        <PackageName Value="DBFLaz"/>
+        <PackageName Value="JSONDataSet"/>
       </Item1>
       <Item2>
-        <PackageName Value="SDFLaz"/>
+        <PackageName Value="DBFLaz"/>
       </Item2>
       <Item3>
-        <PackageName Value="laz_fpspreadsheet_dataset"/>
+        <PackageName Value="SDFLaz"/>
       </Item3>
       <Item4>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="laz_fpspreadsheet_dataset"/>
       </Item4>
       <Item5>
-        <PackageName Value="encconv_package"/>
+        <PackageName Value="ibnongui"/>
       </Item5>
       <Item6>
-        <PackageName Value="atsynedit_cmp_package"/>
+        <PackageName Value="encconv_package"/>
       </Item6>
       <Item7>
-        <PackageName Value="atsynedit_package"/>
+        <PackageName Value="atsynedit_cmp_package"/>
       </Item7>
       <Item8>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="atsynedit_package"/>
       </Item8>
       <Item9>
-        <PackageName Value="rxdbgrid_print"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item9>
       <Item10>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item10>
       <Item11>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="rxnew"/>
       </Item11>
       <Item12>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="indylaz"/>
       </Item12>
       <Item13>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item13>
       <Item14>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="FrameViewer09"/>
       </Item14>
       <Item15>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="atbinhex_package"/>
       </Item15>
       <Item16>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="lazreport"/>
       </Item16>
       <Item17>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="lazdbexport"/>
       </Item17>
       <Item18>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item18>
       <Item19>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item19>
       <Item20>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item20>
       <Item21>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="dclibx"/>
       </Item21>
       <Item22>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="iblocaldb"/>
       </Item22>
       <Item23>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="ibcontrols"/>
       </Item23>
       <Item24>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="ibexpress"/>
       </Item24>
       <Item25>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="Abbrevia"/>
       </Item25>
       <Item26>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="MemDSLaz"/>
       </Item26>
       <Item27>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item27>
       <Item28>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item28>
+      <Item29>
+        <PackageName Value="LCL"/>
+      </Item29>
     </RequiredPackages>
     <Units Count="108">
       <Unit0>

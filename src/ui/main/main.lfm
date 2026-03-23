@@ -1,5 +1,5 @@
 object fmMain: TfmMain
-  Left = 456
+  Left = 427
   Height = 612
   Top = 136
   Width = 906
@@ -6444,7 +6444,6 @@ object fmMain: TfmMain
       end
       object mnBulkClone: TMenuItem
         Caption = 'Bulk Clone'
-        Visible = False
         OnClick = mnBulkCloneClick
       end
       object mnDBReader: TMenuItem
@@ -9613,8 +9612,8 @@ object fmMain: TfmMain
     Font.Name = 'Ubuntu'
     MinFontSize = 0
     MaxFontSize = 0
-    Left = 392
-    Top = 320
+    Left = 424
+    Top = 336
   end
   object ImageList2: TImageList
     DrawingStyle = dsFocus

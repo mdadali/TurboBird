@@ -1,7 +1,7 @@
 object frmBulkClone: TfrmBulkClone
-  Left = 303
+  Left = 239
   Height = 588
-  Top = 121
+  Top = 76
   Width = 1059
   Caption = 'Clone Table → External & Bulk Export'
   ClientHeight = 588
@@ -60,7 +60,7 @@ object frmBulkClone: TfrmBulkClone
     object btnExecute: TButton
       Left = 340
       Height = 43
-      Top = 2
+      Top = 0
       Width = 80
       Caption = 'Execute'
       Enabled = False
@@ -178,7 +178,7 @@ object frmBulkClone: TfrmBulkClone
         Top = 8
         Width = 458
         TabOrder = 1
-        Text = '/opt/firebird/examples/empbuild/country_ext.csv'
+        Text = '/home/maurog/common/employee_ext.bin'
       end
       object edtExternalTableName: TEdit
         Left = 120
