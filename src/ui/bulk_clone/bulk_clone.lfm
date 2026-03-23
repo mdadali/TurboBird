@@ -1,7 +1,7 @@
 object frmBulkClone: TfrmBulkClone
-  Left = 239
+  Left = 433
   Height = 588
-  Top = 76
+  Top = 54
   Width = 1059
   Caption = 'Clone Table → External & Bulk Export'
   ClientHeight = 588
