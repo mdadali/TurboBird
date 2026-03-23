@@ -111,6 +111,13 @@ type
     function GenerateSQLBinary: string;
     function GenerateSQLCSV_CreateView(SrcTable, ExtTable, Quote, Sep: string): string;
     function GenerateSQLCSV_CreateTable(ExtTable, FileName: string): string;
+
+    function TableExists(DB: TIBDatabase; TableName: string): Boolean;
+    function ExternalTableExists(DB: TIBDatabase; TableName: string): Boolean;
+    function CreateExternalTableIfNotExists(DB: TIBDatabase; Transaction: TIBTransaction;
+      TableName, FileName: string): Boolean;
+    function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
+
   public
     procedure Init(ANodeInfos: TPNodeInfos);
     function GenerateSQL: string;
@@ -501,26 +508,26 @@ begin
   SQLBatch := TStringList.Create;
   try
     // -----------------------------
-    //CREATE EXTERNAL lbSourceTable  (all Formats)
+    // Prüfen & ggf. Source External Table erstellen
     // -----------------------------
-    case GetFormat of
-      efBinary,
-      efFixedText,
-      efCSV: SQL := GenerateSQL;
-    end;
-
-    SQLBatch.Text := SQL;
-    IBXScript1.RunScript(SQLBatch);
-
-    // Kein Datenexport gewünscht?
-    if not chkExportData.Checked then
-    begin
-      ShowMessage('External table created.');
-      Exit;
-    end;
+    if not ExternalTableExists(IBDBSource, edtExternalTableName.Text) then
+      CreateExternalTableIfNotExists(IBDBSource, IBTransSource, edtExternalTableName.Text, edtExternalFile.Text);
 
     // -----------------------------
-    //RecordCount
+    // Prüfen & ggf. Destination External Table erstellen
+    // -----------------------------
+    if not ExternalTableExists(IBDBDest, edtExternalTableName.Text) then
+      CreateExternalTableIfNotExists(IBDBDest, IBTransDest, edtExternalTableName.Text, edtExternalFile.Text);
+
+    // -----------------------------
+    // Prüfen & ggf. Destination Tabelle erstellen
+    // -----------------------------
+    if not TableExists(IBDBDest, comboxSourceTables.Text) then
+      if not CreateDestTable(IBDBDest, IBTransDest, comboxSourceTables.Text) then
+        raise Exception.Create('Could not create destination table: ' + comboxSourceTables.Text);
+
+    // -----------------------------
+    // Record Count
     // -----------------------------
     IBQuerySource.Close;
     IBQuerySource.SQL.Text := 'SELECT COUNT(*) FROM ' + comboxSourceTables.Text;
@@ -531,26 +538,22 @@ begin
     batchCount := (recCount + batchSize - 1) div batchSize;
 
     // -----------------------------
-    //Progress Window
+    // Progress Window
     // -----------------------------
     ProgressForm := TForm.Create(nil);
     try
       ProgressForm.FormStyle := fsStayOnTop;
-      ProgressForm.Caption := 'Export running...';
+      ProgressForm.Caption := 'Export/Import running...';
       ProgressForm.Width := 500;
       ProgressForm.Height := 200;
       ProgressForm.Position := poScreenCenter;
       ProgressForm.BorderStyle := bsDialog;
 
-      ProgressLabel := TLabel.Create(ProgressForm);
-      ProgressLabel.Parent := ProgressForm;
-      ProgressLabel.Left := 16; ProgressLabel.Top := 16;
+      ProgressLabel := TLabel.Create(ProgressForm); ProgressLabel.Parent := ProgressForm; ProgressLabel.Left := 16; ProgressLabel.Top := 16;
       ProgressLabel.Caption := Format('Total Records: %d', [recCount]);
 
-      ProgressBar := TProgressBar.Create(ProgressForm);
-      ProgressBar.Parent := ProgressForm;
-      ProgressBar.Left := 16; ProgressBar.Top := 45;
-      ProgressBar.Width := 460; ProgressBar.Height := 20;
+      ProgressBar := TProgressBar.Create(ProgressForm); ProgressBar.Parent := ProgressForm;
+      ProgressBar.Left := 16; ProgressBar.Top := 45; ProgressBar.Width := 460; ProgressBar.Height := 20;
       ProgressBar.Min := 0; ProgressBar.Max := recCount;
 
       lblStart := TLabel.Create(ProgressForm); lblStart.Parent := ProgressForm; lblStart.Left := 16; lblStart.Top := 110;
@@ -561,7 +564,7 @@ begin
       Application.ProcessMessages;
 
       // -----------------------------
-      // 4️⃣ START EXPORT
+      // 4️⃣ START EXPORT (Source DB → External Table)
       // -----------------------------
       StartTime := Now;
       lblStart.Caption := 'Start: ' + FormatDateTime('hh:nn:ss', StartTime);
@@ -570,29 +573,22 @@ begin
       begin
         fromRow := batchIndex * batchSize;
         toRow := (batchIndex + 1) * batchSize;
-        if toRow > recCount then
-          toRow := recCount;
+        if toRow > recCount then toRow := recCount;
 
         IBQuerySource.Close;
 
         case GetFormat of
           efCSV:
-            begin
-              // FIRST/SKIP vor Spaltenliste, direkt CSV-String
-              IBQuerySource.SQL.Text :=
-                'INSERT INTO ' + edtExternalTableName.Text + ' ' +
-                'SELECT FIRST ' + IntToStr(toRow - fromRow) +
-                ' SKIP ' + IntToStr(fromRow) + ' ' +
-                BuildCSVView(comboxSourceTables.Text) + ' ' +
-                'FROM ' + comboxSourceTables.Text;
-            end;
+            IBQuerySource.SQL.Text :=
+              'INSERT INTO ' + edtExternalTableName.Text +
+              ' SELECT FIRST ' + IntToStr(toRow - fromRow) +
+              ' SKIP ' + IntToStr(fromRow) + ' ' +
+              BuildCSVView(comboxSourceTables.Text) +
+              ' FROM ' + comboxSourceTables.Text;
           efBinary, efFixedText:
-            begin
-              // Standard INSERT SELECT
-              IBQuerySource.SQL.Text :=
-                Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
-                       [edtExternalTableName.Text, batchSize, fromRow, comboxSourceTables.Text]);
-            end;
+            IBQuerySource.SQL.Text :=
+              Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
+                     [edtExternalTableName.Text, toRow - fromRow, fromRow, comboxSourceTables.Text]);
         end;
 
         IBQuerySource.ExecSQL;
@@ -605,16 +601,54 @@ begin
       end;
 
       // -----------------------------
-      // finish
+      // 5️⃣ START IMPORT (External Table → Destination DB)
+      // -----------------------------
+
+      IBDBSource.Connected := false;
+      ;
+      if not SkipImport then
+      for batchIndex := 0 to batchCount - 1 do
+      begin
+        fromRow := batchIndex * batchSize;
+        toRow := (batchIndex + 1) * batchSize;
+        if toRow > recCount then toRow := recCount;
+
+        IBQueryDest.Close;
+
+        //inser data from ext table to fb table
+        IBQueryDest.SQL.Text :=
+          Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
+                 [comboxSourceTables.Text, toRow - fromRow, fromRow, edtExternalTableName.Text]);
+
+        IBQueryDest.ExecSQL;
+        ShowMessage(IBQueryDest.SQL.Text);
+        IBTransDest.CommitRetaining;
+
+        ProgressBar.Position := toRow;
+        ProgressLabel.Caption := Format('Imported %d of %d rows...', [toRow, recCount]);
+        lblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
+        Application.ProcessMessages;
+      end;
+
+     if SkipImport then
+     begin
+       MessageDlg(
+         'Source and Destination database are identical.' + sLineBreak +
+          'Only export to the external file was executed.' + sLineBreak +
+          'Import step was skipped.',
+          mtInformation, [mbOK], 0);
+      end;
+
+      // -----------------------------
+      // Finish
       // -----------------------------
       EndTime := Now;
       lblEnd.Caption := 'End: ' + FormatDateTime('hh:nn:ss', EndTime);
       lblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', EndTime - StartTime);
 
       rowsPerSec := recCount / ((EndTime - StartTime) * 24*60*60);
-
       ProgressLabel.Caption :=
-        Format('Export complete. %d rows exported (%.2f rows/sec).', [recCount, rowsPerSec]);
+        Format('Export/Import complete. %d rows processed (%.2f rows/sec).', [recCount, rowsPerSec]);
       ProgressBar.Position := ProgressBar.Max;
 
       MessageDlg(ProgressLabel.Caption, mtInformation, [mbOK], 0);
@@ -627,6 +661,116 @@ begin
     SQLBatch.Free;
   end;
 end;
+
+function TfrmBulkClone.ExternalTableExists(DB: TIBDatabase; TableName: string): Boolean;
+var
+  Q: TIBQuery;
+begin
+  Result := False;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DB;
+    Q.Transaction := DB.DefaultTransaction;
+    Q.AllowAutoActivateTransaction := true;
+    Q.SQL.Text :=
+      'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+      'WHERE UPPER(RDB$RELATION_NAME) = :T AND RDB$EXTERNAL_FILE IS NOT NULL';
+    Q.ParamByName('T').AsString := UpperCase(TableName);
+    Q.Open;
+    Result := not Q.EOF;
+    Q.Close;
+  finally
+    Q.Free;
+  end;
+end;
+
+function TfrmBulkClone.TableExists(DB: TIBDatabase; TableName: string): Boolean;
+var
+  Q: TIBQuery;
+begin
+  Result := False;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DB;
+    Q.Transaction := DB.DefaultTransaction;
+    Q.AllowAutoActivateTransaction := true;
+    Q.SQL.Text :=
+      'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+      'WHERE UPPER(RDB$RELATION_NAME) = :T AND RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0';
+    Q.ParamByName('T').AsString := UpperCase(TableName);
+    Q.Open;
+    Result := not Q.EOF;
+    Q.Close;
+  finally
+    Q.Free;
+  end;
+end;
+
+function TfrmBulkClone.CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
+var
+  SQL: TStringList;
+  FieldDefs: string;
+begin
+  Result := False;
+
+  if TableExists(DestDB, TableName) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // Felder von der Source Tabelle abrufen
+  FieldDefs := BuildFieldList(TableName);
+
+  // CREATE TABLE Statement generieren
+  SQL := TStringList.Create;
+  try
+    SQL.Text :=
+      'CREATE TABLE ' + TableName + sLineBreak +
+      '(' + sLineBreak +
+      FieldDefs + sLineBreak +
+      ');';
+
+    IBXScript1.Database := DestDB;
+    IBXScript1.Transaction := DestTrans;
+    IBXScript1.RunScript(SQL);
+
+    Result := True;
+  finally
+    SQL.Free;
+  end;
+end;
+
+function TfrmBulkClone.CreateExternalTableIfNotExists(DB: TIBDatabase; Transaction: TIBTransaction;
+  TableName, FileName: string): Boolean;
+var
+  SQLBatch: TStringList;
+begin
+  Result := False;
+  if ExternalTableExists(DB, TableName) then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  SQLBatch := TStringList.Create;
+  try
+    // Nutze deine GenerateSQLBinary / CSV / FixedText
+    case GetFormat of
+      efBinary: SQLBatch.Text := GenerateSQLBinary;
+      efFixedText: SQLBatch.Text := GenerateSQLFixedText;
+      efCSV: SQLBatch.Text := GenerateSQLCSV;
+    end;
+
+    IBXScript1.Database := DB;
+    IBXScript1.Transaction := Transaction;
+    IBXScript1.RunScript(SQLBatch);
+    Result := True;
+  finally
+    SQLBatch.Free;
+  end;
+end;
+
 
 procedure TfrmBulkClone.btnOpenExternalFileClick(Sender: TObject);
 begin

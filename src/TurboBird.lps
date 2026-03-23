@@ -281,7 +281,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="17"/>
         <TopLine Value="33"/>
         <CursorPos X="15" Y="50"/>
         <UsageCount Value="200"/>
@@ -294,7 +294,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-        <EditorIndex Value="19"/>
+        <EditorIndex Value="20"/>
         <TopLine Value="286"/>
         <CursorPos X="47" Y="300"/>
         <UsageCount Value="200"/>
@@ -307,7 +307,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="3152"/>
         <CursorPos X="38" Y="3187"/>
         <UsageCount Value="200"/>
@@ -448,7 +448,7 @@
       <Unit44>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="20"/>
+        <EditorIndex Value="21"/>
         <TopLine Value="859"/>
         <CursorPos Y="882"/>
         <UsageCount Value="200"/>
@@ -811,7 +811,7 @@
       <Unit78>
         <Filename Value="utils\fServerSession.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="436"/>
         <CursorPos Y="471"/>
         <UsageCount Value="200"/>
@@ -841,7 +841,7 @@
         <ComponentName Value="fmServerRegistry"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="17"/>
+        <EditorIndex Value="18"/>
         <TopLine Value="467"/>
         <CursorPos X="37" Y="487"/>
         <UsageCount Value="200"/>
@@ -936,7 +936,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="119"/>
         <CursorPos X="36" Y="127"/>
         <UsageCount Value="297092"/>
@@ -1059,8 +1059,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="600"/>
-        <CursorPos X="49" Y="609"/>
+        <TopLine Value="473"/>
+        <CursorPos X="49" Y="483"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1074,7 +1074,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="295"/>
         <CursorPos X="45" Y="303"/>
-        <UsageCount Value="159"/>
+        <UsageCount Value="161"/>
       </Unit103>
       <Unit104>
         <Filename Value="ui\tools\RxCSV\fcsveditor.pas"/>
@@ -1086,7 +1086,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="579"/>
         <CursorPos X="23" Y="592"/>
-        <UsageCount Value="132"/>
+        <UsageCount Value="134"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit104>
@@ -1096,7 +1096,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="139"/>
         <CursorPos X="86" Y="144"/>
-        <UsageCount Value="107"/>
+        <UsageCount Value="109"/>
       </Unit105>
       <Unit106>
         <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
@@ -1107,7 +1107,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="874"/>
         <CursorPos X="3" Y="874"/>
-        <UsageCount Value="101"/>
+        <UsageCount Value="103"/>
       </Unit106>
       <Unit107>
         <Filename Value="ui\tools\DBReader\DBReader\DbGridForm.pas"/>
@@ -1115,7 +1115,7 @@
         <HasResources Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="51" Y="7"/>
-        <UsageCount Value="74"/>
+        <UsageCount Value="76"/>
       </Unit107>
       <Unit108>
         <Filename Value="classes\cdbfbfunction.pas"/>
@@ -1311,10 +1311,10 @@
       <Unit133>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\Rx\rxdb\rxdbgrid.pas"/>
         <UnitName Value="RxDBGrid"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="4169"/>
         <CursorPos X="33" Y="4197"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit133>
       <Unit134>
@@ -1374,10 +1374,11 @@
       </Unit140>
       <Unit141>
         <Filename Value="ui\bulk_clone\new\bulk_clone.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="133"/>
-        <CursorPos Y="171"/>
-        <UsageCount Value="12"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="428"/>
+        <CursorPos Y="450"/>
+        <UsageCount Value="13"/>
+        <Loaded Value="True"/>
       </Unit141>
       <Unit142>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBDatabase.pas"/>
@@ -1388,10 +1389,10 @@
       </Unit142>
       <Unit143>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBMessages.pas"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="16"/>
         <TopLine Value="382"/>
         <CursorPos Y="410"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit143>
       <Unit144>
@@ -1404,10 +1405,10 @@
       </Unit144>
       <Unit145>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\csvdataset.pp"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="97"/>
         <CursorPos X="3" Y="119"/>
-        <UsageCount Value="21"/>
+        <UsageCount Value="22"/>
         <Loaded Value="True"/>
       </Unit145>
       <Unit146>
@@ -1463,10 +1464,10 @@
       </Unit153>
       <Unit154>
         <Filename Value="ui\tools\DBReader\DBReader\DBReaderBase.pas"/>
-        <EditorIndex Value="18"/>
+        <EditorIndex Value="19"/>
         <TopLine Value="31"/>
         <CursorPos X="3" Y="41"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="50"/>
         <Loaded Value="True"/>
       </Unit154>
       <Unit155>
@@ -1528,52 +1529,52 @@
       <Unit162>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\bufdataset.pas"/>
         <UnitName Value="BufDataset"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="636"/>
         <CursorPos X="15" Y="650"/>
-        <UsageCount Value="19"/>
+        <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit162>
       <Unit163>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FPSpreadsheet\source\dataset\fpsdataset.pas"/>
         <UnitName Value="fpsDataset"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="212"/>
         <CursorPos X="14" Y="230"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="24"/>
         <Loaded Value="True"/>
       </Unit163>
       <Unit164>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBParamBlock.pas"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="15"/>
         <TopLine Value="279"/>
         <CursorPos X="42" Y="283"/>
-        <UsageCount Value="20"/>
+        <UsageCount Value="21"/>
         <Loaded Value="True"/>
       </Unit164>
       <Unit165>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FPSpreadsheet\source\common\fpstypes.pas"/>
         <UnitName Value="fpsTypes"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <CursorPos X="50" Y="12"/>
-        <UsageCount Value="16"/>
+        <UsageCount Value="17"/>
         <Loaded Value="True"/>
       </Unit165>
       <Unit166>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\sdf\sdfdata.pp"/>
         <UnitName Value="SdfData"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="141"/>
         <CursorPos X="46" Y="157"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit166>
       <Unit167>
         <Filename Value="components\JSONDataSet\c_json_dataset.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="94"/>
         <CursorPos X="12" Y="103"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="16"/>
         <Loaded Value="True"/>
       </Unit167>
     </Units>
@@ -1585,123 +1586,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="415" TopLine="396"/>
+        <Caret Line="572" TopLine="567"/>
       </Position1>
       <Position2>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="416" TopLine="396"/>
+        <Caret Line="574" TopLine="567"/>
       </Position2>
       <Position3>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="420" TopLine="396"/>
+        <Caret Line="575" TopLine="567"/>
       </Position3>
       <Position4>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="512" TopLine="495"/>
+        <Caret Line="576" TopLine="567"/>
       </Position4>
       <Position5>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="513" TopLine="495"/>
+        <Caret Line="578" TopLine="567"/>
       </Position5>
       <Position6>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="516" TopLine="495"/>
+        <Caret Line="580" TopLine="567"/>
       </Position6>
       <Position7>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="525" TopLine="509"/>
+        <Caret Line="591" TopLine="567"/>
       </Position7>
       <Position8>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="526" TopLine="509"/>
+        <Caret Line="590" TopLine="567"/>
       </Position8>
       <Position9>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="527" TopLine="509"/>
+        <Caret Line="591" TopLine="567"/>
       </Position9>
       <Position10>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="528" TopLine="509"/>
+        <Caret Line="589" TopLine="567"/>
       </Position10>
       <Position11>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="529" TopLine="509"/>
+        <Caret Line="594" TopLine="579"/>
       </Position11>
       <Position12>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="531" TopLine="521"/>
+        <Caret Line="595" TopLine="579"/>
       </Position12>
       <Position13>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="536" TopLine="521"/>
+        <Caret Line="586" Column="41" TopLine="590"/>
       </Position13>
       <Position14>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="537" TopLine="521"/>
+        <Caret Line="598" TopLine="591"/>
       </Position14>
       <Position15>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="560" TopLine="542"/>
+        <Caret Line="599" TopLine="591"/>
       </Position15>
       <Position16>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="561" TopLine="542"/>
+        <Caret Line="600" TopLine="591"/>
       </Position16>
       <Position17>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="566" TopLine="542"/>
+        <Caret Line="572" TopLine="558"/>
       </Position17>
       <Position18>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="567" TopLine="548"/>
+        <Caret Line="607" TopLine="590"/>
       </Position18>
       <Position19>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="569" TopLine="548"/>
+        <Caret Line="609" TopLine="602"/>
       </Position19>
       <Position20>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="571" TopLine="548"/>
+        <Caret Line="610" TopLine="602"/>
       </Position20>
       <Position21>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="572" TopLine="548"/>
+        <Caret Line="612" TopLine="602"/>
       </Position21>
       <Position22>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="573" TopLine="548"/>
+        <Caret Line="613" TopLine="602"/>
       </Position22>
       <Position23>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="574" TopLine="548"/>
+        <Caret Line="614" TopLine="602"/>
       </Position23>
       <Position24>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="576" TopLine="548"/>
+        <Caret Line="616" TopLine="602"/>
       </Position24>
       <Position25>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="578" TopLine="565"/>
+        <Caret Line="620" TopLine="608"/>
       </Position25>
       <Position26>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="594" TopLine="566"/>
+        <Caret Line="619" TopLine="608"/>
       </Position26>
       <Position27>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="593" TopLine="566"/>
+        <Caret Line="620" TopLine="608"/>
       </Position27>
       <Position28>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="594" TopLine="566"/>
+        <Caret Line="618" TopLine="608"/>
       </Position28>
       <Position29>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="592" TopLine="566"/>
+        <Caret Line="622" TopLine="608"/>
       </Position29>
       <Position30>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Caret Line="598" TopLine="570"/>
+        <Caret Line="624" TopLine="608"/>
       </Position30>
     </JumpHistory>
     <RunParams>
@@ -1731,20 +1732,6 @@
         <WatchKind Value="wpkWrite"/>
         <Source Value="ui\tools\RxCSV\fcsveditor.pas"/>
         <Line Value="256"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Line Value="491"/>
-      </Item>
-      <Item>
-        <Kind Value="bpkSource"/>
-        <WatchScope Value="wpsLocal"/>
-        <WatchKind Value="wpkWrite"/>
-        <Source Value="ui\bulk_clone\bulk_clone.pas"/>
-        <Line Value="560"/>
       </Item>
     </BreakPoints>
     <Watches>
