@@ -19,6 +19,7 @@ uses
   IB,
   IBDatabase,
   IBQuery,
+  IBLocalDBSupport,
   IBDatabaseInfo,
   ibxscript, IBSQL, IBExtract,
 
@@ -7245,7 +7246,7 @@ procedure TfmMain.mnBulkCloneClick(Sender: TObject);
 var frmBulkClone: TfrmBulkClone;
     dbIndex: integer;
 begin
-  dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
+  //dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
   frmBulkClone := TfrmBulkClone.Create(Application);
   frmBulkClone.Init(nil);
   frmBulkClone.ShowModal;
@@ -8287,7 +8288,6 @@ begin
       SavePwd := true;
 
     Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;  //neu lesen, in ConnectToDBAs werden User und pwd gespeichert
-
     if not RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected then
     begin
       RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
@@ -8841,7 +8841,14 @@ var CNode: TTreeNode;
     ServerNode: TTreeNode;
     ServerSession: TServerSession;
     DummyNode: TTreeNode;
+    IsEmbedded: boolean;
 begin
+  if ANode = nil then exit;
+
+  ServerNode := turbocommon.GetAncestorAtLevel(ANode, 0);
+  ServerSession := TPNodeInfos(ServerNode.Data)^.ServerSession;
+  IsEmbedded := ServerSession.IsEmbedded;
+
   CNode:= tvMain.Items.AddChild(ANode, 'Query Window');
   CNode.ImageIndex:= 1;
   CNode.SelectedIndex:= 1;
@@ -8976,12 +8983,15 @@ begin
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Users');
-  CNode.ImageIndex:= 30;
-  CNode.SelectedIndex:= 30;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotUserRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+  if not IsEmbedded then
+  begin
+    CNode:= tvMain.Items.AddChild(ANode, 'Users');
+    CNode.ImageIndex:= 30;
+    CNode.SelectedIndex:= 30;
+    TPNodeInfos(CNode.Data)^.ObjectType := tvotUserRoot;
+    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+  end;
 
   CNode:= tvMain.Items.AddChild(ANode, 'System Objects');
   CNode.ImageIndex:= 39;
@@ -9009,6 +9019,7 @@ begin
     tvMain.Items.Clear;
 
     LoadRegisteredServers;
+
     if Length(RegisteredServers) = 0 then
       exit(false);
     if Length(RegisteredDatabases) > 0 then
@@ -9032,6 +9043,9 @@ begin
         Read(F, Rec);
         if not Rec.Deleted then
         begin
+          AServerName := Rec.ServerName;
+          ServerRecord := GetServerRecordFromFileByName(AServerName);
+
           SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
           with RegisteredDatabases[high(RegisteredDatabases)] do
           begin
@@ -9042,16 +9056,26 @@ begin
             if Rec.OverwriteLoadedClientLib then
               ClientLibPath := RegRec.FireBirdClientLibPath
             else begin
-              AServerName := Rec.ServerName;
-              ServerRecord := GetServerRecordFromFileByName(AServerName);
               ClientLibPath := ServerRecord.ClientLibraryPath;
             end;
             IBDatabase := TIBDatabase.Create(nil);
+            IBDatabase.DatabaseName := Rec.DatabaseName;
             IBDatabase.FirebirdLibraryPathName := ClientLibPath;
-
             IBTransaction:= TIBTransaction.Create(nil);
             IBTransaction.DefaultDatabase := IBDatabase;
             IBDatabase.DefaultTransaction := IBTransaction;
+
+            {if Rec.IsEmbedded then
+            begin
+              IBLocalDBSupport := TIBLocalDBSupport.Create(self);
+              IBLocalDBSupport.DatabaseName := ExtractFileName(IBDatabase.DatabaseName);
+              IBLocalDBSupport.FirebirdDirectory := ServerRecord.RootPath;
+              IBLocalDBSupport.EmptyDBArchive := ChangeFileExt(IBDatabase.DatabaseName, '.gbk');
+              IBLocalDBSupport.ServicesConnection.FirebirdLibraryPathName := ServerRecord.RootPath;
+              IBLocalDBSupport.RequiredVersionNo := 2;
+              IBLocalDBSupport.Database := IBDatabase;
+              IBLocalDBSupport.Enabled := true;
+            end;}
 
             if RegRec.TxConfig <> '' then
               IBTransaction.Params.Text :=  RegRec.TxConfig
@@ -9059,7 +9083,6 @@ begin
               IBTransaction.Params.LoadFromFile(DefaultTransactionFile);
               RegRec.TxConfig := IBTransaction.Params.Text;
             end;
-
 
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;
