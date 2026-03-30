@@ -3525,7 +3525,7 @@ begin
   if (SelNode <> nil) and (SelNode.Parent <> nil) then
   begin
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, SelNode.Text, SelNode.Data);
-    QWindow.meQuery.Lines.Text:= 'select * from ' + SelNode.Text;
+    QWindow.meQuery.Lines.Text:= 'select * from ' + turbocommon.GetClearNodeText(SelNode.Text);
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
