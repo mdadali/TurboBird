@@ -1,7 +1,7 @@
 object frmCSVEditor: TfrmCSVEditor
-  Left = 515
+  Left = 563
   Height = 575
-  Top = 94
+  Top = 136
   Width = 847
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 575

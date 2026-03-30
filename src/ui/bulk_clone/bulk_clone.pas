@@ -15,6 +15,18 @@ type
 
   TExternalFormat = (efBinary, efFixedText, efCSV);
 
+type
+  TFieldInfo = record
+    Name: string;
+    FieldType: Integer;
+    FieldLen: Integer;
+    FieldScale: Integer;
+  end;
+
+  TFieldInfoArray = array of TFieldInfo;
+
+//function GetSupportedFields(ATable: string): array of TFieldInfo;
+
   { TfrmBulkClone }
 
   TfrmBulkClone = class(TForm)
@@ -118,7 +130,10 @@ type
       TableName, FileName: string): Boolean;
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
 
-    function BuildFieldNameList(ATable: string): string;
+    function GetSupportedFields(ATable: string; AServerVersion: Word): TFieldInfoArray;
+    function BuildSupportedFieldNameList(ATable: string): string;
+    function BuildSupportedFieldDefs(ATable: string): string;
+
   public
     procedure Init(ANodeInfos: TPNodeInfos);
     function GenerateSQL: string;
@@ -426,12 +441,12 @@ begin
     efCSV:       Result := GenerateSQLCSV;
   end;
 end;
+
 function TfrmBulkClone.GenerateSQLBinary: string;
 var
   FieldDefs: string;
 begin
-  // Felder aus der Quelltabelle erzeugen
-  FieldDefs := BuildFieldList(comboxSourceTables.Text);
+  FieldDefs := BuildSupportedFieldDefs(comboxSourceTables.Text);
 
   Result :=
     'CREATE TABLE ' + Trim(edtExternalTableName.Text) + sLineBreak +
@@ -593,10 +608,10 @@ begin
                        edtExternalTableName.Text,
                        toRow - fromRow,
                        fromRow,
-                       BuildFieldNameList(comboxSourceTables.Text), // ❌ kein * mehr
+                       BuildSupportedFieldNameList(comboxSourceTables.Text), // ✅ RICHTIG
                        comboxSourceTables.Text
                      ]);
-            {IBQuerySource.SQL.Text :=
+          {IBQuerySource.SQL.Text :=
               Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
                      [edtExternalTableName.Text, toRow - fromRow, fromRow, comboxSourceTables.Text]);}
         end;
@@ -632,9 +647,10 @@ begin
                    comboxSourceTables.Text,
                    toRow - fromRow,
                    fromRow,
-                   BuildFieldNameList(comboxSourceTables.Text), // ❌ kein * mehr
+                   BuildSupportedFieldNameList(comboxSourceTables.Text), // ✅ gleich!
                    edtExternalTableName.Text
                  ]);
+
         {IBQueryDest.SQL.Text :=
           Format('INSERT INTO %s SELECT FIRST %d SKIP %d * FROM %s',
                  [comboxSourceTables.Text, toRow - fromRow, fromRow, edtExternalTableName.Text]);}
@@ -680,40 +696,143 @@ begin
   end;
 end;
 
-function TfrmBulkClone.BuildFieldNameList(ATable: string): string;
+function TfrmBulkClone.BuildSupportedFieldNameList(ATable: string): string;
+var
+  Fields: array of TFieldInfo;
+  i: Integer;
+begin
+  Result := '';
+  Fields := GetSupportedFields(ATable, 3); // Firebird 3+ für BOOLEAN
+
+  for i := 0 to High(Fields) do
+  begin
+    if Result <> '' then
+      Result := Result + ', ';
+    Result := Result + Fields[i].Name;
+  end;
+end;
+
+function TfrmBulkClone.GetSupportedFields(ATable: string; AServerVersion: Word): TFieldInfoArray;
 var
   FieldName: string;
-  FieldType: Integer;
-  FieldDefs: TStringList;
+  FieldType, FieldLen, FieldScale: Integer;
+  FieldSubType: Integer;
+  idx: Integer;
 begin
-  FieldDefs := TStringList.Create;
-  try
-    IBQuerySource.Close;
-    IBQuerySource.SQL.Text :=
-      'SELECT RF.RDB$FIELD_NAME, F.RDB$FIELD_TYPE ' +
-      'FROM RDB$RELATION_FIELDS RF ' +
-      'JOIN RDB$FIELDS F ON RF.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME ' +
-      'WHERE RF.RDB$RELATION_NAME = :T ' +
-      'ORDER BY RF.RDB$FIELD_POSITION';
-    IBQuerySource.ParamByName('T').AsString := UpperCase(ATable);
-    IBQuerySource.Open;
+  SetLength(Result, 0);
+  idx := 0;
 
-    while not IBQuerySource.EOF do
+  IBQuerySource.Close;
+  IBQuerySource.SQL.Text :=
+    'SELECT '+
+    '  RF.RDB$FIELD_NAME, '+
+    '  F.RDB$FIELD_TYPE, '+
+    '  F.RDB$FIELD_LENGTH, '+
+    '  F.RDB$FIELD_SCALE, '+
+    '  F.RDB$FIELD_SUB_TYPE '+
+    'FROM RDB$RELATION_FIELDS RF '+
+    'JOIN RDB$FIELDS F ON RF.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME '+
+    'WHERE RF.RDB$RELATION_NAME = :T '+
+    'ORDER BY RF.RDB$FIELD_POSITION';
+
+  IBQuerySource.ParamByName('T').AsString := UpperCase(ATable);
+  IBQuerySource.Open;
+
+  while not IBQuerySource.EOF do
+  begin
+    FieldName   := Trim(IBQuerySource.Fields[0].AsString);
+    FieldType   := IBQuerySource.Fields[1].AsInteger;
+    FieldLen    := IBQuerySource.Fields[2].AsInteger;
+    FieldScale  := IBQuerySource.Fields[3].AsInteger;
+    FieldSubType:= IBQuerySource.Fields[4].AsInteger;
+
+    // ----------------------------------------
+    // NUMERIC / DECIMAL mit Scale < 0 → DOUBLE
+    // ----------------------------------------
+    if (FieldType in [7,8,16]) and (FieldScale < 0) then
     begin
-      FieldName := Trim(IBQuerySource.Fields[0].AsString);
-      FieldType := IBQuerySource.Fields[1].AsInteger;
-
-      // nur Typen unterstützen, die External Tables können
-      if FieldType in [7,8,16,10,27,12,13,14,35,37] then
-        FieldDefs.Add(FieldName);
-
-      IBQuerySource.Next;
+      FieldType := 27;
+      FieldLen  := 8;
     end;
-    IBQuerySource.Close;
 
-    Result := FieldDefs.CommaText;
-  finally
-    FieldDefs.Free;
+    // ----------------------------------------
+    // BOOLEAN (Firebird 3+)
+    // ----------------------------------------
+    if FieldType = 23 then
+    begin
+      if AServerVersion >= 3 then
+      begin
+        FieldType := 14; // CHAR(1)
+        FieldLen  := 1;
+      end
+      else
+        FieldType := -1; // unsupported
+    end;
+
+    // ----------------------------------------
+    // BLOB ignorieren
+    // ----------------------------------------
+    if FieldType = 261 then
+    begin
+      IBQuerySource.Next;
+      Continue;
+    end;
+
+    // ----------------------------------------
+    // ARRAY ignorieren (FB3+ ohne RDB$FIELD_DIMENSIONS)
+    // ----------------------------------------
+    // Firebird 3/2.5: keine direkte Prüfung möglich
+    // wir müssen Arrays manuell im Tool ausschließen oder ignorieren
+    if Pos('[', FieldName) > 0 then
+    begin
+      IBQuerySource.Next;
+      Continue;
+    end;
+
+    // ----------------------------------------
+    // Unterstützte Typen
+    // ----------------------------------------
+    if FieldType in [7,8,16,10,27,12,13,14,35,37] then
+    begin
+      SetLength(Result, idx+1);
+      Result[idx].Name       := FieldName;
+      Result[idx].FieldType  := FieldType;
+      Result[idx].FieldLen   := FieldLen;
+      Result[idx].FieldScale := FieldScale;
+      Inc(idx);
+    end;
+
+    IBQuerySource.Next;
+  end;
+
+  IBQuerySource.Close;
+end;
+
+function TfrmBulkClone.BuildSupportedFieldDefs(ATable: string): string;
+var
+  Fields: TFieldInfoArray;
+  i: Integer;
+begin
+  Result := '';
+  Fields := GetSupportedFields(ATable, 3);
+
+  for i := 0 to High(Fields) do
+  begin
+    if Result <> '' then
+      Result := Result + ',' + sLineBreak;
+
+    case Fields[i].FieldType of
+      7:  Result := Result + '  ' + Fields[i].Name + ' SMALLINT';
+      8:  Result := Result + '  ' + Fields[i].Name + ' INTEGER';
+      16: Result := Result + '  ' + Fields[i].Name + ' BIGINT';
+      10: Result := Result + '  ' + Fields[i].Name + ' FLOAT';
+      27: Result := Result + '  ' + Fields[i].Name + ' DOUBLE PRECISION';
+      12: Result := Result + '  ' + Fields[i].Name + ' DATE';
+      13: Result := Result + '  ' + Fields[i].Name + ' TIME';
+      35: Result := Result + '  ' + Fields[i].Name + ' TIMESTAMP';
+      14,37:
+        Result := Result + '  ' + Fields[i].Name + ' CHAR(' + IntToStr(Fields[i].FieldLen) + ')';
+    end;
   end;
 end;
 
@@ -774,10 +893,9 @@ begin
     Exit;
   end;
 
-  // Felder von der Source Tabelle abrufen
-  FieldDefs := BuildFieldList(TableName);
+  // ✅ korrekte Felddefinitionen (Typen!)
+  FieldDefs := BuildSupportedFieldDefs(TableName);
 
-  // CREATE TABLE Statement generieren
   SQL := TStringList.Create;
   try
     SQL.Text :=
