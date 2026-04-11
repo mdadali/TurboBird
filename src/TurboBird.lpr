@@ -53,7 +53,7 @@ uses
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, fservers, fActivityMonitor, edit_tabledata_new,
-  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fCSVEditor,
+  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fdataeditor,
   db_reader, DbGridForm;
 
 const

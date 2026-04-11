@@ -83,7 +83,7 @@ uses
   ibsqleditor,
   IBTransactionEdit,  //orig
   bulk_clone,
-  fCSVEditor,
+  fdataeditor,
   db_reader
   ;
 
@@ -127,7 +127,7 @@ type
     lmTransConfig: TMenuItem;
     mnDBReader: TMenuItem;
     mnBulkClone: TMenuItem;
-    mnCSVEditor: TMenuItem;
+    mnDataEditor: TMenuItem;
     mnTools: TMenuItem;
     pnlLeft: TPanel;
     Separator9: TMenuItem;
@@ -399,7 +399,7 @@ type
     procedure lmDropTableClick(Sender: TObject);
     procedure lmRecalculateStatisticsClick(Sender: TObject);
     procedure mnBulkCloneClick(Sender: TObject);
-    procedure mnCSVEditorClick(Sender: TObject);
+    procedure mnDataEditorClick(Sender: TObject);
     procedure mnDBReaderClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
     procedure mnExitClick(Sender: TObject);
@@ -7252,11 +7252,11 @@ begin
   frmBulkClone.ShowModal;
 end;
 
-procedure TfmMain.mnCSVEditorClick(Sender: TObject);
-var frmCSVEditor: TfrmCSVEditor;
+procedure TfmMain.mnDataEditorClick(Sender: TObject);
+var frmDataEditor: TfrmDataEditor;
 begin
-  frmCSVEditor := TfrmCSVEditor.Create(self);
-  frmCSVEditor.ShowModal;
+  frmDataEditor := TfrmDataEditor.Create(self);
+  frmDataEditor.ShowModal;
 end;
 
 procedure TfmMain.mnDBReaderClick(Sender: TObject);

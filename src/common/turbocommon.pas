@@ -444,6 +444,7 @@ var
 
     //end-Ini.File////////////////////////////////////////////////////////////////
 
+function FormatMultilineSQLText(const AText: string): string;
 
 procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
 procedure LoadTxConfigFromFile(const FileName: string; Params: TStrings);
@@ -594,6 +595,18 @@ function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
 implementation
 
 uses Reg;
+
+function FormatMultilineSQLText(const AText: string): string;
+var
+  S: string;
+begin
+  // Zeilenenden normalisieren (optional, aber sauber)
+  S := StringReplace(AText, #13#10, #10, [rfReplaceAll]);
+  S := StringReplace(S, #13, #10, [rfReplaceAll]);
+
+  // Firebird akzeptiert direkte Zeilenumbrüche im String
+  Result := QuotedStr(S);
+end;
 
 procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
 var

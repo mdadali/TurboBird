@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 950
+  Left = 385
   Height = 507
-  Top = 230
+  Top = 147
   Width = 936
   Caption = 'Edit Tabledata'
   ClientHeight = 507
@@ -51,22 +51,22 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     TabOrder = 2
     object tsMainTableGrid: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 469
-      ClientWidth = 585
+      ClientHeight = 473
+      ClientWidth = 581
       object pnlMainTable: TPanel
         Left = 0
-        Height = 469
+        Height = 473
         Top = 0
-        Width = 585
+        Width = 581
         Align = alClient
-        ClientHeight = 469
-        ClientWidth = 585
+        ClientHeight = 473
+        ClientWidth = 581
         TabOrder = 0
         object pnlMainTableCaption: TPanel
           Left = 1
           Height = 32
           Top = 1
-          Width = 583
+          Width = 579
           Align = alTop
           Caption = 'pnlMainTableCaption'
           TabOrder = 0
@@ -75,7 +75,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           Left = 1
           Height = 26
           Top = 33
-          Width = 583
+          Width = 579
           Align = alTop
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -85,7 +85,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 26
-          ClientWidth = 583
+          ClientWidth = 579
           DataSource = dsMain
           Options = []
           TabOrder = 1
@@ -93,9 +93,9 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         end
         object RxDBGridMain: TRxDBGrid
           Left = 1
-          Height = 409
+          Height = 413
           Top = 59
-          Width = 583
+          Width = 579
           ColumnDefValues.BlobText = '(blob)'
           TitleButtons = False
           AutoSort = True
@@ -173,13 +173,13 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     end
     object tsFormView: TTabSheet
       Caption = 'Form View'
-      ClientHeight = 469
-      ClientWidth = 585
+      ClientHeight = 473
+      ClientWidth = 581
       object dbnavMainTableFormView: TDBNavigator
         Left = 0
         Height = 25
         Top = 0
-        Width = 585
+        Width = 581
         Align = alTop
         BevelOuter = bvNone
         ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -189,16 +189,16 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 100
         ClientHeight = 25
-        ClientWidth = 585
+        ClientWidth = 581
         DataSource = dsMain
         Options = []
         TabOrder = 0
       end
       object pnlRecord: TScrollBox
         Left = 0
-        Height = 444
+        Height = 448
         Top = 25
-        Width = 585
+        Width = 581
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient

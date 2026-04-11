@@ -24,7 +24,7 @@ type
     cbType: TComboBox;
     cxAllowNull: TCheckBox;
     edDefault: TEdit;
-    edDescription: TEdit;
+    memoDescription: TMemo;
     edFieldName: TEdit;
     GroupBox1: TGroupBox;
     Label1: TLabel;
@@ -105,7 +105,7 @@ begin
     (seOrder.Value <> OldOrder) or
     (cxAllowNull.Checked <> OldAllowNull) or
     (edDefault.Text <> OldDefault) or
-    (edDescription.Text <> OldDescription);
+    (memoDescription.Text <> OldDescription);
 end;
 
 function TfmNewEditField.HasFieldTypeChanged: Boolean;
@@ -332,9 +332,9 @@ begin
     end;
 
     // Beschreibung
-    if edDescription.Text <> OldDescription then
-      Line := Line + 'COMMENT ON COLUMN ' + TableName + '.' + FieldName +
-              ' IS ' + QuotedStr(edDescription.Text) + ';' + LineEnding;
+    if memoDescription.Text <> OldDescription then
+    Line := Line + 'COMMENT ON COLUMN ' + TableName + '.' + FieldName +
+              ' IS ' +  LineEnding + FormatMultilineSQLText(memoDescription.Text) + ';' + LineEnding;
 
     if Line <> '' then
       fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit field: ' + OldFieldName, Line, Clk);
@@ -435,7 +435,7 @@ begin
   edFieldName.Enabled := FFormMode = foNew;
   // Beschreibung und Default-Wert sind immer editierbar
 
-  edDescription.Enabled := True;
+  memoDescription.Enabled := true;
   cxAllowNull.Enabled := True;
 
   // Größe nur bei CHAR, VARCHAR und evtl. bei BLOB subtypes sinnvoll
@@ -518,7 +518,7 @@ begin
   else
    cbCollation.ItemIndex := -1;
   OldDescription:= Description;
-  edDescription.Text:= OldDescription;
+  memoDescription.Text := OldDescription;
   edFieldName.Text:= OldFieldName;
   seSize.Value:= OldFieldSize;
   sePrecision.Value := Precision;

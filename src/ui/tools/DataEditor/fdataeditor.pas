@@ -1,4 +1,4 @@
-unit fCSVEditor;
+unit fdataeditor;
 
 {$mode objfpc}{$H+}
 
@@ -21,29 +21,29 @@ uses
 
 type
 
-  { TfrmCSVEditor }
+  { TfrmDataEditor }
 
 
-  TfrmCSVEditor = class;
+  TfrmDataEditor = class;
 
 type
   TCSVLoadThread = class(TThread)
   private
     FFileName: string;
-    FOwner: TfrmCSVEditor;
+    FOwner: TfrmDataEditor;
     procedure CloseDataset;
     procedure LoadCSVInDataset;
   protected
     procedure Execute; override;
   public
-    constructor Create(AOwner: TfrmCSVEditor; const AFileName: string);
+    constructor Create(AOwner: TfrmDataEditor; const AFileName: string);
   end;
 
-  TfrmCSVEditor = class(TForm)
+  TfrmDataEditor = class(TForm)
+    btnCopySQL: TButton;
     btnOpenFile: TButton;
     btnSaveFileAs: TButton;
     btnCreateSQL: TButton;
-    btnCopySQL: TButton;
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
@@ -119,13 +119,13 @@ type
   end;
 
 //var
-  //frmCSVEditor: TfrmCSVEditor;
+  //frmDataEditor: TfrmDataEditor;
 
 implementation
 
 {$R *.lfm}
 
-constructor TCSVLoadThread.Create(AOwner: TfrmCSVEditor; const AFileName: string);
+constructor TCSVLoadThread.Create(AOwner: TfrmDataEditor; const AFileName: string);
 begin
   inherited Create(True); // suspended
   FreeOnTerminate := True;
@@ -188,8 +188,8 @@ end;
 
 
 
-{ TfrmCSVEditor }
-procedure  TfrmCSVEditor.ReadIni;
+{ TfrmDataEditor }
+procedure  TfrmDataEditor.ReadIni;
 begin
   edtDefaultFieldLength.Text          := IntTostr(CSVDefaultFieldLength);
   edtDelimiter.Text                   := CSVDelimiter;
@@ -200,7 +200,7 @@ begin
   chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
 end;
 
-procedure TfrmCSVEditor.SetCSVSettingsFromForm;
+procedure TfrmDataEditor.SetCSVSettingsFromForm;
 begin
   CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
 
@@ -224,7 +224,7 @@ begin
   CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
-procedure TfrmCSVEditor.WriteIni;
+procedure TfrmDataEditor.WriteIni;
 begin
   CSVDefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
   CSVDelimiter := edtDelimiter.Text[1];
@@ -235,7 +235,7 @@ begin
   CSVQuoteOuterWhitespace := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
-procedure TfrmCSVEditor.LoadFile(const FileName: string);
+procedure TfrmDataEditor.LoadFile(const FileName: string);
 begin
   if DataSource1.DataSet.Active then
   begin
@@ -298,7 +298,7 @@ begin
   end;
 end;
 
-procedure TfrmCSVEditor.SaveFile(const FileName: string);
+procedure TfrmDataEditor.SaveFile(const FileName: string);
 begin
   if not DataSource1.DataSet.Active then Exit;
 
@@ -336,7 +336,7 @@ begin
   end;
 end;
 
-procedure TfrmCSVEditor.SelectDataSetByFileName(const AFileName: string);
+procedure TfrmDataEditor.SelectDataSetByFileName(const AFileName: string);
 var
   Ext: string;
 begin
@@ -395,7 +395,7 @@ begin
     raise Exception.Create('Unknown file extension: ' + Ext);
 end;
 
-procedure TfrmCSVEditor.btnOpenFileClick(Sender: TObject);
+procedure TfrmDataEditor.btnOpenFileClick(Sender: TObject);
 var
   WaitForm: TForm;
   WaitLabel: TLabel;
@@ -486,7 +486,7 @@ begin
   btnSaveFileAs.Enabled := True;
 end;
 
-procedure TfrmCSVEditor.btnCreateSQLClick(Sender: TObject);
+procedure TfrmDataEditor.btnCreateSQLClick(Sender: TObject);
 var
   GenSQLFromCSVDataset: TGenSQLFromCSVDataset;
   TempTableName: string;
@@ -540,6 +540,8 @@ begin
     SynEdit1.Lines.Text := GenSQLFromCSVDataset.SQL;
     PageControl1.ActivePage := tsSQL;
 
+    btnCopySQL.Enabled := true;
+
   except
     on E: Exception do
     begin
@@ -552,12 +554,12 @@ begin
   FreeAndNil(GenSQLFromCSVDataset);
 end;
 
-procedure TfrmCSVEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
+procedure TfrmDataEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
 begin
   SaveFile(FFileName);
 end;
 
-procedure TfrmCSVEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
+procedure TfrmDataEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
 begin
   if Button = nbRefresh then
   begin
@@ -571,13 +573,13 @@ begin
   end;
 end;
 
-procedure TfrmCSVEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+procedure TfrmDataEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   WriteIni;
   CloseAction := caFree;
 end;
 
-procedure TfrmCSVEditor.FormCreate(Sender: TObject);
+procedure TfrmDataEditor.FormCreate(Sender: TObject);
 begin
   ReadIni;
   OpenDialog1.Filter :=
@@ -601,7 +603,7 @@ begin
     'All files (*.*)|*.*';
 end;
 
-procedure TfrmCSVEditor.FormShow(Sender: TObject);
+procedure TfrmDataEditor.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
 
@@ -611,13 +613,13 @@ begin
   SynEdit1.Font.Color := QWEditorFontColor;
 end;
 
-procedure TfrmCSVEditor.btnSaveFileAsClick(Sender: TObject);
+procedure TfrmDataEditor.btnSaveFileAsClick(Sender: TObject);
 begin
   if SaveDialog1.Execute then
     SaveFile(SaveDialog1.FileName);
 end;
 
-procedure TfrmCSVEditor.lmStdExportFormatsClick(Sender: TObject);
+procedure TfrmDataEditor.lmStdExportFormatsClick(Sender: TObject);
 begin
   if DataSource1.DataSet.IsEmpty then
   begin
@@ -628,7 +630,7 @@ begin
   ExportStdFormat(DataSource1.DataSet);
 end;
 
-procedure TfrmCSVEditor.lmExportDataAsHtmlClick(Sender: TObject);
+procedure TfrmDataEditor.lmExportDataAsHtmlClick(Sender: TObject);
 begin
   if DataSource1.DataSet.IsEmpty then
   begin
@@ -638,7 +640,7 @@ begin
   ExportDataHtml(DataSource1.DataSet);
 end;
 
-procedure TfrmCSVEditor.lmExportDataAsMarkDownTableClick(Sender: TObject);
+procedure TfrmDataEditor.lmExportDataAsMarkDownTableClick(Sender: TObject);
 begin
   if DataSource1.DataSet.IsEmpty then
   begin
@@ -648,7 +650,7 @@ begin
   ExportDataMarkDownTable(DataSource1.DataSet);
 end;
 
-procedure TfrmCSVEditor.lmExportDataAsPDFClick(Sender: TObject);
+procedure TfrmDataEditor.lmExportDataAsPDFClick(Sender: TObject);
 begin
   try
     RxDBGridExportPDF1.Execute;
@@ -657,12 +659,12 @@ begin
   end;
 end;
 
-procedure TfrmCSVEditor.lmExportDataAsSpreadSheetClick(Sender: TObject);
+procedure TfrmDataEditor.lmExportDataAsSpreadSheetClick(Sender: TObject);
 begin
   RxDBGridExportSpreadSheet1.Execute;
 end;
 
-procedure TfrmCSVEditor.lmPrintDataClick(Sender: TObject);
+procedure TfrmDataEditor.lmPrintDataClick(Sender: TObject);
 begin
    RxDBGridPrint1.Execute;
 end;
@@ -670,7 +672,7 @@ end;
 
 { Copy query result to Clipboard }
 
-procedure TfrmCSVEditor.lmExportToClipboardClick(Sender: TObject);
+procedure TfrmDataEditor.lmExportToClipboardClick(Sender: TObject);
 var
   MaxExportRows, RowCount, CopiedRows: Integer;
   MsgText: string;
@@ -735,7 +737,7 @@ begin
   end;
 end;
 
-procedure TfrmCSVEditor.btnCopySQLClick(Sender: TObject);
+procedure TfrmDataEditor.btnCopySQLClick(Sender: TObject);
 begin
   if Trim(SynEdit1.Lines.Text) = '' then
   begin

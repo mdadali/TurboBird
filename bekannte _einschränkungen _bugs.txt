@@ -1,0 +1,30 @@
+Bekannte Einschränkungen / Bugs
+------------------------------
+
+[Edit Table Data]
+- Case-sensitive Tabellennamen werden derzeit nicht unterstützt.
+
+[Embedded Connections]
+- Der Usermanager ist ausgeblendet.
+  Anmeldung aktuell nur mit SYSDBA möglich.
+
+[Navi-Baum → Tabellen → Kontextmenü "Copy Table"]
+- Zusammengesetzte Felder werden nicht unterstützt.
+  Beispiel:
+    first_name || ' ' || last_name AS full_name
+
+[DB-Tools → DB Info → Register "Pages"]
+- Die Werte für "Used Pages" und "Free Pages" sind vertauscht.
+- Dieses Verhalten tritt auch im IBX DBAdmin auf.
+  → Vermutlich ein IBX-Problem.
+
+[RTF-Export]
+- Die RTF-Datei wird erzeugt.
+- Öffnung:
+  - AbiWord: funktioniert
+  - LibreOffice: funktioniert nicht
+- Vermutlich wird ein veraltetes RTF-Format erzeugt.
+- Issue wurde gemeldet (08.09.2025).
+
+[Data Editor]
+- Derzeit instabil und in aktiver Entwicklung.

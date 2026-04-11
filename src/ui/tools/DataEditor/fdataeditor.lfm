@@ -1,7 +1,7 @@
-object frmCSVEditor: TfrmCSVEditor
-  Left = 563
+object frmDataEditor: TfrmDataEditor
+  Left = 399
   Height = 575
-  Top = 136
+  Top = 112
   Width = 847
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 575
@@ -21,10 +21,10 @@ object frmCSVEditor: TfrmCSVEditor
     ClientWidth = 847
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 301
+      Left = 401
       Height = 48
       Top = 1
-      Width = 545
+      Width = 445
       Align = alClient
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -34,7 +34,7 @@ object frmCSVEditor: TfrmCSVEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 545
+      ClientWidth = 445
       DataSource = DataSource1
       OnClick = DBNavigator1Click
       Options = []
@@ -72,6 +72,17 @@ object frmCSVEditor: TfrmCSVEditor
       OnClick = btnCreateSQLClick
       TabOrder = 3
     end
+    object btnCopySQL: TButton
+      Left = 301
+      Height = 48
+      Top = 1
+      Width = 100
+      Align = alLeft
+      Caption = 'Copy SQL'
+      Enabled = False
+      OnClick = btnCopySQLClick
+      TabOrder = 4
+    end
   end
   object PageControl1: TPageControl
     Left = 0
@@ -85,12 +96,12 @@ object frmCSVEditor: TfrmCSVEditor
     object tsGrid: TTabSheet
       Caption = 'Grid View'
       ClientHeight = 491
-      ClientWidth = 843
+      ClientWidth = 837
       object RxDBGrid1: TRxDBGrid
         Left = 0
         Height = 491
         Top = 0
-        Width = 843
+        Width = 837
         ColumnDefValues.BlobText = '(blob)'
         TitleButtons = True
         AutoSort = True
@@ -168,13 +179,13 @@ object frmCSVEditor: TfrmCSVEditor
     object tsDetail: TTabSheet
       Caption = 'Detail View'
       ClientHeight = 491
-      ClientWidth = 843
+      ClientWidth = 837
       TabVisible = False
       object ScrollBox1: TScrollBox
         Left = 0
         Height = 491
         Top = 0
-        Width = 843
+        Width = 837
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
@@ -184,7 +195,7 @@ object frmCSVEditor: TfrmCSVEditor
     object tsCSVSettings: TTabSheet
       Caption = 'CSV Settings'
       ClientHeight = 491
-      ClientWidth = 843
+      ClientWidth = 837
       object Label1: TLabel
         Left = 56
         Height = 20
@@ -219,31 +230,31 @@ object frmCSVEditor: TfrmCSVEditor
       end
       object chkBoxIgnoreOuterWhiteSpace: TCheckBox
         Left = 400
-        Height = 22
+        Height = 24
         Top = 88
-        Width = 193
+        Width = 195
         Caption = 'Ignore outer Whiteppace'
         TabOrder = 0
       end
       object chkBoxFirstLineAsFieldName: TCheckBox
         Left = 400
-        Height = 22
+        Height = 24
         Top = 40
-        Width = 178
+        Width = 180
         Caption = 'First Line as Fieldname'
         TabOrder = 1
       end
       object chkBoxQuoteOuterWhiteSpace: TCheckBox
         Left = 400
-        Height = 22
+        Height = 24
         Top = 134
-        Width = 187
+        Width = 189
         Caption = 'Quote outer Whitespace'
         TabOrder = 2
       end
       object edtDefaultFieldLength: TEdit
         Left = 272
-        Height = 30
+        Height = 37
         Top = 40
         Width = 48
         MaxLength = 1024
@@ -253,7 +264,7 @@ object frmCSVEditor: TfrmCSVEditor
       end
       object edtDelimiter: TEdit
         Left = 272
-        Height = 30
+        Height = 37
         Top = 88
         Width = 24
         MaxLength = 1
@@ -262,7 +273,7 @@ object frmCSVEditor: TfrmCSVEditor
       end
       object edtLineEnding: TEdit
         Left = 272
-        Height = 30
+        Height = 37
         Top = 136
         Width = 40
         TabOrder = 5
@@ -270,7 +281,7 @@ object frmCSVEditor: TfrmCSVEditor
       end
       object edtQuoteChar: TEdit
         Left = 272
-        Height = 30
+        Height = 37
         Top = 184
         Width = 24
         TabOrder = 6
@@ -280,12 +291,12 @@ object frmCSVEditor: TfrmCSVEditor
     object tsSQL: TTabSheet
       Caption = 'SQL'
       ClientHeight = 491
-      ClientWidth = 843
+      ClientWidth = 837
       inline SynEdit1: TSynEdit
         Left = 0
         Height = 441
         Top = 0
-        Width = 843
+        Width = 837
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -782,20 +793,9 @@ object frmCSVEditor: TfrmCSVEditor
         Left = 0
         Height = 50
         Top = 441
-        Width = 843
+        Width = 837
         Align = alBottom
-        ClientHeight = 50
-        ClientWidth = 843
         TabOrder = 1
-        object btnCopySQL: TButton
-          Left = 40
-          Height = 25
-          Top = 16
-          Width = 75
-          Caption = 'Copy SQL'
-          OnClick = btnCopySQLClick
-          TabOrder = 0
-        end
       end
     end
   end
