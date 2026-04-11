@@ -1,5 +1,5 @@
 object frmDBReader: TfrmDBReader
-  Left = 235
+  Left = 393
   Height = 572
   Top = 176
   Width = 844
@@ -16,23 +16,23 @@ object frmDBReader: TfrmDBReader
   LCLVersion = '2.2.6.0'
   object spl1: TSplitter
     Left = 260
-    Height = 474
+    Height = 476
     Top = 74
     Width = 4
   end
   object panLeft: TPanel
     Left = 0
-    Height = 474
+    Height = 476
     Top = 74
     Width = 260
     Align = alLeft
-    ClientHeight = 474
+    ClientHeight = 476
     ClientWidth = 260
     ParentBackground = False
     TabOrder = 0
     object tvMain: TTreeView
       Left = 1
-      Height = 472
+      Height = 474
       Top = 1
       Width = 258
       Align = alClient
@@ -48,7 +48,7 @@ object frmDBReader: TfrmDBReader
   end
   object pgcMain: TPageControl
     Left = 264
-    Height = 474
+    Height = 476
     Top = 74
     Width = 580
     ActivePage = tsTableInfo
@@ -60,14 +60,14 @@ object frmDBReader: TfrmDBReader
     OnChange = pgcMainChange
     object tsTableInfo: TTabSheet
       Caption = 'Table Info'
-      ClientHeight = 440
-      ClientWidth = 576
+      ClientHeight = 442
+      ClientWidth = 570
       ImageIndex = 2
       object memoInfo: TMemo
         Left = 0
-        Height = 440
+        Height = 442
         Top = 0
-        Width = 576
+        Width = 570
         Align = alClient
         Font.Color = clWindowText
         Font.Height = -13
@@ -80,14 +80,14 @@ object frmDBReader: TfrmDBReader
     end
     object tsGrid: TTabSheet
       Caption = 'Grid'
-      ClientHeight = 440
-      ClientWidth = 576
+      ClientHeight = 442
+      ClientWidth = 570
       ImageIndex = 1
       object dgItems: TDrawGrid
         Left = 0
-        Height = 440
+        Height = 442
         Top = 0
-        Width = 576
+        Width = 570
         Align = alClient
         ExtendedSelect = False
         Font.Color = clWindowText
@@ -103,13 +103,14 @@ object frmDBReader: TfrmDBReader
     end
     object tsSchema: TTabSheet
       Caption = 'Schema'
-      ClientHeight = 440
-      ClientWidth = 576
+      ClientHeight = 442
+      ClientWidth = 570
+      TabVisible = False
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 440
+        Height = 442
         Top = 0
-        Width = 576
+        Width = 570
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -605,13 +606,13 @@ object frmDBReader: TfrmDBReader
     end
     object tsLog: TTabSheet
       Caption = 'Log'
-      ClientHeight = 440
-      ClientWidth = 576
+      ClientHeight = 442
+      ClientWidth = 570
       object memoLog: TMemo
         Left = 0
-        Height = 440
+        Height = 442
         Top = 0
-        Width = 576
+        Width = 570
         Align = alClient
         Font.Color = clWindowText
         Font.Height = -13
@@ -624,17 +625,17 @@ object frmDBReader: TfrmDBReader
     end
     object tsSettings: TTabSheet
       Caption = 'Settings'
-      ClientHeight = 440
-      ClientWidth = 576
+      ClientHeight = 442
+      ClientWidth = 570
       object grBoxCSVExport: TGroupBox
         Left = 0
         Height = 264
         Top = 0
-        Width = 576
+        Width = 570
         Align = alTop
         Caption = 'CSV Options'
-        ClientHeight = 242
-        ClientWidth = 572
+        ClientHeight = 262
+        ClientWidth = 568
         TabOrder = 0
         object Label1: TLabel
           Left = 24
@@ -670,31 +671,31 @@ object frmDBReader: TfrmDBReader
         end
         object chkBoxIgnoreOuterWhiteSpace: TCheckBox
           Left = 368
-          Height = 22
+          Height = 24
           Top = 72
-          Width = 193
+          Width = 195
           Caption = 'Ignore outer Whiteppace'
           TabOrder = 0
         end
         object chkBoxFirstLineAsFieldName: TCheckBox
           Left = 368
-          Height = 22
+          Height = 24
           Top = 24
-          Width = 178
+          Width = 180
           Caption = 'First Line as Fieldname'
           TabOrder = 1
         end
         object chkBoxQuoteOuterWhiteSpace: TCheckBox
           Left = 368
-          Height = 22
+          Height = 24
           Top = 118
-          Width = 187
+          Width = 189
           Caption = 'Quote outer Whitespace'
           TabOrder = 2
         end
         object edtDefaultFieldLength: TEdit
           Left = 240
-          Height = 30
+          Height = 37
           Top = 24
           Width = 48
           MaxLength = 1024
@@ -704,7 +705,7 @@ object frmDBReader: TfrmDBReader
         end
         object edtDelimiter: TEdit
           Left = 240
-          Height = 30
+          Height = 37
           Top = 168
           Width = 24
           MaxLength = 1
@@ -713,7 +714,7 @@ object frmDBReader: TfrmDBReader
         end
         object edtLineEnding: TEdit
           Left = 240
-          Height = 30
+          Height = 37
           Top = 120
           Width = 40
           TabOrder = 5
@@ -721,7 +722,7 @@ object frmDBReader: TfrmDBReader
         end
         object edtQuoteChar: TEdit
           Left = 240
-          Height = 30
+          Height = 37
           Top = 72
           Width = 24
           TabOrder = 6
@@ -729,36 +730,36 @@ object frmDBReader: TfrmDBReader
         end
         object chkBoxTabDelimiter: TCheckBox
           Left = 368
-          Height = 22
+          Height = 24
           Top = 168
-          Width = 114
+          Width = 116
           Caption = 'Tab Delimiter'
           TabOrder = 7
         end
       end
       object grBoxSchemaOptions: TGroupBox
         Left = 0
-        Height = 176
+        Height = 178
         Top = 264
-        Width = 576
+        Width = 570
         Align = alClient
         Caption = 'Schema Options'
-        ClientHeight = 154
-        ClientWidth = 572
+        ClientHeight = 157
+        ClientWidth = 568
         TabOrder = 1
         object chkBoxInsertData: TCheckBox
           Left = 24
-          Height = 22
+          Height = 24
           Top = 32
-          Width = 99
+          Width = 101
           Caption = 'Insert Data'
           TabOrder = 0
         end
         object chkBoxEmptyTables: TCheckBox
           Left = 168
-          Height = 22
+          Height = 24
           Top = 32
-          Width = 113
+          Width = 115
           Caption = 'Empty Tables'
           Checked = True
           State = cbChecked
@@ -766,17 +767,17 @@ object frmDBReader: TfrmDBReader
         end
         object chkBoxGhostTables: TCheckBox
           Left = 312
-          Height = 22
+          Height = 24
           Top = 32
-          Width = 110
+          Width = 112
           Caption = 'Ghost Tables'
           TabOrder = 2
         end
         object chkBoxsystemTables: TCheckBox
           Left = 448
-          Height = 22
+          Height = 24
           Top = 32
-          Width = 119
+          Width = 121
           Caption = 'System Tables'
           TabOrder = 3
         end
@@ -799,17 +800,17 @@ object frmDBReader: TfrmDBReader
       Width = 258
       Align = alLeft
       Caption = 'DB File'
-      ClientHeight = 50
-      ClientWidth = 254
+      ClientHeight = 51
+      ClientWidth = 256
       TabOrder = 0
       object panFile: TPanel
         Left = 0
-        Height = 50
+        Height = 51
         Top = 0
-        Width = 254
+        Width = 256
         Align = alClient
-        ClientHeight = 50
-        ClientWidth = 254
+        ClientHeight = 51
+        ClientWidth = 256
         ParentBackground = False
         TabOrder = 0
         object lbFileName: TLabel
@@ -823,8 +824,8 @@ object frmDBReader: TfrmDBReader
           ParentFont = False
         end
         object btnFileSelect: TButton
-          Left = 204
-          Height = 48
+          Left = 206
+          Height = 49
           Top = 1
           Width = 49
           Align = alRight
@@ -842,22 +843,22 @@ object frmDBReader: TfrmDBReader
       Width = 584
       Align = alClient
       Caption = 'Schema'
-      ClientHeight = 50
-      ClientWidth = 580
+      ClientHeight = 51
+      ClientWidth = 582
       TabOrder = 1
       Visible = False
       object Panel2: TPanel
         Left = 0
-        Height = 50
+        Height = 51
         Top = 0
-        Width = 580
+        Width = 582
         Align = alClient
-        ClientHeight = 50
-        ClientWidth = 580
+        ClientHeight = 51
+        ClientWidth = 582
         TabOrder = 0
         object btnGenSchema: TButton
           Left = 1
-          Height = 48
+          Height = 49
           Top = 1
           Width = 95
           Align = alLeft
@@ -867,7 +868,7 @@ object frmDBReader: TfrmDBReader
         end
         object btnCopySchema: TButton
           Left = 96
-          Height = 48
+          Height = 49
           Top = 1
           Width = 95
           Align = alLeft
@@ -881,8 +882,8 @@ object frmDBReader: TfrmDBReader
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 24
-    Top = 548
+    Height = 22
+    Top = 550
     Width = 844
     Panels = <    
       item

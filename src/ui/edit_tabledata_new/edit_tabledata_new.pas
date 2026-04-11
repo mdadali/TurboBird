@@ -352,7 +352,7 @@ begin
     end;}
 end;
 
-procedure TfrmEditTableDataNew.CreateDynamicControls;
+{procedure TfrmEditTableDataNew.CreateDynamicControls;
 var
   ALabel: TLabel;
   ADBEdit: TDBEdit;
@@ -432,18 +432,12 @@ begin
 
         Inc(ATop, AArrayGrid.Height + 2); // Abstand für Label
 
-        // Array Info-Label
-        //ALabel := TLabel.Create(pnlRecord);
-        //ALabel.Parent := pnlRecord;
         ALabel.Caption := ALabel.Caption +
                           sLineBreak + '(' +
                           GetArrayFieldInfo(IBTableMain.Database, TIBArrayField(IBTableMain.Fields[i])) + ')';
 
         AArrayGrid.Left := ALabel.Left + ALabel.Width + 150;;
         AArrayGrid.Width := AArrayGrid.Width - 70;
-        //ALabel.Left := AArrayGrid.Left + AArrayGrid.Width + 10;
-        //ALabel.Caption := GetArrayFieldInfo(ibtblForm.Database, TIBArrayField(ibtblForm.Fields[i]));
-        //ALabel.Top := ATop;
         inc(ATop, 20);
         //Inc(ATop, ALabel.Height + VSpacing);
       end;
@@ -459,7 +453,7 @@ begin
           ADBMemo.Parent := pnlRecord;
           ADBMemo.Left := 230;
           ADBMemo.Top := ATop + VSpacing;
-          ADBMemo.Width := 400;
+          ADBMemo.Width := ADBMemo.Parent.ClientWidth - ADBMemo.Left - 10;
           ADBMemo.Height := 200;
           ADBMemo.Anchors := [akLeft, akTop, akRight];
           ADBMemo.ScrollBars := ssBoth;
@@ -497,12 +491,155 @@ begin
           if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
             ADBEdit.Enabled := False;
 
-          AWidth := 80;
-          if IBTableMain.Fields[i].DataType = ftString then
-            AWidth := IBTableMain.Fields[i].DataSize * 10;
-          if AWidth > 400 then
-            AWidth := 400;
-          ADBEdit.Width := AWidth;
+          ADBEdit.Width := ADBEdit.Parent.ClientWidth - ADBEdit.Left - 10;
+
+          Inc(ATop, ADBEdit.Height + VSpacing);
+        end;
+    end;
+  end;
+
+  Height := ATop + VSpacing * 2;
+end;}
+
+procedure TfrmEditTableDataNew.CreateDynamicControls;
+var
+  ALabel: TLabel;
+  ADBEdit: TDBEdit;
+  ADBMemo: TDBMemo;
+  ADBDateTime: TDBDateTimePicker;
+  AArrayGrid: TIBArrayGrid;
+  i, VSpacing: Integer;
+  ATop: Integer;
+  LabelWidth: Integer;
+  ControlLeft: Integer;
+begin
+  ATop := 20;
+  VSpacing := 10;
+
+  LabelWidth := 200;        // feste Labelbreite (für sauberes Layout)
+  ControlLeft := 20 + LabelWidth + 10;
+
+  for i := 0 to IBTableMain.FieldCount - 1 do
+  begin
+    // ===== LABEL =====
+    ALabel := TLabel.Create(pnlRecord);
+    ALabel.Parent := pnlRecord;
+    ALabel.Left := 20;
+    ALabel.Top := ATop + VSpacing;
+    ALabel.Width := LabelWidth;
+    ALabel.WordWrap := True;
+    ALabel.Caption := IBTableMain.Fields[i].FieldName;
+
+    if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+    begin
+      ALabel.Font.Color := clRed;
+      ALabel.Caption := ALabel.Caption + ' (Foreign Key)';
+    end;
+
+    // ===== ARRAY =====
+    if IBTableMain.Fields[i] is TIBArrayField then
+    begin
+      with TIBArrayField(IBTableMain.Fields[i]) do
+      begin
+        AArrayGrid := TIBArrayGrid.Create(pnlRecord);
+        AArrayGrid.Parent := pnlRecord;
+        AArrayGrid.Left := ControlLeft;
+        AArrayGrid.Top := ATop + VSpacing;
+        AArrayGrid.Anchors := [akLeft, akTop, akRight];
+
+        if IsForeignKeyField(FieldName) then
+          AArrayGrid.Enabled := False;
+
+        if ArrayDimensions = 1 then
+        begin
+          AArrayGrid.RowCount := 1;
+          AArrayGrid.ColCount := ArrayBounds[0].UpperBound - ArrayBounds[0].LowerBound + 1;
+          AArrayGrid.DefaultColWidth := 60;
+          AArrayGrid.Height := AArrayGrid.DefaultRowHeight + 8;
+        end
+        else if ArrayDimensions = 2 then
+        begin
+          AArrayGrid.ColCount := ArrayBounds[1].UpperBound - ArrayBounds[1].LowerBound + 1;
+          AArrayGrid.RowCount := ArrayBounds[0].UpperBound - ArrayBounds[0].LowerBound + 1;
+          AArrayGrid.DefaultColWidth := 60;
+          AArrayGrid.Height := AArrayGrid.DefaultRowHeight * AArrayGrid.RowCount + 8;
+        end
+        else
+        begin
+          AArrayGrid.ColCount := 1;
+          AArrayGrid.RowCount := 1;
+          AArrayGrid.Cells[0,0] := Format('%d-dim Array', [ArrayDimensions]);
+          AArrayGrid.Height := 30;
+        end;
+
+        // 👉 volle Breite nutzen
+        AArrayGrid.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+
+        AArrayGrid.DataSource := dsMain;
+        AArrayGrid.DataField := FieldName;
+
+        Inc(ATop, AArrayGrid.Height + VSpacing * 2);
+      end;
+
+      Continue;
+    end;
+
+    // ===== STANDARD FELDER =====
+    case IBTableMain.Fields[i].DataType of
+
+      ftBlob, ftMemo:
+        begin
+          ADBMemo := TDBMemo.Create(pnlRecord);
+          ADBMemo.Parent := pnlRecord;
+          ADBMemo.Left := ControlLeft;
+          ADBMemo.Top := ATop + VSpacing;
+          ADBMemo.Height := 200;
+          ADBMemo.Anchors := [akLeft, akTop, akRight];
+
+          // 👉 volle Breite
+          ADBMemo.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+
+          ADBMemo.ScrollBars := ssBoth;
+          ADBMemo.DataSource := dsMain;
+          ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
+
+          Inc(ATop, ADBMemo.Height + VSpacing * 2);
+        end;
+
+      ftDate, ftTime, ftDateTime:
+        begin
+          ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
+          ADBDateTime.Parent := pnlRecord;
+          ADBDateTime.Left := ControlLeft;
+          ADBDateTime.Top := ATop + VSpacing;
+          ADBDateTime.Width := 180; // bewusst fix (UX besser)
+          ADBDateTime.Anchors := [akLeft, akTop];
+
+          ADBDateTime.DataSource := dsMain;
+          ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
+
+          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+            ADBDateTime.Enabled := False;
+
+          Inc(ATop, ADBDateTime.Height + VSpacing);
+        end;
+
+      else
+        begin
+          ADBEdit := TDBEdit.Create(pnlRecord);
+          ADBEdit.Parent := pnlRecord;
+          ADBEdit.Left := ControlLeft;
+          ADBEdit.Top := ATop + VSpacing;
+          ADBEdit.Anchors := [akLeft, akTop, akRight];
+
+          ADBEdit.DataSource := dsMain;
+          ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
+
+          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+            ADBEdit.Enabled := False;
+
+          // 👉 volle Breite
+          ADBEdit.Width := pnlRecord.ClientWidth - ControlLeft - 10;
 
           Inc(ATop, ADBEdit.Height + VSpacing);
         end;

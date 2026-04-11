@@ -1,0 +1,30 @@
+Known Limitations / Bugs
+-----------------------
+
+[Edit Table Data]
+- Case-sensitive table names are currently not supported.
+
+[Embedded Connections]
+- The user manager is hidden.
+  Login is currently only possible with SYSDBA.
+
+[Navigation Tree → Tables → Context Menu "Copy Table"]
+- Computed fields are not supported.
+  Example:
+    first_name || ' ' || last_name AS full_name
+
+[DB Tools → DB Info → Tab "Pages"]
+- The values for "Used Pages" and "Free Pages" are swapped.
+- This behavior also occurs in IBX DBAdmin.
+  → Likely an IBX issue.
+
+[RTF Export]
+- The RTF file is generated.
+- Opening:
+  - AbiWord: works
+  - LibreOffice: does not work
+- Likely an outdated RTF format is being generated.
+- Issue has been reported (2025-09-08).
+
+[Data Editor]
+- Currently unstable and under active development.

@@ -6,6 +6,26 @@ Neuigkeiten für TurboBird
 
 
 ----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1272
+Build-Datum & -Zeit: 11.04.2026, 15:16:57
+
++DBReader als Datenrettungstool integriert
+   (https://github.com/serbod/DBReader)
+   
++Unterstützung für Embedded Connections hinzugefügt.
+  (Bitte die Datei "bekannte_einschränkungen_bugs.txt" lesen.)
+     
+!CSVEditor wurde in DataEditor umbenannt, da das Tool
+  nun mehrere Dateiformate bearbeiten und exportieren kann.
+  
++Bekannte Einschränkungen/Bugs als Dateien in die Distribution aufgenommen.
+
++Neue Menüeintrag 'Buildin-Tools' in Hauptmenü
+
+!Mehrere Bugs behoben.
+
+
+----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1270
 Build-Datum & -Zeit: 18.03.2026, 00:32:41
 
