@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="TestApplication.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos X="3" Y="9"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="fMain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="61"/>
+        <CursorPos X="5" Y="76"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uPSI_uib.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="20"/>
+        <CursorPos X="60" Y="20"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uPSI_uibconst.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="54"/>
+        <CursorPos X="11" Y="67"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="983"/>
+        <CursorPos X="20" Y="1007"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uPSI_uibmetadata.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uPSI_uibsqlparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="20"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../source/uibconst.pas"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="24"/>
+        <CursorPos X="19" Y="37"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="19">
+      <Position>
+        <Filename Value="fMain.pas"/>
+      </Position>
+      <Position>
+        <Filename Value="fMain.pas"/>
+        <Caret Line="10" Column="10"/>
+      </Position>
+      <Position>
+        <Filename Value="fMain.pas"/>
+        <Caret Line="12" Column="23"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="11" Column="2"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="52" Column="6" TopLine="39"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="53" Column="3" TopLine="40"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="338" Column="17" TopLine="325"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="981" Column="19" TopLine="968"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="982" Column="25" TopLine="968"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="338" Column="49" TopLine="325"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="398" Column="43" TopLine="385"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="542" Column="49" TopLine="525"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="654" Column="8" TopLine="641"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="655" Column="15" TopLine="641"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="658" Column="43" TopLine="645"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="1006" Column="22" TopLine="983"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uiblib.pas"/>
+        <Caret Line="1007" Column="20" TopLine="983"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uibconst.pas"/>
+        <Caret Line="11" Column="2"/>
+      </Position>
+      <Position>
+        <Filename Value="uPSI_uibconst.pas"/>
+        <Caret Line="67" Column="11" TopLine="54"/>
+      </Position>
+      <Position>
+        <Filename Value="fMain.pas"/>
+        <Caret Line="20" Column="10" TopLine="9"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

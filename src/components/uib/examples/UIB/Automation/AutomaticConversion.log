@@ -1,0 +1,4 @@
+UIB.lpi Note: Added defines -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL in custom options
+ Progress: Found all unit files
+ Error: Error="User selected to end conversion with file /home/maurog/daten/mustafa/entwicklung/linux/lazarus/components/uib/examples/UIB/Automation/UIB.dpr"
+ Fatal: Conversion Aborted.

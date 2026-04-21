@@ -1,101 +1,33 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="5"/>
+    <Version Value="12"/>
     <General>
-      <MainUnit Value="0"/>
-      <ActiveEditorIndexAtStart Value="0"/>
-      <IconPath Value="./"/>
-      <TargetFileExt Value=".exe"/>
+      <Flags>
+        <LRSInOutputDirectory Value="False"/>
+        <CompatibilityMode Value="True"/>
+      </Flags>
       <Title Value="bakcupsample"/>
     </General>
-    <JumpHistory Count="6" HistoryIndex="5">
-      <Position1>
-        <Filename Value="C:\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
-        <Caret Line="1833" Column="1" TopLine="1812"/>
-      </Position1>
-      <Position2>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <Caret Line="23" Column="29" TopLine="6"/>
-      </Position2>
-      <Position3>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <Caret Line="114" Column="1" TopLine="88"/>
-      </Position3>
-      <Position4>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <Caret Line="115" Column="1" TopLine="88"/>
-      </Position4>
-      <Position5>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <Caret Line="116" Column="1" TopLine="88"/>
-      </Position5>
-      <Position6>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <Caret Line="117" Column="1" TopLine="88"/>
-      </Position6>
-    </JumpHistory>
-    <Units Count="5">
-      <Unit0>
-        <CursorPos X="5" Y="14"/>
-        <EditorIndex Value="4"/>
-        <Filename Value="bakcupsample.lpr"/>
-        <IsPartOfProject Value="True"/>
-        <Loaded Value="True"/>
-        <TopLine Value="1"/>
-        <UnitName Value="bakcupsample"/>
-        <UsageCount Value="20"/>
-      </Unit0>
-      <Unit1>
-        <CursorPos X="1" Y="117"/>
-        <EditorIndex Value="0"/>
-        <Filename Value="frm_bakcupsample.pp"/>
-        <ComponentName Value="frmBakcup"/>
-        <Loaded Value="True"/>
-        <ResourceFilename Value="frm_bakcupsample.lrs"/>
-        <TopLine Value="87"/>
-        <UnitName Value="frm_bakcupsample"/>
-        <UsageCount Value="10"/>
-      </Unit1>
-      <Unit2>
-        <CursorPos X="21" Y="3619"/>
-        <EditorIndex Value="3"/>
-        <Filename Value="D:\developpement\UIB2\source\uibase.pas"/>
-        <Loaded Value="True"/>
-        <TopLine Value="3615"/>
-        <UnitName Value="uibase"/>
-        <UsageCount Value="10"/>
-      </Unit2>
-      <Unit3>
-        <CursorPos X="1" Y="1833"/>
-        <EditorIndex Value="1"/>
-        <Filename Value="C:\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
-        <Loaded Value="True"/>
-        <TopLine Value="1812"/>
-        <UsageCount Value="10"/>
-      </Unit3>
-      <Unit4>
-        <CursorPos X="93" Y="956"/>
-        <EditorIndex Value="2"/>
-        <Filename Value="D:\developpement\UIB2\source\uiblib.pas"/>
-        <Loaded Value="True"/>
-        <TopLine Value="917"/>
-        <UnitName Value="uiblib"/>
-        <UsageCount Value="10"/>
-      </Unit4>
-    </Units>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
       <DestinationDirectory Value="$(TestDir)\publishedproject\"/>
-      <IgnoreBinaries Value="False"/>
-      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
-      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
@@ -106,16 +38,156 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
+    <Units Count="5">
+      <Unit0>
+        <Filename Value="bakcupsample.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="5" Y="14"/>
+        <UsageCount Value="37"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <ComponentName Value="frmBakcup"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="83"/>
+        <CursorPos X="5" Y="88"/>
+        <UsageCount Value="19"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="D:\developpement\UIB2\source\uibase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3615"/>
+        <CursorPos X="21" Y="3619"/>
+        <UsageCount Value="8"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="C:\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1812"/>
+        <CursorPos Y="1833"/>
+        <UsageCount Value="8"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="D:\developpement\UIB2\source\uiblib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="917"/>
+        <CursorPos X="93" Y="956"/>
+        <UsageCount Value="8"/>
+      </Unit4>
+    </Units>
+    <JumpHistory Count="23" HistoryIndex="22">
+      <Position1>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="23" Column="29" TopLine="6"/>
+      </Position1>
+      <Position2>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="114" TopLine="88"/>
+      </Position2>
+      <Position3>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="115" TopLine="88"/>
+      </Position3>
+      <Position4>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="116" TopLine="88"/>
+      </Position4>
+      <Position5>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="117" TopLine="91"/>
+      </Position5>
+      <Position6>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="104" Column="31" TopLine="95"/>
+      </Position6>
+      <Position7>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="77" Column="3" TopLine="75"/>
+      </Position7>
+      <Position8>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="78" Column="3" TopLine="76"/>
+      </Position8>
+      <Position9>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="77" Column="3" TopLine="75"/>
+      </Position9>
+      <Position10>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="79" Column="3" TopLine="77"/>
+      </Position10>
+      <Position11>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="98" Column="9" TopLine="75"/>
+      </Position11>
+      <Position12>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="64" Column="23" TopLine="52"/>
+      </Position12>
+      <Position13>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="86" Column="39" TopLine="64"/>
+      </Position13>
+      <Position14>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="109" Column="12" TopLine="103"/>
+      </Position14>
+      <Position15>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="110" Column="12" TopLine="104"/>
+      </Position15>
+      <Position16>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="111" Column="12" TopLine="105"/>
+      </Position16>
+      <Position17>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="113" Column="12" TopLine="107"/>
+      </Position17>
+      <Position18>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="137" Column="3" TopLine="123"/>
+      </Position18>
+      <Position19>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="138" Column="3" TopLine="124"/>
+      </Position19>
+      <Position20>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="84" Column="3" TopLine="82"/>
+      </Position20>
+      <Position21>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="145" Column="21" TopLine="125"/>
+      </Position21>
+      <Position22>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="148" TopLine="126"/>
+      </Position22>
+      <Position23>
+        <Filename Value="frm_bakcupsample.pp"/>
+        <Caret Line="134" Column="8" TopLine="126"/>
+      </Position23>
+    </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="2"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <SearchPaths>
-      <SrcPath Value="$(LazarusDir)\lcl\;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)\"/>
+      <SrcPath Value="$(LazarusDir)\lcl;$(LazarusDir)\lcl\interfaces\$(LCLWidgetType)"/>
     </SearchPaths>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
     <Linking>
       <Options>
         <Win32>
@@ -123,8 +195,5 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
 </CONFIG>

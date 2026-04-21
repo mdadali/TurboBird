@@ -8,7 +8,7 @@ code implementing the class wrapper is taken from Carlo Kok's conv utility
 
 }
 interface
-{$I uib.inc}
+{$I ../../source/uib.inc}
 uses
    SysUtils
   ,Classes
@@ -64,7 +64,7 @@ begin
   CL.AddTypeS('TOIDUDFs', 'set of TOIDUDF');
  CL.AddConstantN('ALLOBjects','LongInt').Value.ts32 := ord(OIDDomain) or ord(OIDTable) or ord(OIDView) or ord(OIDProcedure) or ord(OIDGenerator) or ord(OIDException) or ord(OIDUDF) or ord(OIDRole) or ord(OIDDBCharset);
  CL.AddConstantN('ALLTables','LongInt').Value.ts32 := ord(OIDTableField) or ord(OIDPrimary) or ord(OIDForeign) or ord(OIDTableTrigger) or ord(OIDUnique) or ord(OIDIndex) or ord(OIDCheck);
- CL.AddConstantN('ALLViews','LongInt').Value.ts32 := ord(OIDViewFields) or ord(OIDViewTrigers);
+ //maurog CL.AddConstantN('ALLViews','LongInt').Value.ts32 := ord(OIDViewFields) or ord(OIDViewTrigers);
  CL.AddConstantN('ALLProcedures','LongInt').Value.ts32 := ord(OIDProcFieldIn) or ord(OIDProcFieldOut);
  CL.AddConstantN('ALLUDFs','LongInt').Value.ts32 := ord(OIDUDFField);
 end;

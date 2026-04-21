@@ -1,0 +1,6 @@
+Restore.lpi Note: Added defines -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL in custom options
+ Progress: Found all unit files
+Restore.dpr Note: Replaced unit "QForms" with "Forms" in uses section.
+Restore.lpr(1,17) Note: Added MODE Delphi syntax modifier after unit name.
+ Error: Error="Problems when repairing form file /home/maurog/daten/mustafa/entwicklung/linux/lazarus/components/uib/examples/UIB/Component/Restore/Restore.lfm"
+ Fatal: Conversion Aborted.

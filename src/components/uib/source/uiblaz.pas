@@ -1,22 +1,22 @@
-{  Ce fichier est automatiquement créé par Lazarus. Ne pas le modifier!
-  Ce code source est utilisé seulement pour compiler et installer
-  le paquet UIBLaz 1.0.
+{ This file was automatically created by Lazarus. Do not edit!
+  This source is only used to compile and install the package.
  }
 
-unit UIBLaz; 
+unit UIBLaz;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
-  registeruib, uib, uibdataset, LazarusPackageIntf; 
+  registeruib, uib, uibdataset, uibavl, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('registeruib', @registeruib.Register); 
-end; 
+  RegisterUnit('registeruib', @registeruib.Register);
+end;
 
 initialization
-  RegisterPackage('UIBLaz', @Register); 
+  RegisterPackage('UIBLaz', @Register);
 end.

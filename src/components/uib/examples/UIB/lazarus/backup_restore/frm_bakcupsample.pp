@@ -31,28 +31,40 @@ uses
   StdCtrls, Buttons, UIB,keyboard;
 
 type
+
+  { TfrmBakcup }
+
   TfrmBakcup = class(TForm)
+    btnStart: TSpeedButton;
+    btnOpenSourceDB: TButton;
+    btnOpenBackupFile: TButton;
     chkExpand: TCheckBox;
     chkConvert: TCheckBox;
     chkTransportable: TCheckBox;
     chkMetadatadesc: TCheckBox;
     Label1: TLabel;
+    odSourceDB: TOpenDialog;
+    odDestBackFile: TOpenDialog;
     optGarb: TCheckBox;
     OptMetadataOnly: TCheckBox;
     OptLimbo: TCheckBox;
     optChksum: TCheckBox;
     edDatabase: TEdit;
-    edDesti: TEdit;
+    edDest: TEdit;
     Bak: TUIBBackup;
     Label2: TLabel;
     Label3: TLabel;
     moResult: TMemo;
     Panel1: TPanel;
+    pnlBottom: TPanel;
     panOptions: TPanel;
-    btnStart: TSpeedButton;
+    UIBRestore1: TUIBRestore;
     procedure BakVerbose(Sender: TObject; Message: string);
+    procedure btnOpenBackupFileClick(Sender: TObject);
+    procedure btnOpenSourceDBClick(Sender: TObject);
     procedure Form1Show(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
+    procedure pnlBottomClick(Sender: TObject);
   private
     { private declarations }
     function GetOptionBak : TBackupOptions;
@@ -71,22 +83,30 @@ implementation
 procedure TfrmBakcup.btnStartClick(Sender: TObject);
 begin
   Try
+    moResult.Lines.Clear;
+    moResult.Repaint;
+
     Screen.Cursor:=crHourglass;
     btnStart.Enabled:=False;
     try
-      Bak.Database:=edDatabase.Text;
-      Bak.BackupFiles.Text:=edDesti.Text;
+      Bak.Database := edDatabase.Text;
+      Bak.BackupFiles.Text := edDest.Text;
       moResult.Lines.Clear;
-      Bak.Options:=self.GetOptionBak;
+      Bak.Options := self.GetOptionBak;
       Bak.Run;
     except
       On E:Exception do
         ShowMessage(E.Message);
     end;
   finally
-    Screen.Cursor:=crDefault;
-    btnStart.Enabled:=True;
+    Screen.Cursor := crDefault;
+    btnStart.Enabled := True;
   end;
+end;
+
+procedure TfrmBakcup.pnlBottomClick(Sender: TObject);
+begin
+
 end;
 
 //Get the options of backup
@@ -95,7 +115,7 @@ Var i : Integer;
     c : TCheckBox;
 begin
   FillChar(Result,SizeOf(Result),0);
-  for i:=0 to panOptions.ControlCount-1 do
+  for i := 0 to panOptions.ControlCount-1 do
   begin
     If panOptions.Controls[i] is TCheckBox then
     begin
@@ -111,10 +131,22 @@ end;
 procedure TfrmBakcup.BakVerbose(Sender: TObject; Message: string);
 Var j : Integer;
 begin
-  j:=moResult.VertScrollBar.Position;
+  j := moResult.VertScrollBar.Position;
   moResult.Append(Message);
   Inc(j);
   Application.ProcessMessages;
+end;
+
+procedure TfrmBakcup.btnOpenSourceDBClick(Sender: TObject);
+begin
+  if  odSourceDB.Execute then
+    edDatabase.Text := odSourceDB.FileName;
+end;
+
+procedure TfrmBakcup.btnOpenBackupFileClick(Sender: TObject);
+begin
+  if  odDestBackFile.Execute then
+    edDest.Text := odDestBackFile.FileName;
 end;
 
 procedure TfrmBakcup.Form1Show(Sender: TObject);
