@@ -1,100 +1,125 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
+    <Version Value="12"/>
     <PathDelim Value="\"/>
-    <Version Value="5"/>
     <General>
-      <MainUnit Value="0"/>
-      <IconPath Value="./"/>
-      <TargetFileExt Value=".exe"/>
-      <ActiveEditorIndexAtStart Value="0"/>
+      <Flags>
+        <LRSInOutputDirectory Value="False"/>
+        <CompatibilityMode Value="True"/>
+      </Flags>
     </General>
     <VersionInfo>
-      <ProjectVersion Value=""/>
       <Language Value=""/>
       <CharSet Value=""/>
     </VersionInfo>
+    <BuildModes Count="1">
+      <Item1 Name="default" Default="True"/>
+    </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
-      <IgnoreBinaries Value="False"/>
-      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
-      <ExcludeFileFilter Value="*.(bak|ppu|ppw|o|so);*~;backup"/>
     </PublishOptions>
     <RunParams>
       <local>
-        <FormatVersion Value="1"/>
-        <LaunchingApplication PathPlusParams="/usr/X11R6/bin/xterm -T 'Lazarus Run Output' -e $(LazarusDir)/tools/runwait.sh $(TargetCmdLine)"/>
+        <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default">
+          <local>
+            <LaunchingApplication PathPlusParams="\usr\X11R6\bin\xterm -T &apos;Lazarus Run Output&apos; -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
+          </local>
+        </Mode0>
+      </Modes>
     </RunParams>
-    <RequiredPackages Count="4">
+    <RequiredPackages Count="3">
       <Item1>
-        <PackageName Value="virtualtreeslcl"/>
-        <MinVersion Major="4" Release="17" Build="25" Valid="True"/>
+        <PackageName Value="UIBLaz"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item1>
       <Item2>
-        <PackageName Value="UIBLaz"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item2>
       <Item3>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item3>
-      <Item4>
         <PackageName Value="LCL"/>
-      </Item4>
+      </Item3>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="MetaData.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="MetaData"/>
+        <EditorIndex Value="2"/>
         <CursorPos X="28" Y="6"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="1"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="main.pas"/>
-        <ComponentName Value="MainForm"/>
         <IsPartOfProject Value="True"/>
-        <ResourceFilename Value="main.lrs"/>
-        <UnitName Value="main"/>
-        <CursorPos X="5" Y="158"/>
-        <TopLine Value="142"/>
-        <EditorIndex Value="0"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="99"/>
+        <CursorPos X="5" Y="110"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="main.lrs"/>
-        <CursorPos X="1" Y="19"/>
-        <TopLine Value="1"/>
+        <CursorPos Y="19"/>
         <UsageCount Value="10"/>
       </Unit2>
       <Unit3>
         <Filename Value="C:\DOCUME~1\Henri\LOCALS~1\Temp\testcompileroptions.pas"/>
-        <UnitName Value="testcompileroptions"/>
-        <CursorPos X="25" Y="1"/>
-        <TopLine Value="1"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="25"/>
+        <UsageCount Value="10"/>
+        <LoadedDesigner Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\..\..\..\source\uibmetadata.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="46"/>
+        <CursorPos X="3" Y="46"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
-      </Unit3>
+      </Unit4>
     </Units>
-    <JumpHistory Count="1" HistoryIndex="0">
+    <JumpHistory Count="5" HistoryIndex="4">
       <Position1>
-        <Filename Value="C:\DOCUME~1\Henri\LOCALS~1\Temp\testcompileroptions.pas"/>
-        <Caret Line="1" Column="1" TopLine="1"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="158" Column="5" TopLine="142"/>
       </Position1>
+      <Position2>
+        <Filename Value="main.pas"/>
+        <Caret Line="43" Column="18" TopLine="43"/>
+      </Position2>
+      <Position3>
+        <Filename Value="main.pas"/>
+        <Caret Line="12" Column="24"/>
+      </Position3>
+      <Position4>
+        <Filename Value="main.pas"/>
+        <Caret Line="96" Column="57" TopLine="83"/>
+      </Position4>
+      <Position5>
+        <Filename Value="main.pas"/>
+        <Caret Line="95" Column="34" TopLine="83"/>
+      </Position5>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
-    <Version Value="5"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
-    <CodeGeneration>
-      <Generate Value="Faster"/>
-    </CodeGeneration>
+    <Parsing>
+      <SyntaxOptions>
+        <UseAnsiStrings Value="False"/>
+      </SyntaxOptions>
+    </Parsing>
     <Linking>
       <Options>
         <Win32>
@@ -102,9 +127,6 @@
         </Win32>
       </Options>
     </Linking>
-    <Other>
-      <CompilerPath Value="$(CompPath)"/>
-    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="2">

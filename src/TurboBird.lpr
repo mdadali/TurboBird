@@ -52,9 +52,10 @@ uses
   //End-DBAdmin
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
-  datamodulesystem, fservers, fActivityMonitor, edit_tabledata_new,
+  datamodulesystem, jvRuntimeDesign, pascalscriptfcl, pascalscript,
+  uPSI_uibconst, fservers, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fdataeditor,
-  db_reader, DbGridForm;
+  u_psstudio, u_consoleide, db_reader, DbGridForm;
 
 const
   Major = 1;
@@ -152,7 +153,6 @@ begin
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
   //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
 
-
   //DBAdmin
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TDBDataModule, DBDataModule);
@@ -170,4 +170,21 @@ begin
   Application.CreateForm(TdmSystem, dmSystem);
   //Application.CreateForm(TfrmServers, frmServers);
   Application.Run;
+
+  {$IFDEF CONSOLE_SCRIPTER}
+  if LocalConsoleIDE <> nil then
+  begin
+    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
+    LocalConsoleIDE.Free;
+  end;
+  {$ELSE}
+  if PSStudio <> nil then
+  begin
+    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
+    LocalConsoleIDE.Free;
+    PSStudio.JvDesignPanel1.Active := false;
+    PSStudio.Free;
+  end;
+  {$ENDIF}
+
 end.

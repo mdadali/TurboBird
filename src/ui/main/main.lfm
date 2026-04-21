@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 525
+  Left = 628
   Height = 612
-  Top = 112
+  Top = 136
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 584
+  ClientHeight = 586
   ClientWidth = 906
   Color = clForm
   DragMode = dmAutomatic
@@ -5589,7 +5589,7 @@ object fmMain: TfmMain
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 22
+    Height = 24
     Top = 562
     Width = 906
     Panels = <    
@@ -5706,8 +5706,8 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 460
-      ClientWidth = 516
+      ClientHeight = 464
+      ClientWidth = 522
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
@@ -5715,7 +5715,7 @@ object fmMain: TfmMain
         Left = 704
         Height = 82
         Top = 64
-        Width = 190
+        Width = 196
         Anchors = [akTop, akLeft, akRight]
         Picture.Data = {
           0A544A706567496D6167655F420000FFD8FFE000104A46494600010101006000
@@ -6254,9 +6254,9 @@ object fmMain: TfmMain
       end
       object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 460
+        Height = 464
         Top = 0
-        Width = 516
+        Width = 522
         BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
@@ -6283,7 +6283,7 @@ object fmMain: TfmMain
     TabOrder = 4
     object Memo1: TMemo
       Left = 1
-      Height = 33
+      Height = 35
       Top = 1
       Width = 904
       Align = alClient
@@ -6346,13 +6346,13 @@ object fmMain: TfmMain
       Width = 331
       Align = alTop
       Caption = 'Object Filter'
-      ClientHeight = 35
-      ClientWidth = 329
+      ClientHeight = 34
+      ClientWidth = 327
       ParentBackground = False
       TabOrder = 1
       object edtFilter: TEdit
         Left = 32
-        Height = 36
+        Height = 29
         Top = 2
         Width = 285
         OnChange = edtFilterChange
@@ -6360,9 +6360,9 @@ object fmMain: TfmMain
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
-        Height = 23
+        Height = 25
         Top = 5
-        Width = 23
+        Width = 25
         Checked = True
         OnChange = CheckBoxFilterChange
         State = cbChecked
@@ -6450,6 +6450,10 @@ object fmMain: TfmMain
       object mnDBReader: TMenuItem
         Caption = 'DBReader'
         OnClick = mnDBReaderClick
+      end
+      object mnuPascalScript: TMenuItem
+        Caption = 'PascalScript'
+        OnClick = mnuPascalScriptClick
       end
     end
   end

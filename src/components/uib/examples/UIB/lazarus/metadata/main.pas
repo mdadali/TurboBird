@@ -1,6 +1,7 @@
 unit main;
 
-{$mode objfpc}{$H+}
+//{$mode objfpc}{$H+}
+{$mode delphi}{$H+}
 
 interface
 
@@ -91,6 +92,7 @@ const
      (icon: 9;  color : clBlack),   //   MetaRoleGrantee
      (icon: 9;  color : clBlack),   //   MetaProcedureGrantee
      (icon: 9;  color : clBlack),   //   MetaTriggerGrantee
+     (icon: 9;  color : clBlack),    //   MetaViewGrantee
      (icon: 9;  color : clBlack)    //   MetaViewGrantee
    );
 
@@ -98,9 +100,9 @@ procedure TMainForm.mOpenClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
   begin
-    DataBase.Connected := false;
+    //DataBase.Connected := false;
     TreeView.Items.Clear;
-    DataBase.DatabaseName := OpenDialog.FileName;
+    //DataBase.DatabaseName := OpenDialog.FileName;
     MetaData.Free;
     MetaData := TMetaDataBase.Create(nil, 0);
     MetaData.LoadFromDatabase(Transaction);

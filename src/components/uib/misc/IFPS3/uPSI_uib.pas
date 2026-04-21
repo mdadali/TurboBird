@@ -71,8 +71,8 @@ procedure Register;
 
 implementation
 uses
-   Windows
-  ,SyncObjs
+   //Windows
+  SyncObjs
   ,Contnrs
   ,uiblib
   ,uibase
@@ -1108,11 +1108,11 @@ begin T := Self.AutoStart; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TUIBTransactionAutoRetain_W(Self: TUIBTransaction; const T: boolean);
-begin Self.AutoRetain := T; end;
+begin {Maurog Self.AutoRetain := T;} end;
 
 (*----------------------------------------------------------------------------*)
 procedure TUIBTransactionAutoRetain_R(Self: TUIBTransaction; var T: boolean);
-begin T := Self.AutoRetain; end;
+begin {Maurog T := Self.AutoRetain;} end;
 
 (*----------------------------------------------------------------------------*)
 procedure TUIBTransactionOnEndTransaction_W(Self: TUIBTransaction; const T: TOnEndTransaction);
@@ -1744,8 +1744,8 @@ procedure RIRegister_TUIBEvents(CL: TPSRuntimeClassImporter);
 begin
   with CL.Add(TUIBEvents) do
   begin
-    RegisterVirtualMethod(@TUIBEvents.RegisterEvents, 'RegisterEvents');
-    RegisterVirtualMethod(@TUIBEvents.UnRegisterEvents, 'UnRegisterEvents');
+    //maurog RegisterVirtualMethod(@TUIBEvents.RegisterEvents, 'RegisterEvents');
+    //maurog RegisterVirtualMethod(@TUIBEvents.UnRegisterEvents, 'UnRegisterEvents');
     RegisterMethod(@TUIBEvents.SetAutoRegister, 'SetAutoRegister');
     RegisterPropertyHelper(@TUIBEventsAutoRegister_R,@TUIBEventsAutoRegister_W,'AutoRegister');
     RegisterPropertyHelper(@TUIBEventsDatabase_R,@TUIBEventsDatabase_W,'Database');

@@ -84,7 +84,10 @@ uses
   IBTransactionEdit,  //orig
   bulk_clone,
   fdataeditor,
-  db_reader
+  db_reader,
+
+  u_psstudio,
+  u_consoleide
   ;
 
 {$i turbocommon.inc}
@@ -125,6 +128,7 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
+    mnuPascalScript: TMenuItem;
     mnDBReader: TMenuItem;
     mnBulkClone: TMenuItem;
     mnDataEditor: TMenuItem;
@@ -413,6 +417,7 @@ type
     procedure mnRestoreClick(Sender: TObject);
     procedure mnServerRegistryClick(Sender: TObject);
     procedure mnThemeClick(Sender: TObject);
+    procedure mnuPascalScriptClick(Sender: TObject);
     procedure PageControl1CloseTabClicked(Sender: TObject);
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: Integer);
@@ -1517,6 +1522,23 @@ end;
 procedure TfmMain.mnThemeClick(Sender: TObject);
 begin
   frmThemeSelector.ShowModal;
+end;
+
+procedure TfmMain.mnuPascalScriptClick(Sender: TObject);
+begin
+  {$IFDEF CONSOLE_SCRIPTER}
+  if ConsoleIDE = nil then
+  begin
+    ConsoleIDE := TfrmConsoleIDE.Create(self);
+    ConsoleIDE.FormStyle := fsStayOnTop;
+  end;
+  ConsoleIDE.Show;
+
+  {$ELSE}
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(nil);
+  PSStudio.ShowModal;
+  {$ENDIF}
 end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
