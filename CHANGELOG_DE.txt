@@ -5,6 +5,56 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1273
+Build-Datum & -Zeit: 19.05.2026, 18:14:12
+
++ FormDesigner & PascalScript (Neu)
+- Eigener Knoten "Forms" im Datenbank-Baum
+- Pro Datenbank können jetzt eigene Formulare erstellt werden
+- Formulare werden als .cfrm + .rops Dateien gespeichert
+- "New Form" öffnet den visuellen Designer
+- "Edit Form" lädt ein bestehendes Formular in den Designer
+- "Execute Form" führt ein Formular direkt aus
+- Doppelklick auf Formular startet die Ausführung
+- Speicherort: data/PSStudio/Forms/<Server>/<Datenbank>/
+
+! Tablemanagement und Constraints (vollständig überarbeitet)
+- Alle Constraint-Typen jetzt als Unterknoten jeder Tabelle sichtbar
+- Primary Key mit Feldliste
+- Foreign Keys mit Referenz-Anzeige
+- Unique Constraints mit Feldliste
+- Check Constraints mit Bedingung
+- Not Null Constraints mit betroffenen Feldern
+- Indices (nur benutzerdefinierte, ohne Systemindizes)
+- Mehrspaltige Schlüssel werden übersichtlich gruppiert (PRIMARY KEY (Feld1, Feld2))
+- Tabellen-Management um neue Tabs erweitert:
+  - Primary Key: Felder per Checkbox wählen, Änderungen generieren SQL
+  - Foreign Keys: bestehende verwalten, neue mit Assistent erstellen
+  - Unique Constraints: Felder wählen, Name vergeben
+  - Check Constraints: Ausdruck direkt bearbeiten
+  - Not Null Constraints: Felder anhaken, Änderungen als ALTER-Statements
+
+! Trigger-Unterstützung (erweitert)
+- Neue Trigger-Typen im Baum:
+  - Database-Trigger (ON CONNECT, ON DISCONNECT, ON TRANSACTION...)
+  - DDL-Trigger (BEFORE/AFTER CREATE TABLE, DROP TABLE, etc.)
+  - UDR-Trigger (EXTERNAL NAME ... ENGINE UDR)
+- "Create new Trigger" je nach Typ mit passender Vorlage
+- Trigger-Ansicht zeigt korrekten Typ an (Table/DB/DDL)
+- Editieren und Löschen aller Trigger-Typen möglich
+
+! Baumstruktur (verbessert)
+- Tabellen-Felder jetzt übersichtlich gruppiert unter "Fields"
+- Constraints und Indizes direkt unter der Tabelle sichtbar
+- Table-Triggers direkt unter der Tabelle sichtbar
+- "References" und "Permissions" unter jeder Tabelle
+
+
+Und mehrere Bugs behoben.
+
+
 ----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1272
 Build-Datum & -Zeit: 11.04.2026, 15:16:57

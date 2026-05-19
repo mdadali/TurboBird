@@ -16,6 +16,10 @@
         <Verbosity>
           <ShowHints Value="False"/>
         </Verbosity>
+        <CustomOptions Value="-dPS_USESSUPPORT"/>
+        <OtherDefines Count="1">
+          <Define0 Value="PS_USESSUPPORT"/>
+        </OtherDefines>
       </Other>
     </CompilerOptions>
     <Description Value="Modified version of (see readme)

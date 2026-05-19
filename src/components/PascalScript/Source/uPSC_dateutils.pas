@@ -27,7 +27,11 @@ begin
   s.AddDelphiFunction('function UnixToDateTime(U: Int64): TDateTime;');
 
   s.AddDelphiFunction('function DateToStr(D: TDateTime): string;');
+  s.AddDelphiFunction('function TimeToStr(Time: TDateTime): string;');  //maurog
+  s.AddDelphiFunction('function DateTimeToStr(DateTime: TDateTime): string;');
   s.AddDelphiFunction('function StrToDate(const S: string): TDateTime;');
+  s.AddDelphiFunction('function StrToTime(const S: AnsiString): TDateTime;');
+
   s.AddDelphiFunction('function FormatDateTime(const fmt: string; D: TDateTime): string;');
 end;
 

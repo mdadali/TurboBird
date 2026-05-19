@@ -3,7 +3,7 @@
 LazarusResources.Add('TdmSysTables','FORMDATA',[
   'TPF0'#12'TdmSysTables'#11'dmSysTables'#8'OnCreate'#7#16'DataModuleCreate'#14
   +'OldCreateOrder'#8#6'Height'#3#11#2#16'HorizontalOffset'#3#16#2#14'VerticalO'
-  +'ffset'#3#253#0#5'Width'#3#223#1#0#8'TIBQuery'#7'sqQuery'#28'AllowAutoActiva'
+  +'ffset'#3#195#0#5'Width'#3#223#1#0#8'TIBQuery'#7'sqQuery'#28'AllowAutoActiva'
   +'teTransaction'#9#11'Transaction'#7#7'stTrans'#12'BufferChunks'#3#232#3#24'B'
   +'ufferChunksInFirstBlock'#2'2'#13'CachedUpdates'#8#27'CaseSensitiveParameter'
   +'Names'#8#16'EnableStatistics'#8#18'GenerateParamNames'#8#27'GeneratorField.'

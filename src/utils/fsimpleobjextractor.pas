@@ -32,16 +32,18 @@ type
     procedure   ResetExtract;
     destructor  Destroy; override;
 
+    procedure Extract(ObjectType: TObjectType; ObjectName : String;
+                       ExtractTypes: TExtractTypes; Quoted: boolean; var AItems: TStrings);
+
     procedure   ExtractObjectNames(dbIndex: integer; ObjectType: TObjectType; SystemFlag: boolean;  var AItems: TStrings; OwnerObjName: string='');
 
     procedure   ExtractTableNames(AItems: TStrings; Quoted: boolean; SystemFlag: boolean);
     procedure   ExtractTableNamesToTreeNode(Quoted: boolean; Node: TTreeNode; SystemFlag: boolean);
 
-    procedure   Extract(ObjectType: TObjectType; ObjectName : String; ExtractTypes: TExtractTypes; Quoted: boolean; var AItems: TStrings);
     procedure   ExtractToTreeNode(ObjectType: TObjectType; ObjectName : String; ExtractTypes: TExtractTypes; Quoted: boolean; var Node: TTreeNode; AImageIndex: integer);
     procedure   ExtractTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char; RemoveLastComma: boolean);
     procedure   ExtractCleanTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
-    procedure   ExtractTableFieldsToTreeNode(ATableName: string; var Node: TTreeNode; Quoted: boolean; Delimiter: char; ImageIndex: integer);
+    procedure   ExtractTableFieldsToTreeNode(ATableName: string; var Node: TTreeNode; Quoted: boolean; Delimiter: char; ImageIndex: integer; SysFlag: boolean);
 
     property   Initialized: boolean read FInitialized;
   end;
@@ -208,12 +210,12 @@ procedure TSimpleObjExtractor.Extract(
   ExtractTypes: TExtractTypes;
   Quoted: boolean;
   var AItems: TStrings);
-
-var tmpQuoted: boolean;
-    ExtractObjectType: TExtractObjectTypes;
+var
+  tmpQuoted: boolean;
+  ExtractObjectType: TExtractObjectTypes;
+  SQL: string;
+  Qry: TIBSQL;
 begin
-  ExtractObjectType := TBTypeToIBXType(ObjectType);
-
   tmpQuoted := FIBExtract.AlwaysQuoteIdentifiers;
   FIBExtract.AlwaysQuoteIdentifiers := Quoted;
 
@@ -229,19 +231,190 @@ begin
 
       otUDRProcedures:
         begin
-          // TODO: gleiche Methode wie GetUDRFunction
+          // TODO
         end;
 
-    else//case
-      FIBExtract.ExtractObject(ExtractObjectType, ObjectName, ExtractTypes);
+      // Primary Keys - gruppiert
+      // Primary Keys - gruppiert
+      otPrimaryKeys:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  ''PRIMARY KEY ('' || LIST(TRIM(isg.RDB$FIELD_NAME), '', '') || '')'' AS CONSTRAINT_DDL ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''PRIMARY KEY'' ' +
+            'GROUP BY rc.RDB$CONSTRAINT_NAME';
 
-      if FIBExtract.Items.Count > 0 then
-      begin
-        FixArraySyntax(FIBExtract.Items);
-        AItems.Assign(FIBExtract.Items);
-      end;
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
 
-    end; //case
+      // Foreign Keys - gruppiert
+      otForeignKeys:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME || '': '' || ' +
+            '  LIST(TRIM(isg.RDB$FIELD_NAME), '', '') || '' → '' || ' +
+            '  TRIM(refc.RDB$CONST_NAME_UQ) AS FK_DDL ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$REF_CONSTRAINTS refc ON rc.RDB$CONSTRAINT_NAME = refc.RDB$CONSTRAINT_NAME ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''FOREIGN KEY'' ' +
+            'GROUP BY rc.RDB$CONSTRAINT_NAME, refc.RDB$CONST_NAME_UQ';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Unique Constraints - gruppiert
+      otUniqueConstraints:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME || '': UNIQUE ('' || ' +
+            '  LIST(TRIM(isg.RDB$FIELD_NAME), '', '') || '')'' AS UNIQUE_DDL ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''UNIQUE'' ' +
+            'GROUP BY rc.RDB$CONSTRAINT_NAME';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Check Constraints - einfach
+      otCheckConstraints:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME || '': CHECK'' AS CHECK_DDL ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''CHECK'' ' +
+            'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Not Null Constraints - einfach
+      otNotNullConstraints:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  TRIM(rf.RDB$FIELD_NAME) || '': NOT NULL'' AS NOTNULL_DDL ' +
+            'FROM RDB$RELATION_FIELDS rf ' +
+            'WHERE rf.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rf.RDB$NULL_FLAG = 1 ' +
+            'ORDER BY rf.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Indices - gruppiert
+      otIndexes:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  i.RDB$INDEX_NAME || '': '' || ' +
+            '  CASE i.RDB$UNIQUE_FLAG WHEN 1 THEN ''UNIQUE '' ELSE '''' END || ' +
+            '  ''ON ('' || LIST(TRIM(isg.RDB$FIELD_NAME), '', '') || '')'' AS INDEX_DDL ' +
+            'FROM RDB$INDICES i ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON i.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE i.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND NOT EXISTS (' +
+            '  SELECT 1 FROM RDB$RELATION_CONSTRAINTS rc ' +
+            '  WHERE rc.RDB$INDEX_NAME = i.RDB$INDEX_NAME ' +
+            '  AND rc.RDB$CONSTRAINT_TYPE IS NOT NULL' +
+            ') ' +
+            'GROUP BY i.RDB$INDEX_NAME, i.RDB$UNIQUE_FLAG';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.Fields[0].AsString));
+              Qry.Next;
+            end;
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      else
+        // Standard IBExtract für alle anderen Typen
+        ExtractObjectType := TBTypeToIBXType(ObjectType);
+        FIBExtract.ExtractObject(ExtractObjectType, ObjectName, ExtractTypes);
+        if FIBExtract.Items.Count > 0 then
+        begin
+          FixArraySyntax(FIBExtract.Items);
+          AItems.Assign(FIBExtract.Items);
+        end;
+    end;
 
     if Assigned(FIBDatabase) and Assigned(FIBDatabase.DefaultTransaction) then
     begin
@@ -420,7 +593,7 @@ procedure TSimpleObjExtractor.ExtractTableFieldsToTreeNode(
   ATableName: string;
   var Node: TTreeNode;
   Quoted: boolean;
-  Delimiter: char; ImageIndex: integer);
+  Delimiter: char; ImageIndex: integer; SysFlag: boolean);
 var
   Items: TStringList;
   i: Integer;
@@ -441,7 +614,12 @@ begin
       if Line = '' then Continue;
       TmpNode := Node.TreeView.Items.AddChild(Node, Line);
       TPNodeInfos(TmpNode.Data)^.dbIndex := FDBIndex;
-      TPNodeInfos(TmpNode.Data)^.ObjectType := tvotTableField;
+
+      if SysFlag then
+        TPNodeInfos(TmpNode.Data)^.ObjectType := tvotSystemTableField
+      else
+        TPNodeInfos(TmpNode.Data)^.ObjectType := tvotTableField;
+
       TmpNode.ImageIndex := ImageIndex;
     end;
 
@@ -529,10 +707,9 @@ end;
 function TSimpleObjExtractor.TBTypeToIBXType(AObjectType: TObjectType): TExtractObjectTypes;
 begin
   case AObjectType of
-
     // --- Tabellen / Views ---
     otTables:                Result := eoTable;
-    otTableFields:           Result := eoTable;  // Felder sind Teil der Table in IBX
+    otTableFields:           Result := eoTable;
     otViews:                 Result := eoView;
 
     // --- Triggers ---
@@ -543,11 +720,11 @@ begin
     otUDRTriggers:           Result := eoTrigger;
 
     // --- Procedures / Functions ---
-    otProcedures:            Result := eoProcedure;   // PSQL procedures
-    otUDRProcedures:         Result := eoProcedure;   // External / UDR procedures
-    otFunctions:             Result := eoFunction;    // Firebird interne Functions
-    otUDRFunctions:          Result := eoFunction;    // UDRs über normale Function-DDL
-    otUDF:                   Result := eoFunction;    // Firebird 3+: UDFs sind Functions
+    otProcedures:            Result := eoProcedure;
+    otUDRProcedures:         Result := eoProcedure;
+    otFunctions:             Result := eoFunction;
+    otUDRFunctions:          Result := eoFunction;
+    otUDF:                   Result := eoFunction;
 
     // --- Package-Objekte ---
     otPackages,
@@ -575,16 +752,16 @@ begin
     otSystemIndexes:         Result := eoIndexes;
     otForeignKeys:           Result := eoForeign;
     otCheckConstraints:      Result := eoChecks;
-    otConstraints,
-    otPrimaryKeys,
-    //otUniqueConstraints,
-    //otNotNullConstraints,
-    //otSystemConstraints:     Result := eoForeign + eoChecks;  // IBX unterscheidet nicht alle Constraint-Arten
 
-    // --- System Tables / Users ---
+    // Diese Typen werden MANUELL per SQL behandelt (kein IBX-Support)
+    // Dummy-Wert, wird nie für FIBExtract.ExtractObject verwendet
+    otPrimaryKeys:           Result := eoTable;       // Dummy
+    otUniqueConstraints:     Result := eoTable;       // Dummy
+    otNotNullConstraints:    Result := eoTable;       // Dummy
+    otConstraints:           Result := eoTable;       // Dummy
+
+    // --- System Tables ---
     otSystemTables:          Result := eoTable;
-    otUsers,
-    //otSystemUsers:           Result := []; // IBX unterstützt USERS nicht
 
     // --- Data / BLOBs / Comments ---
     otData:                  Result := eoData;
@@ -594,10 +771,10 @@ begin
     // --- Datenbank selbst ---
     otDatabase:              Result := eoDatabase;
 
-    else
-      raise Exception.Create(
-        'Unknown ObjectType in function TBTypeToIBXType (Unit TSimpleObjExtractor)'
-      );
+  else
+    raise Exception.Create(
+      'Unknown ObjectType in function TBTypeToIBXType'
+    );
   end;
 end;
 
@@ -617,6 +794,69 @@ try
     otTables:
       SQL := 'select rdb$relation_name from rdb$relations where rdb$view_blr is null ' +
       ' and (rdb$system_flag is null or rdb$system_flag = 0) order by rdb$relation_name';
+
+    // Constraints - Primärschlüssel
+    otPrimaryKeys:
+      SQL :=
+        'SELECT ' +
+        '  rc.RDB$CONSTRAINT_NAME ' +
+        'FROM RDB$RELATION_CONSTRAINTS rc ' +
+        'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$CONSTRAINT_TYPE = ''PRIMARY KEY'' ' +
+        'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+    // Constraints - Fremdschlüssel
+    otForeignKeys:
+      SQL :=
+        'SELECT ' +
+        '  rc.RDB$CONSTRAINT_NAME ' +
+        'FROM RDB$RELATION_CONSTRAINTS rc ' +
+        'JOIN RDB$REF_CONSTRAINTS ref ON rc.RDB$CONSTRAINT_NAME = ref.RDB$CONSTRAINT_NAME ' +
+        'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$CONSTRAINT_TYPE = ''FOREIGN KEY'' ' +
+        'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+    // Constraints - Unique
+    otUniqueConstraints:
+      SQL :=
+        'SELECT ' +
+        '  rc.RDB$CONSTRAINT_NAME ' +
+        'FROM RDB$RELATION_CONSTRAINTS rc ' +
+        'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$CONSTRAINT_TYPE = ''UNIQUE'' ' +
+        'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+    // Constraints - Check
+    otCheckConstraints:
+      SQL :=
+        'SELECT ' +
+        '  rc.RDB$CONSTRAINT_NAME ' +
+        'FROM RDB$RELATION_CONSTRAINTS rc ' +
+        'JOIN RDB$CHECK_CONSTRAINTS cc ON rc.RDB$CONSTRAINT_NAME = cc.RDB$CONSTRAINT_NAME ' +
+        'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$CONSTRAINT_TYPE = ''CHECK'' ' +
+        'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+    // Constraints - Not Null
+    otNotNullConstraints:
+      SQL :=
+        'SELECT ' +
+        '  rc.RDB$CONSTRAINT_NAME ' +
+        'FROM RDB$RELATION_CONSTRAINTS rc ' +
+        'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$CONSTRAINT_TYPE = ''NOT NULL'' ' +
+        'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+    // Indices (ohne Constraints)
+    otIndexes:
+      SQL :=
+        'SELECT ' +
+        '  i.RDB$INDEX_NAME ' +
+        'FROM RDB$INDICES i ' +
+        'LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON i.RDB$INDEX_NAME = rc.RDB$INDEX_NAME ' +
+        'WHERE i.RDB$RELATION_NAME = ' + QuotedStr(UpperCase(OwnerObjName)) + ' ' +
+        'AND rc.RDB$INDEX_NAME IS NULL ' +  // kein Constraint-Index
+        'ORDER BY i.RDB$INDEX_NAME';
 
     otSystemTables:
       SQL :=

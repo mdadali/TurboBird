@@ -1,0 +1,212 @@
+object JvDesignPanel1: TJvDesignPanel
+  Left = 0
+  Height = 601
+  Top = 0
+  Width = 1034
+  Align = alClient
+  BevelOuter = bvNone
+  ClientHeight = 601
+  ClientWidth = 1034
+  Color = clBtnFace
+  ParentColor = False
+  TabOrder = 0
+  DrawRules = False
+  object pnlDesign: TPanel
+    Tag = 999
+    Left = 83
+    Height = 538
+    Top = 17
+    Width = 810
+    ClientHeight = 538
+    ClientWidth = 810
+    Color = clWindow
+    ParentColor = False
+    TabOrder = 0
+    object pnlFormTitle: TPanel
+      Tag = 999
+      Left = 1
+      Height = 30
+      Top = 1
+      Width = 808
+      Align = alTop
+      Caption = 'Form1'
+      ClientHeight = 30
+      ClientWidth = 808
+      Color = clActiveCaption
+      Constraints.MaxHeight = 30
+      Constraints.MinHeight = 30
+      Enabled = False
+      ParentColor = False
+      TabOrder = 0
+      object btnTitleClose: TButton
+        Tag = 999
+        Left = 779
+        Height = 28
+        Top = 1
+        Width = 28
+        Align = alRight
+        Caption = 'X'
+        Constraints.MaxHeight = 28
+        Constraints.MaxWidth = 28
+        Constraints.MinHeight = 28
+        Constraints.MinWidth = 28
+        TabOrder = 0
+      end
+      object btnTitleMinimize: TButton
+        Tag = 999
+        Left = 751
+        Height = 28
+        Top = 1
+        Width = 28
+        Align = alRight
+        Caption = '_'
+        Constraints.MaxHeight = 28
+        Constraints.MaxWidth = 28
+        Constraints.MinHeight = 28
+        Constraints.MinWidth = 28
+        TabOrder = 1
+      end
+      object btnTitleMaximize: TButton
+        Tag = 999
+        Left = 723
+        Height = 28
+        Top = 1
+        Width = 28
+        Align = alRight
+        Caption = '+'
+        Constraints.MaxHeight = 28
+        Constraints.MaxWidth = 28
+        Constraints.MinHeight = 28
+        Constraints.MinWidth = 28
+        TabOrder = 2
+      end
+    end
+    object DBGrid1: TDBGrid
+      Left = 1
+      Height = 216
+      Top = 271
+      Width = 808
+      Align = alBottom
+      Color = clWindow
+      Columns = <>
+      TabOrder = 1
+    end
+    object Panel6: TPanel
+      Left = 1
+      Height = 50
+      Top = 487
+      Width = 808
+      Align = alBottom
+      ClientHeight = 50
+      ClientWidth = 808
+      TabOrder = 2
+      object btnFirst: TButton
+        Left = 1
+        Height = 48
+        Top = 1
+        Width = 43
+        Align = alLeft
+        Caption = '<<'
+        TabOrder = 0
+      end
+    end
+    object Label2: TLabel
+      Left = 30
+      Height = 20
+      Top = 53
+      Width = 141
+      Caption = 'Firebird-Clientlibrary'
+      ParentColor = False
+    end
+    object edtLibrary: TEdit
+      Left = 194
+      Height = 37
+      Top = 45
+      Width = 560
+      TabOrder = 3
+      Text = '/opt/firebird/lib/libfbclient.so.3.0.13'
+    end
+    object btnLibrary: TButton
+      Left = 760
+      Height = 25
+      Top = 50
+      Width = 31
+      Caption = '...'
+      TabOrder = 4
+    end
+    object Label3: TLabel
+      Left = 32
+      Height = 20
+      Top = 98
+      Width = 91
+      Caption = 'Database-File'
+      ParentColor = False
+    end
+    object edtDBFileName: TEdit
+      Left = 195
+      Height = 37
+      Top = 91
+      Width = 556
+      TabOrder = 5
+      Text = '/opt/firebird/examples/empbuild/employee.fdb'
+    end
+    object Label4: TLabel
+      Left = 34
+      Height = 20
+      Top = 147
+      Width = 41
+      Caption = 'Query'
+      ParentColor = False
+    end
+    object Button1: TButton
+      Left = 761
+      Height = 25
+      Top = 95
+      Width = 31
+      Caption = '...'
+      TabOrder = 6
+    end
+    object edtQuery: TEdit
+      Left = 199
+      Height = 37
+      Top = 146
+      Width = 552
+      TabOrder = 7
+      Text = 'select * from employee'
+    end
+    object Panel7: TPanel
+      Left = 1
+      Height = 66
+      Top = 205
+      Width = 808
+      Align = alBottom
+      ClientHeight = 66
+      ClientWidth = 808
+      TabOrder = 8
+      object btnExecute: TButton
+        Left = 256
+        Height = 25
+        Top = 30
+        Width = 75
+        Caption = 'Execute'
+        TabOrder = 0
+      end
+      object btnConnect: TButton
+        Left = 29
+        Height = 25
+        Top = 30
+        Width = 75
+        Caption = 'Connect'
+        TabOrder = 1
+      end
+      object btnDisconnect: TButton
+        Left = 132
+        Height = 25
+        Top = 30
+        Width = 75
+        Caption = 'Disconnect'
+        TabOrder = 2
+      end
+    end
+  end
+end

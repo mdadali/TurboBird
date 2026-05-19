@@ -1002,48 +1002,119 @@ begin
     end;
 
   end;
-
 end;
 
 procedure TfmComparison.CheckModifiedTriggers;
 var
   i: Integer;
   TriggerName: string;
-  AfterBefor, OnTable, Event, Body : string;
+
+  AfterBefor, OnTable, Event, Body: string;
   TriggerEnabled: Boolean;
   TPosition: Integer;
-  CAfterBefor, COnTable, CEvent, CBody : string;
+  IsDBTrigger, IsDDLTrigger, IsUDRTrigger: Boolean;
+  ExternalName, EngineName, UDRParams: string;
+
+  CAfterBefor, COnTable, CEvent, CBody: string;
   CTriggerEnabled: Boolean;
   CTPosition: Integer;
+  CIsDBTrigger, CIsDDLTrigger, CIsUDRTrigger: Boolean;
+  CExternalName, CEngineName, CUDRParams: string;
+
 begin
   meLog.Lines.Add('');
   meLog.Lines.Add('Modified Triggers');
+
   FModifiedTriggersList.Clear;
 
-  for i:= 0 to FDBExistingObjectsList[ord(otTriggers)].Count - 1 do
+  for i := 0 to FDBExistingObjectsList[Ord(otTriggers)].Count - 1 do
   begin
     // Check for cancel button press
     Application.ProcessMessages;
+
     if FCanceled then
       Exit;
 
-    TriggerName:= FDBExistingObjectsList[ord(otTriggers)][i];
-    dmSysTables.GetTriggerInfo(FDBIndex, TriggerName, AfterBefor, OnTable, Event, Body, TriggerEnabled, TPosition);
+    TriggerName :=
+      FDBExistingObjectsList[Ord(otTriggers)][i];
 
-    // Read all trigger properties
-    if dmSysTables.GetTriggerInfo(cbComparedDatabase.ItemIndex, TriggerName, CAfterBefor, COnTable, CEvent, CBody,
-      CTriggerEnabled, CTPosition) then // Compare
-    if  (StringReplace(Body, ' ', '', [rfReplaceAll]) <> StringReplace(CBody, ' ', '', [rfReplaceAll]))
-       or (AfterBefor <> CAfterBefor) or (TriggerEnabled <> CTriggerEnabled)
-       or (TPosition <> CTPosition) then
+    // =====================================================
+    // SOURCE DATABASE
+    // =====================================================
+
+    dmSysTables.GetTriggerInfo(
+      FDBIndex,
+      TriggerName,
+      AfterBefor,
+      OnTable,
+      Event,
+      Body,
+      TriggerEnabled,
+      TPosition,
+      IsDBTrigger,
+      IsDDLTrigger,
+      IsUDRTrigger,
+      ExternalName,
+      EngineName,
+      UDRParams);
+
+    // =====================================================
+    // COMPARE DATABASE
+    // =====================================================
+
+    if dmSysTables.GetTriggerInfo(
+      cbComparedDatabase.ItemIndex,
+      TriggerName,
+      CAfterBefor,
+      COnTable,
+      CEvent,
+      CBody,
+      CTriggerEnabled,
+      CTPosition,
+      CIsDBTrigger,
+      CIsDDLTrigger,
+      CIsUDRTrigger,
+      CExternalName,
+      CEngineName,
+      CUDRParams) then
+
+    // =====================================================
+    // COMPARE
+    // =====================================================
+
+    if
+
+       // BODY
+       (StringReplace(Body, ' ', '', [rfReplaceAll]) <>
+        StringReplace(CBody, ' ', '', [rfReplaceAll]))
+
+       // BASIC
+       or (AfterBefor <> CAfterBefor)
+       or (TriggerEnabled <> CTriggerEnabled)
+       or (TPosition <> CTPosition)
+       or (Event <> CEvent)
+       or (OnTable <> COnTable)
+
+       // TRIGGER TYPES
+       or (IsDBTrigger <> CIsDBTrigger)
+       or (IsDDLTrigger <> CIsDDLTrigger)
+       or (IsUDRTrigger <> CIsUDRTrigger)
+
+       // UDR
+       or (ExternalName <> CExternalName)
+       or (EngineName <> CEngineName)
+       or (StringReplace(UDRParams, ' ', '', [rfReplaceAll]) <>
+           StringReplace(CUDRParams, ' ', '', [rfReplaceAll]))
+
+    then
     begin
       meLog.Lines.Add(' ' + TriggerName);
+
       FModifiedTriggersList.Add(TriggerName);
+
       Inc(FDiffCount);
     end;
-
   end;
-
 end;
 
 procedure TfmComparison.CheckModifiedProcedures;

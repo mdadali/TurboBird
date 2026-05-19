@@ -5,6 +5,62 @@ What's New for TurboBird
 - : removed
 
 
+-------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1273
+Build Date & Time: 19.05.2026, 18:14:12
+
+
++ FormDesigner & PascalScript (PascalScript Studio)
+
+- Dedicated "Forms" node in the database tree
+- Custom forms can now be created per database
+- Forms are stored as .cfrm + .rops files
+- "New Form" opens the visual designer
+- "Edit Form" loads an existing form into the designer
+- "Execute Form" runs a form directly
+- Double-clicking a form starts execution
+- Storage location: data/PSStudio/Forms/<Server>/<Database>/
+
+! Table Management and Constraints (completely reworked)
+
+* All constraint types are now visible as subnodes of each table
+* Primary Key with field list
+* Foreign Keys with reference display
+* Unique Constraints with field list
+* Check Constraints with condition
+* Not Null Constraints with affected fields
+* Indices (user-defined only, excluding system indices)
+* Multi-column keys are grouped clearly (PRIMARY KEY (Field1, Field2))
+* Table management extended with new tabs:
+
+  * Primary Key: select fields via checkbox, changes generate SQL
+  * Foreign Keys: manage existing ones, create new ones with wizard
+  * Unique Constraints: select fields, assign name
+  * Check Constraints: edit expression directly
+  * Not Null Constraints: check fields, changes generated as ALTER statements
+
+! Trigger Support (extended)
+
+* New trigger types in the tree:
+
+  * Database Triggers (ON CONNECT, ON DISCONNECT, ON TRANSACTION...)
+  * DDL Triggers (BEFORE/AFTER CREATE TABLE, DROP TABLE, etc.)
+  * UDR Triggers (EXTERNAL NAME ... ENGINE UDR)
+* "Create new Trigger" now provides the correct template depending on type
+* Trigger view now displays the correct type (Table/DB/DDL)
+* Editing and deleting all trigger types is now supported
+
+! Tree Structure (improved)
+
+* Table fields are now clearly grouped under "Fields"
+* Constraints and indices are directly visible under the table
+* Table triggers are directly visible under the table
+* "References" and "Permissions" under each table
+
+And several bugs fixed.
+
+
 ----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1272
 Build date & time: 11.04.2026, 15:16:57

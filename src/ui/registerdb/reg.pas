@@ -352,11 +352,11 @@ var ServerErrStr: string;
 begin
   result := false;
 
-  if not IsServerReachable(ServerName, ServerErrStr) then
+  {if not IsServerReachable(ServerName, ServerErrStr) then
   begin
     MessageDlg(ServerErrStr, mtError, [mbOK], 0);
     Exit;
-  end;
+  end;}
 
   try
     IBConnection1.Close;

@@ -1,7 +1,7 @@
 object frmBakcup: TfrmBakcup
-  Left = 477
+  Left = 416
   Height = 406
-  Top = 164
+  Top = 152
   Width = 588
   HorzScrollBar.Page = 562
   VertScrollBar.Page = 301
@@ -32,11 +32,11 @@ object frmBakcup: TfrmBakcup
     end
     object edDatabase: TEdit
       Left = 136
-      Height = 37
+      Height = 30
       Top = 8
       Width = 400
       TabOrder = 1
-      Text = 'd:\employee.fdb'
+      Text = '/opt/firebird/examples/empbuild/employee.fdb'
     end
     object Label3: TLabel
       Left = 8
@@ -48,11 +48,11 @@ object frmBakcup: TfrmBakcup
     end
     object edDest: TEdit
       Left = 136
-      Height = 37
+      Height = 30
       Top = 56
       Width = 400
       TabOrder = 0
-      Text = 'd:\employee.gbk'
+      Text = '/opt/firebird/examples/empbuild/employee.fbk'
     end
     object btnOpenSourceDB: TButton
       Left = 544
@@ -94,9 +94,9 @@ object frmBakcup: TfrmBakcup
     end
     object optChksum: TCheckBox
       Left = 16
-      Height = 24
+      Height = 26
       Top = 48
-      Width = 142
+      Width = 143
       AllowGrayed = True
       Caption = 'Ignore checksum'
       DragCursor = crDefault
@@ -105,9 +105,9 @@ object frmBakcup: TfrmBakcup
     object OptLimbo: TCheckBox
       Tag = 1
       Left = 16
-      Height = 24
+      Height = 26
       Top = 72
-      Width = 113
+      Width = 114
       AllowGrayed = True
       Caption = 'Ignore limbo'
       DragCursor = crDefault
@@ -116,9 +116,9 @@ object frmBakcup: TfrmBakcup
     object OptMetadataOnly: TCheckBox
       Tag = 2
       Left = 16
-      Height = 24
+      Height = 26
       Top = 96
-      Width = 126
+      Width = 127
       AllowGrayed = True
       Caption = 'Meta data only'
       DragCursor = crDefault
@@ -127,9 +127,9 @@ object frmBakcup: TfrmBakcup
     object optGarb: TCheckBox
       Tag = 3
       Left = 16
-      Height = 24
+      Height = 26
       Top = 122
-      Width = 152
+      Width = 153
       AllowGrayed = True
       Caption = 'Garbage collection'
       DragCursor = crDefault
@@ -138,9 +138,9 @@ object frmBakcup: TfrmBakcup
     object chkMetadatadesc: TCheckBox
       Tag = 4
       Left = 16
-      Height = 24
+      Height = 26
       Top = 145
-      Width = 129
+      Width = 130
       AllowGrayed = True
       Caption = 'Meta data desc'
       DragCursor = crDefault
@@ -149,9 +149,9 @@ object frmBakcup: TfrmBakcup
     object chkTransportable: TCheckBox
       Tag = 5
       Left = 16
-      Height = 24
+      Height = 26
       Top = 168
-      Width = 152
+      Width = 153
       AllowGrayed = True
       Caption = 'Non Transportable'
       DragCursor = crDefault
@@ -160,9 +160,9 @@ object frmBakcup: TfrmBakcup
     object chkConvert: TCheckBox
       Tag = 7
       Left = 16
-      Height = 24
+      Height = 26
       Top = 192
-      Width = 149
+      Width = 150
       AllowGrayed = True
       Caption = 'Convert Ext Tables'
       DragCursor = crDefault
@@ -171,9 +171,9 @@ object frmBakcup: TfrmBakcup
     object chkExpand: TCheckBox
       Tag = 8
       Left = 16
-      Height = 24
+      Height = 26
       Top = 216
-      Width = 76
+      Width = 77
       AllowGrayed = True
       Caption = 'Expand'
       DragCursor = crDefault
@@ -214,9 +214,9 @@ object frmBakcup: TfrmBakcup
   object Bak: TUIBBackup
     UserName = 'SYSDBA'
     PassWord = 'masterkey'
-    Host = '127.0.0.1'
+    Host = 'Firebird60/3160'
     Protocol = proTCPIP
-    LibraryName = '/opt/firebird/lib/libfbclient.so.3.0.13'
+    LibraryName = '/opt/FireBird/firebird6/lib/libfbclient.so.6.0.0'
     OnVerbose = BakVerbose
     Verbose = True
     Left = 304

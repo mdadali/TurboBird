@@ -26,7 +26,7 @@ type
     edDefault: TEdit;
     memoDescription: TMemo;
     edFieldName: TEdit;
-    GroupBox1: TGroupBox;
+    GroupBoxMain: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;

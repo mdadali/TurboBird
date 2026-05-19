@@ -1,7 +1,7 @@
 object fmNewEditField: TfmNewEditField
-  Left = 449
+  Left = 436
   Height = 491
-  Top = 137
+  Top = 158
   Width = 383
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
@@ -13,7 +13,7 @@ object fmNewEditField: TfmNewEditField
   OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
-  object GroupBox1: TGroupBox
+  object GroupBoxMain: TGroupBox
     Left = 0
     Height = 491
     Top = 0

@@ -128,6 +128,11 @@ type
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
+    lmNewForm: TMenuItem;
+    lmEditForm: TMenuItem;
+    lmExecuteForm: TMenuItem;
+    Separator11: TMenuItem;
+    Separator10: TMenuItem;
     mnuPascalScript: TMenuItem;
     mnDBReader: TMenuItem;
     mnBulkClone: TMenuItem;
@@ -251,7 +256,6 @@ type
     lmScriptTableCreate: TMenuItem;
     lmScriptInsert: TMenuItem;
     lmScriptUpdate: TMenuItem;
-    lmEditTableData: TMenuItem;
     lmCallStoreProc: TMenuItem;
     lmNewUDF: TMenuItem;
     lmOpenSystemTable: TMenuItem;
@@ -324,8 +328,10 @@ type
     procedure lmDropViewClick(Sender: TObject);
     procedure lmEditExceptionClick(Sender: TObject);
     procedure lmEditFieldClick(Sender: TObject);
+    procedure lmEditFormClick(Sender: TObject);
     procedure lmEditPackageClick(Sender: TObject);
     procedure lmEditTableDataNewClick(Sender: TObject);
+    procedure lmExecuteFormClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -340,6 +346,7 @@ type
     procedure lmEditUDRProcedureClick(Sender: TObject);
     procedure lmGetIncrementGenClick(Sender: TObject);
     procedure lmImportTableClick(Sender: TObject);
+    procedure lmNewFormClick(Sender: TObject);
     procedure lmNewUDRFunctionClick(Sender: TObject);
     procedure lmNewUDRProcedureClick(Sender: TObject);
     // Show all records in table
@@ -349,7 +356,15 @@ type
     procedure lmConnectAsClick(Sender: TObject);
     procedure lmCreateAutoIncClick(Sender: TObject);
     procedure lmCreateStoredProcClick(Sender: TObject);
+
     procedure lmCreateTriggerClick(Sender: TObject);
+    procedure CreateNewTableTrigger(DBIndex: Integer);
+    procedure CreateNewDBTrigger(DBIndex: Integer);
+    procedure CreateNewDDLTrigger(DBIndex: Integer);
+    procedure CreateNewUDRTableTrigger(DBIndex: Integer);
+    procedure CreateNewUDRDBTrigger(DBIndex: Integer);
+    procedure CreateNewUDRDDLTrigger(DBIndex: Integer);
+
     procedure lmCreateViewClick(Sender: TObject);
     procedure lmDeactiveTrigClick(Sender: TObject);
     procedure lmDisplay1000VClick(Sender: TObject);
@@ -521,6 +536,11 @@ type
 
     procedure ExtractTableMetaData(Quoted: boolean);
 
+    function ShowTableManagement(DBIndex: Integer; const TableName: string;
+      NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
+
+    //Forms
+    function GetFormFilePath: string;
   end;
 
 
@@ -2848,16 +2868,8 @@ begin
   dbIndex:= TPNodeInfos(SelNode.Data)^.dbIndex;
 
   FieldName:= Copy(SelNode.Text, 1, Pos(' ', SelNode.Text) - 1);
-  //if IsObjectNameCaseSensitive(FieldName) and   (not IsObjectNameQuoted(FieldName)) then
-    //((FieldName := MakeObjectNameQuoted(FieldName);
 
-  //ShowMessage(FieldName);
-
-  TableName := ExtractObjectName(SelNode.Parent.Text);
-  //if IsObjectNameCaseSensitive(TableName) and  (not IsObjectNameQuoted(TableName)) then
-    //TableName := MakeObjectNameQuoted(TableName);
-
-  //ShowMessage(TableName);
+  TableName := ExtractObjectName(SelNode.Parent.Parent.Text);
 
   if dmSysTables.GetFieldInfo(dbIndex, TableName, FieldName,
     FieldType, Size, Precision, Scale, NotNull,
@@ -2873,10 +2885,86 @@ begin
       TPNodeInfos(SelNode.Data)^.dbIndex,
       not NotNull, nil);
 
+    //für SystemTableFields deaktivieren.
+    fmNewEditField.GroupBoxMain.Enabled := (TPNodeInfos(SelNode.Data)^.ObjectType = tvotTableField);
     fmNewEditField.ShowModal;
   end
   else
-  MessageDlg('Unable to locate the field: ' + SelNode.Text, mtError, [mbOK], 0);
+    MessageDlg('Unable to locate the field: ' + FieldName, mtError, [mbOK], 0);
+end;
+
+// ============================================================
+// Hilfsfunktion in TfmMain (private oder public)
+// ============================================================
+function TfmMain.GetFormFilePath: string;
+var
+  SelNode: TTreeNode;
+  ServerNode, DBNode: TTreeNode;
+  ServerName, DBAlias, FormName: string;
+begin
+  Result := '';
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
+  if TPNodeInfos(SelNode.Data)^.ObjectType <> tvotForm then Exit;
+
+  ServerNode := GetAncestorAtLevel(SelNode, 0);
+  DBNode := GetAncestorAtLevel(SelNode, 1);
+  if (ServerNode = nil) or (DBNode = nil) then Exit;
+
+  ServerName := GetClearNodeText(ServerNode.Text);
+  DBAlias := GetClearNodeText(DBNode.Text);
+  FormName := GetClearNodeText(SelNode.Text);
+
+  // Pfad zur .cfrm-Datei zusammensetzen
+  Result := GetDBFormsPath(ServerName, DBAlias)
+            + FormName + PathDelim
+            + FormName + '.cfrm';
+end;
+
+// ============================================================
+// Popup-Menü-Handler
+// ============================================================
+procedure TfmMain.lmNewFormClick(Sender: TObject);
+begin
+  mnuPascalScriptClick(nil);
+  PSStudio.acFileNewExecute(nil);
+end;
+
+procedure TfmMain.lmEditFormClick(Sender: TObject);
+var
+  FormPath: string;
+begin
+  FormPath := GetFormFilePath;
+  if FormPath = '' then
+  begin
+    ShowMessage('Could not determine form file path.');
+    Exit;
+  end;
+
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(nil);
+
+  PSStudio.OpenFileSilent(FormPath);
+  PSStudio.ShowModal;
+end;
+
+procedure TfmMain.lmExecuteFormClick(Sender: TObject);
+var
+  FormPath: string;
+begin
+  FormPath := GetFormFilePath;
+  if FormPath = '' then
+  begin
+    ShowMessage('Could not determine form file path.');
+    Exit;
+  end;
+
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(nil);
+  PSStudio.Visible := false;
+
+  PSStudio.OpenFileSilent(FormPath);
+  PSStudio.acDebugRunExecute(nil);
 end;
 
 procedure TfmMain.lmEditPackageClick(Sender: TObject);
@@ -3101,38 +3189,6 @@ procedure TfmMain.lmExtractTableMetaDataUnQuotedClick(Sender: TObject);
 begin
   ExtractTableMetaData(false);
 end;
-
-{procedure TfmMain.lmFirebirdConfigClick(Sender: TObject);
-var Rec: TDatabaseRec;
-    dbIndex: Integer; Title: string; ATab: TTabSheet;
-    fmFirebirdConfig: TfmFirebirdConfig;
-begin
-    dbIndex :=  TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-    Rec := RegisteredDatabases[dbIndex];
-
-    Title := 'Configure FireBird Server';
-    fmFirebirdConfig:= FindCustomForm(Title, TfmFirebirdConfig) as TfmFirebirdConfig;
-
-    if fmFirebirdConfig = nil then
-    begin
-      fmFirebirdConfig := TfmFirebirdConfig.Create(Application);
-      ATab:= TTabSheet.Create(self);
-      ATab.Parent:= PageControl1;
-      fmFirebirdConfig.Parent:= ATab;
-      fmFirebirdConfig.Left:= 0;
-      fmFirebirdConfig.Top:= 0;
-      fmFirebirdConfig.BorderStyle:= bsNone;
-      fmFirebirdConfig.Align:= alClient;
-      fmFirebirdConfig.Caption:= Title;
-  end else;
-    ATab:= fmFirebirdConfig.Parent as TTabSheet;
-
-  PageControl1.ActivePage:= ATab;
-  ATab.Tag:= dbIndex;
-  ATab.Caption:= Title;
-  fmFirebirdConfig.Init(dbIndex);
-  fmFirebirdConfig.Show;
-end;}
 
 procedure TfmMain.lmFirebirdConfigClick(Sender: TObject);
 var
@@ -3799,7 +3855,7 @@ begin
 end;
 
 (*******  Create Trigger click  ********)
-procedure TfmMain.lmCreateTriggerClick(Sender: TObject);
+{procedure TfmMain.lmCreateTriggerClick(Sender: TObject);
 var
   SelNode: TTreeNode;
   DBIndex: Integer;
@@ -3812,6 +3868,249 @@ begin
   TableNames:= dmSysTables.GetDBObjectNames(DBIndex, otTables, Count);
   fmCreateTrigger.cbTables.Items.CommaText:= TableNames;
   CreateNewTrigger(DBIndex, '');
+end;}
+
+procedure TfmMain.lmCreateTriggerClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  DBIndex: Integer;
+  NodeInfo: TPNodeInfos;
+  ObjectType: TTreeViewObjectType;
+begin
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
+
+  NodeInfo := TPNodeInfos(SelNode.Data);
+  if NodeInfo = nil then Exit;
+
+  DBIndex := NodeInfo^.dbIndex;
+  ObjectType := NodeInfo^.ObjectType;
+
+  case ObjectType of
+    tvotTableTriggerRoot,
+    tvotTriggerRoot:
+      CreateNewTableTrigger(DBIndex);
+
+    tvotDBTriggerRoot:
+      CreateNewDBTrigger(DBIndex);
+
+    tvotDDLTriggerRoot:
+      CreateNewDDLTrigger(DBIndex);
+
+    tvotUDRTableTriggerRoot:
+      CreateNewUDRTableTrigger(DBIndex);
+
+    tvotUDRDBTriggerRoot:
+      CreateNewUDRDBTrigger(DBIndex);
+
+    tvotUDRDDLTriggerRoot:
+      CreateNewUDRDDLTrigger(DBIndex);
+
+  else
+    CreateNewTableTrigger(DBIndex);
+  end;
+end;
+
+procedure TfmMain.CreateNewTableTrigger(DBIndex: Integer);
+var
+  TableNames: string;
+  Count: Integer;
+begin
+  TableNames := dmSysTables.GetDBObjectNames(DBIndex, otTables, Count);
+  fmCreateTrigger.cbTables.Items.CommaText := TableNames;
+  CreateNewTrigger(DBIndex, '');
+end;
+
+procedure TfmMain.CreateNewDBTrigger(DBIndex: Integer);
+var
+  QWindow: TfmQueryWindow;
+begin
+  QWindow := ShowQueryWindow(DBIndex, 'New DB Trigger#' + IntToStr(DBIndex));
+  QWindow.meQuery.Lines.Clear;
+  QWindow.meQuery.Lines.Add('/*');
+  QWindow.meQuery.Lines.Add('  Database Trigger Template');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  Available events:');
+  QWindow.meQuery.Lines.Add('    ON CONNECT');
+  QWindow.meQuery.Lines.Add('    ON DISCONNECT');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION START');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION COMMIT');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION ROLLBACK');
+  QWindow.meQuery.Lines.Add('*/');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ^;');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('CREATE TRIGGER NewDBTrigger');
+  QWindow.meQuery.Lines.Add('ACTIVE');
+  QWindow.meQuery.Lines.Add('ON CONNECT');
+  QWindow.meQuery.Lines.Add('POSITION 0');
+  QWindow.meQuery.Lines.Add('AS');
+  QWindow.meQuery.Lines.Add('BEGIN');
+  QWindow.meQuery.Lines.Add('  -- Database trigger code here');
+  QWindow.meQuery.Lines.Add('END ^');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  QWindow.Show;
+end;
+
+procedure TfmMain.CreateNewDDLTrigger(DBIndex: Integer);
+var
+  QWindow: TfmQueryWindow;
+begin
+  QWindow := ShowQueryWindow(DBIndex, 'New DDL Trigger#' + IntToStr(DBIndex));
+  QWindow.meQuery.Lines.Clear;
+  QWindow.meQuery.Lines.Add('/*');
+  QWindow.meQuery.Lines.Add('  DDL Trigger Template');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  Available events (examples):');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER ANY DDL STATEMENT');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE TABLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER ALTER TABLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP TABLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE PROCEDURE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER ALTER PROCEDURE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP PROCEDURE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE FUNCTION');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER ALTER FUNCTION');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP FUNCTION');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE PACKAGE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP PACKAGE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE VIEW');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP VIEW');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE SEQUENCE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP SEQUENCE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE DOMAIN');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP DOMAIN');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE EXCEPTION');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP EXCEPTION');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE ROLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP ROLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE INDEX');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP INDEX');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE TRIGGER');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP TRIGGER');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE USER');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP USER');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER GRANT');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER REVOKE');
+  QWindow.meQuery.Lines.Add('*/');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ^;');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('CREATE TRIGGER NewDDLTrigger');
+  QWindow.meQuery.Lines.Add('ACTIVE');
+  QWindow.meQuery.Lines.Add('BEFORE ANY DDL STATEMENT');
+  QWindow.meQuery.Lines.Add('POSITION 0');
+  QWindow.meQuery.Lines.Add('AS');
+  QWindow.meQuery.Lines.Add('BEGIN');
+  QWindow.meQuery.Lines.Add('  -- DDL trigger code here');
+  QWindow.meQuery.Lines.Add('END ^');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  QWindow.Show;
+end;
+
+procedure TfmMain.CreateNewUDRTableTrigger(DBIndex: Integer);
+var
+  QWindow: TfmQueryWindow;
+begin
+  QWindow := ShowQueryWindow(DBIndex, 'New UDR Table Trigger#' + IntToStr(DBIndex));
+  QWindow.meQuery.Lines.Clear;
+  QWindow.meQuery.Lines.Add('/*');
+  QWindow.meQuery.Lines.Add('  UDR Table Trigger Template');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  UDR Triggers require an external library');
+  QWindow.meQuery.Lines.Add('  that is registered on the server.');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  The library must implement the required');
+  QWindow.meQuery.Lines.Add('  UDR interface (IUdrTriggerFactory).');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  Example:');
+  QWindow.meQuery.Lines.Add('    EXTERNAL NAME ''my_library!entry_point''');
+  QWindow.meQuery.Lines.Add('    ENGINE UDR');
+  QWindow.meQuery.Lines.Add('*/');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ^;');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('CREATE TRIGGER NewUDRTableTrigger');
+  QWindow.meQuery.Lines.Add('ACTIVE');
+  QWindow.meQuery.Lines.Add('AFTER INSERT');
+  QWindow.meQuery.Lines.Add('ON YourTableName');
+  QWindow.meQuery.Lines.Add('POSITION 0');
+  QWindow.meQuery.Lines.Add('EXTERNAL NAME ''module_name!entry_point''');
+  QWindow.meQuery.Lines.Add('ENGINE UDR');
+  QWindow.meQuery.Lines.Add('^');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  QWindow.Show;
+end;
+
+procedure TfmMain.CreateNewUDRDBTrigger(DBIndex: Integer);
+var
+  QWindow: TfmQueryWindow;
+begin
+  QWindow := ShowQueryWindow(DBIndex, 'New UDR DB Trigger#' + IntToStr(DBIndex));
+  QWindow.meQuery.Lines.Clear;
+  QWindow.meQuery.Lines.Add('/*');
+  QWindow.meQuery.Lines.Add('  UDR Database Trigger Template');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  UDR Triggers require an external library');
+  QWindow.meQuery.Lines.Add('  that is registered on the server.');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  Available events:');
+  QWindow.meQuery.Lines.Add('    ON CONNECT');
+  QWindow.meQuery.Lines.Add('    ON DISCONNECT');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION START');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION COMMIT');
+  QWindow.meQuery.Lines.Add('    ON TRANSACTION ROLLBACK');
+  QWindow.meQuery.Lines.Add('*/');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ^;');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('CREATE TRIGGER NewUDRDBTrigger');
+  QWindow.meQuery.Lines.Add('ACTIVE');
+  QWindow.meQuery.Lines.Add('ON CONNECT');
+  QWindow.meQuery.Lines.Add('POSITION 0');
+  QWindow.meQuery.Lines.Add('EXTERNAL NAME ''module_name!entry_point''');
+  QWindow.meQuery.Lines.Add('ENGINE UDR');
+  QWindow.meQuery.Lines.Add('^');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  QWindow.Show;
+end;
+
+procedure TfmMain.CreateNewUDRDDLTrigger(DBIndex: Integer);
+var
+  QWindow: TfmQueryWindow;
+begin
+  QWindow := ShowQueryWindow(DBIndex, 'New UDR DDL Trigger#' + IntToStr(DBIndex));
+  QWindow.meQuery.Lines.Clear;
+  QWindow.meQuery.Lines.Add('/*');
+  QWindow.meQuery.Lines.Add('  UDR DDL Trigger Template');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  UDR Triggers require an external library');
+  QWindow.meQuery.Lines.Add('  that is registered on the server.');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('  Available events:');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER ANY DDL STATEMENT');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE TABLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER DROP TABLE');
+  QWindow.meQuery.Lines.Add('    BEFORE/AFTER CREATE PROCEDURE');
+  QWindow.meQuery.Lines.Add('    ... and more');
+  QWindow.meQuery.Lines.Add('*/');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ^;');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('CREATE TRIGGER NewUDRDDLTrigger');
+  QWindow.meQuery.Lines.Add('ACTIVE');
+  QWindow.meQuery.Lines.Add('BEFORE ANY DDL STATEMENT');
+  QWindow.meQuery.Lines.Add('POSITION 0');
+  QWindow.meQuery.Lines.Add('EXTERNAL NAME ''module_name!entry_point''');
+  QWindow.meQuery.Lines.Add('ENGINE UDR');
+  QWindow.meQuery.Lines.Add('^');
+  QWindow.meQuery.Lines.Add('');
+  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  QWindow.Show;
 end;
 
 (******************  Create New View   ***************)
@@ -3903,35 +4202,6 @@ begin
   ShowCompleteQueryWindow(dbIndex, 'Edit Procedure#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
 end;
 
-{procedure TfmMain.lmEditProcClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  AProcName: string;
-  SPOwner: string;
-  spBody: string;
-  QWindow: TfmQueryWindow;
-  DBIndex: Integer;
-begin
-  SelNode:= tvMain.Selected;
-  if (SelNode <> nil) and (SelNode.Parent <> nil) then
-  begin
-    AProcName:= SelNode.Text;
-    DBIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
-    SPBody:= GetStoredProcBody(DBIndex, AProcName, SPOwner);
-
-    // Procedure body
-    QWindow:= ShowQueryWindow(DBIndex, 'Edit stored procedure ' + AProcName);
-    QWindow.meQuery.Lines.Clear;
-  //  QWindow.meQuery.Lines.Add('SET TERM ^ ;');
-    QWindow.meQuery.Lines.Add('ALTER PROCEDURE ' + AProcName);
-    QWindow.meQuery.Text:= QWindow.meQuery.Text + Trim(spBody) + ';';
-   // QWindow.meQuery.Lines.Add('SET TERM ; ^');
-
-    QWindow.Show;
-  end;
-end;
-}
-
 procedure TfmMain.lmEditTableDataClick(Sender: TObject);
 var
   SelNode: TTreeNode;
@@ -3998,7 +4268,6 @@ begin
   EditWindow.Init(dbIndex, ATableName, NodeInfos);
   EditWindow.Show;
 end;
-
 
 (****************  Edit Trigger  ******************)
 procedure TfmMain.lmEditTriggerClick(Sender: TObject);
@@ -4946,111 +5215,6 @@ begin
   ExtractTableMetaData(false);
 end;
 
-{procedure TfmMain.lmScriptInsertClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  QWindow: TfmQueryWindow;
-  ATableName: string;
-  FieldLine: string;
-  FieldNames: string;
-  ParamNames: string;
-  Skipped: Boolean;
-  dbIndex: Integer;
-  LastParam: string;
-  Iso: TIsolatedQuery;
-begin
-  SelNode:= tvMain.Selected;
-  if (SelNode <> nil) and (SelNode.Parent <> nil) then
-  begin
-    ATableName:= SelNode.Text;
-    dbIndex:= TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
-    QWindow:= ShowQueryWindow(dbIndex, 'Script as insert#' + IntToStr(dbIndex) + ':' + ATableName);
-
-
-    QWindow.meQuery.Lines.Clear;
-    QWindow.meQuery.Lines.Add('create procedure InsertTo' + ATableName + ' (');
-
-    // Params
-    FieldNames:= '';
-    ParamNames:= '';
-
-    //GetFields(dbIndex, ATableName, nil);
-    Iso := GetFieldsIsolated(RegisteredDatabases[dbIndex].IBDatabase, ATableName);
-    //with SQLQuery1 do
-    with Iso.Query do
-    while not EOF do
-    begin
-      Skipped:= False;
-      if (FieldByName('computed_source').AsString = '') then
-      begin
-        FieldNames:= FieldNames + Trim(FieldByName('Field_Name').AsString);
-        ParamNames:= ParamNames + ':' + Trim(FieldByName('Field_Name').AsString);
-        FieldLine:= Trim(FieldByName('Field_Name').AsString) + ' ';
-        {FieldLine:= FieldLine +
-          GetFBTypeName(Iso.Query.FieldByName('field_type_int').AsInteger,
-            Iso.Query.FieldByName('field_sub_type').AsInteger,
-            Iso.Query.FieldByName('field_length').AsInteger,
-            Iso.Query.FieldByName('field_precision').AsInteger,
-            Iso.Query.FieldByName('field_scale').AsInteger); }
-
-            FieldLine := FieldLine + GetFBTypeName(
-              FieldByName('field_type_int').AsInteger,
-              FieldByName('field_sub_type').AsInteger,
-              FieldByName('field_length').AsInteger,      // OK: wird nur für numerische Typen benötigt
-              FieldByName('field_precision').AsInteger,
-              FieldByName('field_scale').AsInteger,
-              FieldByName('field_charset').AsString,
-              FieldByName('characterlength').AsInteger    // **WICHTIG: dieser Wert muss rein!**
-            );
-
-        //if Iso.Query.FieldByName('field_type_int').AsInteger in [CStringType,CharType,VarCharType] then
-          //FieldLine:= FieldLine + '(' + FieldByName('CharacterLength').AsString + ') ';
-      end
-      else
-        Skipped:= True;
-
-      Next;
-
-      if not Skipped then
-      begin
-        if not EOF then
-        begin
-          FieldLine:= FieldLine + ',';
-          FieldNames:= FieldNames + ', ';
-          ParamNames:= ParamNames + ', ';
-        end;
-        QWindow.meQuery.Lines.Add(FieldLine);
-      end;
-    end;
-    Iso.Free;
-    //SQLQuery1.Close;
-
-    // Remote last , if any
-    if RightStr(FieldNames, 2) = ', ' then
-    begin
-      System.Delete(FieldNames, Length(FieldNames) - 1, 2);
-      System.Delete(ParamNames, Length(ParamNames) - 1, 2);
-    end;
-
-    // Remove last , if any
-    LastParam:= QWindow.meQuery.Lines[QWindow.meQuery.Lines.Count - 1];
-    if Pos(',', LastParam) > 0 then
-    begin
-      LastParam:= StringReplace(LastParam, ',', '', []);
-      QWindow.meQuery.Lines[QWindow.meQuery.Lines.Count - 1]:= LastParam;
-    end;
-
-    QWindow.meQuery.Lines.Add(')');
-    QWindow.meQuery.Lines.Add('AS');
-    QWindow.meQuery.Lines.Add('BEGIN');
-    QWindow.meQuery.Lines.Add('insert into ' + ATableName + ' (' + FieldNames + ')');
-    QWindow.meQuery.Lines.Add('values (' + ParamNames + ');');
-    QWindow.meQuery.Lines.Add('end;');
-
-    QWindow.Show;
-  end;
-end;}
-
 (*****************  Script as Update table stored proc  ****************)
 procedure TfmMain.lmScriptUpdateClick(Sender: TObject);
 var
@@ -5157,33 +5321,6 @@ begin
   end;
 end;
 
-{procedure TfmMain.lmServerRegistryClick(Sender: TObject);
-var fmServerRegistry: TfmServerRegistry;
-    Node: TTreeNode;
-begin
-  fmServerRegistry := TfmServerRegistry.Create(nil);
-
-  Node := GetAncestorAtLevel(tvMain.Selected, 0);
-
-  if Node = nil then
-    if tvMain.Items.Count > 0 then
-    begin
-      tvMain.Selected := tvMain.Items[0];
-      Node := tvMain.Items[0];
-    end;
-
-  if  Node <> nil then
-  begin
-    //dbs schlissen!
-    fmServerRegistry.init(TPNodeInfos(Node.Data)^.ServerSession);
-  end
-  else
-    fmServerRegistry.init(nil);
-
-  fmServerRegistry.ShowModal;
-  fmServerRegistry.Free;
-end;}
-
 procedure TfmMain.lmServerRegistryClick(Sender: TObject);
 var
   fmServerRegistry: TfmServerRegistry;
@@ -5259,75 +5396,173 @@ begin
   end;
 end;
 
+{function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
+  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
+var
+  ATab: TTabSheet;
+  SelNode: TTreeNode;
+  ShortTitle, FullHint, DBAlias: string;
+begin
+  SelNode := tvMain.Selected;
+
+  // Prüfen, ob EditorForm schon existiert
+  if Assigned(NodeInfo) and Assigned(NodeInfo^.EditorForm) and
+     (NodeInfo^.EditorForm is TfmTableManage) then
+  begin
+    Result := TfmTableManage(NodeInfo^.EditorForm);
+    ATab := Result.Parent as TTabSheet;
+  end
+  else
+  begin
+    Result := TfmTableManage.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := 4; // Tabellen-Icon
+
+    Result.Parent := ATab;
+    Result.Align := alClient;
+    Result.BorderStyle := bsNone;
+
+    if Assigned(NodeInfo) then
+      NodeInfo^.EditorForm := Result;
+  end;
+
+  // Tab vorbereiten
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := DBIndex;
+
+  // Kurzer Titel
+  ShortTitle := GetClearNodeText(TableName) + '#' + IntToStr(NodeInfo^.dbIndex);
+  ATab.Caption := ShortTitle;
+  Result.Caption := ShortTitle;
+
+  // Tooltip
+  if SelNode <> nil then
+  begin
+    DBAlias := GetAncestorNodeText(SelNode, 1);
+    FullHint :=
+      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+      'DBAlias:  ' + DBAlias + sLineBreak +
+      'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
+      'Object type: Table' + sLineBreak +
+      'Table name: ' + TableName;
+    ATab.Hint := FullHint;
+    ATab.ShowHint := True;
+  end;
+
+  // Initialisierung
+  Result.Init(DBIndex, TableName, NodeInfo);
+
+  // Aktiven Tab setzen
+  if (ActiveTabIndex >= 0) and (ActiveTabIndex < Result.PageControl1.PageCount) then
+    Result.PageControl1.ActivePageIndex := ActiveTabIndex;
+
+  Result.Show;
+end;}
+
+function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
+  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
+var
+  ATab: TTabSheet;
+  SelNode: TTreeNode;
+  ShortTitle, FullHint, DBAlias: string;
+  i: Integer;
+  ExistingForm: TfmTableManage;
+  FormKey: string;
+begin
+  SelNode := tvMain.Selected;
+
+  // Eindeutiger Schlüssel: dbIndex + Tabellenname
+  FormKey := IntToStr(DBIndex) + '|' + UpperCase(TableName);
+
+  // Prüfen ob bereits ein TableManage für diese DB+Tabelle existiert
+  ExistingForm := nil;
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    if (PageControl1.Pages[i].Tag = DBIndex) then
+    begin
+      // Prüfen ob in diesem Tab ein TfmTableManage steckt
+      if (PageControl1.Pages[i].ControlCount > 0) and
+         (PageControl1.Pages[i].Controls[0] is TfmTableManage) then
+      begin
+        ExistingForm := TfmTableManage(PageControl1.Pages[i].Controls[0]);
+        // Prüfen ob es die gleiche Tabelle ist
+        if SameText(ExistingForm.Caption, GetClearNodeText(TableName) + '#' + IntToStr(DBIndex)) then
+          Break
+        else
+          ExistingForm := nil;
+      end;
+    end;
+  end;
+
+  if ExistingForm <> nil then
+  begin
+    Result := ExistingForm;
+    ATab := Result.Parent as TTabSheet;
+  end
+  else
+  begin
+    Result := TfmTableManage.Create(Application);
+    ATab := TTabSheet.Create(Self);
+    ATab.Parent := PageControl1;
+    ATab.ImageIndex := 4;
+    ATab.Tag := DBIndex;
+
+    Result.Parent := ATab;
+    Result.Align := alClient;
+    Result.BorderStyle := bsNone;
+
+    // Am Tabellen-Knoten speichern
+    if Assigned(NodeInfo) then
+      NodeInfo^.EditorForm := Result;
+  end;
+
+  // Tab vorbereiten
+  PageControl1.ActivePage := ATab;
+  ATab.Tag := DBIndex;
+
+  // Kurzer Titel
+  ShortTitle := GetClearNodeText(TableName) + '#' + IntToStr(DBIndex);
+  ATab.Caption := ShortTitle;
+  Result.Caption := ShortTitle;
+
+  // Tooltip
+  if SelNode <> nil then
+  begin
+    DBAlias := GetAncestorNodeText(SelNode, 1);
+    FullHint :=
+      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+      'DBAlias:  ' + DBAlias + sLineBreak +
+      'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
+      'Object type: Table' + sLineBreak +
+      'Table name: ' + TableName;
+    ATab.Hint := FullHint;
+    ATab.ShowHint := True;
+  end;
+
+  // Initialisierung
+  Result.Init(DBIndex, TableName, NodeInfo);
+
+  // Aktiven Tab setzen
+  if (ActiveTabIndex >= 0) and (ActiveTabIndex < Result.PageControl1.PageCount) then
+    Result.PageControl1.ActivePageIndex := ActiveTabIndex;
+
+  Result.Show;
+end;
+
 procedure TfmMain.lmTableManageClick(Sender: TObject);
 var
   SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
   dbIndex: Integer;
-  fmTableManage: TfmTableManage;
-  ATab: TTabSheet;
-  ShortTitle, FullHint, DBAlias, TableName: string;
+  TableName: string;
 begin
   SelNode := tvMain.Selected;
   if SelNode = nil then Exit;
 
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
-  dbIndex := NodeInfos^.dbIndex;
-
+  dbIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
   TableName := GetClearNodeText(SelNode.Text);
-  DBAlias := GetAncestorNodeText(SelNode, 1);
 
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmTableManage) then
-    fmTableManage := TfmTableManage(NodeInfos^.EditorForm)
-  else
-  begin
-    fmTableManage := TfmTableManage.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-
-    fmTableManage.Parent := ATab;
-    fmTableManage.Align := alClient;
-    fmTableManage.BorderStyle := bsNone;
-
-    NodeInfos^.EditorForm := fmTableManage;
-  end;
-
-  // Tab vorbereiten
-  ATab := fmTableManage.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Kurzer Titel = nur Tabellenname
-  ShortTitle := TableName;
-  ATab.Caption := ShortTitle;
-  fmTableManage.Caption := ShortTitle;
-
-  // Mehrzeiliger Tooltip
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table' + sLineBreak +
-    'Table name: ' + TableName + sLineBreak +
-    'Modus: Edit Table';
-
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Initialisierung
-  fmTableManage.Init(dbIndex, TableName, SelNode.Data);
-  fmTableManage.PageControl1.TabIndex := 0;
-
-  // Teilbereiche laden
-  //ViewTableFields(TableName, dbIndex, fmTableManage.sgFields);
-  //fmTableManage.FillTriggers;
-  //fmTableManage.FillPermissions;
-  //fmTableManage.bbRefreshReferencesClick(nil);
-
-  fmTableManage.Show;
+  ShowTableManagement(dbIndex, TableName, SelNode.Data, 0);
 end;
 
 
@@ -5740,36 +5975,6 @@ begin
   end;
 end;
 
-(***************  Get Index fields  *******************)
-{Function TfmMain.GetIndexFields(ATableName, AIndexName: string;
-  AQuery: TIBQuery; var FieldsList: TStringList): Boolean;
-begin
-  AQuery.Close;
-  AQuery.SQL.Text:= 'SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS field_name, ' + LineEnding +
-     'RDB$INDICES.RDB$DESCRIPTION AS description, ' +LineEnding +
-     '(RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION + 1) AS field_position ' +LineEnding +
-     'FROM RDB$INDEX_SEGMENTS ' +LineEnding +
-     'LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME ' +LineEnding +
-     'LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME ' +LineEnding +
-     ' WHERE UPPER(RDB$INDICES.RDB$RELATION_NAME)=''' + UpperCase(ATablename) + '''         -- table name ' +LineEnding +
-     '  AND UPPER(RDB$INDICES.RDB$INDEX_NAME)=''' + UpperCase(AIndexName) + ''' -- index name ' +LineEnding +
-     '--  AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE IS NULL ' +LineEnding +
-     'ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION;';
-  AQuery.Open;
-  Result:= AQuery.FieldCount > 0;
-  FieldsList.Clear;
-
-  // Get index field names
-  if Result then
-  while not AQuery.EOF do
-  begin
-    FieldsList.Add(Trim(AQuery.FieldByName('field_name').AsString));
-    AQuery.Next;
-  end;
-  if not Result then
-    AQuery.Close;
-end;}
-
 function TfmMain.GetUDFInfo(DatabaseIndex: Integer; UDFName: string;
   var ModuleName, EntryPoint, Params: string): Boolean;
 var
@@ -5813,87 +6018,6 @@ begin
 end;
 
 (***********  Show Query window  ************)
-{function TfmMain.ShowQueryWindow(DatabaseIndex: Integer; ATitle: string; ANodeInfos: TPNodeInfos=nil): TfmQueryWindow;
-var
-  Rec: TDatabaseRec;
-  ATab: TTabSheet;
-  AServer,
-  ADBAlias,
-  ADBPath,
-  AObjectType,
-  AName,
-  ACaption,
-  FullHint: string;
-  NodeQueryWindow: boolean;
-begin
-  ACaption := ATitle;
-  Result := nil;
-  NodeQueryWindow := false;
-
-  Rec:= RegisteredDatabases[DatabaseIndex];
-
-  AServer   := 'Server:   ' +  GetAncestorNodeText(tvMain.Selected, 0);
-  ADBAlias  := 'DBAlias:  ' +  Rec.RegRec.Title;
-  ADBPath   := 'DBPath:   ' +  Rec.RegRec.DatabaseName;
-  FullHint  :=  AServer + sLineBreak + ADBAlias + sLineBreak + ADBPath + sLineBreak;
-
-  if ANodeInfos = nil then
-  begin
-     Result:= TfmQueryWindow(FindQueryWindow(ACaption))
-  end else
-  begin
-    NodeQueryWindow := true;
-    if Assigned(ANodeInfos^.ViewForm) and (ANodeInfos^.ViewForm is TfmQueryWindow) then
-      Result := TfmQueryWindow(ANodeInfos^.ViewForm);
-  end;
-
-  if Result = nil then
-  begin
-    // No opened query window
-    Result:= TfmQueryWindow.Create(Application);
-    ATab:= TTabSheet.Create(self);
-    ATab.Parent:= PageControl1;
-    Result.Parent:= ATab;
-    Result.Left:= 0;
-    Result.Top:= 0;
-    Result.Align:= alClient;
-
-    ATab.Tag:= DatabaseIndex;
-    ATab.ShowHint := True;
-    Result.BorderStyle:= bsNone;
-    Result.Caption:= ACaption;
-
-    if NodeQueryWindow then
-    begin
-      ANodeInfos^.ViewForm := Result;
-      ATab.ImageIndex := tvMain.Selected.ImageIndex;
-      if tvMain.Selected.Text <> 'Query Window' then //Main-QueryWindow
-      begin
-        ACaption :=  tvMain.Selected.Text;
-        FullHint := FullHint + 'Object type: '  + TreeViewObjectToStr(ANodeInfos^.ObjectType) + sLineBreak +
-                    'Object Name:  ' + ACaption;
-      end else
-        FullHint := FullHint + 'Object type: '  + TreeViewObjectToStr(ANodeInfos^.ObjectType)
-    end else
-    begin
-      ATab.ImageIndex := 1;
-      FullHint := FullHint + 'Object type: Query Window';
-    end;
-
-    ATab.Caption:= ACaption;
-    ATab.Hint := FullHint;
-  end
-
-  else // Already opened query window found
-    ATab:= Result.Parent as TTabSheet;
-
-  Result.Init(DatabaseIndex, ANodeInfos);
-  OpenSQLHistory(Rec.RegRec.Title);
-  Result.Parent.Show;
-  Result.Show;
-  fmMain.Show;
-end;  }
-
 function TfmMain.ShowQueryWindow(DatabaseIndex: Integer; ATitle: string; ANodeInfos: TPNodeInfos=nil): TfmQueryWindow;
 var
   Rec: TDatabaseRec;
@@ -6035,6 +6159,15 @@ var
   ANodeText: string;
   NodeType: TTreeViewObjectType;
   DummyNode: TTreeNode;
+  SubItem: TTreeNode;
+
+  //Forms
+  ServerName, DBAlias, FormsPath, FormDir, CFrmFile, RopsFile: string;
+  ChildNode: TTreeNode;
+  SearchRec: TSearchRec;
+  //HasCFrm, HasRops: Boolean;
+  //FileSearchRec: TSearchRec;
+  //Ext, BaseName, FormBaseName: string;
 begin
   DBIndex:= TPNodeInfos(Node.Data)^.dbIndex;
 
@@ -6066,13 +6199,223 @@ begin
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
-        //Table
+        // Table
         tvotTable: begin
-          //self.lmViewFieldsClick(nil);
           Node.DeleteChildren;
           Node.Text := ANodeText;
-          SimpleObjExtractor.ExtractTableFieldsToTreeNode(Node.Text, Node, false, ' ', 83);
+
+          // 1. Fields Root
+          Item := tvMain.Items.AddChild(Node, 'Fields');
+          Item.ImageIndex := 83;
+          Item.SelectedIndex := 83;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotTableFieldRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 2. Primary Keys
+          Item := tvMain.Items.AddChild(Node, 'Primary Key');
+          Item.ImageIndex := 28;
+          Item.SelectedIndex := 28;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotPrimaryKeyRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 3. Foreign Keys
+          Item := tvMain.Items.AddChild(Node, 'Foreign Keys');
+          Item.ImageIndex := 29;
+          Item.SelectedIndex := 29;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotForeignKeyRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 4. Unique Constraints
+          Item := tvMain.Items.AddChild(Node, 'Unique Constraints');
+          Item.ImageIndex := 82;
+          Item.SelectedIndex := 82;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotUniqueConstraintRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 5. Check Constraints
+          Item := tvMain.Items.AddChild(Node, 'Check Constraints');
+          Item.ImageIndex := 82;
+          Item.SelectedIndex := 82;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotCheckConstraintRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 6. Not Null Constraints
+          Item := tvMain.Items.AddChild(Node, 'Not Null Constraints');
+          Item.ImageIndex := 82;
+          Item.SelectedIndex := 82;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotNotNullConstraintRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 7. Indices Root
+          Item := tvMain.Items.AddChild(Node, 'Indices');
+          Item.ImageIndex := 82;
+          Item.SelectedIndex := 82;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotIndexRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 8. TableTriggers Root
+          Item := tvMain.Items.AddChild(Node, 'Triggers');
+          Item.ImageIndex := 8;
+          Item.SelectedIndex := 8;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotTableTriggerRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          // 9. References Root
+          Item := tvMain.Items.AddChild(Node, 'References');
+          Item.ImageIndex := 8;
+          Item.SelectedIndex := 8;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotTableReferencesRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+
+          // 10. Permissions Root
+          Item := tvMain.Items.AddChild(Node, 'Permissions');
+          Item.ImageIndex := 8;
+          Item.SelectedIndex := 8;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotTablePermissionsRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+
+          // Node-Text mit Gesamtzahl aktualisieren
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Fields Root unter Tabelle
+        tvotTableFieldRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableFieldsToTreeNode(
+            GetClearNodeText(Node.Parent.Text), Node, false, ' ', 83, false);
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Primary Keys unter Tabelle
+        tvotPrimaryKeyRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otPrimaryKeys,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            28
+          );
+        end;
+
+        // Foreign Keys unter Tabelle
+        tvotForeignKeyRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otForeignKeys,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            29
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Unique Constraints unter Tabelle
+        tvotUniqueConstraintRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otUniqueConstraints,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            82
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Check Constraints unter Tabelle
+        tvotCheckConstraintRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otCheckConstraints,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            82
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Not Null Constraints unter Tabelle
+        tvotNotNullConstraintRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otNotNullConstraints,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            82
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Indices unter Tabelle
+        tvotIndexRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otIndexes,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            82
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+        // Einzelner Primary Key
+        tvotPrimaryKey: begin
+          // Später: Anzeige/DoubleClick
+        end;
+
+        // Einzelner Foreign Key
+        tvotForeignKey: begin
+          // Später: Anzeige/DoubleClick
+        end;
+
+        // Einzelner Unique Constraint
+        tvotUniqueConstraint: begin
+          // Später: Anzeige/DoubleClick
+        end;
+
+        // Einzelner Check Constraint
+        tvotCheckConstraint: begin
+          // Später: Anzeige/DoubleClick
         end;
 
         tvotSystemTableRoot: begin
@@ -6082,28 +6425,29 @@ begin
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
-        {tvotSystemTableRoot: begin
-          SysTableNode:= Node;
-          Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otSystemTables, Count);
-          Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
-          SysTableNode.DeleteChildren;
-          for i:= 0 to Objects.Count - 1 do
-          begin
-            Item:= tvMain.Items.AddChild(SysTableNode, Objects[i]);
-            Item.ImageIndex:= 16;
-            Item.SelectedIndex:= 16;
-            TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTable;
-            TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
-          end;
-        end;}
-
-
-        //SystemTable
+        // SystemTable
         tvotSystemTable: begin
-          //self.lmViewFieldsClick(nil);
           Node.DeleteChildren;
           Node.Text := ANodeText;
-          SimpleObjExtractor.ExtractTableFieldsToTreeNode(Node.Text, Node, false, ' ', 83);
+
+          // 1. Fields Root
+          Item := tvMain.Items.AddChild(Node, 'Fields');
+          Item.ImageIndex := 83;
+          Item.SelectedIndex := 83;
+          TPNodeInfos(Item.Data)^.ObjectType := tvotSystemTableFieldRoot;
+          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
+          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+
+        tvotSystemTableFieldRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractTableFieldsToTreeNode(
+            GetClearNodeText(Node.Parent.Text), Node, false, ' ', 83, true);
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
@@ -6125,7 +6469,10 @@ begin
 
         tvotTableTriggerRoot: begin
           TableTrigNode:= Node;
-          Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otTableTriggers, Count);
+          if TPNodeInfos(Node.Parent.Data)^.ObjectType = tvotTable then
+            Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otTableTriggers, Count, GetClearNodeText(Node.Parent.Text))
+          else
+            Objects.CommaText:= dmSysTables.GetDBObjectNames(DBIndex, otTableTriggers, Count);
           Node.Text:= ANodeText + ' (' + IntToStr(Count) + ')';
           TableTrigNode.DeleteChildren;
           for i:= 0 to Objects.Count - 1 do
@@ -6176,6 +6523,7 @@ begin
           Item.SelectedIndex:= 8;
           TPNodeInfos(Item.Data)^.ObjectType := tvotUDRTableTriggerRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
           DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
 
           Item := tvMain.Items.AddChild(Node, 'UDR-DBTriggers');
@@ -6183,6 +6531,7 @@ begin
           Item.SelectedIndex:= 8;
           TPNodeInfos(Item.Data)^.ObjectType := tvotUDRDBTriggerRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
           DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
 
           Item := tvMain.Items.AddChild(Node, 'UDR-DDLTriggers');
@@ -6190,6 +6539,7 @@ begin
           Item.SelectedIndex:= 8;
           TPNodeInfos(Item.Data)^.ObjectType := tvotUDRDDLTriggerRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+          TPNodeInfos(Item.Data)^.Refreshable := true;
           DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
         end;
 
@@ -6651,6 +7001,109 @@ begin
                 end;
 
 
+                {tvotFormRoot: begin
+                  Node.DeleteChildren;
+                  Node.Text := ANodeText;
+
+                  ServerName := GetClearNodeText(GetAncestorAtLevel(Node, 0).Text);  // Level 0 = Server
+                  DBAlias   := GetClearNodeText(GetAncestorAtLevel(Node, 1).Text);    // Level 1 = DB
+
+                  FormsPath := GetDBFormsPath(ServerName, DBAlias);
+                  ForceDirectories(FormsPath);   // Stellt sicher, dass der Pfad existiert
+
+                  // Unterverzeichnisse einlesen
+                  if DirectoryExists(FormsPath) then
+                  begin
+                    if FindFirst(FormsPath + '*', faDirectory, SearchRec) = 0 then
+                    begin
+                      repeat
+                        // Nur echte Unterverzeichnisse (keine . und ..)
+                        if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') and
+                           (SearchRec.Attr and faDirectory <> 0) then
+                        begin
+                          FormDir := FormsPath + SearchRec.Name;
+
+                          // Case-insensitive Prüfung auf .cfrm und .rops
+                          HasCFrm := False;
+                          HasRops := False;
+                          if FindFirst(FormDir + PathDelim + '*', faAnyFile, FileSearchRec) = 0 then
+                          begin
+                            repeat
+                              if (FileSearchRec.Attr and faDirectory) = 0 then  // nur Dateien
+                              begin
+                                Ext := LowerCase(ExtractFileExt(FileSearchRec.Name));
+                                BaseName := LowerCase(ChangeFileExt(FileSearchRec.Name, ''));
+                                FormBaseName := LowerCase(SearchRec.Name);
+
+                                if (Ext = '.cfrm') and (BaseName = FormBaseName) then
+                                  HasCFrm := True
+                                else if (Ext = '.rops') and (BaseName = FormBaseName) then
+                                  HasRops := True;
+                              end;
+                            until FindNext(FileSearchRec) <> 0;
+                            FindClose(FileSearchRec);
+                          end;
+
+                          if HasCFrm and HasRops then
+                          begin
+                            ChildNode := tvMain.Items.AddChild(Node, SearchRec.Name);
+                            ChildNode.ImageIndex := 19;
+                            ChildNode.SelectedIndex := 19;
+
+                            TPNodeInfos(ChildNode.Data)^.ObjectType := tvotForm;
+                            TPNodeInfos(ChildNode.Data)^.dbIndex := DBIndex;
+
+                          end;
+                        end;
+                      until FindNext(SearchRec) <> 0;
+                      FindClose(SearchRec);
+                    end;
+                  end;
+
+                  Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+                end;}
+
+
+                tvotFormRoot: begin
+                  Node.DeleteChildren;
+                  Node.Text := ANodeText;
+
+                  ServerName := GetClearNodeText(GetAncestorAtLevel(Node, 0).Text);  // Level 0 = Server
+                  DBAlias   := GetClearNodeText(GetAncestorAtLevel(Node, 1).Text);    // Level 1 = DB
+
+                  FormsPath := GetDBFormsPath(ServerName, DBAlias);
+                  ForceDirectories(FormsPath);   // Stellt sicher, dass der Pfad existiert
+
+                  // Unterverzeichnisse einlesen
+                  if DirectoryExists(FormsPath) then
+                  begin
+                    if FindFirst(FormsPath + '*', faDirectory, SearchRec) = 0 then
+                    begin
+                      repeat
+                        if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') and
+                           (SearchRec.Attr and faDirectory <> 0) then
+                        begin
+                          FormDir := FormsPath + SearchRec.Name;
+                          CFrmFile := FormDir + PathDelim + SearchRec.Name + '.cfrm';
+                          RopsFile := FormDir + PathDelim + SearchRec.Name + '.rops';
+
+                          if FileExists(CFrmFile) and FileExists(RopsFile) then
+                          begin
+                            ChildNode := tvMain.Items.AddChild(Node, SearchRec.Name);
+                            ChildNode.ImageIndex := 84;
+                            ChildNode.SelectedIndex := 84;
+                            TPNodeInfos(ChildNode.Data)^.ObjectType := tvotForm;
+                            TPNodeInfos(ChildNode.Data)^.dbIndex := DBIndex;
+                          end;
+                        end;
+                      until FindNext(SearchRec) <> 0;
+                      FindClose(SearchRec);
+                    end;
+                  end;
+
+                  Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+                end;
+
 
             {
 
@@ -6688,19 +7141,6 @@ begin
     Screen.Cursor:= crDefault;
   end;
 end;
-
-(*************  Get main indices information  ******************)
-{Function TfmMain.GetIndices(ATableName: string; AQuery: TIBQuery): Boolean;
-begin
-  AQuery.Close;
-  AQuery.SQL.Text:= 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + UpperCase(ATableName) +
-    ''' AND RDB$FOREIGN_KEY IS NULL';
-  AQuery.Open;
-  Result:= AQuery.RecordCount > 0;
-  //Result := not SQLQuery1.IsEmpty;
-  if not Result then
-    AQuery.Close;
-end;}
 
 (*************   Display View DDL *******************)
 procedure TfmMain.lmDisplayViewClick(Sender: TObject);
@@ -7006,89 +7446,306 @@ begin
   frmViewSProc.Show;
 end;
 
-
 (*******************  View Trigger   **********************)
 procedure TfmMain.lmViewTriggerClick(Sender: TObject);
 var
   SelNode: TTreeNode;
   NodeInfos: TPNodeInfos;
-  ATriggerName, Event, BeforeAfter, OnTable, Body: string;
+
+  ATriggerName: string;
+  Event: string;
+  BeforeAfter: string;
+  OnTable: string;
+  Body: string;
+
   TriggerEnabled: Boolean;
-  TriggerPosition, dbIndex: Integer;
+  TriggerPosition: Integer;
+  dbIndex: Integer;
+
+  IsDatabaseTrigger: Boolean;
+  IsDDLTrigger: Boolean;
+  IsUDRTrigger: Boolean;
+
+  ExternalName: string;
+  EngineName: string;
+  UDRParams: string;
+
   ATab: TTabSheet;
   frmViewTrigger: TfmViewTrigger;
-  ShortTitle, FullHint, DBAlias, EnabledText: string;
+
+  ShortTitle: string;
+  FullHint: string;
+  DBAlias: string;
+  EnabledText: string;
+  TriggerTypeText: string;
+
 begin
   SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
+
+  if (SelNode = nil) or (SelNode.Parent = nil) then
+    Exit;
 
   NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
+
+  if NodeInfos = nil then
+    Exit;
+
   dbIndex := NodeInfos^.dbIndex;
 
-  // Trigger-Info aus DB holen
+  // =====================================================
+  // TRIGGER INFO HOLEN
+  // =====================================================
+
   ATriggerName := SelNode.Text;
-  dmSysTables.GetTriggerInfo(dbIndex, ATriggerName, BeforeAfter, OnTable,
-    Event, Body, TriggerEnabled, TriggerPosition);
 
-  DBAlias := GetAncestorNodeText(SelNode, 1);
+  dmSysTables.GetTriggerInfo(
+    dbIndex,
+    ATriggerName,
+    BeforeAfter,
+    OnTable,
+    Event,
+    Body,
+    TriggerEnabled,
+    TriggerPosition,
+    IsDatabaseTrigger,
+    IsDDLTrigger,
+    IsUDRTrigger,
+    ExternalName,
+    EngineName,
+    UDRParams);
 
-  // Prüfen ob ViewForm schon existiert
-  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmViewTrigger) then
-    frmViewTrigger := TfmViewTrigger(NodeInfos^.ViewForm)
+  DBAlias :=
+    GetAncestorNodeText(SelNode, 1);
+
+  // =====================================================
+  // VIEW FORM
+  // =====================================================
+
+  if Assigned(NodeInfos^.ViewForm) and
+     (NodeInfos^.ViewForm is TfmViewTrigger) then
+
+    frmViewTrigger :=
+      TfmViewTrigger(NodeInfos^.ViewForm)
+
   else
   begin
-    frmViewTrigger := TfmViewTrigger.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    frmViewTrigger.Parent := ATab;
-    frmViewTrigger.Align := alClient;
-    frmViewTrigger.BorderStyle := bsNone;
+    frmViewTrigger :=
+      TfmViewTrigger.Create(Application);
 
-    NodeInfos^.ViewForm := frmViewTrigger;
+    ATab :=
+      TTabSheet.Create(Self);
+
+    ATab.Parent :=
+      PageControl1;
+
+    ATab.ImageIndex :=
+      SelNode.ImageIndex;
+
+    frmViewTrigger.Parent :=
+      ATab;
+
+    frmViewTrigger.Align :=
+      alClient;
+
+    frmViewTrigger.BorderStyle :=
+      bsNone;
+
+    NodeInfos^.ViewForm :=
+      frmViewTrigger;
   end;
 
-  // Tab vorbereiten
-  ATab := frmViewTrigger.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
+  // =====================================================
+  // TAB
+  // =====================================================
 
-  // Kurzer Tab-Titel
-  ShortTitle := ATriggerName;
-  ATab.Caption := ShortTitle;
-  frmViewTrigger.Caption := ShortTitle;
+  ATab :=
+    frmViewTrigger.Parent as TTabSheet;
 
-  // Detaillierte Infos als Hint
+  PageControl1.ActivePage :=
+    ATab;
+
+  ATab.Tag :=
+    dbIndex;
+
+  ShortTitle :=
+    ATriggerName;
+
+  ATab.Caption :=
+    ShortTitle;
+
+  frmViewTrigger.Caption :=
+    ShortTitle;
+
+  // =====================================================
+  // TRIGGER TYPE
+  // =====================================================
+
+  if IsUDRTrigger then
+    TriggerTypeText := 'UDR Trigger'
+  else if IsDDLTrigger then
+    TriggerTypeText := 'DDL Trigger'
+  else if IsDatabaseTrigger then
+    TriggerTypeText := 'Database Trigger'
+  else
+    TriggerTypeText := 'Table Trigger';
+
+  // =====================================================
+  // ENABLED TEXT
+  // =====================================================
+
   if TriggerEnabled then
     EnabledText := 'Yes'
   else
     EnabledText := 'No';
 
+  // =====================================================
+  // HINT
+  // =====================================================
+
   FullHint :=
-      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-      'DBAlias:  ' + DBAlias + sLineBreak +
-      'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-      'Object type: Trigger' + sLineBreak +
-      'Trigger name: ' + ATriggerName + sLineBreak +
-      'On Table: ' + OnTable + sLineBreak +
-      'Event: ' + Event + sLineBreak +
-      'Type: ' + BeforeAfter + sLineBreak +
-      'Position: ' + IntToStr(TriggerPosition) + sLineBreak +
-      'Enabled: ' + EnabledText;
+      'Server:   ' +
+      GetAncestorNodeText(SelNode, 0) + sLineBreak +
 
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
+      'DBAlias:  ' +
+      DBAlias + sLineBreak +
 
-  // Form mit Triggerdaten füllen
+      'DBPath:   ' +
+      RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
+
+      'Object type: ' +
+      TriggerTypeText + sLineBreak +
+
+      'Trigger name: ' +
+      ATriggerName + sLineBreak;
+
+  if OnTable <> '' then
+    FullHint :=
+      FullHint +
+      'On Table: ' + OnTable + sLineBreak;
+
+  FullHint :=
+      FullHint +
+      'Event: ' + Event + sLineBreak;
+
+  if BeforeAfter <> '' then
+    FullHint :=
+      FullHint +
+      'Type: ' + BeforeAfter + sLineBreak;
+
+  FullHint :=
+      FullHint +
+      'Position: ' +
+      IntToStr(TriggerPosition) + sLineBreak +
+
+      'Enabled: ' +
+      EnabledText;
+
+  // =====================================================
+  // UDR INFO
+  // =====================================================
+
+  if IsUDRTrigger then
+  begin
+    FullHint :=
+      FullHint +
+      sLineBreak +
+      'External Name: ' + ExternalName + sLineBreak +
+      'Engine: ' + EngineName;
+
+    if Trim(UDRParams) <> '' then
+      FullHint :=
+        FullHint +
+        sLineBreak +
+        'UDR Params: ' + UDRParams;
+  end;
+
+  ATab.Hint :=
+    FullHint;
+
+  ATab.ShowHint :=
+    True;
+
+  // =====================================================
+  // FORM FILL
+  // =====================================================
+
   with frmViewTrigger do
   begin
-    edName.Caption := ATriggerName;
-    edOnTable.Caption := OnTable;
-    laEvent.Caption := Event;
-    laType.Caption := BeforeAfter;
-    laPos.Caption := IntToStr(TriggerPosition);
-    seScript.Lines.Text := Body;
+    edName.Caption :=
+      ATriggerName;
+
+    edOnTable.Caption :=
+      OnTable;
+
+    laEvent.Caption :=
+      Event;
+
+    laType.Caption :=
+      BeforeAfter;
+
+    laPos.Caption :=
+      IntToStr(TriggerPosition);
+
+    seScript.Clear;
+
+    // ===================================================
+    // UDR SCRIPT
+    // ===================================================
+
+    if IsUDRTrigger then
+    begin
+      seScript.Lines.Add(
+        'EXTERNAL NAME ''' + ExternalName + '''');
+
+      seScript.Lines.Add(
+        'ENGINE ' + EngineName);
+
+      if Trim(UDRParams) <> '' then
+        seScript.Lines.Add(
+          'AS ''' + UDRParams + '''');
+    end
+    else
+    begin
+      seScript.Lines.Text := Body;
+    end;
+
+    // ===================================================
+    // TYPE DISPLAY
+    // ===================================================
+
+    if IsUDRTrigger then
+    begin
+      laType.Caption :=
+        'UDR';
+
+      edOnTable.Caption :=
+        OnTable;
+    end
+    else if IsDDLTrigger then
+    begin
+      laType.Caption :=
+        BeforeAfter + ' ' + Event;
+    end
+    else if IsDatabaseTrigger then
+    begin
+      laType.Caption :=
+        Event;
+
+      edOnTable.Caption :=
+        '(Database)';
+    end
+    else
+    begin
+      laType.Caption :=
+        BeforeAfter;
+
+      edOnTable.Caption :=
+        OnTable;
+    end;
+
+    // ===================================================
+    // ENABLED COLOR
+    // ===================================================
 
     if TriggerEnabled then
       laEnabled.Font.Color := clGreen
@@ -7102,6 +7759,7 @@ begin
   end;
 
   frmViewTrigger.Init(SelNode.Data);
+
   frmViewTrigger.Show;
 end;
 
@@ -7675,27 +8333,48 @@ begin
   SelNode:= tvMain.Selected;
 
   if SelNode = nil then
-    exit;
-  //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
+  begin
+    // Kein Knoten selektiert → alle Menüpunkte ausblenden
+    for i:= 0 to pmDatabase.Items.Count - 1 do
+      pmDatabase.Items[i].Visible := False;
+    Exit;
+  end;
 
   ObjectType := TPNodeInfos(SelNode.Data)^.ObjectType;
 
   case  ObjectType of
-    tvotServer:
-      Filter:= -2;
+    tvotServer: Filter:= -2;
+    tvotDatabase: Filter:= 0;
+
     tvotSystemTableRoot: Filter := 100;
     tvotSystemTable: Filter:= 7;
-    tvotDatabase: Filter:= 0;
+    tvotSystemTableFieldRoot: Filter := 110;
+    tvotSystemTableField:     Filter := 111;
 
     tvotTableRoot: Filter := 11;
     tvotTable: Filter := 1;
-    tvotTableField: Filter := 120;
+    tvotTableFieldRoot:    Filter := 120;
+    tvotTableField:        Filter := 121;
 
     tvotGeneratorRoot: Filter:= 12;
     tvotGenerator: Filter := 2;
 
-    tvotTriggerRoot: Filter := 13;
-    tvotTrigger: Filter := 3;
+    tvotDBTriggerRoot,
+    tvotTableTriggerRoot,
+    tvotDDLTriggerRoot: Filter := 13;
+
+    tvotUDRTriggerRoot: Filter := 300;
+    tvotUDRTableTriggerRoot,
+    tvotUDRDBTriggerRoot,
+    tvotUDRDDLTriggerRoot: Filter := 13;
+
+    tvotTableTrigger,
+    tvotDBTrigger,
+    tvotDDLTrigger,
+    tvotUDRTableTrigger,
+    tvotUDRDBTrigger,
+    tvotUDRDDLTrigger,
+    tvotUDRTrigger: Filter := 3;
 
     tvotViewRoot: Filter := 14;
     tvotView: Filter := 4;
@@ -7740,48 +8419,37 @@ begin
     tvotUDRProcedureRoot: Filter := 45;
     tvotUDRProcedure: Filter := 46;
 
-    tvotTableTriggerRoot,
-    tvotTableTrigger,
+
+    // Constraints & Indices   Roots are only Refreshable
+     //tvotPrimaryKeyRoot:       Filter := 400;
+     tvotPrimaryKey:           Filter := 281;
+     //tvotForeignKeyRoot:       Filter := 400;
+     tvotForeignKey:           Filter := 282;
+     //tvotUniqueConstraintRoot: Filter := 400;
+     tvotUniqueConstraint:     Filter := 283;
+     //tvotCheckConstraintRoot:  Filter := 400;
+     tvotCheckConstraint:      Filter := 284;
+     //tvotNotNullConstraintRoot:Filter := 400;
+     tvotNotNullConstraint:    Filter := 285;
+     //tvotIndexRoot:            Filter := 294;
+     tvotIndex:                Filter := 286;
+     //tvotTableReferencesRoot
+     //tvotTablePermissionsRoot
 
 
-    tvotDBTriggerRoot,
-    tvotDBTrigger,
+     //Forms
+     tvotFormRoot:   Filter := 501;
+     tvotForm:       Filter := 500;
 
-    tvotDDLTriggerRoot,
-    tvotDDLTrigger,
+  else
+    Filter:= -1;
+  end;
 
-    tvotUDRTriggerRoot,
-    tvotUDRTrigger,
+  Refreshable := TPNodeInfos(SelNode.Data)^.Refreshable;
 
-    tvotUDRTableTriggerRoot,
-    tvotUDRTableTrigger,
-
-    tvotUDRDBTriggerRoot,
-    tvotUDRDBTrigger,
-
-    tvotUDRDDLTriggerRoot,
-    tvotUDRDDLTrigger: Filter:= -1;
-
-
-   else
-      Filter:= -1;
-  end; //casw
-
-  //ShowMessage(TreeViewObjectToStr(TPNodeInfos(SelNode.Data)^.ObjectType));
-
-  // Show menu for specific filter
-  {for i:= 0 to pmDatabase.Items.Count - 1 do
+  for i:= 0 to pmDatabase.Items.Count - 1 do
     pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
-      ((pmDatabase.Items[i].Tag = 100) and (SelNode <> nil) and (SelNode.Parent <> nil) and
-      (SelNode.Parent.Parent <> nil) and (SelNode.Parent.Parent.Parent = nil));
- }
-
- Refreshable := TPNodeInfos(SelNode.Data)^.Refreshable;
-
- for i:= 0 to pmDatabase.Items.Count - 1 do
-   pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
-     ((pmDatabase.Items[i].Tag = 100) and Refreshable);
-
+      ((pmDatabase.Items[i].Tag = 100) and Refreshable);
 end;
 
 procedure TfmMain.tbCheckDBIntegrityClick(Sender: TObject);
@@ -7828,7 +8496,7 @@ begin
     new(PNodeInfos);
     PNodeInfos^.dbIndex := -1;
     PNodeInfos^.ObjectType := tvotNone;
-    PNodeInfos^.Refreshable := true;
+    PNodeInfos^.Refreshable := false;
     PNodeInfos^.PopupMenuTag := -1;
     PNodeInfos^.ImageIndex := -1;
     PNodeInfos^.ViewForm := nil;
@@ -8287,12 +8955,13 @@ begin
   // Database nodes are always Level 1
   if Node.Level = 1 then
   begin
-    if not IsServerReachable(Node.Parent.Text, ServerErrStr) then
+    {if not IsServerReachable(Node.Parent.Text, ServerErrStr) then
     begin
       AllowExpansion := false;
       MessageDlg(ServerErrStr, mtError, [mbOK], 0);
       Exit;
-    end;
+    end;}
+
 
     Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
@@ -8467,7 +9136,7 @@ end;
 procedure TfmMain.tvMainDblClick(Sender: TObject);
 var
   Node: TTreeNode;
-  Info: TPNodeInfos;
+  NodeInfo: TPNodeInfos;
   QWindow: TfmQueryWindow;
   DBIndex: Integer;
   DBPath: string;
@@ -8476,6 +9145,7 @@ var
   DBNode: TTreeNode;
   SimpleObjExtractor: TSimpleObjExtractor;
   ExtractorItems: TStringList;
+  TableName: string;
 begin
   Node := tvMain.Selected;
 
@@ -8487,10 +9157,10 @@ try
   SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
   ExtractorItems := TStringList.Create;
 
-  Info := TPNodeInfos(Node.Data);
-  if Info = nil then Exit;
+  NodeInfo := TPNodeInfos(Node.Data);
+  if NodeInfo = nil then Exit;
 
-  DBIndex := Info^.dbIndex;
+  DBIndex := NodeInfo^.dbIndex;
 
   if Node.Level = 2 then
   begin
@@ -8512,7 +9182,7 @@ try
   end;
 
   try
-    case Info^.ObjectType of
+    case NodeInfo^.ObjectType of
 
       // ----------------------
       // Database node
@@ -8527,13 +9197,6 @@ try
       // ----------------------
       tvotTable:
         begin
-          {try
-            lmViewFieldsClick(nil);
-          except
-            on E: Exception do
-              ShowMessage('Error while opening table fields: ' + E.Message);
-          end;}
-
           try
             lmViewFirst1000Click(nil);
           except
@@ -8543,9 +9206,23 @@ try
         end;
 
       // ----------------------
-      // Table Field
+      // System Table
       // ----------------------
-      tvotTableField:
+      tvotSystemTable:
+        begin
+          try
+            lmViewFirst1000Click(nil);
+          except
+            on E: Exception do
+              ShowMessage('Error while opening system table: ' + E.Message);
+          end;
+        end;
+
+      // ----------------------
+      // Table/SystemTable Field
+      // ----------------------
+      //tvotTableField, tvotSystemTableField:
+      tvotSystemTableField:
         begin
           try
             lmEditFieldClick(nil);
@@ -8571,7 +9248,7 @@ try
       // ----------------------
       // TableTrigger
       // ----------------------
-      tvotTableTrigger, tvotDBTrigger, tvotDDLTrigger:
+      {tvotTableTrigger, tvotDBTrigger, tvotDDLTrigger:
         begin
           try
             SimpleObjExtractor.Extract(otTriggers, Node.Text, [], AlwaysQuoteIdentifiers, TStrings(ExtractorItems));
@@ -8582,7 +9259,7 @@ try
             on E: Exception do
             MessageDlg('Error while opening Trigger ' + Node.Text + sLineBreak + sLineBreak + E.Message, mtError, [mbOK], 0);
           end;
-        end;
+        end;}
 
       // ----------------------
       // DBTrigger
@@ -8664,21 +9341,6 @@ try
           except
             on E: Exception do
               ShowMessage('Error while opening Firebird function: ' + E.Message);
-          end;
-        end;
-
-      // ----------------------
-      // System Table
-      // ----------------------
-      tvotSystemTable:
-        begin
-          try
-            //lmViewFieldsClick(nil);
-            //lmOpenSystemTableClick(nil);
-            lmViewFirst1000Click(nil);
-          except
-            on E: Exception do
-              ShowMessage('Error while opening system table: ' + E.Message);
           end;
         end;
 
@@ -8814,6 +9476,157 @@ try
           end;
         end;
 
+
+
+      // ============================================================
+      // tvMainDblClick - ALLE Constraint/Index/Trigger-Typen:
+      // Tab-Indices: 0=Fields, 1=Indices, 2=PrimaryKey, 3=ForeignKeys,
+      //              4=Unique, 5=Check, 6=NotNull, 7=References, 8=Triggers, 9=Permissions
+      // ============================================================
+      // Table Field → Fields
+      tvotTableFieldRoot: begin
+        try
+          TableName := GetClearNodeText(Node.Parent.Text);
+          ShowTableManagement(DBIndex, TableName, NodeInfo, 0);
+        except
+          on E: Exception do
+            ShowMessage('Error while opening Table Field: ' + E.Message);
+        end;
+      end;
+
+
+      // Index
+      tvotIndexRoot: begin
+        try
+          TableName := GetClearNodeText(Node.Parent.Text);
+          ShowTableManagement(DBIndex, TableName, NodeInfo, 1);
+        except
+          on E: Exception do
+            ShowMessage('Error while opening Index: ' + E.Message);
+        end;
+      end;
+
+              // Primary Key
+              tvotPrimaryKeyRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 2);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Primary Key: ' + E.Message);
+                end;
+              end;
+
+              // Foreign Key
+              tvotForeignKeyRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 3);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Foreign Key: ' + E.Message);
+                end;
+              end;
+
+              // Unique Constraint
+              tvotUniqueConstraintRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 4);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Unique Constraint: ' + E.Message);
+                end;
+              end;
+
+              // Check Constraint
+              tvotCheckConstraintRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 5);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Check Constraint: ' + E.Message);
+                end;
+              end;
+
+              // Not Null Constraint
+              tvotNotNullConstraintRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 6);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Not Null Constraint: ' + E.Message);
+                end;
+              end;
+
+              // Table References Root (unter Tabelle)
+              tvotTableReferencesRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 7);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Table references: ' + E.Message);
+                end;
+              end;
+
+              // Table Trigger (unter Tabelle)
+              tvotTableTriggerRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 8);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Table Trigger: ' + E.Message);
+                end;
+              end;
+
+              // Table Permissions Root (unter Tabelle)
+              tvotTablePermissionsRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 9);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening Table Permissons: ' + E.Message);
+                end;
+              end;
+
+
+              // Form (PascalScript) – direkt ausführen
+              tvotForm: begin
+                try
+                  lmExecuteFormClick(nil);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while executing form: ' + E.Message);
+                end;
+              end;
+
+              // System Table → Fields
+              {tvotSystemTable: begin
+                try
+                  TableName := GetClearNodeText(Node.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 0);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening System Table: ' + E.Message);
+                end;
+              end;
+
+              // System Table Field → Fields (readonly)
+              tvotSystemTableField: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, NodeInfo, 0);
+                except
+                  on E: Exception do
+                    ShowMessage('Error while opening System Table Field: ' + E.Message);
+                end;
+              end;}
+
     else
       begin
         // Unknown / do nothing
@@ -8881,6 +9694,7 @@ begin
   CNode:= tvMain.Items.AddChild(ANode, 'Tables');
   TPNodeInfos(CNode.Data)^.ObjectType := tvotTableRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   CNode.ImageIndex:= 2;
   CNode.SelectedIndex:= 2;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
@@ -8888,6 +9702,7 @@ begin
   CNode:= tvMain.Items.AddChild(ANode, 'Sequences');
   TPNodeInfos(CNode.Data)^.ObjectType := tvotGeneratorRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   CNode.ImageIndex:= 6;
   CNode.SelectedIndex:= 6;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
@@ -8899,6 +9714,7 @@ begin
   CNode.SelectedIndex:= 8;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotTriggerRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   //DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
     CNode:= tvMain.Items.AddChild(CNode, 'Table-Triggers');
@@ -8907,6 +9723,7 @@ begin
     CNode.SelectedIndex:= 8;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotTableTriggerRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
     CNode := CNode.Parent;
 
@@ -8916,6 +9733,7 @@ begin
     CNode.SelectedIndex:= 8;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotDBTriggerRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
     CNode := CNode.Parent;
 
@@ -8925,6 +9743,7 @@ begin
     CNode.SelectedIndex:= 8;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotDDLTriggerRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
     CNode := CNode.Parent;
 
@@ -8934,6 +9753,7 @@ begin
     CNode.SelectedIndex:= 8;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRTriggerRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
     CNode := CNode.Parent;
     /////END.Triggers
@@ -8943,6 +9763,7 @@ begin
   CNode.SelectedIndex:= 10;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotViewRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   CNode:= tvMain.Items.AddChild(ANode, 'UDFs');
@@ -8950,6 +9771,7 @@ begin
   CNode.SelectedIndex:= 14;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotUDFRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   CNode:= tvMain.Items.AddChild(ANode, 'Procedures');
@@ -8957,6 +9779,7 @@ begin
   CNode.SelectedIndex:= 12;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotProcedureRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
 
@@ -8967,6 +9790,7 @@ begin
     CNode.SelectedIndex:= 52;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotFunctionRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
     CNode:= tvMain.Items.AddChild(ANode, 'UDRs');
@@ -8974,6 +9798,7 @@ begin
     CNode.SelectedIndex:= 66;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
     CNode:= tvMain.Items.AddChild(ANode, 'Packages');
@@ -8981,6 +9806,7 @@ begin
     CNode.SelectedIndex:= 60;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotPackageRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
   end;
 
@@ -8989,6 +9815,7 @@ begin
   CNode.SelectedIndex:= 17;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotDomainRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   CNode:= tvMain.Items.AddChild(ANode, 'Exceptions');
@@ -8996,6 +9823,7 @@ begin
   CNode.SelectedIndex:= 22;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotExceptionRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   CNode:= tvMain.Items.AddChild(ANode, 'Roles');
@@ -9003,6 +9831,7 @@ begin
   CNode.SelectedIndex:= 19;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotRoleRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   if not IsEmbedded then
@@ -9012,16 +9841,25 @@ begin
     CNode.SelectedIndex:= 30;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotUserRoot;
     TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
   end;
+
+  CNode:= tvMain.Items.AddChild(ANode, 'Forms');
+  CNode.ImageIndex:= 84;
+  CNode.SelectedIndex:= 84;
+  TPNodeInfos(CNode.Data)^.ObjectType := tvotFormRoot;
+  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
+  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
   CNode:= tvMain.Items.AddChild(ANode, 'System Objects');
   CNode.ImageIndex:= 39;
   CNode.SelectedIndex:= 39;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotSystemObjectRoot;
   TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
 end;
 
 Function TfmMain.LoadRegisteredDatabases: Boolean;
