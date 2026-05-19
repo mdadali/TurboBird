@@ -12318,63 +12318,32 @@ end;
   {$ifend}
 {$endif}
 
-{$ifdef empty_methods_handler}
-procedure MyAllMethodsHandler;
-begin
-end;
-{$else}
-
-
-{$IFDEF CPU64}
-function MyAllMethodsHandler3(Self: PScriptMethodInfo; _RDX, _R8, _R9:Pointer; Stack: PPointer;  _XMM1, _XMM2, _XMM3: Pointer): Integer; forward;
-{$ELSE}
 function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer; forward;
-{$ENDIF}
+
 procedure MyAllMethodsHandler;
-{$ifdef CPU64}
-//  On entry:
-//  RCX = Self pointer
-//  - function:
-//    * RDX - result
-//    * R8, R9 = param1 .. param2
-//    * STACK = param3... paramcount
-//  - procedure
-//    * RDX, R8, R9 - param1 - param3
-//    * STACK = param4... paramcount
+{$ifdef CPUX64}
 asm
-  PUSH RBP
-  MOVQ RAX, XMM3
-  PUSH RAX
-  MOVQ RAX, XMM2
-  PUSH RAX
-  MOVQ RAX, XMM1
-  PUSH RAX
-  MOV RAX, RSP
-  ADD RAX, 20h+28h   //48h
-  PUSH RAX  // stack
-  // R9 - 3rd param
-  // R8 - 2nd param
-  // Rdx -1st param
-  // Rcx - Self
-  SUB RSP, 20h
-  CALL MyAllMethodsHandler3
-  ADD   RSP, 20h  //Restore stack
-  ADD   RSP, 40h
-  POP RAX
-  SUB RSP, 40h
-  ADD RSP, 4*8
+  sub rsp, 20h        // shadow space (Pflicht)
+
+  // rdx = Param1
+  // r8  = Param2
+  // r9  = Param3
+
+  mov rdx, rsp        // Stack für PascalScript vorbereiten
+
+  call MyAllMethodsHandler2
+
+  add rsp, 20h
 end;
+
+
 {$else}
-//  On entry:
-//     EAX = Self pointer
-//     EDX, ECX = param1 and param2
-//     STACK = param3... paramcount
 asm
   push 0
   push ecx
   push edx
   mov edx, esp
-  add edx, 16 // was 12
+  add edx, 16
   pop ecx
   call MyAllMethodsHandler2
   pop ecx
@@ -12383,7 +12352,7 @@ asm
   mov [esp], edx
   mov eax, ecx
 end;
-{$endif empty_methods_handler}
+{$endif}
 
 function ResultAsRegister(b: TPSTypeRec): Boolean;
 begin
@@ -12464,12 +12433,35 @@ begin
   end;
 end;
 
-procedure PutOnFPUStackExtended(ft: extended);
+{procedure PutOnFPUStackExtended(ft: extended);
 asm
 //  fstp tbyte ptr [ft]
   fld tbyte ptr [ft]
 
+end;}
+
+procedure PutOnFPUStackExtended(ft: extended);
+var
+  tempFt: extended;
+begin
+{$IFDEF CPU64}
+  {$IFDEF WINDOWS}
+    tempFt := ft;
+    asm
+      fld tbyte ptr [tempFt]
+    end;
+  {$ELSE}
+    asm
+      fld tbyte ptr [ft]
+    end;
+  {$ENDIF}
+{$ELSE}
+  asm
+    fld tbyte ptr [ft]
+  end;
+{$ENDIF}
 end;
+
 {$IFDEF CPU64}
 function MyAllMethodsHandler3(Self: PScriptMethodInfo; _RDX, _R8, _R9:Pointer; Stack: PPointer;  _XMM1, _XMM2, _XMM3: Pointer): Integer;
 var
@@ -12658,7 +12650,7 @@ begin
       raise EPSException.Create(PSErrorToString(Self.SE.ExceptionCode, Self.Se.ExceptionString), Self.Se, Self.Se.ExProc, Self.Se.ExPos);
   end;
 end;
-{$ELSE}
+
 function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer;
 var
   Decl: tbtString;
@@ -12843,7 +12835,7 @@ begin
   end;
 end;
 {$ENDIF}
-{$endif}
+
 function TPSRuntimeClassImporter.FindClass(const Name: tbtString): TPSRuntimeClass;
 var
   h, i: Longint;

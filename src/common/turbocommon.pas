@@ -63,7 +63,27 @@ type
 
   tvotTableRoot,
   tvotTable,
+  tvotTableFieldRoot,
   tvotTableField,
+
+  // Constraints (NEU)
+  tvotConstraintRoot,
+  tvotConstraint,
+  tvotPrimaryKeyRoot,
+  tvotPrimaryKey,
+  tvotForeignKeyRoot,
+  tvotForeignKey,
+  tvotUniqueConstraintRoot,
+  tvotUniqueConstraint,
+  tvotCheckConstraintRoot,
+  tvotCheckConstraint,
+  tvotNotNullConstraintRoot,
+  tvotNotNullConstraint,
+  tvotIndexRoot,
+  tvotIndex,
+
+  tvotTableReferencesRoot,
+  tvotTablePermissionsRoot,
 
   tvotGeneratorRoot,
   tvotGenerator,
@@ -107,22 +127,6 @@ type
   tvotUserRoot,
   tvotUser,
 
-  tvotConstraintRoot,
-  tvotConstraint,
-  tvotIndexRoot,
-  tvotIndex,
-
-  tvotPrimaryKeyRoot,
-  tvotPrimaryKey,
-  tvotForeignKeyRoot,
-  tvotForeignKey,
-  tvotUniqueConstraintRoot,
-  tvotUniqueConstraint,
-  tvotCheckConstraintRoot,
-  tvotCheckConstraint,
-  tvotNotNullConstraintRoot,
-  tvotNotNullConstraint,
-
   tvotProcedureRoot,
   tvotProcedure,
   tvotFunctionRoot,
@@ -164,6 +168,9 @@ type
   tvotSystemObjectRoot,
   tvotSystemTableRoot,
   tvotSystemTable,
+  tvotSystemTableFieldRoot,
+  tvotSystemTableField,
+
   tvotSystemDomainRoot,
   tvotSystemDomain,
   tvotSystemGeneratorRoot,
@@ -179,7 +186,10 @@ type
   tvotSystemUserRoot,
   tvotSystemUser,
   tvotSystemExceptionRoot,
-  tvotSystemException
+  tvotSystemException,
+
+  tvotFormRoot,
+  tvotForm
   );
 
 
@@ -444,6 +454,12 @@ var
 
     //end-Ini.File////////////////////////////////////////////////////////////////
 
+//Forms
+function GetFormsBasePath: string;
+function GetDBFormsPath(const AServerName, ADBAlias: string): string;
+function SanitizeFileName(const AName: string): string;
+//
+
 function FormatMultilineSQLText(const AText: string): string;
 
 procedure SaveTxConfigToFile(const FileName: string; Params: TStrings);
@@ -596,6 +612,45 @@ implementation
 
 uses Reg;
 
+function GetFormsBasePath: string;
+begin
+  Result := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))
+            + 'data' + PathDelim + 'PSStudio' + PathDelim + 'Forms' + PathDelim;
+end;
+
+function GetDBFormsPath(const AServerName, ADBAlias: string): string;
+begin
+  Result := GetFormsBasePath
+            + SanitizeFileName(AServerName) + PathDelim
+            + SanitizeFileName(ADBAlias) + PathDelim;
+end;
+
+function SanitizeFileName(const AName: string): string;
+var
+  i: Integer;
+  S: string;
+begin
+  S := Trim(AName);
+  if S = '' then
+    Result := '_'
+  else
+  begin
+    for i := 1 to Length(S) do
+      if not (S[i] in ['A'..'Z', 'a'..'z', '0'..'9', '-', '_', '.', ' ']) then
+        S[i] := '_';
+
+    // Entferne Punkte am Anfang/Ende (verursachen Probleme im Dateisystem)
+    while (S <> '') and (S[1] = '.') do
+      Delete(S, 1, 1);
+    while (S <> '') and (S[Length(S)] = '.') do
+      Delete(S, Length(S), 1);
+
+    if S = '' then
+      S := '_';
+    Result := S;
+  end;
+end;
+
 function FormatMultilineSQLText(const AText: string): string;
 var
   S: string;
@@ -734,6 +789,9 @@ begin
     tvotQueryWindow,
 
     tvotTableRoot,
+    tvotTableFieldRoot,
+    tvotSystemTableFieldRoot,
+
     tvotGeneratorRoot,
     tvotViewRoot,
     tvotUDFRoot,
@@ -757,13 +815,18 @@ begin
 
     tvotPackage,
     tvotPackageRoot,
-    //tvotPackageUDFFunctionRoot,
     tvotPackageFunctionRoot,
     tvotPackageProcedureRoot,
     tvotPackageUDRFunctionRoot,
     tvotPackageUDRProcedureRoot,
-    //tvotPackageTriggerRoot,
-    //tvotPackageUDRTriggerRoot,
+
+    // Constraints (NEU)
+    tvotConstraintRoot,
+    tvotPrimaryKeyRoot,
+    tvotForeignKeyRoot,
+    tvotUniqueConstraintRoot,
+    tvotCheckConstraintRoot,
+    tvotNotNullConstraintRoot,
 
     tvotSystemObjectRoot,
     tvotSystemTableRoot:
@@ -2381,8 +2444,20 @@ begin
     tvotPackageUDRFunction:  Result := tvotPackageUDRFunctionRoot;
     tvotPackageUDRProcedure: Result := tvotPackageUDRProcedureRoot;
     tvotTable:               Result := tvotTableRoot;
+    tvotTableField:          Result := tvotTableFieldRoot;
     tvotView:                Result := tvotViewRoot;
     tvotSystemTable:         Result := tvotSystemTableRoot;
+
+    tvotSystemTableField:     Result := tvotSystemTableFieldRoot;
+
+
+    // Constraints (NEU)
+    tvotPrimaryKey:          Result := tvotPrimaryKeyRoot;
+    tvotForeignKey:          Result := tvotForeignKeyRoot;
+    tvotUniqueConstraint:    Result := tvotUniqueConstraintRoot;
+    tvotCheckConstraint:     Result := tvotCheckConstraintRoot;
+    tvotNotNullConstraint:   Result := tvotNotNullConstraintRoot;
+    tvotConstraint:          Result := tvotConstraintRoot;
   else
     Result := tvotNone;
   end;
@@ -2465,6 +2540,8 @@ begin
     otTables:                Result := tvotTable;
     otTableFields:           Result := tvotTableField;
     otViews:                 Result := tvotView;
+
+    otSystemTableFields:     Result := tvotSystemTableField;
 
     // --- Generators / Sequences ---
     otGenerators,
@@ -2617,6 +2694,7 @@ begin
     // --- Tables ---
     tvotTableRoot:             Result := 'Tables';
     tvotTable:                 Result := 'Table';
+    tvotTableFieldRoot:        Result := 'Fields';
     tvotTableField:            Result := 'Table Field';
 
     // --- Generators / Sequences ---
@@ -2686,6 +2764,15 @@ begin
     tvotUDRTriggerRoot:        Result := 'UDR Triggers';
     tvotUDRTrigger:            Result := 'UDR Trigger';
 
+
+    // UDR Trigger Untertypen (NEU - falls noch nicht vorhanden)
+    tvotUDRTableTriggerRoot:   Result := 'UDR Table Triggers';
+    tvotUDRTableTrigger:       Result := 'UDR Table Trigger';
+    tvotUDRDBTriggerRoot:      Result := 'UDR DB Triggers';
+    tvotUDRDBTrigger:          Result := 'UDR DB Trigger';
+    tvotUDRDDLTriggerRoot:     Result := 'UDR DDL Triggers';
+    tvotUDRDDLTrigger:         Result := 'UDR DDL Trigger';
+
     // --- Packages ---
     tvotPackageRoot:           Result := 'Packages';
     tvotPackage:               Result := 'Package';
@@ -2714,6 +2801,9 @@ begin
     // --- System Objects ---
     tvotSystemTableRoot:       Result := 'System Tables';
     tvotSystemTable:           Result := 'System Table';
+    tvotSystemTableFieldRoot:  Result := 'Fields';
+    tvotSystemTableField:      Result := 'System Table Field';
+
     tvotSystemDomainRoot:      Result := 'System Domains';
     tvotSystemDomain:          Result := 'System Domain';
     tvotSystemGeneratorRoot:   Result := 'System Generators';

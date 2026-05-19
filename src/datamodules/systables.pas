@@ -57,10 +57,16 @@ type
     // Returns object list (list of object names, i.e. tables, views) sorted by dependency
     // Limits sorting within one category (e.g. views)
     procedure SortDependencies(var ObjectList: TStringList);
+
     // Gets information on specified trigger
     function GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
       var AfterBefore, OnTable, Event, Body: string; var TriggerEnabled: Boolean;
-      var TriggerPosition: Integer): Boolean;
+      var TriggerPosition: Integer; var IsDatabaseTrigger: Boolean;
+      var IsDDLTrigger: Boolean;
+      var IsUDRTrigger: Boolean;
+      var ExternalName: string;
+      var EngineName: string;
+      var UDRParams: string): Boolean;
     // Scripts all check constraints for a database's tables as alter table
     // statement, adding the SQL to List
     function ScriptCheckConstraints(dbIndex: Integer; List: TStrings): boolean;
@@ -241,27 +247,49 @@ begin
     otGenerators:
       sqQuery.SQL.Text:= 'select RDB$GENERATOR_Name from RDB$GENERATORS where RDB$SYSTEM_FLAG = 0 order by rdb$generator_Name';
 
-    otTriggers:
+    {otTriggers:
       sqQuery.SQL.Text:= 'SELECT rdb$Trigger_Name FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 order by rdb$Trigger_Name';
+    //überflüssig
+    }
 
-
-    otTableTriggers:
+    otTableTriggers: begin
+      if OwnerObjName = '' then
       sqQuery.SQL.Text :=
-      'SELECT rdb$trigger_name ' +
-      'FROM rdb$triggers ' +
-      'WHERE rdb$system_flag = 0 ' +
-      'AND rdb$relation_name IS NOT NULL ' +
-      'ORDER BY rdb$trigger_name';
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        '  AND rdb$relation_name IS NOT NULL ' +
+        '  AND COALESCE(rdb$engine_name, '''') = '''' ' +
+        '  AND rdb$trigger_type < 8192 ' +
+        'ORDER BY rdb$trigger_name'
+      else
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        '  AND rdb$relation_name = ' + QuotedStr(OwnerObjName) +
+        '  AND COALESCE(rdb$engine_name, '''') = '''' ' +
+        '  AND rdb$trigger_type < 8192 ' +
+        'ORDER BY rdb$trigger_name'
+    end;
 
     otDBTriggers:
-    sqQuery.SQL.Text:= 'SELECT rdb$trigger_name FROM rdb$triggers WHERE rdb$system_flag = 0 AND rdb$relation_name IS NULL ' +
-                       ' AND rdb$trigger_type < 16384 ORDER BY rdb$trigger_name';
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        '  AND rdb$relation_name IS NULL ' +
+        '  AND COALESCE(rdb$engine_name, '''') = '''' ' +
+        '  AND rdb$trigger_type BETWEEN 8192 AND 8196 ' +
+        'ORDER BY rdb$trigger_name';
 
     otDDLTriggers:
       sqQuery.SQL.Text :=
-        'SELECT rdb$trigger_name FROM rdb$triggers ' +
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
-        'AND rdb$trigger_type >= 16384 ' +
+        '  AND rdb$trigger_type >= 16384 ' +
+        '  AND COALESCE(rdb$engine_name, '''') = '''' ' +
         'ORDER BY rdb$trigger_name';
 
     otUDRTriggers:
@@ -277,27 +305,26 @@ begin
         'SELECT rdb$trigger_name ' +
         'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
-        'AND rdb$engine_name = ''UDR'' ' +
-        'AND rdb$relation_name IS NOT NULL ' +
+        '  AND rdb$relation_name IS NOT NULL ' +
+        '  AND TRIM(UPPER(rdb$engine_name)) LIKE ''%UDR%'' ' +
         'ORDER BY rdb$trigger_name';
 
     otUDRDBTriggers:
-          sqQuery.SQL.Text :=
-            'SELECT rdb$trigger_name ' +
-            'FROM rdb$triggers ' +
-            'WHERE rdb$system_flag = 0 ' +
-            'AND rdb$engine_name = ''UDR'' ' +
-            'AND rdb$relation_name IS NULL ' +
-            'AND rdb$trigger_type < 16384 ' +
-            'ORDER BY rdb$trigger_name';
+      sqQuery.SQL.Text :=
+        'SELECT rdb$trigger_name ' +
+        'FROM rdb$triggers ' +
+        'WHERE rdb$system_flag = 0 ' +
+        '  AND rdb$relation_name IS NULL ' +
+        '  AND TRIM(UPPER(rdb$engine_name)) LIKE ''%UDR%'' ' +
+        'ORDER BY rdb$trigger_name';
 
     otUDRDDLTriggers:
       sqQuery.SQL.Text :=
         'SELECT rdb$trigger_name ' +
         'FROM rdb$triggers ' +
         'WHERE rdb$system_flag = 0 ' +
-        'AND rdb$engine_name = ''UDR'' ' +
-        'AND rdb$trigger_type >= 16384 ' +
+        '  AND TRIM(UPPER(rdb$engine_name)) LIKE ''%UDR%'' ' +
+        '  AND rdb$trigger_type >= 16384 ' +
         'ORDER BY rdb$trigger_name';
 
     otViews:
@@ -793,165 +820,414 @@ begin
   end;
 end;
 
-(***********  Get Trigger Info  ***************)
-
-{function TdmSysTables.GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
-  var AfterBefore, OnTable, Event, Body: string; var TriggerEnabled: Boolean; var TriggerPosition: Integer): Boolean;
+procedure AddBodyToList(const Body: string; List: TStrings);
 var
-  Encode: string;
+  SL: TStringList;
 begin
+  SL := TStringList.Create;
   try
-    Init(DatabaseIndex);
-    sqQuery.Close;
-    sqQuery.SQL.Text:= 'SELECT RDB$TRIGGER_NAME AS trigger_name, ' +
-      '  RDB$RELATION_NAME AS table_name, ' +
-      '  RDB$TRIGGER_SOURCE AS trigger_body, ' +
-      '  RDB$TRIGGER_TYPE as Trigger_Type, ' +
-      '  RDB$Trigger_Sequence as TPos, ' +
-      '   CASE RDB$TRIGGER_INACTIVE ' +
-      '   WHEN 1 THEN 0 ELSE 1 ' +
-      ' END AS trigger_enabled, ' +
-      ' RDB$DESCRIPTION AS trigger_comment ' +
-      ' FROM RDB$TRIGGERS ' +
-      ' WHERE UPPER(RDB$TRIGGER_NAME)=''' + ATriggerName + ''' ';
-
-    sqQuery.Open;
-    Body:= Trim(sqQuery.FieldByName('Trigger_Body').AsString);
-    OnTable:= Trim(sqQuery.FieldByName('Table_Name').AsString);
-    TriggerEnabled:= sqQuery.FieldByName('Trigger_Enabled').AsBoolean;
-    TriggerPosition:= sqQuery.FieldByName('TPos').AsInteger;
-    Encode:= DecToBin(sqQuery.FieldByName('Trigger_Type').AsInteger + 1, 7);
-    if Encode[7] = '1' then
-      AfterBefore:= 'After'
-    else
-      AfterBefore:= 'Before';
-    Delete(Encode, 7, 1);
-    Event:= '';
-    while Length(Encode) > 0 do
-    begin
-      if Copy(Encode, Length(Encode) - 1, 2) = '01' then
-        Event:= Event + 'Insert'
-      else
-      if Copy(Encode, Length(Encode) - 1, 2) = '10' then
-        Event:= Event + 'Update'
-      else
-      if Copy(Encode, Length(Encode) - 1, 2) = '11' then
-        Event:= Event + 'Delete';
-      Delete(Encode, Length(Encode) - 1, 2);
-      if (Encode <> '') and (Copy(Encode, Length(Encode) - 1, 2) <> '00') then
-        Event:= Event + ' or ';
-    end;
-    sqQuery.Close;
-    Result:= True;
-  except
-    on E: Exception do
-    begin
-      MessageDlg('Error: ' + e.Message, mtError, [mbOk], 0);
-      Result:= False;
-    end;
+    SL.Text := Body;
+    List.AddStrings(SL);
+  finally
+    SL.Free;
   end;
 end;
-}
 
-function TdmSysTables.GetTriggerInfo(DatabaseIndex: Integer; ATriggername: string;
+function TdmSysTables.GetTriggerInfo(
+  DatabaseIndex: Integer;
+  ATriggername: string;
   var AfterBefore, OnTable, Event, Body: string;
-  var TriggerEnabled: Boolean; var TriggerPosition: Integer): Boolean;
+  var TriggerEnabled: Boolean;
+  var TriggerPosition: Integer;
+  var IsDatabaseTrigger: Boolean;
+  var IsDDLTrigger: Boolean;
+  var IsUDRTrigger: Boolean;
+  var ExternalName: string;
+  var EngineName: string;
+  var UDRParams: string): Boolean;
 var
   TrigType: Integer;
-  Encode: string;
-  ServerVersionMajor: word;
+  AbsTrigType: Integer;
+  FullEvent: string;
 begin
+  Result := False;
+
   try
     Init(DatabaseIndex);
 
-    ServerVersionMajor := RegisteredDatabases[DatabaseIndex].RegRec.ServerVersionMajor;
-
-    // Trigger holen
     sqQuery.Close;
     sqQuery.SQL.Text :=
-      'SELECT RDB$TRIGGER_NAME AS trigger_name, ' +
-      '  RDB$RELATION_NAME AS table_name, ' +
-      '  RDB$TRIGGER_SOURCE AS trigger_body, ' +
-      '  RDB$TRIGGER_TYPE as Trigger_Type, ' +
-      '  RDB$Trigger_Sequence as TPos, ' +
-      '   CASE RDB$TRIGGER_INACTIVE ' +
-      '     WHEN 1 THEN 0 ELSE 1 ' +
-      '   END AS trigger_enabled, ' +
-      '  RDB$DESCRIPTION AS trigger_comment ' +
-      ' FROM RDB$TRIGGERS ' +
-      ' WHERE UPPER(RDB$TRIGGER_NAME)=''' + UpperCase(ATriggerName) + ''' ';
+      'SELECT ' +
+      '  RDB$TRIGGER_NAME, ' +
+      '  RDB$RELATION_NAME, ' +
+      '  RDB$TRIGGER_SOURCE, ' +
+      '  RDB$TRIGGER_TYPE, ' +
+      '  RDB$TRIGGER_SEQUENCE, ' +
+      '  RDB$TRIGGER_INACTIVE, ' +
+      '  RDB$ENGINE_NAME, ' +
+      '  RDB$ENTRYPOINT ' +
+      'FROM RDB$TRIGGERS ' +
+      'WHERE UPPER(RDB$TRIGGER_NAME) = :TRIGGERNAME';
+
+    sqQuery.ParamByName('TRIGGERNAME').AsString := UpperCase(ATriggerName);
+
     if not sqQuery.Transaction.InTransaction then
       sqQuery.Transaction.StartTransaction;
+
     sqQuery.Open;
-    Body := Trim(sqQuery.FieldByName('Trigger_Body').AsString);
-    OnTable := Trim(sqQuery.FieldByName('Table_Name').AsString);
-    TriggerEnabled := sqQuery.FieldByName('Trigger_Enabled').AsBoolean;
-    TriggerPosition := sqQuery.FieldByName('TPos').AsInteger;
-    TrigType := sqQuery.FieldByName('Trigger_Type').AsInteger;
 
-    if ServerVersionMajor <= 2 then
+    if sqQuery.IsEmpty then
+      Exit;
+
+    Body := Trim(sqQuery.FieldByName('RDB$TRIGGER_SOURCE').AsString);
+    OnTable := Trim(sqQuery.FieldByName('RDB$RELATION_NAME').AsString);
+    TriggerEnabled := sqQuery.FieldByName('RDB$TRIGGER_INACTIVE').AsInteger = 0;
+    TriggerPosition := sqQuery.FieldByName('RDB$TRIGGER_SEQUENCE').AsInteger;
+    TrigType := sqQuery.FieldByName('RDB$TRIGGER_TYPE').AsInteger;
+    ExternalName := Trim(sqQuery.FieldByName('RDB$ENTRYPOINT').AsString);
+    EngineName := Trim(sqQuery.FieldByName('RDB$ENGINE_NAME').AsString);
+    UDRParams := Body;
+
+    IsDatabaseTrigger := False;
+    IsDDLTrigger := False;
+    IsUDRTrigger := EngineName <> '';
+
+    AbsTrigType := Abs(TrigType);
+    AfterBefore := '';
+    Event := '';
+
+    // =========================================================
+    // DDL TRIGGERS - haben NEGATIVE Typ-Werte!
+    // =========================================================
+    if TrigType < 0 then
     begin
-      // --- Alte Logik für Firebird 2.5 und älter ---
-      Encode := DecToBin(TrigType + 1, 7);
-      if Encode[7] = '1' then
-        AfterBefore := 'After'
+      IsDDLTrigger := True;
+
+      case AbsTrigType of
+        8194: FullEvent := 'BEFORE ANY DDL STATEMENT';
+        8195: FullEvent := 'AFTER ANY DDL STATEMENT';
+
+        8196: FullEvent := 'BEFORE CREATE TABLE';
+        8197: FullEvent := 'AFTER CREATE TABLE';
+
+        8198: FullEvent := 'BEFORE ALTER TABLE';
+        8199: FullEvent := 'AFTER ALTER TABLE';
+
+        8200: FullEvent := 'BEFORE DROP TABLE';
+        8201: FullEvent := 'AFTER DROP TABLE';
+
+        8202: FullEvent := 'BEFORE CREATE PROCEDURE';
+        8203: FullEvent := 'AFTER CREATE PROCEDURE';
+
+        8204: FullEvent := 'BEFORE ALTER PROCEDURE';
+        8205: FullEvent := 'AFTER ALTER PROCEDURE';
+
+        8206: FullEvent := 'BEFORE DROP PROCEDURE';
+        8207: FullEvent := 'AFTER DROP PROCEDURE';
+
+        8208: FullEvent := 'BEFORE CREATE FUNCTION';
+        8209: FullEvent := 'AFTER CREATE FUNCTION';
+
+        8210: FullEvent := 'BEFORE ALTER FUNCTION';
+        8211: FullEvent := 'AFTER ALTER FUNCTION';
+
+        8212: FullEvent := 'BEFORE DROP FUNCTION';
+        8213: FullEvent := 'AFTER DROP FUNCTION';
+
+        // ... weitere bei Bedarf ergänzen ...
       else
-        AfterBefore := 'Before';
+        FullEvent := 'UNKNOWN DDL EVENT (' + IntToStr(AbsTrigType) + ')';
+      end;
 
-      Delete(Encode, 7, 1);
-      Event := '';
-      while Length(Encode) > 0 do
-      begin
-        if Copy(Encode, Length(Encode) - 1, 2) = '01' then
-          Event := Event + 'Insert'
-        else if Copy(Encode, Length(Encode) - 1, 2) = '10' then
-          Event := Event + 'Update'
-        else if Copy(Encode, Length(Encode) - 1, 2) = '11' then
-          Event := Event + 'Delete';
+      Event := FullEvent;
+    end
 
-        Delete(Encode, Length(Encode) - 1, 2);
+    // =========================================================
+    // DATABASE TRIGGERS (8192-8196 positiv)
+    // =========================================================
+    else if (TrigType >= 8192) and (TrigType <= 8196) then
+    begin
+      IsDatabaseTrigger := True;
 
-        if (Encode <> '') and (Copy(Encode, Length(Encode) - 1, 2) <> '00') then
-          Event := Event + ' or ';
+      case TrigType of
+        8192: Event := 'ON CONNECT';
+        8193: Event := 'ON DISCONNECT';
+        8194: Event := 'ON TRANSACTION START';
+        8195: Event := 'ON TRANSACTION COMMIT';
+        8196: Event := 'ON TRANSACTION ROLLBACK';
+      else
+        Event := 'UNKNOWN DB EVENT (' + IntToStr(TrigType) + ')';
       end;
     end
+
+    // =========================================================
+    // TABLE TRIGGERS
+    // =========================================================
     else
     begin
-      // --- Neue Logik für Firebird 3+ ---
       case TrigType of
-        1: begin AfterBefore := 'Before'; Event := 'Insert'; end;
-        2: begin AfterBefore := 'After';  Event := 'Insert'; end;
-        3: begin AfterBefore := 'Before'; Event := 'Update'; end;
-        4: begin AfterBefore := 'After';  Event := 'Update'; end;
-        5: begin AfterBefore := 'Before'; Event := 'Delete'; end;
-        6: begin AfterBefore := 'After';  Event := 'Delete'; end;
-
-        17: begin AfterBefore := 'Before'; Event := 'Connect'; end;
-        18: begin AfterBefore := 'After';  Event := 'Connect'; end;
-        19: begin AfterBefore := 'Before'; Event := 'Disconnect'; end;
-        20: begin AfterBefore := 'After';  Event := 'Disconnect'; end;
-        21: begin AfterBefore := 'Before'; Event := 'Transaction Start'; end;
-        22: begin AfterBefore := 'After';  Event := 'Transaction Start'; end;
-        23: begin AfterBefore := 'Before'; Event := 'Transaction Commit'; end;
-        24: begin AfterBefore := 'After';  Event := 'Transaction Commit'; end;
-        25: begin AfterBefore := 'Before'; Event := 'Transaction Rollback'; end;
-        26: begin AfterBefore := 'After';  Event := 'Transaction Rollback'; end;
-
+        1:  begin AfterBefore := 'BEFORE'; Event := 'INSERT'; end;
+        2:  begin AfterBefore := 'AFTER';  Event := 'INSERT'; end;
+        3:  begin AfterBefore := 'BEFORE'; Event := 'UPDATE'; end;
+        4:  begin AfterBefore := 'AFTER';  Event := 'UPDATE'; end;
+        5:  begin AfterBefore := 'BEFORE'; Event := 'DELETE'; end;
+        6:  begin AfterBefore := 'AFTER';  Event := 'DELETE'; end;
+        17: begin AfterBefore := 'BEFORE'; Event := 'INSERT OR UPDATE'; end;
+        18: begin AfterBefore := 'AFTER';  Event := 'INSERT OR UPDATE'; end;
+        25: begin AfterBefore := 'BEFORE'; Event := 'INSERT OR DELETE'; end;
+        26: begin AfterBefore := 'AFTER';  Event := 'INSERT OR DELETE'; end;
+        27: begin AfterBefore := 'BEFORE'; Event := 'UPDATE OR DELETE'; end;
+        28: begin AfterBefore := 'AFTER';  Event := 'UPDATE OR DELETE'; end;
+        113: begin AfterBefore := 'BEFORE'; Event := 'INSERT OR UPDATE OR DELETE'; end;
+        114: begin AfterBefore := 'AFTER';  Event := 'INSERT OR UPDATE OR DELETE'; end;
       else
-        AfterBefore := 'Unknown';
-        Event := 'Unknown (' + IntToStr(TrigType) + ')';
+        begin
+          AfterBefore := 'UNKNOWN';
+          Event := 'UNKNOWN (' + IntToStr(TrigType) + ')';
+        end;
       end;
     end;
 
     sqQuery.Close;
     Result := True;
+
   except
     on E: Exception do
     begin
-      MessageDlg('Error: ' + e.Message, mtError, [mbOk], 0);
+      MessageDlg('Error while opening Trigger ' + ATriggerName + sLineBreak +
+        sLineBreak + E.Message, mtError, [mbOK], 0);
       Result := False;
     end;
   end;
+end;
+
+{function TdmSysTables.ScriptTrigger(
+  dbIndex: Integer;
+  ATriggerName: string;
+  List: TStrings;
+  AsCreate: Boolean): Boolean;
+var
+  Body: string;
+  AfterBefore: string;
+  Event: string;
+  OnTable: string;
+  TriggerEnabled: Boolean;
+  TriggerPosition: Integer;
+  IsDatabaseTrigger: Boolean;
+  IsDDLTrigger: Boolean;
+  IsUDRTrigger: Boolean;
+  ExternalName: string;
+  EngineName: string;
+  UDRParams: string;
+  i: Integer;
+begin
+  Result := GetTriggerInfo(
+    dbIndex, ATriggerName,
+    AfterBefore, OnTable, Event, Body,
+    TriggerEnabled, TriggerPosition,
+    IsDatabaseTrigger, IsDDLTrigger, IsUDRTrigger,
+    ExternalName, EngineName, UDRParams);
+
+  if not Result then
+    Exit;
+
+  List.Clear;
+  List.Add('SET TERM ^;');
+  List.Add('');
+
+  // =========================================================
+  // CREATE HEADER
+  // =========================================================
+  List.Add('RECREATE TRIGGER ' + ATriggerName);
+
+  // =========================================================
+  // ACTIVE / INACTIVE
+  // =========================================================
+  if TriggerEnabled then
+    List.Add('ACTIVE')
+  else
+    List.Add('INACTIVE');
+
+  // =========================================================
+  // EVENT
+  // =========================================================
+  if IsDDLTrigger then
+  begin
+    List.Add(Event);
+  end
+  else if IsDatabaseTrigger then
+  begin
+    List.Add(Event);
+  end
+  else
+  begin
+    List.Add(AfterBefore + ' ' + Event);
+    if OnTable <> '' then
+      List.Add('ON ' + OnTable);
+  end;
+
+  // =========================================================
+  // POSITION - immer ausgeben
+  // =========================================================
+  List.Add('POSITION ' + IntToStr(TriggerPosition));
+
+  // =========================================================
+  // UDR TRIGGER
+  // =========================================================
+  if IsUDRTrigger then
+  begin
+    if ExternalName <> '' then
+      List.Add('EXTERNAL NAME ''' + ExternalName + '''');
+    if EngineName <> '' then
+      List.Add('ENGINE ' + EngineName);
+    if Trim(UDRParams) <> '' then
+      List.Add('AS ' + QuotedStr(Trim(UDRParams)));
+    List.Add('^');
+    List.Add('');
+    List.Add('SET TERM ;^');
+    Exit(True);
+  end;
+
+  // =========================================================
+  // NORMAL PSQL BODY
+  // =========================================================
+  if Body <> '' then
+  begin
+    List.Text := List.Text + Body;
+  end
+  else
+  begin
+    List.Add('AS');
+    List.Add('BEGIN');
+    List.Add('  -- Trigger body');
+    List.Add('END');
+  end;
+
+  // Sicherstellen, dass END mit ^ abgeschlossen wird
+  if List.Count > 0 then
+  begin
+    i := List.Count - 1;
+    if Trim(List[i]) <> '' then
+      List[i] := TrimRight(List[i]) + ' ^'
+    else
+      List.Add('^');
+  end;
+
+  List.Add('');
+  List.Add('SET TERM ;^');
+end;}
+
+function TdmSysTables.ScriptTrigger(
+  dbIndex: Integer;
+  ATriggerName: string;
+  List: TStrings;
+  AsCreate: Boolean): Boolean;
+var
+  Body: string;
+  AfterBefore: string;
+  Event: string;
+  OnTable: string;
+  TriggerEnabled: Boolean;
+  TriggerPosition: Integer;
+  IsDatabaseTrigger: Boolean;
+  IsDDLTrigger: Boolean;
+  IsUDRTrigger: Boolean;
+  ExternalName: string;
+  EngineName: string;
+  UDRParams: string;
+  i: Integer;
+begin
+  Result := GetTriggerInfo(
+    dbIndex, ATriggerName,
+    AfterBefore, OnTable, Event, Body,
+    TriggerEnabled, TriggerPosition,
+    IsDatabaseTrigger, IsDDLTrigger, IsUDRTrigger,
+    ExternalName, EngineName, UDRParams);
+
+  if not Result then
+    Exit;
+
+  List.Clear;
+  List.Add('SET TERM ^;');
+  List.Add('');
+
+  // =========================================================
+  // CREATE HEADER
+  // =========================================================
+  List.Add('CREATE OR ALTER TRIGGER ' + ATriggerName);
+
+  // =========================================================
+  // ACTIVE / INACTIVE
+  // =========================================================
+  if TriggerEnabled then
+    List.Add('ACTIVE')
+  else
+    List.Add('INACTIVE');
+
+  // =========================================================
+  // EVENT
+  // =========================================================
+  if IsDDLTrigger then
+    List.Add(Event)
+  else if IsDatabaseTrigger then
+    List.Add(Event)
+  else
+  begin
+    List.Add(AfterBefore + ' ' + Event);
+    if OnTable <> '' then
+      List.Add('ON ' + OnTable);
+  end;
+
+  // =========================================================
+  // POSITION - weglassen wegen Firebird 3.0 Bug
+  // =========================================================
+  // Nicht ausgeben - Firebird 3.0 akzeptiert POSITION nicht
+  // bei CREATE OR ALTER TRIGGER
+
+  // =========================================================
+  // UDR TRIGGER
+  // =========================================================
+  if IsUDRTrigger then
+  begin
+    if ExternalName <> '' then
+      List.Add('EXTERNAL NAME ''' + ExternalName + '''');
+    if EngineName <> '' then
+      List.Add('ENGINE ' + EngineName);
+    if Trim(UDRParams) <> '' then
+      List.Add('AS ' + QuotedStr(Trim(UDRParams)));
+    List.Add('^');
+    List.Add('');
+    List.Add('SET TERM ;^');
+    Exit(True);
+  end;
+
+  // =========================================================
+  // NORMAL PSQL BODY
+  // =========================================================
+  if Body <> '' then
+  begin
+    List.Text := List.Text + Body;
+  end
+  else
+  begin
+    List.Add('AS');
+    List.Add('BEGIN');
+    List.Add('  EXIT;');
+    List.Add('END');
+  end;
+
+  // Sicherstellen, dass END mit ^ abgeschlossen wird
+  if List.Count > 0 then
+  begin
+    i := List.Count - 1;
+    if Trim(List[i]) <> '' then
+      List[i] := TrimRight(List[i]) + ' ^'
+    else
+      List.Add('^');
+  end;
+
+  List.Add('');
+  List.Add('SET TERM ;^');
 end;
 
 function TdmSysTables.ScriptCheckConstraints(dbIndex: Integer; List: TStrings
@@ -992,39 +1268,6 @@ begin
     begin
       MessageDlg('Error: ' + e.Message, mtError, [mbOk], 0);
     end;
-  end;
-end;
-
-(****************  Script Trigger  ***************)
-
-function TdmSysTables.ScriptTrigger(dbIndex: Integer; ATriggerName: string;
-  List: TStrings; AsCreate: Boolean): Boolean;
-var
-  Body: string;
-  AfterBefore: string;
-  Event: string;
-  OnTable: string;
-  TriggerEnabled: Boolean;
-  TriggerPosition: Integer;
-begin
-  Result:= GetTriggerInfo(dbIndex, ATriggerName, AfterBefore, OnTable, Event, Body, TriggerEnabled, TriggerPosition);
-  if Result then
-  begin
-    List.Add('SET TERM ^ ;');
-    if AsCreate then
-      List.Add('Create Trigger ' + ATriggerName + ' for ' + OnTable)
-    else
-      List.Add('Alter Trigger ' + ATriggerName);
-      if TriggerEnabled then
-        List.Add('ACTIVE')
-      else
-        List.Add('INACTIVE');
-
-    List.Add(AfterBefore + ' ' + Event);
-    List.Add('Position ' + IntToStr(TriggerPosition));
-
-    List.Text:= List.Text + Body + ' ^';
-    List.Add('SET TERM ; ^');
   end;
 end;
 

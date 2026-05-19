@@ -1,62 +1,63 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfrmBakcup','FORMDATA',[
-  'TPF0'#10'TfrmBakcup'#9'frmBakcup'#4'Left'#3#221#1#6'Height'#3#150#1#3'Top'#3
-  +#164#0#5'Width'#3'L'#2#18'HorzScrollBar.Page'#3'2'#2#18'VertScrollBar.Page'#3
+  'TPF0'#10'TfrmBakcup'#9'frmBakcup'#4'Left'#3#160#1#6'Height'#3#150#1#3'Top'#3
+  +#152#0#5'Width'#3'L'#2#18'HorzScrollBar.Page'#3'2'#2#18'VertScrollBar.Page'#3
   +'-'#1#7'Caption'#6#17'IB/FB Backup tool'#12'ClientHeight'#3#150#1#11'ClientW'
   +'idth'#3'L'#2#6'OnShow'#7#9'Form1Show'#10'LCLVersion'#6#7'2.2.6.0'#7'Visible'
   +#9#0#6'TPanel'#6'Panel1'#4'Left'#2#0#6'Height'#2'h'#3'Top'#2#0#5'Width'#3'L'
   +#2#5'Align'#7#5'alTop'#12'ClientHeight'#2'h'#11'ClientWidth'#3'L'#2#11'FullR'
   +'epaint'#8#8'TabOrder'#2#0#7'TabStop'#9#0#6'TLabel'#6'Label1'#4'Left'#2#8#6
   +'Height'#2#20#3'Top'#2#15#5'Width'#2'p'#7'Caption'#6#15'DataBase source'#11
-  +'ParentColor'#8#0#0#5'TEdit'#10'edDatabase'#4'Left'#3#136#0#6'Height'#2'%'#3
-  +'Top'#2#8#5'Width'#3#144#1#8'TabOrder'#2#1#4'Text'#6#15'd:\employee.fdb'#0#0
-  +#6'TLabel'#6'Label3'#4'Left'#2#8#6'Height'#2#20#3'Top'#2'@'#5'Width'#2'M'#7
-  +'Caption'#6#11'Destination'#11'ParentColor'#8#0#0#5'TEdit'#6'edDest'#4'Left'
-  +#3#136#0#6'Height'#2'%'#3'Top'#2'8'#5'Width'#3#144#1#8'TabOrder'#2#0#4'Text'
-  +#6#15'd:\employee.gbk'#0#0#7'TButton'#15'btnOpenSourceDB'#4'Left'#3' '#2#6'H'
-  +'eight'#2#25#3'Top'#2#10#5'Width'#2#27#7'Caption'#6#3'...'#7'OnClick'#7#20'b'
-  +'tnOpenSourceDBClick'#8'TabOrder'#2#2#0#0#7'TButton'#17'btnOpenBackupFile'#4
-  +'Left'#3' '#2#6'Height'#2#28#3'Top'#2':'#5'Width'#2#27#7'Caption'#6#3'...'#7
-  +'OnClick'#7#22'btnOpenBackupFileClick'#8'TabOrder'#2#3#0#0#0#6'TPanel'#10'pa'
-  +'nOptions'#4'Left'#2#0#6'Height'#3#0#1#3'Top'#2'h'#5'Width'#3#193#0#5'Align'
-  +#7#6'alLeft'#12'ClientHeight'#3#0#1#11'ClientWidth'#3#193#0#11'FullRepaint'#8
-  +#8'TabOrder'#2#1#7'TabStop'#9#0#6'TLabel'#6'Label2'#4'Left'#2#16#6'Height'#2
-  +#20#3'Top'#2#8#5'Width'#2'5'#7'Caption'#6#7'Options'#11'ParentColor'#8#0#0#9
-  +'TCheckBox'#9'optChksum'#4'Left'#2#16#6'Height'#2#24#3'Top'#2'0'#5'Width'#3
-  +#142#0#11'AllowGrayed'#9#7'Caption'#6#15'Ignore checksum'#10'DragCursor'#7#9
-  +'crDefault'#8'TabOrder'#2#0#0#0#9'TCheckBox'#8'OptLimbo'#3'Tag'#2#1#4'Left'#2
-  +#16#6'Height'#2#24#3'Top'#2'H'#5'Width'#2'q'#11'AllowGrayed'#9#7'Caption'#6
-  +#12'Ignore limbo'#10'DragCursor'#7#9'crDefault'#8'TabOrder'#2#1#0#0#9'TCheck'
-  +'Box'#15'OptMetadataOnly'#3'Tag'#2#2#4'Left'#2#16#6'Height'#2#24#3'Top'#2'`'
-  +#5'Width'#2'~'#11'AllowGrayed'#9#7'Caption'#6#14'Meta data only'#10'DragCurs'
-  +'or'#7#9'crDefault'#8'TabOrder'#2#2#0#0#9'TCheckBox'#7'optGarb'#3'Tag'#2#3#4
-  +'Left'#2#16#6'Height'#2#24#3'Top'#2'z'#5'Width'#3#152#0#11'AllowGrayed'#9#7
-  +'Caption'#6#18'Garbage collection'#10'DragCursor'#7#9'crDefault'#8'TabOrder'
-  +#2#3#0#0#9'TCheckBox'#15'chkMetadatadesc'#3'Tag'#2#4#4'Left'#2#16#6'Height'#2
-  +#24#3'Top'#3#145#0#5'Width'#3#129#0#11'AllowGrayed'#9#7'Caption'#6#14'Meta d'
-  +'ata desc'#10'DragCursor'#7#9'crDefault'#8'TabOrder'#2#4#0#0#9'TCheckBox'#16
-  +'chkTransportable'#3'Tag'#2#5#4'Left'#2#16#6'Height'#2#24#3'Top'#3#168#0#5'W'
-  +'idth'#3#152#0#11'AllowGrayed'#9#7'Caption'#6#17'Non Transportable'#10'DragC'
-  +'ursor'#7#9'crDefault'#8'TabOrder'#2#5#0#0#9'TCheckBox'#10'chkConvert'#3'Tag'
-  +#2#7#4'Left'#2#16#6'Height'#2#24#3'Top'#3#192#0#5'Width'#3#149#0#11'AllowGra'
-  +'yed'#9#7'Caption'#6#18'Convert Ext Tables'#10'DragCursor'#7#9'crDefault'#8
-  +'TabOrder'#2#7#0#0#9'TCheckBox'#9'chkExpand'#3'Tag'#2#8#4'Left'#2#16#6'Heigh'
-  +'t'#2#24#3'Top'#3#216#0#5'Width'#2'L'#11'AllowGrayed'#9#7'Caption'#6#6'Expan'
-  +'d'#10'DragCursor'#7#9'crDefault'#8'TabOrder'#2#6#0#0#0#5'TMemo'#8'moResult'
-  +#4'Left'#3#193#0#6'Height'#3#0#1#3'Top'#2'h'#5'Width'#3#139#1#5'Align'#7#8'a'
-  +'lClient'#8'ReadOnly'#9#10'ScrollBars'#7#6'ssBoth'#8'TabOrder'#2#2#8'WordWra'
-  +'p'#8#0#0#6'TPanel'#9'pnlBottom'#4'Left'#2#0#6'Height'#2'.'#3'Top'#3'h'#1#5
-  +'Width'#3'L'#2#5'Align'#7#8'alBottom'#12'ClientHeight'#2'.'#11'ClientWidth'#3
-  +'L'#2#8'TabOrder'#2#3#7'OnClick'#7#14'pnlBottomClick'#0#12'TSpeedButton'#8'b'
-  +'tnStart'#4'Left'#3#128#1#6'Height'#2#30#3'Top'#2#8#5'Width'#2'@'#7'Caption'
-  +#6#3'Run'#9'NumGlyphs'#2#2#7'OnClick'#7#13'btnStartClick'#0#0#0#10'TUIBBacku'
-  +'p'#3'Bak'#8'UserName'#6#6'SYSDBA'#8'PassWord'#6#9'masterkey'#4'Host'#6#9'12'
-  +'7.0.0.1'#8'Protocol'#7#8'proTCPIP'#11'LibraryName'#6'''/opt/firebird/lib/li'
-  +'bfbclient.so.3.0.13'#9'OnVerbose'#7#10'BakVerbose'#7'Verbose'#9#4'Left'#3'0'
-  +#1#3'Top'#3#128#0#0#0#11'TUIBRestore'#11'UIBRestore1'#11'LibraryName'#6#14'l'
-  +'ibfbclient.so'#4'Left'#3#160#1#3'Top'#3#128#0#0#0#11'TOpenDialog'#10'odSour'
-  +'ceDB'#6'Filter'#6'#Firebird Databasefile (*.fdb)|*.fdb'#4'Left'#3'0'#1#3'To'
-  +'p'#3#248#0#0#0#11'TOpenDialog'#14'odDestBackFile'#6'Filter'#6'"Firebird Bac'
-  +'kupfiles (*.fbk)|*.fbk'#4'Left'#3#168#1#3'Top'#3#248#0#0#0#0
+  +'ParentColor'#8#0#0#5'TEdit'#10'edDatabase'#4'Left'#3#136#0#6'Height'#2#30#3
+  +'Top'#2#8#5'Width'#3#144#1#8'TabOrder'#2#1#4'Text'#6',/opt/firebird/examples'
+  +'/empbuild/employee.fdb'#0#0#6'TLabel'#6'Label3'#4'Left'#2#8#6'Height'#2#20#3
+  +'Top'#2'@'#5'Width'#2'M'#7'Caption'#6#11'Destination'#11'ParentColor'#8#0#0#5
+  +'TEdit'#6'edDest'#4'Left'#3#136#0#6'Height'#2#30#3'Top'#2'8'#5'Width'#3#144#1
+  +#8'TabOrder'#2#0#4'Text'#6',/opt/firebird/examples/empbuild/employee.fbk'#0#0
+  +#7'TButton'#15'btnOpenSourceDB'#4'Left'#3' '#2#6'Height'#2#25#3'Top'#2#10#5
+  +'Width'#2#27#7'Caption'#6#3'...'#7'OnClick'#7#20'btnOpenSourceDBClick'#8'Tab'
+  +'Order'#2#2#0#0#7'TButton'#17'btnOpenBackupFile'#4'Left'#3' '#2#6'Height'#2
+  +#28#3'Top'#2':'#5'Width'#2#27#7'Caption'#6#3'...'#7'OnClick'#7#22'btnOpenBac'
+  +'kupFileClick'#8'TabOrder'#2#3#0#0#0#6'TPanel'#10'panOptions'#4'Left'#2#0#6
+  +'Height'#3#0#1#3'Top'#2'h'#5'Width'#3#193#0#5'Align'#7#6'alLeft'#12'ClientHe'
+  +'ight'#3#0#1#11'ClientWidth'#3#193#0#11'FullRepaint'#8#8'TabOrder'#2#1#7'Tab'
+  +'Stop'#9#0#6'TLabel'#6'Label2'#4'Left'#2#16#6'Height'#2#20#3'Top'#2#8#5'Widt'
+  +'h'#2'5'#7'Caption'#6#7'Options'#11'ParentColor'#8#0#0#9'TCheckBox'#9'optChk'
+  +'sum'#4'Left'#2#16#6'Height'#2#26#3'Top'#2'0'#5'Width'#3#143#0#11'AllowGraye'
+  +'d'#9#7'Caption'#6#15'Ignore checksum'#10'DragCursor'#7#9'crDefault'#8'TabOr'
+  +'der'#2#0#0#0#9'TCheckBox'#8'OptLimbo'#3'Tag'#2#1#4'Left'#2#16#6'Height'#2#26
+  +#3'Top'#2'H'#5'Width'#2'r'#11'AllowGrayed'#9#7'Caption'#6#12'Ignore limbo'#10
+  +'DragCursor'#7#9'crDefault'#8'TabOrder'#2#1#0#0#9'TCheckBox'#15'OptMetadataO'
+  +'nly'#3'Tag'#2#2#4'Left'#2#16#6'Height'#2#26#3'Top'#2'`'#5'Width'#2#127#11'A'
+  +'llowGrayed'#9#7'Caption'#6#14'Meta data only'#10'DragCursor'#7#9'crDefault'
+  +#8'TabOrder'#2#2#0#0#9'TCheckBox'#7'optGarb'#3'Tag'#2#3#4'Left'#2#16#6'Heigh'
+  +'t'#2#26#3'Top'#2'z'#5'Width'#3#153#0#11'AllowGrayed'#9#7'Caption'#6#18'Garb'
+  +'age collection'#10'DragCursor'#7#9'crDefault'#8'TabOrder'#2#3#0#0#9'TCheckB'
+  +'ox'#15'chkMetadatadesc'#3'Tag'#2#4#4'Left'#2#16#6'Height'#2#26#3'Top'#3#145
+  +#0#5'Width'#3#130#0#11'AllowGrayed'#9#7'Caption'#6#14'Meta data desc'#10'Dra'
+  +'gCursor'#7#9'crDefault'#8'TabOrder'#2#4#0#0#9'TCheckBox'#16'chkTransportabl'
+  +'e'#3'Tag'#2#5#4'Left'#2#16#6'Height'#2#26#3'Top'#3#168#0#5'Width'#3#153#0#11
+  +'AllowGrayed'#9#7'Caption'#6#17'Non Transportable'#10'DragCursor'#7#9'crDefa'
+  +'ult'#8'TabOrder'#2#5#0#0#9'TCheckBox'#10'chkConvert'#3'Tag'#2#7#4'Left'#2#16
+  +#6'Height'#2#26#3'Top'#3#192#0#5'Width'#3#150#0#11'AllowGrayed'#9#7'Caption'
+  +#6#18'Convert Ext Tables'#10'DragCursor'#7#9'crDefault'#8'TabOrder'#2#7#0#0#9
+  +'TCheckBox'#9'chkExpand'#3'Tag'#2#8#4'Left'#2#16#6'Height'#2#26#3'Top'#3#216
+  +#0#5'Width'#2'M'#11'AllowGrayed'#9#7'Caption'#6#6'Expand'#10'DragCursor'#7#9
+  +'crDefault'#8'TabOrder'#2#6#0#0#0#5'TMemo'#8'moResult'#4'Left'#3#193#0#6'Hei'
+  +'ght'#3#0#1#3'Top'#2'h'#5'Width'#3#139#1#5'Align'#7#8'alClient'#8'ReadOnly'#9
+  +#10'ScrollBars'#7#6'ssBoth'#8'TabOrder'#2#2#8'WordWrap'#8#0#0#6'TPanel'#9'pn'
+  +'lBottom'#4'Left'#2#0#6'Height'#2'.'#3'Top'#3'h'#1#5'Width'#3'L'#2#5'Align'#7
+  +#8'alBottom'#12'ClientHeight'#2'.'#11'ClientWidth'#3'L'#2#8'TabOrder'#2#3#7
+  +'OnClick'#7#14'pnlBottomClick'#0#12'TSpeedButton'#8'btnStart'#4'Left'#3#128#1
+  +#6'Height'#2#30#3'Top'#2#8#5'Width'#2'@'#7'Caption'#6#3'Run'#9'NumGlyphs'#2#2
+  +#7'OnClick'#7#13'btnStartClick'#0#0#0#10'TUIBBackup'#3'Bak'#8'UserName'#6#6
+  +'SYSDBA'#8'PassWord'#6#9'masterkey'#4'Host'#6#15'Firebird60/3160'#8'Protocol'
+  +#7#8'proTCPIP'#11'LibraryName'#6'0/opt/FireBird/firebird6/lib/libfbclient.so'
+  +'.6.0.0'#9'OnVerbose'#7#10'BakVerbose'#7'Verbose'#9#4'Left'#3'0'#1#3'Top'#3
+  +#128#0#0#0#11'TUIBRestore'#11'UIBRestore1'#11'LibraryName'#6#14'libfbclient.'
+  +'so'#4'Left'#3#160#1#3'Top'#3#128#0#0#0#11'TOpenDialog'#10'odSourceDB'#6'Fil'
+  +'ter'#6'#Firebird Databasefile (*.fdb)|*.fdb'#4'Left'#3'0'#1#3'Top'#3#248#0#0
+  +#0#11'TOpenDialog'#14'odDestBackFile'#6'Filter'#6'"Firebird Backupfiles (*.f'
+  +'bk)|*.fbk'#4'Left'#3#168#1#3'Top'#3#248#0#0#0#0
 ]);

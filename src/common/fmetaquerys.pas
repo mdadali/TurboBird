@@ -84,10 +84,17 @@ end;
 function GetIndicesIsolated(const SourceDB: TIBDatabase; const ATableName: string): TIsolatedQuery;
 var
   SQL: string;
-  IndexName: string;
 begin
-  SQL := 'SELECT * FROM RDB$INDICES WHERE RDB$RELATION_NAME=''' + ATableName +
-    ''' AND RDB$FOREIGN_KEY IS NULL';
+  SQL :=
+    'SELECT i.RDB$INDEX_NAME, i.RDB$UNIQUE_FLAG, i.RDB$INDEX_TYPE ' +
+    'FROM RDB$INDICES i ' +
+    'WHERE i.RDB$RELATION_NAME = ' + QuotedStr(ATableName) + ' ' +
+    'AND NOT EXISTS (' +
+    '  SELECT 1 FROM RDB$RELATION_CONSTRAINTS rc ' +
+    '  WHERE rc.RDB$INDEX_NAME = i.RDB$INDEX_NAME ' +
+    '  AND rc.RDB$CONSTRAINT_TYPE IS NOT NULL' +
+    ') ' +
+    'ORDER BY i.RDB$INDEX_NAME';
 
   Result := TIsolatedQuery.Create(SourceDB, SQL, nil);
 end;
@@ -158,7 +165,7 @@ const
 var
   SQL: string;
 begin
-  SQL := Format(QueryTemplate, [UpperCase(ATableName)]);
+  SQL := Format(QueryTemplate, [ATableName]);
   Result := TIsolatedQuery.Create(SourceDB, SQL, AStrList);
 end;
 

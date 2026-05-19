@@ -7,7 +7,7 @@ interface
 
 uses
   Classes, SysUtils, LResources, Forms, Controls, Graphics, Dialogs, Menus,
-  ComCtrls, uibmetadata, StdCtrls, uib, uiblib, SynEdit,
+  ComCtrls, uibmetadata, StdCtrls, uib, uiblib, uibconst, SynEdit,
   SynHighlighterSQL;
 
 type
@@ -28,6 +28,7 @@ type
     mFile: TMenuItem;
     OpenDialog: TOpenDialog;
     TreeView: TTreeView;
+    UIBQuery1: TUIBQuery;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure mLoadClick(Sender: TObject);
@@ -100,15 +101,35 @@ procedure TMainForm.mOpenClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
   begin
-    //DataBase.Connected := false;
+    DataBase.Connected := false;
     TreeView.Items.Clear;
-    //DataBase.DatabaseName := OpenDialog.FileName;
+
+    //OK
+    DataBase.DatabaseName := '127.0.0.1/3030:/opt/firebird/examples/empbuild/employee.fdb';
+    Database.LibraryName  := '/opt/firebird/lib/libfbclient.so.3.0.13';
+
+    //OK
+    //DataBase.DatabaseName := 'Firebird25/3125:/var/lib/firebird/backups/employee.fdb';
+    //Database.LibraryName  := '/opt/firebird/lib/libfbclient.so';
+
+    //DataBase.DatabaseName := 'Firebird40/3140:/opt/firebird/examples/empbuild/employee.fdb';
+    //Database.LibraryName  := '/opt/FireBird/Firebird-4.0.6.3221-0.amd64/lib/libfbclient.so';
+
+    //DataBase.DatabaseName := 'Firebird60/3160:/opt/firebird/examples/empbuild/employee.fdb';
+    //Database.LibraryName := '/opt/FireBird/firebird6/lib/libfbclient.so.6.0.0';
+
+    DataBase.Connected := true;
+    Transaction.StartTransaction;
+
     MetaData.Free;
     MetaData := TMetaDataBase.Create(nil, 0);
+    //MetaData.OIDDatabases := [OIDTable];  // nur Tabellen
+    //MetaData.OIDTables := [];             // keine Details!
     MetaData.LoadFromDatabase(Transaction);
-    Transaction.Commit;
-    ShowNodes(MetaData, nil);
-  end;
+
+    Transaction.Commit;  //PFLICHT!
+
+    ShowNodes(MetaData, nil);  end;
 end;
 
 procedure TMainForm.mSaveClick(Sender: TObject);
@@ -162,8 +183,11 @@ end;
 procedure TMainForm.TreeViewChange(Sender: TObject; Node: TTreeNode);
 begin
   If (node.Data <> nil) then
-    memo.Lines.Text := TMetaNode(Node.Data).AsDDL else
+    memo.Lines.Text := TMetaNode(Node.Data).AsDDL
+  else
     memo.Lines.Text := '';
+
+  //TMetaNode(Node.Data).NodeType;
 end;
 
 procedure TMainForm.ShowNodes(node: TMetaNode; from: TTreeNode);

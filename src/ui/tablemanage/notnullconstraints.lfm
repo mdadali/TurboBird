@@ -1,0 +1,86 @@
+object fmNotNullConstraints: TfmNotNullConstraints
+  Left = 450
+  Height = 485
+  Top = 135
+  Width = 881
+  Caption = 'Not Null Constraints'
+  ClientHeight = 485
+  ClientWidth = 881
+  OnShow = FormShow
+  LCLVersion = '2.2.6.0'
+  object pnBottom: TPanel
+    Left = 0
+    Height = 72
+    Top = 413
+    Width = 881
+    Align = alBottom
+    ClientHeight = 72
+    ClientWidth = 881
+    TabOrder = 0
+    object bbRefresh: TBitBtn
+      Left = 288
+      Height = 40
+      Top = 14
+      Width = 115
+      Anchors = [akLeft, akBottom]
+      Caption = 'Refresh'
+      Color = clForm
+      Kind = bkRetry
+      OnClick = bbRefreshClick
+      TabOrder = 0
+    end
+    object bbClose: TButton
+      Left = 488
+      Height = 40
+      Top = 14
+      Width = 115
+      Anchors = [akLeft, akBottom]
+      Caption = 'Close'
+      OnClick = bbCloseClick
+      TabOrder = 1
+    end
+    object bbApply: TBitBtn
+      Left = 136
+      Height = 40
+      Top = 14
+      Width = 115
+      Caption = 'Apply'
+      OnClick = bbApplyClick
+      TabOrder = 2
+    end
+  end
+  object pnlTop: TPanel
+    Left = 0
+    Height = 413
+    Top = 0
+    Width = 881
+    Align = alClient
+    ClientHeight = 413
+    ClientWidth = 881
+    TabOrder = 1
+    object sgNotNullConstraints: TStringGrid
+      Left = 1
+      Height = 411
+      Top = 1
+      Width = 555
+      Align = alClient
+      ColCount = 1
+      FixedCols = 0
+      TabOrder = 0
+      ColWidths = (
+        562
+      )
+    end
+    object chkLstBoxFields: TCheckListBox
+      Left = 556
+      Height = 411
+      Top = 1
+      Width = 324
+      Align = alRight
+      ItemHeight = 0
+      OnClickCheck = chkLstBoxFieldsClickCheck
+      TabOrder = 1
+      TopIndex = -1
+    end
+  end
+end

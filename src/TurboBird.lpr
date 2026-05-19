@@ -21,7 +21,7 @@ uses
   rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
   QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
   EnterPass, About, CreateTrigger, fedittabledata, CallProc, UDFInfo,
-  ViewDomain, NewDomain, SysTables, NewConstraint, NewEditField, Calen,
+  ViewDomain, NewDomain, SysTables, newForeignKey, NewEditField, Calen,
   Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
   PermissionManage, SQLHistory, CopyTable, dynlibs, dbInfo, sysutils,
   Comparison, topologicalsort, turbocommon, importtable, fileimport,
@@ -55,7 +55,8 @@ uses
   datamodulesystem, jvRuntimeDesign, pascalscriptfcl, pascalscript,
   uPSI_uibconst, fservers, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fdataeditor,
-  u_psstudio, u_consoleide, db_reader, DbGridForm;
+  u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
+UniqueConstraints, CheckConstraints, NotNullConstraints;
 
 const
   Major = 1;
@@ -136,7 +137,7 @@ begin
   //Application.CreateForm(TfmEditTable, fmEditTable);
   //Application.CreateForm(TfmCallProc, fmCallProc);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
-  Application.CreateForm(TfmNewConstraint, fmNewConstraint);
+  Application.CreateForm(TfmNewForeignKey, fmNewForeignKey);
   Application.CreateForm(TfmCalen, fmCalen);
   //Application.CreateForm(TfmBackupRestore, fmBackupRestore);
   Application.CreateForm(TfmCreateUser, fmCreateUser);

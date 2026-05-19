@@ -22,6 +22,14 @@ type
     // --- User-Objekte ---
     otTables,
     otTableFields,
+
+    otConstraints,
+    otPrimaryKeys,
+    otForeignKeys,
+    otUniqueConstraints,
+    otCheckConstraints,
+    otNotNullConstraints,
+
     otViews,
 
     otGenerators,
@@ -45,13 +53,6 @@ type
     otIndexes,
 
     otExceptions,
-
-    otConstraints,
-    otPrimaryKeys,
-    otForeignKeys,
-    otUniqueConstraints,
-    otCheckConstraints,
-    otNotNullConstraints,
 
     otFunctions,
     otProcedures,
@@ -80,6 +81,7 @@ type
 
     // --- System-Objekte ---
     otSystemTables,
+    otSystemTableFields,
     otSystemDomains,
     otSystemGenerators,
     otSystemTriggers,
@@ -146,9 +148,7 @@ type
 const
 
   //NumObjects = 13; //number of different objects in dbObjects array below
-  //newlib
-  NumObjects = 24;
-  //end-newlib
+  NumObjects = 29;
   dbObjects: array [0 .. NumObjects-1] of string =
     ('None', 'Tables', 'Generators', 'Triggers',
     'Views', 'Stored Procedures', 'UDFs',
@@ -157,8 +157,9 @@ const
     'Constraints', 'FBFunctions', 'FBProcedures',
     'UDRFunctions', 'UDRProcedures',
     'Packages', 'PackageFunctions', 'PackageProcedures',
-    'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures');
-
+    'PackageUDFFunctions', 'PackageUDRFunctions', 'PackageUDRProcedures',
+    'PrimaryKeys', 'ForeignKeys', 'UniqueConstraints',
+    'CheckConstraints', 'NotNullConstraints');
 
 function ConnectFirebirdService(
     const AServer: string;

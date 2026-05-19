@@ -134,6 +134,14 @@ Compiling
 Before compiling TurboBird, the following packages must be installed in Lazarus:
 ![TurboBird Screenshot](src/images/Turbobird_ReqPackages.png)
 
+Additionally, the following packages from the TurboBird source tree must also be installed manually from src/components:
+
+JSONDataset
+jvDesign
+UIB
+
+Also, the standard Lazarus PascalScript package needs to be replaced with my modified version located in the components directory.
+
 After that, open Turbobird.lpi with Lazarus.
 
 In the Lazarus main menu go to:
@@ -145,6 +153,12 @@ Compiling and debugging
 
 In the Lazarus main menu go to:
 Run → Compile
+
+If a message such as “can't find u_consoleide.pas” appears during compilation, please add the following directories to the project's unit search path:
+
+ src/ui/tools/PascalScript_IDE/source/editor/
+ src/ui/tools/PascalScript_IDE/source/designer/
+
 
 After that, TurboBird can be started and debugged.
 
@@ -165,6 +179,14 @@ Bevor TurboBird kompiliert wird, sollten folgende Packages in Lazarus installier
 
 ![TurboBird Screenshot](src/images/Turbobird_ReqPackages.png)
 
+Zusätzlich müssen die folgenden Pakete aus dem TurboBird-Quellverzeichnis ebenfalls manuell aus src/components installiert werden:
+
+JSONDataset
+jvDesign
+UIB
+
+Außerdem muss das standardmäßige Lazarus-PascalScript-Paket durch meine angepasste Version ersetzt werden, die sich im Verzeichnis components befindet.
+
 Danach Turbobird.lpi mit Lazarus öffnen.
 
 In Lazarus Hauptmenü → Project → Project Options → Config and Target
@@ -174,6 +196,11 @@ Zum Kompilieren und Debuggen:
 
 In Lazarus Hauptmenü → Run → Compile
 Danach kann TurboBird gestartet und debuggt werden.
+
+Falls beim Kompilieren eine Meldung wie „can't find u_consoleide.pas“ angezeigt wird, fügen Sie bitte die folgenden Verzeichnisse dem Unit-Suchpfad des Projekts hinzu:
+
+ src/ui/tools/PascalScript_IDE/source/editor/
+ src/ui/tools/PascalScript_IDE/source/designer/
 
 Für die finale Version:
 

@@ -56,8 +56,14 @@ begin
   S.RegisterDelphiFunction(@DateTimeToUnix, 'DateTimeToUnix', cdRegister);
   S.RegisterDelphiFunction(@UnixToDateTime, 'UnixToDateTime', cdRegister);
   S.RegisterDelphiFunction(@DateToStr, 'DateToStr', cdRegister);
-  S.RegisterDelphiFunction(@FormatDateTime, 'FormatDateTime', cdRegister);
+  S.RegisterDelphiFunction(@TimeToStr, 'TimeToStr', cdRegister);  //maurog
+  S.RegisterDelphiFunction(@DateTimeToStr, 'DateTimeToStr', cdRegister); //maurog
+
   S.RegisterDelphiFunction(@StrToDate, 'StrToDate', cdRegister);
+  S.RegisterDelphiFunction(@StrToTime, 'StrToTime', cdRegister);
+
+  S.RegisterDelphiFunction(@FormatDateTime, 'FormatDateTime', cdRegister);
+
 end;
 
 end.

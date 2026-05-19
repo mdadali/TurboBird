@@ -1,6 +1,12 @@
 Known Limitations / Bugs
 -----------------------
 
+[PascalScript Studio]
+- When using {$I} include directives or additional units in the uses clause,
+  the debugger line numbers are no longer mapped correctly.
+  As a result, incorrect lines are highlighted in the editor during step-by-step script execution.
+  This is caused by included source files changing the internal line offsets used by the debugger.
+
 [Edit Table Data]
 - Case-sensitive table names are currently not supported.
 

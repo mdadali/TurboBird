@@ -1,5 +1,10 @@
 Bekannte Einschränkungen / Bugs
 ------------------------------
+[PascalScript Studio]
+- Bei Verwendung von {$I} Include-Direktiven oder zusätzlichen Units in der uses-Klausel
+  stimmen die Debug-Zeilennummern nicht mehr korrekt.
+  Dadurch werden bei der schrittweisen Skriptausführung falsche Zeilen im Editor farbig markiert. 
+  Ursache ist, dass eingebundene Include-Dateien die internen Zeilenoffsets des Debuggers verändern.
 
 [Edit Table Data]
 - Case-sensitive Tabellennamen werden derzeit nicht unterstützt.

@@ -3,7 +3,7 @@ object dmSysTables: TdmSysTables
   OldCreateOrder = False
   Height = 523
   HorizontalOffset = 528
-  VerticalOffset = 253
+  VerticalOffset = 195
   Width = 479
   object sqQuery: TIBQuery
     AllowAutoActivateTransaction = True

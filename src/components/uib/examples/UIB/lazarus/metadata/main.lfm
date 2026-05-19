@@ -1,33 +1,34 @@
 object MainForm: TMainForm
-  Left = 399
+  Left = 285
   Height = 538
-  Top = 142
-  Width = 692
+  Top = 309
+  Width = 1077
   HorzScrollBar.Page = 691
   VertScrollBar.Page = 518
   ActiveControl = TreeView
   Caption = 'Metadata explorer'
-  ClientHeight = 510
-  ClientWidth = 692
+  ClientHeight = 512
+  ClientWidth = 1077
   Menu = MainMenu
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '2.2.6.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 510
+    Height = 512
     Top = 0
-    Width = 224
+    Width = 344
     Align = alLeft
+    ExpandSignType = tvestPlusMinus
     Images = ImageList
     TabOrder = 0
     OnChange = TreeViewChange
   end
   inline Memo: TSynEdit
-    Left = 224
-    Height = 510
+    Left = 344
+    Height = 512
     Top = 0
-    Width = 468
+    Width = 733
     Align = alClient
     Font.Height = -16
     Font.Name = 'courier'
@@ -570,5 +571,11 @@ object MainForm: TMainForm
     FilterIndex = 0
     Left = 56
     Top = 280
+  end
+  object UIBQuery1: TUIBQuery
+    DataBase = DataBase
+    QuickScript = True
+    Left = 595
+    Top = 50
   end
 end
