@@ -13,7 +13,7 @@ uses
   AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
   LCLType, LCLVersion, versiontypes, versionresource,
   interfaces, LCLPlatformDef,
-  DB,  RegExpr,
+  DB,  RegExpr,  FileUtil,
 
   fpstdexports,
   fpDataExporter,
@@ -543,7 +543,7 @@ function GetConfigurationDirectory: string;
 procedure ReadIniFile;
 procedure WriteIniFile;
 function FirstRun: boolean;
-procedure ExtractResources;
+procedure ExtractResourcesIfNeeded;
 function ExtractVersionFromName(const Name: string): string;
 function GetProgramVersion: string;
 function GetLazarusVersion: string;
@@ -2058,39 +2058,160 @@ begin
   DataDirectory := ExtractFilePath(Application.ExeName) + '\data';
   {$ELSE}
   DataDirectory := ExtractFilePath(Application.ExeName) + '/data';
- {$ENDIF}
+  {$ENDIF}
   result := not DirectoryExists(DataDirectory);
 end;
 
-procedure ExtractResources;
+procedure UpdateFilesFromList(const DataDir, TempDataDir: string);
+var
+  UpdateList: TStringList;
+  i: Integer;
+  SourceFile, TargetFile: string;
+  UpdateFilePath: string;
+begin
+  UpdateFilePath := TempDataDir + PathDelim + 'FilesToUpdate.txt';
+
+  if not FileExists(UpdateFilePath) then
+    Exit;
+
+  UpdateList := TStringList.Create;
+  try
+    UpdateList.LoadFromFile(UpdateFilePath);
+
+    for i := 0 to UpdateList.Count - 1 do
+    begin
+      // Kommentare und Leerzeilen überspringen
+      if (Trim(UpdateList[i]) = '') or (UpdateList[i][1] = '#') then
+        Continue;
+
+      SourceFile := IncludeTrailingPathDelimiter(TempDataDir) + UpdateList[i];
+      TargetFile := IncludeTrailingPathDelimiter(DataDir) + UpdateList[i];
+
+      if FileExists(SourceFile) then
+      begin
+        // Zielverzeichnis sicherstellen
+        ForceDirectories(ExtractFilePath(TargetFile));
+        // Datei überschreiben
+        CopyFile(SourceFile, TargetFile);
+      end;
+    end;
+  finally
+    UpdateList.Free;
+  end;
+end;
+
+procedure CopyMissingFiles(const SourceDir, TargetDir: string);
+var
+  SearchRec: TSearchRec;
+  SourceFile, TargetFile: string;
+begin
+  if not DirectoryExists(SourceDir) then
+    Exit;
+
+  ForceDirectories(TargetDir);
+
+  if FindFirst(SourceDir + PathDelim + '*', faAnyFile, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Name = '.') or (SearchRec.Name = '..') then
+        Continue;
+
+      SourceFile := SourceDir + PathDelim + SearchRec.Name;
+      TargetFile := TargetDir + PathDelim + SearchRec.Name;
+
+      if (SearchRec.Attr and faDirectory <> 0) then
+      begin
+        // Unterverzeichnis rekursiv kopieren
+        CopyMissingFiles(SourceFile, TargetFile);
+      end
+      else
+      begin
+        // Datei nur kopieren wenn sie noch nicht existiert
+        if not FileExists(TargetFile) then
+          CopyFile(SourceFile, TargetFile);
+      end;
+    until FindNext(SearchRec) <> 0;
+    FindClose(SearchRec);
+  end;
+end;
+
+procedure ExtractResourcesIfNeeded;
 var
   DataStream: TResourceStream;
   MemoryStream: TMemoryStream;
   AbUnZipper: TAbUnZipper;
+  DataDir, TempDir: string;
+  IsFirstRun: Boolean;
 begin
-  AbUnZipper := TAbUnZipper.Create(nil);
-  if FirstRun then
+  {$IFDEF WINDOWS}
+  DataDir := ExtractFilePath(Application.ExeName) + '\data';
+  {$ELSE}
+  DataDir := ExtractFilePath(Application.ExeName) + '/data';
+  {$ENDIF}
+
+  IsFirstRun := FirstRun;
+
+  if IsFirstRun then
   begin
+    // Komplett extrahieren wie bisher
     DataStream := TResourceStream.Create(HInstance, 'DATA', RT_RCDATA);
     MemoryStream := TMemoryStream.Create;
     try
-      // Load the ZIP file from the resource into memory
       MemoryStream.LoadFromStream(DataStream);
       MemoryStream.Position := 0;
-
-      // Extract the contents of the ZIP file to the target directory.
-      AbUnZipper.Stream := MemoryStream;
-      AbUnZipper.ExtractOptions := [eoCreateDirs, eoRestorePath]; // Create directories
-      AbUnZipper.BaseDirectory := ExtractFilePath(Application.ExeName);
-      AbUnZipper.ExtractFiles('*.*');
+      AbUnZipper := TAbUnZipper.Create(nil);
+      try
+        AbUnZipper.Stream := MemoryStream;
+        AbUnZipper.ExtractOptions := [eoCreateDirs, eoRestorePath];
+        AbUnZipper.BaseDirectory := ExtractFilePath(Application.ExeName);
+        AbUnZipper.ExtractFiles('*.*');
+      finally
+        AbUnZipper.Free;
+      end;
     finally
       MemoryStream.Free;
       DataStream.Free;
-      AbUnZipper.Free;
+    end;
+  end
+  else
+  begin
+    // DataDir existiert bereits
+    // 1. Ins Temp-Verzeichnis entpacken
+    TempDir := GetTempDir + 'turbobird_update' + PathDelim;
+    ForceDirectories(TempDir);
+
+    try
+      DataStream := TResourceStream.Create(HInstance, 'DATA', RT_RCDATA);
+      MemoryStream := TMemoryStream.Create;
+      try
+        MemoryStream.LoadFromStream(DataStream);
+        MemoryStream.Position := 0;
+        AbUnZipper := TAbUnZipper.Create(nil);
+        try
+          AbUnZipper.Stream := MemoryStream;
+          AbUnZipper.ExtractOptions := [eoCreateDirs, eoRestorePath];
+          AbUnZipper.BaseDirectory := TempDir;
+          AbUnZipper.ExtractFiles('*.*');
+        finally
+          AbUnZipper.Free;
+        end;
+      finally
+        MemoryStream.Free;
+        DataStream.Free;
+      end;
+
+      // 2. Fehlende Dateien aus TempDir nach DataDir kopieren
+      CopyMissingFiles(IncludeTrailingPathDelimiter(TempDir) + 'data', DataDir);
+
+      // 3. FilesToUpdate.txt einlesen und gelistete Dateien überschreiben
+      UpdateFilesFromList(DataDir, IncludeTrailingPathDelimiter(TempDir) + 'data');
+
+    finally
+      // TempDir aufräumen
+      DeleteDirectory(TempDir, True);
     end;
   end;
 end;
-
 
 function ExtractVersionFromName(const Name: string): string;
 var
@@ -3384,11 +3505,9 @@ initialization
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
   fIniFile     := TIniFile.Create(fIniFileName);
 
-  if FirstRun then
-    ExtractResources;
+  ExtractResourcesIfNeeded;
 
   ReadIniFile;
-
 
   //if not LoadClientLibIBX(InitialFBClientLibPath) then
     //SetInitialClientLib;

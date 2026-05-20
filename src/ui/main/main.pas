@@ -596,13 +596,13 @@ begin
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
 
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'index.html';
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'index.html';
 
   if FileExists(htmlPath) then
     HtmlViewer1.LoadFromFile(htmlPath)
   else
     HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
+      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
     );
 end;
 
@@ -620,7 +620,7 @@ procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
 var htmlPath: string;
 begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim;
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
 
   if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
@@ -628,7 +628,7 @@ begin
       HtmlViewer1.LoadFromFile(htmlPath + SRC)
     else
     HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
+      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
   end
   else
   begin
