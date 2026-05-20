@@ -1,0 +1,123 @@
+//<HEADER_COMMENTS-BEGIN>
+{
+  Add your header comments here
+}
+//<HEADER_COMMENTS-END>
+
+//<USER-GLOBALS-BEGIN>
+// Add your global variables and types here
+var
+  db: TUIBDatabase;
+  tr: TUIBTransaction;
+  qr: TUIBDataSet;
+  DataSource: TDataSource;
+//<USER-GLOBALS-END>
+
+//<DESIGNER-VARS-BEGIN>
+var
+  Form1: TForm;
+  DBGrid1: TDBGrid;
+  Panel6: TPanel;
+  btnFirst: TButton;
+//<DESIGNER-VARS-END>
+
+//<USERCODE-BEGIN>
+// Add your code here (procedures, functions, types, variables)
+
+procedure CreateDataComponents;
+begin
+  db := TUIBDatabase.Create(nil);
+  db.LibraryName := '/opt/firebird/lib/libfbclient.so.3.0.13';
+  db.Username := 'SYSDBA';
+  db.Password := 'masterkey';
+  db.DatabaseName := '/opt/firebird/examples/empbuild/employee.fdb';
+  db.Connected := True;
+
+  tr := TUIBTransaction.Create(nil);
+  tr.Database := db;
+  tr.StartTransaction;
+
+  qr := TUIBDataSet.Create(nil);
+  qr.Database := db;
+  qr.Transaction := tr;
+
+  DataSource := TDataSource.Create(nil);
+  DataSource.DataSet := qr;
+  DBGrid1.DataSource := DataSource;
+
+  qr.SQL.Text := 'select * from employee';
+  qr.Open;
+end;
+
+procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  qr.Free;
+  tr.Free;
+  db.Free;
+end;
+
+procedure btnFirst_OnClick(Sender: TObject);
+begin
+  qr.First;
+end;
+
+
+//<USERCODE-END>
+
+//<DESIGNER-BEGIN>
+procedure CreateNewForm;
+begin
+  Form1 := TForm.Create(nil);
+  Form1.SetBounds(63, 65, 850, 446);
+  Form1.Color := -2147483643;
+  Form1.Position := poDesigned;
+  Form1.Caption := 'Form1';
+
+  DBGrid1 := TDBGrid.Create(Form1);
+  DBGrid1.Parent := Form1;
+
+  Panel6 := TPanel.Create(Form1);
+  Panel6.Parent := Form1;
+
+  btnFirst := TButton.Create(Panel6);
+  btnFirst.Parent := Panel6;
+
+  DBGrid1.Left := 1;
+  DBGrid1.Top := 1;
+  DBGrid1.Width := 848;
+  DBGrid1.Height := 364;
+  DBGrid1.Visible := True;
+  DBGrid1.Enabled := True;
+  DBGrid1.Tag := 0;
+  DBGrid1.Color := -2147483643;
+  Panel6.Left := 1;
+  Panel6.Top := 365;
+  Panel6.Width := 848;
+  Panel6.Height := 50;
+  Panel6.Visible := True;
+  Panel6.Enabled := True;
+  Panel6.Tag := 0;
+  Panel6.Caption := '';
+  Panel6.Color := -2147483643;
+  btnFirst.Left := 1;
+  btnFirst.Top := -29;
+  btnFirst.Width := 43;
+  btnFirst.Height := 48;
+  btnFirst.Visible := True;
+  btnFirst.Enabled := True;
+  btnFirst.Tag := 0;
+  btnFirst.Caption := '<<';
+  //<EVENT_BINDINGS-BEGIN>
+  Form1.OnClose := @FormClose;
+  btnFirst.OnClick := @btnFirst_OnClick;
+  //<EVENT_BINDINGS-END>
+  Form1.Visible := True;
+end;
+//<DESIGNER-END>
+
+//<MAIN-BEGIN>
+begin
+  CreateNewForm;
+  CreateDataComponents;
+end.
+//<MAIN-END>
