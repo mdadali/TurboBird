@@ -1,0 +1,32 @@
+//<DESIGNER-VARS-BEGIN>
+var
+  TestForm: TForm;
+//<DESIGNER-VARS-END>
+
+//<USER-GLOBAL-VARS-BEGIN>
+//<USER-GLOBAL-VARS-END>
+
+//<USERCODE-BEGIN>
+
+//<USERCODE-END>
+
+//<DESIGNER-BEGIN>
+procedure CreateNewForm;
+begin
+  TestForm := TForm.Create(nil);
+  TestForm.SetBounds(95, 85, 790, 386);
+  TestForm.Color := -2147483643;
+  TestForm.Position := poDesigned;
+  TestForm.Caption := 'TestForm';
+
+  //<EVENT_BINDINGS-BEGIN>
+  //<EVENT_BINDINGS-END>
+  TestForm.Visible := True;
+end;
+//<DESIGNER-END>
+
+//<MAIN-BEGIN>
+begin
+  CreateNewForm;
+end.
+//<MAIN-END>

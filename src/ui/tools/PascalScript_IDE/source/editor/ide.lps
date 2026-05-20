@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectSession>
+    <Version Value="12"/>
+    <BuildModes Active="Default"/>
+    <Units>
+      <Unit>
+        <Filename Value="ide.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="18" Y="6"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ide_editor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="editor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="534"/>
+        <CursorPos X="3" Y="538"/>
+        <UsageCount Value="25"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="ide_debugoutput.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="118" Y="17"/>
+        <UsageCount Value="25"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uFrmGotoLine.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="99" Y="16"/>
+        <UsageCount Value="25"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dlgSearchText.pas"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="19"/>
+        <DefaultSyntaxHighlighter Value="Delphi"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dlgConfirmReplace.pas"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="60"/>
+        <CursorPos X="5" Y="77"/>
+        <UsageCount Value="23"/>
+      </Unit>
+      <Unit>
+        <Filename Value="dlgReplaceText.pas"/>
+        <HasResources Value="True"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3"/>
+        <CursorPos X="20" Y="40"/>
+        <UsageCount Value="23"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../../../../Programme/Lazarus/2.2.6/lazarus/lcl/forms.pp"/>
+        <UnitName Value="Forms"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="53"/>
+        <CursorPos X="25" Y="70"/>
+        <UsageCount Value="11"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="ide.lpr"/>
+        <Caret Line="16" Column="5"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="7" Column="117"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="130" Column="18" TopLine="108"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="429" Column="36" TopLine="416"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="434" Column="16" TopLine="416"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="435" Column="16" TopLine="416"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="437" Column="37" TopLine="416"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="422" Column="30" TopLine="416"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="8" Column="104"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="75" Column="16" TopLine="47"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="102" Column="26" TopLine="74"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="109" Column="87" TopLine="94"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="105" Column="14" TopLine="94"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="122" Column="23" TopLine="94"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="319" TopLine="304"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="328" Column="19" TopLine="319"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="322" Column="67" TopLine="309"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="318" Column="21" TopLine="288"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="319" Column="21" TopLine="289"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="320" Column="21" TopLine="290"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="321" Column="21" TopLine="291"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="576" Column="3" TopLine="573"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="394" Column="3" TopLine="392"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="304" Column="3" TopLine="301"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="563" Column="36" TopLine="560"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="293" Column="3" TopLine="290"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="298" Column="36" TopLine="284"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="69" Column="30" TopLine="62"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="660" Column="2" TopLine="644"/>
+      </Position>
+      <Position>
+        <Filename Value="ide_editor.pas"/>
+        <Caret Line="540" Column="57" TopLine="534"/>
+      </Position>
+    </JumpHistory>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes ActiveMode=""/>
+    </RunParams>
+  </ProjectSession>
+</CONFIG>

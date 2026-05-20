@@ -1,0 +1,1045 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <PathDelim Value="\"/>
+    <General>
+      <Flags>
+        <CompatibilityMode Value="True"/>
+      </Flags>
+      <Title Value="PSDesigner"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <Resources Count="1">
+        <Resource_0 FileName="resources/data.zip" Type="RCDATA" ResourceName="DATA"/>
+      </Resources>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <BuildModes Count="8" Active="Linux64_Gtk2_Debug">
+      <Item1 Name="Linux64_Gtk2_Debug" Default="True"/>
+      <Item2 Name="Linux64_Gtk2_Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-gtk2-release\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS).release"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="Linux32_Gtk2_Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-gtk2-debug\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="common;designer;editor;..\..\components\PascalScript\Source;..\..\components\PascalScript\Source\ThirdParty\dialogs;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\common;..\..\components\uib\source;..\..\components\PascalScript\Source\ThirdParty\dbctrls;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-debug"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dPSStudio"/>
+            <OtherDefines Count="1">
+              <Define0 Value="PSStudio"/>
+            </OtherDefines>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+      <Item4 Name="Linux32_Gtk2_Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-gtk2-release\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-release"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="Win64_Win_Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-win-debug\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-debug"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="Win64_Win_Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-win-release\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-release"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="Win32_Win_Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-win-debug\PSDesigner_$(TargetCPU)-$(TargetOS)" ApplyConventions="False"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-debug"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <ExecuteBefore>
+              <Command Value="wine ..\bin\$(TargetCPU)-$(TargetOS)-win-debug\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+              <CompileReasons Compile="False" Build="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="Win32_Win_Release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-win-release\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+            <OtherUnitFiles Value="editor\Imports;common;designer;editor;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+            <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-release"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <ExecuteBefore>
+              <Command Value="wine ..\bin\$(TargetCPU)-$(TargetOS)-win-release\PSDesigner_$(TargetCPU)-$(TargetOS).exe"/>
+              <CompileReasons Compile="False" Build="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="wine ..\bin\$(TargetCPU)-$(TargetOS)-win-release\PSDesigner_$(TargetCPU)-$(TargetOS).exe"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item8>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default"/>
+      </Modes>
+    </RunParams>
+    <RequiredPackages Count="11">
+      <Item1>
+        <PackageName Value="pascalscriptfcl"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="pascalscript"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="ibnongui"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="fbintf"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="Abbrevia"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="cadsys"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="Printer4Lazarus"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="SynEdit"/>
+      </Item8>
+      <Item9>
+        <PackageName Value="RunTimeTypeInfoControls"/>
+      </Item9>
+      <Item10>
+        <PackageName Value="jvRuntimeDesign"/>
+        <MinVersion Valid="True"/>
+      </Item10>
+      <Item11>
+        <PackageName Value="LCL"/>
+      </Item11>
+    </RequiredPackages>
+    <Units Count="90">
+      <Unit0>
+        <Filename Value="PSDesigner.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="10"/>
+        <CursorPos X="22" Y="24"/>
+        <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="designer\designer.pas"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="576"/>
+        <CursorPos X="68" Y="599"/>
+        <UsageCount Value="188"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="..\..\jvdesignsurface.pas"/>
+        <UnitName Value="JvDesignSurface"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="642"/>
+        <CursorPos X="40" Y="644"/>
+        <UsageCount Value="74"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\..\..\codetools\laz2_xmlwrite.pas"/>
+        <UnitName Value="laz2_XMLWrite"/>
+        <TopLine Value="172"/>
+        <CursorPos X="25" Y="187"/>
+        <UsageCount Value="2"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="..\..\..\..\fpc\2.4.3\source\rtl\win32\system.pp"/>
+        <UnitName Value="System"/>
+        <TopLine Value="51"/>
+        <CursorPos X="3" Y="66"/>
+        <UsageCount Value="7"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="..\E:\sw\laz_jvdesigner\mainunit.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="mainUnit"/>
+        <TopLine Value="106"/>
+        <CursorPos Y="120"/>
+        <UsageCount Value="2"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="..\..\..\..\designer\controlselection.pp"/>
+        <UnitName Value="ControlSelection"/>
+        <TopLine Value="1252"/>
+        <CursorPos X="3" Y="1257"/>
+        <UsageCount Value="2"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="..\..\..\..\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <TopLine Value="1947"/>
+        <CursorPos X="15" Y="1733"/>
+        <UsageCount Value="2"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="..\..\..\..\fpc\2.4.3\source\packages\fcl-db\src\dbase\dbf_idxfile.pas"/>
+        <TopLine Value="1226"/>
+        <CursorPos X="31" Y="1236"/>
+        <UsageCount Value="2"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="..\..\jvdesignimp.pas"/>
+        <UnitName Value="JvDesignImp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1298"/>
+        <CursorPos Y="1481"/>
+        <UsageCount Value="10"/>
+        <Bookmarks Count="1">
+          <Item0 X="23" Y="363" ID="1"/>
+        </Bookmarks>
+      </Unit9>
+      <Unit10>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus\2.2.6\lazarus\lcl\include\customform.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="193"/>
+        <CursorPos X="42" Y="201"/>
+        <UsageCount Value="10"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus\2.2.6\lazarus\lcl\include\wincontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="5132"/>
+        <CursorPos Y="5145"/>
+        <UsageCount Value="10"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus\2.2.6\lazarus\lcl\editbtn.pas"/>
+        <UnitName Value="EditBtn"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1181"/>
+        <CursorPos X="31" Y="1194"/>
+        <UsageCount Value="7"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\BGRAControls\bgradialogs.pas"/>
+        <UnitName Value="BGRADialogs"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="402"/>
+        <CursorPos X="7" Y="420"/>
+        <UsageCount Value="7"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="editor\ide_editor.pas"/>
+        <ComponentName Value="IDE"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="14" Y="19"/>
+        <UsageCount Value="143"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="..\editor\Imports\upsi_mathscriptinterface.pas"/>
+        <UnitName Value="uPSI_MathScriptinterface"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="49"/>
+        <CursorPos X="70" Y="67"/>
+        <UsageCount Value="11"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="..\editor\Imports\upsi_cad2dscripinterface.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27"/>
+        <CursorPos X="36" Y="27"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="..\editor\Imports\mainscriptinterface.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4"/>
+        <CursorPos X="15" Y="14"/>
+        <UsageCount Value="12"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="..\..\..\..\LazCAD_git\LazCAD\src\components\PascalScript\Source\uPSCompiler.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13550"/>
+        <CursorPos Y="13568"/>
+        <UsageCount Value="8"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="..\editor\Imports\upsi_dialogsscriptinterface.pas"/>
+        <UnitName Value="uPSI_DialogsScriptInterface"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="187"/>
+        <CursorPos X="52" Y="194"/>
+        <UsageCount Value="8"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="..\..\..\..\LazCAD_git\LazCAD\src\components\PascalScript\Source\uPSComponent.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1442"/>
+        <CursorPos X="68" Y="1448"/>
+        <UsageCount Value="7"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\extdlgs.pas"/>
+        <UnitName Value="ExtDlgs"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="115"/>
+        <CursorPos X="3" Y="132"/>
+        <UsageCount Value="7"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="..\editor\formcodegenerator.pas"/>
+        <UnitName Value="FormCodeGenerator"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13"/>
+        <CursorPos X="45" Y="13"/>
+        <UsageCount Value="30"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\forms.pp"/>
+        <UnitName Value="Forms"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1766"/>
+        <CursorPos X="60" Y="1790"/>
+        <UsageCount Value="6"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\components\PascalScript\Source\uPSComponent.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="317"/>
+        <CursorPos X="9" Y="332"/>
+        <UsageCount Value="7"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="..\..\..\PascalScript\Source\uPSCompiler.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="13550"/>
+        <CursorPos X="24" Y="13560"/>
+        <UsageCount Value="7"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="common\ucodegenerator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCodeGenerator"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="8" Y="16"/>
+        <UsageCount Value="193"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\components\ideintf\objectinspector.pp"/>
+        <ComponentName Value="ObjectInspectorDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ObjectInspector"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="4538"/>
+        <CursorPos X="38" Y="4546"/>
+        <UsageCount Value="21"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\rtl\objpas\classes\classesh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="58"/>
+        <CursorPos X="23" Y="84"/>
+        <UsageCount Value="29"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\controls.pp"/>
+        <UnitName Value="Controls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1754"/>
+        <CursorPos Y="1780"/>
+        <UsageCount Value="27"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="..\..\components\jvdesign\jvdesignsurface.pas"/>
+        <UnitName Value="JvDesignSurface"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1073"/>
+        <CursorPos X="59" Y="1078"/>
+        <UsageCount Value="57"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="..\..\components\jvdesign\jvdesignutils.pas"/>
+        <UnitName Value="JvDesignUtils"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="309"/>
+        <CursorPos Y="324"/>
+        <UsageCount Value="9"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="..\..\components\jvdesign\jvdesignimp.pas"/>
+        <UnitName Value="JvDesignImp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6"/>
+        <CursorPos X="65" Y="21"/>
+        <UsageCount Value="20"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="..\..\components\PascalScript\Source\uPSComponent_StdCtrls.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="28"/>
+        <CursorPos X="10" Y="28"/>
+        <UsageCount Value="3"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="..\..\components\PascalScript\Source\uPSR_stdctrls.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
+        <CursorPos X="48" Y="25"/>
+        <UsageCount Value="10"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="..\..\components\jvdesign\tp_register.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="..\..\components\jvdesign\jvconsts.pas"/>
+        <UnitName Value="JvConsts"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="169"/>
+        <CursorPos X="48" Y="204"/>
+        <UsageCount Value="2"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="..\..\components\jvdesign\jvdesignclip.pas"/>
+        <UnitName Value="JvDesignClip"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="2"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="..\..\components\jvdesign\jvresources.pas"/>
+        <UnitName Value="JvResources"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="64" Y="6"/>
+        <UsageCount Value="2"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="designer\u_psstudio.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmPSStudio"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="252"/>
+        <CursorPos X="11" Y="266"/>
+        <UsageCount Value="105"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="editor\u_consoleide.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmConsoleIDE"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="237"/>
+        <CursorPos X="36" Y="252"/>
+        <UsageCount Value="105"/>
+        <Loaded Value="True"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="editor\Imports\upsi_cad2dscripinterface.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="31"/>
+        <CursorPos X="19" Y="43"/>
+        <UsageCount Value="5"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="editor\Imports\mainscriptinterface.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="54"/>
+        <CursorPos X="27" Y="54"/>
+        <UsageCount Value="46"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="editor\Imports\uPSI_Dialogs.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="2" Y="13"/>
+        <UsageCount Value="5"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="components\PascalScript\Source\ThirdParty\uPSI_Dialogs.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="19" Y="10"/>
+        <UsageCount Value="94"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\uPSI_IBX.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="14"/>
+        <UsageCount Value="16"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="43"/>
+        <CursorPos X="12" Y="57"/>
+        <UsageCount Value="5"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="components\PascalScript\Source\uPSDisassembly.pas"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="90"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_stabile\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBCustomDataSet.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="46"/>
+        <CursorPos X="12" Y="57"/>
+        <UsageCount Value="5"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="components\PascalScript\Source\ThirdParty\uPSI_IBX.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <CursorPos X="40" Y="14"/>
+        <UsageCount Value="15"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="..\..\components\PascalScript\Source\uPSComponent.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1266"/>
+        <CursorPos X="21" Y="1274"/>
+        <UsageCount Value="11"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="..\..\components\PascalScript\Source\uPSDebugger.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="38"/>
+        <CursorPos X="14" Y="49"/>
+        <UsageCount Value="11"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="..\..\components\PascalScript\Source\uPSUtils.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="22" Y="4"/>
+        <UsageCount Value="12"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\control.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2946"/>
+        <CursorPos Y="2959"/>
+        <UsageCount Value="5"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="..\..\components\PascalScript\Source\uPSRuntime.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="23" Y="9"/>
+        <UsageCount Value="11"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="..\..\components\PascalScript\Source\uPSCompiler.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1468"/>
+        <CursorPos X="18" Y="1481"/>
+        <UsageCount Value="10"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\upsi_ibxconnection.pas"/>
+        <UnitName Value="uPSI_IBXConnection"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="68"/>
+        <CursorPos X="8" Y="78"/>
+        <UsageCount Value="78"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\lclclasses.pp"/>
+        <UnitName Value="LCLClasses"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="39"/>
+        <CursorPos X="3" Y="65"/>
+        <UsageCount Value="13"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\customform.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1886"/>
+        <CursorPos Y="1899"/>
+        <UsageCount Value="7"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\rtl\inc\objpash.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="193"/>
+        <CursorPos X="23" Y="206"/>
+        <UsageCount Value="10"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\components\ideintf\propedits.pp"/>
+        <UnitName Value="PropEdits"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2537"/>
+        <CursorPos Y="2550"/>
+        <UsageCount Value="7"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\firebird\FirebirdOOAPI.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="6646"/>
+        <CursorPos Y="6660"/>
+        <UsageCount Value="9"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="..\..\components\uib\misc\IFPS3\uPSI_uib.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="40"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="..\..\components\uib\misc\IFPS3\uPSI_uibconst.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="36"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="..\..\components\uib\misc\IFPS3\uPSI_uiblib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="56"/>
+        <CursorPos Y="80"/>
+        <UsageCount Value="36"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="..\..\components\uib\misc\IFPS3\uPSI_uibmetadata.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="109"/>
+        <CursorPos X="22" Y="134"/>
+        <UsageCount Value="36"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="..\..\components\uib\misc\IFPS3\uPSI_uibsqlparser.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="24" Y="5"/>
+        <UsageCount Value="36"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="components\PascalScript\Source\ThirdParty\uPSC_LCLAuto.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="64"/>
+        <CursorPos X="69" Y="65"/>
+        <UsageCount Value="21"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="components\PascalScript\Source\ThirdParty\uPSC_DBControls.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="196"/>
+        <CursorPos Y="222"/>
+        <UsageCount Value="31"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="components\PascalScript\Source\uPSC_DB.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="921"/>
+        <CursorPos Y="955"/>
+        <UsageCount Value="29"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="..\..\components\uib\source\uiblib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="51"/>
+        <CursorPos Y="77"/>
+        <UsageCount Value="11"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="..\..\components\uib\source\uibreg.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="108"/>
+        <CursorPos X="35" Y="134"/>
+        <UsageCount Value="11"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="..\..\components\uib\source\uibdataset.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="67" Y="213"/>
+        <UsageCount Value="11"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="..\..\components\uib\source\uib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1929"/>
+        <CursorPos X="88" Y="1954"/>
+        <UsageCount Value="16"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="components\PascalScript\Source\uPSR_classes.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="41"/>
+        <CursorPos Y="55"/>
+        <UsageCount Value="10"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="..\..\components\uib\misc\IFPS3\upsi_uibdataset.pas"/>
+        <UnitName Value="uPSI_uibdataset"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="47"/>
+        <CursorPos X="45" Y="61"/>
+        <UsageCount Value="25"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="components\PascalScript\Source\uPSComponent.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1539"/>
+        <CursorPos X="78" Y="1563"/>
+        <UsageCount Value="10"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="..\..\LazCAD_git\LazCAD\src\components\PascalScript\Source\uPSC_DB.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="80" Y="3"/>
+        <UsageCount Value="10"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="..\..\components\PascalScript\Source\uPSC_DB.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="28" Y="914"/>
+        <UsageCount Value="14"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="..\..\components\PascalScript\Source\uPSC_buttons.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="14"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\IBX\upsi_ibxconnection.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uPSI_IBXConnection"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="28"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="44"/>
+        <CursorPos X="29" Y="44"/>
+        <UsageCount Value="14"/>
+        <Loaded Value="True"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\dialogs\uPSI_Dialogs.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="2" Y="13"/>
+        <UsageCount Value="12"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="..\..\components\PascalScript\Source\PascalScript.inc"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="25"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\uib\uPSI_uibconst.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="5" Y="11"/>
+        <UsageCount Value="27"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\uib\uPSI_uiblib.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="44"/>
+        <CursorPos X="28" Y="49"/>
+        <UsageCount Value="13"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\uib\upsi_uibdataset.pas"/>
+        <UnitName Value="uPSI_uibdataset"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="11" Y="22"/>
+        <UsageCount Value="21"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\uib\uPSI_uib.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="2" Y="2"/>
+        <UsageCount Value="11"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="..\..\components\uib\source\uib.inc"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
+        <WindowIndex Value="-1"/>
+        <TopLine Value="-1"/>
+        <CursorPos X="-1" Y="-1"/>
+        <UsageCount Value="23"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\packager\registration\fcllaz.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="3" Y="11"/>
+        <UsageCount Value="10"/>
+      </Unit89>
+    </Units>
+    <OtherDefines Count="1">
+      <Define0 Value="PSStudio"/>
+    </OtherDefines>
+    <JumpHistory Count="13" HistoryIndex="12">
+      <Position1>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="85" TopLine="65"/>
+      </Position1>
+      <Position2>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="66" Column="33" TopLine="49"/>
+      </Position2>
+      <Position3>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="65" Column="20" TopLine="50"/>
+      </Position3>
+      <Position4>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="64" Column="22" TopLine="50"/>
+      </Position4>
+      <Position5>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="69" Column="35" TopLine="65"/>
+      </Position5>
+      <Position6>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="76" Column="19" TopLine="65"/>
+      </Position6>
+      <Position7>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="58" Column="37" TopLine="47"/>
+      </Position7>
+      <Position8>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="44" Column="29" TopLine="44"/>
+      </Position8>
+      <Position9>
+        <Filename Value="designer\u_psstudio.pas"/>
+        <Caret Line="252" Column="18" TopLine="245"/>
+      </Position9>
+      <Position10>
+        <Filename Value="designer\u_psstudio.pas"/>
+        <Caret Line="252" Column="18" TopLine="245"/>
+      </Position10>
+      <Position11>
+        <Filename Value="designer\u_psstudio.pas"/>
+        <Caret Line="777" Column="35" TopLine="764"/>
+      </Position11>
+      <Position12>
+        <Filename Value="..\..\components\PascalScript\Source\ThirdParty\common\mainscriptinterface.pas"/>
+        <Caret Line="44" Column="29" TopLine="44"/>
+      </Position12>
+      <Position13>
+        <Filename Value="PSDesigner.lpr"/>
+        <Caret Line="34" Column="48" TopLine="14"/>
+      </Position13>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="..\bin\$(TargetCPU)-$(TargetOS)-gtk2-debug\PSDesigner_$(TargetCPU)-$(TargetOS)"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);..\..\components\uib\source;..\..\components\PascalScript\Source"/>
+      <OtherUnitFiles Value="common;designer;editor;..\..\components\PascalScript\Source;..\..\components\PascalScript\Source\ThirdParty\dialogs;..\..\components\PascalScript\Source\ThirdParty\IBX;..\..\components\PascalScript\Source\ThirdParty\common;..\..\components\uib\source;..\..\components\PascalScript\Source\ThirdParty\dbctrls;..\..\components\PascalScript\Source\ThirdParty\uib"/>
+      <UnitOutputDirectory Value="..\lib\$(TargetCPU)-$(TargetOS)-debug"/>
+    </SearchPaths>
+    <CodeGeneration>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="linux"/>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf2Set"/>
+      </Debugging>
+    </Linking>
+    <Other>
+      <OtherDefines Count="1">
+        <Define0 Value="PSStudio"/>
+      </OtherDefines>
+    </Other>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="5">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+      <Item4>
+        <Name Value="EAbstractError"/>
+      </Item4>
+      <Item5>
+        <Name Value="RunError(211)"/>
+      </Item5>
+    </Exceptions>
+  </Debugging>
+</CONFIG>
