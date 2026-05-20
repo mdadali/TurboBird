@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, Graphics, Dialogs, ExtCtrls, math,
   fphttpclient, LazFileUtils, Process, opensslsockets, jsonparser, fpjson,
-  strutils, LResources,
+  strutils, LResources, AbUnzper,
   turbocommon,
   uthemeselector;
 
@@ -16,8 +16,10 @@ type
   { TfrmUpdateChecker }
 
   TfrmUpdateChecker = class(TForm)
+    AbUnZipper1: TAbUnZipper;
     btnCheck: TButton;
     btnDownload: TButton;
+    chkBoxUnzip: TCheckBox;
     Label1: TLabel;
     lbCurrentVersion: TLabel;
     lblStatus: TLabel;
@@ -32,6 +34,7 @@ type
     procedure SetStatus(const Msg: string);
     function GetCurrentVersionInfo(out BaseName, Version: string): Boolean;
     function CompareVersions(const CurrentVer, NewVer: string): Integer;
+    procedure UnzipDownloadedFile;
   public
   end;
 
@@ -164,6 +167,7 @@ begin
             FDownloadURL := Asset.FindPath('browser_download_url').AsString;
             FFileName := DownloadName;
             btnDownload.Enabled := True;
+            chkBoxUnzip.Enabled := True;
             SetStatus('New version found:' + sLineBreak + AssetVer);
             pnlColor.Color := clGreen;
             Application.ProcessMessages;
@@ -191,6 +195,22 @@ begin
   Client.Free;
 end;
 
+procedure TfrmUpdateChecker.UnzipDownloadedFile;
+begin
+  SetStatus('Extracting...');
+  pnlColor.Color := clYellow;
+  Application.ProcessMessages;
+
+  AbUnZipper1.FileName := AppendPathDelim(ExtractFilePath(Application.ExeName)) + FFileName;
+  AbUnZipper1.OutputPath := ExtractFilePath(Application.ExeName);
+  AbUnZipper1.Examine;
+  AbUnZipper1.UnZipAllFiles;
+
+  SetStatus('Extraction completed.');
+  pnlColor.Color := clGreen;
+  Application.ProcessMessages;
+end;
+
 procedure TfrmUpdateChecker.btnDownloadClick(Sender: TObject);
 var
   Client: TFPHTTPClient;
@@ -209,6 +229,9 @@ begin
     Client.Get(FDownloadURL, SavePath);
     SetStatus('Download completed: ' + sLineBreak + FFileName);
     pnlColor.Color := clDefault;
+
+    if chkBoxUnzip.Checked then
+      UnzipDownloadedFile;
   except
     on E: Exception do
       SetStatus('Download failed: ' + sLineBreak + E.Message);
