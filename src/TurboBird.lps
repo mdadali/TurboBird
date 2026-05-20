@@ -449,8 +449,8 @@
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="2096"/>
-        <CursorPos X="49" Y="2119"/>
+        <TopLine Value="2151"/>
+        <CursorPos X="19" Y="2162"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="1134" ID="4"/>
@@ -646,8 +646,8 @@
         <UnitName Value="UpdateChecker"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="213"/>
-        <CursorPos X="27" Y="234"/>
+        <TopLine Value="189"/>
+        <CursorPos X="14" Y="206"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1163,7 +1163,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="196"/>
         <CursorPos X="2" Y="211"/>
-        <UsageCount Value="119"/>
+        <UsageCount Value="120"/>
       </Unit112>
       <Unit113>
         <Filename Value="ui\tablemanage\uniqueconstraints.pas"/>
@@ -1174,7 +1174,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="193"/>
         <CursorPos Y="214"/>
-        <UsageCount Value="112"/>
+        <UsageCount Value="113"/>
       </Unit113>
       <Unit114>
         <Filename Value="ui\tablemanage\checkconstraints.pas"/>
@@ -1186,7 +1186,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="99"/>
         <CursorPos X="23" Y="107"/>
-        <UsageCount Value="86"/>
+        <UsageCount Value="87"/>
       </Unit114>
       <Unit115>
         <Filename Value="ui\tablemanage\notnullconstraints.pas"/>
@@ -1197,7 +1197,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="7"/>
         <CursorPos X="21" Y="24"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="84"/>
       </Unit115>
       <Unit116>
         <Filename Value="components\PascalScript\Source\PascalScript.inc"/>
@@ -1206,7 +1206,7 @@
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="34"/>
       </Unit116>
       <Unit117>
         <Filename Value="classes\cdbfbfunction.pas"/>
@@ -1481,7 +1481,7 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="28" HistoryIndex="27">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
         <Caret Line="6170" Column="24" TopLine="6143"/>
@@ -1594,6 +1594,14 @@
         <Filename Value="ui\updatechecker\updatechecker.pas"/>
         <Caret Line="170" Column="41" TopLine="157"/>
       </Position28>
+      <Position29>
+        <Filename Value="ui\updatechecker\updatechecker.pas"/>
+        <Caret Line="232" Column="24" TopLine="213"/>
+      </Position29>
+      <Position30>
+        <Filename Value="ui\updatechecker\updatechecker.pas"/>
+        <Caret Line="206" Column="38" TopLine="188"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

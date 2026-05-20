@@ -202,10 +202,8 @@ begin
   Application.ProcessMessages;
 
   AbUnZipper1.FileName := AppendPathDelim(ExtractFilePath(Application.ExeName)) + FFileName;
-  AbUnZipper1.OutputPath := ExtractFilePath(Application.ExeName);
-  AbUnZipper1.Examine;
-  AbUnZipper1.UnZipAllFiles;
-
+  AbUnZipper1.BaseDirectory := ExtractFilePath(Application.ExeName);
+  AbUnZipper1.ExtractFiles('*.*');
   SetStatus('Extraction completed.');
   pnlColor.Color := clGreen;
   Application.ProcessMessages;
