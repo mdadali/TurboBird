@@ -224,7 +224,6 @@ end;
 procedure TfmNotNullConstraints.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(Self);
-  FillNotNullConstraints;
 end;
 
 end.

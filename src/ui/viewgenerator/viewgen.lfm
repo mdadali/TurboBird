@@ -66,8 +66,8 @@ object fmViewGen: TfmViewGen
     Top = 0
     Width = 615
     Align = alClient
-    ClientHeight = 100
-    ClientWidth = 611
+    ClientHeight = 102
+    ClientWidth = 613
     TabOrder = 0
     object Label1: TLabel
       Left = 11
@@ -89,7 +89,7 @@ object fmViewGen: TfmViewGen
       Left = 120
       Height = 32
       Top = 8
-      Width = 205
+      Width = 207
       Anchors = [akTop, akLeft, akRight]
       AutoSize = False
       AutoSelect = False

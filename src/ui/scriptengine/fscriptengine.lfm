@@ -1,7 +1,7 @@
 object frmScriptEngine: TfrmScriptEngine
-  Left = 147
+  Left = 268
   Height = 564
-  Top = 78
+  Top = 124
   Width = 1031
   Caption = 'MWA Software IBX-Scripter'
   ClientHeight = 564
@@ -15,7 +15,7 @@ object frmScriptEngine: TfrmScriptEngine
   object Panel1: TPanel
     Left = 0
     Height = 48
-    Top = 0
+    Top = 286
     Width = 1031
     Align = alTop
     ClientHeight = 48
@@ -33,25 +33,25 @@ object frmScriptEngine: TfrmScriptEngine
       Left = 14
       Height = 20
       Top = 16
-      Width = 111
-      Caption = 'Database Name:'
+      Width = 67
+      Caption = 'Database:'
       ParentColor = False
     end
     object chkBoxStopOnError: TCheckBox
-      Left = 685
-      Height = 22
+      Left = 683
+      Height = 24
       Top = 16
-      Width = 149
+      Width = 151
       Anchors = [akTop, akRight]
       Caption = 'Stop On First Error'
       OnChange = chkBoxStopOnErrorChange
       TabOrder = 0
     end
     object chkBoxEchoInput: TCheckBox
-      Left = 873
-      Height = 22
+      Left = 871
+      Height = 24
       Top = 16
-      Width = 97
+      Width = 99
       Anchors = [akTop, akRight]
       Caption = 'Echo Input'
       OnChange = chkBoxEchoInputChange
@@ -61,18 +61,18 @@ object frmScriptEngine: TfrmScriptEngine
   object GroupBox1: TGroupBox
     Left = 0
     Height = 286
-    Top = 48
+    Top = 0
     Width = 1031
     Align = alTop
     Caption = 'Script'
-    ClientHeight = 264
-    ClientWidth = 1027
+    ClientHeight = 265
+    ClientWidth = 1029
     TabOrder = 1
     object ed: TATSynEdit
       Left = 0
-      Height = 264
+      Height = 265
       Top = 0
-      Width = 1027
+      Width = 1029
       Align = alClient
       DoubleBuffered = True
       Font.Height = -12
@@ -136,14 +136,14 @@ object frmScriptEngine: TfrmScriptEngine
     Width = 1031
     Align = alClient
     Caption = 'ResultsLog'
-    ClientHeight = 153
-    ClientWidth = 1027
+    ClientHeight = 154
+    ClientWidth = 1029
     TabOrder = 3
     object ResultsLog: TMemo
       Left = 0
-      Height = 153
+      Height = 154
       Top = 0
-      Width = 1027
+      Width = 1029
       Align = alClient
       Anchors = [akTop, akRight, akBottom]
       ScrollBars = ssAutoVertical
@@ -197,8 +197,8 @@ object frmScriptEngine: TfrmScriptEngine
       'concurrency'
       'nowait'
     )
-    Left = 216
-    Top = 264
+    Left = 552
+    Top = 184
   end
   object ActionList1: TActionList
     Left = 504
@@ -224,8 +224,8 @@ object frmScriptEngine: TfrmScriptEngine
   object OpenBlobDialog: TOpenDialog
     Filter = 'All Files|*.*'
     Options = [ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 75
-    Top = 256
+    Left = 736
+    Top = 112
   end
   object Timer1: TTimer
     Interval = 0

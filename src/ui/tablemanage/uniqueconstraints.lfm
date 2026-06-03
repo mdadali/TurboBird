@@ -6,6 +6,7 @@ object fmUniqueConstraints: TfmUniqueConstraints
   Caption = 'Unique Constraints'
   ClientHeight = 467
   ClientWidth = 789
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object pnlTop: TPanel
     Left = 0

@@ -6,13 +6,8 @@ interface
 
 uses
   Math, Variants, Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, DBGrids, DBCtrls, ComCtrls, StdCtrls, DBDateTimePicker, RxDBGrid,
-  DB,
-  IBArrayGrid,
-  IBDatabase,
-  IBCustomDataSet,
-  IBQuery,
-  IBTable,
+  ExtCtrls, DBGrids, DBCtrls, ComCtrls, StdCtrls, Buttons, DBDateTimePicker,
+  RxDBGrid, DB, IBArrayGrid, IBDatabase, IBCustomDataSet, IBQuery, IBTable,
 
   turbocommon,
   uthemeselector,
@@ -23,6 +18,7 @@ type
   { TfrmEditTableDataNew }
 
   TfrmEditTableDataNew = class(TForm)
+    BitBtn1: TBitBtn;
     DBNavigator1: TDBNavigator;
     dbnavMainTableFormView: TDBNavigator;
     dsMain: TDataSource;
@@ -39,6 +35,7 @@ type
     transMain: TIBTransaction;
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
+    procedure BitBtn1Click(Sender: TObject);
     procedure dsMainStateChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -116,38 +113,50 @@ begin
 end;
 
 function TfrmEditTableDataNew.InitDB: boolean;
-var user, password: string;
 begin
-  if  IBDatabaseMain.Connected then
-    exit(true);
+  if IBDatabaseMain.Connected then
+    Exit(True);
 
   Result := False;
 
   try
     FDBRec := RegisteredDatabases[FDBIndex];
 
-    IBDatabaseMain.Params.Clear;
-    IBDatabaseMain.LoginPrompt := False;
-
-    // Retrieve username and password from the database configuration
-    user := FDBRec.IBDatabase.Params.Values['user_name'];
-    password := FDBRec.IBDatabase.Params.Values['password'];
-
-    // Set parameters correctly
-    IBDatabaseMain.Params.Values['user_name'] := user;
-    IBDatabaseMain.Params.Values['password'] := password;
-
     IBDatabaseMain.DatabaseName := FDBRec.IBDatabase.DatabaseName;
     IBDatabaseMain.FirebirdLibraryPathName := FDBRec.IBDatabase.FirebirdLibraryPathName;
 
-    // Test connection
-    IBDatabaseMain.Connected := True;
-    IBDatabaseMain.Connected := False;
+    // Verbinden + Transaction starten
+    ConnectDBPrepared(IBDatabaseMain, transMain, FDBIndex, FDBRec.IBTransaction.Params);
+
+    // Test erfolgreich → Transaction beenden und Disconnect
+    try
+      if transMain.InTransaction then
+        transMain.Rollback;  // Rollback ist sicherer als Commit für Test
+    except
+    end;
+
+    try
+      if IBDatabaseMain.Connected then
+        IBDatabaseMain.Connected := False;
+    except
+    end;
 
     Result := True;
   except
     on E: Exception do
     begin
+      // Bei Fehler: Aufräumen versuchen
+      try
+        if transMain.InTransaction then
+          transMain.Rollback;
+      except
+      end;
+      try
+        if IBDatabaseMain.Connected then
+          IBDatabaseMain.Connected := False;
+      except
+      end;
+
       MessageDlg('Error initializing database:' + sLineBreak + E.Message,
                  mtError, [mbOK], 0);
       Result := False;
@@ -158,11 +167,7 @@ end;
 function TfrmEditTableDataNew.OpenDB: boolean;
 begin
   try
-    if not IBDatabaseMain.Connected then
-      IBDatabaseMain.Connected := true;
-
-    if not transMain.InTransaction then
-      transMain.StartTransaction;
+    ConnectDBPrepared(IBDatabaseMain, transMain, FDBIndex, IBDatabaseMain.DefaultTransaction.Params);
 
     if IBTableMain.Active then
       IBTableMain.Close;
@@ -172,7 +177,7 @@ begin
 
     RxDBGridMain.OptimizeColumnsWidthAll;
 
-    result := true;
+    Result := True;
   except
     on E: Exception do
     begin
@@ -320,6 +325,7 @@ begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.EditorForm := nil;
 
+  Parent.Free;
   CloseAction:= caFree;
 end;
 
@@ -329,6 +335,11 @@ begin
   begin
     pnlDetailTables.Enabled := (dsMain.DataSet.State = dsBrowse);
   end;
+end;
+
+procedure TfrmEditTableDataNew.BitBtn1Click(Sender: TObject);
+begin
+  Close;
 end;
 
 procedure TfrmEditTableDataNew.FormCreate(Sender: TObject);
@@ -727,15 +738,23 @@ function TfrmEditTableDataNew.GetForeignKeys(
   ATableName: string): TForeignKeyInfoArray;
 var
   Q: TIBQuery;
+  Trans: TIBTransaction;
   CurrentConstraint: string;
   Index: Integer;
 begin
   SetLength(Result, 0);
 
   Q := TIBQuery.Create(nil);
+  Trans := TIBTransaction.Create(nil);
   try
+    Trans.DefaultDatabase := Database;
     Q.Database := Database;
-    Q.Transaction := Database.DefaultTransaction;
+    Q.Transaction := Trans;
+
+    // Transaction starten (DB ist bereits verbunden)
+    if not Trans.InTransaction then
+      Trans.StartTransaction;
+
 
     Q.SQL.Text :=
       'SELECT ' +
@@ -762,8 +781,8 @@ begin
       'AND TRIM(fk_rel.RDB$RELATION_NAME) = :TableName ' +
       'ORDER BY rc.RDB$CONSTRAINT_NAME, fk_seg.RDB$FIELD_POSITION';
 
-
     Q.ParamByName('TableName').AsString := ATableName;
+
     Q.Open;
 
     CurrentConstraint := '';
@@ -778,34 +797,31 @@ begin
         SetLength(Result, Index + 1);
 
         Result[Index].ConstraintName := CurrentConstraint;
-        Result[Index].ForeignTable :=
-          Q.FieldByName('FK_TABLE').AsString;
-        Result[Index].MasterTable :=
-          Q.FieldByName('PK_TABLE').AsString;
+        Result[Index].ForeignTable := Q.FieldByName('FK_TABLE').AsString;
+        Result[Index].MasterTable := Q.FieldByName('PK_TABLE').AsString;
         Result[Index].ForeignFields := '';
         Result[Index].MasterFields := '';
       end;
 
       if Result[Index].ForeignFields <> '' then
       begin
-        Result[Index].ForeignFields :=
-          Result[Index].ForeignFields + ';';
-        Result[Index].MasterFields :=
-          Result[Index].MasterFields + ';';
+        Result[Index].ForeignFields := Result[Index].ForeignFields + ';';
+        Result[Index].MasterFields := Result[Index].MasterFields + ';';
       end;
 
-      Result[Index].ForeignFields :=
-        Result[Index].ForeignFields +
-        Q.FieldByName('FK_FIELD').AsString;
-
-      Result[Index].MasterFields :=
-        Result[Index].MasterFields +
-        Q.FieldByName('PK_FIELD').AsString;
+      Result[Index].ForeignFields := Result[Index].ForeignFields + Q.FieldByName('FK_FIELD').AsString;
+      Result[Index].MasterFields := Result[Index].MasterFields + Q.FieldByName('PK_FIELD').AsString;
 
       Q.Next;
     end;
 
   finally
+    if Assigned(Trans) then
+    begin
+      if Trans.InTransaction then
+        Trans.Rollback;
+      Trans.Free;
+    end;
     Q.Free;
   end;
 end;

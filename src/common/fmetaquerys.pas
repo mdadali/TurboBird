@@ -5,7 +5,11 @@ unit fmetaquerys;
 interface
 
 uses
-  Classes, SysUtils, IBDatabase, IBQuery, turbocommon, fbcommon;
+  Classes, SysUtils, IBDatabase, IBQuery,
+
+  SysTables,
+  turbocommon,
+  fbcommon;
 
 type
   TIsolatedQuery = class
@@ -260,7 +264,10 @@ end;
 
 { TIsolatedQuery }
 constructor TIsolatedQuery.Create(const SourceDB: TIBDatabase; const SQLText: string; FieldsList: TStringList = nil);
-Var FieldName: string;
+var
+  DBIndex: Integer;
+  Rec: TRegisteredDatabase;
+  CachedPwd: string;
 begin
   inherited Create;
 
@@ -268,71 +275,70 @@ begin
   FDatabase := TIBDatabase.Create(nil);
   AssignIBDatabase(SourceDB, FDatabase);
 
-  FDatabase.Connected := true;
+  // DB-Index finden
+  DBIndex := GetDBIndexByDatabase(SourceDB);
 
+  // Passwort aus Registrierung ODER Session-Cache holen und in Params setzen
+  if DBIndex >= 0 then
+  begin
+    Rec := RegisteredDatabases[DBIndex].RegRec;
+
+    // User setzen
+    FDatabase.Params.Values['user_name'] := Rec.UserName;
+
+    // Passwort: Erst aus Registrierung, dann aus Session-Cache
+    if Rec.Password <> '' then
+      FDatabase.Params.Values['password'] := Rec.Password
+    else
+    begin
+      CachedPwd := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+      if CachedPwd <> '' then
+        FDatabase.Params.Values['password'] := CachedPwd;
+      // Wenn beides leer → OnLogin wird später feuern
+    end;
+
+    // Role
+    if Rec.Role <> '' then
+      FDatabase.Params.Values['sql_role_name'] := Rec.Role;
+
+    // Charset
+    if Rec.Charset <> '' then
+      FDatabase.Params.Values['lc_ctype'] := Rec.Charset;
+  end;
+
+  // OnLogin-Handler als Fallback setzen
+  FDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+  FDatabase.LoginPrompt := True;
+
+  // Verbinden
+  if not FDatabase.Connected then
+    FDatabase.Connected := true;
+
+  // Transaction
   FTransaction := TIBTransaction.Create(nil);
   FTransaction.DefaultDatabase := FDatabase;
   FTransaction.StartTransaction;
 
+  // Query
   FQuery := TIBQuery.Create(nil);
   FQuery.Database := FDatabase;
   FQuery.Transaction := FTransaction;
 
   FQuery.SQL.Text := SQLText;
-  FQuery.Open; // direkt öffnen
+  FQuery.Open;
 
-  // optional FieldsList befüllen
+  // Optional FieldsList befüllen
   if Assigned(FieldsList) then
   begin
     FieldsList.Clear;
     while not FQuery.EOF do
     begin
-      FieldName := Trim(FQuery.FieldByName('field_name').AsString);
-      if FieldsList.IndexOf(FieldName) = -1 then
-        FieldsList.Add(FieldName);
+      FieldsList.Add(Trim(FQuery.FieldByName('field_name').AsString));
       FQuery.Next;
     end;
-    FQuery.First; // Cursor wieder auf erste Zeile
+    FQuery.First;
   end;
-
 end;
-
-{constructor TIsolatedQuery.Create(const SourceDB: TIBDatabase; const SQLText: string; FieldsList: TStringList = nil);
-Var FieldName: string;
-begin
-  inherited Create;
-
-  // lokale Kopie der DB anlegen
-  FDatabase := TIBDatabase.Create(nil);
-  AssignIBDatabase(SourceDB, FDatabase);
-
-  FDatabase.Connected := true;
-
-  FTransaction := TIBTransaction.Create(nil);
-  FTransaction.DefaultDatabase := FDatabase;
-  FTransaction.StartTransaction;
-
-  FQuery := TIBQuery.Create(nil);
-  FQuery.Database := FDatabase;
-  FQuery.Transaction := FTransaction;
-
-  FQuery.SQL.Text := SQLText;
-  FQuery.Open; // direkt öffnen
-
-  // optional FieldsList befüllen
-  if Assigned(FieldsList) then
-  begin
-    FieldsList.Clear;
-    while not FQuery.EOF do
-    begin
-      FieldName := Trim(FQuery.FieldByName('field_name').AsString);
-      if FieldsList.IndexOf(FieldName) = -1 then
-        FieldsList.Add(FieldName);
-      FQuery.Next;
-    end;
-    FQuery.First; // Cursor wieder auf erste Zeile
-  end;
-end;}
 
 destructor TIsolatedQuery.Destroy;
 begin

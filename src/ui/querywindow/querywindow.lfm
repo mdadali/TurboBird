@@ -1,11 +1,11 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 232
-  Height = 613
-  Top = 135
-  Width = 1079
+  Left = 939
+  Height = 748
+  Top = 73
+  Width = 679
   Caption = 'fmQueryWindow'
-  ClientHeight = 613
-  ClientWidth = 1079
+  ClientHeight = 748
+  ClientWidth = 679
   Color = clForm
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
@@ -70291,26 +70291,26 @@ object fmQueryWindow: TfmQueryWindow
     Cursor = crVSplit
     Left = 0
     Height = 12
-    Top = 296
-    Width = 1079
+    Top = 34
+    Width = 679
     Align = alTop
     ResizeAnchor = akTop
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 305
+    Height = 440
     Top = 308
-    Width = 1079
+    Width = 679
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 305
-    ClientWidth = 1079
+    ClientHeight = 440
+    ClientWidth = 679
     TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 305
+      Height = 440
       Top = 0
-      Width = 1079
+      Width = 679
       Align = alClient
       Images = imTabs
       TabOrder = 0
@@ -70320,8 +70320,8 @@ object fmQueryWindow: TfmQueryWindow
   inline meQuery: TSynEdit
     Left = 0
     Height = 262
-    Top = 34
-    Width = 1079
+    Top = 46
+    Width = 679
     Align = alTop
     BlockIndent = 3
     Color = clMedGray
@@ -70872,6 +70872,7 @@ object fmQueryWindow: TfmQueryWindow
     MouseLinkColor.Foreground = clBlue
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
+    OnChangeUpdating = meQueryChangeUpdating
     inline TSynGutterPartList
       object TSynGutterMarks
         Width = 24
@@ -70956,7 +70957,7 @@ object fmQueryWindow: TfmQueryWindow
     Left = 0
     Height = 34
     Top = 0
-    Width = 1079
+    Width = 679
     BorderWidth = 2
     ButtonHeight = 32
     ButtonWidth = 32
@@ -71006,7 +71007,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbRun: TToolButton
-      Left = 145
+      Left = 109
       Hint = 'Run Query (F5)'
       Top = 2
       AutoSize = True
@@ -71017,7 +71018,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbCommit: TToolButton
-      Left = 222
+      Left = 186
       Hint = 'Commit Transaction'
       Top = 2
       AutoSize = True
@@ -71030,7 +71031,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbRollback: TToolButton
-      Left = 294
+      Left = 258
       Hint = 'Rollback Transaction'
       Top = 2
       AutoSize = True
@@ -71042,7 +71043,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object ToolButton2: TToolButton
-      Left = 330
+      Left = 294
       Height = 32
       Top = 2
       Caption = 'ToolButton2'
@@ -71056,7 +71057,7 @@ object fmQueryWindow: TfmQueryWindow
       Style = tbsSeparator
     end
     object tbHistory: TToolButton
-      Left = 338
+      Left = 302
       Hint = 'SQL History'
       Top = 2
       AutoSize = True
@@ -71068,7 +71069,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object ToolButton5: TToolButton
-      Left = 217
+      Left = 145
       Height = 32
       Top = 2
       Caption = 'ToolButton5'
@@ -71086,20 +71087,8 @@ object fmQueryWindow: TfmQueryWindow
       ParentShowHint = False
       ShowHint = True
     end
-    object tbCommitRetaining: TToolButton
-      Left = 181
-      Hint = 'Commit Retaining'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbCommitRetaining'
-      ImageIndex = 6
-      OnClick = tbCommitRetainingClick
-      OnMouseEnter = tbCommitRetainingMouseEnter
-      ParentShowHint = False
-      ShowHint = True
-    end
     object tbRollbackRetaining: TToolButton
-      Left = 258
+      Left = 222
       Hint = 'Rollback Retaining'
       Top = 2
       AutoSize = True
@@ -71119,12 +71108,13 @@ object fmQueryWindow: TfmQueryWindow
     end
     object cxAutoCommit: TCheckBox
       Left = 530
-      Height = 22
+      Height = 24
       Hint = 'Auto Commit ON/OFF'
       Top = 2
-      Width = 111
+      Width = 113
       Caption = 'Auto Commit'
       Checked = True
+      OnChange = cxAutoCommitChange
       OnMouseEnter = cxAutoCommitMouseEnter
       OnMouseLeave = cxAutoCommitMouseLeave
       State = cbChecked
@@ -71157,8 +71147,8 @@ object fmQueryWindow: TfmQueryWindow
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
-      ClientHeight = 28
-      ClientWidth = 181
+      ClientHeight = 30
+      ClientWidth = 183
       Columns = 3
       ItemIndex = 0
       Items.Strings = (
@@ -71171,7 +71161,7 @@ object fmQueryWindow: TfmQueryWindow
       TabOrder = 1
     end
     object ToolButton4: TToolButton
-      Left = 109
+      Left = 338
       Hint = 'MWA ScriptEngine'
       Top = 2
       Caption = 'ToolButton4'
@@ -71191,6 +71181,18 @@ object fmQueryWindow: TfmQueryWindow
       Top = 2
       Caption = 'ToolButton6'
       Enabled = False
+    end
+    object tbCommitRetaining: TToolButton
+      Left = 150
+      Hint = 'Commit Retaining'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbCommitRetaining'
+      ImageIndex = 6
+      OnClick = tbCommitRetainingClick
+      OnMouseEnter = tbCommitRetainingMouseEnter
+      ParentShowHint = False
+      ShowHint = True
     end
   end
   object OpenDialog1: TOpenDialog
@@ -71254,6 +71256,13 @@ object fmQueryWindow: TfmQueryWindow
       OnClick = lmSelectAllClick
     end
     object MenuItem2: TMenuItem
+      Caption = '-'
+    end
+    object lmSQLParser: TMenuItem
+      Caption = 'SQL Select Parser...'
+      OnClick = lmSQLParserClick
+    end
+    object Separator3: TMenuItem
       Caption = '-'
     end
     object lmFind: TMenuItem
@@ -72668,19 +72677,26 @@ object fmQueryWindow: TfmQueryWindow
     Connected = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
-    DefaultTransaction = FSQLTrans
+    DefaultTransaction = FQueryTrans
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 629
-    Top = 216
+    Left = 456
+    Top = 240
   end
-  object FSQLTrans: TIBTransaction
+  object FQueryTrans: TIBTransaction
     TransactionName = '{16B319E3-F966-444D-9E9D-270E8A795ED9}'
     Active = False
     DefaultDatabase = FIBConnection
-    Left = 518
-    Top = 216
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
+    AfterTransactionEnd = FQueryTransAfterTransactionEnd
+    OnStartTransaction = FQueryTransStartTransaction
+    Left = 368
+    Top = 248
   end
   object SynAutoComplete1: TSynAutoComplete
     AutoCompleteList.Strings = (
@@ -72721,7 +72737,7 @@ object fmQueryWindow: TfmQueryWindow
     Options = []
     PdfOptions.Options = []
     AuthorPdf = 'TurboBird'
-    Left = 91
+    Left = 99
     Top = 490
   end
   object SaveDialogPDF: TSaveDialog
@@ -72733,5 +72749,31 @@ object fmQueryWindow: TfmQueryWindow
     MaxFontSize = 0
     Left = 832
     Top = 80
+  end
+  object FIBXScript: TIBXScript
+    Database = FIBConnection
+    IgnoreGrants = False
+    IgnoreCreateDatabase = False
+    Transaction = FScriptTrans
+    ShowAffectedRows = True
+    ShowPerformanceStats = True
+    StopOnFirstError = False
+    OnSelectSQL = FIBXScriptSelectSQL
+    Left = 120
+    Top = 240
+  end
+  object FScriptTrans: TIBTransaction
+    TransactionName = '{4E112E83-89DD-4F89-9653-7D32044E4F00}'
+    Active = False
+    DefaultDatabase = FIBConnection
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
+    AfterTransactionEnd = FScriptTransAfterTransactionEnd
+    OnStartTransaction = FScriptTransStartTransaction
+    Left = 216
+    Top = 240
   end
 end

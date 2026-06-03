@@ -1,5 +1,5 @@
 object fmNewTable: TfmNewTable
-  Left = 339
+  Left = 376
   Height = 634
   Top = 114
   Width = 1023
@@ -25,7 +25,7 @@ object fmNewTable: TfmNewTable
   end
   object edNewTable: TEdit
     Left = 8
-    Height = 30
+    Height = 37
     Top = 32
     Width = 344
     OnKeyUp = edNewTableKeyUp
@@ -34,7 +34,7 @@ object fmNewTable: TfmNewTable
   object StringGrid1: TStringGrid
     Left = 0
     Height = 414
-    Top = 66
+    Top = 64
     Width = 1020
     Anchors = [akTop, akLeft, akRight, akBottom]
     ColCount = 6
@@ -77,18 +77,18 @@ object fmNewTable: TfmNewTable
   end
   object cxCreateGen: TCheckBox
     Left = 18
-    Height = 22
-    Top = 495
-    Width = 330
+    Height = 24
+    Top = 493
+    Width = 333
     Anchors = [akLeft, akBottom]
     Caption = 'Create Auto increment Generator and Trigger'
     TabOrder = 2
   end
   object cxGrantPermission: TCheckBox
     Left = 18
-    Height = 22
-    Top = 545
-    Width = 61
+    Height = 24
+    Top = 543
+    Width = 64
     Anchors = [akLeft, akBottom]
     Caption = 'Grant'
     OnChange = cxGrantPermissionChange
@@ -96,8 +96,8 @@ object fmNewTable: TfmNewTable
   end
   object cbPermission: TComboBox
     Left = 88
-    Height = 28
-    Top = 545
+    Height = 32
+    Top = 541
     Width = 145
     Anchors = [akLeft, akBottom]
     Enabled = False
@@ -124,8 +124,8 @@ object fmNewTable: TfmNewTable
   end
   object cbRolesUsers: TComboBox
     Left = 352
-    Height = 30
-    Top = 544
+    Height = 37
+    Top = 537
     Width = 181
     Anchors = [akLeft, akBottom]
     ItemHeight = 0

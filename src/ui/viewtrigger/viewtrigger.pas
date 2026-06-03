@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, ExtCtrls, IniFiles,
+  StdCtrls, ComCtrls, Buttons, SynEdit, SynHighlighterSQL, LCLType, ExtCtrls, IniFiles,
   turbocommon,
   uthemeselector;
 
@@ -61,8 +61,11 @@ end;
 
 procedure TfmViewTrigger.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  FNodeInfos^.ViewForm := nil;
-  CloseAction:= caFree;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmViewTrigger.FormCreate(Sender: TObject);
@@ -92,7 +95,6 @@ end;
 procedure TfmViewTrigger.bbCloseClick(Sender: TObject);
 begin
   Close;
-  Parent.Free;
 end;
 
 initialization

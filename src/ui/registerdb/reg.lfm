@@ -1,7 +1,7 @@
 object fmReg: TfmReg
-  Left = 541
+  Left = 653
   Height = 695
-  Top = 0
+  Top = 53
   Width = 683
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'
@@ -70810,6 +70810,7 @@ object fmReg: TfmReg
       Caption = 'Register'
       Color = clForm
       Default = True
+      Enabled = False
       Glyph.Data = {
         36090000424D3609000000000000360000002800000018000000180000000100
         2000000000000009000064000000640000000000000000000000FFFFFF00FFFF
@@ -70896,8 +70897,8 @@ object fmReg: TfmReg
     Top = 16
     Width = 480
     Caption = 'Database'
-    ClientHeight = 402
-    ClientWidth = 476
+    ClientHeight = 403
+    ClientWidth = 478
     TabOrder = 1
     object Label1: TLabel
       Left = 16
@@ -70925,7 +70926,7 @@ object fmReg: TfmReg
     end
     object edDatabaseName: TEdit
       Left = 16
-      Height = 30
+      Height = 37
       Top = 184
       Width = 411
       TabOrder = 0
@@ -70941,14 +70942,14 @@ object fmReg: TfmReg
     end
     object edTitle: TEdit
       Left = 16
-      Height = 30
+      Height = 37
       Top = 112
       Width = 411
       TabOrder = 2
     end
     object cbCharset: TComboBox
       Left = 256
-      Height = 28
+      Height = 32
       Top = 224
       Width = 168
       ItemHeight = 0
@@ -71021,7 +71022,7 @@ object fmReg: TfmReg
     end
     object cboxSQLDialect: TComboBox
       Left = 104
-      Height = 28
+      Height = 32
       Top = 224
       Width = 55
       ItemHeight = 0
@@ -71061,14 +71062,14 @@ object fmReg: TfmReg
     end
     object edUserName: TEdit
       Left = 16
-      Height = 30
+      Height = 37
       Top = 320
       Width = 153
       TabOrder = 5
     end
     object edPassword: TEdit
       Left = 184
-      Height = 30
+      Height = 37
       Top = 320
       Width = 139
       EchoMode = emPassword
@@ -71077,15 +71078,15 @@ object fmReg: TfmReg
     end
     object cxSavePassword: TCheckBox
       Left = 184
-      Height = 22
+      Height = 24
       Top = 368
-      Width = 123
+      Width = 125
       Caption = 'Save Password'
       TabOrder = 7
     end
     object edRole: TEdit
       Left = 72
-      Height = 30
+      Height = 37
       Top = 360
       Width = 93
       TabOrder = 8
@@ -71100,7 +71101,7 @@ object fmReg: TfmReg
     end
     object cboxServers: TComboBox
       Left = 16
-      Height = 32
+      Height = 36
       Top = 40
       Width = 408
       ItemHeight = 0
@@ -71109,9 +71110,9 @@ object fmReg: TfmReg
     end
     object chkBoxConnectDBOnStart: TCheckBox
       Left = 320
-      Height = 22
+      Height = 24
       Top = 370
-      Width = 150
+      Width = 152
       Caption = 'ConnectDBOnStart'
       TabOrder = 10
       Visible = False
@@ -71123,8 +71124,8 @@ object fmReg: TfmReg
     Top = 496
     Width = 480
     Caption = 'Firebird Client library'
-    ClientHeight = 106
-    ClientWidth = 476
+    ClientHeight = 107
+    ClientWidth = 478
     TabOrder = 2
     object btnBrowseClient: TButton
       Left = 427
@@ -71137,7 +71138,7 @@ object fmReg: TfmReg
     end
     object edtPort: TEdit
       Left = 56
-      Height = 30
+      Height = 37
       Top = 64
       Width = 64
       TabOrder = 1
@@ -71145,7 +71146,7 @@ object fmReg: TfmReg
     end
     object edtFBClient: TEdit
       Left = 8
-      Height = 30
+      Height = 37
       Top = 16
       Width = 408
       ReadOnly = True
@@ -71161,9 +71162,9 @@ object fmReg: TfmReg
     end
     object chkboxOverwriteServerClientLib: TCheckBox
       Left = 144
-      Height = 22
+      Height = 24
       Top = 64
-      Width = 170
+      Width = 172
       Caption = 'Use own client library'
       TabOrder = 3
     end

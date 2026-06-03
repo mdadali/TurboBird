@@ -1,0 +1,17 @@
+# Dateien ohne Erweiterung in: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src
+# REKURSIV durchsucht (alle Unterverzeichnisse)
+# Sortiert nach Dateigröße (kleinste zuerst)
+# Gefunden: 11 Dateien
+############################################################
+
+         0 B | ./src/utils/Leere Datei
+       548 B | ./src/resources/data/PSStudio/Forms/127.0.0.1/employee/lib/LIB_DATETIME
+       548 B | ./src/resources/data/PSStudio/Forms/localhost/employee/lib/LIB_DATETIME
+       548 B | ./src/resources/data/PSStudio/Forms/Localhost/employee/lib/LIB_DATETIME
+       548 B | ./src/resources/data/PSStudio/lib/LIB_DATETIME
+     1.01 KB | ./src/ui/tools/PascalScript_IDE/LICENSE
+     1.04 KB | ./src/ui/tools/DBReader/DBReader/LICENSE
+     1.04 KB | ./src/ui/tools/DBReader/NovaLib/LICENSE
+     1.05 KB | ./src/resources/data/images/edit
+     1.05 KB | ./src/images/edit
+   167.58 KB | ./src/components/PascalScript/Source/Makefile

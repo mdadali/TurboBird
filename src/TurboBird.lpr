@@ -20,7 +20,7 @@ uses
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
   rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
   QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-  EnterPass, About, CreateTrigger, fedittabledata, CallProc, UDFInfo,
+  EnterPass, CreateTrigger, fedittabledata, UDFInfo,
   ViewDomain, NewDomain, SysTables, newForeignKey, NewEditField, Calen,
   Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
   PermissionManage, SQLHistory, CopyTable, dynlibs, dbInfo, sysutils,
@@ -31,7 +31,7 @@ uses
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
   QBLnkFrm, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
   fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest,
-  floginservicemanager, fserverregistry, tb_netutils,
+  fserverregistry, tb_netutils,
 
   //DBAdmin
   MainFormUnit,
@@ -51,12 +51,13 @@ uses
   ExecuteSQLScriptDlgUnit,
   //End-DBAdmin
 
+  //About,
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
-  datamodulesystem, jvRuntimeDesign, pascalscriptfcl, pascalscript,
-  uPSI_uibconst, fservers, fActivityMonitor, edit_tabledata_new,
-  foreign_key_table, ibsqleditor, IBTransactionEdit, bulk_clone, fdataeditor,
-  u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
-UniqueConstraints, CheckConstraints, NotNullConstraints;
+  datamodulesystem, jvRuntimeDesign, pascalscript, uPSI_uibconst, fservers,
+  fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
+  IBTransactionEdit, bulk_clone, fdataeditor, fSQLParser, u_psstudio,
+  u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
+  CheckConstraints, NotNullConstraints, clone_table_to_external_table_dialog;
 
 const
   Major = 1;
@@ -105,7 +106,13 @@ begin
   frmThemeSelector := TfrmThemeSelector.Create(fmMain);
   Application.CreateForm(TdmSysTables, dmSysTables);
 
-  Application.CreateForm(TfmAbout, fmAbout);
+  //Application.CreateForm(TfrmPSStudio, PSStudio);
+  //PSStudio := TfrmPSStudio.Create(nil);
+
+  Application.CreateForm(TfrmUpdateChecker, frmUpdateChecker);
+  //frmUpdateChecker.PerformAutoSearch;
+
+  {Application.CreateForm(TfmAbout, fmAbout);
   fmAbout.Init;
   fmAbout.bbtnClose.Visible:= False;
   fmAbout.ProgressBar1.Align := alClient;
@@ -120,13 +127,8 @@ begin
 
   fmAbout.Hide;
   fmAbout.ProgressBar1.Visible := false;
+  }
 
-  fmMain.Version:= Format('%d.%d.%d', [Major, Minor, Release]);
-  fmMain.StatusBar1.Panels[1].Text:= 'Version: ' + fmMain.Version;
-  fmMain.VersionDate:= VersionDate;
-  fmMain.Major:= Major;
-  fmMain.Minor:= Minor;
-  fmMain.ReleaseVersion:= Release;
 
   Application.CreateForm(TfmCreateDB, fmCreateDB);
   Application.CreateForm(TfmReg, fmReg);
@@ -135,7 +137,6 @@ begin
   Application.CreateForm(TfmCreateTrigger, fmCreateTrigger);
   //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
   //Application.CreateForm(TfmEditTable, fmEditTable);
-  //Application.CreateForm(TfmCallProc, fmCallProc);
   Application.CreateForm(TfmNewDomain, fmNewDomain);
   Application.CreateForm(TfmNewForeignKey, fmNewForeignKey);
   Application.CreateForm(TfmCalen, fmCalen);
@@ -169,23 +170,6 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-  //Application.CreateForm(TfrmServers, frmServers);
+  Application.CreateForm(TfmCloneToExternalTable, fmCloneToExternalTable);
   Application.Run;
-
-  {$IFDEF CONSOLE_SCRIPTER}
-  if LocalConsoleIDE <> nil then
-  begin
-    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
-    LocalConsoleIDE.Free;
-  end;
-  {$ELSE}
-  if PSStudio <> nil then
-  begin
-    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
-    LocalConsoleIDE.Free;
-    PSStudio.JvDesignPanel1.Active := false;
-    PSStudio.Free;
-  end;
-  {$ENDIF}
-
 end.

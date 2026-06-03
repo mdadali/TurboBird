@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 479
+  Left = 583
   Height = 706
-  Top = 26
+  Top = 42
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70289,12 +70289,12 @@ object fmServerRegistry: TfmServerRegistry
     Top = 0
     Width = 779
     Align = alClient
-    ClientHeight = 653
-    ClientWidth = 775
+    ClientHeight = 655
+    ClientWidth = 777
     TabOrder = 0
     object cbServerName: TComboBox
       Left = 192
-      Height = 32
+      Height = 36
       Top = 16
       Width = 248
       ItemHeight = 0
@@ -70320,7 +70320,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtServerAlias: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 240
       Width = 248
       OnChange = edtServerAliasChange
@@ -70337,7 +70337,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtUserName: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 102
       Width = 248
       OnChange = edtUserNameChange
@@ -70346,7 +70346,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtRole: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 203
       Width = 248
       OnChange = edtRoleChange
@@ -70362,7 +70362,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object cbProtocol: TComboBox
       Left = 192
-      Height = 28
+      Height = 32
       Top = 61
       Width = 92
       ItemHeight = 0
@@ -70393,7 +70393,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtPassword: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 136
       Width = 248
       EchoMode = emPassword
@@ -70412,7 +70412,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object cbCharset: TComboBox
       Left = 192
-      Height = 32
+      Height = 36
       Top = 280
       Width = 252
       ItemHeight = 0
@@ -70422,7 +70422,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtClientLibraryPath: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 392
       Width = 529
       OnChange = edtClientLibraryPathChange
@@ -70448,10 +70448,12 @@ object fmServerRegistry: TfmServerRegistry
     end
     object chkSavePassword: TCheckBox
       Left = 192
-      Height = 22
+      Height = 24
       Top = 168
-      Width = 122
+      Width = 125
       Caption = 'Save Password'
+      Checked = True
+      State = cbChecked
       TabOrder = 6
     end
     object btnClientLib: TButton
@@ -70465,7 +70467,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtPort: TEdit
       Left = 360
-      Height = 30
+      Height = 37
       Top = 61
       Width = 80
       Enabled = False
@@ -70491,7 +70493,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtConfigFilePath: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 464
       Width = 531
       OnChange = edtConfigFilePathChange
@@ -70550,9 +70552,9 @@ object fmServerRegistry: TfmServerRegistry
     end
     object cboxLoadRegisteredClientLib: TCheckBox
       Left = 193
-      Height = 22
+      Height = 24
       Top = 432
-      Width = 273
+      Width = 276
       Caption = 'Load registered FireBird Clientlibrary'
       OnChange = cboxLoadRegisteredClientLibChange
       TabOrder = 15
@@ -70593,7 +70595,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtConnectionTimeout: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 512
       Width = 80
       TabOrder = 16
@@ -70609,7 +70611,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtRetryCount: TEdit
       Left = 423
-      Height = 30
+      Height = 37
       Top = 512
       Width = 80
       TabOrder = 17
@@ -70625,7 +70627,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtQueryTimeout: TEdit
       Left = 193
-      Height = 30
+      Height = 37
       Top = 560
       Width = 80
       TabOrder = 18
@@ -70651,7 +70653,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtVersionString: TEdit
       Left = 193
-      Height = 30
+      Height = 37
       Top = 613
       Width = 239
       ReadOnly = True
@@ -70668,7 +70670,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtVersionMajor: TEdit
       Left = 552
-      Height = 30
+      Height = 37
       Top = 616
       Width = 45
       TabOrder = 20
@@ -70685,7 +70687,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtVersionMinor: TEdit
       Left = 722
-      Height = 30
+      Height = 37
       Top = 613
       Width = 40
       TabOrder = 21
@@ -70701,7 +70703,7 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtRootPath: TEdit
       Left = 192
-      Height = 30
+      Height = 37
       Top = 336
       Width = 531
       TabOrder = 22

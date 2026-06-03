@@ -41,7 +41,12 @@ end;
 
 procedure TfmCallProc.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  StringGrid1.Row:= 1;
+  //StringGrid1.Row:= 1;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ExecuteForm := nil;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmCallProc.FormShow(Sender: TObject);

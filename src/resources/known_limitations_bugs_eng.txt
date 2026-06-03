@@ -34,3 +34,31 @@ Known Limitations / Bugs
 
 [Data Editor]
 - Currently unstable and under active development.
+
+[Sorting with calculated columns without aliases]
+- Problem: Attempting to sort a calculated column without an alias (system-generated name like CONCATENATION)
+  in the grid leads to SQL error -206 (Column unknown - CONCATENATION).
+  This also occurs with multi-column sorting (custom-built), because Firebird does not accept the internal
+  column name for ORDER BY.
+
+  Affected query (produces error when sorting):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1'),
+    '2' || ' = ' || ASCII_VAL('2'),
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z')
+  FROM RDB$DATABASE;
+
+  Workaround: Give each calculated column a unique alias, e.g. AS COL1, AS COL2, …
+  After that, sorting works perfectly – both single and multi-column.
+
+  Corrected query (works with sorting):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1') AS COL1,
+    '2' || ' = ' || ASCII_VAL('2') AS COL2,
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z') AS COL16
+  FROM RDB$DATABASE;
+
+  Affects: Custom-built sorting procedures in QueryWindow.
+  Status: May be fixed in a future version.

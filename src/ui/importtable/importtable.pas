@@ -117,6 +117,9 @@ begin
     FNodeInfos^.ViewForm := nil;
 
   FImporter.Free;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmImportTable.FormCreate(Sender: TObject);
@@ -216,7 +219,7 @@ begin
         begin
           RegisteredDatabases[FDestIndex].RegRec.UserName := fmEnterPass.edUser.Text;
           RegisteredDatabases[FDestIndex].RegRec.Password := fmEnterPass.edPassword.Text;
-          RegisteredDatabases[FDestIndex].RegRec.Role := fmEnterPass.cbRole.Text;
+          RegisteredDatabases[FDestIndex].RegRec.Role := fmEnterPass.edtRole.Text;
         end
         else
           Exit;
@@ -546,7 +549,7 @@ begin
 
         RegRec.UserName := fmEnterPass.edUser.Text;
         RegRec.Password := fmEnterPass.edPassword.Text;
-        RegRec.Role     := fmEnterPass.cbRole.Text;
+        RegRec.Role     := fmEnterPass.edtRole.Text;
       end;
     end;
 

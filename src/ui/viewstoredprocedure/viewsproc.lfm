@@ -1,7 +1,7 @@
 object fmViewSProc: TfmViewSProc
-  Left = 294
+  Left = 479
   Height = 530
-  Top = 209
+  Top = 158
   Width = 809
   BorderStyle = bsSingle
   Caption = 'fmViewSProc'
@@ -597,17 +597,17 @@ object fmViewSProc: TfmViewSProc
       TabOrder = 1
       object Label1: TLabel
         Left = 20
-        Height = 19
+        Height = 20
         Top = 20
-        Width = 108
+        Width = 117
         Caption = 'Stored Procedure'
         ParentColor = False
       end
       object Label3: TLabel
         Left = 20
-        Height = 19
+        Height = 20
         Top = 56
-        Width = 42
+        Width = 45
         Caption = 'Owner'
         ParentColor = False
       end

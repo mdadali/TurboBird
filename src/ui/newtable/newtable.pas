@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils,  FileUtil, LResources, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, Grids, Buttons, ExtCtrls, SynEdit, SynCompletion,
+  Graphics, Dialogs, StdCtrls, Grids, Buttons, ComCtrls, ExtCtrls, SynEdit, SynCompletion,
   SynHighlighterSQL, LCLType,
   turbocommon,
   uthemeselector;
@@ -340,7 +340,6 @@ end;
 procedure TfmNewTable.Button1Click(Sender: TObject);
 begin
   Close;
-  Parent.Free;
 end;
 
 procedure TfmNewTable.cxGrantPermissionChange(Sender: TObject);
@@ -361,7 +360,9 @@ procedure TfmNewTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.NewForm := nil;
-  CloseAction:= caFree;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmNewTable.FormKeyDown(Sender: TObject; var Key: Word;

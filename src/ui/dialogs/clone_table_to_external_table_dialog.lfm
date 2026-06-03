@@ -1,0 +1,73 @@
+object fmCloneToExternalTable: TfmCloneToExternalTable
+  Left = 378
+  Height = 203
+  Top = 223
+  Width = 729
+  BorderStyle = bsSingle
+  Caption = 'Clone to External Table'
+  ClientHeight = 203
+  ClientWidth = 729
+  LCLVersion = '2.2.6.0'
+  object Label1: TLabel
+    Left = 43
+    Height = 20
+    Top = 40
+    Width = 133
+    Caption = 'External Tablename'
+    ParentColor = False
+  end
+  object edtTableName: TEdit
+    Left = 197
+    Height = 37
+    Top = 40
+    Width = 459
+    TabOrder = 0
+    Text = 'EXT_'
+  end
+  object Label2: TLabel
+    Left = 43
+    Height = 20
+    Top = 96
+    Width = 82
+    Caption = 'External File'
+    ParentColor = False
+  end
+  object edtExternalFileName: TEdit
+    Left = 197
+    Height = 37
+    Top = 96
+    Width = 459
+    TabOrder = 1
+  end
+  object btnBrowseFile: TButton
+    Left = 664
+    Height = 32
+    Top = 96
+    Width = 32
+    Caption = '...'
+    OnClick = btnBrowseFileClick
+    TabOrder = 2
+  end
+  object btnOK: TButton
+    Left = 581
+    Height = 25
+    Top = 152
+    Width = 75
+    Caption = 'OK'
+    ModalResult = 1
+    TabOrder = 3
+  end
+  object btnCancel: TButton
+    Left = 480
+    Height = 25
+    Top = 152
+    Width = 75
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 4
+  end
+  object SaveDialog1: TSaveDialog
+    Left = 73
+    Top = 151
+  end
+end

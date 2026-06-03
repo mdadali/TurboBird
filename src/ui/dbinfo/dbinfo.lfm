@@ -1,7 +1,7 @@
 object fmDBInfo: TfmDBInfo
-  Left = 428
+  Left = 470
   Height = 591
-  Top = 111
+  Top = 102
   Width = 820
   Align = alClient
   Caption = 'fmDBInfo'
@@ -27,25 +27,25 @@ object fmDBInfo: TfmDBInfo
     object tsInfos: TTabSheet
       Caption = 'Infos'
       ClientHeight = 507
-      ClientWidth = 816
+      ClientWidth = 810
       object Panel1: TPanel
         Left = 0
         Height = 502
         Top = 5
-        Width = 816
+        Width = 810
         Align = alClient
         ClientHeight = 502
-        ClientWidth = 816
+        ClientWidth = 810
         TabOrder = 0
         object GroupBox1: TGroupBox
           Left = 1
           Height = 500
           Top = 1
-          Width = 814
+          Width = 808
           Align = alClient
           Caption = 'Database informations'
-          ClientHeight = 478
-          ClientWidth = 810
+          ClientHeight = 479
+          ClientWidth = 806
           TabOrder = 0
           object Label1: TLabel
             Left = 16
@@ -293,9 +293,9 @@ object fmDBInfo: TfmDBInfo
           end
           object chkBoxEncrypted: TCheckBox
             Left = 471
-            Height = 22
+            Height = 24
             Top = 8
-            Width = 92
+            Width = 94
             Caption = 'Encrypted'
             Enabled = False
             TabOrder = 8
@@ -495,7 +495,7 @@ object fmDBInfo: TfmDBInfo
         Left = 0
         Height = 5
         Top = 0
-        Width = 816
+        Width = 810
         Align = alTop
         ResizeAnchor = akTop
       end
@@ -503,16 +503,16 @@ object fmDBInfo: TfmDBInfo
     object tsPages: TTabSheet
       Caption = 'Pages'
       ClientHeight = 507
-      ClientWidth = 816
+      ClientWidth = 810
       OnShow = tsPagesShow
       object Panel2: TPanel
         Left = 0
         Height = 144
         Top = 0
-        Width = 816
+        Width = 810
         Align = alTop
         ClientHeight = 144
-        ClientWidth = 816
+        ClientWidth = 810
         TabOrder = 0
         object Label5: TLabel
           Left = 24
@@ -693,10 +693,10 @@ object fmDBInfo: TfmDBInfo
         Left = 0
         Height = 50
         Top = 144
-        Width = 816
+        Width = 810
         Align = alTop
         ClientHeight = 50
-        ClientWidth = 816
+        ClientWidth = 810
         TabOrder = 1
         object btnFirst: TButton
           Left = 16
@@ -769,7 +769,7 @@ object fmDBInfo: TfmDBInfo
         Left = 0
         Height = 313
         Top = 194
-        Width = 816
+        Width = 810
         Align = alClient
         BorderStyle = bsSingle
         Color = clWindow

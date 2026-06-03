@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 473
+  Left = 555
   Height = 618
-  Top = 106
+  Top = 168
   Width = 641
   BorderIcons = []
   BorderStyle = bsNone
@@ -70332,7 +70332,7 @@ object fmAbout: TfmAbout
     object TabSheet2: TTabSheet
       Caption = 'Info'
       ClientHeight = 526
-      ClientWidth = 601
+      ClientWidth = 595
       ParentShowHint = False
       ShowHint = True
       object pnlMWA: TPanel
@@ -71323,7 +71323,7 @@ object fmAbout: TfmAbout
       end
       object GifAnim1: TGifAnim
         Cursor = crHandPoint
-        Left = 3
+        Left = 0
         Height = 72
         Top = 198
         Width = 600
@@ -71336,11 +71336,11 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 148
         Top = 38
-        Width = 601
+        Width = 595
         Align = alTop
         BevelOuter = bvNone
         ClientHeight = 148
-        ClientWidth = 601
+        ClientWidth = 595
         Color = clWhite
         Font.Color = 7303023
         ParentColor = False
@@ -71366,20 +71366,6 @@ object fmAbout: TfmAbout
           Font.Color = 6908265
           ParentColor = False
           ParentFont = False
-        end
-        object laUpdate: TLabel
-          Cursor = crHandPoint
-          Left = 9
-          Height = 19
-          Top = 120
-          Width = 106
-          Anchors = []
-          Caption = 'Check for update'
-          Font.Color = clBlue
-          Font.Style = [fsUnderline]
-          ParentColor = False
-          ParentFont = False
-          OnClick = laUpdateClick
         end
         object Label1: TLabel
           Left = 8
@@ -122922,7 +122908,7 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 38
         Top = 0
-        Width = 601
+        Width = 595
         Align = alTop
         BevelOuter = bvNone
         Caption = 'TurboBird  XT - Firebird Admin Tool'
@@ -122937,10 +122923,10 @@ object fmAbout: TfmAbout
         Left = 0
         Height = 106
         Top = 420
-        Width = 601
+        Width = 595
         Align = alBottom
         ClientHeight = 106
-        ClientWidth = 601
+        ClientWidth = 595
         TabOrder = 4
         object Label4: TLabel
           Left = 184
@@ -122989,12 +122975,12 @@ object fmAbout: TfmAbout
     object TabSheet1: TTabSheet
       Caption = 'Credits'
       ClientHeight = 526
-      ClientWidth = 601
+      ClientWidth = 595
       object SecretPanel1: TSecretPanel
         Left = 0
         Height = 526
         Top = 0
-        Width = 601
+        Width = 595
         Cycled = True
         Lines.Strings = (
           'Thanks to the Community'

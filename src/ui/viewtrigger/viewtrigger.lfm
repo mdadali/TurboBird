@@ -1,7 +1,7 @@
 object fmViewTrigger: TfmViewTrigger
-  Left = 1022
+  Left = 436
   Height = 612
-  Top = 324
+  Top = 105
   Width = 811
   BorderStyle = bsSingle
   Caption = 'fmViewTrigger'
@@ -586,33 +586,33 @@ object fmViewTrigger: TfmViewTrigger
     TabOrder = 1
     object Label1: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 15
-      Width = 86
+      Width = 93
       Caption = 'Trigger Name'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 43
-      Width = 53
+      Width = 60
       Caption = 'On Table'
       ParentColor = False
     end
     object Label4: TLabel
       Left = 397
-      Height = 19
+      Height = 20
       Top = 15
-      Width = 56
+      Width = 61
       Caption = 'On Event'
       ParentColor = False
     end
     object laEvent: TLabel
       Left = 474
-      Height = 19
+      Height = 20
       Top = 15
-      Width = 93
+      Width = 101
       Caption = 'laTriggerName'
       Font.Color = 10234153
       ParentColor = False
@@ -620,17 +620,17 @@ object fmViewTrigger: TfmViewTrigger
     end
     object Label5: TLabel
       Left = 397
-      Height = 19
+      Height = 20
       Top = 43
-      Width = 30
+      Width = 32
       Caption = 'Type'
       ParentColor = False
     end
     object laType: TLabel
       Left = 474
-      Height = 19
+      Height = 20
       Top = 43
-      Width = 93
+      Width = 101
       Caption = 'laTriggerName'
       Font.Color = 10234153
       ParentColor = False
@@ -638,17 +638,17 @@ object fmViewTrigger: TfmViewTrigger
     end
     object Label6: TLabel
       Left = 397
-      Height = 19
+      Height = 20
       Top = 72
-      Width = 49
+      Width = 55
       Caption = 'Enabled'
       ParentColor = False
     end
     object laEnabled: TLabel
       Left = 474
-      Height = 19
+      Height = 20
       Top = 72
-      Width = 93
+      Width = 101
       Caption = 'laTriggerName'
       Font.Color = 10234153
       ParentColor = False
@@ -656,18 +656,18 @@ object fmViewTrigger: TfmViewTrigger
     end
     object Label7: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 72
-      Width = 49
+      Width = 53
       Caption = 'Position'
       DragCursor = crAppStart
       ParentColor = False
     end
     object laPos: TLabel
       Left = 106
-      Height = 19
+      Height = 20
       Top = 72
-      Width = 93
+      Width = 101
       Caption = 'laTriggerName'
       Font.Color = 10234153
       ParentColor = False
@@ -715,7 +715,7 @@ object fmViewTrigger: TfmViewTrigger
       Top = 1
       Width = 27
       Align = alRight
-      Caption = 'X'
+      Caption = 'x'
       OnClick = bbCloseClick
       ParentFont = False
       TabOrder = 0
@@ -734,7 +734,7 @@ object fmViewTrigger: TfmViewTrigger
       Left = 1
       Height = 22
       Top = 1
-      Width = 32
+      Width = 33
       Align = alLeft
       Caption = 'Body'
       ParentColor = False

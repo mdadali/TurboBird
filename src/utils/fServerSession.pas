@@ -526,12 +526,24 @@ begin
 end;
 
 
-procedure TServerSession.Disconnect;
+{procedure TServerSession.Disconnect;
 begin
   if not Assigned(IBXServicesConnection) then
     exit;
   if IBXServicesConnection.Connected then
     IBXServicesConnection.Connected := false;
+
+  FConnected := False;
+  FServiceHandle := 0;
+end; }
+
+procedure TServerSession.Disconnect;
+begin
+  if Assigned(IBXServicesConnection) then
+  begin
+    if IBXServicesConnection.Connected then
+      IBXServicesConnection.Connected := false;
+  end;
 
   FConnected := False;
   FServiceHandle := 0;

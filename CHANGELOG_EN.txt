@@ -4,6 +4,27 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1275
+Build Date & Time: 21.05.2026, 13:02:15
+
++ Automatic update notification
++ SQLSelectParser integrated
++ Clone to ExternalTable
++ New switches in the INI file:
+
+[QueryWindow]
+AutoCommit=1
+ExecMultiStatementsAsScript=1
+
+[Database]
+NumBuffers=254
+
+– PascalScriptStudio disabled
+
++ Several bugs fixed
+
+
 
 -------------------------------------------------------------------------------------------
 

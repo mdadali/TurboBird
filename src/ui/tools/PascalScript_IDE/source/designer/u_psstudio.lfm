@@ -1,10 +1,10 @@
 object frmPSStudio: TfrmPSStudio
-  Left = 382
+  Left = 137
   Height = 572
-  Top = 176
+  Top = 151
   Width = 980
   Caption = 'PascalScript Studio'
-  ClientHeight = 546
+  ClientHeight = 544
   ClientWidth = 980
   KeyPreview = True
   Menu = MainMenu1
@@ -187,12 +187,12 @@ object frmPSStudio: TfrmPSStudio
       object tsStandard: TTabSheet
         Caption = 'Standard'
         ClientHeight = 44
-        ClientWidth = 679
+        ClientWidth = 673
         object tbarStandard: TToolBar
           Left = 0
           Height = 34
           Top = 0
-          Width = 679
+          Width = 673
           AutoSize = True
           ButtonHeight = 32
           ButtonWidth = 33
@@ -408,12 +408,12 @@ object frmPSStudio: TfrmPSStudio
       object tsAdditional: TTabSheet
         Caption = 'Additional'
         ClientHeight = 44
-        ClientWidth = 679
+        ClientWidth = 673
         object tbarAdditional: TToolBar
           Left = 0
           Height = 34
           Top = 0
-          Width = 679
+          Width = 673
           Caption = 'tbarAdditional'
           Images = ImageList1
           TabOrder = 0
@@ -454,12 +454,12 @@ object frmPSStudio: TfrmPSStudio
       object tsDialogs: TTabSheet
         Caption = 'Dialogs'
         ClientHeight = 44
-        ClientWidth = 679
+        ClientWidth = 673
         object tbarDataControls1: TToolBar
           Left = 0
           Height = 34
           Top = 0
-          Width = 679
+          Width = 673
           AutoSize = True
           ButtonHeight = 32
           ButtonWidth = 33
@@ -497,12 +497,12 @@ object frmPSStudio: TfrmPSStudio
       object tsDataControls: TTabSheet
         Caption = 'Data Controls'
         ClientHeight = 44
-        ClientWidth = 679
+        ClientWidth = 673
         object tbarDataControls: TToolBar
           Left = 0
           Height = 34
           Top = 0
-          Width = 679
+          Width = 673
           AutoSize = True
           ButtonHeight = 32
           ButtonWidth = 33
@@ -548,12 +548,12 @@ object frmPSStudio: TfrmPSStudio
       object tsDataAccess: TTabSheet
         Caption = 'Data Access'
         ClientHeight = 44
-        ClientWidth = 679
+        ClientWidth = 673
         object tbarStandard1: TToolBar
           Left = 0
           Height = 34
           Top = 0
-          Width = 679
+          Width = 673
           AutoSize = True
           ButtonHeight = 32
           ButtonWidth = 33
@@ -582,17 +582,17 @@ object frmPSStudio: TfrmPSStudio
   end
   object Panel3: TPanel
     Left = 320
-    Height = 466
+    Height = 464
     Top = 80
     Width = 660
     Align = alClient
     Caption = 'Panel3'
-    ClientHeight = 466
+    ClientHeight = 464
     ClientWidth = 660
     TabOrder = 1
     object pgcCenter: TPageControl
       Left = 1
-      Height = 459
+      Height = 457
       Top = 1
       Width = 658
       ActivePage = tsDesign
@@ -602,13 +602,13 @@ object frmPSStudio: TfrmPSStudio
       TabPosition = tpBottom
       object tsDesign: TTabSheet
         Caption = 'Designer'
-        ClientHeight = 425
-        ClientWidth = 654
+        ClientHeight = 423
+        ClientWidth = 648
         object JvDesignPanel1: TJvDesignPanel
           Left = 0
-          Height = 425
+          Height = 423
           Top = 0
-          Width = 654
+          Width = 648
           Align = alClient
           BevelOuter = bvNone
           ParentColor = False
@@ -626,7 +626,7 @@ object frmPSStudio: TfrmPSStudio
       Cursor = crVSplit
       Left = 1
       Height = 5
-      Top = 460
+      Top = 458
       Width = 658
       Align = alBottom
       ResizeAnchor = akBottom
@@ -634,23 +634,23 @@ object frmPSStudio: TfrmPSStudio
   end
   object Splitter2: TSplitter
     Left = 315
-    Height = 466
+    Height = 464
     Top = 80
     Width = 5
   end
   object Panel5: TPanel
     Left = 0
-    Height = 466
+    Height = 464
     Top = 80
     Width = 315
     Align = alLeft
     Caption = 'Panel5'
-    ClientHeight = 466
+    ClientHeight = 464
     ClientWidth = 315
     TabOrder = 3
     object pgcLeft: TPageControl
       Left = 1
-      Height = 414
+      Height = 412
       Top = 51
       Width = 313
       ActivePage = tsOInspector
@@ -659,13 +659,13 @@ object frmPSStudio: TfrmPSStudio
       TabOrder = 0
       object tsOInspector: TTabSheet
         Caption = 'Objectinspector'
-        ClientHeight = 380
-        ClientWidth = 309
+        ClientHeight = 378
+        ClientWidth = 303
         object pnlInsp: TPanel
           Left = 0
-          Height = 380
+          Height = 378
           Top = 0
-          Width = 309
+          Width = 303
           Align = alClient
           Caption = 'pnlInsp'
           TabOrder = 0
@@ -673,14 +673,14 @@ object frmPSStudio: TfrmPSStudio
       end
       object tsCodeTree: TTabSheet
         Caption = 'Codetree'
-        ClientHeight = 380
-        ClientWidth = 309
+        ClientHeight = 378
+        ClientWidth = 303
         OnContextPopup = tsCodeTreeContextPopup
         object pnlCodeTree: TPanel
           Left = 0
-          Height = 380
+          Height = 378
           Top = 0
-          Width = 309
+          Width = 303
           Align = alClient
           TabOrder = 0
         end
@@ -705,7 +705,7 @@ object frmPSStudio: TfrmPSStudio
       end
       object edtFormName: TEdit
         Left = 104
-        Height = 30
+        Height = 37
         Top = 5
         Width = 192
         OnChange = edtFormNameChange

@@ -16,7 +16,8 @@ type
   TfmEnterPass = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
-    cbRole: TComboBox;
+    cxSavePassword: TCheckBox;
+    edtRole: TEdit;
     edPassword: TEdit;
     edUser: TEdit;
     Label1: TLabel;
@@ -53,7 +54,6 @@ end;
 
 procedure TfmEnterPass.FormShow(Sender: TObject);
 begin
-  cbRole.ItemIndex:= -1;
   frmThemeSelector.btnApplyClick(self);
 end;
 

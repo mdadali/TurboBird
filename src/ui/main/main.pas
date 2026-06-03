@@ -24,7 +24,10 @@ uses
   ibxscript, IBSQL, IBExtract,
 
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
-  fFirebirdConfig, fsqlmonitor,
+  fFirebirdConfig,
+  fsqlmonitor,
+  fSQLParser,
+
   fservers,
 
   udb_udf_fetcher,
@@ -66,6 +69,10 @@ uses
   HTMLUn2, HtmlGlobals, RxDBGrid,
 
   fmetaquerys,
+
+  uExternalTable,
+  clone_table_to_external_table_dialog,
+
   uthemeselector,
   fsimpleobjextractor,
   cUnIntelliSenseCache,
@@ -87,7 +94,9 @@ uses
   db_reader,
 
   u_psstudio,
-  u_consoleide
+  u_consoleide,
+
+  UpdateChecker
   ;
 
 {$i turbocommon.inc}
@@ -131,6 +140,11 @@ type
     lmNewForm: TMenuItem;
     lmEditForm: TMenuItem;
     lmExecuteForm: TMenuItem;
+    lmCloneToExternalTable: TMenuItem;
+    lmDropRole: TMenuItem;
+    mnSQLParser: TMenuItem;
+    mnCheckForUpdate: TMenuItem;
+    PopupMenu1: TPopupMenu;
     Separator11: TMenuItem;
     Separator10: TMenuItem;
     mnuPascalScript: TMenuItem;
@@ -305,6 +319,7 @@ type
     procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
     procedure lmChangePasswordClick(Sender: TObject);
+    procedure lmCloneToExternalTableClick(Sender: TObject);
     procedure lmCompareClick(Sender: TObject);
     procedure lmCopyRolePermissionClick(Sender: TObject);
     procedure lmCopyUserPermissionClick(Sender: TObject);
@@ -319,6 +334,7 @@ type
     procedure lmDropGeneratorClick(Sender: TObject);
     procedure lmDropPackageClick(Sender: TObject);
     procedure lmDropPackageProcedureClick(Sender: TObject);
+    procedure lmDropRoleClick(Sender: TObject);
     procedure lmDropStoredProcedureClick(Sender: TObject);
     procedure lmDropTriggerClick(Sender: TObject);
     procedure lmDropUDFFunctionClick(Sender: TObject);
@@ -418,6 +434,7 @@ type
     procedure lmDropTableClick(Sender: TObject);
     procedure lmRecalculateStatisticsClick(Sender: TObject);
     procedure mnBulkCloneClick(Sender: TObject);
+    procedure mnCheckForUpdateClick(Sender: TObject);
     procedure mnDataEditorClick(Sender: TObject);
     procedure mnDBReaderClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
@@ -431,6 +448,7 @@ type
     procedure lmNewRoleClick(Sender: TObject);
     procedure mnRestoreClick(Sender: TObject);
     procedure mnServerRegistryClick(Sender: TObject);
+    procedure mnSQLParserClick(Sender: TObject);
     procedure mnThemeClick(Sender: TObject);
     procedure mnuPascalScriptClick(Sender: TObject);
     procedure PageControl1CloseTabClicked(Sender: TObject);
@@ -472,6 +490,7 @@ type
 
     procedure CreateIntelliSenseCache(Data: PtrInt);
 
+    procedure CreateSQLParser(AShowApplyButton: boolean; AStrings: TStrings);
   protected
     // This procedure will receive the events that are logged by the connection:
   public
@@ -524,6 +543,8 @@ type
     function  CheckActiveTransaction(AIBTransaction: TIBTransaction; ADefaultCommitKind: TCommitKind; ASilent: Boolean): Boolean;
 
     function CheckActiveTransActions(dbIndex: Integer;ADefaultCommitKind: TCommitKind; ASilent: Boolean): Boolean;
+    function CloseAllTabsForDB(dbIndex: Word): Boolean;
+
     procedure CloseDB(dbIndex: word; Silent: Boolean = True);
     procedure CheckOpenDBsBeforeClientSwap(TargetDB: string);
     function  ReadODSViaSQL(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
@@ -541,6 +562,12 @@ type
 
     //Forms
     function GetFormFilePath: string;
+
+    //UpdateChecker
+    procedure DeleteOldVersionsOnStart;
+
+    //ExternalTable
+    procedure CloneTableAsExternal(const ATableName: string; ADBIndex: Integer);
   end;
 
 
@@ -561,12 +588,67 @@ implementation
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
      EnterPass, CreateTrigger, fedittabledata, CallProc,  UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
-     PermissionManage, CopyTable, About, NewEditField, dbInfo, Comparison;
+     PermissionManage, CopyTable, NewEditField, dbInfo, Comparison;
+     // About,
 
+
+procedure TfmMain.CreateSQLParser(AShowApplyButton: boolean; AStrings: TStrings);
+var fmSQLParser: TfmSQLParser;
+begin
+  fmSQLParser := TfmSQLParser.create(Self);
+  fmSQLParser.btnApply.Visible := false;
+  fmSQLParser.ShowModal;
+end;
 
 procedure TfmMain.mnExitClick(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfmMain.DeleteOldVersionsOnStart;
+var
+  SearchRec: TSearchRec;
+  CurrentExe, ExePath, FileName: string;
+  CurrentVersion, FileVersion: string;
+  CompareResult: Integer;
+begin
+  if not DeleteOldVersions then Exit;
+
+  CurrentExe := ExtractFileName(Application.ExeName);
+  ExePath := ExtractFilePath(Application.ExeName);
+
+  // Aktuelle Version extrahieren
+  CurrentVersion := ExtractVersionFromName(CurrentExe);
+  if CurrentVersion = '' then Exit;
+
+  // Nach allen TurboBird-Executables im Verzeichnis suchen
+  if FindFirst(ExePath + 'TurboBird_*', faAnyFile, SearchRec) = 0 then
+  begin
+    repeat
+      FileName := SearchRec.Name;
+
+      // Aktuelle EXE nicht löschen
+      if FileName = CurrentExe then Continue;
+
+      // Nur Executables und ZIPs löschen (keine .txt, .ini etc.)
+      if (ExtractFileExt(FileName) = '.zip') or
+         (ExtractFileExt(FileName) = '') then
+      begin
+        FileVersion := ExtractVersionFromName(FileName);
+        if FileVersion <> '' then
+        begin
+          // Nur löschen wenn älter als aktuelle Version
+          CompareResult := frmUpdateChecker.CompareVersions(FileVersion, CurrentVersion);
+          if CompareResult < 0 then
+          begin
+            DeleteFile(ExePath + FileName);
+          end;
+        end;
+      end;
+    until FindNext(SearchRec) <> 0;
+
+    FindClose(SearchRec);
+  end;
 end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
@@ -604,6 +686,7 @@ begin
     HtmlViewer1.LoadFromFile(
       IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
     );
+
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
@@ -614,6 +697,10 @@ begin
   frmThemeSelectorLocal.btnApplyClick(fmMain);
   frmThemeSelectorLocal.Free;
   //Repaint;
+
+  DeleteOldVersionsOnStart;
+  if AutoSearchOnProgramStart then
+    frmUpdateChecker.PerformAutoSearch;
 end;
 
 procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
@@ -675,27 +762,95 @@ begin
   CanShow := (HintStr <> '');
 end;
 
-procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+{procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   try
+    ClearAllSessionPasswords;
     Screen.Cursor := crSQLWait;
     tvMain.BeginUpdate;
     CheckBoxFilter.Checked := false;
-  try
-    //if Length(RegisteredDatabases) > 0 then
-      //fmReg.SaveRegistrations;
-    SaveAndCloseSQLHistory;
-    lmDisconnectAllClick(nil);
-    ReleaseRegisteredDatabases;
-    CloseAction := caFree; // Alles OK → freigeben
-  except
-    on E: Exception do
-    begin
-      Screen.Cursor := crDefault;
-      ShowMessage('Error while closing the databases: ' + E.Message);
+    try
+      SaveAndCloseSQLHistory;
+      // !!! lmDisconnectAllClick(nil) ENTFERNT – ruft CloseDB auf,
+      //     ReleaseRegisteredDatabases ruft CloseDB bereits korrekt auf.
+      ReleaseRegisteredDatabases;
       CloseAction := caFree;
+    except
+      on E: Exception do
+      begin
+        Screen.Cursor := crDefault;
+        ShowMessage('Error while closing the databases: ' + E.Message);
+        CloseAction := caFree;
+      end;
+    end;
+  finally
+    tvMain.EndUpdate;
+
+  end;
+end;}
+
+procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
+var
+  i, j: Integer;
+  ts: TTabSheet;
+  frm: TForm;
+begin
+  // ── 1. Alle eingebetteten Fenster schließen ─────────────────
+  for i := PageControl1.PageCount - 1 downto 1 do
+  begin
+    if not (PageControl1.Pages[i] is TTabSheet) then
+      Continue;
+
+    ts := PageControl1.Pages[i] as TTabSheet;
+    for j := 0 to ts.ControlCount - 1 do
+    begin
+      if not (ts.Controls[j] is TForm) then
+        Continue;
+
+      frm := ts.Controls[j] as TForm;
+
+      WinCloseCanceled := False;          // vor jedem Close zurücksetzen
+
+      // Bekannte Formulartypen – jedes kann sein eigenes Close haben
+      if frm is TfmQueryWindow then
+        (frm as TfmQueryWindow).Close
+      else if frm is TfmTableManage then
+        (frm as TfmTableManage).Close
+      else if frm is TfrmEditTableDataNew then
+        (frm as TfrmEditTableDataNew).Close
+      else if frm is TfmImportTable then
+        (frm as TfmImportTable).Close
+      else
+        frm.Close;                        // Fallback für alle anderen TForm
+
+      // Hat das Formular den Schließvorgang abgebrochen?
+      if WinCloseCanceled then
+      begin
+        CloseAction := caNone;            // gesamtes Beenden stoppen
+        Exit;
+      end;
+
+      Break;  // pro Tab gibt es nur ein Formular
     end;
   end;
+
+  // ── 2. Alle Fenster sind geschlossen → Datenbanken freigeben ─
+  try
+    Screen.Cursor := crSQLWait;
+    tvMain.BeginUpdate;
+    CheckBoxFilter.Checked := False;
+    try
+      SaveAndCloseSQLHistory;
+      ReleaseRegisteredDatabases;
+      CloseAction := caFree;
+    except
+      on E: Exception do
+      begin
+        Screen.Cursor := crDefault;
+        ShowMessage('Error while closing the databases: ' + E.Message);
+        CloseAction := caFree;
+      end;
+    end;
   finally
     tvMain.EndUpdate;
   end;
@@ -1539,6 +1694,11 @@ begin
   lmServerRegistryClick(nil);
 end;
 
+procedure TfmMain.mnSQLParserClick(Sender: TObject);
+begin
+  CreateSQLParser(false, nil);
+end;
+
 procedure TfmMain.mnThemeClick(Sender: TObject);
 begin
   frmThemeSelector.ShowModal;
@@ -1546,6 +1706,7 @@ end;
 
 procedure TfmMain.mnuPascalScriptClick(Sender: TObject);
 begin
+  {
   {$IFDEF CONSOLE_SCRIPTER}
   if ConsoleIDE = nil then
   begin
@@ -1556,9 +1717,12 @@ begin
 
   {$ELSE}
   if PSStudio = nil then
-    PSStudio := TfrmPSStudio.Create(nil);
+    PSStudio := TfrmPSStudio.Create(Self);
   PSStudio.ShowModal;
   {$ENDIF}
+  }
+  if PSStudio <> nil then
+    PSStudio.ShowModal;
 end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
@@ -1995,6 +2159,85 @@ begin
   frmCopyTable.Show;
 end;
 
+procedure TfmMain.CloneTableAsExternal(const ATableName: string; ADBIndex: Integer);
+var
+  Gen: TExternalTableGenerator;
+  FieldsDS: TDataSet;
+  SQL: string;
+begin
+  if not RegisteredDatabases[ADBIndex].IBDatabase.Connected then
+  begin
+    MessageDlg('Database is not connected.', mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  fmCloneToExternalTable := TfmCloneToExternalTable.Create(nil);
+  try
+    fmCloneToExternalTable.TableName := 'EXT_' + ATableName;
+
+    if fmCloneToExternalTable.ShowModal <> mrOK then
+      Exit;
+
+    Screen.Cursor := crSQLWait;
+    Application.ProcessMessages;
+
+    FieldsDS := nil;
+    try
+      FieldsDS := GetTableFieldsForExternalTable(ADBIndex, ATableName);
+
+      if (FieldsDS = nil) or FieldsDS.IsEmpty then
+      begin
+        MessageDlg('Could not retrieve table fields.', mtError, [mbOK], 0);
+        Exit;
+      end;
+
+      Gen := TExternalTableGenerator.Create;
+      try
+        Gen.TableName := fmCloneToExternalTable.TableName;
+        Gen.ExternalFileName := fmCloneToExternalTable.ExternalFileName;
+        Gen.AnalyzeFromFBTable(FieldsDS, ATableName);
+
+        SQL := Gen.GenerateCreateSQL;
+
+        if Trim(SQL) <> '' then
+          ShowCompleteQueryWindow(ADBIndex, 'Clone ' + ATableName + '#' + IntToStr(ADBIndex), SQL);
+
+        if Gen.Warnings.Count > 0 then
+          MessageDlg('Conversion Warnings',
+            Gen.Warnings.Text, mtWarning, [mbOK], 0);
+      finally
+        Gen.Free;
+      end;
+    finally
+      FieldsDS.Free;
+    end;
+  finally
+    fmCloneToExternalTable.Free;
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+// ============================================================================
+// Popup-Menü: Tabelle → Clone As External Table
+// ============================================================================
+
+procedure TfmMain.lmCloneToExternalTableClick(Sender: TObject);
+var
+  SelectedNode: TTreeNode;
+  NodeInfo: TPNodeInfos;
+  TableName: string;
+  DBIndex: Integer;
+begin
+  SelectedNode := tvMain.Selected;
+  if (SelectedNode = nil) or (SelectedNode.Data = nil) then
+    Exit;
+
+  NodeInfo := SelectedNode.Data;
+  TableName := SelectedNode.Text;
+  DBIndex := NodeInfo^.dbIndex;
+
+  CloneTableAsExternal(GetClearNodeText(TableName), DBIndex);
+end;
 
 procedure TfmMain.lmCreateDBClick(Sender: TObject);
 var cboxItems: TStringList;
@@ -2134,14 +2377,15 @@ begin
 end;
 
 procedure TfmMain.ReleaseRegisteredDatabase(dbIndex: Integer);
-var
-  i: Integer;
 begin
   if (dbIndex < 0) or (dbIndex >= Length(RegisteredDatabases)) then Exit;
 
+  // CloseDB kümmert sich um Transaktionsabschluss und DB-Trennung
+  if RegisteredDatabases[dbIndex].IBDatabase.Connected then
+    CloseDB(dbIndex, True);
+
   with RegisteredDatabases[dbIndex] do
   begin
-    CloseDB(dbIndex, True);
     FreeAndNil(IBDatabaseInfo);
     FreeAndNil(IBQuery);
     FreeAndNil(IBTransaction);
@@ -2237,7 +2481,8 @@ begin
           if not CommitOK then
           begin
             try
-              AIBTransaction.Rollback;
+              if AIBTransaction.InTransaction then
+                AIBTransaction.Rollback;
             except
               on E3: Exception do
                 MessageDlg('Rollback error for "' + dbName + '": ' + E3.Message, mtError, [mbOK], 0);
@@ -2248,7 +2493,8 @@ begin
 
       mrNo:
         try
-          AIBTransaction.Rollback;
+          if AIBTransaction.InTransaction then
+            AIBTransaction.Rollback;
         except
           on E: Exception do
           begin
@@ -2281,7 +2527,8 @@ begin
           on E2: Exception do
           begin
             try
-              AIBTransaction.Rollback;
+              if AIBTransaction.InTransaction then
+                AIBTransaction.Rollback;
             except end;
             Result := False;
           end;
@@ -2291,91 +2538,81 @@ begin
   end;
 end;
 
-// ============================================================================
-// Schließt eine einzelne DB (inkl. Tabs, TreeView-Knoten, ggf. Session)
-// Silent = True → keine Dialoge, Rollback automatisch
-// ============================================================================
-procedure TfmMain.CloseDB(dbIndex: word; Silent: Boolean = True);
+// Schließt alle eingebetteten Fenster für eine DB und gibt True zurück,
+// wenn der Benutzer das Schließen abgebrochen hat.
+function TfmMain.CloseAllTabsForDB(dbIndex: Word): Boolean;
 var
   i, j: Integer;
-  TabSheet: TTabSheet;
-  Trans: TIBTransaction;
+  ts: TTabSheet;
+  frm: TForm;
+begin
+  Result := False;  // assume success
+  for i := PageControl1.PageCount - 1 downto 1 do
+  begin
+    if PageControl1.Pages[i] is TTabSheet then
+    begin
+      ts := PageControl1.Pages[i] as TTabSheet;
+      if ts.Tag = dbIndex then  // nur Tabs dieser DB
+      begin
+        for j := 0 to ts.ControlCount - 1 do
+        begin
+          if ts.Controls[j] is TForm then
+          begin
+            frm := ts.Controls[j] as TForm;
+            WinCloseCanceled := False;
+            frm.Close;  // löst das FormClose des jeweiligen Fensters aus
+            if WinCloseCanceled then
+            begin
+              Result := True;  // Abbruch
+              Exit;
+            end;
+            Break;
+          end;
+        end;
+      end;
+    end;
+  end;
+end;
+
+procedure TfmMain.CloseDB(dbIndex: word; Silent: Boolean = True);
+var
+  DB: TIBDatabase;
+  DBName: string;
   Node: TTreeNode;
-  NodeName: string;
+  NodeInfos: TPNodeInfos;
 begin
   if (dbIndex < 0) or (dbIndex >= Length(RegisteredDatabases)) then
     Exit;
 
-  // search Node
+  DB     := RegisteredDatabases[dbIndex].IBDatabase;
+  DBName := RegisteredDatabases[dbIndex].RegRec.DatabaseName;
+
+  // Ressourcen des DB‑Knotens freigeben, damit keine DB‑Handles mehr offen sind
   Node := FindNodeByDBIndex(dbIndex);
-  NodeName := '';
-  if Assigned(Node) then
-    NodeName := Node.Text;
-
-  // Transaction
-  Trans := RegisteredDatabases[dbIndex].IBTransaction;
-  if Assigned(Trans) and Trans.InTransaction then
+  if Assigned(Node) and Assigned(Node.Data) then
   begin
-    if Silent then
+    NodeInfos := TPNodeInfos(Node.Data);
+    if Assigned(NodeInfos) then
     begin
-      try
-        Trans.Commit;
-      except
-        on E: Exception do
-          MessageDlg('Commit-Error (Silent)',
-                     'Error committing DB ' + NodeName + LineEnding + E.Message,
-                     mtError, [mbOK], 0);
-      end;
-    end
-    else
-    begin
-      if not CheckActiveTransActions(dbIndex, tctCommit, True) then
-        Exit;
+      // Extract‑ und Cache‑Objekte freigeben, die eigene DB‑Verbindungen halten
+      FreeAndNil(NodeInfos^.SimpleObjExtractor);
+      FreeAndNil(NodeInfos^.UnIntelliSenseCache);
+      // ServerSession trennen (hält eigene Verbindung offen)
+      if Assigned(NodeInfos^.ServerSession) then
+        NodeInfos^.ServerSession.Disconnect;
     end;
   end;
 
-  // close Tabs
-  for i := PageControl1.PageCount - 1 downto 1 do
-  begin
-    if (PageControl1.Pages[i] as TComponent).Tag = dbIndex then
-    begin
-      TabSheet := PageControl1.Pages[i] as TTabSheet;
-
-      // Unterformulare schließen
-      for j := 0 to TabSheet.ControlCount - 1 do
-        if TabSheet.Controls[j] is TForm then
-          (TabSheet.Controls[j] as TForm).Close;
-
-      TabSheet.Free;
-    end;
-  end;
-
-  // delete TreeNodes(DBNode.Children)
-  if Assigned(Node) then
-  begin
-    tvMain.Items.BeginUpdate;
-    try
-      if Node.Count > 0 then
-        Node.DeleteChildren;
-    finally
-      // Dummy Child
-      if (Node.Count = 0) then
-        tvMain.Items.AddChild(Node, 'Loading...');
-
-      tvMain.Items.EndUpdate;
-    end;
-  end;
-
-  // Close DB
+  // Datenbankverbindung trennen
   try
-    if Assigned(RegisteredDatabases[dbIndex].IBDatabase) and
-       RegisteredDatabases[dbIndex].IBDatabase.Connected then
-      RegisteredDatabases[dbIndex].IBDatabase.Close;
+    if Assigned(DB) and DB.Connected then
+      DB.Close;
   except
     on E: Exception do
-      MessageDlg('Database Close Error',
-                 'Error-CloseDB: ' + NodeName + LineEnding + E.Message,
-                 mtError, [mbOK], 0);
+      if not Silent then
+        MessageDlg('Database Close Error',
+                   'Error closing ' + DBName + LineEnding + E.Message,
+                   mtError, [mbOK], 0);
   end;
 end;
 
@@ -2389,37 +2626,44 @@ var
   dbIndex: Word;
 begin
   Node := tvMain.Selected;
-
   if not Assigned(Node) then Exit;
-  if Node.Level <> 1 then Exit; // only DB-Nodes
+  if Node.Level <> 1 then Exit;  // only DB-Nodes
 
-  NodeInfos := nil;
-  if Assigned(Node.Data) then
-    NodeInfos := TPNodeInfos(Node.Data);
-
+  NodeInfos := TPNodeInfos(Node.Data);
   if not Assigned(NodeInfos) then Exit;
 
   dbIndex := NodeInfos^.dbIndex;
 
-  //Close DB (Silent = True)
-  CloseDB(dbIndex, True);
+  // Erst alle zugehörigen Fenster schließen
+  if CloseAllTabsForDB(dbIndex) then
+    Exit;  // Benutzer hat abgebrochen
 
-  // Dummy Child
-  //if Assigned(Node) and (Node.Count = 0) then
-    //tvMain.Items.AddChild(Node, 'Loading...');
+  // Dann DB im Hintergrund trennen
+  CloseDB(dbIndex, True);
+  Node.Collapse(True);
 end;
 
 // ============================================================================
 // Alle DBs schließen (Silent, keine Dialoge)
 // ============================================================================
 procedure TfmMain.lmDisconnectAllClick(Sender: TObject);
-var i: Integer;
+var
+  i: Integer;
 begin
   if tvMain.Items.Count = 0 then
-    exit;
+    Exit;
 
   for i := 0 to Length(RegisteredDatabases) - 1 do
-    CloseDB(i, True);
+  begin
+    if RegisteredDatabases[i].IBDatabase.Connected then
+    begin
+      // Zuerst die Fenster der aktuellen DB schließen
+      if CloseAllTabsForDB(i) then
+        Exit;  // Benutzer hat abgebrochen – keine weiteren DBs trennen
+
+      CloseDB(i, True);
+    end;
+  end;
 end;
 
 procedure TfmMain.lmDropDomainClick(Sender: TObject);
@@ -2563,6 +2807,23 @@ end;
 procedure TfmMain.lmDropPackageProcedureClick(Sender: TObject);
 begin
 
+end;
+
+procedure TfmMain.lmDropRoleClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  QWindow: TfmQueryWindow;
+  dbIndex: integer;
+begin
+  SelNode:= tvMain.Selected;
+  dbIndex := TPNodeInfos(SelNode.Parent.Data)^.dbIndex;
+  if (SelNode <> nil) and (SelNode.Parent <> nil) then
+  begin
+    QWindow:= ShowQueryWindow(dbIndex, 'Drop Role#' + IntToStr(dbIndex));
+    QWindow.meQuery.Lines.Clear;
+    QWindow.meQuery.Lines.Add('DROP ROLE ' + SelNode.Text + ';');
+    QWindow.Show;
+  end;
 end;
 
 procedure TfmMain.lmDropStoredProcedureClick(Sender: TObject);
@@ -2926,42 +3187,42 @@ end;
 // ============================================================
 procedure TfmMain.lmNewFormClick(Sender: TObject);
 begin
+  if PSStudio = nil then
+    exit;
+
   mnuPascalScriptClick(nil);
   PSStudio.acFileNewExecute(nil);
 end;
 
 procedure TfmMain.lmEditFormClick(Sender: TObject);
-var
-  FormPath: string;
+var FormPath: string;
 begin
+  if PSStudio = nil then
+    exit;
+
   FormPath := GetFormFilePath;
   if FormPath = '' then
   begin
     ShowMessage('Could not determine form file path.');
     Exit;
   end;
-
-  if PSStudio = nil then
-    PSStudio := TfrmPSStudio.Create(nil);
 
   PSStudio.OpenFileSilent(FormPath);
   PSStudio.ShowModal;
 end;
 
 procedure TfmMain.lmExecuteFormClick(Sender: TObject);
-var
-  FormPath: string;
+var FormPath: string;
 begin
+  if PSStudio = nil then
+    exit;
+
   FormPath := GetFormFilePath;
   if FormPath = '' then
   begin
     ShowMessage('Could not determine form file path.');
     Exit;
   end;
-
-  if PSStudio = nil then
-    PSStudio := TfrmPSStudio.Create(nil);
-  PSStudio.Visible := false;
 
   PSStudio.OpenFileSilent(FormPath);
   PSStudio.acDebugRunExecute(nil);
@@ -4726,7 +4987,7 @@ begin
   begin
     fmEnterPass.edPassword.Clear;
     try
-      fmEnterPass.cbRole.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
+      fmEnterPass.edtRole.Text := '';
     except
     end;
     if fmEnterPass.ShowModal = mrOk then
@@ -6056,7 +6317,12 @@ begin
   if Result = nil then
   begin
     // No opened query window
-    Result:= TfmQueryWindow.Create(Application);
+    Result := TfmQueryWindow.Create(Application);
+    Result.tbRun.Enabled := false;
+
+    Result.SetTransactionButtonsState(false);
+    Result.tbRun.Enabled := false;
+
     ATab:= TTabSheet.Create(self);
     ATab.Parent:= PageControl1;
     Result.Parent:= ATab;
@@ -6224,8 +6490,8 @@ begin
 
           // 3. Foreign Keys
           Item := tvMain.Items.AddChild(Node, 'Foreign Keys');
-          Item.ImageIndex := 29;
-          Item.SelectedIndex := 29;
+          Item.ImageIndex := 88;
+          Item.SelectedIndex := 88;
           TPNodeInfos(Item.Data)^.ObjectType := tvotForeignKeyRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6233,8 +6499,8 @@ begin
 
           // 4. Unique Constraints
           Item := tvMain.Items.AddChild(Node, 'Unique Constraints');
-          Item.ImageIndex := 82;
-          Item.SelectedIndex := 82;
+          Item.ImageIndex := 87;
+          Item.SelectedIndex := 87;
           TPNodeInfos(Item.Data)^.ObjectType := tvotUniqueConstraintRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6242,8 +6508,8 @@ begin
 
           // 5. Check Constraints
           Item := tvMain.Items.AddChild(Node, 'Check Constraints');
-          Item.ImageIndex := 82;
-          Item.SelectedIndex := 82;
+          Item.ImageIndex := 85;
+          Item.SelectedIndex := 85;
           TPNodeInfos(Item.Data)^.ObjectType := tvotCheckConstraintRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6251,8 +6517,8 @@ begin
 
           // 6. Not Null Constraints
           Item := tvMain.Items.AddChild(Node, 'Not Null Constraints');
-          Item.ImageIndex := 82;
-          Item.SelectedIndex := 82;
+          Item.ImageIndex := 86;
+          Item.SelectedIndex := 86;
           TPNodeInfos(Item.Data)^.ObjectType := tvotNotNullConstraintRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6278,8 +6544,8 @@ begin
 
           // 9. References Root
           Item := tvMain.Items.AddChild(Node, 'References');
-          Item.ImageIndex := 8;
-          Item.SelectedIndex := 8;
+          Item.ImageIndex := 75;
+          Item.SelectedIndex := 75;
           TPNodeInfos(Item.Data)^.ObjectType := tvotTableReferencesRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6288,8 +6554,8 @@ begin
 
           // 10. Permissions Root
           Item := tvMain.Items.AddChild(Node, 'Permissions');
-          Item.ImageIndex := 8;
-          Item.SelectedIndex := 8;
+          Item.ImageIndex := 31;
+          Item.SelectedIndex := 31;
           TPNodeInfos(Item.Data)^.ObjectType := tvotTablePermissionsRoot;
           TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
           TPNodeInfos(Item.Data)^.Refreshable := true;
@@ -6297,7 +6563,7 @@ begin
 
 
           // Node-Text mit Gesamtzahl aktualisieren
-          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+          //Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
         // Fields Root unter Tabelle
@@ -6333,7 +6599,7 @@ begin
             [],
             AlwaysQuoteIdentifiers,
             Node,
-            29
+            88
           );
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
@@ -6348,7 +6614,7 @@ begin
             [],
             AlwaysQuoteIdentifiers,
             Node,
-            82
+            87
           );
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
@@ -6363,7 +6629,7 @@ begin
             [],
             AlwaysQuoteIdentifiers,
             Node,
-            82
+            85
           );
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
@@ -6378,7 +6644,7 @@ begin
             [],
             AlwaysQuoteIdentifiers,
             Node,
-            82
+            86
           );
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
@@ -7932,6 +8198,11 @@ begin
   frmBulkClone.ShowModal;
 end;
 
+procedure TfmMain.mnCheckForUpdateClick(Sender: TObject);
+begin
+   frmUpdateChecker.ShowModal;
+end;
+
 procedure TfmMain.mnDataEditorClick(Sender: TObject);
 var frmDataEditor: TfrmDataEditor;
 begin
@@ -8107,8 +8378,8 @@ end;
 (**********  About  ****************)
 procedure TfmMain.mnAboutClick(Sender: TObject);
 begin
-  fmAbout.bbtnClose.Visible := true;
-  fmAbout.ShowModal;
+  //fmAbout.bbtnClose.Visible := true;
+  //fmAbout.ShowModal;
 end;
 
 (****************  Unregister database *************)
@@ -8156,8 +8427,9 @@ begin
   begin
     CleanNodeText := GetClearNodeText(SelNode.Text);
     QWindow:= ShowQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex,  CleanNodeText,  SelNode.Data);
-    QWindow.meQuery.Lines.Text:= 'select * from ' + MakeObjectNameQuoted(CleanNodeText);
+    QWindow.meQuery.Lines.Text:= 'select first 1000 * from ' + MakeObjectNameQuoted(CleanNodeText);
     QWindow.bbRunClick(nil);
+    QWindow.SetTransactionButtonsState(false);
     QWindow.Show;
   end;
 end;
@@ -8194,7 +8466,7 @@ begin
     end;
 end;}
 
-procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
+{procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
 var
   i: Integer;
   ts: TTabSheet;
@@ -8228,6 +8500,29 @@ begin
   // Danach das Tab selbst freigeben
   if not (ctrl is TfmQueryWindow) then
     ts.Free;
+end;}
+
+procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
+var
+  i: Integer;
+  ts: TTabSheet;
+  ctrl: TControl;
+begin
+  ts := PageControl1.ActivePage;
+  if (ts = nil) or (ts.TabIndex = 0) then Exit;
+
+  for i := 0 to ts.ControlCount - 1 do
+  begin
+    ctrl := ts.Controls[i];
+    if ctrl is TForm then
+    begin
+      // Für QueryWindows löst Close → FormClose alles aus (inkl. Transaktionsdialog)
+      (ctrl as TForm).Close;
+      Break;
+    end
+    else
+      ctrl.Free;
+  end;
 end;
 
 function IsExcluded(Index: Integer): Boolean;
@@ -8934,161 +9229,173 @@ var
   NodeInfo: TPNodeInfos;
   ServerNode: TTreeNode;
   ServerSession: TServerSession;
-  ServerRec: TServerRecord;
-  SavePwd: boolean;
   ServerErrStr: string;
   WasDBConnectedOnEntry: Boolean;
 begin
   try
-  //tvMain.Enabled := false;
-  Screen.Cursor := crSQLWait;
-  Application.ProcessMessages;
+    Screen.Cursor := crSQLWait;
+    Application.ProcessMessages;
 
-  WasDBConnectedOnEntry := true;
-  AllowExpansion := True;
+    WasDBConnectedOnEntry := True;
+    AllowExpansion := True;
 
-  if (Node = nil) or (Node.Data = nil) then
-    Exit;
-
-  NodeInfo := Node.Data;
-
-  // Database nodes are always Level 1
-  if Node.Level = 1 then
-  begin
-    {if not IsServerReachable(Node.Parent.Text, ServerErrStr) then
-    begin
-      AllowExpansion := false;
-      MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    if (Node = nil) or (Node.Data = nil) then
       Exit;
-    end;}
 
+    NodeInfo := Node.Data;
 
-    Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
-
-    // Only if no password is set → ask for connection
-    if Rec.Password = '' then
+    // ============================================================
+    // SERVER-NODE (Level 0) - Server-Login mit TfrmLoginServiceManager
+    // ============================================================
+    if Node.Level = 0 then
     begin
-      SavePwd := false;
-      if not ConnectToDBAs(NodeInfo^.dbIndex) then
+      if not IsServerReachable(Node.Text, ServerErrStr) then
       begin
-        //Connection failed → do not expand
         AllowExpansion := False;
+        if ServerErrStr <> 'Login cancelled by user.' then
+          MessageDlg(ServerErrStr, mtError, [mbOK], 0);
         Exit;
       end;
-    end else
-      SavePwd := true;
 
-    Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;  //neu lesen, in ConnectToDBAs werden User und pwd gespeichert
-    if not RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected then
-    begin
-      RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
-      RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := Rec.Password;
-      RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := false;
-      RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected := true;
-      WasDBConnectedOnEntry := false;
-    end;
-
-    //wenn connect erfolg den server infos holen und in serverfile speichern
-    ServerNode := GetAncestorAtLevel(Node, 0);
-    ServerSession := TServerSession(TPNodeInfos(ServerNode.Data)^.ServerSession);
-
-    if ServerSession.FBVersionMajor = 0 then
-    begin
-      ServerSession.UserName := Rec.UserName;
-      ServerSession.Password := Rec.Password;
-      if ServerSession.IBXConnect then
+      // Server-Session im Node speichern
+      if TPNodeInfos(Node.Data)^.ServerSession = nil then
       begin
-        //Rec.ServerVersionMajor := ServerSession.FBVersionMajor;
-        //Rec.ServerVersionMinor := ServerSession.FBVersionMinor;
-        //Rec.ServerVersionString := ServerSession.FBVersionString;
-        ServerRec := BuildServerRecordFromSession(ServerSession, SavePwd);
-        SaveServerDataToFile(ServerRec);
+        ServerSession := CreateServerSessionFromRegistry(Node.Text);
+        TPNodeInfos(Node.Data)^.ServerSession := ServerSession;
+
+        if ServerSession.IBXConnect then
+        begin
+          TPNodeInfos(Node.Data)^.ServerVersionMajor := ServerSession.FBVersionMajor;
+          TPNodeInfos(Node.Data)^.ServerVersionMinor := ServerSession.FBVersionMinor;
+          TPNodeInfos(Node.Data)^.ServerVersionString := ServerSession.FBVersionString;
+          ServerSession.Disconnect;
+        end;
       end;
+
+      if (Node.Count > 0) and (Node.Items[0].Text = 'Loading...') then
+      begin
+        Node.Items[0].Delete;
+      end;
+
+      Exit;
     end;
 
-    Rec.ServerVersionMajor := ServerSession.FBVersionMajor;
-    Rec.ServerVersionMinor := ServerSession.FBVersionMinor;
-    Rec.ServerVersionString := ServerSession.FBVersionString;
-
-    if (Node.Items[0].Text = 'Loading...') then
+    // ============================================================
+    // DATABASE-NODE (Level 1) - Login über OnDatabaseLogin-Event
+    // ============================================================
+    if Node.Level = 1 then
     begin
-      Node.Items[0].Delete;
-      AddRootObjects(Node, ServerSession.FBVersionMajor);
-    end;
+      Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
-    SetConnection(NodeInfo^.dbIndex);
+      // Nur wenn DB noch nicht verbunden ist
+      if not RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected then
+      begin
+        // DB-Params setzen
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := Rec.Password;
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := true;
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
 
-    // Connection successful → update timestamp
-    RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened := Now;
-    RegisteredDatabases[NodeInfo^.dbIndex].OrigRegRec.LastOpened := Now;
+        try
+          RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected := True;
+          WasDBConnectedOnEntry := False;
+        except
+          on E: Exception do
+          begin
+            AllowExpansion := False;
+            if not (E is EAbort) then
+              MessageDlg('Database connection failed: ' + E.Message, mtError, [mbOK], 0);
+            Exit;
+          end;
+        end;
+      end;
 
-    // Database is now connected → Extractor initialisieren
-    if NodeInfo^.SimpleObjExtractor = nil then
-    begin
-      NodeInfo^.SimpleObjExtractor := TSimpleObjExtractor.Create(NodeInfo^.dbIndex);
-    end else
-    begin
-      // Vorhandenen Extractor zurücksetzen, aber nicht freigeben
-      if MainTreeViewAlwaysRefresh or   MetaDataChanged  or (not WasDBConnectedOnEntry) then
+      // Neu lesen (kann durch OnLogin geändert worden sein)
+      Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
+
+      // Server-Version holen
+      ServerNode := GetAncestorAtLevel(Node, 0);
+      if Assigned(ServerNode) and Assigned(ServerNode.Data) then
+      begin
+        ServerSession := TServerSession(TPNodeInfos(ServerNode.Data)^.ServerSession);
+        if Assigned(ServerSession) then
+        begin
+          Rec.ServerVersionMajor := ServerSession.FBVersionMajor;
+          Rec.ServerVersionMinor := ServerSession.FBVersionMinor;
+          Rec.ServerVersionString := ServerSession.FBVersionString;
+          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionMajor := ServerSession.FBVersionMajor;
+          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionMinor := ServerSession.FBVersionMinor;
+          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionString := ServerSession.FBVersionString;
+        end;
+      end;
+
+      // Root-Objekte laden
+      if (Node.Count > 0) and (Node.Items[0].Text = 'Loading...') then
+      begin
+        Node.Items[0].Delete;
+        if Assigned(ServerSession) then
+          AddRootObjects(Node, ServerSession.FBVersionMajor)
+        else
+          AddRootObjects(Node, 0);
+      end;
+
+      SetConnection(NodeInfo^.dbIndex);
+
+      RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened := Now;
+      RegisteredDatabases[NodeInfo^.dbIndex].OrigRegRec.LastOpened := Now;
+
+      // Extractor initialisieren
+      if NodeInfo^.SimpleObjExtractor = nil then
+        NodeInfo^.SimpleObjExtractor := TSimpleObjExtractor.Create(NodeInfo^.dbIndex)
+      else if MainTreeViewAlwaysRefresh or MetaDataChanged or (not WasDBConnectedOnEntry) then
       begin
         NodeInfo^.SimpleObjExtractor.ResetExtract;
-        MetaDataChanged := false;
+        MetaDataChanged := False;
       end;
-    end;
 
-    if NodeInfo^.UnIntelliSenseCache = nil then
-    begin
-      //Application.QueueAsyncCall(@CreateIntelliSenseCache, 0)
-      NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor);
-    end else
-    begin
-      // Vorhandene Cache zurücksetzen, aber nicht freigeben
-      // inifile.ReloadCacheOnNodeExpand, MetaDataChanged = turbocommon global variable
-      if ReloadCacheOnNodeExpand or MetaDataChanged   or (not WasDBConnectedOnEntry) then
+      if NodeInfo^.UnIntelliSenseCache = nil then
+        NodeInfo^.UnIntelliSenseCache := TUnIntelliSenseCache.Create(NodeInfo^.SimpleObjExtractor)
+      else if ReloadCacheOnNodeExpand or MetaDataChanged or (not WasDBConnectedOnEntry) then
       begin
         NodeInfo^.UnIntelliSenseCache.RefreshCache;
-        MetaDataChanged := false;
+        MetaDataChanged := False;
       end;
     end;
 
-  end;
-
-  if Node.Level > 1 then
-  begin
-    if (Node.Count = 1) and (Node.Items[0].Text = 'Loading...') then
+    // ============================================================
+    // OBJECT-NODE (Level > 1)
+    // ============================================================
+    if Node.Level > 1 then
     begin
-      Node.Items[0].Delete;
+      if (Node.Count = 1) and (Node.Items[0].Text = 'Loading...') then
+        Node.Items[0].Delete;
+
+      if MainTreeViewAlwaysRefresh or (Node.Count = 0) then
+      begin
+        tvMain.Selected := Node;
+        tvMain.BeginUpdate;
+        FillObjectRoot(Node);
+        tvMain.EndUpdate;
+        Application.ProcessMessages;
+      end;
     end;
 
-    if MainTreeViewAlwaysRefresh or (Node.Count = 0) then
+  finally
+    Application.ProcessMessages;
+
+    if IsFilterScopeNode(Node) then
     begin
-      tvMain.Selected := Node;
       tvMain.BeginUpdate;
-      FillObjectRoot(Node);
-      tvMain.EndUpdate;
-      Application.ProcessMessages;
+      try
+        ApplyFilterToAllNodes;
+      finally
+        tvMain.EndUpdate;
+      end;
     end;
 
+    Screen.Cursor := crDefault;
+    Application.ProcessMessages;
   end;
-finally
-  Application.ProcessMessages;
-  //tvMain.Enabled := true;
-
-  if IsFilterScopeNode(Node) then
-  begin
-    tvMain.BeginUpdate;
-    try
-     // ApplyVisibilityToChildren(Node);
-      ApplyFilterToAllNodes;
-    finally
-      tvMain.EndUpdate;
-    end;
-  end;
-
-  Screen.Cursor := crDefault;
-  Application.ProcessMessages;
-end;
-
 end;
 
 // ============================================================================
@@ -9168,8 +9475,9 @@ try
       if tvMain.Selected.Text = 'Query Window' then
       begin
         QWindow:= ShowQueryWindow(TPNodeInfos(tvMain.Selected.Data)^.dbIndex, 'SQLdb#:' + IntToStr(DBIndex), tvMain.Selected.Data);
+        QWindow.tbRun.Enabled := false;
         QWindow.Show;
-        QWindow.tbCommit.Enabled := true;
+        //QWindow.tbCommit.Enabled := true;
       end else // Expand object
       begin
         tvMainExpanded(nil, Node);
@@ -9574,12 +9882,15 @@ try
 
               // Table Trigger (unter Tabelle)
               tvotTableTriggerRoot: begin
-                try
-                  TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 8);
-                except
-                  on E: Exception do
-                    ShowMessage('Error while opening Table Trigger: ' + E.Message);
+                if TPNodeInfos(Node.Parent.Data)^.ObjectType = tvotTable then
+                begin
+                  try
+                    TableName := GetClearNodeText(Node.Parent.Text);
+                    ShowTableManagement(DBIndex, TableName, NodeInfo, 8);
+                  except
+                    on E: Exception do
+                      ShowMessage('Error while opening Table Trigger: ' + E.Message);
+                  end;
                 end;
               end;
 
@@ -9965,11 +10276,13 @@ begin
               IBDatabase.Params.Add('lc_ctype=' + Rec.Charset);
 
             IBDatabase.Params.Add('sql_dialect=' + Rec.SQLDialect);
-            IBDatabase.Params.Add('isc_dpb_num_buffers=1024');
+            IBDatabase.Params.Add('isc_dpb_num_buffers=' + IntToStr(NumBuffers));
             IBDatabase.Params.Add('isc_dpb_force_write=1');
 
             IBDatabase.DefaultTransaction := IBTransaction;
-            IBDatabase.LoginPrompt := (Rec.Password = '');
+
+            IBDatabase.LoginPrompt := true;
+            IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
 
             IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
             IBDatabaseInfo.Database := IBDatabase;
