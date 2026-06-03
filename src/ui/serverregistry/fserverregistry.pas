@@ -591,6 +591,7 @@ begin
     ApplyServerRecordToSession(Rec, FServerSession);
   end;
 
+  //chkSavePassword.Checked := true; // save pwd allways
   SavePwd := chkSavePassword.Checked;
 
   if SavePwd then

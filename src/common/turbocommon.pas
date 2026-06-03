@@ -15,6 +15,8 @@ uses
   interfaces, LCLPlatformDef,
   DB,  RegExpr,  FileUtil,
 
+  floginservicemanager,
+
   fpstdexports,
   fpDataExporter,
 
@@ -194,6 +196,7 @@ type
 
 
 type
+
   TServerRecord = packed record
     ServerName: string[127];
     ServerAlias: string[127];
@@ -280,20 +283,23 @@ type
 
   TPNodeInfos = ^TNodeInfos;
   TNodeInfos = record
-    dbIndex: integer;
-    ObjectType: TTreeViewObjectType;
-    Refreshable: boolean;
-    PopupMenuTag: integer; //reserve
-    ImageIndex: Integer;   //reserve
-    ViewForm,
-    EditorForm,
-    NewForm,
-    ExecuteForm: TForm;
-    SimpleObjExtractor: TSimpleObjExtractor;
-    UnIntelliSenseCache: TUnIntelliSenseCache;
-    ServerSession: TServerSession;
-    Visible: boolean;
-  end;
+      dbIndex: integer;
+      ObjectType: TTreeViewObjectType;
+      Refreshable: boolean;
+      PopupMenuTag: integer;
+      ImageIndex: Integer;
+      ViewForm,
+      EditorForm,
+      NewForm,
+      ExecuteForm: TForm;
+      SimpleObjExtractor: TSimpleObjExtractor;
+      UnIntelliSenseCache: TUnIntelliSenseCache;
+      ServerSession: TServerSession;
+      ServerVersionMajor: word;
+      ServerVersionMinor: word;
+      ServerVersionString: string;
+      Visible: boolean;
+    end;
 
 type
   TForeignKeyInfo = record
@@ -351,6 +357,8 @@ const
   TmpDir = 'temp';
 
 var
+   WinCloseCanceled: Boolean = False;
+
     MainTreeView: TTreeView;
 
     fIniFileName: string;
@@ -424,6 +432,8 @@ var
     AutoFilter: boolean;
 
     //QueryWindow
+    QWAutoCommit: boolean;
+    QWExecMultiStatementsAsScript: boolean;
     QWShowNavigator: boolean;
     QWEditorBackgroundColor: TColor;
     QWEditorFontName: string;
@@ -452,7 +462,27 @@ var
     CSVQuoteOuterWhitespace: boolean;
 
 
+    //UpdateChecker
+    AutoSearchOnProgramStart: boolean;
+    UnzipAfterDownload: boolean;
+    RunNewVersionAfterUnzip: boolean;
+    DeleteOldVersions: boolean;
+
+    //Database
+    NumBuffers: integer;
+
     //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+    // Session-Cache für Passwörter
+var    SessionPasswordCache: TStringList;
+  function  GetServerSessionPassword(const AServerName: string): string;
+  procedure SetServerSessionPassword(const AServerName, APassword: string);
+  procedure ClearServerSessionPassword(const AServerName: string);
+  function  GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
+  procedure SetDBSessionPassword(const AServerName, ADatabaseName, APassword: string);
+  procedure ClearDBSessionPassword(const AServerName, ADatabaseName: string);
+  procedure ClearAllSessionPasswords;
 
 //Forms
 function GetFormsBasePath: string;
@@ -484,6 +514,7 @@ function NeedsCommit(Q: TIBQuery): Boolean;
 function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 
 function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
+function CreateServerSessionFromRegistry(const AServerName: string): TServerSession;
 
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
 
@@ -491,6 +522,7 @@ function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
 function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
 function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
 
+function GetDBIndexByDatabase(Database: TIBDatabase): Integer;
 function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
 
 function LoadClientLibIBX(ALib: string): boolean;
@@ -503,6 +535,7 @@ function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: 
 function  CloseDB(dbIndex: integer): boolean;
 
 function DeleteDBRegistrationFromFile(const ATitle: string; const AServerName: string): Boolean;
+function EditRegisteredDB(var ARec: TRegisteredDatabase): Boolean;
 
 procedure MarkAllServerDatabasesDeleted(const ServerName: string);
 procedure MarkAllDatabasesDeleted;
@@ -608,9 +641,186 @@ function FontStylesToStr(AStyles: TFontStyles): string;
 function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
 
 
+//ExternalTable
+function GetTableFieldsForExternalTable(ADBIndex: Integer;
+  const ATableName: string): TDataSet;
+
+function CountChar(const S: string; const C: Char): Integer;
+procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
+                            ATxParams: TStrings);
+
+
 implementation
 
 uses Reg;
+
+procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
+                            ATxParams: TStrings);
+var
+  Rec: TRegisteredDatabase;
+  CachedPwd: string;
+  ErrMsg: string;
+begin
+  ErrMsg := '';
+
+  try
+    // 1. Validierung
+    if (ADBIndex < 0) or (ADBIndex >= Length(RegisteredDatabases)) then
+      raise Exception.Create('Invalid DBIndex: ' + IntToStr(ADBIndex));
+
+    Rec := RegisteredDatabases[ADBIndex].RegRec;
+
+    // 2. Disconnect (Fehler ignorieren)
+    if Assigned(ATransaction) and ATransaction.InTransaction then
+      try ATransaction.Rollback; except end;
+
+    if Assigned(ADatabase) and ADatabase.Connected then
+      try ADatabase.Connected := false; except end;
+
+    // 3. Credentials setzen
+    ADatabase.Params.Values['user_name'] := Rec.UserName;
+
+    if Rec.Password <> '' then
+      ADatabase.Params.Values['password'] := Rec.Password
+    else
+    begin
+      CachedPwd := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+      if CachedPwd <> '' then
+        ADatabase.Params.Values['password'] := CachedPwd
+      else
+        ADatabase.Params.Values['password'] := '';
+    end;
+
+    if Rec.Role <> '' then
+      ADatabase.Params.Values['sql_role_name'] := Rec.Role;
+    if Rec.Charset <> '' then
+      ADatabase.Params.Values['lc_ctype'] := Rec.Charset;
+
+    // 4. OnLogin-Handler + LoginPrompt
+    ADatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+    ADatabase.LoginPrompt := True;
+
+    // 5. Connect
+    if not ADatabase.Connected then
+      ADatabase.Connected := true;
+
+    // 6. Transaktionsparameter zuweisen (falls übergeben), dann starten
+    if Assigned(ATransaction) then
+    begin
+      if Assigned(ATxParams) then
+        ATransaction.Params.Assign(ATxParams);  // <-- Parameter übernehmen
+
+      if not ATransaction.InTransaction then
+        ATransaction.StartTransaction;
+    end;
+
+  except
+    on E: Exception do
+    begin
+      // Bei Login-Fehler: Session-Cache löschen wenn Passwort daraus kam
+      if (Rec.Password = '') and (ADBIndex >= 0) then
+        ClearDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+
+      ErrMsg := 'ConnectDBPrepared failed:' + sLineBreak +
+                '  Server: ' + Rec.ServerName + sLineBreak +
+                '  Database: ' + Rec.DatabaseName + sLineBreak +
+                '  Error: ' + E.Message;
+      raise Exception.Create(ErrMsg);
+    end;
+  end;
+end;
+
+// ============================================================================
+// Session-Cache für temporäre Passwörter (nicht in Datei gespeichert)
+// ============================================================================
+function GetServerSessionPassword(const AServerName: string): string;
+var
+  idx: Integer;
+begin
+  Result := '';
+  if not Assigned(SessionPasswordCache) then
+    Exit;
+
+  idx := SessionPasswordCache.IndexOfName('SRV_' + UpperCase(AServerName));
+  if idx >= 0 then
+    Result := SessionPasswordCache.ValueFromIndex[idx];
+end;
+
+procedure SetServerSessionPassword(const AServerName, APassword: string);
+var
+  idx: Integer;
+  Key: string;
+begin
+  if not Assigned(SessionPasswordCache) then
+    SessionPasswordCache := TStringList.Create;
+
+  Key := 'SRV_' + UpperCase(AServerName);
+  idx := SessionPasswordCache.IndexOfName(Key);
+  if idx >= 0 then
+    SessionPasswordCache[idx] := Key + '=' + APassword
+  else
+    SessionPasswordCache.Add(Key + '=' + APassword);
+end;
+
+procedure ClearServerSessionPassword(const AServerName: string);
+var
+  idx: Integer;
+begin
+  if not Assigned(SessionPasswordCache) then
+    Exit;
+
+  idx := SessionPasswordCache.IndexOfName('SRV_' + UpperCase(AServerName));
+  if idx >= 0 then
+    SessionPasswordCache.Delete(idx);
+end;
+
+function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
+var
+  idx: Integer;
+begin
+  Result := '';
+  if not Assigned(SessionPasswordCache) then
+    Exit;
+
+  idx := SessionPasswordCache.IndexOfName('DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName));
+  if idx >= 0 then
+    Result := SessionPasswordCache.ValueFromIndex[idx];
+end;
+
+procedure SetDBSessionPassword(const AServerName, ADatabaseName, APassword: string);
+var
+  idx: Integer;
+  Key: string;
+begin
+  if not Assigned(SessionPasswordCache) then
+    SessionPasswordCache := TStringList.Create;
+
+  Key := 'DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName);
+  idx := SessionPasswordCache.IndexOfName(Key);
+  if idx >= 0 then
+    SessionPasswordCache[idx] := Key + '=' + APassword
+  else
+    SessionPasswordCache.Add(Key + '=' + APassword);
+end;
+
+procedure ClearDBSessionPassword(const AServerName, ADatabaseName: string);
+var
+  idx: Integer;
+begin
+  if not Assigned(SessionPasswordCache) then
+    Exit;
+
+  idx := SessionPasswordCache.IndexOfName('DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName));
+  if idx >= 0 then
+    SessionPasswordCache.Delete(idx);
+end;
+
+procedure ClearAllSessionPasswords;
+begin
+  if Assigned(SessionPasswordCache) then
+    SessionPasswordCache.Clear;
+end;
+//////////////////////////////////////////////////
 
 function GetFormsBasePath: string;
 begin
@@ -930,31 +1140,114 @@ function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
 var
   ServerRecord: TServerRecord;
   ServerSession: TServerSession;
+  LoginForm: TfrmLoginServiceManager;
+  UserName, Password: string;
 begin
   Result := False;
   ErrorStr := '';
+  ServerSession := nil;
 
   try
     ServerRecord := GetServerRecordFromFileByName(AServerName);
+
+    UserName := ServerRecord.UserName;
+    Password := ServerRecord.Password;
+
+    // 1. Wenn kein Passwort gespeichert → Session-Cache prüfen
+    if (Password = '') and (UserName <> '') then
+      Password := GetServerSessionPassword(AServerName);
+
+    // 2. Wenn immer noch kein Passwort → Server-Login-Dialog
+    if (Password = '') and (UserName <> '') then
+    begin
+      LoginForm := TfrmLoginServiceManager.Create(nil);
+      try
+        LoginForm.lbSever.Caption := AServerName;
+        LoginForm.edtUserName.Text := UserName;
+        LoginForm.edtPassword.Text := '';
+        LoginForm.chkBoxSavePwd.Checked := False;
+
+        if LoginForm.ShowModal <> mrOK then
+        begin
+          ErrorStr := 'Login cancelled by user.';
+          Exit;
+        end;
+
+        UserName := LoginForm.edtUserName.Text;
+        Password := LoginForm.edtPassword.Text;
+
+        if LoginForm.chkBoxSavePwd.Checked then
+        begin
+          // Dauerhaft in Datei speichern
+          ServerRecord.UserName := UserName;
+          ServerRecord.Password := Password;
+          SaveServerDataToFile(ServerRecord);
+        end
+        else
+        begin
+          // NUR in Session-Cache (temporär)
+          SetServerSessionPassword(AServerName, Password);
+        end;
+      finally
+        LoginForm.Free;
+      end;
+    end;
+
+    // 3. ServerSession erstellen und verbinden
     ServerSession := TServerSession.Create(
       AServerName, '', '', '', '', TCP, '', '', '', '', '', 0, 0, False, False, 0, 0, 0
     );
 
     ApplyServerRecordToSession(ServerRecord, ServerSession);
+    ServerSession.UserName := UserName;
+    ServerSession.Password := Password;
 
     if not ServerSession.Connected then
       if not ServerSession.IBXConnect then
       begin
         ErrorStr := ServerSession.ErrorStr;
+        // Bei Fehler: Session-Cache löschen
+        ClearServerSessionPassword(AServerName);
         Exit;
       end;
 
     Result := True;
 
   finally
-    ServerSession.Disconnect;
-    ServerSession.Free;
+    if Assigned(ServerSession) then
+    begin
+      ServerSession.Disconnect;
+      ServerSession.Free;
+    end;
   end;
+end;
+
+function CreateServerSessionFromRegistry(const AServerName: string): TServerSession;
+var
+  ServerRecord: TServerRecord;
+begin
+  ServerRecord := GetServerRecordFromFileByName(AServerName);
+
+  Result := TServerSession.Create(
+    AServerName,
+    ServerRecord.ServerAlias,
+    ServerRecord.UserName,
+    ServerRecord.Password,
+    ServerRecord.Role,
+    ServerRecord.Protocol,
+    ServerRecord.Port,
+    ServerRecord.Charset,
+    ServerRecord.RootPath,
+    ServerRecord.ClientLibraryPath,
+    ServerRecord.ConfigFilePath,
+    ServerRecord.VersionMinor,
+    ServerRecord.VersionMajor,
+    ServerRecord.LoadRegisteredClientLib,
+    ServerRecord.IsEmbedded,
+    ServerRecord.ConnectTimeoutMS,
+    ServerRecord.RetryCount,
+    ServerRecord.QueryTimeoutMS
+  );
 end;
 
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
@@ -1197,6 +1490,54 @@ begin
         Result := True;
         Exit;
       end;
+    end;
+
+  finally
+    CloseFile(F);
+  end;
+end;
+
+function EditRegisteredDB(var ARec: TRegisteredDatabase): Boolean;
+var
+  F: file of TRegisteredDatabase;
+  FileName: string;
+  Rec: TRegisteredDatabase;
+  Found: Boolean;
+  PosIndex: Integer;
+begin
+  Result := False;
+  Found := False;
+  PosIndex := -1;
+
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+  if not FileExists(FileName) then
+    Exit;
+
+  AssignFile(F, FileName);
+  try
+    FileMode := 2;
+    Reset(F);
+
+    // Nach dem passenden Record suchen (ServerName + DatabaseName)
+    while not Eof(F) do
+    begin
+      Read(F, Rec);
+      if SameText(Trim(Rec.ServerName), Trim(ARec.ServerName)) and
+         SameText(Trim(Rec.DatabaseName), Trim(ARec.DatabaseName)) then
+      begin
+        PosIndex := FilePos(F) - 1;
+        Found := True;
+        Break;
+      end;
+    end;
+
+    if Found then
+    begin
+      // Record an der gefundenen Position überschreiben
+      Seek(F, PosIndex);
+      Write(F, ARec);
+      Result := True;
     end;
 
   finally
@@ -1920,6 +2261,8 @@ begin
   AutoFilter                  :=  fIniFile.ReadBool('MainTreeView',  'AutoFilter', false);
 
   //QueryWindow
+  QWAutoCommit             := fIniFile.ReadBool('QueryWindow',  'AutoCommit', true);
+  QWExecMultiStatementsAsScript := fIniFile.ReadBool('QueryWindow',  'ExecMultiStatementsAsScript', true);
   QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
   QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clSilver'));
   QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
@@ -1956,6 +2299,19 @@ begin
   CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
   CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
   CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
+
+
+  //UpdateChecker
+  AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
+  UnzipAfterDownload := fIniFile.ReadBool('UpdateChecker','UnzipAfterDownload', True);
+  RunNewVersionAfterUnzip:= fIniFile.ReadBool('UpdateChecker','RunNewVersionAfterUnzip', false);
+
+
+  DeleteOldVersions := fIniFile.ReadBool('UpdateChecker','DeleteOldVersions', false);
+
+
+  //Database
+  NumBuffers := fIniFile.ReadInteger('Database','NumBuffers', 1024);
 end;
 
 procedure WriteIniFile;
@@ -2015,6 +2371,8 @@ begin
   fIniFile.WriteBool('MainTreeView',  'AutoFilter', AutoFilter);
 
   //QueryWindow
+  fIniFile.WriteBool('QueryWindow',  'AutoCommit', QWAutoCommit);
+  fIniFile.WriteBool('QueryWindow',  'ExecMultiStatementsAsScript', QWExecMultiStatementsAsScript);
   fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
   fIniFile.WriteString('QueryWindow',  'BackgroundColor', ColorToString(QWEditorBackgroundColor));
   fIniFile.WriteString('QueryWindow',  'FontName', QWEditorFontName);
@@ -2048,6 +2406,16 @@ begin
     fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
     fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
     fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
+
+
+    //UpdateChecker
+    fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
+    fIniFile.WriteBool('UpdateChecker','UnzipAfterDownload', UnzipAfterDownload);
+    fIniFile.WriteBool('UpdateChecker','RunNewVersionAfterUnzip', RunNewVersionAfterUnzip);
+    fIniFile.WriteBool('UpdateChecker','DeleteOldVersions', DeleteOldVersions);
+
+    //Database
+    fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
 end;
 
 
@@ -2131,7 +2499,7 @@ begin
           CopyFile(SourceFile, TargetFile);
       end;
     until FindNext(SearchRec) <> 0;
-    FindClose(SearchRec);
+    SysUtils.FindClose(SearchRec);
   end;
 end;
 
@@ -3135,13 +3503,6 @@ begin
     Result := 'UNKNOWN_TYPE. CODE = ' + IntToStr(Index);
   end;
 
-  // Längenangabe bei CHAR und VARCHAR
-  if Index in [14, 37] then
-  begin
-    if FieldLength > 0 then
-      //Result := Result + '(' + IntToStr(FieldLength) + ')';
-      Result := Result + '(' + IntToStr(CharacterLengt) + ')';
-  end;
 
   // Numerische Typen mit SubType (NUMERIC/DECIMAL)
   if Index in [7, 8, 16] then
@@ -3305,44 +3666,116 @@ begin
   end;
 end;
 
-Function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
+function GetDBIndexByDatabase(Database: TIBDatabase): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to High(RegisteredDatabases) do
+    if RegisteredDatabases[i].IBDatabase = Database then
+      Exit(i);
+end;
+
+function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean = false): Boolean;
 var
   Rec: TRegisteredDatabase;
-  Count: Integer;
+  CachedPwd: string;
 begin
-  Result:= False;
-  Rec:= RegisteredDatabases[dbIndex].RegRec;
-  fmEnterPass.laDatabase.Caption:= Rec.Title;
-  fmEnterPass.edUser.Text:= Rec.UserName;
-  fmEnterPass.edPassword.Clear;
-  fmEnterPass.cbRole.Clear;
-  // Use may have saved an empty password, which is valid for embedded dbs
-  // So check SavePassword instead of Password itself.
-  if (ForceConnectDialog=false) and Rec.SavePassword then
-  try
-    fmEnterPass.cbRole.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
-    fmEnterPass.cbRole.ItemIndex:= -1;
-    fmEnterPass.cbRole.Text:= '';
-    Result:= True; //this works, no need to go through a retry attempt below
-  except
-    // We don't particularly care which error occurred; we're trying again below.
-    Result:= False;
-  end;
-  // Only show form if connection failed before
-  if (ForceConnectDialog or (Result=false)) and
-    (fmEnterPass.ShowModal = mrOk) then
-  begin
-    if fmReg.TestDBConnection(Rec.DatabaseName, fmEnterPass.edUser.Text, fmEnterPass.edPassword.Text,
-      Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
-    begin
-      RegisteredDatabases[dbIndex].RegRec.UserName:= fmEnterPass.edUser.Text;
-      RegisteredDatabases[dbIndex].RegRec.Password:= fmEnterPass.edPassword.Text;
-      RegisteredDatabases[dbIndex].RegRec.Role:= fmEnterPass.cbRole.Text;
+  Result := False;
+  Rec := RegisteredDatabases[dbIndex].RegRec;
 
+  // ============================================================
+  // 1. Session-Cache prüfen (nur wenn Passwort NICHT gespeichert)
+  // ============================================================
+  if (not Rec.SavePassword) and (Rec.Password = '') then
+  begin
+    CachedPwd := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+    if CachedPwd <> '' then
+    begin
+      Rec.Password := CachedPwd;
+      RegisteredDatabases[dbIndex].RegRec.Password := CachedPwd;
+    end;
+  end;
+
+  // ============================================================
+  // 2. Wenn Passwort vorhanden (gespeichert ODER aus Cache)
+  //    UND kein erzwungener Dialog → direkt verbinden
+  // ============================================================
+  if (not ForceConnectDialog) and (Rec.Password <> '') then
+  begin
+    try
+      if fmReg.TestDBConnection(Rec.DatabaseName, Rec.UserName, Rec.Password,
+        Rec.Charset, Rec.FireBirdClientLibPath, Rec.SQLDialect, Rec.Port,
+        Rec.ServerName, Rec.OverwriteLoadedClientLib) then
+      begin
+        // Erfolg: DB-Params setzen
+        RegisteredDatabases[dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
+        RegisteredDatabases[dbIndex].IBDatabase.Params.Values['password'] := Rec.Password;
+        RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := False;
+        Result := True;
+        Exit;
+      end
+      else
+      begin
+        // Fehlgeschlagen: Cache löschen wenn daraus gelesen
+        if (not Rec.SavePassword) then
+        begin
+          ClearDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+          Rec.Password := '';
+          RegisteredDatabases[dbIndex].RegRec.Password := '';
+        end;
+      end;
+    except
+      // Bei Exception ebenfalls Cache bereinigen
+      if (not Rec.SavePassword) then
+      begin
+        ClearDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+        Rec.Password := '';
+        RegisteredDatabases[dbIndex].RegRec.Password := '';
+      end;
+    end;
+  end;
+
+  // ============================================================
+  // 3. DB-Login-Dialog anzeigen (OHNE Rollen zu laden!)
+  // ============================================================
+  fmEnterPass.laDatabase.Caption := Rec.Title;
+  fmEnterPass.edUser.Text := Rec.UserName;
+  fmEnterPass.edPassword.Clear;
+  fmEnterPass.edtRole.Text := '';
+  fmEnterPass.cxSavePassword.Checked := False;
+
+  if fmEnterPass.ShowModal = mrOK then
+  begin
+    // Testen ob die eingegebenen Credentials funktionieren
+    if fmReg.TestDBConnection(Rec.DatabaseName, fmEnterPass.edUser.Text,
+      fmEnterPass.edPassword.Text, Rec.Charset, Rec.FireBirdClientLibPath,
+      Rec.SQLDialect, Rec.Port, Rec.ServerName, Rec.OverwriteLoadedClientLib) then
+    begin
+      // User + Passwort + Rolle in Registrierung speichern
+      RegisteredDatabases[dbIndex].RegRec.UserName := fmEnterPass.edUser.Text;
+      RegisteredDatabases[dbIndex].RegRec.Password := fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].RegRec.Role := fmEnterPass.edtRole.Text;
+
+      // Prüfen ob Passwort dauerhaft gespeichert werden soll
+      if fmEnterPass.cxSavePassword.Checked then
+      begin
+        // Dauerhaft in Datei speichern
+        RegisteredDatabases[dbIndex].RegRec.SavePassword := True;
+        EditRegisteredDB(RegisteredDatabases[dbIndex].RegRec);
+      end
+      else
+      begin
+        // Nur temporär in Session-Cache
+        RegisteredDatabases[dbIndex].RegRec.SavePassword := False;
+        SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName, fmEnterPass.edPassword.Text);
+      end;
+
+      // DB-Params setzen
       RegisteredDatabases[dbIndex].IBDatabase.Params.Values['user_name'] := fmEnterPass.edUser.Text;
-      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['password']  := fmEnterPass.edPassword.Text;
-      RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := false;
-      Result:= True;
+      RegisteredDatabases[dbIndex].IBDatabase.Params.Values['password'] := fmEnterPass.edPassword.Text;
+      RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := False;
+      Result := True;
     end;
   end;
 end;
@@ -3498,8 +3931,61 @@ begin
   end;
 end;
 
+//ExternalTable
+function GetTableFieldsForExternalTable(ADBIndex: Integer;
+  const ATableName: string): TDataSet;
+var
+  Query: TIBQuery;
+begin
+  Query := TIBQuery.Create(nil);
+  try
+    Query.Database := RegisteredDatabases[ADBIndex].IBDatabase;
+    Query.Transaction := RegisteredDatabases[ADBIndex].IBTransaction;
+
+    if not Query.Transaction.InTransaction then
+          Query.Transaction.StartTransaction;
+
+    Query.SQL.Text :=
+      'SELECT ' +
+      '  RF.RDB$FIELD_NAME AS FIELD_NAME, ' +
+      '  F.RDB$FIELD_TYPE AS FIELD_TYPE, ' +
+      '  F.RDB$FIELD_LENGTH AS FIELD_LENGTH, ' +
+      '  F.RDB$FIELD_PRECISION AS FIELD_PRECISION, ' +
+      '  F.RDB$FIELD_SCALE AS FIELD_SCALE, ' +
+      '  F.RDB$FIELD_SUB_TYPE AS FIELD_SUB_TYPE, ' +
+      '  COALESCE(F.RDB$CHARACTER_LENGTH, F.RDB$FIELD_LENGTH) AS CHAR_LEN ' +
+      'FROM RDB$RELATION_FIELDS RF ' +
+      'JOIN RDB$FIELDS F ON RF.RDB$FIELD_SOURCE = F.RDB$FIELD_NAME ' +
+      'WHERE RF.RDB$RELATION_NAME = :TableName ' +
+      'ORDER BY RF.RDB$FIELD_POSITION';
+
+    Query.ParamByName('TableName').AsString := UpperCase(ATableName);
+
+    if not Query.Database.Connected then
+      Query.Database.Connected := true;
+    if not Query.Transaction.InTransaction then
+      Query.Transaction.StartTransaction;
+
+    Query.Open;
+    Result := Query;
+  except
+    Query.Free;
+    raise;
+  end;
+end;
+
+function CountChar(const S: string; const C: Char): Integer;
+var
+  i: Integer;
+begin
+  Result:= 0;
+  for i:= 1 to Length(S) do
+    if S[i] = C then
+      Inc(Result);
+end;
 
 initialization
+  SessionPasswordCache := nil;
   MetaDataChanged := false;
 
   fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
@@ -3513,6 +3999,9 @@ initialization
     //SetInitialClientLib;
 
 finalization
+  if Assigned(SessionPasswordCache) then
+    SessionPasswordCache.Free;
+
   WriteIniFile;
   fIniFile.Free;
   fIniFile := nil;

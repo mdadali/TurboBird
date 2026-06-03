@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, LCLType,
+  StdCtrls, ComCtrls, Buttons, LCLType,
   turbocommon,
   uthemeselector;
 
@@ -57,8 +57,11 @@ end;
 
 procedure TfmViewDomain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  FNodeInfos^.ViewForm := nil;
-  CloseAction:= caFree;
+  if Assigned(FNodeInfos) then
+    FNodeInfos^.ViewForm := nil;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmViewDomain.FormKeyDown(Sender: TObject; var Key: Word;

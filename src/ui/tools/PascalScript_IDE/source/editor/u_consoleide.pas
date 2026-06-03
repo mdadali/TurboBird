@@ -249,8 +249,8 @@ type
   end;
 
 
-var
-  ConsoleIDE: TfrmConsoleIDE;
+//var
+  //ConsoleIDE: TfrmConsoleIDE;
 
 implementation
 

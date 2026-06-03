@@ -9,7 +9,6 @@ uses
   IB, IBDatabase, IBSQL, IBExtract,
 
   fbcommon,
-
   udb_udr_func_fetcher;
 
 {$I turbocommon.inc}
@@ -51,7 +50,7 @@ type
 
 implementation
 
-uses turbocommon;
+uses  SysTables, turbocommon;
 
 procedure TSimpleObjExtractor.ExtractTableNames(AItems: TStrings; Quoted: boolean; SystemFlag: boolean);
 var
@@ -119,7 +118,7 @@ begin
   end;
 end;
 
-constructor TSimpleObjExtractor.Create(DBIndex: integer);
+{constructor TSimpleObjExtractor.Create(DBIndex: integer);
 begin
   inherited Create;
   FInitialized := False;
@@ -138,6 +137,92 @@ begin
     FIBTransaction := TIBTransaction.Create(FIBDatabase);
     FIBDatabase.DefaultTransaction := FIBTransaction;
     FIBTransaction.DefaultDatabase := FIBDatabase;
+
+    FIBDatabase.OnLogin := RegisteredDatabases[FDBIndex].IBDatabase.OnLogin;
+    FIBDatabase.LoginPrompt := RegisteredDatabases[FDBIndex].IBDatabase.LoginPrompt;
+
+    // Verbindung prüfen
+    if not FIBDatabase.Connected then
+      FIBDatabase.Connected := True;
+
+    // Extract-Objekt erstellen
+    FIBExtract := TIBExtract.Create(FIBDatabase);
+    FIBExtract.Database := FIBDatabase;
+    FIBExtract.Transaction := FIBTransaction;
+
+    FIBExtract.AlwaysQuoteIdentifiers := AlwaysQuoteIdentifiers;
+    FIBExtract.CaseSensitiveObjectNames := CaseSensitiveObjectNames;
+    FIBExtract.ShowSystem := ShowSystem;
+
+    // Sicherstellen, dass DB verbunden bleibt
+    FIBDatabase.Connected := True;
+
+    FInitialized := True;
+
+  except
+    on E: Exception do
+    begin
+      // Ressourcen sauber freigeben
+      FreeAndNil(FIBExtract);
+      FreeAndNil(FIBTransaction);
+      FreeAndNil(FIBDatabase);
+
+      FInitialized := False;
+
+      raise Exception.Create('Error creating TSimpleObjExtractor: ' + E.Message);
+    end;
+  end;
+end;}
+
+constructor TSimpleObjExtractor.Create(DBIndex: integer);
+var
+  OrigRec: TRegisteredDatabase;
+  CachedPwd: string;
+begin
+  inherited Create;
+  FInitialized := False;
+  FDBIndex := DBIndex;
+
+  FIBDatabase := nil;
+  FIBTransaction := nil;
+  FIBExtract := nil;
+
+  try
+    // Datenbankobjekt erstellen
+    FIBDatabase := TIBDatabase.Create(nil);
+    AssignIBDatabase(RegisteredDatabases[FDBIndex].IBDatabase, FIBDatabase);
+
+    // Transaction erstellen
+    FIBTransaction := TIBTransaction.Create(FIBDatabase);
+    FIBDatabase.DefaultTransaction := FIBTransaction;
+    FIBTransaction.DefaultDatabase := FIBDatabase;
+
+    // OnLogin-Handler setzen
+    FIBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+    FIBDatabase.LoginPrompt := True;
+
+    // WICHTIG: DB-Params mit Passwort aus Registrierung ODER Session-Cache befüllen
+    OrigRec := RegisteredDatabases[FDBIndex].RegRec;
+
+    FIBDatabase.Params.Values['user_name'] := OrigRec.UserName;
+
+    // Passwort: Erst aus Registrierung, dann aus Session-Cache
+    if OrigRec.SavePassword and (OrigRec.Password <> '') then
+      FIBDatabase.Params.Values['password'] := OrigRec.Password
+    else
+    begin
+      CachedPwd := GetDBSessionPassword(OrigRec.ServerName, OrigRec.DatabaseName);
+      if CachedPwd <> '' then
+        FIBDatabase.Params.Values['password'] := CachedPwd
+      else
+        FIBDatabase.Params.Values['password'] := OrigRec.Password; // leer → OnLogin feuert
+    end;
+
+    if OrigRec.Role <> '' then
+      FIBDatabase.Params.Values['sql_role_name'] := OrigRec.Role;
+
+    if OrigRec.Charset <> '' then
+      FIBDatabase.Params.Values['lc_ctype'] := OrigRec.Charset;
 
     // Verbindung prüfen
     if not FIBDatabase.Connected then
@@ -553,8 +638,15 @@ begin
           FieldType := StringReplace(FieldType, '"', '', [rfReplaceAll]);
         end;
 
+        //if RemoveLastComma then
+          //FieldType := StringReplace(FieldType, ',', '', [rfReplaceAll]);
+
         if RemoveLastComma then
-          FieldType := StringReplace(FieldType, ',', '', [rfReplaceAll]);
+        begin
+          // Nur das letzte Komma entfernen (falls vorhanden)
+          if (Length(FieldType) > 0) and (FieldType[Length(FieldType)] = ',') then
+            FieldType := Copy(FieldType, 1, Length(FieldType) - 1);
+        end;
 
         AItems.Add(FieldName + Delimiter + FieldType);
       end;

@@ -1,7 +1,7 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 858
+  Left = 262
   Height = 673
-  Top = 353
+  Top = 75
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
@@ -57,13 +57,13 @@ object frmActivityMonitor: TfrmActivityMonitor
       TabOrder = 2
       object tsAttachments: TTabSheet
         Caption = 'Attachments'
-        ClientHeight = 178
-        ClientWidth = 1092
+        ClientHeight = 182
+        ClientWidth = 1088
         object grdAttachments: TRxDBGrid
           Left = 0
           Height = 136
           Top = 0
-          Width = 1092
+          Width = 1088
           ColumnDefValues.BlobText = '(blob)'
           TitleButtons = False
           AutoSort = True
@@ -155,13 +155,13 @@ object frmActivityMonitor: TfrmActivityMonitor
       TabOrder = 3
       object tsStatements: TTabSheet
         Caption = 'Statements'
-        ClientHeight = 208
-        ClientWidth = 1092
+        ClientHeight = 212
+        ClientWidth = 1088
         object grdStatements: TRxDBGrid
           Left = 0
-          Height = 208
+          Height = 212
           Top = 0
-          Width = 1092
+          Width = 1088
           ColumnDefValues.BlobText = '(blob)'
           TitleButtons = False
           AutoSort = True
@@ -251,13 +251,13 @@ object frmActivityMonitor: TfrmActivityMonitor
       TabOrder = 4
       object tsTransactions: TTabSheet
         Caption = 'Transactions'
-        ClientHeight = 119
-        ClientWidth = 1092
+        ClientHeight = 123
+        ClientWidth = 1088
         object grdTransactions: TRxDBGrid
           Left = 0
-          Height = 119
+          Height = 123
           Top = 0
-          Width = 1092
+          Width = 1088
           ColumnDefValues.BlobText = '(blob)'
           TitleButtons = False
           AutoSort = True

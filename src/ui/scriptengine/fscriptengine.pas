@@ -138,10 +138,17 @@ begin
   IBDatabase1.Params.Add('user_name=' + DBRec.RegRec.UserName);
   IBDatabase1.Params.Add('password=' + DBRec.RegRec.Password);
 
-  IBTransaction1.Params.Assign(IBDatabase1.DefaultTransaction.Params);
+  // NEU: Transaction korrekt einrichten
+  IBTransaction1.DefaultDatabase := IBDatabase1;
+  IBDatabase1.DefaultTransaction := IBTransaction1;
+
+  // Params von der Haupt-DB-Transaktion übernehmen (aber vorher prüfen!)
+  if Assigned(DBRec.IBDatabase.DefaultTransaction) then
+    IBTransaction1.Params.Assign(DBRec.IBDatabase.DefaultTransaction.Params)
+  else
+    IBTransaction1.Params.Clear; // Standard-Params
 
   IBDatabase1.Connected := true;
-
 end;
 
 procedure TfrmScriptEngine.ReadScripterSettings;
@@ -200,8 +207,9 @@ begin
   StopOnFirstError := chkBoxStopOnError.Checked;
   WriteIniFile;
 
-  //
-  //CloseAction := caFree;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfrmScriptEngine.FormCreate(Sender: TObject);
@@ -296,6 +304,13 @@ end;
 procedure TfrmScriptEngine.RunScriptExecute(Sender: TObject);
 begin
   //ReadScripterSettings; //from inifile
+  if not IBDatabase1.Connected then
+    IBDatabase1.Connected := true;
+
+  // Sicherstellen, dass eine Transaktion läuft
+  if not IBTransaction1.InTransaction then
+    IBTransaction1.StartTransaction;
+
   ResultsLog.Lines.Clear;
   IBXScript1.ExecSQLScript(ed.Strings.TextString_Unicode(0));
   Timer1.Interval := 1000;

@@ -104,7 +104,9 @@ procedure TfmCopyTable.FormClose(Sender: TObject; var CloseAction: TCloseAction)
 begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
+
   CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfmCopyTable.FormCreate(Sender: TObject);

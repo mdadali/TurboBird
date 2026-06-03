@@ -575,7 +575,6 @@ begin
           end;
         ///////////////////////////////////////////////////
 
-
         IBDB.Connected := False;
       except
         on E: Exception do
@@ -598,8 +597,10 @@ begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
 
-  self.CloseDB;
+  CloseDB;
+
   CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 end.

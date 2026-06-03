@@ -14,7 +14,9 @@ uses
   //IBDatabaseInfo, IBXServices,
 
   fbcommon,
-  fsimpleobjextractor;
+  fsimpleobjextractor,
+  EnterPass
+  ;
 
 type
 
@@ -141,13 +143,10 @@ type
     // Gets field names for table
     procedure GetTableFields(dbIndex: Integer; ATableName: string; FieldsList: TStringList);
 
-    function GetConstraintsOfTable(ATableName: string; var SqlQuery: TIBQuery;
-      ConstraintsList: TStringList=nil): Boolean;
-
     function EnsureDummyRole: Boolean;
     function DummyRoleExists: Boolean;
 
-    { public declarations }
+    procedure OnDatabaseLogin(Database: TIBDatabase; LoginParams: TStrings);
   end; 
 
 var
@@ -183,31 +182,32 @@ begin
   Conn := RegisteredDatabases[dbIndex].IBDatabase;
   IBDb := fmMain.CurrentIBConnection;
 
-  //if (IBDb <> Conn) then
-  //begin
-    // alte Verbindung lösen
-    IBDb := Conn;
-    FSQLTransaction := RegisteredDatabases[dbIndex].IBTransaction;
+  // alte Verbindung lösen
+  IBDb := Conn;
+  FSQLTransaction := RegisteredDatabases[dbIndex].IBTransaction;
 
-    if IBDb.DefaultTransaction.InTransaction then
-      IBDb.DefaultTransaction.Rollback;
+  if IBDb.DefaultTransaction.InTransaction then
+    IBDb.DefaultTransaction.Rollback;
 
-    if FSQLTransaction.InTransaction then
-      FSQLTransaction.Rollback;
+  if FSQLTransaction.InTransaction then
+    FSQLTransaction.Rollback;
 
-    IBDb.DefaultTransaction := FSQLTransaction;
-    sqQuery.DataBase := IBDb;
-    sqQuery.Transaction := FSQLTransaction;
+  IBDb.DefaultTransaction := FSQLTransaction;
+  sqQuery.DataBase := IBDb;
+  sqQuery.Transaction := FSQLTransaction;
 
-    ibcDatabase:= IBDb;
-    stTrans:= FSQLTransaction;
+  ibcDatabase:= IBDb;
+  stTrans:= FSQLTransaction;
 
-    if not RegisteredDatabases[dbIndex].IBDatabase.Connected then
-      RegisteredDatabases[dbIndex].IBDatabase.Connected := true;
+  // WICHTIG: OnLogin-Handler setzen bevor Connect!
+  RegisteredDatabases[dbIndex].IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+  RegisteredDatabases[dbIndex].IBDatabase.LoginPrompt := True;
 
-    if not RegisteredDatabases[dbIndex].IBTransaction.InTransaction then
-      RegisteredDatabases[dbIndex].IBTransaction.StartTransaction;
-  //end;
+  if not RegisteredDatabases[dbIndex].IBDatabase.Connected then
+    RegisteredDatabases[dbIndex].IBDatabase.Connected := true;
+
+  if not RegisteredDatabases[dbIndex].IBTransaction.InTransaction then
+    RegisteredDatabases[dbIndex].IBTransaction.StartTransaction;
 
   // Prüfen, ob DB überhaupt verbunden ist
   if not Conn.Connected then
@@ -221,10 +221,76 @@ begin
 
     Conn.FirebirdLibraryPathName := RegisteredDatabases[dbIndex].RegRec.FireBirdClientLibPath;
 
-    Conn.LoginPrompt := (RegisteredDatabases[dbIndex].RegRec.Password = '');
+    Conn.OnLogin := @dmSysTables.OnDatabaseLogin;
+    Conn.LoginPrompt := True;
 
     Conn.Open;
   end;
+end;
+
+procedure TdmSysTables.OnDatabaseLogin(Database: TIBDatabase; LoginParams: TStrings);
+var
+  UserName, Password: string;
+  DBIndex: Integer;
+  Rec: TRegisteredDatabase;
+  // Count: Integer;  // nicht mehr nötig
+begin
+  DBIndex := GetDBIndexByDatabase(Database);
+  if DBIndex < 0 then
+    Exit;
+
+  Rec := RegisteredDatabases[DBIndex].RegRec;
+
+  // 1. Wenn Passwort gespeichert → direkt verwenden
+  if Rec.SavePassword and (Rec.Password <> '') then
+  begin
+    LoginParams.Values['user_name'] := Rec.UserName;
+    LoginParams.Values['password'] := Rec.Password;
+    Exit;
+  end;
+
+  // 2. Session-Cache prüfen
+  Password := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+  if Password <> '' then
+  begin
+    LoginParams.Values['user_name'] := Rec.UserName;
+    LoginParams.Values['password'] := Password;
+    RegisteredDatabases[DBIndex].RegRec.Password := Password;
+    Exit;
+  end;
+
+  // 3. Login-Dialog anzeigen (OHNE Rollen zu laden – DB ist ja noch nicht verbunden!)
+  fmEnterPass.laDatabase.Caption := Rec.Title;
+  fmEnterPass.edUser.Text := Rec.UserName;
+  fmEnterPass.edPassword.Clear;
+  fmEnterPass.edtRole.Text := '';
+  fmEnterPass.cxSavePassword.Checked := False;
+
+  if fmEnterPass.ShowModal = mrOK then
+  begin
+    UserName := fmEnterPass.edUser.Text;
+    Password := fmEnterPass.edPassword.Text;
+
+    LoginParams.Values['user_name'] := UserName;
+    LoginParams.Values['password'] := Password;
+
+    RegisteredDatabases[DBIndex].RegRec.UserName := UserName;
+    RegisteredDatabases[DBIndex].RegRec.Password := Password;
+    RegisteredDatabases[DBIndex].RegRec.Role := fmEnterPass.edtRole.Text;
+
+    if fmEnterPass.cxSavePassword.Checked then
+    begin
+      RegisteredDatabases[DBIndex].RegRec.SavePassword := True;
+      EditRegisteredDB(RegisteredDatabases[DBIndex].RegRec);
+    end
+    else
+    begin
+      RegisteredDatabases[DBIndex].RegRec.SavePassword := False;
+      SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName, Password);
+    end;
+  end
+  else
+    Abort;
 end;
 
 (*****  GetDBObjectNames, like Table names, Triggers, Generators, etc according to TVIndex  ****)
@@ -596,11 +662,18 @@ begin
   Result := '';
   Count := 0;
 
-
   if not Assigned(sqQuery.Database) then
     sqQuery.Database := RegisteredDatabases[DatabaseIndex].IBDatabase;
+
+  if sqQuery.Database.Connected then
+    sqQuery.Database.Connected := false;
+
+   sqQuery.Database.OnLogin := @dmSysTables.OnDatabaseLogin;
+   sqQuery.Database.LoginPrompt := True;
+
   if not sqQuery.Database.Connected then
     sqQuery.Database.Connected := true;
+
   if not sqQuery.Transaction.InTransaction then
     sqQuery.Transaction.StartTransaction;
 
@@ -1001,122 +1074,6 @@ begin
   end;
 end;
 
-{function TdmSysTables.ScriptTrigger(
-  dbIndex: Integer;
-  ATriggerName: string;
-  List: TStrings;
-  AsCreate: Boolean): Boolean;
-var
-  Body: string;
-  AfterBefore: string;
-  Event: string;
-  OnTable: string;
-  TriggerEnabled: Boolean;
-  TriggerPosition: Integer;
-  IsDatabaseTrigger: Boolean;
-  IsDDLTrigger: Boolean;
-  IsUDRTrigger: Boolean;
-  ExternalName: string;
-  EngineName: string;
-  UDRParams: string;
-  i: Integer;
-begin
-  Result := GetTriggerInfo(
-    dbIndex, ATriggerName,
-    AfterBefore, OnTable, Event, Body,
-    TriggerEnabled, TriggerPosition,
-    IsDatabaseTrigger, IsDDLTrigger, IsUDRTrigger,
-    ExternalName, EngineName, UDRParams);
-
-  if not Result then
-    Exit;
-
-  List.Clear;
-  List.Add('SET TERM ^;');
-  List.Add('');
-
-  // =========================================================
-  // CREATE HEADER
-  // =========================================================
-  List.Add('RECREATE TRIGGER ' + ATriggerName);
-
-  // =========================================================
-  // ACTIVE / INACTIVE
-  // =========================================================
-  if TriggerEnabled then
-    List.Add('ACTIVE')
-  else
-    List.Add('INACTIVE');
-
-  // =========================================================
-  // EVENT
-  // =========================================================
-  if IsDDLTrigger then
-  begin
-    List.Add(Event);
-  end
-  else if IsDatabaseTrigger then
-  begin
-    List.Add(Event);
-  end
-  else
-  begin
-    List.Add(AfterBefore + ' ' + Event);
-    if OnTable <> '' then
-      List.Add('ON ' + OnTable);
-  end;
-
-  // =========================================================
-  // POSITION - immer ausgeben
-  // =========================================================
-  List.Add('POSITION ' + IntToStr(TriggerPosition));
-
-  // =========================================================
-  // UDR TRIGGER
-  // =========================================================
-  if IsUDRTrigger then
-  begin
-    if ExternalName <> '' then
-      List.Add('EXTERNAL NAME ''' + ExternalName + '''');
-    if EngineName <> '' then
-      List.Add('ENGINE ' + EngineName);
-    if Trim(UDRParams) <> '' then
-      List.Add('AS ' + QuotedStr(Trim(UDRParams)));
-    List.Add('^');
-    List.Add('');
-    List.Add('SET TERM ;^');
-    Exit(True);
-  end;
-
-  // =========================================================
-  // NORMAL PSQL BODY
-  // =========================================================
-  if Body <> '' then
-  begin
-    List.Text := List.Text + Body;
-  end
-  else
-  begin
-    List.Add('AS');
-    List.Add('BEGIN');
-    List.Add('  -- Trigger body');
-    List.Add('END');
-  end;
-
-  // Sicherstellen, dass END mit ^ abgeschlossen wird
-  if List.Count > 0 then
-  begin
-    i := List.Count - 1;
-    if Trim(List[i]) <> '' then
-      List[i] := TrimRight(List[i]) + ' ^'
-    else
-      List.Add('^');
-  end;
-
-  List.Add('');
-  List.Add('SET TERM ;^');
-end;}
-
 function TdmSysTables.ScriptTrigger(
   dbIndex: Integer;
   ATriggerName: string;
@@ -1301,8 +1258,18 @@ begin
   SqlQuery.Close;
   SQLQuery.SQL.Text:= format(QueryTemplate, [UpperCase(ATableName)]);
 
+  if SQLQuery.Transaction.InTransaction then
+    SQLQuery.Transaction.Rollback;
+
+  if SqlQuery.Database.Connected then
+    SqlQuery.Database.Connected := false;
+
+  SqlQuery.Database.OnLogin := @dmSysTables.OnDatabaseLogin;
+  SqlQuery.Database.LoginPrompt := True;
+
   if not SqlQuery.Database.Connected then
     SqlQuery.Database.Connected := true;
+
   if not SQLQuery.Transaction.InTransaction then
     SQLQuery.Transaction.StartTransaction;
 
@@ -1321,50 +1288,6 @@ begin
     end;
     First;
   end;
-end;
-
-(**********  Get Constraints for a table Info  ********************)
-
-function TdmSysTables.GetConstraintsOfTable(ATableName: string; var SqlQuery: TIBQuery;
-   ConstraintsList: TStringList = nil): Boolean;
-begin
-  SqlQuery.Close;
-  SQLQuery.SQL.Text:='select '+
-  'trim(rc.rdb$constraint_name) as ConstName, '+
-  'trim(rfc.rdb$const_name_uq) as KeyName, '+
-  'trim(rc2.rdb$relation_name) as CurrentTableName, '+
-  'trim(flds_pk.rdb$field_name) as CurrentFieldName, '+
-  'trim(rc.rdb$relation_name) as OtherTableName, '+
-  'trim(flds_fk.rdb$field_name) as OtherFieldName, '+
-  'trim(rfc.rdb$update_rule) as UpdateRule, '+
-  'trim(rfc.rdb$delete_rule) as DeleteRule '+
-  'from rdb$relation_constraints AS rc '+
-  'inner join rdb$ref_constraints as rfc on (rc.rdb$constraint_name = rfc.rdb$constraint_name) '+
-  'inner join rdb$index_segments as flds_fk on (flds_fk.rdb$index_name = rc.rdb$index_name) ' +
-  'inner join rdb$relation_constraints as rc2 on (rc2.rdb$constraint_name = rfc.rdb$const_name_uq) ' +
-  'inner join rdb$index_segments as flds_pk on ' +
-  '((flds_pk.rdb$index_name = rc2.rdb$index_name) and (flds_fk.rdb$field_position = flds_pk.rdb$field_position)) ' +
-  'where rc.rdb$constraint_type = ''FOREIGN KEY'' '+
-  'and rc2.rdb$relation_name = ''' + UpperCase(ATableName) + ''' '+
-  'order by rc.rdb$constraint_name, flds_fk.rdb$field_position ';
-  if not sqlQuery.Database.Connected then
-     sqlQuery.Database.Connected := true;
-  if not sqlQuery.Transaction.InTransaction then
-    sqlQuery.Transaction.StartTransaction;
-  SqlQuery.Open;
-  Result:= SqlQuery.RecordCount > 0;
-  with SqlQuery do
-  if Result and Assigned(ConstraintsList) then
-  begin
-    ConstraintsList.Clear;
-    while not Eof do
-    begin
-      ConstraintsList.Add(FieldByName('ConstName').AsString);
-      Next;
-    end;
-    First;
-  end;
-
 end;
 
 function TdmSysTables.GetAllConstraints(dbIndex: Integer; ConstraintsList, TablesList: TStringList): Boolean;
@@ -1557,7 +1480,6 @@ end;
 
 
 (************  View Domain info  ***************)
-
 procedure TdmSysTables.GetDomainInfo(dbIndex: Integer; DomainName: string; var DomainType: string;
   var DomainSize: Integer; var DefaultValue: string; var CheckConstraint: string; var CharacterSet: string; var Collation: string);
 const
@@ -1610,9 +1532,7 @@ begin
   sqQuery.Close;
 end;
 
-
 (*************  Get constraint foreign key fields  *************)
-
 function TdmSysTables.GetConstraintForeignKeyFields(AIndexName: string; SqlQuery: TIBQuery): string;
 begin
   SqlQuery.Close;
@@ -1643,10 +1563,21 @@ begin
     sqQuery.SQL.Add('where RDB$Relation_Name = ''' + UpperCase(ObjectName) + ''' ');
   sqQuery.SQL.Add('order by RDB$User_Type');
 
+  if sqQuery.Transaction.InTransaction then
+    sqQuery.Transaction.Rollback;
+
+  if sqQuery.Database.Connected then
+    sqQuery.Database.Connected := false;
+
+  sqQuery.Database.OnLogin := @dmSysTables.OnDatabaseLogin;
+  sqQuery.Database.LoginPrompt := True;
+
   if not sqQuery.Database.Connected then
     sqQuery.Database.Connected := true;
+
   if not sqQuery.Transaction.InTransaction then
     sqQuery.Transaction.StartTransaction;
+
   sqQuery.Open;
   while not sqQuery.EOF do
   begin
@@ -1952,8 +1883,18 @@ begin
   try
     if sqQuery.Active then
       sqQuery.Close;
-    if stTrans.InTransaction then
-      stTrans.Rollback;
+
+    if sqQuery.Transaction.InTransaction then
+      sqQuery.Transaction.Rollback;
+
+    if sqQuery.Database.Connected then
+      sqQuery.Database.Connected := false;
+
+    sqQuery.Database.OnLogin := @dmSysTables.OnDatabaseLogin;
+    sqQuery.Database.LoginPrompt := True;
+
+    if not sqQuery.Database.Connected then
+      sqQuery.Database.Connected := true;
 
     //sqQuery.SQL.Text := 'SELECT RDB$TYPE_NAME FROM RDB$TYPES WHERE RDB$FIELD_NAME = ' + quotedstr('RDB$FIELD_TYPE');
     sqQuery.SQL.Text :=
@@ -1963,8 +1904,7 @@ begin
       'AND RDB$TYPE_NAME NOT STARTING WITH ' + QuotedStr('MON$') + ' ' +
       'AND RDB$TYPE_NAME NOT STARTING WITH ' + QuotedStr('SEC$') + ' ' +
       'ORDER BY RDB$TYPE_NAME';
-    if not sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.StartTransaction;
+
     sqQuery.Open;
     while not sqQuery.Eof do
     begin
@@ -2213,210 +2153,6 @@ begin
   sqQuery.Close;
 end;
 
-{function TdmSysTables.GetDatabaseInfo(dbIndex: Integer; var ADatabaseName,
-  CharSet, CreationDate, ServerTime: string; var ODSVerMajor, ODSVerMinor,
-  Pages, PageSize: Integer; var ProcessList: TStringList; var ErrorMsg: string
-  ): Boolean;
-begin
-  ADatabaseName := '';
-  CharSet := '';
-  CreationDate := '';
-  ServerTime  := '';
-  ODSVerMajor := 0;
-  ODSVerMinor := 0;
-  Pages := 0;
-  PageSize := 0;
-  ErrorMsg := '';
-  //ProcessList := TStringList.Create;
-
-  try
-    result := true;
-    Init(dbIndex);
-
-   if stTrans.InTransaction then
-      stTrans.Commit;
-
-    sqQuery.SQL.Text:= 'select * from RDB$DATABASE';
-    if not sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.StartTransaction;
-    sqQuery.Open;
-    CharSet:= sqQuery.fieldbyName('RDB$Character_Set_Name').AsString;
-    sqQuery.Close;
-
-    if sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.Commit;
-    if stTrans.InTransaction then
-      stTrans.Commit;
-
-    sqQuery.SQL.Text:= 'select * from MON$DATABASE';
-    if not sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.StartTransaction;
-    sqQuery.Open;
-
-    ADatabaseName:= sqQuery.FieldByName('MON$Database_Name').AsString;
-    PageSize:= sqQuery.FieldByName('MON$Page_Size').AsInteger;
-    ODSVerMajor:= sqQuery.FieldByName('MON$ODS_Major').AsInteger;
-    ODSVerMinor:= sqQuery.FieldByName('MON$ODS_Minor').AsInteger;
-    CreationDate:= Trim(sqQuery.FieldByName('MON$Creation_Date').AsString);
-    Pages:= sqQuery.FieldByName('MON$Pages').AsInteger;
-    sqQuery.Close;
-
-    if sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.Commit;
-    if stTrans.InTransaction then
-      stTrans.Commit;
-
-    // Attached clients
-    sqQuery.SQL.Text:= 'select * from MON$ATTACHMENTS';
-    if ProcessList = nil then
-      ProcessList:= TStringList.Create;
-    if not sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.StartTransaction;
-    sqQuery.Open;
-    with sqQuery do
-    while not EOF do
-    begin
-      ProcessList.Add('Host: ' + Trim(FieldByName('MON$Remote_Address').AsString) +
-        '   User: ' + Trim(FieldByName('Mon$User').AsString)  +
-        '   Process: ' + Trim(FieldByName('Mon$Remote_Process').AsString));
-      Next;
-    end;
-    sqQuery.Close;
-    sqQuery.Transaction.Commit;
-
-    // Server time
-    sqQuery.SQL.Text:= 'select current_timestamp from RDB$Database';
-    if not sqQuery.Transaction.InTransaction then
-      sqQuery.Transaction.StartTransaction;
-    sqQuery.Open;
-    ServerTime:= sqQuery.Fields[0].AsString;
-    sqQuery.Close;
-    sqQuery.Transaction.Commit;
-
-    if stTrans.InTransaction then
-      stTrans.Commit;
-    Result:= True;
-  except
-    on E: Exception do
-    begin
-      ErrorMsg:= E.Message;
-      Result:= False;
-    end;
-  end;
-end;}
-
-{function TdmSysTables.GetDatabaseInfo(dbIndex: Integer; var ADatabaseName,
-  CharSet, CreationDate, ServerTime: string; var ODSVerMajor, ODSVerMinor,
-  Pages, PageSize: Integer; var ProcessList: TStringList; var ErrorMsg: string
-  ): Boolean;
-var
-  DB: TIBDatabase;
-  Trans: TIBTransaction;
-  SQL: TIBQuery;
-begin
-  DB := TIBDatabase.Create(self);
-  Trans := TIBTransaction.Create(self);
-  SQL := TIBQuery.Create(self);
-
-  try
-    Result := True;
-
-    // DB und Transaktion verbinden
-    DB.Params.Clear;
-    DB.DatabaseName := Trim(RegisteredDatabases[dbIndex].RegRec.DatabaseName);
-    DB.Params.Add('user_name=' + RegisteredDatabases[dbIndex].RegRec.UserName);
-    DB.Params.Add('password=' + RegisteredDatabases[dbIndex].RegRec.Password);
-    DB.Params.Add('sql_role_name=' + RegisteredDatabases[dbIndex].RegRec.Role);
-    DB.Params.Add('lc_ctype=' + RegisteredDatabases[dbIndex].RegRec.Charset);
-
-    DB.LoginPrompt := (RegisteredDatabases[dbIndex].RegRec.Password = '');
-    DB.FirebirdLibraryPathName := RegisteredDatabases[dbIndex].RegRec.FireBirdClientLibPath;
-
-    Trans.DefaultDatabase := DB;
-    DB.DefaultTransaction := Trans;
-
-    SQL.Database := DB;
-    SQL.Transaction := Trans;
-
-    try
-      DB.Connected := true;
-
-    except
-      raise;
-    end;
-
-    // Charset (RDB$DATABASE)
-    if not Trans.InTransaction then
-      Trans.StartTransaction;
-    SQL.SQL.Text := 'select * from RDB$DATABASE';
-    SQL.Open;
-    CharSet := Trim(SQL.FieldByName('RDB$CHARACTER_SET_NAME').AsString);
-    SQL.Close;
-    Trans.Rollback;
-
-    // DB-Infos (MON$DATABASE)
-    if not Trans.InTransaction then
-      Trans.StartTransaction;
-
-    SQL.SQL.Text := 'select * from MON$DATABASE';
-    SQL.Open;
-    ADatabaseName := Trim(SQL.FieldByName('MON$DATABASE_NAME').AsString);
-    PageSize := SQL.FieldByName('MON$PAGE_SIZE').AsInteger;
-    ODSVerMajor := SQL.FieldByName('MON$ODS_MAJOR').AsInteger;
-    ODSVerMinor := SQL.FieldByName('MON$ODS_MINOR').AsInteger;
-    CreationDate := Trim(SQL.FieldByName('MON$CREATION_DATE').AsString);
-    Pages := SQL.FieldByName('MON$PAGES').AsInteger;
-    SQL.Close;
-    Trans.Rollback;
-
-    // Clients (MON$ATTACHMENTS)
-    if not Trans.InTransaction then
-      Trans.StartTransaction;
-    SQL.SQL.Text := 'select * from MON$ATTACHMENTS';
-    SQL.Open;
-    while not SQL.Eof do
-    begin
-      ProcessList.Add('Host: ' + Trim(SQL.FieldByName('MON$REMOTE_ADDRESS').AsString) +
-        '   User: ' + Trim(SQL.FieldByName('MON$USER').AsString) +
-        '   Process: ' + Trim(SQL.FieldByName('MON$REMOTE_PROCESS').AsString));
-      SQL.Next;
-    end;
-    SQL.Close;
-    Trans.Rollback;
-
-    // Server-Zeit
-    if not Trans.InTransaction then
-      Trans.StartTransaction;
-    SQL.SQL.Text := 'select current_timestamp from RDB$DATABASE';
-    SQL.Open;
-    ServerTime := SQL.Fields[0].AsString;
-    SQL.Close;
-    Trans.Rollback;
-
-  except
-    on E: Exception do
-    begin
-      ErrorMsg := E.Message;
-      Result := False;
-    end;
-  end;
-
-  // Aufräumen
-
-  if SQL.Active then
-    SQL.Close;
-
-  if Trans.InTransaction then
-    Trans.Rollback;
-
-  //if DB.Connected then
-    //DB.Connected := false;
-
-  SQL.Free;
-  Trans.Free;
-  //DB.Free;
-end;}
-
 function TdmSysTables.GetDatabaseInfo(
   dbIndex: Integer; var ADatabaseName, CharSet, CreationDate, ServerTime: string;
   var ODSVerMajor, ODSVerMinor, Pages, PageSize: Integer;
@@ -2444,7 +2180,9 @@ begin
         DB.Params.Add('sql_role_name=' + RegisteredDatabases[dbIndex].RegRec.Role);
         DB.Params.Add('lc_ctype=' + RegisteredDatabases[dbIndex].RegRec.Charset);
 
-        DB.LoginPrompt := (RegisteredDatabases[dbIndex].RegRec.Password = '');
+        DB.OnLogin := @dmSysTables.OnDatabaseLogin;
+        DB.LoginPrompt := True;
+
         DB.FirebirdLibraryPathName := RegisteredDatabases[dbIndex].RegRec.FireBirdClientLibPath;
 
         Trans.DefaultDatabase := DB;

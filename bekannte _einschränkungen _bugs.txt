@@ -33,3 +33,31 @@ Bekannte Einschränkungen / Bugs
 
 [Data Editor]
 - Derzeit instabil und in aktiver Entwicklung.
+
+
+[Sortierung bei berechneten Spalten ohne Alias]
+- Problem: Der Versuch, eine berechnete Spalte ohne Alias (systemgenerierter Name wie CONCATENATION)
+  im Grid zu sortieren, führt zum     SQL‑Fehler -206 (Column unknown - CONCATENATION). 
+  Das tritt auch bei der Mehrspaltensortierung (selbstgebaut) auf, da Firebird den internen Spaltennamen nicht für ORDER BY akzeptiert.
+
+  Betroffene Query (erzeugt Fehler bei Sortierung):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1'),
+    '2' || ' = ' || ASCII_VAL('2'),
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z')
+  FROM RDB$DATABASE;
+
+  Workaround: Jeder berechneten Spalte einen eindeutigen Alias geben, z. B. AS COL1, AS COL2, … 
+  Danach funktioniert die Sortierung sowohl einzeln als auch mehrspaltig problemlos.
+
+ Korrigierte Query (funktioniert mit Sortierung):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1') AS COL1,
+    '2' || ' = ' || ASCII_VAL('2') AS COL2,
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z') AS COL16
+  FROM RDB$DATABASE;
+
+ Betrifft: Selbstgebaute Sortier‑Prozeduren in QueryWindow.
+ Status: Wird in einer späteren Version möglicherweise behoben.

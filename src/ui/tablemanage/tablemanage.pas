@@ -58,6 +58,7 @@ type
     GroupBox2: TGroupBox;
     CurrentIBDatabase: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
+    ImageList2: TImageList;
     SQLQuery1: TIBQuery;
     SQLQuery2: TIBQuery;
     ImageList1: TImageList;
@@ -103,6 +104,7 @@ type
     procedure edDropClick(Sender: TObject);
     procedure bbEditPermissionClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
@@ -110,8 +112,6 @@ type
     procedure sgTriggersDblClick(Sender: TObject);
     procedure tsCheckConstraintsShow(Sender: TObject);
     procedure tsForeignKeysShow(Sender: TObject);
-    procedure tsFieldsContextPopup(Sender: TObject; MousePos: TPoint;
-        var Handled: Boolean);
     procedure tsFieldsShow(Sender: TObject);
     procedure tsIndicesShow(Sender: TObject);
     procedure tsNotNullConstraintsShow(Sender: TObject);
@@ -188,6 +188,13 @@ begin
     CurrentIBDatabase.Connected := false;
 
   CloseAction := caFree;
+  TTabSheet(Parent).Free;
+end;
+
+procedure TfmTableManage.FormCreate(Sender: TObject);
+begin
+  CurrentIBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+  CurrentIBDatabase.LoginPrompt := true;
 end;
 
 procedure TfmTableManage.FormKeyDown(Sender: TObject; var Key: Word;
@@ -232,12 +239,6 @@ procedure TfmTableManage.tsCheckConstraintsShow(Sender: TObject);
 begin
   if Assigned(fmCheckConstraints) then
     fmCheckConstraints.FillCheckConstraints;
-end;
-
-procedure TfmTableManage.tsFieldsContextPopup(Sender: TObject;
-    MousePos: TPoint; var Handled: Boolean);
-begin
-
 end;
 
 procedure TfmTableManage.bbEditClick(Sender: TObject);
@@ -535,30 +536,51 @@ begin
 end;
 
 procedure TfmTableManage.FillReferences;
+var
+  SQL: string;
 begin
-  //CurrentIBTransaction.Commit;
-  dmSysTables.Init(FDBIndex);
-  dmSysTables.GetConstraintsOfTable(FTableName, SQLQuery1);
-  sgReferences.RowCount:= 1;
+  sgReferences.RowCount := 1;
 
-  if not SQLQuery1.Transaction.InTransaction then
-    SQLQuery1.Transaction.StartTransaction;
+  SQLQuery1.Close;
+  SQLQuery1.SQL.Text :=
+    'select '+
+    'trim(rc.rdb$constraint_name) as ConstName, '+
+    'trim(rfc.rdb$const_name_uq) as KeyName, '+
+    'trim(rc2.rdb$relation_name) as CurrentTableName, '+
+    'trim(flds_pk.rdb$field_name) as CurrentFieldName, '+
+    'trim(rc.rdb$relation_name) as OtherTableName, '+
+    'trim(flds_fk.rdb$field_name) as OtherFieldName, '+
+    'trim(rfc.rdb$update_rule) as UpdateRule, '+
+    'trim(rfc.rdb$delete_rule) as DeleteRule '+
+    'from rdb$relation_constraints AS rc '+
+    'inner join rdb$ref_constraints as rfc on (rc.rdb$constraint_name = rfc.rdb$constraint_name) '+
+    'inner join rdb$index_segments as flds_fk on (flds_fk.rdb$index_name = rc.rdb$index_name) ' +
+    'inner join rdb$relation_constraints as rc2 on (rc2.rdb$constraint_name = rfc.rdb$const_name_uq) ' +
+    'inner join rdb$index_segments as flds_pk on ' +
+    '((flds_pk.rdb$index_name = rc2.rdb$index_name) and (flds_fk.rdb$field_position = flds_pk.rdb$field_position)) ' +
+    'where rc.rdb$constraint_type = ''FOREIGN KEY'' '+
+    'and rc2.rdb$relation_name = ''' + UpperCase(FTableName) + ''' '+
+    'order by rc.rdb$constraint_name, flds_fk.rdb$field_position ';
 
-  if not SQLQuery1.Active then
-    SQLQuery1.Open;
+  ConnectDBPrepared(SQLQuery1.Database, SQLQuery1.Transaction, FDBIndex, SQLQuery1.Database.DefaultTransaction.Params);
 
-  SQLQuery1.First;
-  with SQLQuery1, sgReferences do
+  SQLQuery1.Open;
+
+  with SQLQuery1 do
   while not EOF do
   begin
-    RowCount:= RowCount + 1;
-    Cells[0, RowCount - 1]:= FieldByName('ConstName').AsString;
-    Cells[1, RowCount - 1]:= FieldByName('OtherTableName').AsString;
-    Cells[2, RowCount - 1]:= FieldByName('OtherFieldName').AsString;
-    Cells[3, RowCount - 1]:= FieldByName('KeyName').AsString;
+    sgReferences.RowCount := sgReferences.RowCount + 1;
+    sgReferences.Cells[0, sgReferences.RowCount - 1] := FieldByName('ConstName').AsString;
+    sgReferences.Cells[1, sgReferences.RowCount - 1] := FieldByName('OtherTableName').AsString;
+    sgReferences.Cells[2, sgReferences.RowCount - 1] := FieldByName('OtherFieldName').AsString;
+    sgReferences.Cells[3, sgReferences.RowCount - 1] := FieldByName('KeyName').AsString;
     Next;
   end;
+
   SQLQuery1.Close;
+
+  if sgReferences.RowCount > 1 then
+    sgReferences.Row := 1;
 end;
 
 {procedure TfmTableManage.cbIndexTypeChange(Sender: TObject);
@@ -690,6 +712,10 @@ begin
     AssignIBDatabase(RegisteredDatabases[dbIndex].IBDatabase, CurrentIBDatabase);
     CurrentIBDatabase.DefaultTransaction := CurrentIBTransaction;
 
+    // WICHTIG: OnLogin-Handler setzen, sonst kommt IBX-eigener Dialog!
+    CurrentIBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+    CurrentIBDatabase.LoginPrompt := True;
+
     SQLQuery1.DataBase := CurrentIBDatabase;
     SQLQuery1.Transaction := CurrentIBTransaction;
     SQLQuery2.DataBase := CurrentIBDatabase;
@@ -714,6 +740,7 @@ begin
       fmUniqueConstraints.BorderStyle := bsNone;
       fmUniqueConstraints.Init(dbIndex, FTableName, FNodeInfos, FExtractor);
       fmUniqueConstraints.Visible := true;
+      fmUniqueConstraints.bbClose.Visible := false;
     end;
 
     if not Assigned(fmCheckConstraints) then
@@ -724,6 +751,7 @@ begin
       fmCheckConstraints.BorderStyle := bsNone;
       fmCheckConstraints.Init(dbIndex, FTableName, FNodeInfos, FExtractor);
       fmCheckConstraints.Visible := true;
+      fmCheckConstraints.bbClose.Visible := false;
     end;
 
     if not Assigned(fmNotNullConstraints) then
@@ -734,8 +762,8 @@ begin
       fmNotNullConstraints.BorderStyle := bsNone;
       fmNotNullConstraints.Init(dbIndex, FTableName, FNodeInfos, FExtractor);
       fmNotNullConstraints.Visible := true;
+      fmNotNullConstraints.bbClose.Visible := false;
     end;
-
 
   except
     on E: Exception do
@@ -920,18 +948,17 @@ begin
   SQLQuery1.Close;
   SQLQuery1.SQL.Text:= Format('SELECT RDB$Trigger_Name, RDB$Trigger_Inactive FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 ' +
     'and RDB$Relation_Name = ''%s'' ',[FTableName]);
-  if not SQLQuery1.Database.Connected then
-    SQLQuery1.Database.Connected := true;
-  if not SQLQuery1.Transaction.InTransaction then
-    SQLQuery1.Transaction.StartTransaction;
+
+  ConnectDBPrepared(SQLQuery1.Database, SQLQuery1.Transaction, FDBIndex, SQLQuery1.Database.DefaultTransaction.Params);
+
   SQLQuery1.Open;
   sgTriggers.RowCount:= 1;
   with sgTriggers, SQLQuery1 do
   while not EOF do
   begin
     RowCount:= RowCount + 1;
-    Cells[0, RowCount - 1]:= SQLQuery1.Fields[0].AsString;
-    if SQLQuery1.Fields[1].AsString = '1' then
+    Cells[0, RowCount - 1]:= Fields[0].AsString;
+    if Fields[1].AsString = '1' then
       Cells[1, RowCount - 1]:= '0'
     else
       Cells[1, RowCount - 1]:= '1';

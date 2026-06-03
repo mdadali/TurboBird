@@ -1,7 +1,7 @@
 object fmNotNullConstraints: TfmNotNullConstraints
   Left = 450
   Height = 485
-  Top = 135
+  Top = 263
   Width = 881
   Caption = 'Not Null Constraints'
   ClientHeight = 485

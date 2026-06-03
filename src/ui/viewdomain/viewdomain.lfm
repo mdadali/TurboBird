@@ -71,17 +71,17 @@ object fmViewDomain: TfmViewDomain
     TabOrder = 0
     object Label1: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 15
-      Width = 86
+      Width = 94
       Caption = 'Domain name'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 48
-      Width = 60
+      Width = 64
       Caption = 'Data type'
       ParentColor = False
     end
@@ -98,9 +98,9 @@ object fmViewDomain: TfmViewDomain
     end
     object Label4: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 80
-      Width = 24
+      Width = 27
       Caption = 'Size'
       ParentColor = False
     end
@@ -117,9 +117,9 @@ object fmViewDomain: TfmViewDomain
     end
     object Label5: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 112
-      Width = 83
+      Width = 90
       Caption = 'Default Value'
       ParentColor = False
     end
@@ -149,9 +149,9 @@ object fmViewDomain: TfmViewDomain
     end
     object Label6: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 140
-      Width = 101
+      Width = 112
       Caption = 'Check constraint'
       ParentColor = False
     end
@@ -168,9 +168,9 @@ object fmViewDomain: TfmViewDomain
     end
     object Label7: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 176
-      Width = 82
+      Width = 90
       Caption = 'Character set'
       ParentColor = False
     end
@@ -198,9 +198,9 @@ object fmViewDomain: TfmViewDomain
     end
     object Label8: TLabel
       Left = 11
-      Height = 19
+      Height = 20
       Top = 216
-      Width = 53
+      Width = 59
       Caption = 'Collation'
       ParentColor = False
     end

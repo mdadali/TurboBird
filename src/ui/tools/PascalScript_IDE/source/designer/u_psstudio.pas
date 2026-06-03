@@ -455,8 +455,13 @@ end;
 
 procedure TfrmPSStudio.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
-  if LocalConsoleIDE.SaveCheck then //check if script changed and not yet saved
+  LocalConsoleIDE.acDebugResetExecute(nil); // Script stoppen
+
+  // Wichtig: Dem Script Zeit geben, sauber zu terminieren
+  Application.ProcessMessages;
+  Sleep(50);
+
+  if LocalConsoleIDE.SaveCheck then
   begin
     {$IFDEF SCRIPTER_EMBEDDED}
       CloseAction := caHide;
@@ -507,8 +512,8 @@ end;
 procedure TfrmPSStudio.FormCreate(Sender: TObject);
 var RootCtrl: TComponent;
 begin;
-  if FirstRun then
-    ExtractDataDirectory;
+  //if FirstRun then
+    //ExtractDataDirectory;
 
   FFileName := '';
 
@@ -547,6 +552,7 @@ begin;
   LocalConsoleIDE.pnlTools.Visible := false;
   LocalConsoleIDE.Align := alClient;
   LocalConsoleIDE.Visible := true;
+
 
   PropertyGrid.OnModified := @PropertyGridOnModified;
   OpenFileSilent(FStdFormTemplateFile);
@@ -718,6 +724,12 @@ begin
     Selection.Free;
     Selection := nil;
   end;
+
+  LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
+  Sleep(100);  // Zeit zum Aufräumen geben
+  //LocalConsoleIDE.Free;
+  JvDesignPanel1.Active := false;
+  Sleep(100);
 end;
 
 
@@ -844,8 +856,8 @@ begin
     if FileExists(CfrmFile) then
       JvDesignPanel1.LoadFromFile(CfrmFile);
 
-    // Pascal-Code laden (.ROPS)
-    RopsFile := BaseName + '.ROPS';
+    // Pascal-Code laden (.rops)
+    RopsFile := BaseName + '.rops';
     if FileExists(RopsFile) then
     begin
       SL := TStringList.Create;
@@ -915,8 +927,8 @@ begin
     CfrmFile := BaseName + '.cfrm';
     JvDesignPanel1.SaveToFile(CfrmFile);
 
-    // Pascal-Code-Datei (.ROPS)
-    RopsFile := BaseName + '.ROPS';
+    // Pascal-Code-Datei (.rops)
+    RopsFile := BaseName + '.rops';
     LocalConsoleIDE.ed.Lines.SaveToFile(RopsFile); // SynEdit Lines speichern
     LocalConsoleIDE.ed.Modified := false;
 
@@ -945,8 +957,8 @@ begin
   CfrmFile := BaseName + '.cfrm';
   JvDesignPanel1.SaveToFile(CfrmFile);
 
-  // Pascal-Code-Datei (.ROPS) speichern
-  RopsFile := BaseName + '.ROPS';
+  // Pascal-Code-Datei (.rops) speichern
+  RopsFile := BaseName + '.rops';
   LocalConsoleIDE.ed.Lines.SaveToFile(RopsFile);
   LocalConsoleIDE.ed.Modified := false;
 

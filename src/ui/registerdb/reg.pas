@@ -135,13 +135,15 @@ begin
                      cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
                      chkboxOverwriteServerClientLib.Checked) then
   begin
+    bbReg.Enabled := true;
     if Rec.IsEmbedded then
       ConnMessage := 'Embedded connection established successfully'
     else
       ConnMessage := IBXProtocolToString(Rec.Protocol) + ' connection established successfully';
 
     ShowMessage(ConnMessage);
-  end;
+  end else
+    bbReg.Enabled := false;
 end;
 
 procedure TfmReg.btBrowseDBClick(Sender: TObject);
@@ -352,11 +354,11 @@ var ServerErrStr: string;
 begin
   result := false;
 
-  {if not IsServerReachable(ServerName, ServerErrStr) then
+  if not IsServerReachable(ServerName, ServerErrStr) then
   begin
     MessageDlg(ServerErrStr, mtError, [mbOK], 0);
     Exit;
-  end;}
+  end;
 
   try
     IBConnection1.Close;

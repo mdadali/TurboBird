@@ -734,8 +734,8 @@ object frmConsoleIDE: TfrmConsoleIDE
     TabPosition = tpBottom
     object tsMessages: TTabSheet
       Caption = 'Messages'
-      ClientHeight = 91
-      ClientWidth = 992
+      ClientHeight = 84
+      ClientWidth = 986
       object messages: TListBox
         Left = 0
         Height = 91
@@ -750,8 +750,8 @@ object frmConsoleIDE: TfrmConsoleIDE
     end
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ClientHeight = 91
-      ClientWidth = 992
+      ClientHeight = 84
+      ClientWidth = 986
       object vleWatches: TValueListEditor
         Left = 122
         Height = 91
@@ -768,7 +768,7 @@ object frmConsoleIDE: TfrmConsoleIDE
         )
         ColWidths = (
           64
-          802
+          806
         )
       end
       object pnlAddDeleteWatch: TPanel

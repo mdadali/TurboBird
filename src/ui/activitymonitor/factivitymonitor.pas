@@ -438,6 +438,9 @@ begin
     if Assigned(FNodeInfos) then
       FNodeInfos^.ViewForm := nil;
   end;
+
+  CloseAction := caFree;
+  TTabSheet(Parent).Free;
 end;
 
 procedure TfrmActivityMonitor.grdAttachmentsDrawColumnCell(

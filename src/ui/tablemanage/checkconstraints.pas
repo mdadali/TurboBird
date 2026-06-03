@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Grids,
-  StdCtrls, Buttons,
+  StdCtrls, Buttons, SynEdit, SynHighlighterSQL,
 
   turbocommon,
   fbcommon,
@@ -25,21 +25,26 @@ type
     bbDrop: TBitBtn;
     bbEdit: TBitBtn;
     bbNew: TBitBtn;
+    bbPost: TBitBtn;
     bbRefresh: TBitBtn;
     edConstraintName: TEdit;
+    GroupBox1: TGroupBox;
     Label1: TLabel;
-    Label2: TLabel;
-    meCheckExpression: TMemo;
+    meCheckExpression: TSynEdit;
+    pnlConstraintsName: TPanel;
     pnlMiddle: TPanel;
     pnBottom: TPanel;
     pnlTop: TPanel;
     sgCheckConstraints: TStringGrid;
+    Splitter1: TSplitter;
+    SynSQLSyn1: TSynSQLSyn;
 
     procedure bbEditClick(Sender: TObject);
     procedure bbDropClick(Sender: TObject);
+    procedure bbNewClick(Sender: TObject);
+    procedure bbPostClick(Sender: TObject);
     procedure bbRefreshClick(Sender: TObject);
     procedure bbCloseClick(Sender: TObject);
-    procedure bbNewClick(Sender: TObject);
     procedure sgCheckConstraintsSelection(Sender: TObject; aCol, aRow: Integer);
     procedure FormShow(Sender: TObject);
 
@@ -49,7 +54,12 @@ type
     FNodeInfos: TPNodeInfos;
     FExtractor: TSimpleObjExtractor;
 
+    FEditMode: Boolean;
+    FEditingConstraintName: string;
+
     procedure LoadConstraintDetail(const ConstraintName: string);
+    procedure ClearEditFields;
+    procedure UpdateButtonStates;
 
   public
     procedure Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -73,10 +83,57 @@ begin
   FNodeInfos := ANodeInfos;
   FExtractor := AExtractor;
 
+  FEditMode := False;
+  FEditingConstraintName := '';
+
   Caption := 'Check Constraints: ' + FTableName;
 
   sgCheckConstraints.Cells[0, 0] := 'Constraint Definition';
   sgCheckConstraints.ColWidths[0] := 400;
+end;
+
+procedure TfmCheckConstraints.ClearEditFields;
+begin
+  edConstraintName.Text := '';
+  meCheckExpression.Clear;
+end;
+
+procedure TfmCheckConstraints.UpdateButtonStates;
+var
+  HasSelection: Boolean;
+  HasContent: Boolean;
+begin
+  HasSelection := (sgCheckConstraints.RowCount > 1) and (sgCheckConstraints.Row > 0);
+  HasContent := (Trim(edConstraintName.Text) <> '') and (Trim(meCheckExpression.Text) <> '');
+
+  if FEditMode then
+  begin
+    bbNew.Enabled := False;
+    bbEdit.Enabled := False;
+    bbDrop.Enabled := False;
+    bbPost.Enabled := HasContent;
+
+    // Name nur bei New änderbar, nicht bei Edit
+    edConstraintName.Enabled := (FEditingConstraintName = '');
+    meCheckExpression.Enabled := True;
+
+    if edConstraintName.Enabled then
+      edConstraintName.Color := clWindow
+    else
+      edConstraintName.Color := clBtnFace;
+    meCheckExpression.Color := clWindow;
+  end
+  else
+  begin
+    bbNew.Enabled := True;
+    bbEdit.Enabled := HasSelection;
+    bbDrop.Enabled := HasSelection;
+    bbPost.Enabled := False;
+    edConstraintName.Enabled := False;
+    meCheckExpression.Enabled := False;
+    edConstraintName.Color := clBtnFace;
+    meCheckExpression.Color := clBtnFace;
+  end;
 end;
 
 procedure TfmCheckConstraints.LoadConstraintDetail(const ConstraintName: string);
@@ -85,8 +142,7 @@ var
   Qry: TIsolatedQuery;
   RawSource: string;
 begin
-  edConstraintName.Text := '';
-  meCheckExpression.Clear;
+  ClearEditFields;
 
   if ConstraintName = '' then
     Exit;
@@ -109,10 +165,10 @@ begin
     begin
       RawSource := Trim(Qry.Query.FieldByName('CHECK_SOURCE').AsString);
 
+      // "CHECK (...)" → "(...)" entfernen
       if Pos('CHECK', UpperCase(RawSource)) = 1 then
       begin
         RawSource := Trim(Copy(RawSource, Length('CHECK') + 1, MaxInt));
-        // Äußere Klammern entfernen falls vorhanden
         if (Length(RawSource) >= 2) and (RawSource[1] = '(') and (RawSource[Length(RawSource)] = ')') then
           RawSource := Trim(Copy(RawSource, 2, Length(RawSource) - 2));
       end;
@@ -145,7 +201,7 @@ begin
     Items.Free;
   end;
 
-  // Wenn Einträge vorhanden, ersten selektieren
+  // Ersten Eintrag selektieren, falls vorhanden
   if sgCheckConstraints.RowCount > 1 then
   begin
     sgCheckConstraints.Row := 1;
@@ -153,14 +209,13 @@ begin
   end
   else
   begin
-    edConstraintName.Text := '';
-    meCheckExpression.Clear;
+    ClearEditFields;
   end;
 
-  // Button-Status
-  bbEdit.Enabled := (sgCheckConstraints.RowCount > 1);
-  bbDrop.Enabled := (sgCheckConstraints.RowCount > 1);
-  bbNew.Enabled := True;
+  // Immer in den Normalmodus zurücksetzen
+  FEditMode := False;
+  FEditingConstraintName := '';
+  UpdateButtonStates;
 end;
 
 procedure TfmCheckConstraints.sgCheckConstraintsSelection(Sender: TObject; aCol, aRow: Integer);
@@ -172,7 +227,6 @@ begin
   if (aRow > 0) and (aRow < sgCheckConstraints.RowCount) then
   begin
     Line := sgCheckConstraints.Cells[0, aRow];
-    // Extrahiere Constraint-Namen aus "CHK_NAME: CHECK"
     ColonPos := Pos(':', Line);
     if ColonPos > 0 then
       ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
@@ -180,87 +234,103 @@ begin
       ConstraintName := '';
 
     LoadConstraintDetail(ConstraintName);
+
+    FEditMode := False;
+    FEditingConstraintName := '';
+    UpdateButtonStates;
   end;
-end;
-
-procedure TfmCheckConstraints.bbEditClick(Sender: TObject);
-var
-  QWindow: TfmQueryWindow;
-  ConstraintName: string;
-  NewExpression: string;
-  Line: string;
-  ColonPos: Integer;
-begin
-  if sgCheckConstraints.RowCount <= 1 then
-    Exit;
-
-  // Aktuellen Constraint-Namen ermitteln
-  Line := sgCheckConstraints.Cells[0, sgCheckConstraints.Row];
-  ColonPos := Pos(':', Line);
-  if ColonPos > 0 then
-    ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
-  else
-    ConstraintName := '';
-
-  if ConstraintName = '' then
-    Exit;
-
-  NewExpression := Trim(meCheckExpression.Text);
-  if NewExpression = '' then
-  begin
-    ShowMessage('Please enter a check expression.');
-    Exit;
-  end;
-
-  QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Check Constraint: ' + ConstraintName);
-  QWindow.meQuery.Lines.Clear;
-  QWindow.meQuery.Lines.Add('SET TERM ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('-- Drop existing Check Constraint');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' DROP CONSTRAINT ' + ConstraintName + ' ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('-- Create new Check Constraint');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD CONSTRAINT ' + ConstraintName + ' CHECK (' + NewExpression + ') ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('SET TERM ;^');
-
-  QWindow.OnCommit := @bbRefreshClick;
-  QWindow.Show;
 end;
 
 procedure TfmCheckConstraints.bbNewClick(Sender: TObject);
+begin
+  ClearEditFields;
+  edConstraintName.Text := 'CHK_' + FTableName + '_' + IntToStr(sgCheckConstraints.RowCount);
+  meCheckExpression.Text := '-- Enter check condition, e.g. FIELD_NAME > 0';
+  FEditMode := True;
+  FEditingConstraintName := '';   // New = kein existierender Name
+  UpdateButtonStates;
+  edConstraintName.SetFocus;
+end;
+
+procedure TfmCheckConstraints.bbPostClick(Sender: TObject);
 var
   QWindow: TfmQueryWindow;
-  NewName: string;
-  NewExpression: string;
+  ConstraintName: string;
+  IsNew: Boolean;
 begin
-  NewName := Trim(edConstraintName.Text);
-  if NewName = '' then
+  ConstraintName := Trim(edConstraintName.Text);
+  if ConstraintName = '' then
   begin
     ShowMessage('Please enter a constraint name.');
     Exit;
   end;
 
-  NewExpression := Trim(meCheckExpression.Text);
-  if NewExpression = '' then
+  if Trim(meCheckExpression.Text) = '' then
   begin
     ShowMessage('Please enter a check expression.');
     Exit;
   end;
 
-  QWindow := fmMain.ShowQueryWindow(FDBIndex, 'New Check Constraint: ' + NewName);
-  QWindow.meQuery.Lines.Clear;
+  IsNew := (FEditingConstraintName = '');
+
+  if IsNew then
+    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'New Check Constraint: ' + ConstraintName)
+  else
+    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Check Constraint: ' + ConstraintName);  QWindow.meQuery.Lines.Clear;
+
   QWindow.meQuery.Lines.Add('SET TERM ^;');
   QWindow.meQuery.Lines.Add('');
+
+  if not IsNew then
+  begin
+    QWindow.meQuery.Lines.Add('-- Drop existing Check Constraint');
+    QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+      ' DROP CONSTRAINT ' + FEditingConstraintName + ' ^;');
+    QWindow.meQuery.Lines.Add('');
+  end;
+
+  if IsNew then
+    QWindow.meQuery.Lines.Add('-- Create new Check Constraint')
+  else
+    QWindow.meQuery.Lines.Add('-- Create updated Check Constraint');
+
   QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD CONSTRAINT ' + NewName + ' CHECK (' + NewExpression + ') ^;');
+    ' ADD CONSTRAINT ' + ConstraintName + ' CHECK (');
+  QWindow.meQuery.Lines.AddStrings(meCheckExpression.Lines);
+  QWindow.meQuery.Lines.Add(') ^;');
   QWindow.meQuery.Lines.Add('');
   QWindow.meQuery.Lines.Add('SET TERM ;^');
 
   QWindow.OnCommit := @bbRefreshClick;
   QWindow.Show;
+
+  // Zurücksetzen
+  FEditMode := False;
+  FEditingConstraintName := '';
+  ClearEditFields;
+  FillCheckConstraints;
+end;
+
+procedure TfmCheckConstraints.bbEditClick(Sender: TObject);
+var
+  Line: string;
+  ColonPos: Integer;
+begin
+  if sgCheckConstraints.RowCount <= 1 then Exit;
+
+  Line := sgCheckConstraints.Cells[0, sgCheckConstraints.Row];
+  ColonPos := Pos(':', Line);
+  if ColonPos > 0 then
+    FEditingConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
+  else
+    FEditingConstraintName := '';
+
+  if FEditingConstraintName = '' then Exit;
+
+  FEditMode := True;
+  UpdateButtonStates;
+  edConstraintName.Enabled := False;   // Name nicht änderbar
+  meCheckExpression.SetFocus;
 end;
 
 procedure TfmCheckConstraints.bbDropClick(Sender: TObject);
@@ -309,7 +379,7 @@ end;
 procedure TfmCheckConstraints.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(Self);
-  FillCheckConstraints;
+  //FillCheckConstraints;
 end;
 
 end.

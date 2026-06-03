@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ExtCtrls, StdCtrls, Buttons, LCLIntf, ComCtrls, GifAnim, rxctrls,
   turbocommon,
-  updatechecker,
   uthemeselector;
 
 
@@ -35,7 +34,6 @@ type
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
-    laUpdate: TLabel;
     laWebSite: TLabel;
     lbFPCVersion: TLabel;
     lbLazarus: TLabel;
@@ -63,7 +61,6 @@ type
     procedure GifAnim1Click(Sender: TObject);
     procedure Image4Click(Sender: TObject);
     procedure Label6Click(Sender: TObject);
-    procedure laUpdateClick(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure pnlTopClick(Sender: TObject);
@@ -126,17 +123,6 @@ end;
 procedure TfmAbout.Label6Click(Sender: TObject);
 begin
   OpenURL('http://lazarus.freepascal.org');
-end;
-
-procedure TfmAbout.laUpdateClick(Sender: TObject);
-var frmUpdateChecker: TfrmUpdateChecker;
-begin
-  try
-    frmUpdateChecker := TfrmUpdateChecker.Create(self);
-    frmUpdateChecker.ShowModal;
-  finally
-    frmUpdateChecker.Free;
-  end;
 end;
 
 procedure TfmAbout.FormClose(Sender: TObject; var CloseAction: TCloseAction);

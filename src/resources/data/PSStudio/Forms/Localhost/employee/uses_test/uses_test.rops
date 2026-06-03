@@ -1,0 +1,59 @@
+//<HEADER_COMMENTS-BEGIN>
+{
+  Add your header comments here
+}
+//<HEADER_COMMENTS-END>
+
+//<USER-GLOBALS-BEGIN>
+  // Add your global variables and types here
+uses LIB_DATETIME;
+//<USER-GLOBALS-END>
+
+//<DESIGNER-VARS-BEGIN>
+var
+  Form1: TForm;
+  Button1: TButton;
+//<DESIGNER-VARS-END>
+
+//<USERCODE-BEGIN>
+  // Add your code here (procedures, functions, types, variables)
+procedure Button1_OnClick(Sender: TObject);
+var d: string;
+begin
+  d := Duration(now, (now + 1));
+  ShowMessage(d);
+end;
+//<USERCODE-END>
+
+//<DESIGNER-BEGIN>
+procedure CreateNewForm;
+begin
+  Form1 := TForm.Create(nil);
+  Form1.SetBounds(63, 65, 850, 446);
+  Form1.Color := -2147483643;
+  Form1.Position := poDesigned;
+  Form1.Caption := 'Form1';
+
+  Button1 := TButton.Create(Form1);
+  Button1.Parent := Form1;
+
+  Button1.Left := 75;
+  Button1.Top := 104;
+  Button1.Width := 75;
+  Button1.Height := 25;
+  Button1.Visible := True;
+  Button1.Enabled := True;
+  Button1.Tag := 0;
+  Button1.Caption := 'Button1';
+  //<EVENT_BINDINGS-BEGIN>
+  Button1.OnClick := @Button1_OnClick;
+  //<EVENT_BINDINGS-END>
+  Form1.Visible := True;
+end;
+//<DESIGNER-END>
+
+//<MAIN-BEGIN>
+begin
+  CreateNewForm;
+end.
+//<MAIN-END>

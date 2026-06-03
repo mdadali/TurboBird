@@ -41,7 +41,9 @@ implementation
 procedure TfrmLoginServiceManager.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+  edtPassword.SetFocus;
 end;
+
 
 end.
 

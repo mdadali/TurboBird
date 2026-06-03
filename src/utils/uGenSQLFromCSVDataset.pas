@@ -207,45 +207,4 @@ begin
   end;
 end;
 
-{procedure TGenSQLFromCSVDataset.GenerateSQL;
-var
-  i: Integer;
-  Field: TField;
-  SL: TStringList;
-  FieldName: string;
-  UseHeader: Boolean;
-begin
-  if not FDataSet.Active then Exit;
-
-  UseHeader := False;
-
-  if FDataSet is TCSVDataset then
-    UseHeader := TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames;
-
-  SL := TStringList.Create;
-  try
-    SL.Add('CREATE TABLE ' + FTableName + ' (');
-
-    for i := 0 to FDataSet.FieldCount - 1 do
-    begin
-      Field := FDataSet.Fields[i];
-
-      if UseHeader then
-        FieldName := Field.FieldName
-      else
-        FieldName := 'Column' + IntToStr(i + 1);
-
-      SL.Add('  ' + FieldName + ' VARCHAR(255)' +
-        IfThen(i < FDataSet.FieldCount - 1, ',', ''));
-    end;
-
-    SL.Add(');');
-
-    FSQL := SL.Text;
-
-  finally
-    SL.Free;
-  end;
-end;}
-
 end.
