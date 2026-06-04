@@ -23,6 +23,7 @@ uses
   IBDatabaseInfo,
   ibxscript, IBSQL, IBExtract,
 
+  About,
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig,
   fsqlmonitor,
@@ -8377,9 +8378,12 @@ end;
 
 (**********  About  ****************)
 procedure TfmMain.mnAboutClick(Sender: TObject);
+var fmAbout: TfmAbout;
 begin
-  //fmAbout.bbtnClose.Visible := true;
-  //fmAbout.ShowModal;
+  fmAbout := TfmAbout.Create(self);
+  fmAbout.bbtnClose.Visible := true;
+  fmAbout.ShowModal;
+  fmAbout.Free;
 end;
 
 (****************  Unregister database *************)

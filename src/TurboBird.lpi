@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1823"/>
+      <BuildNr Value="1825"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -664,7 +664,7 @@
         <PackageName Value="LCL"/>
       </Item32>
     </RequiredPackages>
-    <Units Count="118">
+    <Units Count="119">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1391,6 +1391,14 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSQLParser"/>
       </Unit117>
+      <Unit118>
+        <Filename Value="ui/about/about.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmAbout"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="About"/>
+      </Unit118>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

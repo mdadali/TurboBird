@@ -137,6 +137,7 @@ begin
   pnlTop.Width := self.Width;
   GifAnim1.Width := self.Width;
   pnlMWA.Width := self.Width;
+  Init;
 end;
 
 procedure TfmAbout.FormShow(Sender: TObject);
