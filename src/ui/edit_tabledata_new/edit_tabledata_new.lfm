@@ -224,7 +224,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     AllowStreamedConnected = False
     DefaultTransaction = transMain
     IdleTimer = 0
-    TraceFlags = [tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc]
+    TraceFlags = []
     UseDefaultSystemCodePage = False
     Left = 64
     Top = 152
