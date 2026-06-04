@@ -4,9 +4,17 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+
 ----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1275
-Build Date & Time: 04.06.2026, 11:55
+Build Date & Time: 04.06.2026, 14:00
+
++ Several bugs fixed
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1275
+Build Date & Time: 04.06.2026, 11:50
 
 + Automatic update notification
 + SQLSelectParser integrated

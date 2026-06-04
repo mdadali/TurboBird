@@ -1,7 +1,7 @@
 object fmAbout: TfmAbout
-  Left = 555
+  Left = 453
   Height = 618
-  Top = 168
+  Top = 48
   Width = 641
   BorderIcons = []
   BorderStyle = bsNone
@@ -70315,9 +70315,10 @@ object fmAbout: TfmAbout
       Top = 0
       Width = 104
       Color = clGray
+      Enabled = False
       ParentColor = False
-      Style = pbstMarquee
       TabOrder = 1
+      Visible = False
     end
   end
   object PageControl1: TPageControl
