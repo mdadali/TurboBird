@@ -1,4 +1,4 @@
-🕒 Started: Do 21 Mai 2026 14:01:37 CEST
+🕒 Started: Do 04 Jun 2026 10:56:19 CEST
 🚀 Starting handle script for TurboBird [x86_64-win64-win-release], version 1.2.1.1275
 📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe
 + '[' ON = ON ']'
@@ -18,7 +18,6 @@
 + echo '📌 SRC initially points to: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe'
 + handle_file /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe
 + local src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe
-🔍 Detected .exe input file
 + DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe
 + '[' ON = ON ']'
 + [[ /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe == *.exe ]]
@@ -27,14 +26,15 @@
 🔍 Detected .exe input file
 + '[' ON = ON ']'
 + echo '🔍 Detected .exe input file'
+🔍 Detected .exe input file
 + local new_src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 + mv /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
-📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 + log '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release'
 + echo '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release'
 📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 + '[' ON = ON ']'
 + echo '📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release'
+📁 Renamed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release.exe → /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 + src=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 + IS_EXE=true
 + DST=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275
@@ -74,19 +74,20 @@
 📦 Compressing file, please wait...
 + zip -j -q /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip
-+ ZIP_SIZE=28044049
++ ZIP_SIZE=27854044
 ++ stat -c%s /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe
-+ ORIG_SIZE=46658560
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 43MB → 26MB)
++ ORIG_SIZE=45886976
 + ((  ZIP_SIZE < ORIG_SIZE  ))
-+ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 44MB → 26MB)'
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 44MB → 26MB)'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 44MB → 26MB)
++ log '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 43MB → 26MB)'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 43MB → 26MB)'
+📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 43MB → 26MB)
 + '[' ON = ON ']'
-📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 44MB → 26MB)
-+ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 44MB → 26MB)'
++ echo '📦 Compressed: /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip (from 43MB → 26MB)'
 ++ dirname /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe
 + DST_DIR=/home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release
 ++ basename /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release/TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe
+🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-release
 + DST_FILENAME=TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe
 + '[' ON = ON ']'
 + BASENAME_RAW=TurboBird_x86_64-win64-win-release
@@ -101,6 +102,5 @@
 🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-release
 + '[' ON = ON ']'
 + echo '🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-release'
-🧹 Cleaning up old versions of: TurboBird_x86_64-win64-win-release
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release -type f -name 'TurboBird_x86_64-win64-win-release-v*.zip' '!' -name TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old ZIP: $1"; rm -v "$1"' _ '{}' ';'
 + find /home/maurog/daten/mustafa/entwicklung/windows/lazarus/FireBird/turbobird/src/handle_scripts/../../bin/x86_64-win64-win-release/TurboBird_x86_64-win64-win-release -type f -name 'TurboBird_x86_64-win64-win-release-v*' '!' -name TurboBird_x86_64-win64-win-release-v1.2.1.1275 '!' -name TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe '!' -name TurboBird_x86_64-win64-win-release-v1.2.1.1275.exe.zip '!' -name '*.zip' '!' -name '*.ini' -exec bash -c 'echo "🗑️ Deleting old binary: $1"; rm -v "$1"' _ '{}' ';'
