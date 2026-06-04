@@ -9830,7 +9830,7 @@ object fmMain: TfmMain
     AllowStreamedConnected = False
     DefaultTransaction = CurrentIBTransaction
     IdleTimer = 0
-    TraceFlags = [tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc]
+    TraceFlags = []
     UseDefaultSystemCodePage = False
     Left = 104
     Top = 104
