@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 939
+  Left = 706
   Height = 748
-  Top = 73
+  Top = 242
   Width = 679
   Caption = 'fmQueryWindow'
   ClientHeight = 748
@@ -70872,6 +70872,7 @@ object fmQueryWindow: TfmQueryWindow
     MouseLinkColor.Foreground = clBlue
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
+    OnChange = meQueryChange
     OnChangeUpdating = meQueryChangeUpdating
     inline TSynGutterPartList
       object TSynGutterMarks

@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 438
+  Left = 486
   Height = 612
-  Top = 267
+  Top = 241
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -8463,6 +8463,7 @@ object fmMain: TfmMain
     object lmCloneToExternalTable: TMenuItem
       Tag = 1
       Caption = 'Clone to external Table'
+      Visible = False
       OnClick = lmCloneToExternalTableClick
     end
     object lmCopyTable: TMenuItem

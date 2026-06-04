@@ -6,11 +6,10 @@ Neuigkeiten für TurboBird
 
 ----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1275
-Build-Datum & -Zeit: 21.06.2026, 11:20
+Build-Datum & -Zeit: 04.06.2026, 11:50
 
 + Automatische Update-Benachrichtigung
 + SQLSelectParser integriert
-+ Clone to ExternalTable
 + Neue Schalter in der INI-Datei:
 
 [QueryWindow]

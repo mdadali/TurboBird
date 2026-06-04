@@ -152,6 +152,7 @@ type
     procedure lmUndoClick(Sender: TObject);
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
+    procedure meQueryChange(Sender: TObject);
     procedure meQueryChangeUpdating(ASender: TObject; AnUpdating: Boolean);
     procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure meQueryMouseEnter(Sender: TObject);
@@ -2434,6 +2435,11 @@ end;
 procedure TfmQueryWindow.lmFindAgainClick(Sender: TObject);
 begin
   meQuery.SearchReplace(FindDialog1.FindText, '', FOptions);
+end;
+
+procedure TfmQueryWindow.meQueryChange(Sender: TObject);
+begin
+
 end;
 
 procedure TfmQueryWindow.meQueryChangeUpdating(ASender: TObject;
