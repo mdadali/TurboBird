@@ -5,8 +5,8 @@ unit fsqlmonitor;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, IBSQLMonitor,
-  uthemeselector;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, SynEdit,
+  SynHighlighterSQL, IBSQLMonitor, uthemeselector;
 
 type
 
@@ -14,7 +14,8 @@ type
 
   TfmSQLMonitor = class(TForm)
     IBSQLMonitor1: TIBSQLMonitor;
-    Memo1: TMemo;
+    SynEditMonitor: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -36,16 +37,18 @@ implementation
 
 procedure TfmSQLMonitor.IBSQLMonitor1SQL(EventText: String; EventTime: TDateTime);
 begin
-  Memo1.Lines.Add(DateTimeToStr(EventTime));
-  Memo1.Lines.Add(EventText);
+  SynEditMonitor.Lines.Add(FormatDateTime('dd/mm/yyyy hh:nn:ss.zzzz',EventTime) + ': ' + EventText);
+  Application.ProcessMessages;
 end;
 
 procedure TfmSQLMonitor.FormClose(Sender: TObject; var CloseAction: TCloseAction
   );
 begin
-  //if IBSQLMonitor1.Enabled then
+  if IBSQLMonitor1.Enabled then
     IBSQLMonitor1.Enabled := false;
-  //CloseAction := caFree;
+
+  DisableMonitoring;
+  Application.ProcessMessages;
   CloseAction := caHide;
 end;
 
@@ -57,6 +60,8 @@ end;
 procedure TfmSQLMonitor.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+  EnableMonitoring;
+  Application.ProcessMessages;
 end;
 
 end.

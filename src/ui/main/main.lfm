@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 372
+  Left = 438
   Height = 612
-  Top = 488
+  Top = 267
   Width = 906
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -6312,8 +6312,8 @@ object fmMain: TfmMain
     TabOrder = 6
     object tvMain: TTreeView
       Left = 1
-      Height = 452
-      Top = 56
+      Height = 444
+      Top = 64
       Width = 331
       Align = alClient
       BackgroundColor = clMedGray
@@ -6341,12 +6341,12 @@ object fmMain: TfmMain
     end
     object grBoxObjectFilter: TGroupBox
       Left = 1
-      Height = 55
+      Height = 63
       Top = 1
       Width = 331
       Align = alTop
       Caption = 'Object Filter'
-      ClientHeight = 35
+      ClientHeight = 43
       ClientWidth = 329
       ParentBackground = False
       TabOrder = 1
@@ -9830,7 +9830,7 @@ object fmMain: TfmMain
     AllowStreamedConnected = False
     DefaultTransaction = CurrentIBTransaction
     IdleTimer = 0
-    TraceFlags = []
+    TraceFlags = [tfQPrepare, tfQExecute, tfQFetch, tfError, tfStmt, tfConnect, tfTransact, tfBlob, tfService, tfMisc]
     UseDefaultSystemCodePage = False
     Left = 104
     Top = 104
