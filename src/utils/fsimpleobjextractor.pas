@@ -9,6 +9,7 @@ uses
   IB, IBDatabase, IBSQL, IBExtract,
 
   fbcommon,
+
   udb_udr_func_fetcher;
 
 {$I turbocommon.inc}
@@ -41,6 +42,8 @@ type
 
     procedure   ExtractToTreeNode(ObjectType: TObjectType; ObjectName : String; ExtractTypes: TExtractTypes; Quoted: boolean; var Node: TTreeNode; AImageIndex: integer);
     procedure   ExtractTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char; RemoveLastComma: boolean);
+    procedure   ExtractTableFieldsWithComma(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
+    procedure   ExtractTableFieldsForExternalTable(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
     procedure   ExtractCleanTableFields(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
     procedure   ExtractTableFieldsToTreeNode(ATableName: string; var Node: TTreeNode; Quoted: boolean; Delimiter: char; ImageIndex: integer; SysFlag: boolean);
 
@@ -656,6 +659,112 @@ begin
   finally
     re.Free;
     FIBExtract.AlwaysQuoteIdentifiers := tmpQuoted;
+  end;
+end;
+
+procedure TSimpleObjExtractor.ExtractTableFieldsWithComma(ATableName: string; var AItems: TStringList; Quoted: boolean; Delimiter: char);
+var
+  i: Integer;
+  Line: string;
+begin
+  // Bestehende Methode nutzen (mit RemoveLastComma=True)
+  ExtractTableFields(ATableName, AItems, Quoted, Delimiter, True);
+
+  // Fehlende Kommas am Ende jeder Zeile hinzufügen
+  for i := 0 to AItems.Count - 1 do
+  begin
+    Line := AItems[i];
+    if (Length(Line) > 0) and (Line[Length(Line)] <> ',') then
+      AItems[i] := Line + ',';
+  end;
+
+  // Letztes Komma wieder entfernen (letzte Zeile)
+  if AItems.Count > 0 then
+  begin
+    i := AItems.Count - 1;
+    Line := AItems[i];
+    if (Length(Line) > 0) and (Line[Length(Line)] = ',') then
+      AItems[i] := Copy(Line, 1, Length(Line) - 1);
+  end;
+end;
+
+procedure TSimpleObjExtractor.ExtractTableFieldsForExternalTable(
+  ATableName: string;
+  var AItems: TStringList;
+  Quoted: boolean;
+  Delimiter: char);
+var
+  TempItems: TStringList;
+  i: Integer;
+  Line, FieldName, FieldType, DomainName, BaseType: string;
+  SpacePos: Integer;
+  RestAfterDomain: string;
+begin
+  // 1. Felder mit Komma extrahieren
+  TempItems := TStringList.Create;
+  try
+    ExtractTableFieldsWithComma(ATableName, TempItems, false, Delimiter);
+
+    AItems.Clear;
+
+    // 2. Domänen auflösen
+    for i := 0 to TempItems.Count - 1 do
+    begin
+      Line := TempItems[i];
+
+      // Feldname und Typ trennen
+      SpacePos := Pos(Delimiter, Line);
+      if SpacePos > 0 then
+      begin
+        FieldName := Copy(Line, 1, SpacePos - 1);
+        FieldType := Trim(Copy(Line, SpacePos + 1, MaxInt));
+      end
+      else
+      begin
+        FieldName := Line;
+        FieldType := '';
+      end;
+
+      // Letztes Komma entfernen
+      if (Length(FieldType) > 0) and (FieldType[Length(FieldType)] = ',') then
+        FieldType := Copy(FieldType, 1, Length(FieldType) - 1);
+
+      // Domänen-Namen extrahieren (erster Teil)
+      DomainName := FieldType;
+      if Pos(' ', DomainName) > 0 then
+        DomainName := Copy(DomainName, 1, Pos(' ', DomainName) - 1);
+      if Pos('(', DomainName) > 0 then
+        DomainName := Copy(DomainName, 1, Pos('(', DomainName) - 1);
+
+      // Rest nach Domänen-Namen (NOT NULL, DEFAULT etc.)
+      RestAfterDomain := '';
+      if Pos(' ', FieldType) > 0 then
+        RestAfterDomain := Copy(FieldType, Pos(' ', FieldType) + 1, MaxInt);
+      if Pos('(', FieldType) > 0 then
+        RestAfterDomain := Copy(FieldType, Pos('(', FieldType), MaxInt);
+
+      // Domäne auflösen mit der neuen Funktion!
+      BaseType := DomainToDataType(DomainName, FIBDatabase, FIBTransaction);
+
+      if BaseType <> '' then
+      begin
+        // Domäne gefunden → Typ ersetzen, Rest behalten
+        FieldType := BaseType;
+
+        // NOT NULL, DEFAULT etc. wieder anhängen
+        if RestAfterDomain <> '' then
+          FieldType := FieldType + ' ' + RestAfterDomain;
+      end;
+
+      // Komma wieder anhängen (außer letzte Zeile)
+      if i < TempItems.Count - 1 then
+        FieldType := FieldType + ',';
+
+      AItems.Add(FieldName + Delimiter + FieldType);
+    end;
+
+  finally
+    TempItems.Free;
   end;
 end;
 

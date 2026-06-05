@@ -15,7 +15,7 @@ type
     btnBrowseFile: TButton;
     btnOK: TButton;
     btnCancel: TButton;
-    edtTableName: TEdit;
+    edtExtTableName: TEdit;
     edtExternalFileName: TEdit;
     Label1: TLabel;
     Label2: TLabel;
@@ -54,7 +54,7 @@ end;
 
 function TfmCloneToExternalTable.GetTableName: string;
 begin
-  Result := Trim(edtTableName.Text);
+  Result := Trim(edtExtTableName.Text);
 end;
 
 function TfmCloneToExternalTable.GetExternalFileName: string;
@@ -64,7 +64,7 @@ end;
 
 procedure TfmCloneToExternalTable.SetTableName(const AValue: string);
 begin
-  edtTableName.Text := AValue;
+  edtExtTableName.Text := AValue;
   // Automatisch Dateinamen vorschlagen
   edtExternalFileName.Text := ExtractFilePath(Application.ExeName) +
                               AValue + '.dat';

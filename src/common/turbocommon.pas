@@ -474,7 +474,8 @@ var
     //end-Ini.File////////////////////////////////////////////////////////////////
 
 
-    // Session-Cache für Passwörter
+
+// Session-Cache für Passwörter
 var    SessionPasswordCache: TStringList;
   function  GetServerSessionPassword(const AServerName: string): string;
   procedure SetServerSessionPassword(const AServerName, APassword: string);
@@ -648,6 +649,10 @@ function GetTableFieldsForExternalTable(ADBIndex: Integer;
 function CountChar(const S: string; const C: Char): Integer;
 procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
                             ATxParams: TStrings);
+
+function IsDomain(const ATypeName: string): Boolean;
+function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATransaction: TIBTransaction): string;
+
 
 
 implementation
@@ -3468,7 +3473,7 @@ begin
 end;
 
 (**************  Get Firebird Type name  *****************)
-function GetFBTypeName(Index: Integer;
+{function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
   Precision: integer = -1; Scale: integer = -1;
   CharacterSet: string = ''; CharacterLengt: integer = -1
@@ -3528,6 +3533,81 @@ begin
 
       if Precision < 0 then
         Precision := 2; // Default-Wert
+
+      Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
+    end;
+  end;
+
+  if (Index = 14) and (CharacterLengt = 63) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
+      Result := 'UUID';
+end;}
+
+function GetFBTypeName(Index: Integer;
+  SubType: integer = -1; FieldLength: integer = -1;
+  Precision: integer = -1; Scale: integer = -1;
+  CharacterSet: string = ''; CharacterLengt: integer = -1
+): string;
+begin
+  case Index of
+    7  : Result := 'SMALLINT';
+    8  : Result := 'INTEGER';
+    9  : Result := 'QUAD';
+    10 : Result := 'FLOAT';
+    11 : Result := 'D_FLOAT';
+    12 : Result := 'DATE';
+    13 : Result := 'TIME';
+    14 : Result := 'CHAR';
+    16 : Result := 'BIGINT';
+    23 : Result := 'BOOLEAN';
+    27 : Result := 'DOUBLE PRECISION';
+    35 : Result := 'TIMESTAMP';
+    37 : Result := 'VARCHAR';
+    40 : Result := 'CSTRING';
+    45 : Result := 'BLOB_ID';
+    261: Result := 'BLOB';
+
+    // Firebird 4.0 / 5.0 neue Typen
+    24: Result := 'DECFLOAT(16)';
+    25: Result := 'DECFLOAT(34)';
+    26: Result := 'INT128';
+    28: Result := 'TIME WITH TIME ZONE';
+    29: Result := 'TIMESTAMP WITH TIME ZONE';
+
+  else
+    Result := 'UNKNOWN_TYPE. CODE = ' + IntToStr(Index);
+  end;
+
+  // Längenangabe bei CHAR und VARCHAR
+  if Index in [14, 37] then  // 14=CHAR, 37=VARCHAR
+  begin
+    if CharacterLengt > 0 then
+      Result := Result + '(' + IntToStr(CharacterLengt) + ')'
+    else if FieldLength > 0 then
+      Result := Result + '(' + IntToStr(FieldLength) + ')';
+  end;
+
+  // Numerische Typen mit SubType (NUMERIC/DECIMAL)
+  if Index in [7, 8, 16] then
+  begin
+    if SubType = 0 then
+    begin
+      case Index of
+        7: Result := 'SMALLINT';
+        8: Result := 'INTEGER';
+        16: Result := 'BIGINT';
+      end;
+    end
+    else
+    begin
+      if SubType = 1 then
+        Result := 'NUMERIC('
+      else if SubType = 2 then
+        Result := 'DECIMAL('
+      else
+        Result := 'UNKNOWN_NUMERIC(';
+
+      if Precision < 0 then
+        Precision := 2;
 
       Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
     end;
@@ -3888,7 +3968,7 @@ begin
     FieldType := MetaQuery.FieldByName('RDB$FIELD_TYPE').AsInteger;
     FieldSubType := MetaQuery.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
     Dimensions := MetaQuery.FieldByName('RDB$DIMENSIONS').AsInteger;
-    FieldLength := MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger; // <-- jetzt verfügbar
+    FieldLength := MetaQuery.FieldByName('RDB$FIELD_LENGTH').AsInteger;
 
     // 2. Dimensionen abfragen
     DimQuery.SQL.Text :=
@@ -3942,9 +4022,6 @@ begin
     Query.Database := RegisteredDatabases[ADBIndex].IBDatabase;
     Query.Transaction := RegisteredDatabases[ADBIndex].IBTransaction;
 
-    if not Query.Transaction.InTransaction then
-          Query.Transaction.StartTransaction;
-
     Query.SQL.Text :=
       'SELECT ' +
       '  RF.RDB$FIELD_NAME AS FIELD_NAME, ' +
@@ -3959,7 +4036,7 @@ begin
       'WHERE RF.RDB$RELATION_NAME = :TableName ' +
       'ORDER BY RF.RDB$FIELD_POSITION';
 
-    Query.ParamByName('TableName').AsString := UpperCase(ATableName);
+    Query.ParamByName('TableName').AsString := ATableName;
 
     if not Query.Database.Connected then
       Query.Database.Connected := true;
@@ -3983,6 +4060,107 @@ begin
     if S[i] = C then
       Inc(Result);
 end;
+
+function IsDomain(const ATypeName: string): Boolean;
+const
+  StandardTypes: array[0..22] of string = (
+    'SMALLINT', 'INTEGER', 'BIGINT', 'INT128',
+    'FLOAT', 'DOUBLE', 'DOUBLE PRECISION', 'DECFLOAT',
+    'DECIMAL', 'NUMERIC',
+    'CHAR', 'VARCHAR', 'CSTRING',
+    'DATE', 'TIME', 'TIMESTAMP',
+    'BLOB', 'BOOLEAN', 'UUID', 'QUAD', 'D_FLOAT',
+    'TIME WITH TIME ZONE', 'TIMESTAMP WITH TIME ZONE'
+  );
+var
+  CleanType: string;
+  i: Integer;
+begin
+  CleanType := UpperCase(Trim(ATypeName));
+
+  if Pos('(', CleanType) > 0 then
+    CleanType := Copy(CleanType, 1, Pos('(', CleanType) - 1);
+
+  for i := Low(StandardTypes) to High(StandardTypes) do
+    if CleanType = StandardTypes[i] then
+      Exit(False);
+
+  Result := True;
+end;
+
+function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATransaction: TIBTransaction): string;
+var
+  Qry: TIBQuery;
+  FieldType, FieldSubType, FieldLen, FieldPrecision, FieldScale, CharLen: Integer;
+  Charset: string;
+begin
+  Result := '';
+
+  if (Trim(ADomainName) = '') or (not Assigned(ADatabase)) then
+    Exit;
+
+  // Keine System-Domänen (RDB$...)
+  if IsFieldDomainSystemGenerated(ADomainName) then
+    Exit;
+
+  // Keine Standard-Typen
+  if not IsDomain(ADomainName) then
+    Exit;
+
+  if not Assigned(ATransaction) then
+    Exit;
+
+  if not ATransaction.InTransaction then
+    ATransaction.StartTransaction;
+
+  Qry := TIBQuery.Create(nil);
+  try
+    Qry.Database := ADatabase;
+    Qry.Transaction := ATransaction;
+
+    // Gleiche Query wie GetDomainInfo – bewährt und funktionierend
+    Qry.SQL.Text :=
+      'SELECT f.*, ' +
+      '  coll.RDB$COLLATION_NAME, ' +
+      '  cs.RDB$CHARACTER_SET_NAME ' +
+      'FROM RDB$FIELDS f ' +
+      'LEFT JOIN ( ' +
+      '  RDB$COLLATIONS coll ' +
+      '  INNER JOIN RDB$CHARACTER_SETS cs ON ' +
+      '    coll.RDB$CHARACTER_SET_ID = cs.RDB$CHARACTER_SET_ID ' +
+      ') ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID AND ' +
+      '     f.RDB$CHARACTER_SET_ID = coll.RDB$CHARACTER_SET_ID ' +
+      'WHERE f.RDB$FIELD_NAME = :DomainName';
+
+    Qry.ParamByName('DomainName').AsString := UpperCase(ADomainName);
+
+    Qry.Open;
+
+    if Qry.RecordCount > 0 then
+    begin
+      Qry.First;
+      FieldType := Qry.FieldByName('RDB$FIELD_TYPE').AsInteger;
+      FieldSubType := Qry.FieldByName('RDB$FIELD_SUB_TYPE').AsInteger;
+      FieldLen := Qry.FieldByName('RDB$FIELD_LENGTH').AsInteger;
+      FieldPrecision := Qry.FieldByName('RDB$FIELD_PRECISION').AsInteger;
+      FieldScale := Qry.FieldByName('RDB$FIELD_SCALE').AsInteger;
+      // RDB$CHARACTER_LENGTH könnte NULL sein → FieldLen als Fallback
+      if Qry.FieldByName('RDB$CHARACTER_LENGTH').IsNull then
+        CharLen := FieldLen
+      else
+        CharLen := Qry.FieldByName('RDB$CHARACTER_LENGTH').AsInteger;
+      Charset := Trim(Qry.FieldByName('RDB$CHARACTER_SET_NAME').AsString);
+
+      Result := GetFBTypeName(FieldType, FieldSubType, FieldLen, FieldPrecision, FieldScale, Charset, CharLen);
+    end;
+
+    Qry.Close;
+
+  finally
+    Qry.Free;
+  end;
+end;
+
 
 initialization
   SessionPasswordCache := nil;
