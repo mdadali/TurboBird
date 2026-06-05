@@ -1,11 +1,11 @@
 object fmCloneToExternalTable: TfmCloneToExternalTable
-  Left = 378
-  Height = 203
-  Top = 223
+  Left = 376
+  Height = 206
+  Top = 117
   Width = 729
-  BorderStyle = bsSingle
+  BorderStyle = bsDialog
   Caption = 'Clone to External Table'
-  ClientHeight = 203
+  ClientHeight = 206
   ClientWidth = 729
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
@@ -16,7 +16,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     Caption = 'External Tablename'
     ParentColor = False
   end
-  object edtTableName: TEdit
+  object edtExtTableName: TEdit
     Left = 197
     Height = 37
     Top = 40
@@ -67,7 +67,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     TabOrder = 4
   end
   object SaveDialog1: TSaveDialog
-    Left = 73
-    Top = 151
+    Left = 376
+    Top = 64
   end
 end

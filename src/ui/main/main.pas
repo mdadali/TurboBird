@@ -23,7 +23,7 @@ uses
   IBDatabaseInfo,
   ibxscript, IBSQL, IBExtract,
 
-  About,
+  //About,
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig,
   fsqlmonitor,
@@ -2162,14 +2162,27 @@ end;
 
 procedure TfmMain.CloneTableAsExternal(const ATableName: string; ADBIndex: Integer);
 var
-  Gen: TExternalTableGenerator;
-  FieldsDS: TDataSet;
+  Items, Warnings: TStringList;
   SQL: string;
+  i: Integer;
+  Extractor: TSimpleObjExtractor;
+  Line, FieldType, CleanType: string;
+  SpacePos: Integer;
 begin
-  if not RegisteredDatabases[ADBIndex].IBDatabase.Connected then
-  begin
-    MessageDlg('Database is not connected.', mtError, [mbOK], 0);
-    Exit;
+  // Verbindung prüfen und ggf. herstellen
+  try
+    if not RegisteredDatabases[ADBIndex].IBDatabase.Connected then
+      ConnectDBPrepared(
+        RegisteredDatabases[ADBIndex].IBDatabase,
+        RegisteredDatabases[ADBIndex].IBTransaction,
+        ADBIndex, RegisteredDatabases[ADBIndex].IBTransaction.Params);
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Could not connect to database:' + sLineBreak + E.Message,
+                 mtError, [mbOK], 0);
+      Exit;
+    end;
   end;
 
   fmCloneToExternalTable := TfmCloneToExternalTable.Create(nil);
@@ -2182,35 +2195,87 @@ begin
     Screen.Cursor := crSQLWait;
     Application.ProcessMessages;
 
-    FieldsDS := nil;
-    try
-      FieldsDS := GetTableFieldsForExternalTable(ADBIndex, ATableName);
+    Items    := TStringList.Create;
+    Warnings := TStringList.Create;
 
-      if (FieldsDS = nil) or FieldsDS.IsEmpty then
+    Extractor := TSimpleObjExtractor.Create(ADBIndex);
+    try
+      Extractor.ExtractTableFieldsForExternalTable(ATableName, Items, AlwaysQuoteIdentifiers, ' ');
+
+      if Items.Count = 0 then
       begin
         MessageDlg('Could not retrieve table fields.', mtError, [mbOK], 0);
         Exit;
       end;
 
-      Gen := TExternalTableGenerator.Create;
-      try
-        Gen.TableName := fmCloneToExternalTable.TableName;
-        Gen.ExternalFileName := fmCloneToExternalTable.ExternalFileName;
-        Gen.AnalyzeFromFBTable(FieldsDS, ATableName);
+      // Problemfelder aus Items entfernen (BLOB, ARRAY, COMPUTED BY, INT128, DECFLOAT)
+      for i := Items.Count - 1 downto 0 do
+      begin
+        Line := Items[i];
 
-        SQL := Gen.GenerateCreateSQL;
+        // Typ extrahieren (alles nach erstem Space)
+        SpacePos := Pos(' ', Line);
+        if SpacePos > 0 then
+          FieldType := Trim(Copy(Line, SpacePos + 1, MaxInt))
+        else
+          FieldType := '';
 
-        if Trim(SQL) <> '' then
-          ShowCompleteQueryWindow(ADBIndex, 'Clone ' + ATableName + '#' + IntToStr(ADBIndex), SQL);
+        // Letztes Komma entfernen
+        if (Length(FieldType) > 0) and (FieldType[Length(FieldType)] = ',') then
+          FieldType := Copy(FieldType, 1, Length(FieldType) - 1);
 
-        if Gen.Warnings.Count > 0 then
-          MessageDlg('Conversion Warnings',
-            Gen.Warnings.Text, mtWarning, [mbOK], 0);
-      finally
-        Gen.Free;
+        CleanType := UpperCase(Trim(FieldType));
+        if Pos(' ', CleanType) > 0 then
+          CleanType := Copy(CleanType, 1, Pos(' ', CleanType) - 1);
+        if Pos('(', CleanType) > 0 then
+          CleanType := Copy(CleanType, 1, Pos('(', CleanType) - 1);
+
+        // Prüfen ob Problemfeld und entferne aus der Liste
+        if (CleanType = 'BLOB') or
+           (Pos('[', FieldType) > 0) or                          // ARRAY
+           (Pos('COMPUTED', UpperCase(FieldType)) > 0) or        // COMPUTED BY
+           (CleanType = 'INT128') or
+           (CleanType = 'DECFLOAT(16)') or
+           (CleanType = 'DECFLOAT(34)') then
+        begin
+          Warnings.Add('-- ' + Items[i]);
+          Items.Delete(i);
+        end;
       end;
+
+      if Items.Count = 0 then
+      begin
+        MessageDlg('No valid fields for external table! All fields are BLOB, ARRAY or unsupported types.', mtError, [mbOK], 0);
+        Exit;
+      end;
+
+      // SQL generieren
+      SQL := 'CREATE TABLE ' + fmCloneToExternalTable.TableName +
+             ' EXTERNAL FILE ''' + fmCloneToExternalTable.ExternalFileName + ''' (' + sLineBreak;
+
+      for i := 0 to Items.Count - 1 do
+      begin
+        SQL := SQL + '  ' + Items[i] + sLineBreak;
+      end;
+
+      SQL := SQL + ');';
+
+      //Warnungen hinzufügen
+      if Warnings.Count > 0 then
+      begin
+        Warnings.Insert(0, '-- Unsupported Fields:');
+        Warnings.Add(sLineBreak);
+      end;
+
+      SQL := Warnings.Text +  SQL;
+
+      if Trim(SQL) <> '' then
+        ShowCompleteQueryWindow(ADBIndex, 'Clone ' + ATableName + '#' + IntToStr(ADBIndex), SQL);
+
     finally
-      FieldsDS.Free;
+      Extractor.Free;
+      Items.Free;
+      Warnings.Free;
     end;
   finally
     fmCloneToExternalTable.Free;
@@ -2221,7 +2286,6 @@ end;
 // ============================================================================
 // Popup-Menü: Tabelle → Clone As External Table
 // ============================================================================
-
 procedure TfmMain.lmCloneToExternalTableClick(Sender: TObject);
 var
   SelectedNode: TTreeNode;
@@ -5958,8 +6022,8 @@ begin
   if Pos('default', LowerCase(DefaultValue)) = 1 then
     DefaultValue := Trim(Copy(DefaultValue, 8, Length(DefaultValue)));
 
-  if (Pos('CHAR', DomainType) > 0) or (Pos('CSTRING', DomainType) > 0) then
-    DomainType := DomainType + '(' + IntToStr(DomainSize) + ')';
+  //if (Pos('CHAR', DomainType) > 0) or (Pos('CSTRING', DomainType) > 0) then
+    //DomainType := DomainType + '(' + IntToStr(DomainSize) + ')';
 
   // Prüfen ob ViewForm schon existiert
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmViewDomain) then
@@ -8378,12 +8442,12 @@ end;
 
 (**********  About  ****************)
 procedure TfmMain.mnAboutClick(Sender: TObject);
-var fmAbout: TfmAbout;
+//var fmAbout: TfmAbout;
 begin
-  fmAbout := TfmAbout.Create(self);
+  {fmAbout := TfmAbout.Create(self);
   fmAbout.bbtnClose.Visible := true;
   fmAbout.ShowModal;
-  fmAbout.Free;
+  fmAbout.Free;}
 end;
 
 (****************  Unregister database *************)
