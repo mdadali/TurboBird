@@ -1,11 +1,11 @@
 object fmMain: TfmMain
-  Left = 598
+  Left = 143
   Height = 612
-  Top = 149
-  Width = 906
+  Top = 136
+  Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
-  ClientWidth = 906
+  ClientWidth = 1219
   Color = clForm
   DragMode = dmAutomatic
   Font.Name = 'Sans'
@@ -5591,7 +5591,7 @@ object fmMain: TfmMain
     Left = 0
     Height = 22
     Top = 562
-    Width = 906
+    Width = 1219
     Panels = <    
       item
         Width = 250
@@ -5605,7 +5605,7 @@ object fmMain: TfmMain
     Left = 0
     Height = 34
     Top = 0
-    Width = 906
+    Width = 1219
     ButtonHeight = 32
     ButtonWidth = 32
     Caption = 'ToolBar1'
@@ -5682,7 +5682,7 @@ object fmMain: TfmMain
     Left = 377
     Height = 502
     Top = 37
-    Width = 526
+    Width = 839
     ActivePage = tsMain
     Align = alClient
     BorderSpacing.Left = 1
@@ -5707,7 +5707,7 @@ object fmMain: TfmMain
       BorderWidth = 1
       Caption = 'Home'
       ClientHeight = 460
-      ClientWidth = 516
+      ClientWidth = 829
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
@@ -5715,7 +5715,7 @@ object fmMain: TfmMain
         Left = 704
         Height = 82
         Top = 64
-        Width = 190
+        Width = 503
         Anchors = [akTop, akLeft, akRight]
         Picture.Data = {
           0A544A706567496D6167655F420000FFD8FFE000104A46494600010101006000
@@ -6256,7 +6256,7 @@ object fmMain: TfmMain
         Left = 0
         Height = 460
         Top = 0
-        Width = 516
+        Width = 829
         BorderStyle = htFocused
         HistoryMaxCount = 0
         NoSelect = False
@@ -6275,17 +6275,17 @@ object fmMain: TfmMain
     Left = 0
     Height = 19
     Top = 543
-    Width = 906
+    Width = 1219
     Align = alBottom
     ClientHeight = 19
-    ClientWidth = 906
+    ClientWidth = 1219
     ParentBackground = False
     TabOrder = 4
     object Memo1: TMemo
       Left = 1
       Height = 33
       Top = 1
-      Width = 904
+      Width = 1217
       Align = alClient
       TabOrder = 0
     end

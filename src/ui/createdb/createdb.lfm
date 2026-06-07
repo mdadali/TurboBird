@@ -216,8 +216,8 @@ object fmCreateDB: TfmCreateDB
     Width = 710
     Align = alClient
     Caption = 'Database'
-    ClientHeight = 228
-    ClientWidth = 706
+    ClientHeight = 229
+    ClientWidth = 708
     TabOrder = 1
     object Label1: TLabel
       Left = 24
@@ -229,7 +229,7 @@ object fmCreateDB: TfmCreateDB
     end
     object edNewDatabase: TEdit
       Left = 100
-      Height = 30
+      Height = 37
       Top = 16
       Width = 556
       TabOrder = 0
@@ -253,7 +253,7 @@ object fmCreateDB: TfmCreateDB
     end
     object cbCharset: TComboBox
       Left = 100
-      Height = 30
+      Height = 37
       Top = 64
       Width = 236
       ItemHeight = 0
@@ -269,7 +269,7 @@ object fmCreateDB: TfmCreateDB
     end
     object comboxSQLDialect: TComboBox
       Left = 533
-      Height = 28
+      Height = 32
       Top = 64
       Width = 100
       ItemHeight = 0
@@ -294,7 +294,7 @@ object fmCreateDB: TfmCreateDB
     end
     object comboxPageSize: TComboBox
       Left = 100
-      Height = 28
+      Height = 32
       Top = 112
       Width = 92
       ItemHeight = 0
@@ -321,7 +321,7 @@ object fmCreateDB: TfmCreateDB
     end
     object edtSweepInterval: TEdit
       Left = 533
-      Height = 30
+      Height = 37
       Top = 112
       Width = 97
       TabOrder = 5
@@ -330,18 +330,18 @@ object fmCreateDB: TfmCreateDB
     end
     object chkboxForcedWrites: TCheckBox
       Left = 24
-      Height = 22
+      Height = 24
       Top = 160
-      Width = 115
+      Width = 118
       Caption = 'Forced Writes'
       TabOrder = 6
       Visible = False
     end
     object chkboxReserveSpace: TCheckBox
       Left = 240
-      Height = 22
+      Height = 24
       Top = 160
-      Width = 120
+      Width = 123
       Caption = 'Reserve Space'
       TabOrder = 7
       Visible = False
@@ -363,8 +363,8 @@ object fmCreateDB: TfmCreateDB
       Width = 708
       Align = alClient
       Caption = 'Server Info'
-      ClientHeight = 96
-      ClientWidth = 704
+      ClientHeight = 97
+      ClientWidth = 706
       TabOrder = 0
       object Label5: TLabel
         Left = 24
@@ -376,7 +376,7 @@ object fmCreateDB: TfmCreateDB
       end
       object cmbBoxServers: TComboBox
         Left = 88
-        Height = 32
+        Height = 36
         Top = 8
         Width = 593
         Enabled = False
@@ -395,7 +395,7 @@ object fmCreateDB: TfmCreateDB
       end
       object edtServerVersion: TEdit
         Left = 88
-        Height = 30
+        Height = 37
         Top = 56
         Width = 286
         ReadOnly = True
@@ -412,7 +412,7 @@ object fmCreateDB: TfmCreateDB
       end
       object edtServerType: TEdit
         Left = 480
-        Height = 30
+        Height = 37
         Top = 56
         Width = 201
         ReadOnly = True
@@ -429,8 +429,8 @@ object fmCreateDB: TfmCreateDB
     Width = 710
     Align = alTop
     Caption = 'User'
-    ClientHeight = 116
-    ClientWidth = 706
+    ClientHeight = 117
+    ClientWidth = 708
     TabOrder = 3
     object Label2: TLabel
       Left = 24
@@ -442,7 +442,7 @@ object fmCreateDB: TfmCreateDB
     end
     object edUserName: TEdit
       Left = 104
-      Height = 30
+      Height = 37
       Top = 16
       Width = 192
       TabOrder = 0
@@ -457,7 +457,7 @@ object fmCreateDB: TfmCreateDB
     end
     object edPassword: TEdit
       Left = 400
-      Height = 30
+      Height = 37
       Top = 16
       Width = 192
       EchoMode = emPassword
@@ -474,7 +474,7 @@ object fmCreateDB: TfmCreateDB
     end
     object edtRole: TEdit
       Left = 104
-      Height = 30
+      Height = 37
       Top = 64
       Width = 192
       TabOrder = 2

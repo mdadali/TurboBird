@@ -31,12 +31,12 @@ type
     chkboxOverwriteServerClientLib: TCheckBox;
     cxSavePassword: TCheckBox;
     edDatabaseName: TEdit;
-    edPassword: TEdit;
-    edRole: TEdit;
+    edtPassword: TEdit;
+    edtRole: TEdit;
     edtFBClient: TEdit;
     edTitle: TEdit;
     edtPort: TEdit;
-    edUserName: TEdit;
+    edtUserName: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     IBConnection1: TIBDatabase;
@@ -45,10 +45,10 @@ type
     Label1: TLabel;
     Label10: TLabel;
     Label2: TLabel;
-    Label3: TLabel;
+    lbPassword: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    Label6: TLabel;
+    lbRole: TLabel;
     Label8: TLabel;
     Label9: TLabel;
     OpenDialog1: TOpenDialog;
@@ -58,8 +58,10 @@ type
     procedure bbTestClick(Sender: TObject);
     procedure btBrowseDBClick(Sender: TObject);
     procedure btnBrowseClientClick(Sender: TObject);
+    procedure cboxServersChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure GroupBox1Click(Sender: TObject);
 
   private
     { private declarations }
@@ -82,6 +84,7 @@ type
     procedure Sort;
 
     procedure RefreshServerCombobox;
+    procedure UpdateControlsForProtocol;
   end;
 
 var
@@ -90,6 +93,31 @@ var
 implementation
 
 { TfmReg }
+
+procedure TfmReg.UpdateControlsForProtocol;
+var
+  ServerRec: TServerRecord;
+  IsLocal: Boolean;
+begin
+  ServerRec := GetServerRecordFromFileByName(Trim(cboxServers.Items[cboxServers.ItemIndex]));
+
+  IsLocal := ServerRec.IsEmbedded;
+
+  // Passwort-Felder ein-/ausblenden
+  edtUserName.Enabled    := not IsLocal;
+  edtPassword.Enabled    := not IsLocal;
+  cxSavePassword.Enabled := not IsLocal;
+  if not cxSavePassword.Enabled then
+    cxSavePassword.Checked := false;
+
+  edtPort.Enabled        := not IsLocal;
+  if not edtPort.Enabled then
+    edtPort.Text := '';
+
+  edtRole.Enabled := not IsLocal;
+  if not edtRole.Enabled then
+    edtRole.Text := '';
+end;
 
 procedure TfmReg.bbRegClick(Sender: TObject);
 var ServerRec: TServerRecord;
@@ -105,22 +133,22 @@ begin
     Exit;
   end;
 
-  if Trim(edPassword.Text) = '' then
+  if Trim(edtPassword.Text) = '' then
     cxSavePassword.Checked := false;
 
   // Neue Registrierung
   if NewReg then
   begin
-    if RegisterDatabase(edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text,
-      edRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
+    if RegisterDatabase(edTitle.Text, edDatabaseName.Text, edtUserName.Text, edtPassword.Text, cbCharset.Text,
+      edtRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
       cboxServers.Text, chkboxOverwriteServerClientLib.Checked, chkBoxConnectDBOnStart.Checked) then
       ModalResult := mrOK;
   end
   else
   // Bearbeiten einer bestehenden Registrierung
   begin
-    if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edUserName.Text, edPassword.Text,
-           cbCharset.Text, edRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
+    if EditRegisteration(RecPos, edTitle.Text, edDatabaseName.Text, edtUserName.Text, edtPassword.Text,
+           cbCharset.Text, edtRole.Text, cxSavePassword.Checked, edtFBClient.Text, cboxSQLDialect.Text, edtPort.Text,
            cboxServers.Text, chkboxOverwriteServerClientLib.Checked, chkBoxConnectDBOnStart.Checked) then
       ModalResult := mrOK;
   end;
@@ -131,7 +159,7 @@ var Rec: TServerRecord;
     ConnMessage: string;
 begin
   Rec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
-  if TestDBConnection(edDatabaseName.Text, edUserName.Text, edPassword.Text, cbCharset.Text, edtFBClient.Text,
+  if TestDBConnection(edDatabaseName.Text, edtUserName.Text, edtPassword.Text, cbCharset.Text, edtFBClient.Text,
                      cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,
                      chkboxOverwriteServerClientLib.Checked) then
   begin
@@ -164,6 +192,11 @@ procedure TfmReg.btnBrowseClientClick(Sender: TObject);
 begin
   if OpenDialogClient.Execute then
     edtFBClient.Text := OpenDialogClient.FileName;
+end;
+
+procedure TfmReg.cboxServersChange(Sender: TObject);
+begin
+  UpdateControlsForProtocol;
 end;
 
 procedure TfmReg.FormCreate(Sender: TObject);
@@ -203,7 +236,13 @@ end;
 
 procedure TfmReg.FormShow(Sender: TObject);
 begin
+  UpdateControlsForProtocol;
   frmThemeSelector.btnApplyClick(self);
+end;
+
+procedure TfmReg.GroupBox1Click(Sender: TObject);
+begin
+
 end;
 
 function TfmReg.RegisterDatabase(

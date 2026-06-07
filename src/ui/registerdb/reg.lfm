@@ -1,5 +1,5 @@
 object fmReg: TfmReg
-  Left = 653
+  Left = 511
   Height = 695
   Top = 53
   Width = 683
@@ -70900,6 +70900,7 @@ object fmReg: TfmReg
     ClientHeight = 403
     ClientWidth = 478
     TabOrder = 1
+    OnClick = GroupBox1Click
     object Label1: TLabel
       Left = 16
       Height = 20
@@ -71044,7 +71045,7 @@ object fmReg: TfmReg
       Caption = 'User name'
       ParentColor = False
     end
-    object Label3: TLabel
+    object lbPassword: TLabel
       Left = 184
       Height = 20
       Top = 288
@@ -71052,7 +71053,7 @@ object fmReg: TfmReg
       Caption = 'Password'
       ParentColor = False
     end
-    object Label6: TLabel
+    object lbRole: TLabel
       Left = 16
       Height = 20
       Top = 368
@@ -71060,14 +71061,14 @@ object fmReg: TfmReg
       Caption = 'Role'
       ParentColor = False
     end
-    object edUserName: TEdit
+    object edtUserName: TEdit
       Left = 16
       Height = 37
       Top = 320
       Width = 153
       TabOrder = 5
     end
-    object edPassword: TEdit
+    object edtPassword: TEdit
       Left = 184
       Height = 37
       Top = 320
@@ -71084,7 +71085,7 @@ object fmReg: TfmReg
       Caption = 'Save Password'
       TabOrder = 7
     end
-    object edRole: TEdit
+    object edtRole: TEdit
       Left = 72
       Height = 37
       Top = 360
@@ -71105,6 +71106,7 @@ object fmReg: TfmReg
       Top = 40
       Width = 408
       ItemHeight = 0
+      OnChange = cboxServersChange
       Style = csOwnerDrawFixed
       TabOrder = 9
     end

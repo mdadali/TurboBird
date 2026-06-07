@@ -70,6 +70,7 @@ type
 
     FServerRec: TServerRecord;
 
+    procedure UpdateControlsForProtocol;
   public
     { public declarations }
      procedure Init;
@@ -83,6 +84,23 @@ implementation
 uses Reg;
 
 { TfmCreateDB }
+
+procedure TfmCreateDB.UpdateControlsForProtocol;
+var IsLocal: Boolean;
+begin
+
+  IsLocal := FServerRec.IsEmbedded;
+
+  // Passwort-Felder ein-/ausblenden
+  //edtUserName.Enabled    := not IsLocal;
+  edPassword.Enabled    := not IsLocal;
+  if not edPassword.Enabled then
+    edPassword.Text := '';
+
+  edtRole.Enabled := not IsLocal;
+  if not edtRole.Enabled then
+    edtRole.Text := '';
+end;
 
 procedure TfmCreateDB.btBrowseClick(Sender: TObject);
 begin
@@ -108,8 +126,15 @@ end;
 
 procedure TfmCreateDB.FormShow(Sender: TObject);
 begin
+  UpdateControlsForProtocol;
+
   edUserName.Text := FServerRec.UserName;
-  edPassword.Text := FServerRec.Password;
+
+  if not FServerRec.IsEmbedded then
+    edPassword.Text := FServerRec.Password
+  else
+    FServerRec.Password := '';
+
   edtServerVersion.Text := FServerRec.VersionString;
   frmThemeSelector.btnApplyClick(self);
 end;
@@ -184,8 +209,8 @@ begin
     fmReg.edTitle.Text := FileNameOnly;
 
     fmReg.edDatabaseName.Text:= IBDatabase1.DatabaseName;
-    fmReg.edUserName.Text:= edUserName.Text;
-    fmReg.edPassword.Text:= edPassword.Text;
+    fmReg.edtUserName.Text:= edUserName.Text;
+    fmReg.edtPassword.Text:= edPassword.Text;
     fmReg.cbCharset.Text:= cbCharset.Text;
     fmReg.NewReg:= True;
     ModalResult := fmReg.ShowModal;

@@ -939,8 +939,9 @@ begin
   meuqb.OQBEngine.DatabaseName := FDbConnection.DatabaseName;
 
   try
+
     if not FDbConnection.Connected then
-      FDbConnection.Connected := true;
+      ConnectDBPrepared(FDbConnection, FTransaction, dbIndex, FTransaction.Params);
   except
     raise;
   end;

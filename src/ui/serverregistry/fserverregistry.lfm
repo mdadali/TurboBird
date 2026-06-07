@@ -1,7 +1,7 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 583
+  Left = 457
   Height = 706
-  Top = 42
+  Top = 20
   Width = 779
   BorderIcons = []
   BorderStyle = bsDialog
@@ -70292,6 +70292,7 @@ object fmServerRegistry: TfmServerRegistry
     ClientHeight = 655
     ClientWidth = 777
     TabOrder = 0
+    OnClick = GroupBox1Click
     object cbServerName: TComboBox
       Left = 192
       Height = 36
@@ -70352,13 +70353,14 @@ object fmServerRegistry: TfmServerRegistry
       OnChange = edtRoleChange
       TabOrder = 7
     end
-    object Label4: TLabel
+    object lbPassword: TLabel
       Left = 20
       Height = 20
       Top = 141
       Width = 64
       Caption = 'Password'
       ParentColor = False
+      OnClick = lbPasswordClick
     end
     object cbProtocol: TComboBox
       Left = 192
@@ -70400,7 +70402,6 @@ object fmServerRegistry: TfmServerRegistry
       OnChange = edtPasswordChange
       PasswordChar = '*'
       TabOrder = 5
-      Text = 'Password'
     end
     object Label6: TLabel
       Left = 20
@@ -70423,10 +70424,9 @@ object fmServerRegistry: TfmServerRegistry
     object edtClientLibraryPath: TEdit
       Left = 192
       Height = 37
-      Top = 392
+      Top = 336
       Width = 529
       OnChange = edtClientLibraryPathChange
-      ReadOnly = True
       TabStop = False
       TabOrder = 12
     end
@@ -70441,7 +70441,7 @@ object fmServerRegistry: TfmServerRegistry
     object Label8: TLabel
       Left = 20
       Height = 20
-      Top = 392
+      Top = 336
       Width = 83
       Caption = 'Clientlibrary'
       ParentColor = False
@@ -70449,17 +70449,15 @@ object fmServerRegistry: TfmServerRegistry
     object chkSavePassword: TCheckBox
       Left = 192
       Height = 24
-      Top = 168
+      Top = 172
       Width = 125
       Caption = 'Save Password'
-      Checked = True
-      State = cbChecked
       TabOrder = 6
     end
     object btnClientLib: TButton
-      Left = 722
+      Left = 736
       Height = 24
-      Top = 392
+      Top = 336
       Width = 32
       Caption = '...'
       OnClick = btnClientLibClick
@@ -70470,7 +70468,6 @@ object fmServerRegistry: TfmServerRegistry
       Height = 37
       Top = 61
       Width = 80
-      Enabled = False
       OnChange = edtPortChange
       TabOrder = 14
       Text = '3050'
@@ -70492,7 +70489,7 @@ object fmServerRegistry: TfmServerRegistry
       ParentColor = False
     end
     object edtConfigFilePath: TEdit
-      Left = 192
+      Left = 193
       Height = 37
       Top = 464
       Width = 531
@@ -70504,7 +70501,7 @@ object fmServerRegistry: TfmServerRegistry
       TabOrder = 13
     end
     object btnfirebirdconffile: TButton
-      Left = 722
+      Left = 736
       Height = 25
       Top = 464
       Width = 32
@@ -70551,9 +70548,9 @@ object fmServerRegistry: TfmServerRegistry
       ParentFont = False
     end
     object cboxLoadRegisteredClientLib: TCheckBox
-      Left = 193
+      Left = 192
       Height = 24
-      Top = 432
+      Top = 376
       Width = 276
       Caption = 'Load registered FireBird Clientlibrary'
       OnChange = cboxLoadRegisteredClientLibChange
@@ -70696,7 +70693,7 @@ object fmServerRegistry: TfmServerRegistry
     object Label17: TLabel
       Left = 20
       Height = 20
-      Top = 336
+      Top = 408
       Width = 64
       Caption = 'Root Path'
       ParentColor = False
@@ -70704,14 +70701,14 @@ object fmServerRegistry: TfmServerRegistry
     object edtRootPath: TEdit
       Left = 192
       Height = 37
-      Top = 336
-      Width = 531
+      Top = 408
+      Width = 530
       TabOrder = 22
     end
     object btnOpenRootPath: TButton
-      Left = 725
+      Left = 736
       Height = 25
-      Top = 340
+      Top = 408
       Width = 32
       Caption = '...'
       OnClick = btnOpenRootPathClick
@@ -70734,7 +70731,6 @@ object fmServerRegistry: TfmServerRegistry
       Width = 162
       Caption = 'Test connection'
       Color = clForm
-      Enabled = False
       Kind = bkAll
       OnClick = bbTestConnectionClick
       TabOrder = 0
@@ -70845,12 +70841,12 @@ object fmServerRegistry: TfmServerRegistry
     Top = 504
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
-    Left = 576
-    Top = 285
+    Left = 640
+    Top = 208
   end
   object IBXServerProperties1: TIBXServerProperties
     TraceFlags = []
-    Left = 605
-    Top = 285
+    Left = 648
+    Top = 280
   end
 end
