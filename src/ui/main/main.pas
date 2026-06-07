@@ -552,7 +552,7 @@ type
     function  TryReadODS(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
     function  GetODSVersion(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
     function  GetServerLoginDlg(AserverName: string): TfrmLoginServiceManager;
-    function  ConnectToServiceManager(ServerSession: TServerSession): boolean;
+    //function  ConnectToServiceManager(ServerSession: TServerSession): boolean;
 
     procedure OnIBConnectionLogin(Database: TIBDatabase; LoginParams: TStrings);
 
@@ -1891,9 +1891,9 @@ begin
         fmReg.edtPort.Text := ServerRec.Port;
         fmReg.cboxSQLDialect.ItemIndex := 2;
         fmReg.cbCharset.ItemIndex := fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
-        fmReg.edUserName.Text := ServerRec.UserName;
-        fmReg.edPassword.Text := ServerRec.Password;
-        fmReg.edRole.Text := ServerRec.Role;
+        fmReg.edtUserName.Text := ServerRec.UserName;
+        fmReg.edtPassword.Text := ServerRec.Password;
+        fmReg.edtRole.Text := ServerRec.Role;
 
         fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
         fmReg.edtPort.Text := ServerRec.Port;
@@ -2169,7 +2169,7 @@ var
   Line, FieldType, CleanType: string;
   SpacePos: Integer;
 begin
-  // Verbindung prüfen und ggf. herstellen
+ { // Verbindung prüfen und ggf. herstellen
   try
     if not RegisteredDatabases[ADBIndex].IBDatabase.Connected then
       ConnectDBPrepared(
@@ -2280,7 +2280,7 @@ begin
   finally
     fmCloneToExternalTable.Free;
     Screen.Cursor := crDefault;
-  end;
+  end;}
 end;
 
 // ============================================================================
@@ -2288,6 +2288,7 @@ end;
 // ============================================================================
 procedure TfmMain.lmCloneToExternalTableClick(Sender: TObject);
 var
+  fmCloneToExternalTable: TfmCloneToExternalTable;
   SelectedNode: TTreeNode;
   NodeInfo: TPNodeInfos;
   TableName: string;
@@ -2301,7 +2302,14 @@ begin
   TableName := SelectedNode.Text;
   DBIndex := NodeInfo^.dbIndex;
 
-  CloneTableAsExternal(GetClearNodeText(TableName), DBIndex);
+  try
+    fmCloneToExternalTable := TfmCloneToExternalTable.Create(Self);
+    fmCloneToExternalTable.Init(GetClearNodeText(TableName), DBIndex);
+    fmCloneToExternalTable.ShowModal;
+    //fmCloneToExternalTable.Free;
+  finally
+  end;
+  //CloneTableAsExternal(GetClearNodeText(TableName), DBIndex);
 end;
 
 procedure TfmMain.lmCreateDBClick(Sender: TObject);
@@ -5659,17 +5667,18 @@ begin
     if Node <> nil then
     begin
       // Falls Node gültig ist
-      fmServerRegistry.Init(TPNodeInfos(Node.Data)^.ServerSession);
+      fmServerRegistry.Init(Node);
     end else
     begin
       if tvMain.Items.Count > 0 then
       begin
         tvMain.Selected := tvMain.Items[0];
         Node := tvMain.Items[0];
-        fmServerRegistry.Init(TPNodeInfos(Node.Data)^.ServerSession);
+        fmServerRegistry.Init(Node);
       end else
       begin
-        fmServerRegistry.Init(nil);
+        //kein Server, nur Show Form!
+        fmServerRegistry.ResetForm;
       end;
     end;
 
@@ -8366,11 +8375,11 @@ begin
 
   fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(Trim(ServerRec.ServerName));
   fmReg.edTitle.Text := '';
-  fmReg.edRole.Text := ServerRec.Role;
+  fmReg.edtRole.Text := ServerRec.Role;
   fmReg.cboxSQLDialect.ItemIndex := 2;  //SQLDialect = 3
   fmReg.cbCharset.ItemIndex :=  fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
-  fmReg.edUserName.Text := ServerRec.UserName;
-  fmReg.edPassword.Text := ServerRec.Password;
+  fmReg.edtUserName.Text := ServerRec.UserName;
+  fmReg.edtPassword.Text := ServerRec.Password;
   fmReg.cxSavePassword.Checked := (ServerRec.Password <> '');
   fmReg.chkboxOverwriteServerClientLib.Checked := false;
   fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
@@ -8415,10 +8424,10 @@ begin
 
     fmReg.edDatabaseName.Text:= Rec.DatabaseName;
     fmReg.edTitle.Text:= Rec.Title;
-    fmReg.edUserName.Text:= Rec.UserName;
-    fmReg.edPassword.Text:= Rec.Password;
+    fmReg.edtUserName.Text:= Rec.UserName;
+    fmReg.edtPassword.Text:= Rec.Password;
     fmReg.cbCharset.Text:= Rec.Charset;
-    fmReg.edRole.Text:= Rec.Role;
+    fmReg.edtRole.Text:= Rec.Role;
     fmReg.cxSavePassword.Checked:= Rec.SavePassword;
     fmReg.edtFBClient.Text := Rec.FireBirdClientLibPath;
     fmReg.edtPort.Text := Rec.Port;
@@ -8427,6 +8436,7 @@ begin
     fmReg.chkBoxConnectDBOnStart.Checked := Rec.ConnectOnApplicationStart;
 
     fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(Rec.ServerName);
+    fmReg.cboxServers.Enabled   := false;
 
     if fmReg.ShowModal = mrOK then
     begin
@@ -8871,7 +8881,7 @@ begin
     PNodeInfos^.SimpleObjExtractor := nil;
     PNodeInfos^.UnIntelliSenseCache := nil;
 
-    {if (Node.Level = 0) and () then
+    {if (Node.Level = 0) and (not Assigned(PNodeInfos^.ServerSession)) then
     begin
       tmpProtocol := TCP;
 
@@ -8895,7 +8905,7 @@ begin
                                                              0   //       Rec.QueryTimeOut.
 
                                                              );
-    end}
+    end;}
 
 
 
@@ -9114,7 +9124,7 @@ begin
   Result := LoginForm;
 end;
 
-function TfmMain.ConnectToServiceManager(ServerSession: TServerSession): Boolean;
+{function TfmMain.ConnectToServiceManager(ServerSession: TServerSession): Boolean;
 var
   fmServerRegistry: TfmServerRegistry;
   ServerRecord: TServerRecord;
@@ -9157,7 +9167,7 @@ begin
       // Versionsinfo übernehmen
     end;
   Result := ServerSession.Connected;
-end;
+end;}
 
 procedure TfmMain.CreateIntelliSenseCache(Data: PtrInt);
 var Node: TTreeNode;

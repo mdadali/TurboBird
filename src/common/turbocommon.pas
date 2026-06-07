@@ -659,7 +659,7 @@ implementation
 
 uses Reg;
 
-procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
+{procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
                             ATxParams: TStrings);
 var
   Rec: TRegisteredDatabase;
@@ -733,6 +733,96 @@ begin
       raise Exception.Create(ErrMsg);
     end;
   end;
+end;}
+
+procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
+                            ATxParams: TStrings);
+var
+  Rec: TRegisteredDatabase;
+  ServerRecord: TServerRecord;
+  CachedPwd: string;
+  ErrMsg: string;
+  IsLocal: Boolean;
+begin
+  ErrMsg := '';
+
+  try
+    // 1. Validierung
+    if (ADBIndex < 0) or (ADBIndex >= Length(RegisteredDatabases)) then
+      raise Exception.Create('Invalid DBIndex: ' + IntToStr(ADBIndex));
+
+    Rec := RegisteredDatabases[ADBIndex].RegRec;
+
+    // 2. Disconnect (Fehler ignorieren)
+    if Assigned(ATransaction) and ATransaction.InTransaction then
+      try ATransaction.Rollback; except end;
+
+    if Assigned(ADatabase) and ADatabase.Connected then
+      try ADatabase.Connected := false; except end;
+
+    // 3. Prüfen ob der SERVER Local/Embedded ist (robust, keine DB-Abhängigkeit)
+    ServerRecord := GetServerRecordFromFileByName(Rec.ServerName);
+    IsLocal := ServerRecord.IsEmbedded;
+
+    // 4. Credentials setzen
+    ADatabase.Params.Values['user_name'] := Rec.UserName;
+
+    if Rec.Password <> '' then
+      ADatabase.Params.Values['password'] := Rec.Password
+    else
+    begin
+      CachedPwd := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+      if CachedPwd <> '' then
+        ADatabase.Params.Values['password'] := CachedPwd
+      else
+      begin
+        // Bei Local/Embedded: Dummy-Passwort für den Cache
+        if IsLocal then
+        begin
+          ADatabase.Params.Values['password'] := 'embedded_local';
+          SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName, 'embedded_local');
+        end
+        else
+          ADatabase.Params.Values['password'] := '';
+      end;
+    end;
+
+    if Rec.Role <> '' then
+      ADatabase.Params.Values['sql_role_name'] := Rec.Role;
+    if Rec.Charset <> '' then
+      ADatabase.Params.Values['lc_ctype'] := Rec.Charset;
+
+    // 5. OnLogin-Handler + LoginPrompt
+    ADatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+    ADatabase.LoginPrompt := True;
+
+    // 6. Connect
+    if not ADatabase.Connected then
+      ADatabase.Connected := true;
+
+    // 7. Transaktionsparameter zuweisen (falls übergeben), dann starten
+    if Assigned(ATransaction) then
+    begin
+      if Assigned(ATxParams) then
+        ATransaction.Params.Assign(ATxParams);
+
+      if not ATransaction.InTransaction then
+        ATransaction.StartTransaction;
+    end;
+
+  except
+    on E: Exception do
+    begin
+      if (Rec.Password = '') and (ADBIndex >= 0) then
+        ClearDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+
+      ErrMsg := 'ConnectDBPrepared failed:' + sLineBreak +
+                '  Server: ' + Rec.ServerName + sLineBreak +
+                '  Database: ' + Rec.DatabaseName + sLineBreak +
+                '  Error: ' + E.Message;
+      raise Exception.Create(ErrMsg);
+    end;
+  end;
 end;
 
 // ============================================================================
@@ -779,7 +869,7 @@ begin
     SessionPasswordCache.Delete(idx);
 end;
 
-function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
+{function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
 var
   idx: Integer;
 begin
@@ -790,6 +880,33 @@ begin
   idx := SessionPasswordCache.IndexOfName('DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName));
   if idx >= 0 then
     Result := SessionPasswordCache.ValueFromIndex[idx];
+end;}
+
+function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
+var
+  idx: Integer;
+  ServerRecord: TServerRecord;
+begin
+  Result := '';
+
+  // 1. Im Session-Cache nachsehen
+  if Assigned(SessionPasswordCache) then
+  begin
+    idx := SessionPasswordCache.IndexOfName('DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName));
+    if idx >= 0 then
+    begin
+      Result := SessionPasswordCache.ValueFromIndex[idx];
+      Exit;
+    end;
+  end;
+
+  // 2. Wenn nichts im Cache → prüfen ob der SERVER Local/Embedded ist
+  ServerRecord := GetServerRecordFromFileByName(AServerName);
+  if ServerRecord.IsEmbedded then
+  begin
+    Result := 'embedded_local';
+    SetDBSessionPassword(AServerName, ADatabaseName, 'embedded_local');
+  end;
 end;
 
 procedure SetDBSessionPassword(const AServerName, ADatabaseName, APassword: string);
@@ -1141,7 +1258,7 @@ begin
     Result := AServerName + '/' + APort + ':' + ADBFileName;
 end;
 
-function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
+{function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
 var
   ServerRecord: TServerRecord;
   ServerSession: TServerSession;
@@ -1195,6 +1312,102 @@ begin
         end;
       finally
         LoginForm.Free;
+      end;
+    end;
+
+    // 3. ServerSession erstellen und verbinden
+    ServerSession := TServerSession.Create(
+      AServerName, '', '', '', '', TCP, '', '', '', '', '', 0, 0, False, False, 0, 0, 0
+    );
+
+    ApplyServerRecordToSession(ServerRecord, ServerSession);
+    ServerSession.UserName := UserName;
+    ServerSession.Password := Password;
+
+    if not ServerSession.Connected then
+      if not ServerSession.IBXConnect then
+      begin
+        ErrorStr := ServerSession.ErrorStr;
+        // Bei Fehler: Session-Cache löschen
+        ClearServerSessionPassword(AServerName);
+        Exit;
+      end;
+
+    Result := True;
+
+  finally
+    if Assigned(ServerSession) then
+    begin
+      ServerSession.Disconnect;
+      ServerSession.Free;
+    end;
+  end;
+end;}
+
+function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
+var
+  ServerRecord: TServerRecord;
+  ServerSession: TServerSession;
+  LoginForm: TfrmLoginServiceManager;
+  UserName, Password: string;
+begin
+  Result := False;
+  ErrorStr := '';
+  ServerSession := nil;
+
+  try
+    ServerRecord := GetServerRecordFromFileByName(AServerName);
+
+    UserName := ServerRecord.UserName;
+    Password := ServerRecord.Password;
+
+    // 1. Wenn kein Passwort gespeichert → Session-Cache prüfen
+    if (Password = '') and (UserName <> '') then
+      Password := GetServerSessionPassword(AServerName);
+
+    // 2. Wenn immer noch kein Passwort
+    if (Password = '') and (UserName <> '') then
+    begin
+      // Bei Local/Embedded: Dummy-Passwort für den Cache
+      if ServerRecord.IsEmbedded then
+      begin
+        Password := 'embedded_local';
+        SetServerSessionPassword(AServerName, Password);
+      end
+      else
+      begin
+        // TCP: Server-Login-Dialog
+        LoginForm := TfrmLoginServiceManager.Create(nil);
+        try
+          LoginForm.lbSever.Caption := AServerName;
+          LoginForm.edtUserName.Text := UserName;
+          LoginForm.edtPassword.Text := '';
+          LoginForm.chkBoxSavePwd.Checked := False;
+
+          if LoginForm.ShowModal <> mrOK then
+          begin
+            ErrorStr := 'Login cancelled by user.';
+            Exit;
+          end;
+
+          UserName := LoginForm.edtUserName.Text;
+          Password := LoginForm.edtPassword.Text;
+
+          if LoginForm.chkBoxSavePwd.Checked then
+          begin
+            // Dauerhaft in Datei speichern
+            ServerRecord.UserName := UserName;
+            ServerRecord.Password := Password;
+            SaveServerDataToFile(ServerRecord);
+          end
+          else
+          begin
+            // NUR in Session-Cache (temporär)
+            SetServerSessionPassword(AServerName, Password);
+          end;
+        finally
+          LoginForm.Free;
+        end;
       end;
     end;
 
@@ -2016,10 +2229,10 @@ begin
 
   //Session.ServerName          := Rec.ServerName;
   Session.ServerAlias         := Rec.ServerAlias;
-
-  {Session.FBVersionString     := Rec.VersionString;
+  Session.ServerName          := Rec.ServerName;
+  Session.FBVersionString     := Rec.VersionString;
   Session.FBVersionMajor      := Rec.VersionMajor;
-  Session.FBVersionMinor      := Rec.VersionMinor;}
+  Session.FBVersionMinor      := Rec.VersionMinor;
 
   Session.UserName            := Rec.UserName;
   Session.Password            := Rec.Password;

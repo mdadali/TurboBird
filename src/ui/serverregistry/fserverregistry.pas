@@ -74,7 +74,7 @@ type
     lbPortInfo: TLabel;
     Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
+    lbPassword: TLabel;
     Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
@@ -105,6 +105,8 @@ type
     procedure cbServerNameChange(Sender: TObject);
     procedure btnClientLibClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure GroupBox1Click(Sender: TObject);
+    procedure lbPasswordClick(Sender: TObject);
   private
     FEventBackupList: array of TEventBackup;
 
@@ -128,8 +130,10 @@ type
 
     function  CreateServiceUser: Boolean;
   public
-    procedure init(AServerSession: TServerSession);
+    procedure init(ANode: TTreeNode);
     function  CheckPortNumber(AServerName: string): boolean;
+    procedure UpdateControlsForProtocol;
+    procedure ResetForm;
   end;
 
 //var
@@ -138,6 +142,45 @@ type
 implementation
 
 {$R *.lfm}
+
+procedure TfmServerRegistry.ResetForm;
+begin
+  // Server-Auswahl zurücksetzen
+  //cbServerName.ItemIndex := -1;
+
+  // Alle Eingabefelder leeren
+  edtServerAlias.Clear;
+  edtUserName.Text := 'SYSDBA';
+  edtRole.Clear;
+  edtPassword.Text := 'masterkey';
+  edtPort.Text := '3050';
+  edtRootPath.Text := '/opt/firebird';
+  edtClientLibraryPath.Text := '/opt/firebird/lib/fbclient.so';
+  edtConfigFilePath.Text := '/opt/firebird/firebird.conf';
+  edtConnectionTimeout.Text := '2000';
+  edtRetryCount.Text := '3';
+  edtQueryTimeout.Text := '0';
+
+  // Versionsfelder leeren
+  edtVersionMajor.Text := '0';
+  edtVersionMinor.Text := '0';
+  edtVersionString.Clear;
+
+  // Comboboxen auf Default setzen
+  cbProtocol.ItemIndex := 0;  // TCP
+  cbCharset.ItemIndex := DefaultFBCharacterSet;
+
+  // Checkboxen zurücksetzen
+  chkSavePassword.Checked := true;
+  cboxLoadRegisteredClientLib.Checked := true;
+
+  // Buttons
+  bbTestConnection.Enabled := true;
+  bbReg.Enabled := False;
+
+  // Controls je nach Protokoll aktualisieren
+  //UpdateControlsForProtocol;
+end;
 
 procedure TfmServerRegistry.FillServerCombobox;
 var ServerList: TStringList;
@@ -212,42 +255,70 @@ begin
   PopulateCharsets;
 end;
 
-procedure TfmServerRegistry.init(AServerSession: TServerSession);
+{procedure TfmServerRegistry.init(ANode: TTreeNode);
 var Rec:TServerRecord;
+    SavedPwd: boolean;
 begin
-  FServerSession := AServerSession;
+  if not Assigned(ANode.Data) then
+    exit;
+
+  FServerSession := TPNodeInfos(ANode.Data)^.ServerSession;
   if FServerSession = nil then
   begin
-    CreateServerSession(FServerSession, '');
-    FSelectedServer := '';
+    CreateServerSession(FServerSession, Trim(ANode.Text));
     FIsNewServer := true;
     cbServerName.ItemIndex := -1;
   end else
   begin
-    FSelectedServer := FServerSession.ServerName;
     cbServerName.ItemIndex := cbServerName.Items.IndexOf(FSelectedServer);
     FIsNewServer := false;
-    Rec := BuildServerRecordFromSession(FServerSession, chkSavePassword.Checked);
-    FillFormFromServerRecord(Rec);
-
-    //EnableFormControlsAndEvents;
   end;
+
+  //UpdateControlsForProtocol;
+  FSelectedServer := FServerSession.ServerName;
+  SavedPwd := FServerSession.Password <> '';
+  Rec := BuildServerRecordFromSession(FServerSession, SavedPwd);
+  FillFormFromServerRecord(Rec);
+end;}
+
+procedure TfmServerRegistry.init(ANode: TTreeNode);
+var Rec:TServerRecord;
+    SavedPwd: boolean;
+begin
+  if not Assigned(ANode.Data) then
+    exit;
+
+  FServerSession := TPNodeInfos(ANode.Data)^.ServerSession;
+
+  if FServerSession = nil then
+  begin
+    CreateServerSession(FServerSession, Trim(ANode.Text));
+    FIsNewServer := true;
+    cbServerName.ItemIndex := -1;
+  end else
+  begin
+    FIsNewServer := false;
+  end;
+
+  // FSelectedServer IMMER setzen (für neue UND bestehende)
+  FSelectedServer := FServerSession.ServerName;
+
+  if not FIsNewServer then
+    cbServerName.ItemIndex := cbServerName.Items.IndexOf(FSelectedServer);
+
+  SavedPwd := FServerSession.Password <> '';
+  Rec := BuildServerRecordFromSession(FServerSession, SavedPwd);
+  FillFormFromServerRecord(Rec);
 end;
 
 procedure TfmServerRegistry.FormShow(Sender: TObject);
 var idx: Integer;
 begin
-  //EnableFormControlsAndEvents;
+  UpdateControlsForProtocol;
 
   frmThemeSelector.btnApplyClick(self);
 
   cbServerName.SetFocus;
-
-  edtPort.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] <> 'Local');
-  edtRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
-  if not edtRootPath.Enabled then
-    edtRootPath.Text := '';
-  btnOpenRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
 
   if cbServerName.Items.Count = 0 then
     exit;
@@ -259,6 +330,16 @@ begin
     cbServerName.ItemIndex := 0;
 
   cbServerNameChange(nil);
+end;
+
+procedure TfmServerRegistry.GroupBox1Click(Sender: TObject);
+begin
+
+end;
+
+procedure TfmServerRegistry.lbPasswordClick(Sender: TObject);
+begin
+
 end;
 
 procedure TfmServerRegistry.cbCharsetChange(Sender: TObject);
@@ -277,13 +358,27 @@ begin
     FServerSession.LoadRegisteredClientLib := false;
 end;
 
+procedure TfmServerRegistry.UpdateControlsForProtocol;
+var
+  IsLocal: Boolean;
+begin
+  IsLocal := (LowerCase(Trim(cbProtocol.Text)) = 'local');
+
+  edtPassword.Enabled := not IsLocal;
+  if not edtPassword.Enabled then
+    edtPassword.Text := '';
+
+  chkSavePassword.Enabled := not IsLocal;
+  if not chkSavePassword.Enabled then
+    chkSavePassword.Checked := false;
+
+  edtRole.Enabled := not IsLocal;
+  edtPort.Enabled := not IsLocal;
+end;
+
 procedure TfmServerRegistry.cbProtocolChange(Sender: TObject);
 begin
-  edtPort.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] <> 'Local');
-  edtRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
-  if not edtRootPath.Enabled then
-    edtRootPath.Text := '';
-  btnOpenRootPath.Enabled := (cbProtocol.Items[cbProtocol.ItemIndex] = 'Local');
+  UpdateControlsForProtocol;
 end;
 
 procedure TfmServerRegistry.edtClientLibraryPathChange(Sender: TObject);
@@ -402,6 +497,7 @@ procedure TfmServerRegistry.btnAddServerClick(Sender: TObject);
 var
   NewServer: string;
   i: Integer;
+  Node: TTreeNode;
 begin
   if not InputQuery('Add New Server', 'Enter the server name:', NewServer) then
     Exit; // User hat abgebrochen
@@ -421,26 +517,29 @@ begin
     begin
       MessageDlg('This server already exists in the list.', mtInformation, [mbOK], 0);
       cbServerName.ItemIndex := i;
-      //Init(nil); // existierenden Datensatz laden
       Exit;
     end;
 
   // Neuen Server hinzufügen
-  //CreateDefaultServerSession;
-  CreateServerSession(FServerSession, NewServer);
+  Node := turbocommon.MainTreeView.Items.Add(nil, NewServer);
+  TPNodeInfos(Node.Data)^.ObjectType := tvotServer;
+  Node.Visible := false;
+  Node.Text := NewServer;
+
   cbServerName.Items.Add(NewServer);
   cbServerName.ItemIndex := cbServerName.Items.Count - 1;
 
-  // Init mit Defaultwerten
-  Init(FServerSession);
   bbTestConnection.Enabled := true;
   //bbReg.Enabled := true;
-
 
   MessageDlg('New server "' + NewServer + '" has been added.' + sLineBreak +
              'Please complete the details and save.', mtInformation, [mbOK], 0);
 
-  FIsNewServer := true;
+  ResetForm;
+  Init(Node);
+  UpdateControlsForProtocol;
+
+  btnAddServer.Enabled := false;
 end;
 
 procedure TfmServerRegistry.CreateServerSession(var AServerSession: TServerSession; AServerName: string);
@@ -483,7 +582,6 @@ begin
   // Session aktualisieren und trennen
   FServerSession.Disconnect;
   ApplyServerRecordToSession(Rec, FServerSession);
-
 
   if FServerSession.Connected then
     FServerSession.Disconnect;
@@ -591,7 +689,6 @@ begin
     ApplyServerRecordToSession(Rec, FServerSession);
   end;
 
-  //chkSavePassword.Checked := true; // save pwd allways
   SavePwd := chkSavePassword.Checked;
 
   if SavePwd then
@@ -608,47 +705,48 @@ begin
 
     if FIsNewServer then
     begin
-      {if CreateServiceUser then
-      begin
-        Rec.UserName := InitialServiceUser;
-        if chkSavePassword.Checked then
-          Rec.Password := InitialServiceUserPwd
-        else
-          Rec.Password := '';
-      end else
-        Rec.Password := ''; }
-      FSelectedServer :=  cbServerName.Text;
-      tmpNode := turbocommon.MainTreeView.Items.Add(nil, cbServerName.Text);
+      FSelectedServer :=  Trim(cbServerName.Text);
+      tmpNode := GetServerNodeByServerName(FSelectedServer);
+      tmpNode.Visible := true;
+      //tmpNode := turbocommon.MainTreeView.Items.Add(nil, cbServerName.Text);
       tmpNode.ImageIndex := 25;
       tmpNode.SelectedIndex := 25;
       TPNodeInfos(tmpNode.Data)^.ObjectType := tvotServer;
-      //turbocommon.MainTreeView.Selected := tmpNode;
+      turbocommon.MainTreeView.Selected := tmpNode;
       turbocommon.MainTreeView.Selected := turbocommon.MainTreeView.Items[0];
       FIsNewServer := false;
-    end; {else
-    begin
-       Rec.UserName := InitialServiceUser;
-      if chkSavePassword.Checked then
-        Rec.Password := InitialServiceUserPwd
-      else
-        Rec.Password := '';
-    end; }
+    end;
   finally
     SaveServerDataToFile(Rec);
     Application.ProcessMessages;
   end;
 
+  btnAddServer.Enabled := true;
   ModalResult := mrOk;
 end;
 
 procedure TfmServerRegistry.bbCancelClick(Sender: TObject);
+var tmpNode: TTreeNode;
 begin
-
+  if FIsNewServer then
+  begin
+    tmpNode := GetServerNodeByServerName(Trim(cbServerName.Text));
+    if Assigned(TmpNode) then
+    begin
+      if  Assigned(TmpNode.Data) then
+        if Assigned(TPNodeInfos(TmpNode.Data)^.ServerSession) then
+          if TPNodeInfos(TmpNode.Data)^.ServerSession.Connected then
+            TPNodeInfos(TmpNode.Data)^.ServerSession.Disconnect;
+      turbocommon.MainTreeView.Items.Delete(tmpNode);
+    end;
+  end;
+  btnAddServer.Enabled := true;
 end;
 
 procedure TfmServerRegistry.btnDeleteServerClick(Sender: TObject);
 var
   ServerName: string;
+  ServerRec: TServerRecord;
   idx: Integer;
   Node: TTreeNode;
 begin
@@ -660,28 +758,23 @@ begin
 
   //bbReg.Enabled := False;
   ServerName := cbServerName.Text;
+  Node := GetServerNodeByServerName(ServerName);
 
   // Prüfen, ob Server in TreeView noch Childnodes hat
-  Node := turbocommon.MainTreeView.Items.GetFirstNode;
-  while Assigned(Node) do
+  if Assigned(Node) then
   begin
-    if (Node.Level = 0) and SameText(Node.Text, ServerName) then
+    if Node.HasChildren then
     begin
-      if Node.HasChildren then
-      begin
-        if MessageDlg(
-             'The server "' + ServerName + '" still has registered databases.' + sLineBreak +
-             'Do you still want to delete it?',
-             mtWarning, [mbYes, mbNo], 0
-           ) <> mrYes then
-          Exit;
+      if MessageDlg(
+           'The server "' + ServerName + '" still has registered databases.' + sLineBreak +
+           'Do you still want to delete it?',
+           mtWarning, [mbYes, mbNo], 0
+         ) <> mrYes then
+        Exit;
 
-        // Alle DB-ChildNodes still als gelöscht markieren
-        MarkAllServerDatabasesDeleted(Node.Text);
-      end;
-      Break;
+      // Alle DB-ChildNodes still als gelöscht markieren
+      MarkAllServerDatabasesDeleted(Node.Text);
     end;
-    Node := Node.GetNextSibling;
   end;
 
   // Sicherstellen, dass Datei konsistent bleibt
@@ -690,51 +783,40 @@ begin
   // Server wirklich löschen
   DeleteServer(ServerName);
 
-  init(nil);
-  if Assigned(FServerSession) then
-    if FServerSession.Connected then
-      FServerSession.Disconnect;
-
   // Server auch aus TreeView entfernen
-  Node := turbocommon.MainTreeView.Items.GetFirstNode;
-  while Assigned(Node) do
-  begin
-    if (Node.Level = 0) and SameText(Node.Text, ServerName) then
-    begin
-      // optional: Abstandhalter löschen, falls vorhanden
-      if Assigned(Node.GetPrevSibling) and (Trim(Node.GetPrevSibling.Text) = '') then
-        Node.GetPrevSibling.Delete;
+  turbocommon.MainTreeView.Selected := nil;
+  turbocommon.MainTreeView.Items.Delete(Node);
 
-      Node.Delete; // entfernt Server + ChildNodes
-      Break;
+  if Assigned(FServerSession) then
+  begin
+    if FServerSession.Connected then
+    begin
+      FServerSession.Disconnect;
+      Application.ProcessMessages;
     end;
-    Node := Node.getNextSibling;
   end;
 
   // Server auch aus ComboBox entfernen
   idx := cbServerName.Items.IndexOf(ServerName);
   if idx >= 0 then
+  begin
     cbServerName.Items.Delete(idx);
+  end;
 
   if cbServerName.Items.Count > 0 then
   begin
     cbServerName.ItemIndex := 0;
-  end
-  else
+    Node := GetServerNodeByServerName(Trim(cbServerName.Text));
+    ServerRec  := GetServerRecordFromFileByName(cbServerName.Text);
+    ApplyServerRecordToSession(ServerRec, TPNodeInfos(Node.Data)^.ServerSession);
+    Init(Node);
+  end else
   begin
-    cbServerName.ItemIndex := -1;
-    edtServerAlias.Clear;
-    edtUserName.Clear;
-    edtRole.Clear;
-    edtPassword.Clear;
-    cbProtocol.ItemIndex := -1;
-    cbCharset.ItemIndex := -1;
-    edtPort.Text := '';
-    edtClientLibraryPath.Clear;
-    bbTestConnection.Enabled := False;
+    ResetForm
     //bbReg.Enabled := False;
   end;
 
+  UpdateControlsForProtocol;
   MessageDlg('Server "' + ServerName + '" has been deleted.', mtInformation, [mbOK], 0);
 end;
 
@@ -763,7 +845,6 @@ procedure TfmServerRegistry.cbServerNameChange(Sender: TObject);
 var Rec: TServerRecord;
 begin
   Rec := GetServerRecordFromFileByName(cbServerName.Text);
-
   cbProtocol.OnChange := nil;
 
   if Ord(Rec.Protocol) < cbProtocol.Items.Count then
@@ -771,37 +852,20 @@ begin
   else
     cbProtocol.ItemIndex := -1;
 
-  if Rec.IsEmbedded then
-    edtPort.Enabled := false
-  else
-  begin
-    cbProtocol.Enabled := true;
-    edtPort.Enabled := true;
-  end;
-
+  UpdateControlsForProtocol;
   cbProtocol.OnChange := @cbProtocolChange;
 
   FSelectedServer := cbServerName.Text;
   //bbReg.Enabled := false;
 
-  //Rec := GetServerRecordFromFile(cbServerName.Text);
   if Rec.ServerName <> '' then
   begin
     FillFormFromServerRecord(Rec);
-    //CheckPortNumber(Rec.ServerName);
-  end
-  else
+  end else
   begin
-    edtServerAlias.Text := '';
-    edtUserName.Text := 'SYSDBA';
-    edtRole.Text := '';
-    cbProtocol.ItemIndex := 0; // TCP
-    edtPassword.Text := '';
-    cbCharset.ItemIndex := DefaultFBCharacterSet;
-    edtPort.Text := '3050';
-    edtClientLibraryPath.Text := '';
-    chkSavePassword.Checked := False;
+    ResetForm;
   end;
+
 end;
 
 procedure TfmServerRegistry.FillServerRecordFromForm(var Rec: TServerRecord);
@@ -868,7 +932,6 @@ begin
   edtConnectionTimeout.Text := IntToStr(Rec.ConnectTimeoutMS);
   edtRetryCount.Text        := IntToStr(Rec.RetryCount);
   edtQueryTimeout.Text      := IntToStr(Rec.QueryTimeoutMS);
-
 end;
 
 function TfmServerRegistry.GetServerRecordFromForm: TServerRecord;
@@ -908,6 +971,7 @@ begin
     begin
       edtClientLibraryPath.Text := OpenDlgLoadClientLib.FileName; //    frmSetFBClient.FBClientLibPath;
       FBConfigFilePath := GetFBConffilePathFromFBClientlibPath(edtClientLibraryPath.Text);
+      edtRootPath.Text := ExtractFilePath(edtClientLibraryPath.Text);
       FServerSession.ClientLibraryPath := edtClientLibraryPath.Text;
       if FileExists(FBConfigFilePath) then
       begin

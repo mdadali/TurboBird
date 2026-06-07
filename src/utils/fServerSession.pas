@@ -134,7 +134,7 @@ type
     function ConnectServerIBX: boolean;
     function ConnectEmbeddedIBX: boolean;
 
-    property ServerName: string read FServerName;
+    property ServerName: string read FServerName write FServerName;
     property ServerAlias: string read FServerAlias write FServerAlias;
 
     property Protocol: TProtocol read FProtocol write FProtocol;

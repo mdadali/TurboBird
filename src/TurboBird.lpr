@@ -170,6 +170,5 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-  Application.CreateForm(TfmCloneToExternalTable, fmCloneToExternalTable);
   Application.Run;
 end.
