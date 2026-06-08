@@ -1,7 +1,7 @@
 object fmCloneToExternalTable: TfmCloneToExternalTable
-  Left = 466
+  Left = 422
   Height = 708
-  Top = 0
+  Top = 26
   Width = 702
   BorderStyle = bsDialog
   Caption = 'Clone to External Table'
@@ -1169,7 +1169,6 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
         Font.Style = [fsBold]
         ParentColor = False
         ParentFont = False
-        OnClick = Label4Click
       end
       object edtTo: TEdit
         Left = 240
