@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
   Left = 493
   Height = 748
-  Top = 107
+  Top = 0
   Width = 679
   Caption = 'fmQueryWindow'
   ClientHeight = 748
@@ -70291,7 +70291,7 @@ object fmQueryWindow: TfmQueryWindow
     Cursor = crVSplit
     Left = 0
     Height = 12
-    Top = 34
+    Top = 296
     Width = 679
     Align = alTop
     ResizeAnchor = akTop
@@ -70320,7 +70320,7 @@ object fmQueryWindow: TfmQueryWindow
   inline meQuery: TSynEdit
     Left = 0
     Height = 262
-    Top = 46
+    Top = 34
     Width = 679
     Align = alTop
     BlockIndent = 3

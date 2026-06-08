@@ -1,38 +1,30 @@
 object fmCloneToExternalTable: TfmCloneToExternalTable
-  Left = 412
-  Height = 588
-  Top = 117
+  Left = 458
+  Height = 667
+  Top = 55
   Width = 702
   BorderStyle = bsDialog
   Caption = 'Clone to External Table'
-  ClientHeight = 588
+  ClientHeight = 667
   ClientWidth = 702
   OnClose = FormClose
   OnCreate = FormCreate
+  Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
-  object btnOK: TButton
-    Left = 584
-    Height = 33
-    Top = 544
-    Width = 96
-    Caption = 'OK'
-    ModalResult = 1
-    TabOrder = 0
-  end
   object grBoxTables: TGroupBox
     Left = 0
-    Height = 144
+    Height = 112
     Top = 0
     Width = 702
     Align = alTop
     Caption = 'Tables'
-    ClientHeight = 123
+    ClientHeight = 91
     ClientWidth = 700
-    TabOrder = 1
+    TabOrder = 0
     object Label2: TLabel
       Left = 24
       Height = 20
-      Top = 64
+      Top = 48
       Width = 82
       Caption = 'External File'
       ParentColor = False
@@ -40,7 +32,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     object Label1: TLabel
       Left = 24
       Height = 20
-      Top = 16
+      Top = 8
       Width = 133
       Caption = 'External Tablename'
       ParentColor = False
@@ -48,7 +40,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     object edtExtTableName: TEdit
       Left = 176
       Height = 37
-      Top = 16
+      Top = 8
       Width = 459
       TabOrder = 0
       Text = 'EXT_'
@@ -56,7 +48,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     object edtExternalFileName: TEdit
       Left = 176
       Height = 37
-      Top = 64
+      Top = 48
       Width = 459
       TabOrder = 1
       Text = '/opt/firebird/examples/empbuild/'
@@ -64,7 +56,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     object btnBrowseFile: TButton
       Left = 640
       Height = 32
-      Top = 69
+      Top = 48
       Width = 32
       Caption = '...'
       OnClick = btnBrowseFileClick
@@ -73,18 +65,18 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
   end
   object grBoxQuery: TGroupBox
     Left = 0
-    Height = 224
-    Top = 144
+    Height = 264
+    Top = 112
     Width = 702
     Align = alTop
     Caption = 'Query'
-    ClientHeight = 203
+    ClientHeight = 243
     ClientWidth = 700
-    TabOrder = 2
+    TabOrder = 1
     object btnCreateQuery: TButton
       Left = 8
       Height = 41
-      Top = 152
+      Top = 192
       Width = 136
       Caption = 'Create Query'
       OnClick = btnCreateQueryClick
@@ -92,7 +84,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     end
     inline SynEditExtTableQuery: TSynEdit
       Left = 0
-      Height = 150
+      Height = 176
       Top = 0
       Width = 700
       Align = alTop
@@ -590,7 +582,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     object btnCreateExtTable: TButton
       Left = 176
       Height = 41
-      Top = 152
+      Top = 192
       Width = 176
       Caption = 'Create External Table'
       Enabled = False
@@ -600,18 +592,18 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
   end
   object grBoxCopy: TGroupBox
     Left = 0
-    Height = 161
-    Top = 368
+    Height = 232
+    Top = 384
     Width = 702
-    Align = alTop
+    Align = alBottom
     Caption = 'Copy'
-    ClientHeight = 140
+    ClientHeight = 211
     ClientWidth = 700
-    TabOrder = 3
+    TabOrder = 2
     object btnCopy: TButton
       Left = 8
       Height = 43
-      Top = 96
+      Top = 161
       Width = 136
       Caption = 'Copy'
       Enabled = False
@@ -620,7 +612,7 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
     end
     inline SynEditInsertQuery: TSynEdit
       Left = 0
-      Height = 88
+      Height = 152
       Top = 0
       Width = 700
       Align = alTop
@@ -1116,30 +1108,49 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
       end
     end
     object Label3: TLabel
-      Left = 204
+      Left = 184
       Height = 20
-      Top = 103
-      Width = 122
-      Caption = 'Default Batch Size'
+      Top = 176
+      Width = 69
+      Caption = 'Batch Size'
       ParentColor = False
     end
     object edtDefaultBatchSize: TEdit
-      Left = 392
+      Left = 272
       Height = 37
-      Top = 100
-      Width = 80
+      Top = 168
+      Width = 112
       TabOrder = 2
-      Text = '500000'
+      Text = '1000000'
     end
   end
-  object btnReset: TButton
-    Left = 432
-    Height = 33
-    Top = 544
-    Width = 99
-    Caption = 'Reset'
-    OnClick = btnResetClick
-    TabOrder = 4
+  object pnlBottom: TPanel
+    Left = 0
+    Height = 51
+    Top = 616
+    Width = 702
+    Align = alBottom
+    ClientHeight = 51
+    ClientWidth = 702
+    TabOrder = 3
+    object btnReset: TButton
+      Left = 433
+      Height = 33
+      Top = 8
+      Width = 99
+      Caption = 'Reset'
+      OnClick = btnResetClick
+      TabOrder = 0
+    end
+    object btnOK: TButton
+      Left = 577
+      Height = 33
+      Top = 8
+      Width = 96
+      Caption = 'Close'
+      ModalResult = 1
+      TabOrder = 1
+    end
   end
   object SaveDialog1: TSaveDialog
     Left = 88

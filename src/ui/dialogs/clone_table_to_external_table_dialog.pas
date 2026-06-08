@@ -11,16 +11,61 @@ uses
   turbocommon,
   fsimpleobjextractor;
 
+
 type
+  TCopyDataThread = class(TThread)
+  private
+    FDatabase: TIBDatabase;
+    FTransaction: TIBTransaction;
+    FTableName: string;
+    FExtTableName: string;
+    FFieldList: string;
+    FBatchSize: Integer;
+    FRecCount: Integer;
+    FFromRow: Integer;
+    FToRow: Integer;
+    FStartTime: TDateTime;
+    FEndTime: TDateTime;
+    FCopiedRows: Integer;
+    FRowsPerSec: Double;
+    FErrorMessage: string;
+
+    // Für Synchronisation mit GUI
+    FOnProgress: TNotifyEvent;
+    FOnComplete: TNotifyEvent;
+    FOnError: TNotifyEvent;
+
+    procedure DoProgress;
+    procedure DoComplete;
+    procedure DoError;
+  protected
+    procedure Execute; override;
+  public
+    Cancelled: Boolean;
+
+    constructor Create(ADatabase: TIBDatabase; ATransaction: TIBTransaction;
+      const ATableName, AExtTableName, AFieldList: string;
+      ABatchSize, ARecCount: Integer);
+
+    property CopiedRows: Integer read FCopiedRows;
+    property RowsPerSec: Double read FRowsPerSec;
+    property StartTime: TDateTime read FStartTime;
+    property EndTime: TDateTime read FEndTime;
+    property ErrorMessage: string read FErrorMessage;
+
+    property OnProgress: TNotifyEvent read FOnProgress write FOnProgress;
+    property OnComplete: TNotifyEvent read FOnComplete write FOnComplete;
+    property OnError: TNotifyEvent read FOnError write FOnError;
+  end;
 
   { TfmCloneToExternalTable }
 
   TfmCloneToExternalTable = class(TForm)
     btnBrowseFile: TButton;
-    btnOK: TButton;
     btnCreateQuery: TButton;
     btnCopy: TButton;
     btnCreateExtTable: TButton;
+    btnOK: TButton;
     btnReset: TButton;
     edtDefaultBatchSize: TEdit;
     edtExternalFileName: TEdit;
@@ -34,6 +79,7 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    pnlBottom: TPanel;
     SaveDialog1: TSaveDialog;
     SynEditExtTableQuery: TSynEdit;
     SynEditInsertQuery: TSynEdit;
@@ -48,11 +94,26 @@ type
   private
     FDBIndex: integer;
     FTableName: string;
-    FUsedFields: TStringList;       // Feldname=TYPE,...
-    FUsedFieldNames: TStringList;   // Nur Feldnamen
+    FUsedFields: TStringList;
+    FUsedFieldNames: TStringList;
+
+    FThread: TCopyDataThread;
+    FProgressForm: TForm;
+    FProgressLabel, FlblElapsed: TLabel;
+    FProgressBar: TProgressBar;
+    FBtnCancel: TButton;
+
+    procedure ThreadProgress(Sender: TObject);
+    procedure ThreadComplete(Sender: TObject);
+    procedure ThreadError(Sender: TObject);
+    procedure CancelButtonClick(Sender: TObject);
+
     procedure CloneTableAsExternal;
     procedure GenerateInsertQuery;
     procedure CopyDataWithProgress;
+    function ExternalTableExists: Boolean;
+    function ExternalFileExists: Boolean;
+    procedure ProgressFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
     procedure Init(const ATableName: string; ADBIndex: Integer);
   end;
@@ -64,7 +125,188 @@ implementation
 
 {$R *.lfm}
 
+{ TCopyDataThread }
+
+constructor TCopyDataThread.Create(ADatabase: TIBDatabase; ATransaction: TIBTransaction;
+  const ATableName, AExtTableName, AFieldList: string;
+  ABatchSize, ARecCount: Integer);
+begin
+  inherited Create(True);
+  FreeOnTerminate := False;
+
+  // DIREKT die übergebene DB nutzen, keine eigene erstellen!
+  FDatabase := ADatabase;
+  FTransaction := ATransaction;
+
+  FTableName := ATableName;
+  FExtTableName := AExtTableName;
+  FFieldList := AFieldList;
+  FBatchSize := ABatchSize;
+  FRecCount := ARecCount;
+
+  FCopiedRows := 0;
+  Cancelled := False;
+end;
+
+procedure TCopyDataThread.Execute;
+var
+  Query: TIBQuery;
+  BatchCount, BatchIndex: Integer;
+  FromRow, ToRow: Integer;
+begin
+  try
+    // DB ist bereits verbunden (vom Formular)
+    // KEIN Connect! KEIN StartTransaction!
+
+    Query := TIBQuery.Create(nil);
+    try
+      Query.Database := FDatabase;
+      Query.Transaction := FTransaction;
+
+      BatchCount := (FRecCount + FBatchSize - 1) div FBatchSize;
+
+      FStartTime := Now;
+
+      for BatchIndex := 0 to BatchCount - 1 do
+      begin
+        if Cancelled then
+          Break;
+
+        FromRow := (BatchIndex * FBatchSize) + 1;
+        ToRow := (BatchIndex + 1) * FBatchSize;
+        if ToRow > FRecCount then
+          ToRow := FRecCount;
+
+        Query.Close;
+        Query.SQL.Text :=
+          'INSERT INTO ' + FExtTableName + ' (' + FFieldList + ')' + sLineBreak +
+          'SELECT FIRST ' + IntToStr(ToRow - FromRow + 1) +
+          ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
+          FFieldList + sLineBreak +
+          'FROM ' + FTableName;
+
+        if not FTransaction.InTransaction then
+          FTransaction.StartTransaction;
+
+        Query.ExecSQL;
+        FTransaction.CommitRetaining;
+
+        FCopiedRows := ToRow;
+
+        Synchronize(@DoProgress);
+      end;
+
+      if not Cancelled then
+        FTransaction.Commit;
+
+      FEndTime := Now;
+      if FEndTime > FStartTime then
+        FRowsPerSec := FCopiedRows / ((FEndTime - FStartTime) * 24 * 60 * 60)
+      else
+        FRowsPerSec := 0;
+
+    finally
+      Query.Free;
+    end;
+
+    Synchronize(@DoComplete);
+
+  except
+    on E: Exception do
+    begin
+      FErrorMessage := E.Message;
+      Synchronize(@DoError);
+    end;
+  end;
+end;
+
+procedure TCopyDataThread.DoProgress;
+begin
+  if Assigned(FOnProgress) then
+    FOnProgress(Self);
+end;
+
+procedure TCopyDataThread.DoComplete;
+begin
+  if Assigned(FOnComplete) then
+    FOnComplete(Self);
+end;
+
+procedure TCopyDataThread.DoError;
+begin
+  if Assigned(FOnError) then
+    FOnError(Self);
+end;
+
 { TfmCloneToExternalTable }
+
+procedure TfmCloneToExternalTable.ProgressFormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  if Assigned(FThread) and (not FThread.Finished) then
+  begin
+    FThread.Cancelled := True;
+    CloseAction := caNone;  // Fenster noch nicht schließen – Thread läuft noch
+  end
+  else
+    CloseAction := caFree;
+end;
+
+procedure TfmCloneToExternalTable.ThreadProgress(Sender: TObject);
+begin
+  if Assigned(FProgressBar) and Assigned(FThread) then
+  begin
+    FProgressBar.Position := FThread.CopiedRows;
+    FProgressLabel.Caption := Format('Copied %d of %d rows...', [FThread.CopiedRows, FProgressBar.Max]);
+    FlblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - FThread.StartTime);
+    Application.ProcessMessages;
+  end;
+end;
+
+procedure TfmCloneToExternalTable.ThreadComplete(Sender: TObject);
+var
+  StatusStr: string;
+  Msg: string;
+begin
+  // Progress-Fenster schließen
+  FProgressForm.ModalResult := mrOK;
+  Application.ProcessMessages;
+  Sleep(100);
+
+  if FThread.Cancelled then
+    StatusStr := 'cancelled'
+  else
+    StatusStr := 'completed';
+
+  Msg := Format('Data copy %s!' + sLineBreak + sLineBreak +
+                'Rows copied: %d' + sLineBreak +
+                'Time: %s' + sLineBreak +
+                'Speed: %.0f rows/sec',
+                [StatusStr, FThread.CopiedRows,
+                 FormatDateTime('hh:nn:ss', FThread.EndTime - FThread.StartTime),
+                 FThread.RowsPerSec]);
+
+  ShowMessage(Msg);
+end;
+
+procedure TfmCloneToExternalTable.ThreadError(Sender: TObject);
+begin
+  FProgressForm.ModalResult := mrOK;
+  Application.ProcessMessages;
+  Sleep(100);
+
+  ShowMessage('Data copy failed:' + sLineBreak + FThread.ErrorMessage);
+end;
+
+procedure TfmCloneToExternalTable.CancelButtonClick(Sender: TObject);
+begin
+  if Assigned(FThread) then
+  begin
+    FThread.Cancelled := True;
+    FBtnCancel.Enabled := False;
+    FBtnCancel.Caption := 'Cancelling...';
+  end;
+end;
 
 procedure TfmCloneToExternalTable.FormCreate(Sender: TObject);
 begin
@@ -117,6 +359,39 @@ begin
 end;
 
 // ============================================================================
+// Prüft ob die External Table bereits existiert
+// ============================================================================
+function TfmCloneToExternalTable.ExternalTableExists: Boolean;
+var
+  Q: TIBQuery;
+begin
+  Result := False;
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := IBDatabase1;
+    Q.Transaction := IBTransaction1;
+    Q.AllowAutoActivateTransaction := True;
+    Q.SQL.Text :=
+      'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+      'WHERE UPPER(RDB$RELATION_NAME) = :T AND RDB$EXTERNAL_FILE IS NOT NULL';
+    Q.ParamByName('T').AsString := UpperCase(edtExtTableName.Text);
+    Q.Open;
+    Result := not Q.EOF;
+    Q.Close;
+  finally
+    Q.Free;
+  end;
+end;
+
+// ============================================================================
+// Prüft ob die External-Datei bereits existiert
+// ============================================================================
+function TfmCloneToExternalTable.ExternalFileExists: Boolean;
+begin
+  Result := FileExists(edtExternalFileName.Text);
+end;
+
+// ============================================================================
 // CREATE TABLE SQL generieren
 // ============================================================================
 procedure TfmCloneToExternalTable.btnCreateQueryClick(Sender: TObject);
@@ -145,6 +420,35 @@ begin
     begin
       MessageDlg('No CREATE TABLE SQL to execute.', mtWarning, [mbOK], 0);
       Exit;
+    end;
+
+    // Prüfen ob External Table bereits existiert
+    if ExternalTableExists then
+    begin
+      if MessageDlg(
+           'External Table "' + edtExtTableName.Text + '" already exists!' + sLineBreak +
+           sLineBreak +
+           'Do you want to drop and recreate it?',
+           mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+      begin
+        IBQuery1.Close;
+        IBQuery1.SQL.Text := 'DROP TABLE ' + edtExtTableName.Text;
+        IBQuery1.ExecSQL;
+        IBTransaction1.Commit;
+      end
+      else
+        Exit;
+    end;
+
+    // Prüfen ob External-Datei bereits existiert
+    if ExternalFileExists then
+    begin
+      if MessageDlg(
+           'External File "' + edtExternalFileName.Text + '" already exists!' + sLineBreak +
+           sLineBreak +
+           'Continue anyway? (Existing data will be overwritten)',
+           mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+        Exit;
     end;
 
     IBQuery1.Close;
@@ -190,7 +494,6 @@ var
   i, SpacePos: Integer;
   FieldName: string;
 begin
-  // Nur Feldnamen aus FUsedFields extrahieren
   FUsedFieldNames.Clear;
 
   for i := 0 to FUsedFields.Count - 1 do
@@ -203,7 +506,6 @@ begin
     FUsedFieldNames.Add(FieldName);
   end;
 
-  // Kommagetrennte Feldliste
   FieldList := '';
   for i := 0 to FUsedFieldNames.Count - 1 do
   begin
@@ -219,7 +521,7 @@ begin
 end;
 
 // ============================================================================
-// COPY DATA mit Progress-Fenster
+// COPY DATA mit Progress-Fenster + Cancel-Button
 // ============================================================================
 procedure TfmCloneToExternalTable.btnCopyClick(Sender: TObject);
 begin
@@ -234,141 +536,138 @@ end;
 
 procedure TfmCloneToExternalTable.CopyDataWithProgress;
 var
-  ProgressForm: TForm;
-  ProgressLabel, lblElapsed: TLabel;
-  ProgressBar: TProgressBar;
-  StartTime, EndTime: TDateTime;
-  RecCount, BatchSize, BatchCount, BatchIndex, FromRow, ToRow: Integer;
-  RowsPerSec: Double;
+  BatchSize: Integer;
+  RecCount: Integer;
   FieldList: string;
   CountQuery: TIBQuery;
+  i: Integer;
 begin
   BatchSize := StrToIntDef(edtDefaultBatchSize.Text, 500000);
 
-  // ========================================================================
-  // Record Count ermitteln
-  // ========================================================================
-  CountQuery := TIBQuery.Create(nil);
-  try
-    CountQuery.Database := IBDatabase1;
-    CountQuery.Transaction := IBTransaction1;
-    CountQuery.AllowAutoActivateTransaction := true;
-    CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + FTableName;
-    CountQuery.Open;
-    RecCount := CountQuery.Fields[0].AsInteger;
-    CountQuery.Close;
-  finally
-    CountQuery.Free;
-  end;
-
-  if RecCount = 0 then
-  begin
-    MessageDlg('Source table is empty. Nothing to copy.', mtInformation, [mbOK], 0);
-    Exit;
-  end;
-
-  BatchCount := (RecCount + BatchSize - 1) div BatchSize;
-
-  // ========================================================================
-  // Feldliste aus FUsedFieldNames
-  // ========================================================================
+  // Feldliste
   FieldList := '';
-  for FromRow := 0 to FUsedFieldNames.Count - 1 do
+  for i := 0 to FUsedFieldNames.Count - 1 do
   begin
     if FieldList <> '' then
       FieldList := FieldList + ', ';
-    FieldList := FieldList + FUsedFieldNames[FromRow];
+    FieldList := FieldList + FUsedFieldNames[i];
   end;
 
   // ========================================================================
-  // Progress Window
+  // Progress-Fenster EINMAL anzeigen
   // ========================================================================
-  ProgressForm := TForm.Create(nil);
+  FProgressForm := TForm.Create(nil);
   try
-    ProgressForm.FormStyle := fsStayOnTop;
-    ProgressForm.Caption := 'Copying data...';
-    ProgressForm.Width := 500;
-    ProgressForm.Height := 180;
-    ProgressForm.Position := poScreenCenter;
-    ProgressForm.BorderStyle := bsDialog;
+    FProgressForm.FormStyle := fsNormal;
+    FProgressForm.Caption := 'Copying data...';
+    FProgressForm.Width := 520;
+    FProgressForm.Height := 230;
+    FProgressForm.Position := poScreenCenter;
+    FProgressForm.BorderStyle := bsDialog;
+    FProgressForm.OnClose := @ProgressFormClose;
 
-    ProgressLabel := TLabel.Create(ProgressForm);
-    ProgressLabel.Parent := ProgressForm;
-    ProgressLabel.Left := 16;
-    ProgressLabel.Top := 16;
-    ProgressLabel.Caption := Format('Total Records: %d', [RecCount]);
+    FProgressLabel := TLabel.Create(FProgressForm);
+    FProgressLabel.Parent := FProgressForm;
+    FProgressLabel.Left := 16;
+    FProgressLabel.Top := 16;
+    FProgressLabel.Caption := 'Please wait, counting records...';
+    FProgressLabel.Width := 460;
 
-    ProgressBar := TProgressBar.Create(ProgressForm);
-    ProgressBar.Parent := ProgressForm;
-    ProgressBar.Left := 16;
-    ProgressBar.Top := 45;
-    ProgressBar.Width := 460;
-    ProgressBar.Height := 20;
-    ProgressBar.Min := 0;
-    ProgressBar.Max := RecCount;
+    FProgressBar := TProgressBar.Create(FProgressForm);
+    FProgressBar.Parent := FProgressForm;
+    FProgressBar.Left := 16;
+    FProgressBar.Top := 45;
+    FProgressBar.Width := 470;
+    FProgressBar.Height := 20;
+    FProgressBar.Min := 0;
+    FProgressBar.Max := 100;
+    FProgressBar.Style := pbstMarquee;
 
-    lblElapsed := TLabel.Create(ProgressForm);
-    lblElapsed.Parent := ProgressForm;
-    lblElapsed.Left := 16;
-    lblElapsed.Top := 80;
+    FlblElapsed := TLabel.Create(FProgressForm);
+    FlblElapsed.Parent := FProgressForm;
+    FlblElapsed.Left := 16;
+    FlblElapsed.Top := 80;
 
-    ProgressForm.Show;
+    FBtnCancel := TButton.Create(FProgressForm);
+    FBtnCancel.Parent := FProgressForm;
+    FBtnCancel.Caption := 'Cancel';
+    FBtnCancel.Left := 200;
+    FBtnCancel.Top := 120;
+    FBtnCancel.Width := 100;
+    FBtnCancel.Enabled := False;
+    FBtnCancel.OnClick := @CancelButtonClick;
+
+    // EINMAL Show
+    FProgressForm.Show;
     Application.ProcessMessages;
 
     // ========================================================================
-    // Batch-Verarbeitung
+    // Record Count ermitteln
     // ========================================================================
-    StartTime := Now;
-
-    for BatchIndex := 0 to BatchCount - 1 do
-    begin
-      FromRow := (BatchIndex * BatchSize) + 1;
-      ToRow := (BatchIndex + 1) * BatchSize;
-      if ToRow > RecCount then
-        ToRow := RecCount;
-
-      IBQuery1.Close;
-      IBQuery1.SQL.Text :=
-        'INSERT INTO ' + edtExtTableName.Text + ' (' + FieldList + ')' + sLineBreak +
-        'SELECT FIRST ' + IntToStr(ToRow - FromRow + 1) + ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
-        FieldList + sLineBreak +
-        'FROM ' + FTableName;
-
-      if not IBTransaction1.InTransaction then
-        IBTransaction1.StartTransaction;
-
-      IBQuery1.ExecSQL;
-      IBTransaction1.CommitRetaining;
-      Application.ProcessMessages;
-
-      ProgressBar.Position := ToRow;
-      ProgressLabel.Caption := Format('Copied %d of %d rows...', [ToRow, RecCount]);
-      lblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
-      Application.ProcessMessages;
+    CountQuery := TIBQuery.Create(nil);
+    try
+      CountQuery.Database := IBDatabase1;
+      CountQuery.Transaction := IBTransaction1;
+      CountQuery.AllowAutoActivateTransaction := True;
+      CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + FTableName;
+      CountQuery.Open;
+      RecCount := CountQuery.Fields[0].AsInteger;
+      CountQuery.Close;
+    finally
+      CountQuery.Free;
     end;
 
-    IBTransaction1.Commit;
+    if RecCount = 0 then
+    begin
+      FProgressForm.Close;
+      ShowMessage('Source table is empty. Nothing to copy.');
+      Exit;
+    end;
+
+    // ProgressBar für echten Fortschritt konfigurieren
+    FProgressBar.Style := pbstNormal;
+    FProgressBar.Max := RecCount;
+    FProgressBar.Position := 0;
+    FProgressLabel.Caption := Format('Total Records: %d', [RecCount]);
+    FBtnCancel.Enabled := True;
     Application.ProcessMessages;
 
     // ========================================================================
-    // Finish
+    // Thread starten
     // ========================================================================
-    EndTime := Now;
-    RowsPerSec := RecCount / ((EndTime - StartTime) * 24 * 60 * 60);
+    FThread := TCopyDataThread.Create(
+      IBDatabase1, IBTransaction1,
+      FTableName, edtExtTableName.Text, FieldList,
+      BatchSize, RecCount
+    );
+    try
+      FThread.OnProgress := @ThreadProgress;
+      FThread.OnComplete := @ThreadComplete;
+      FThread.OnError := @ThreadError;
+      FThread.Start;
 
-    ProgressBar.Position := ProgressBar.Max;
-    ProgressLabel.Caption := Format('Copy complete. %d rows (%.0f rows/sec).', [RecCount, RowsPerSec]);
+      // Warten bis Thread fertig ODER Fenster geschlossen
+      while (not FThread.Finished) and (FProgressForm.Visible) do
+      begin
+        Application.ProcessMessages;
+        Sleep(50);
+      end;
 
-    MessageDlg(
-      Format('Data copy completed!' + sLineBreak + sLineBreak +
-             'Rows copied: %d' + sLineBreak +
-             'Time: %s' + sLineBreak +
-             'Speed: %.0f rows/sec',
-             [RecCount, FormatDateTime('hh:nn:ss', EndTime - StartTime), RowsPerSec]),
-      mtInformation, [mbOK], 0);
-
+    finally
+      if Assigned(FThread) then
+      begin
+        if not FThread.Finished then
+        begin
+          FThread.Cancelled := True;
+          FThread.WaitFor;
+        end;
+        FThread.Free;
+        FThread := nil;
+      end;
+    end;
   finally
-    ProgressForm.Free;
+    FProgressForm.Free;
+    FProgressForm := nil;
   end;
 end;
 
@@ -399,7 +698,7 @@ begin
 end;
 
 // ============================================================================
-// CloneTableAsExternal (unverändert)
+// CloneTableAsExternal
 // ============================================================================
 procedure TfmCloneToExternalTable.CloneTableAsExternal;
 var
@@ -410,6 +709,7 @@ var
   Line, FieldType, CleanType: string;
   SpacePos: Integer;
   FieldName: string;
+  LastItemIndex: Integer;
 begin
   if not IBDatabase1.Connected then
     Exit;
@@ -435,12 +735,10 @@ begin
       FUsedFields.Clear;
 
       // Problemfelder aus Items entfernen
-      // Problemfelder aus Items entfernen (BLOB, ARRAY, COMPUTED BY, INT128, DECFLOAT)
       for i := Items.Count - 1 downto 0 do
       begin
         Line := Items[i];
 
-        // Typ extrahieren (alles nach erstem Space)
         SpacePos := Pos(' ', Line);
         if SpacePos > 0 then
           FieldType := Trim(Copy(Line, SpacePos + 1, MaxInt))
@@ -457,17 +755,16 @@ begin
         if Pos('(', CleanType) > 0 then
           CleanType := Copy(CleanType, 1, Pos('(', CleanType) - 1);
 
-        // BOOLEAN → SMALLINT konvertieren (nicht löschen!)
+        // BOOLEAN → SMALLINT konvertieren
         if CleanType = 'BOOLEAN' then
         begin
           Items[i] := StringReplace(Items[i], 'BOOLEAN', 'SMALLINT', [rfIgnoreCase]);
-          // Feldname aus Items[i] extrahieren für Warnung
           SpacePos := Pos(' ', Items[i]);
           if SpacePos > 0 then
             FieldName := Copy(Items[i], 1, SpacePos - 1)
           else
             FieldName := Items[i];
-          Warnings.Add('Column "' + FieldName + '" is BOOLEAN - converted to SMALLINT (0=false, 1=true).');
+          Warnings.Add('-- Column "' + FieldName + '" is BOOLEAN - converted to SMALLINT (0=false, 1=true).');
         end
 
         // BLOB → ignorieren
@@ -510,6 +807,18 @@ begin
         Exit;
       end;
 
+      // ============================================================
+      // LETZTES KOMMA ENTFERNEN
+      // ============================================================
+      if Items.Count > 0 then
+      begin
+        LastItemIndex := Items.Count - 1;
+        Line := Items[LastItemIndex];
+        // Letztes Komma entfernen (falls vorhanden)
+        if (Length(Line) > 0) and (Line[Length(Line)] = ',') then
+          Items[LastItemIndex] := Copy(Line, 1, Length(Line) - 1);
+      end;
+
       // SQL generieren
       SQL := 'CREATE TABLE ' + edtExtTableName.Text +
              ' EXTERNAL FILE ''' + edtExternalFileName.Text + ''' (' + sLineBreak;
@@ -541,3 +850,4 @@ begin
 end;
 
 end.
+
