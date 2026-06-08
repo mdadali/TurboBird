@@ -9,55 +9,11 @@ uses
   IBQuery, SynEdit, SynHighlighterSQL, ComCtrls, ExtCtrls,
 
   turbocommon,
-  fsimpleobjextractor;
+  fsimpleobjextractor,
+  uCopyTable;
 
 
 type
-  TCopyDataThread = class(TThread)
-  private
-    FDatabase: TIBDatabase;
-    FTransaction: TIBTransaction;
-    FTableName: string;
-    FExtTableName: string;
-    FFieldList: string;
-    FBatchSize: Integer;
-    FRecCount: Integer;
-    FFromRow: Integer;
-    FToRow: Integer;
-    FStartTime: TDateTime;
-    FEndTime: TDateTime;
-    FCopiedRows: Integer;
-    FRowsPerSec: Double;
-    FErrorMessage: string;
-
-    // Für Synchronisation mit GUI
-    FOnProgress: TNotifyEvent;
-    FOnComplete: TNotifyEvent;
-    FOnError: TNotifyEvent;
-
-    procedure DoProgress;
-    procedure DoComplete;
-    procedure DoError;
-  protected
-    procedure Execute; override;
-  public
-    Cancelled: Boolean;
-
-    constructor Create(ADatabase: TIBDatabase; ATransaction: TIBTransaction;
-      const ATableName, AExtTableName, AFieldList: string;
-      ABatchSize, ARecCount, AFromRow: Integer);
-
-    property CopiedRows: Integer read FCopiedRows;
-    property RowsPerSec: Double read FRowsPerSec;
-    property StartTime: TDateTime read FStartTime;
-    property EndTime: TDateTime read FEndTime;
-    property ErrorMessage: string read FErrorMessage;
-
-    property OnProgress: TNotifyEvent read FOnProgress write FOnProgress;
-    property OnComplete: TNotifyEvent read FOnComplete write FOnComplete;
-    property OnError: TNotifyEvent read FOnError write FOnError;
-  end;
-
   { TfmCloneToExternalTable }
 
   TfmCloneToExternalTable = class(TForm)
@@ -97,7 +53,6 @@ type
     procedure btnResetClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
-    procedure Label4Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
   private
     FDBIndex: integer;
@@ -105,23 +60,11 @@ type
     FUsedFields: TStringList;
     FUsedFieldNames: TStringList;
 
-    FThread: TCopyDataThread;
-    FProgressForm: TForm;
-    FProgressLabel, FlblElapsed: TLabel;
-    FProgressBar: TProgressBar;
-    FBtnCancel: TButton;
-
-    procedure ThreadProgress(Sender: TObject);
-    procedure ThreadComplete(Sender: TObject);
-    procedure ThreadError(Sender: TObject);
-    procedure CancelButtonClick(Sender: TObject);
-
     procedure CloneTableAsExternal;
     procedure GenerateInsertQuery;
     procedure CopyDataWithProgress;
     function ExternalTableExists: Boolean;
     function ExternalFileExists: Boolean;
-    procedure ProgressFormClose(Sender: TObject; var CloseAction: TCloseAction);
   public
     procedure Init(const ATableName: string; ADBIndex: Integer);
   end;
@@ -133,189 +76,7 @@ implementation
 
 {$R *.lfm}
 
-{ TCopyDataThread }
-
-constructor TCopyDataThread.Create(ADatabase: TIBDatabase; ATransaction: TIBTransaction;
-  const ATableName, AExtTableName, AFieldList: string;
-  ABatchSize, ARecCount, AFromRow: Integer);
-begin
-  inherited Create(True);
-  FreeOnTerminate := False;
-
-  FDatabase := ADatabase;
-  FTransaction := ATransaction;
-  FTableName := ATableName;
-  FExtTableName := AExtTableName;
-  FFieldList := AFieldList;
-  FBatchSize := ABatchSize;
-  FRecCount := ARecCount;
-  FFromRow := AFromRow;
-
-  FCopiedRows := 0;
-  Cancelled := False;
-end;
-
-procedure TCopyDataThread.Execute;
-var
-  Query: TIBQuery;
-  BatchCount, BatchIndex: Integer;
-  FromRow, ToRow: Integer;
-  BatchRows: Integer;
-begin
-  try
-    Query := TIBQuery.Create(nil);
-    try
-      Query.Database := FDatabase;
-      Query.Transaction := FTransaction;
-
-      BatchCount := (FRecCount + FBatchSize - 1) div FBatchSize;
-
-      FStartTime := Now;
-
-      for BatchIndex := 0 to BatchCount - 1 do
-      begin
-        if Cancelled then
-          Break;
-
-        FromRow := FFromRow + (BatchIndex * FBatchSize);
-        ToRow := FromRow + FBatchSize - 1;
-        if ToRow > (FFromRow + FRecCount - 1) then
-          ToRow := FFromRow + FRecCount - 1;
-
-        BatchRows := ToRow - FromRow + 1;
-
-        Query.Close;
-        Query.SQL.Text :=
-          'INSERT INTO ' + FExtTableName + ' (' + FFieldList + ')' + sLineBreak +
-          'SELECT FIRST ' + IntToStr(BatchRows) +
-          ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
-          FFieldList + sLineBreak +
-          'FROM ' + FTableName;
-
-        if not FTransaction.InTransaction then
-          FTransaction.StartTransaction;
-
-        Query.ExecSQL;
-        FTransaction.CommitRetaining;
-
-        FCopiedRows := FCopiedRows + BatchRows;  // Aufaddieren!
-
-        Synchronize(@DoProgress);
-      end;
-
-      if not Cancelled then
-        FTransaction.Commit;
-
-      FEndTime := Now;
-      if FEndTime > FStartTime then
-        FRowsPerSec := FCopiedRows / ((FEndTime - FStartTime) * 24 * 60 * 60)
-      else
-        FRowsPerSec := 0;
-
-    finally
-      Query.Free;
-    end;
-
-    Synchronize(@DoComplete);
-
-  except
-    on E: Exception do
-    begin
-      FErrorMessage := E.Message;
-      Synchronize(@DoError);
-    end;
-  end;
-end;
-
-procedure TCopyDataThread.DoProgress;
-begin
-  if Assigned(FOnProgress) then
-    FOnProgress(Self);
-end;
-
-procedure TCopyDataThread.DoComplete;
-begin
-  if Assigned(FOnComplete) then
-    FOnComplete(Self);
-end;
-
-procedure TCopyDataThread.DoError;
-begin
-  if Assigned(FOnError) then
-    FOnError(Self);
-end;
-
 { TfmCloneToExternalTable }
-
-procedure TfmCloneToExternalTable.ProgressFormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
-begin
-  if Assigned(FThread) and (not FThread.Finished) then
-  begin
-    FThread.Cancelled := True;
-    CloseAction := caNone;  // Fenster noch nicht schließen – Thread läuft noch
-  end
-  else
-    CloseAction := caFree;
-end;
-
-procedure TfmCloneToExternalTable.ThreadProgress(Sender: TObject);
-begin
-  if Assigned(FProgressBar) and Assigned(FThread) then
-  begin
-    FProgressBar.Position := FThread.CopiedRows;
-    FProgressLabel.Caption := Format('Copied %d of %d rows...',
-      [FThread.CopiedRows, FProgressBar.Max]);
-    FlblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss',
-      Now - FThread.StartTime);
-    Application.ProcessMessages;
-  end;
-end;
-
-procedure TfmCloneToExternalTable.ThreadComplete(Sender: TObject);
-var
-  StatusStr: string;
-  Msg: string;
-begin
-  // Progress-Fenster schließen
-  FProgressForm.ModalResult := mrOK;
-  Application.ProcessMessages;
-  Sleep(100);
-
-  if FThread.Cancelled then
-    StatusStr := 'cancelled'
-  else
-    StatusStr := 'completed';
-
-  Msg := Format('Data copy %s!' + sLineBreak + sLineBreak +
-                'Rows copied: %d' + sLineBreak +
-                'Time: %s' + sLineBreak +
-                'Speed: %.0f rows/sec',
-                [StatusStr, FThread.CopiedRows,
-                 FormatDateTime('hh:nn:ss', FThread.EndTime - FThread.StartTime),
-                 FThread.RowsPerSec]);
-
-  ShowMessage(Msg);
-end;
-
-procedure TfmCloneToExternalTable.ThreadError(Sender: TObject);
-begin
-  FProgressForm.ModalResult := mrOK;
-  Application.ProcessMessages;
-  Sleep(100);
-
-  ShowMessage('Data copy failed:' + sLineBreak + FThread.ErrorMessage);
-end;
-
-procedure TfmCloneToExternalTable.CancelButtonClick(Sender: TObject);
-begin
-  if Assigned(FThread) then
-  begin
-    FThread.Cancelled := True;
-    FBtnCancel.Enabled := False;
-    FBtnCancel.Caption := 'Cancelling...';
-  end;
-end;
 
 procedure TfmCloneToExternalTable.FormCreate(Sender: TObject);
 begin
@@ -323,11 +84,6 @@ begin
   FUsedFieldNames := TStringList.Create;
   SaveDialog1.Filter := 'External Table Files|*.dat;*.txt;*.csv|All Files|*.*';
   SaveDialog1.DefaultExt := 'dat';
-end;
-
-procedure TfmCloneToExternalTable.Label4Click(Sender: TObject);
-begin
-
 end;
 
 procedure TfmCloneToExternalTable.rbAllRowsChange(Sender: TObject);
@@ -582,164 +338,46 @@ end;
 
 procedure TfmCloneToExternalTable.CopyDataWithProgress;
 var
-  BatchSize: Integer;
-  RecCount: Integer;
+  Fields: array of TFieldTransform;
+  CopyEngine: TCopyTable;
+  i: Integer;
   FromRow: Integer;
   ToRow: Integer;
-  FieldList: string;
-  CountQuery: TIBQuery;
-  i: Integer;
 begin
-  BatchSize := StrToIntDef(edtBatchSize.Text, 500000);
-
-  // Feldliste
-  FieldList := '';
+  // Felder aus FUsedFieldNames bauen
+  SetLength(Fields, FUsedFieldNames.Count);
   for i := 0 to FUsedFieldNames.Count - 1 do
   begin
-    if FieldList <> '' then
-      FieldList := FieldList + ', ';
-    FieldList := FieldList + FUsedFieldNames[i];
+    Fields[i].SourceField := FUsedFieldNames[i];
+    Fields[i].DestField := FUsedFieldNames[i];
+    Fields[i].Formula := '';
+    Fields[i].CopyField := True;
   end;
 
-  // ========================================================================
-  // Progress-Fenster EINMAL anzeigen
-  // ========================================================================
-  FProgressForm := TForm.Create(nil);
+  // From/To je nach Auswahl
+  if rbRange.Checked then
+  begin
+    FromRow := StrToIntDef(edtFrom.Text, 1);
+    ToRow := StrToIntDef(edtTo.Text, 0);
+  end
+  else
+  begin
+    FromRow := 1;
+    ToRow := 0;
+  end;
+
+  // Alles an TCopyTable delegieren!
+  CopyEngine := TCopyTable.Create(
+    FDBIndex, FDBIndex,
+    FTableName, edtExtTableName.Text,
+    Fields,
+    StrToIntDef(edtBatchSize.Text, 500000),
+    FromRow, ToRow
+  );
   try
-    FProgressForm.FormStyle := fsNormal;
-    FProgressForm.Caption := 'Copying data...';
-    FProgressForm.Width := 520;
-    FProgressForm.Height := 230;
-    FProgressForm.Position := poScreenCenter;
-    FProgressForm.BorderStyle := bsDialog;
-    FProgressForm.OnClose := @ProgressFormClose;
-
-    FProgressLabel := TLabel.Create(FProgressForm);
-    FProgressLabel.Parent := FProgressForm;
-    FProgressLabel.Left := 16;
-    FProgressLabel.Top := 16;
-    FProgressLabel.Caption := 'Please wait, counting records...';
-    FProgressLabel.Width := 460;
-
-    FProgressBar := TProgressBar.Create(FProgressForm);
-    FProgressBar.Parent := FProgressForm;
-    FProgressBar.Left := 16;
-    FProgressBar.Top := 45;
-    FProgressBar.Width := 470;
-    FProgressBar.Height := 20;
-    FProgressBar.Min := 0;
-    FProgressBar.Max := 100;
-    FProgressBar.Style := pbstMarquee;
-
-    FlblElapsed := TLabel.Create(FProgressForm);
-    FlblElapsed.Parent := FProgressForm;
-    FlblElapsed.Left := 16;
-    FlblElapsed.Top := 80;
-
-    FBtnCancel := TButton.Create(FProgressForm);
-    FBtnCancel.Parent := FProgressForm;
-    FBtnCancel.Caption := 'Cancel';
-    FBtnCancel.Left := 200;
-    FBtnCancel.Top := 120;
-    FBtnCancel.Width := 100;
-    FBtnCancel.Enabled := False;
-    FBtnCancel.OnClick := @CancelButtonClick;
-
-    FProgressForm.Show;
-    Application.ProcessMessages;
-
-    // ========================================================================
-    // Record Count ermitteln
-    // ========================================================================
-    CountQuery := TIBQuery.Create(nil);
-    try
-      CountQuery.Database := IBDatabase1;
-      CountQuery.Transaction := IBTransaction1;
-      CountQuery.AllowAutoActivateTransaction := True;
-      CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + FTableName;
-      CountQuery.Open;
-      RecCount := CountQuery.Fields[0].AsInteger;
-      CountQuery.Close;
-    finally
-      CountQuery.Free;
-    end;
-
-    if RecCount = 0 then
-    begin
-      FProgressForm.Close;
-      ShowMessage('Source table is empty. Nothing to copy.');
-      Exit;
-    end;
-
-    // ========================================================================
-    // From/To je nach Auswahl
-    // ========================================================================
-    if rbRange.Checked then
-    begin
-      FromRow := StrToIntDef(edtFrom.Text, 1);
-      ToRow := StrToIntDef(edtTo.Text, RecCount);
-      if FromRow < 1 then
-        FromRow := 1;
-      if ToRow > RecCount then
-        ToRow := RecCount;
-      if FromRow > ToRow then
-      begin
-        FProgressForm.Close;
-        ShowMessage('"From" must be less than or equal to "To".');
-        Exit;
-      end;
-      RecCount := ToRow - FromRow + 1;
-    end
-    else
-    begin
-      FromRow := 1;
-    end;
-
-    // ========================================================================
-    // ProgressBar konfigurieren
-    // ========================================================================
-    FProgressBar.Style := pbstNormal;
-    FProgressBar.Max := RecCount;
-    FProgressBar.Position := 0;
-    FProgressLabel.Caption := Format('Total Records: %d', [RecCount]);
-    FBtnCancel.Enabled := True;
-    Application.ProcessMessages;
-
-    // ========================================================================
-    // Thread starten
-    // ========================================================================
-    FThread := TCopyDataThread.Create(
-      IBDatabase1, IBTransaction1,
-      FTableName, edtExtTableName.Text, FieldList,
-      BatchSize, RecCount, FromRow
-    );
-    try
-      FThread.OnProgress := @ThreadProgress;
-      FThread.OnComplete := @ThreadComplete;
-      FThread.OnError := @ThreadError;
-      FThread.Start;
-
-      while (not FThread.Finished) and (FProgressForm.Visible) do
-      begin
-        Application.ProcessMessages;
-        Sleep(50);
-      end;
-
-    finally
-      if Assigned(FThread) then
-      begin
-        if not FThread.Finished then
-        begin
-          FThread.Cancelled := True;
-          FThread.WaitFor;
-        end;
-        FThread.Free;
-        FThread := nil;
-      end;
-    end;
+    CopyEngine.Execute;
   finally
-    FProgressForm.Free;
-    FProgressForm := nil;
+    CopyEngine.Free;
   end;
 end;
 

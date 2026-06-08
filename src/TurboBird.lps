@@ -5,12 +5,12 @@
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
     <BuildModes Active="x86_64-linux64-gtk2-debug"/>
-    <Units Count="145">
+    <Units Count="147">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="139"/>
-        <CursorPos Y="173"/>
+        <TopLine Value="48"/>
+        <CursorPos X="24" Y="56"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -227,7 +227,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CopyTable"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="16"/>
         <TopLine Value="103"/>
         <CursorPos Y="110"/>
         <UsageCount Value="200"/>
@@ -239,7 +239,7 @@
         <ComponentName Value="fmImportTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="17"/>
         <TopLine Value="112"/>
         <CursorPos X="2" Y="123"/>
         <UsageCount Value="200"/>
@@ -265,7 +265,6 @@
           <Item0 Y="5595" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="ui\createdb\createdb.pas"/>
@@ -274,7 +273,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="125"/>
         <CursorPos X="45" Y="153"/>
         <UsageCount Value="200"/>
@@ -287,7 +286,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="95"/>
         <CursorPos Y="122"/>
         <UsageCount Value="200"/>
@@ -426,8 +425,8 @@
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="818"/>
-        <CursorPos X="44" Y="818"/>
+        <TopLine Value="460"/>
+        <CursorPos X="43" Y="486"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="1645" ID="4"/>
@@ -997,7 +996,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="15"/>
         <TopLine Value="431"/>
         <CursorPos X="26" Y="443"/>
         <UsageCount Value="200"/>
@@ -1009,7 +1008,7 @@
         <ComponentName Value="frmEditTableDataNew"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="323"/>
         <CursorPos X="14" Y="338"/>
         <UsageCount Value="200"/>
@@ -1072,7 +1071,7 @@
       <Unit103>
         <Filename Value="utils\uGenSQLFromCSVDataset.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="17"/>
+        <EditorIndex Value="18"/>
         <TopLine Value="176"/>
         <CursorPos X="99" Y="181"/>
         <UsageCount Value="215"/>
@@ -1206,10 +1205,9 @@
         <ComponentName Value="fmCloneToExternalTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="510"/>
-        <CursorPos X="21" Y="544"/>
+        <TopLine Value="51"/>
+        <CursorPos X="36" Y="63"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1224,7 +1222,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="81"/>
         <CursorPos X="48" Y="96"/>
-        <UsageCount Value="156"/>
+        <UsageCount Value="158"/>
       </Unit117>
       <Unit118>
         <Filename Value="ui\callprocedure\callproc.pas"/>
@@ -1232,7 +1230,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CallProc"/>
-        <EditorIndex Value="18"/>
+        <EditorIndex Value="19"/>
         <CursorPos X="11"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -1442,6 +1440,25 @@
         <CursorPos X="36" Y="2948"/>
         <UsageCount Value="8"/>
       </Unit144>
+      <Unit145>
+        <Filename Value="common\ucopytable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyTable"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="320"/>
+        <CursorPos Y="354"/>
+        <UsageCount Value="22"/>
+        <Loaded Value="True"/>
+      </Unit145>
+      <Unit146>
+        <Filename Value="ui\openquerybuilder\unit1.pas"/>
+        <UnitName Value="Unit1"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="93"/>
+        <CursorPos X="30" Y="103"/>
+        <UsageCount Value="10"/>
+      </Unit146>
     </Units>
     <Debugger>
       <Backend Value="{F437EEEC-1F4C-463D-8FF8-38AA474CF2F8}"/>
@@ -1454,127 +1471,123 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="407" Column="33" TopLine="379"/>
+        <Caret Line="651" Column="18" TopLine="644"/>
       </Position1>
       <Position2>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="412" Column="37" TopLine="384"/>
+        <Caret Line="650" Column="18" TopLine="643"/>
       </Position2>
       <Position3>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="413" Column="40" TopLine="385"/>
+        <Caret Line="649" Column="18" TopLine="642"/>
       </Position3>
       <Position4>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="681" Column="20" TopLine="653"/>
+        <Caret Line="853" Column="45" TopLine="819"/>
       </Position4>
       <Position5>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="211" Column="11" TopLine="207"/>
+        <Caret Line="822" Column="95" TopLine="819"/>
       </Position5>
       <Position6>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="2" Column="8"/>
+        <Caret Line="823" Column="95" TopLine="820"/>
       </Position6>
       <Position7>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="25" Column="20"/>
+        <Caret Line="824" Column="95" TopLine="821"/>
       </Position7>
       <Position8>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="313" Column="41" TopLine="285"/>
+        <Caret Line="825" Column="95" TopLine="822"/>
       </Position8>
       <Position9>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="655" TopLine="621"/>
+        <Caret Line="824" Column="95" TopLine="821"/>
       </Position9>
       <Position10>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="69" TopLine="52"/>
+        <Caret Line="823" Column="95" TopLine="820"/>
       </Position10>
       <Position11>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="822" Column="5" TopLine="789"/>
+        <Caret Line="825" Column="95" TopLine="822"/>
       </Position11>
       <Position12>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="256" Column="37" TopLine="243"/>
+        <Caret Line="826" Column="95" TopLine="823"/>
       </Position12>
       <Position13>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="650" Column="18" TopLine="643"/>
+        <Caret Line="833" Column="95" TopLine="830"/>
       </Position13>
       <Position14>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="651" Column="18" TopLine="644"/>
+        <Caret Line="327" Column="3" TopLine="324"/>
       </Position14>
       <Position15>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="650" Column="18" TopLine="643"/>
+        <Caret Line="289" Column="53" TopLine="258"/>
       </Position15>
       <Position16>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="649" Column="18" TopLine="642"/>
+        <Caret Line="336" Column="43" TopLine="333"/>
       </Position16>
       <Position17>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="853" Column="45" TopLine="819"/>
+        <Caret Line="508" Column="17" TopLine="503"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="822" Column="95" TopLine="819"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="396" Column="10" TopLine="362"/>
       </Position18>
       <Position19>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="823" Column="95" TopLine="820"/>
+        <Caret Line="531" Column="51" TopLine="511"/>
       </Position19>
       <Position20>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="824" Column="95" TopLine="821"/>
+        <Caret Line="604" Column="18" TopLine="604"/>
       </Position20>
       <Position21>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="825" Column="95" TopLine="822"/>
+        <Caret Line="5" Column="16"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="824" Column="95" TopLine="821"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="319" Column="49" TopLine="313"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="823" Column="95" TopLine="820"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="315" Column="17" TopLine="310"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="825" Column="95" TopLine="822"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="2033" Column="69" TopLine="2026"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="826" Column="95" TopLine="823"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="9" Column="34"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="833" Column="95" TopLine="830"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="240" Column="69" TopLine="238"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="327" Column="3" TopLine="324"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="343" TopLine="309"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="289" Column="53" TopLine="258"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="45" Column="41" TopLine="35"/>
       </Position28>
       <Position29>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="336" Column="43" TopLine="333"/>
+        <Caret Line="56" TopLine="37"/>
       </Position29>
-      <Position30>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="508" Column="17" TopLine="503"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

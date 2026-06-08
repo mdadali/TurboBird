@@ -664,7 +664,7 @@
         <PackageName Value="LCL"/>
       </Item32>
     </RequiredPackages>
-    <Units Count="118">
+    <Units Count="119">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1391,6 +1391,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSQLParser"/>
       </Unit117>
+      <Unit118>
+        <Filename Value="common/ucopytable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyTable"/>
+      </Unit118>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
