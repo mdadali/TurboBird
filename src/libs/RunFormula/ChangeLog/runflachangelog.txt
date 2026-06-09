@@ -1,0 +1,29 @@
+//*****************************************************
+//  RunFormula Expression Scripting Engine
+//  ChangeLog
+//  Rev. 3.06.2026
+
+//  Author: Alexander Torubarov
+//  Contact: runfla@yandex.com
+
+//  Copyright (C) 2026 Alexander Torubarov
+//  Licensed under the MIT License.
+//  See the LICENSE file in the project root
+//  or a copy available at https://opensource.org
+//  for full license information.
+//*****************************************************
+
+// TODO - -oRFla.Change -cRev.2026.05.10:
+
+===== Version 0.0 - 9.05.2026
+- First RunFormula release
+
+===== Version 0.1.b - 1.06.2026
+- Changed: Error message structure is updated
+- Changed: In external function parameter Phy is renamed to Dim
+- Changed: Help files are updated
+- Added: Physical dimension handling
+- Changed: Char value is converted to a Variant of type byte
+
+===== Develop branch changes
+- Fixed: Incorrect error position in qtx function

@@ -1,0 +1,744 @@
+//*****************************************************
+//  RunFormula Expression Scripting Engine
+//  RunFormula Help File
+//  Rev. 8.05.2026
+
+//  Author: Alexander Torubarov
+//  Contact: runfla@yandex.com
+
+//  Copyright (C) 2026 Alexander Torubarov
+//  Licensed under the MIT License.
+//  See the LICENSE file in the project root
+//  or a copy available at https://opensource.org
+//  for full license information.
+//*****************************************************
+
+// TODO -oRFla.Help -cRev.2026.05.15:
+
+1. a. Short description.
+
+The RunFormula module is designed for calculating mathematical expressions and physical functions.
+formulas presented in text form, with scripting language support and processing
+physical dimensions.
+
+Supported data types:
+ - integers in decimal, hexadecimal, and binary formats.
+ - floating-point numbers in decimal and scientific notation.
+ - complex numbers and operations on them.
+ - intervals and operations on them.
+ - ASCII strings and characters.
+
+Arithmetic and logical operations: + - * / or and xor not shl (<<) shr ( > > ) mod (%)
+div == <> < <= >= > & (string concatenation) * * (integer exponentiation).
+Variables and their dynamic initialization at runtime are supported via
+an external callback function.
+There is a basic set of built-in functions and the ability to register and use
+additional user-defined functions.
+Execution flow control functions: if () repeat() exit() result() continue() break()
+Ability to declare and then use functions directly in the text
+formulas (subroutines).
+Support for physical dimensions and their control during operations,
+automatic calculation of the result dimension and automatic conversion of values from
+from one system of units to another.
+The define directive is supported.
+Compiles the original formula to bytecode for repeated execution.
+Minimal dependencies (only SysUtils in the basic configuration).
+
+1. b. Integration of RunFormula into the project.
+
+ - Copy all files from the RunFormula directory (runformula. pas and all .inc files)
+in a project or in a separate folder.
+ - Add RunFormula to the uses section of the interface or implementation section.
+For example, like this:
+
+  implementation
+    uses RunFormula;
+
+or, if you use a separate folder:
+
+  implementation
+    uses RunFormula in 'RunFormula/runformula.pas';
+
+alternatively, specify the path to the RunFormula directory in the appropriate compiler parameter.
+
+The easiest way to use RunFormula is to call the RunFlaParse function and pass
+its result is in the RunFlaExecStr or RunFlaExecVrt function. For example:
+
+  ShowMessage( RunFlaExecStr( RunFlaParse('9 * 3') ) ); // отображает 27
+
+The RunFlaParse function compiles the original formula into bytecode for execution by functions
+RunFlaExecStr или RunFlaExecVrt. The result of the RunFlaExecStr function is a string,
+and RunFlaExecVrt is a variable of type Variant.
+See the relevant help sections for more information.
+
+2. Syntax of the formula scripting language.
+2. a. Language format. Comments.
+
+The scripting language uses a free recording format. Spaces, tabs, line breaks
+they are delimited where necessary, but otherwise ignored.
+Spaces are not allowed in identifiers, integers and real numbers, and constructs
+"function (" , "array [" , "unit^order". Case-insensitive characters are ignored, except
+specified cases.
+Comments can be written in curly brackets or after a double slash.
+For example:
+
+ { comment text }
+ // comment text
+
+2. b. Integers.
+
+An integer can be specified in decimal, hexadecimal, or binary form.
+For example:
+
+ X = 12345 // decimal integer
+ X = 0xA12B // hexadecimal integer
+ X = 0a12bH // hexadecimal integer
+ X = 10101b // binary integer
+
+Case-insensitive characters are ignored, except for the 0x prefix.
+When overflow occurs, decimal numbers are converted to real numbers, but for hexadecimal numbers
+and binary numbers overflow is not checked.
+Acceptable ranges of integers:
+
+ -9223372036854775807 ... 9223372036854775807 on 64-bit systems.
+ -2147483647 ... 2147483647 on 32-bit systems.
+ -32767 ... 32767 on 16-bit systems.
+
+Minimum system negative number (-9223372036854775808 in 64-bit,
+-2147483647 on 32-bit, -32768 on 16-bit systems) can be used,
+however, in some arithmetic operations ( + - * * * ), it is considered out of bounds
+range and is converted to a real number.
+The "-number" or "- number " constructs are interpreted as a positive number and unary
+minus (with the corresponding operation priority). If you need to specify exactly
+if it is a negative number, then square brackets should be used. For example:
+
+ X = - 3 ** 2 // result -9
+ X = -10 ** 2 // result -100
+ X = [- 3] ** 2 // result 9
+ X = [-10] ** 2 // result 100
+
+2. c. Real numbers.
+
+A real number can be specified as a decimal number with a dot, or as
+numbers with an order. For example:
+
+  X = 12.34
+  Y = 0.12
+  X = 1E1
+  Y = 0.2e-4
+  Z = 23E+34
+
+As with integers, the "-number" or "- number " constructs are interpreted as
+a positive number and a unary minus sign (with the corresponding operation priority). If
+if you specify a negative number, then use square brackets.
+For example:
+
+ X = - 3.5 ** 2 // result -12.25
+ X = -10. 2E20 ** 2 // result -1. 0404E42
+ X = [- 3.5] ** 2 // result 12.25
+ X = [-10. 2E20] ** 2 // result 1. 0404E42
+
+2. d. Text strings.
+
+The text string can be specified in quotation marks or apostrophes. If the string is set in
+If it is placed in quotation marks, then it can contain apostrophes and vice versa. For example:
+
+  X = '"A"' & "'s'" // result of "A"'s'
+
+An empty string can be set as "", " or the constant None.
+
+2. e. ASCII characters.
+
+An ASCII character can be specified as a string containing this character. In contrast to the string,
+the ASCII character can participate in arithmetic operations as an integer corresponding to
+its code. You can also specify a control character using the "^ " prefix. For example:
+
+ X = "B" - "A" // result 1
+  X = "B" & "A" // result of BA
+ X = "One" & "^M " & "^J " & "Two" / / output One and Two in 2 lines
+
+2. f. Constants.
+
+There are predefined constants:
+
+ True // -1 integer
+ False / / 0 integer
+ None / / empty string, no value specified
+  Pi      // 3.14159265358979323846
+  E       // 2.71828182845904523536
+ J / / imaginary 1
+
+2. g. Complex numbers.
+
+To specify a complex number, you can use square brackets, an expression with
+the constant j is an imaginary 1, or the built-in function cplex(R, I). For example:
+
+ X = [(-12.1, - 23.3)] // result (-12.1,-23.3)
+ X = 4+5*j / / result (4,5)
+ X = cplex(2, 3) / / result (2,3)
+
+2. h. Intervals.
+
+The interval can be specified using square brackets or the built-in range(L, R) function.
+For example:
+
+ X = [-1.1: 23] // result [-1.1: 23]
+ X = range(19, 23.5) / / result [19:23.5]
+
+The left border of the interval must be less than or equal to the right one.
+
+2. i. Square brackets.
+
+Any data type (except for an array) can be specified using square brackets.
+For example:
+
+  X = [""] // empty string, None
+  X = ["M"] + ['^C']                                 // ASCII characters
+  X = ["qwerty"] & ['asdfg']                         // strings, not recommended
+ X = [-0x10] + [- 20.3 ] // Integers and real numbers
+ X = [ ( - 12.1 ,-12.45)] // complex number
+  X = [ - 100:25 ]-[ "^A" : "^Z" ]+[-"A":200.4] // intervals
+
+2. j. Operator brackets.
+
+One or more expressions can be enclosed in parentheses. Expressions in parentheses
+calculated sequentially from left to right. The result of calculating the "brackets" is the result of
+the last expression. Expressions in parentheses are separated by a comma or semicolon.
+For example:
+
+ 5 * (4-7) / / result -15
+ 5 * ( 21 , 21 + 1; 21 + 2 ) // result 115
+ 5 * ( 21 + 1; 21 + 2; 100 ) // result 500
+
+Parentheses with expressions can be nested in each other. It is allowed to put a comma or
+a semicolon before the closing parenthesis.
+Instead of parentheses, you can use the keywords "do" and "end"for the same purpose.
+For example:
+
+  do
+    X = 10;
+    Y = 20;
+    X + Y
+  end
+
+If a group of expressions was opened with a parenthesis, then it must also be closed with a parenthesis
+if the group was opened with the word "do", then it should be closed.
+the word "end".
+
+3. a. Mathematical operations.
+
+The table lists supported mathematical operations for different types of values.
+
+                          Integer Real Complex Interval ASCII Character String
+
+== <> < > <= >=              +     +      +       +       as integer       +
++ - *                        +     +      +       +       as integer       -
+/                           real   +      +       +          real          -
+or and xor div mod (%)
+shl (<<) shr ( > > ) not     +     -      -       -       as integer       -
+- unary                      +     +      +       +       as integer       -
+**                           +     +      +       +       as integer       -
+&                         string string string string         +            +
+
+** - integer exponentiation operation (positive or negative)
+& - string concatenation operation
+If integers overflow in + - * ** - (unary) operations, the result is converted
+to a real type.
+For intervals, the operations == and <> function as in and not in, the operations < > <= >=
+compare intervals by midpoints
+
+3. b. Priority of operations.
+
+In an expression, mathematical operations are performed according to the following priority:
+
+ maximum:            **                       // integer exponentiation
+                     - not // unary
+                     * / shl (<<) shr (>>) div mod (%)
+                     + -
+                     &                        // combining strings
+                     == <> < > <= >=
+                     and
+                     or xor
+ minimum:            =                        // assignment
+
+Assignment (=) and exponentiation (**) operations are right-associative
+and are executed sequentially from right to left.
+
+3. c. Type conversion.
+
+The value type can be converted according to the following table. It also includes
+the Variant type used for passing values to external functions is specified.
+
+                                 Integer Real Complex Interval ASCII Character String Variant
+
+Integer -->                         +     +     X+0*j   [X:X]        -           +       +
+Real -->                            -     +     X+0*j   [X:X]        -           +       +
+Complex -- >                        -     -      +        -          -         (R, I)    R
+Interval -->                        -  L+R)/2  (L+R)/2+0*j  +        -         [L:R]  (L+R)/2
+ASCII character -->                 +     +     X+0*j   [X:X]        +           +      byte
+String -->                          -     -      -        -          -           +       +
+Variant -->                         +     +      -        -     if string[1]     +       -
+
+4. a. Variables and assignment operation.
+
+Expressions can use variables. Letters are allowed in the variable name
+Latin alphabet, numbers, dots (except for the first character), underscores.
+The value of a variable is set using the assignment operation:
+
+ <variable> = <expression>
+
+Before being used in an expression, the variable must be defined using the operator
+assignments. The result of the assignment operation is equal to the assigned value. For example:
+
+ X=2+4 // result 6
+ abc=18/3 / / result 6
+  ( X=4, Y=6.1; Z=X+Y ) / / result 10.1
+
+Since the assignment operation is right-associative, it is allowed in a single expression
+assigning values to multiple variables at once. For example:
+
+ X = Y = Z = 3, X * Y * Z / / result 27
+
+4. b. Initializing variables during evaluation.
+
+The value of a variable can be assigned during formula calculation using the inverse method.
+calling an external global function of the following type:
+
+  function(constref Name:string; out Dim:SizeInt; out Save:boolean):Variant;
+
+Function Parameters:
+ Name - name (in lowercase) of the requested variable.
+ Dim - encoded dimension of the variable value (0-if not used).
+ Save = True - save the value of the variable in the global variable list and then on
+ don't request it.
+
+For example, let's define a global function like this:
+
+  function MyRunFlaVar(constref Name:string; out Dim:SizeInt; out Save:boolean):Variant;
+  begin
+    Result:=InputBox('', 'Get value for variable '+Name, '');
+    Dim:=0;
+    Save:=false;
+  end;
+
+We specify its address in the RunFlaExecStr/RunFlaExecVrt function:
+
+  ShowMessage( RunFlaExecStr(RunFlaParse('A & A'), Error, @MyRunFlaVar) );
+
+For more information about the Error parameter, see the Error Handling help section.
+The result will display a string consisting of two combined entered characters.
+a user of strings.
+
+Attention! The Name parameter has a valid value only during function execution
+RunFlaExecStr/RunFlaExecVrt. If the Name value is also required after, then it should be
+copy it to a new line, for example, like this:
+
+  S:=Name;
+  UniqueString(S);
+
+or
+
+  S:=StrPas(PChar(Name));
+
+5. Using dimensions of physical quantities.
+5. a. Units of measurement.
+
+The value can be set to a physical dimension consisting of basic units of measurement.
+The range of orders of magnitude of the base units is from -127 to 127. On 64-bit systems
+up to 8 base units are allowed, up to 4 in 32-bit versions, and up to 2 in 16 - bit versions.
+There can also be an unlimited number of values derived from them.
+
+5. b. Dimension syntax.
+
+The dimensions in the formula are set in back quotes. For dimensions, units of measurement,
+prefixes are case-sensitive. The order of units is set after the " ^ " character without
+spaces. The order of "^1 " may not be specified. The negative order is set by specifying
+units with a positive order after the "/ " symbol. For example:
+
+  10`m`; 10`m^3`; 10`m/s`; 10 `m / s^2`; 10 `1/m^2`; 10 `m^2 kg`
+
+Units of measurement can have prefixes (without spaces). For example:
+
+ 10'm` + 100'cm ' / / result 11'm`
+ 10'm^2 '+ 1000'mm^2 ' / / result 10.001'm^2`
+ 10`cm/us^2` + 100`m/ms^2` // result 100.1'Gm/s^2`
+
+5. c. Assigning dimensions.
+
+The dimension can be assigned to an integer, a real number, a complex number, an interval,
+the ASCII character. The dimension can be assigned to a number directly in the formula, or to the value of
+a variable in an expression (but not the variable itself), an expression, or the result of a function.
+For example:
+
+  X = 10 `m/s` + 20`mm/us`                   // result 20.01'km / s`
+ X = 10; X'm '+ X'mm ' / / result 10.01'm`
+  X = 10; range(X, X+1)'mm' +1'mm` / / result [0.011:0.012]`m`
+  X = 10; (X *2)`mm` + (X+2)`cm`             // 140`mm`
+
+When assigning a dimension, the value is converted according to
+parameters of change units, their order, and prefixes. Re-assigning a dimension
+not allowed.
+When using square brackets, the dimension can be specified as inside parentheses
+(recommended), and outside. For example:
+
+ [(10,20) `m/s`] == [(10,20)]`m/s`
+ ["^A":"^C" `km/h`] == [1:3] `km/h`
+
+6. Error handling.
+6. a. The TRunFlaError structure.
+
+To get information about an error during the RunFlaParse and
+RunFlaExecStr / RunFlaExecVrt is the TRunFlaError structure defined in the file
+runflaerr.inc. In it, Code is the error code from the TRunFlaErrCode list, and Position is the position
+errors starting from 0 in the original formula. Value - result of the last operation in the form
+a text string that is filled in by the RunFlaExecStr/RunFlaExecVrt functions.
+A variable with the TRunFlaError type must be passed to the RunFlaParse function and
+RunFlaExecStr/RunFlaExecVrt. The RunFlaParse function will populate this structure with information
+about an error. If there is no error, then Code will be assigned the code OK, Position-0.
+The RunFlaExecStr/RunFlaExecVrt functions populate the TRunFlaError structure, provided that
+it does not contain information about the error (Code = OK).
+
+6. b. Global variable RunFlaErrCode.
+
+Error code during execution of the RunFlaParse, RunFlaExecStr, and RunFlaExecVrt functions
+and RunFlaFuncReg is also written to the global variable RunFlaErrCode, but provided that
+that it didn't contain any information about the error before (RunFlaErrCode = OK).
+
+6. c. Results of the RunFlaParse and RunFlaExecStr/RunFlaExecVrt functions on error.
+
+If an error occurs in the RunFlaParse and RunFlaExecStr/RunFlaExecVrt functions, use them
+the result is an empty string. When passing an empty string as an Fla parameter
+in the RunFlaParse and RunFlaExecStr/RunFlaExecVrt functions, their result will also be empty.
+a string, but the error does not occur in this case.
+Note: Giving a non-empty, correct, but not containing formula parameter Fla in
+the RunFlaParse function (for example, containing only a comment) equivalent to
+passing the None constant (empty string).
+
+6. d. Error generation by the user.
+
+In functions for querying the value of a variable (TRunFlaVar) and additional functions defined by
+by the user (TRunFlaFunc), it is possible to interrupt the calculation and generate an error with
+a code from the TRunFlaErrCode list. To do this, use the RunFlaRaise procedure. For example:
+
+  function MySumFunc(const ParamCount:SizeInt; out Dim:SizeInt; Context:pointer):Variant;
+  begin
+ if ParamCount<>2 then RunFlaRaise(ParamNumber); / / checking the number of parameters
+    Dim:=0;
+    Result:=RunFlaParam(0-ParamCount, Context)+RunFlaParam(1-ParamCount, Context);
+  end;
+
+6. e. Text error message.
+
+To convert the error code to a text message, use the RunFlaErrorMsg list.
+defined in the runflamsg.inc file. For example:
+
+  procedure TForm1.ExecButtonClick(Sender: TObject);
+  var Error : TRunFlaError;
+  begin
+    ShowMessage( RunFlaExecStr(RunFlaParse('9 * 3x', Error), Error) );
+    ShowMessage( RunFlaErrorMsg[Error.Code].ErrMsg + ' at: ' + IntToStr( Error.Position ) +
+      ' "'+Error.Value+'"');
+  end;
+
+This list and file can be replaced by the user.
+
+6. f. It is recommended to disable exception generation in MemGet
+
+7. Functions.
+7. a. Predefined functions.
+
+RunFormula has a set of predefined functions. All functions, except for the specified ones
+in some cases, they support all valid parameter types.
+
+ result ([result]) - interrupts script execution and returns the value as
+the result. If no value is set, then None
+
+ exit ([result]) - early exit from the function with the specified result. If the result is
+if not set, then None. If in the global block, then exit the script.
+
+ break ([value]) - early exit from the loop
+
+ continue () - early iteration of the loop
+
+ if(<condition>, <value 1> [, value 2]) - if the condition is met, it returns
+value 1, if not, then value 2, if set
+
+ repeat(<condition>, <value>) - repeats the value until the condition is met
+
+ type (<argument>) - returns an integer corresponding to the argument type
+
+ re (<complex argument>) - returns the real part of the complex argument
+
+ im (<complex argument>) - returns the imaginary part of the complex argument
+
+ cplex (<real part>, < imaginary part>) - forms a complex value
+
+ left (<interval>) - returns the left border of the interval
+
+ right (<interval>) - returns the right border of the interval
+
+ range (<left border>, <right border>) - forms a value of the interval type. Left border
+must be less than or equal to the right one
+
+ frac (<argument>) - returns the fractional part of a valid argument
+
+ int (<argument>) - returns the fractional part of a valid argument as a real number
+
+ trunc (<argument>) - truncates a valid argument to an integer
+
+ sign (<argument>) - returns -1 0 +1 according to the sign of the argument
+
+ length (<string>) - returns the length of the string
+
+ string (<argument>) - converts an argument to a string, equivalent to <argument> & ""
+
+ value (<string>) - converts a string to a numeric value
+
+ exp (<argument>) - calculates the exponent from the argument
+
+ ln (<argument>) - calculates the natural logarithm of the argument
+
+ sin (<argument>) - calculates the sine of the argument
+
+ cos (<argument>) - calculates the cosine of the argument
+
+ sqrt (<argument>) - calculates the square root of the argument
+
+ arctan (<argument>) - calculates the arctangent of the argument
+
+ round (<argument>) - rounds the argument. For complex numbers, rounding is performed in polar coordinates.
+in coordinates
+
+ abs (<argument>) - returns the absolute value of the argument
+
+ char(<argument>) - converts the argument to the Char type
+
+ compare (<argument 1>, <argument 2>) - compares arguments, returns -1 0 +1
+
+ match((<argument 1>, <argument 2>) - compares the dimensions of arguments, returns
+true or false
+
+ qty (<argument>, <string>) - assigns the dimension specified by the string
+
+ convert (<argument>, <string>) - converts the argument to a dimensionless value with
+by transformation according to the specified dimension
+
+7. b. Custom functions.
+
+You can register and use additional user-defined functions.
+The custom function must be global and have the following header:
+
+  function MyFunc(const ParamCount:SizeInt; out Dim:SizeInt; Context:pointer):Variant;
+
+ParamCount - the number of parameters passed.
+Dim - encoded dimension of the variable value (0-if not used).
+Context-a pointer required to get the parameter values.
+The result type of a custom function is Variant.
+
+7. c. Registering a custom function.
+
+The custom function must be registered using the RunFlaFuncReg function.
+In the RunFlaFuncReg function, Name is a string with the function name, always in empty characters.
+Func-pointer to a custom function. If a registration error occurs, the function
+RunFlaFuncReg returns an error code from the TRunFlaErrCode list, or OK if there is no error.
+Also, RunFlaFuncReg will enter the error code in the global variable RunFlaErrCode, if previously
+there was no other error code in it.
+Registration is required once after starting the program before calling the RunFlaParse function
+(and, respectively, RunFlaExecStr/RunFlaExecVrt). Multiple registration is allowed,
+registration with a function address change and overlap of predefined functions.
+In this case, RunFlaFuncReg returns the error code FuncExist, but the information will be changed.
+
+7. d. Getting parameter values.
+
+To get parameter values for a custom function, use the RunFlaParam function.
+In it, Affset is calculated as <0-based number of the required parameter> - ParamCount, Context
+must be passed from the header of the custom function.
+Note: the value of the parameter (even in the case of a predefined function) is calculated by
+only when requesting it inside the function itself.
+
+7. e. Example of a custom function.
+
+  function MyIFFunc(const ParamCount:SizeInt; out Dim:SizeInt; Context:pointer):Variant;
+  begin
+ if ParamCount<>3 then RunFlaRaise(ParamNumber); / / checking the number of parameters
+    if RunFlaParam(-3, Dim, Context)>0 / / testing the first parameter
+      then Result:=RunFlaParam(-2, Dim, Context)             // if >0, return the second one
+      else Result:=RunFlaParam(-1, Dim, Context); // if not, then the third one
+  end;
+ / / registration with error checking
+  if RunFlaFuncReg('myiffunc', @MyIFFunc)<>OK then ShowMessage('Registration Error');
+
+ now if we enter the formula
+
+  ( X=10, Y=20, MyIfFunc(10, X+10, Y-20) )
+
+ we get the result 20. However, the Y-20 subtraction will not be performed.
+
+8. Functions-subroutines defined in the formula.
+8. a. Definition of the subroutine function.
+
+In a formula, you can use subroutine functions defined directly in the formula itself.
+For example:
+
+  (  func ABC(A, B, C);
+       A+B+C
+     endfunc;
+
+     ABC(10, 20, 30)  )
+
+The subroutine function must be defined before it can be used. A subroutine function can
+can be defined anywhere in the formula where you can specify an expression, including, and
+inside another subroutine function, however, the scope of all subroutine functions -
+global, regardless of where they are defined.
+A subroutine function is defined as:
+
+ func <Name>( <formal parameters via [,;]> )[,;]
+ one or more expressions separated by [,;]
+ the result of a subroutine function is the result of the last expression
+  endfunc
+
+8. b. Local variables in the subroutine function.
+
+The subroutine function creates its own local variable scope. To get the value
+a variable or value assignment is searched hierarchically for a variable
+from a local area to a global one. To create a variable (with the option
+its initialization) in the local area without searching, the Local function is used. For example:
+
+   (  func ABC(A, B, C);
+         local(X, Y=10, Z=A);
+         X=2;
+         X+Y+Z+B+C
+      endfunc;
+
+      ABC(1, 2, 3)   )
+
+Formal variables are also created in the local scope.
+
+8. c. Default parameters.
+
+The parameters can specify a default value, which is used if it is
+not passed during the call. For example:
+
+        (  func ABC(A, B=15, C=34+23);
+              A+B+C
+           endfunc;
+
+           ABC(1)   )
+
+9. Directives.
+9. a. The define directive.
+Define <id> "text" directive-replaces the specified ID with text in the formula.
+ The ID must contain Latin letters, numbers, a period character (except for the first character), and an underscore.
+ Case-insensitive characters are ignored. Before using an identifier in a formula, it must be defined.
+ Identifiers of other definitions can also be used in the substituted text.
+For example:
+
+  define MySum " 2 plus 7 "
+  define plus  ' + '
+ MySum // result 9
+
+10. Run the bytecode.
+
+The result of the RunFlaParse function (bytecode) can be stored, and the function
+RunFlaExecStr/RunFlaExecVrt can be called multiple times with it without prior notice.
+calling RunFlaParse. The following conditions must be met:
+ - user-defined functions must be registered in the same volume and order,
+ which was before the RunFlaParse call
+ - to get information about an error, use the TRunFlaError field.Code and global variable
+ RunFlaErrCode must be initialized as OK.
+ - if the source code of RunFormula has changed, RunFlaParse must be executed again.
+
+11. Predefined units of measurement.
+
+The runflaunits. inc file defines the units of measurement that are available in the module by default.
+
+// Electromagnetics
+  'W'         // Power (Watt)
+  'C'         // Charge (Coulomb)
+  'F'         // Capacitance (Farad)
+  'H'         // Inductance (Henry)
+  'Ohm'       // Resistance (Ohm)
+  'S'         // Conductance (Siemens)
+  'Wb'        // Magnetic Flux (Weber)
+  'T'         // Magnetic Induction (Tesla)
+  'V'         // Voltage (Volt)
+  'Hz'        // Frequency (Hertz)
+  'Wh'        // Watt-hour
+  'Ah'        // Ampere-hour
+
+// Mass volume area
+  'g'         // Metric Gram
+  't'         // Metric Ton
+  'l'         // Liter
+  'ha'        // Hectare
+
+// Mechanics
+  'N'         // Force (Newton)
+  'J'         // Energy (Joule)
+  'Pa'        // Pressure (Pascal)
+  'atm'       // Pressure (Standard Atmosphere)
+  'bar'       // Pressure (bar)
+  'mmHg'      // Pressure (mmHg)
+  'mmH2O'     // Pressure (mmH2O)
+  'kgf'       // Kilogram-force
+  'hp'        // Horsepower
+  'rpm'       // Revolutions per minute
+
+// Optics
+  'lm'        // Luminous Flux (Lumen)
+  'lx'        // Illuminance (Lux)
+
+// Thermo
+  'degC'      // Temperature (Celsius)
+  'cal'       // Calorie
+  'BTU'       // British Thermal Unit
+  'degF'      // Temperature (Fahrenheit)
+
+// Nuclear
+  'eV'        // Electronvolt (eV)
+  'R'         // Roentgen
+  'Sv'        // Equivalent Dose (Sievert)
+  'Ci'        // Curie
+  'Bq'        // Activity (Becquerel)
+  'Gy'        // Absorbed Dose (Gray)
+  'b'         // Cross-section (Barn)
+  'u'         // Unified atomic mass unit
+
+// Speed
+  'km/h'      // Speed (km/h)
+  'mph'       // Miles per hour
+  'kn'        // Knots
+
+// Time
+  'min'       // Minute
+  'h'         // Hour
+  'd'         // Day
+  'wk'        // Week
+  'mo'        // Month
+  'yr'        // Year
+
+// US units
+  'in'        // Inch
+  'ft'        // Foot
+  'yd'        // Yard
+  'mi'        // Mile
+  'nmi'       // Nautical Mile
+  'ac'        // Acre
+  'lb'        // Pound
+  'oz'        // Ounce
+  'ton'       // Short Ton
+  'st'        // Stone
+  'gal'       // Gallon
+  'qt'        // Quart
+  'pt'        // Pint
+  'fl_oz'     // Fluid Ounce
+
+// SI units
+  'A'         // Current (Ampere)
+  'K'         // Temperature (Kelvin)
+  'kg'        // Mass (Kilogram)
+  'm'         // Length (Meter)
+  's'         // Time (Second)
+  'mol'       // Amount of Substance (Mole)
+  'cd'        // Luminous Intensity (Candela)
+

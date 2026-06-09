@@ -344,7 +344,6 @@ var
   FromRow: Integer;
   ToRow: Integer;
 begin
-  // Felder aus FUsedFieldNames bauen
   SetLength(Fields, FUsedFieldNames.Count);
   for i := 0 to FUsedFieldNames.Count - 1 do
   begin
@@ -354,7 +353,17 @@ begin
     Fields[i].CopyField := True;
   end;
 
-  // From/To je nach Auswahl
+  // TEST: Formeln mit %s-Platzhalter (werden in TransformRow automatisch typgerecht ersetzt)
+  {for i := 0 to High(Fields) do
+  begin
+    if SameText(Fields[i].SourceField, 'NAME') then
+      Fields[i].Formula := '$1 + ''_fromFormula'''      // String-Verkettung
+    else if SameText(Fields[i].SourceField, 'QUANTITY') then
+      Fields[i].Formula := '$1 * 2'
+    else if SameText(Fields[i].SourceField, 'CODE') then
+      Fields[i].Formula := 'UpperCase($1)';
+  end;}
+
   if rbRange.Checked then
   begin
     FromRow := StrToIntDef(edtFrom.Text, 1);
@@ -366,7 +375,6 @@ begin
     ToRow := 0;
   end;
 
-  // Alles an TCopyTable delegieren!
   CopyEngine := TCopyTable.Create(
     FDBIndex, FDBIndex,
     FTableName, edtExtTableName.Text,

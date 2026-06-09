@@ -1,0 +1,170 @@
+//*****************************************************
+//  RunFormula Expression Scripting Engine
+//  Examples
+//  Rev. 14.04.2026
+
+//  Author: Alexander Torubarov
+//  Contact: runfla@yandex.com
+
+//  Copyright (C) 2026 Alexander Torubarov
+//  Licensed under the MIT License.
+//  See the LICENSE file in the project root
+//  or a copy available at https://opensource.org
+//  for full license information.
+//*****************************************************
+
+// TODO - -oRFla.Exam -cRev.2026.04.14:Множество Мандельброт
+
+1. Long formula
+
+x = 10.1, y = 14.3, z = 3.4;
+
+Ctrl_D = "^M", Ctrl_A = "^J";
+
+func tan(x);
+  sin(x)/cos(x)
+endfunc;
+
+A = ((x + 1.234) * cos(y - 5.678) / sqrt(z**2 + 1)) + (sin(x * pi) / tan(y / e)) *
+    ln(abs(z) + 0.0001)**2 - (sqrt(x**2 + y**2 + z**2) / (1 + exp(-x))) * (1 / (1 +
+    (1 / (1 + (1 / x)))));
+
+"  -11.841755077030165 = " & Ctrl_D & Ctrl_A & "  " & A
+
+2. Factorial with recursion
+
+A = 10;
+
+func fact(n);
+  if(n < 2, 1, n * fact(n - 1))
+endfunc;
+
+fact(A)
+
+3. Fibonacci with recursion
+
+A = 10;
+
+func f(n);
+  if(n < 2, n, f(n-1) + f(n-2))
+endfunc;
+
+f(A)
+
+4. Double recursion
+
+func funcA(n);
+    
+     func funcB(n);
+       local(val);
+       val = n,
+       if(val < 1, 0, val + funcA(val - 1))
+     endfunc;
+
+  val = n,
+  if(val < 1, 0, val + funcB(val - 1))
+endfunc;
+
+funcA(11)
+
+5. Demo Test
+
+globalSum = 0; // Global counter
+
+func DoRecursive(level, isSecondPhase);
+  local(localVar);
+  localVar = level * 100;
+  globalSum = globalSum + 1; // Increment global variable
+
+  appendresult("ENTER: " & level & " [L=" & localVar & "] [Global=" & globalSum & "]");
+
+  if( isSecondPhase,
+    // SECOND PHASE: 5 to 15
+    if(level < 15,
+       DoRecursive(level + 1, True)
+    ),
+    // FIRST PHASE: 1 to 10
+    if(level < 10,
+       DoRecursive(level + 1, False),
+       DoRecursive(5, True) // Jump to 5
+    )
+  );
+
+  // LOCALITY CHECK ON EXIT
+  appendresult("EXIT: " & level & " [L=" & localVar & "] [Global=" & globalSum & "]");
+endfunc;
+
+// Initial call
+DoRecursive(1, False);
+appendresult("FINAL globalSum: " & globalSum);
+
+6. Testing EXIT
+
+func TestExit(level);
+  local(localVar, received);
+  localVar = level * 10;
+
+  appendresult("ENTER [" & level & "] L=" & localVar);
+
+  if(level == 3,
+    (
+      appendresult("--- Вызываем exit(777) на уровне 3 ---");
+      exit(777)
+    ),
+    0 // Пустой else
+  );
+
+  received = TestExit(level + 1);
+
+  appendresult("BACK  [" & level & "] получил: " & received & " | Моя локальная L=" & localVar);
+
+  exit(received + 1);
+endfunc;
+
+finalRes = TestExit(1);
+appendresult("ИТОГ: " & finalRes);
+
+7. Test REPEAT CONTINUE
+
+func TestLoop(level);
+  local(i, log);
+  i = 0;
+  log = "";
+
+  appendresult("ENTER [" & level & "]");
+
+  repeat(i < 5, (
+    i = i + 1;
+
+    // 1. Тест continue: пропускаем цифру 2
+    if(i == 2, continue(), 0);
+
+    // 2. Тест рекурсии: на i=3 заходим глубже
+    if(level < 2,
+      if(i == 3, TestLoop(level + 1), 0),
+      0
+    );
+
+    // 3. Тест break: на i=4 выходим из цикла
+    if(i == 4, break(), 0);
+
+    // Накапливаем лог, если не сработал continue или break
+    log = log & i & " ";
+  ));
+
+  appendresult("EXIT [" & level & "] i=" & i & " Log=[" & log & "]");
+  log
+endfunc;
+
+appendresult("FINAL: " & TestLoop(1));
+
+8. Complex Power Calculation
+R = 24`Ohm`; L = 0.5`H`; C = 30`uF`; f = 50`Hz`;  U = 220`V`;
+
+w = 2*pi*f;
+Z = R + j*(w*L-1/(w*C));
+Zre = Re(Z); Zim = Im(Z);
+S = U ** 2/cplex(Zre, - Zim)
+
+
+
