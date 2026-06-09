@@ -356,12 +356,16 @@ begin
   // TEST: Formeln mit %s-Platzhalter (werden in TransformRow automatisch typgerecht ersetzt)
   {for i := 0 to High(Fields) do
   begin
-    if SameText(Fields[i].SourceField, 'NAME') then
-      Fields[i].Formula := '$1 + ''_fromFormula'''      // String-Verkettung
-    else if SameText(Fields[i].SourceField, 'QUANTITY') then
-      Fields[i].Formula := '$1 * 2'
-    else if SameText(Fields[i].SourceField, 'CODE') then
-      Fields[i].Formula := 'UpperCase($1)';
+      if SameText(Fields[i].SourceField, 'NAME') then
+        Fields[i].Formula := '$1 || ''_fromFormula'''   // String anhängen
+      else if SameText(Fields[i].SourceField, 'QUANTITY') then
+        Fields[i].Formula := '$1 * 2'                   // Multiplikation
+      else if SameText(Fields[i].SourceField, 'PRICE') then
+        Fields[i].Formula := '$1 * 1.5'                 // 50% Aufschlag
+      else if SameText(Fields[i].SourceField, 'SALARY') then
+        Fields[i].Formula := '$1 + 1000'                // Addition
+      else if SameText(Fields[i].SourceField, 'CODE') then
+        Fields[i].Formula := 'UPPER($1)';               // Großbuchstaben
   end;}
 
   if rbRange.Checked then

@@ -419,7 +419,7 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="460"/>
         <CursorPos X="43" Y="486"/>
         <UsageCount Value="200"/>
@@ -1181,7 +1181,7 @@
         <Filename Value="common\uexternaltable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uExternalTable"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <CursorPos X="45"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -1195,7 +1195,7 @@
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="351"/>
-        <CursorPos X="8" Y="365"/>
+        <CursorPos X="3" Y="370"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1210,16 +1210,15 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="81"/>
         <CursorPos X="48" Y="96"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="165"/>
       </Unit117>
       <Unit118>
         <Filename Value="common\ucopytable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTable"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="198"/>
-        <CursorPos Y="232"/>
-        <UsageCount Value="28"/>
+        <EditorIndex Value="3"/>
+        <CursorPos X="43" Y="14"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit118>
       <Unit119>
@@ -1481,123 +1480,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="362" Column="36" TopLine="346"/>
+        <Caret Line="365" Column="3" TopLine="346"/>
       </Position1>
       <Position2>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="197" Column="54" TopLine="191"/>
+        <Caret Line="9" Column="49"/>
       </Position2>
       <Position3>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="365" Column="3" TopLine="346"/>
+        <Caret Line="327" Column="2" TopLine="327"/>
       </Position3>
       <Position4>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="9" Column="49"/>
+        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
+        <Caret Line="332" Column="41" TopLine="325"/>
       </Position4>
       <Position5>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="327" Column="2" TopLine="327"/>
+        <Caret Line="386" Column="23" TopLine="358"/>
       </Position5>
       <Position6>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="332" Column="41" TopLine="325"/>
+        <Caret Line="133" Column="25" TopLine="116"/>
       </Position6>
       <Position7>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="386" Column="23" TopLine="358"/>
+        <Caret Line="199" Column="49" TopLine="171"/>
       </Position7>
       <Position8>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="133" Column="25" TopLine="116"/>
+        <Caret Line="332" Column="41" TopLine="304"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="199" Column="49" TopLine="171"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="7" Column="40"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="332" Column="41" TopLine="304"/>
+        <Filename Value="common\ucopytable.pas"/>
+        <Caret Line="47" Column="22" TopLine="19"/>
       </Position10>
       <Position11>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="7" Column="40"/>
+        <Caret Line="105" Column="21" TopLine="78"/>
       </Position11>
       <Position12>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="19"/>
+        <Caret Line="281" Column="30" TopLine="253"/>
       </Position12>
       <Position13>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Caret Line="635" Column="57" TopLine="627"/>
       </Position13>
       <Position14>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="281" Column="30" TopLine="253"/>
+        <Caret Line="43" Column="27" TopLine="28"/>
       </Position14>
       <Position15>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="635" Column="57" TopLine="627"/>
+        <Caret Line="237" Column="33" TopLine="222"/>
       </Position15>
       <Position16>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Caret Line="360" Column="32" TopLine="332"/>
       </Position16>
       <Position17>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="237" Column="33" TopLine="222"/>
+        <Caret Line="42" Column="33" TopLine="28"/>
       </Position17>
       <Position18>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="360" Column="32" TopLine="332"/>
+        <Caret Line="47" Column="22" TopLine="27"/>
       </Position18>
       <Position19>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="42" Column="33" TopLine="28"/>
+        <Caret Line="105" Column="21" TopLine="78"/>
       </Position19>
       <Position20>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="27"/>
+        <Caret Line="405" Column="52" TopLine="401"/>
       </Position20>
       <Position21>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Caret Line="43" Column="27" TopLine="28"/>
       </Position21>
       <Position22>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="405" Column="52" TopLine="401"/>
+        <Caret Line="167" Column="23" TopLine="152"/>
       </Position22>
       <Position23>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Caret Line="424" Column="46" TopLine="400"/>
       </Position23>
       <Position24>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="167" Column="23" TopLine="152"/>
+        <Caret Line="491" Column="28" TopLine="463"/>
       </Position24>
       <Position25>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="424" Column="46" TopLine="400"/>
+        <Caret Line="47" Column="22" TopLine="31"/>
       </Position25>
       <Position26>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="491" Column="28" TopLine="463"/>
+        <Caret Line="105" Column="21" TopLine="78"/>
       </Position26>
       <Position27>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="31"/>
+        <Caret Line="388" Column="34" TopLine="368"/>
       </Position27>
       <Position28>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Caret Line="43" Column="27" TopLine="28"/>
       </Position28>
       <Position29>
         <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="388" Column="34" TopLine="368"/>
+        <Caret Line="206" Column="50" TopLine="199"/>
       </Position29>
       <Position30>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
+        <Caret Line="352" Column="11" TopLine="351"/>
       </Position30>
     </JumpHistory>
     <RunParams>
