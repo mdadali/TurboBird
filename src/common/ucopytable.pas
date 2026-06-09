@@ -6,14 +6,14 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
-  IBDatabase, IBQuery, DateUtils, Variants, DB, fpexprpars;
+  IBDatabase, IBQuery, DateUtils;
 
 type
   TFieldTransform = record
-    SourceField : string;
-    DestField   : string;
-    Formula     : string;      // '' = 1:1 Copy, sonst Formel mit $1-Platzhalter
-    CopyField   : Boolean;
+    SourceField : string;      // Quell-Spaltenname
+    DestField   : string;      // Ziel-Spaltenname
+    Formula     : string;      // SQL-Ausdruck mit $1 als Platzhalter für SourceField
+    CopyField   : Boolean;     // True = kopieren/transformieren, False = überspringen
   end;
 
   { TCopyThread }
@@ -33,15 +33,13 @@ type
     FCopiedRows    : Integer;
     FStartTime     : TDateTime;
     FErrorMessage  : string;
-    FDestValues    : array of string;
 
     FProgressLabel : TLabel;
     FProgressBar   : TProgressBar;
     FLblElapsed    : TLabel;
     FBtnCancel     : TButton;
 
-    function  TransformRow(SourceQuery: TIBQuery): Boolean;
-    procedure BuildDirectInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
+    procedure BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
     procedure UpdateProgressGUI;
   protected
     procedure Execute; override;
@@ -166,91 +164,37 @@ begin
   FBtnCancel     := ABtnCancel;
 end;
 
-function TCopyThread.TransformRow(SourceQuery: TIBQuery): Boolean;
-var
-  i          : Integer;
-  FieldValue : string;
-  FormulaStr : string;
-  Parser     : TFPExpressionParser;
-  ExprValue  : TFPExpressionResult;
-  IsString   : Boolean;
-begin
-  Result := True;
-  SetLength(FDestValues, Length(FFieldTransforms));
-
-  for i := 0 to High(FFieldTransforms) do
-  begin
-    if not FFieldTransforms[i].CopyField then Continue;
-
-    if FFieldTransforms[i].Formula = '' then
-    begin
-      if SourceQuery.FieldByName(FFieldTransforms[i].SourceField).IsNull then
-        FDestValues[i] := ''
-      else
-        FDestValues[i] := SourceQuery.FieldByName(FFieldTransforms[i].SourceField).AsString;
-    end
-    else begin
-      if SourceQuery.FieldByName(FFieldTransforms[i].SourceField).IsNull then
-        FieldValue := ''
-      else
-      begin
-        IsString := SourceQuery.FieldByName(FFieldTransforms[i].SourceField).DataType in
-                     [ftString, ftWideString, ftFixedChar, ftMemo, ftFmtMemo];
-        if IsString then
-          FieldValue := QuotedStr(SourceQuery.FieldByName(FFieldTransforms[i].SourceField).AsString)
-        else
-          FieldValue := SourceQuery.FieldByName(FFieldTransforms[i].SourceField).AsString;
-      end;
-
-      FormulaStr := StringReplace(FFieldTransforms[i].Formula, '$1', FieldValue, [rfReplaceAll]);
-
-      Parser := TFPExpressionParser.Create(nil);
-      try
-        Parser.BuiltIns := [bcStrings, bcMath];
-        Parser.Expression := FormulaStr;
-        ExprValue := Parser.Evaluate;
-        case ExprValue.ResultType of
-          rtBoolean : FDestValues[i] := BoolToStr(ExprValue.ResBoolean, True);
-          rtInteger : FDestValues[i] := IntToStr(ExprValue.ResInteger);
-          rtFloat   : FDestValues[i] := FloatToStr(ExprValue.ResFloat);
-          rtString  : FDestValues[i] := ExprValue.ResString;
-          else FDestValues[i] := '';
-        end;
-      except
-        on E: Exception do
-        begin
-          FErrorMessage := 'Expression error in field ' + FFieldTransforms[i].DestField + ': ' + E.Message;
-          Result := False;
-          Parser.Free;
-          Exit;
-        end;
-      end;
-      Parser.Free;
-    end;
-  end;
-end;
-
-procedure TCopyThread.BuildDirectInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
+procedure TCopyThread.BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
 var
   DestFields, SourceFields : string;
   i : Integer;
+  FormulaExpr : string;
 begin
   DestFields := '';
   SourceFields := '';
+
   for i := 0 to High(FFieldTransforms) do
   begin
-    if FFieldTransforms[i].CopyField then
-    begin
-      if DestFields <> '' then
-        DestFields := DestFields + ', ';
-      DestFields := DestFields + FFieldTransforms[i].DestField;
+    if not FFieldTransforms[i].CopyField then
+      Continue;
 
-      if SourceFields <> '' then
-        SourceFields := SourceFields + ', ';
-      if FFieldTransforms[i].Formula = '' then
-        SourceFields := SourceFields + FFieldTransforms[i].SourceField
-      else
-        SourceFields := SourceFields + FFieldTransforms[i].Formula;
+    // Zielfeld
+    if DestFields <> '' then
+      DestFields := DestFields + ', ';
+    DestFields := DestFields + FFieldTransforms[i].DestField;
+
+    // Quellfeld (mit oder ohne Formel)
+    if SourceFields <> '' then
+      SourceFields := SourceFields + ', ';
+
+    if FFieldTransforms[i].Formula = '' then
+      SourceFields := SourceFields + FFieldTransforms[i].SourceField
+    else
+    begin
+      // $1 durch den Quell-Spaltennamen ersetzen
+      FormulaExpr := StringReplace(FFieldTransforms[i].Formula, '$1',
+                                   FFieldTransforms[i].SourceField, [rfReplaceAll]);
+      SourceFields := SourceFields + FormulaExpr;
     end;
   end;
 
@@ -274,19 +218,15 @@ end;
 
 procedure TCopyThread.Execute;
 var
-  SourceQuery, DestQuery : TIBQuery;
+  DestQuery : TIBQuery;
   HasFormula : Boolean;
   BatchCount, BatchIndex : Integer;
   FromRow, ToRow, BatchRows : Integer;
   SQL : string;
   i : Integer;
-  DestFields, DestValues : string;
-  OldDecimalSep : Char;                 // <-- NEU
 begin
-  // === EINMALIGE UMSCHALTUNG DES DEZIMALTRENNZEICHENS ===
-  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
-  DefaultFormatSettings.DecimalSeparator := '.';
   try
+    // Prüfen, ob überhaupt Formeln vorhanden sind
     HasFormula := False;
     for i := 0 to High(FFieldTransforms) do
     begin
@@ -297,22 +237,8 @@ begin
       end;
     end;
 
-    DestFields := '';
-    for i := 0 to High(FFieldTransforms) do
-    begin
-      if FFieldTransforms[i].CopyField then
-      begin
-        if DestFields <> '' then
-          DestFields := DestFields + ', ';
-        DestFields := DestFields + FFieldTransforms[i].DestField;
-      end;
-    end;
-
-    SourceQuery := TIBQuery.Create(nil);
     DestQuery := TIBQuery.Create(nil);
     try
-      SourceQuery.Database := FSourceDB;
-      SourceQuery.Transaction := FSourceTrans;
       DestQuery.Database := FDestDB;
       DestQuery.Transaction := FDestTrans;
 
@@ -329,73 +255,34 @@ begin
           ToRow := FFromRow + FTotalRows - 1;
         BatchRows := ToRow - FromRow + 1;
 
-        if HasFormula then
-        begin
-          SourceQuery.Close;
-          SourceQuery.SQL.Text :=
-            'SELECT FIRST ' + IntToStr(BatchRows) +
-            ' SKIP ' + IntToStr(FromRow - 1) + ' *' +
-            ' FROM ' + FSourceTable;
+        // SQL generieren (mit oder ohne Formeln)
+        BuildInsertSQL(FromRow, BatchRows, SQL);
 
-          if not FSourceTrans.InTransaction then
-            FSourceTrans.StartTransaction;
-          SourceQuery.Open;
+        DestQuery.Close;
+        DestQuery.SQL.Text := SQL;
 
-          while not SourceQuery.EOF do
-          begin
-            if Cancelled then Break;
-            if not TransformRow(SourceQuery) then Break;
+        if not FDestTrans.InTransaction then
+          FDestTrans.StartTransaction;
 
-            DestValues := '';
-            for i := 0 to High(FFieldTransforms) do
-            begin
-              if FFieldTransforms[i].CopyField then
-              begin
-                if DestValues <> '' then
-                  DestValues := DestValues + ', ';
-                if FDestValues[i] = '' then
-                  DestValues := DestValues + 'NULL'
-                else
-                  DestValues := DestValues + QuotedStr(FDestValues[i]);
-              end;
-            end;
+        DestQuery.ExecSQL;
+        FDestTrans.CommitRetaining;
 
-            SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + DestValues + ')';
-            DestQuery.Close;
-            DestQuery.SQL.Text := SQL;
-
-            if not FDestTrans.InTransaction then
-              FDestTrans.StartTransaction;
-            DestQuery.ExecSQL;
-            FDestTrans.CommitRetaining;
-
-            Inc(FCopiedRows);
-            SourceQuery.Next;
-          end;
-          SourceQuery.Close;
-        end
-        else begin
-          BuildDirectInsertSQL(FromRow, BatchRows, SQL);
-          DestQuery.Close;
-          DestQuery.SQL.Text := SQL;
-          if not FDestTrans.InTransaction then
-            FDestTrans.StartTransaction;
-          DestQuery.ExecSQL;
-          FDestTrans.CommitRetaining;
-          Inc(FCopiedRows, BatchRows);
-        end;
-
+        Inc(FCopiedRows, BatchRows);
         Synchronize(@UpdateProgressGUI);
       end;
 
-      if not Cancelled then FDestTrans.Commit;
+      if not Cancelled then
+        FDestTrans.Commit;
+
     finally
-      SourceQuery.Free;
       DestQuery.Free;
     end;
-  finally
-    // === ZURÜCKSETZEN ===
-    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+
+  except
+    on E: Exception do
+    begin
+      FErrorMessage := E.Message;
+    end;
   end;
 end;
 
@@ -473,20 +360,20 @@ begin
   end;
 end;
 
-function TCopyTable.Execute: Boolean;
+function TCopyTable.Execute : Boolean;
 var
-  CountQuery: TIBQuery;
-  TotalInSource: Integer;
-  ProgressForm: TForm;
-  ProgressLabel: TLabel;
-  ProgressBar: TProgressBar;
-  LblElapsed: TLabel;
-  BtnCancel: TButton;
-  EndTime: TDateTime;
-  RowsPerSec: Double;
-  StatusStr: string;
-  Msg: string;
-  ErrorMsg: string;                // <-- NEU
+  CountQuery : TIBQuery;
+  TotalInSource : Integer;
+  ProgressForm : TForm;
+  ProgressLabel : TLabel;
+  ProgressBar : TProgressBar;
+  LblElapsed : TLabel;
+  BtnCancel : TButton;
+  EndTime : TDateTime;
+  RowsPerSec : Double;
+  StatusStr : string;
+  Msg : string;
+  ErrorMsg : string;
 begin
   Result := False;
   FCopiedRows := 0;
@@ -561,7 +448,6 @@ begin
       Exit;
     end;
 
-    // From/To berechnen
     if FToRow = 0 then
       FToRow := TotalInSource;
     if FFromRow < 1 then
@@ -571,7 +457,6 @@ begin
 
     FTotalRows := FToRow - FFromRow + 1;
 
-    // ProgressBar auf "echten" Modus
     ProgressBar.Style := pbstNormal;
     ProgressBar.Max := FTotalRows;
     ProgressBar.Position := 0;
@@ -593,7 +478,6 @@ begin
     FThread.SetProgressControls(ProgressLabel, ProgressBar, LblElapsed, BtnCancel);
     FThread.Start;
 
-    // Warten bis Thread fertig ist (oder Fenster geschlossen)
     while (not FThread.Finished) and (ProgressForm.Visible) do
     begin
       Application.ProcessMessages;
@@ -608,7 +492,7 @@ begin
 
     FCopiedRows := FThread.CopiedRows;
     FStartTime := FThread.StartTime;
-    ErrorMsg := FThread.ErrorMessage;          // <-- Fehlertext sichern
+    ErrorMsg := FThread.ErrorMessage;
     FThread.Free;
     FThread := nil;
 
@@ -616,9 +500,7 @@ begin
     ProgressForm.Free;
   end;
 
-  // ------------------------------------------------------------------
-  // Fehlerbehandlung (nachdem Fortschrittsfenster geschlossen ist)
-  // ------------------------------------------------------------------
+  // Fehler anzeigen, falls aufgetreten
   if ErrorMsg <> '' then
   begin
     ShowMessage('Copy error: ' + ErrorMsg);
