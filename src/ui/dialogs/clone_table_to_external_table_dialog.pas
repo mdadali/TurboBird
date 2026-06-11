@@ -53,6 +53,7 @@ type
     procedure btnResetClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure grBoxQueryClick(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
   private
     FDBIndex: integer;
@@ -84,6 +85,11 @@ begin
   FUsedFieldNames := TStringList.Create;
   SaveDialog1.Filter := 'External Table Files|*.dat;*.txt;*.csv|All Files|*.*';
   SaveDialog1.DefaultExt := 'dat';
+end;
+
+procedure TfmCloneToExternalTable.grBoxQueryClick(Sender: TObject);
+begin
+
 end;
 
 procedure TfmCloneToExternalTable.rbAllRowsChange(Sender: TObject);

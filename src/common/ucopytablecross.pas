@@ -1,4 +1,4 @@
-unit uCopyTable;
+unit uCopyTableCross;
 
 {$mode objfpc}{$H+}
 
@@ -6,14 +6,16 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
-  IBDatabase, IBQuery, DateUtils,
+  IBDatabase, IBQuery, ibxscript, DateUtils,
+  DB,
   turbocommon;
+
 
 type
 
-  { TCopyThread }
+  { TCopyThreadCross }
 
-  TCopyThread = class(TThread)
+  TCopyThreadCross = class(TThread)
   private
     FSourceDB      : TIBDatabase;
     FSourceTrans   : TIBTransaction;
@@ -34,9 +36,9 @@ type
     FLblElapsed    : TLabel;
     FBtnCancel     : TButton;
 
-    procedure BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
-    procedure UpdateProgressGUI;
+    procedure BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
   protected
+    procedure UpdateProgressGUI;
     procedure Execute; override;
   public
     Cancelled : Boolean;
@@ -61,15 +63,15 @@ type
     property ErrorMessage : string read FErrorMessage;
   end;
 
-  { TCopyTable }
+  { TCopyTableCross }
 
-  TCopyTable = class
+  TCopyTableCross = class
   private
     FSourceDBIndex : Integer;
     FDestDBIndex   : Integer;
     FSourceTable   : string;
     FDestTable     : string;
-    FFieldTransforms : array of TFieldTransform;
+    FFieldTransforms : TFieldTransformArray;
     FBatchSize     : Integer;
     FFromRow       : Integer;
     FToRow         : Integer;
@@ -77,7 +79,7 @@ type
     FCopiedRows    : Integer;
     FStartTime     : TDateTime;
     FCancelled     : Boolean;
-    FThread        : TCopyThread;
+    FThread        : TCopyThreadCross;
 
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
@@ -89,7 +91,7 @@ type
       ASourceDBIndex, ADestDBIndex : Integer;
       const ASourceTable, ADestTable : string;
       const AFieldTransforms : TFieldTransformArray;
-      ABatchSize : Integer = 500000;
+      ABatchSize : Integer = 10000;
       AFromRow   : Integer = 1;
       AToRow     : Integer = 0);
 
@@ -104,9 +106,9 @@ type
 implementation
 
 
-{ TCopyThread }
+{ TCopyThreadCross }
 
-constructor TCopyThread.Create(
+constructor TCopyThreadCross.Create(
   ASourceDB, ADestDB : TIBDatabase;
   ASourceTrans, ADestTrans : TIBTransaction;
   const ASourceTable, ADestTable : string;
@@ -140,12 +142,12 @@ begin
   FBtnCancel := nil;
 end;
 
-destructor TCopyThread.Destroy;
+destructor TCopyThreadCross.Destroy;
 begin
   inherited Destroy;
 end;
 
-procedure TCopyThread.SetProgressControls(
+procedure TCopyThreadCross.SetProgressControls(
   AProgressLabel : TLabel;
   AProgressBar   : TProgressBar;
   ALblElapsed    : TLabel;
@@ -157,48 +159,55 @@ begin
   FBtnCancel     := ABtnCancel;
 end;
 
-procedure TCopyThread.BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
+procedure TCopyThreadCross.BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
 var
-  DestFields, SourceFields : string;
-  i : Integer;
-  FormulaExpr : string;
+  DestFields, RowValues: string;
+  i: Integer;
+  FieldValue: string;
 begin
   DestFields := '';
-  SourceFields := '';
+  for i := 0 to High(FFieldTransforms) do
+  begin
+    if FFieldTransforms[i].CopyField then
+    begin
+      if DestFields <> '' then
+        DestFields := DestFields + ', ';
+      DestFields := DestFields + FFieldTransforms[i].DestField;
+    end;
+  end;
 
+  // NUR EINE Zeile!
+  RowValues := '';
   for i := 0 to High(FFieldTransforms) do
   begin
     if not FFieldTransforms[i].CopyField then
       Continue;
 
-    // Zielfeld
-    if DestFields <> '' then
-      DestFields := DestFields + ', ';
-    DestFields := DestFields + FFieldTransforms[i].DestField;
+    if RowValues <> '' then
+      RowValues := RowValues + ', ';
 
-    // Quellfeld (mit oder ohne Formel)
-    if SourceFields <> '' then
-      SourceFields := SourceFields + ', ';
-
-    if FFieldTransforms[i].Formula = '' then
-      SourceFields := SourceFields + FFieldTransforms[i].SourceField
+    if SourceQuery.FieldByName(FFieldTransforms[i].SourceField).IsNull then
+      RowValues := RowValues + 'NULL'
     else
     begin
-      // $1 durch den Quell-Spaltennamen ersetzen
-      FormulaExpr := StringReplace(FFieldTransforms[i].Formula, '$1',
-                                   FFieldTransforms[i].SourceField, [rfReplaceAll]);
-      SourceFields := SourceFields + FormulaExpr;
+      if FFieldTransforms[i].Formula <> '' then
+      begin
+        // Formel: $1 durch Feldnamen ersetzen, nicht durch Wert!
+        RowValues := RowValues + StringReplace(FFieldTransforms[i].Formula, '$1',
+                                               FFieldTransforms[i].SourceField, [rfReplaceAll]);
+      end
+      else
+      begin
+        FieldValue := SourceQuery.FieldByName(FFieldTransforms[i].SourceField).AsString;
+        RowValues := RowValues + QuotedStr(FieldValue);
+      end;
     end;
   end;
 
-  SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ')' + sLineBreak +
-         'SELECT FIRST ' + IntToStr(BatchRows) +
-         ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
-         SourceFields + sLineBreak +
-         'FROM ' + FSourceTable;
+  SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + RowValues + ')';
 end;
 
-procedure TCopyThread.UpdateProgressGUI;
+procedure TCopyThreadCross.UpdateProgressGUI;
 begin
   if Assigned(FProgressLabel) then
     FProgressLabel.Caption := Format('Copied %d of %d rows...', [FCopiedRows, FTotalRows]);
@@ -209,79 +218,217 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TCopyThread.Execute;
+procedure TCopyThreadCross.Execute;
 var
-  DestQuery : TIBQuery;
-  HasFormula : Boolean;
-  BatchCount, BatchIndex : Integer;
-  FromRow, ToRow, BatchRows : Integer;
-  SQL : string;
-  i : Integer;
+  SourceQuery: TIBQuery;
+  DestQuery: TIBQuery;
+  Script: TIBXScript;
+  BatchCount, BatchIndex: Integer;
+  FromRow, ToRow, BatchRows: Integer;
+  SQL: string;
+  i: Integer;
+  DestFields, DestValues: string;
+  FieldValue: string;
+  SelectFields: string;
+  OldDecimalSep: Char;
+  ScriptText: string;
+  RowCount: Integer;
 begin
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  DefaultFormatSettings.DecimalSeparator := '.';
   try
-    // Prüfen, ob überhaupt Formeln vorhanden sind
-    HasFormula := False;
-    for i := 0 to High(FFieldTransforms) do
-    begin
-      if (FFieldTransforms[i].CopyField) and (FFieldTransforms[i].Formula <> '') then
-      begin
-        HasFormula := True;
-        Break;
-      end;
-    end;
-
-    DestQuery := TIBQuery.Create(nil);
     try
-      DestQuery.Database := FDestDB;
-      DestQuery.Transaction := FDestTrans;
-
-      BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
-      FStartTime := Now;
-
-      for BatchIndex := 0 to BatchCount - 1 do
+      // Zielfelder einmalig sammeln
+      DestFields := '';
+      for i := 0 to High(FFieldTransforms) do
       begin
-        if Cancelled then Break;
-
-        FromRow := FFromRow + (BatchIndex * FBatchSize);
-        ToRow := FromRow + FBatchSize - 1;
-        if ToRow > (FFromRow + FTotalRows - 1) then
-          ToRow := FFromRow + FTotalRows - 1;
-        BatchRows := ToRow - FromRow + 1;
-
-        // SQL generieren (mit oder ohne Formeln)
-        BuildInsertSQL(FromRow, BatchRows, SQL);
-
-        DestQuery.Close;
-        DestQuery.SQL.Text := SQL;
-
-        if not FDestTrans.InTransaction then
-          FDestTrans.StartTransaction;
-
-        DestQuery.ExecSQL;
-        FDestTrans.CommitRetaining;
-
-        Inc(FCopiedRows, BatchRows);
-        Synchronize(@UpdateProgressGUI);
+        if FFieldTransforms[i].CopyField then
+        begin
+          if DestFields <> '' then
+            DestFields := DestFields + ', ';
+          DestFields := DestFields + FFieldTransforms[i].DestField;
+        end;
       end;
 
-      if not Cancelled then
-        FDestTrans.Commit;
+      // SELECT-Felder einmalig zusammenstellen (mit Formeln!)
+      SelectFields := '';
+      for i := 0 to High(FFieldTransforms) do
+      begin
+        if not FFieldTransforms[i].CopyField then
+          Continue;
 
-    finally
-      DestQuery.Free;
-    end;
+        if SelectFields <> '' then
+          SelectFields := SelectFields + ', ';
 
-  except
-    on E: Exception do
-    begin
-      FErrorMessage := E.Message;
+        if FFieldTransforms[i].Formula <> '' then
+        begin
+          SelectFields := SelectFields + '(' +
+            StringReplace(FFieldTransforms[i].Formula, '$1',
+                          FFieldTransforms[i].SourceField, [rfReplaceAll]) + ')';
+        end
+        else
+        begin
+          SelectFields := SelectFields + FFieldTransforms[i].SourceField;
+        end;
+      end;
+
+      SourceQuery := TIBQuery.Create(nil);
+      DestQuery := TIBQuery.Create(nil);
+      Script := TIBXScript.Create(nil);
+      try
+        SourceQuery.Database := FSourceDB;
+        SourceQuery.Transaction := FSourceTrans;
+        DestQuery.Database := FDestDB;
+        DestQuery.Transaction := FDestTrans;
+        Script.Database := FDestDB;
+        Script.Transaction := FDestTrans;
+
+        BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
+        FStartTime := Now;
+
+        for BatchIndex := 0 to BatchCount - 1 do
+        begin
+          if Cancelled then
+            Break;
+
+          FromRow := FFromRow + (BatchIndex * FBatchSize);
+          ToRow := FromRow + FBatchSize - 1;
+          if ToRow > (FFromRow + FTotalRows - 1) then
+            ToRow := FFromRow + FTotalRows - 1;
+          BatchRows := ToRow - FromRow + 1;
+
+          // ============================================================
+          // 1) SELECT mit Formeln auf der QUELL-DB ausführen
+          // ============================================================
+          SourceQuery.Close;
+          SourceQuery.SQL.Text :=
+            'SELECT FIRST ' + IntToStr(BatchRows) +
+            ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
+            SelectFields +
+            ' FROM ' + FSourceTable;
+
+          if not FSourceTrans.InTransaction then
+            FSourceTrans.StartTransaction;
+
+          SourceQuery.Open;
+
+          // ============================================================
+          // 2) INSERT-Statements sammeln
+          // ============================================================
+          ScriptText := '';
+          RowCount := 0;
+          while not SourceQuery.EOF do
+          begin
+            if Cancelled then
+              Break;
+
+            DestValues := '';
+            for i := 0 to SourceQuery.FieldCount - 1 do
+            begin
+              if DestValues <> '' then
+                DestValues := DestValues + ', ';
+
+              if SourceQuery.Fields[i].IsNull then
+                DestValues := DestValues + 'NULL'
+              else
+              begin
+                FieldValue := SourceQuery.Fields[i].AsString;
+
+                if SourceQuery.Fields[i].DataType in [ftSmallint, ftInteger, ftLargeint,
+                                                       ftFloat, ftCurrency, ftBCD, ftFMTBcd] then
+                  DestValues := DestValues + FieldValue
+                else if SourceQuery.Fields[i].DataType = ftBoolean then
+                  DestValues := DestValues + FieldValue
+                else
+                  DestValues := DestValues + QuotedStr(FieldValue);
+              end;
+            end;
+
+            ScriptText := ScriptText + 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + DestValues + ');' + sLineBreak;
+
+            Inc(RowCount);
+            SourceQuery.Next;
+          end;
+
+          SourceQuery.Close;
+
+          // ============================================================
+          // 3) Alle INSERTs mit TIBXScript auf einmal ausführen!
+          // ============================================================
+          if ScriptText <> '' then
+          begin
+            if not FDestTrans.InTransaction then
+              FDestTrans.StartTransaction;
+
+            Script.ExecSQLScript(ScriptText);
+            FDestTrans.CommitRetaining;
+
+            FCopiedRows := FCopiedRows + RowCount;
+          end;
+
+          Synchronize(@UpdateProgressGUI);
+        end;
+
+        if not Cancelled then
+          FDestTrans.Commit;
+
+      finally
+        if Assigned(SourceQuery) then
+        begin
+          if SourceQuery.Active then
+            SourceQuery.Close;
+          SourceQuery.Free;
+        end;
+
+        if Assigned(SourceQuery.Transaction) then
+        begin
+          if SourceQuery.Transaction.InTransaction then
+            SourceQuery.Transaction.Rollback;
+        end;
+
+        if Assigned(SourceQuery.Database) then
+          if SourceQuery.Database.Connected then
+            SourceQuery.Database.Connected := false;
+
+        if Assigned(DestQuery) then
+        begin
+          if DestQuery.Active then
+            DestQuery.Close;
+          DestQuery.Free;
+        end;
+
+        if Assigned(DestQuery.Transaction) then
+        begin
+          if DestQuery.Transaction.InTransaction then
+            DestQuery.Transaction.Commit;
+        end;
+
+        if Assigned(DestQuery.Database) then
+          if DestQuery.Database.Connected then
+            DestQuery.Database.Connected := false;
+
+        if Assigned(Script) then
+        begin
+          Script.Free;
+          Script := nil;
+        end;
+      end;
+
+    except
+      on E: Exception do
+      begin
+        FErrorMessage := E.Message;
+      end;
     end;
+  finally
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
   end;
+
 end;
 
-{ TCopyTable }
+{ TCopyTableCross }
 
-constructor TCopyTable.Create(
+constructor TCopyTableCross.Create(
   ASourceDBIndex, ADestDBIndex : Integer;
   const ASourceTable, ADestTable : string;
   const AFieldTransforms : TFieldTransformArray;
@@ -310,7 +457,7 @@ begin
     FFieldTransforms[i] := AFieldTransforms[i];
 end;
 
-destructor TCopyTable.Destroy;
+destructor TCopyTableCross.Destroy;
 begin
   if Assigned(FThread) then
   begin
@@ -321,31 +468,32 @@ begin
   inherited Destroy;
 end;
 
-function TCopyTable.GetSourceDB : TIBDatabase;
+function TCopyTableCross.GetSourceDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
-function TCopyTable.GetSourceTrans : TIBTransaction;
+function TCopyTableCross.GetSourceTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
-function TCopyTable.GetDestDB : TIBDatabase;
+function TCopyTableCross.GetDestDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
-function TCopyTable.GetDestTrans : TIBTransaction;
+function TCopyTableCross.GetDestTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
-procedure TCopyTable.CancelButtonClick(Sender: TObject);
+procedure TCopyTableCross.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
   if Assigned(FThread) then
     FThread.Cancelled := True;
+
   if Sender is TButton then
   begin
     TButton(Sender).Enabled := False;
@@ -353,7 +501,7 @@ begin
   end;
 end;
 
-function TCopyTable.Execute : Boolean;
+function TCopyTableCross.Execute : Boolean;
 var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
@@ -372,9 +520,7 @@ begin
   FCopiedRows := 0;
   FCancelled := False;
 
-  // ------------------------------------------------------------------
   // Progress-Fenster
-  // ------------------------------------------------------------------
   ProgressForm := TForm.Create(nil);
   try
     ProgressForm.FormStyle := fsNormal;
@@ -418,9 +564,7 @@ begin
     ProgressForm.Show;
     Application.ProcessMessages;
 
-    // ------------------------------------------------------------------
-    // Datensätze zählen
-    // ------------------------------------------------------------------
+    // Record Count
     CountQuery := TIBQuery.Create(nil);
     try
       CountQuery.Database := GetSourceDB;
@@ -457,10 +601,8 @@ begin
     BtnCancel.Enabled := True;
     Application.ProcessMessages;
 
-    // ------------------------------------------------------------------
     // Thread starten
-    // ------------------------------------------------------------------
-    FThread := TCopyThread.Create(
+    FThread := TCopyThreadCross.Create(
       GetSourceDB, GetDestDB,
       GetSourceTrans, GetDestTrans,
       FSourceTable, FDestTable,
@@ -474,6 +616,7 @@ begin
     while (not FThread.Finished) and (ProgressForm.Visible) do
     begin
       Application.ProcessMessages;
+      CheckSynchronize;  // <-- Verarbeitet Synchronize aus allen Threads
       Sleep(50);
     end;
 
@@ -489,11 +632,19 @@ begin
     FThread.Free;
     FThread := nil;
 
+    if FDestDBIndex >= 0 then
+    begin
+      if GetDestTrans.InTransaction then
+        GetDestTrans.Commit;
+    end;
+
   finally
     ProgressForm.Free;
   end;
 
-  // Fehler anzeigen, falls aufgetreten
+  // ============================================================
+  // FEHLER ZUERST ANZEIGEN!
+  // ============================================================
   if ErrorMsg <> '' then
   begin
     ShowMessage('Copy error: ' + ErrorMsg);
@@ -501,9 +652,9 @@ begin
     Exit;
   end;
 
-  // ------------------------------------------------------------------
-  // Statistik
-  // ------------------------------------------------------------------
+  // ============================================================
+  // Statistik (nur wenn kein Fehler)
+  // ============================================================
   EndTime := Now;
   if EndTime > FStartTime then
     RowsPerSec := FCopiedRows / ((EndTime - FStartTime) * 24 * 60 * 60)

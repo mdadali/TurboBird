@@ -282,7 +282,7 @@ begin
         SQLTarget.ExecSQL;
         Inc(Num);
 
-        if (Num mod 1000) = 0 then
+        if (Num mod 1000000) = 0 then
         begin
           SQLTarget.Transaction.CommitRetaining;
 
