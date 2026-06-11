@@ -6,13 +6,17 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, CheckLst, IBQuery, IBDatabase, IBDatabaseInfo, IBExtract, ibxscript,
+  Grids, CheckLst, IB, IBQuery, IBDatabase, IBDatabaseInfo, IBExtract, ibxscript,
 
   turbocommon,
+
   uCopyTable,
   uCopyTableCross,
+  uFormulaPresets,
+
   fmetaquerys,
   uthemeselector;
+
 
 type
 
@@ -30,12 +34,15 @@ type
     btnCancel: TButton;
     btnExecute: TButton;
     btnNewDB: TButton;
+    btnOpenExternalFile: TButton;
     btnPreviewSQL: TButton;
     btnAddToQueue: TButton;
     btnSelectAll: TButton;
     btnDeselectAll: TButton;
+    btnRefreshPresets: TButton;
     chkCreateTable: TCheckBox;
     chkLstFields: TCheckListBox;
+    cbFormulaPreset: TComboBox;
     comboxDestDB: TComboBox;
     comboxSourceDB: TComboBox;
     comboxDestServer: TComboBox;
@@ -49,6 +56,7 @@ type
     grboxCopyOptions: TGroupBox;
     grBoxFields: TGroupBox;
     grBoxSource: TGroupBox;
+    grBoxFormulaPresets: TGroupBox;
     IBDBDest: TIBDatabase;
     IBDBSource: TIBDatabase;
     IBQueryDest: TIBQuery;
@@ -67,6 +75,7 @@ type
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
     Panel2: TPanel;
+    pnlFields: TPanel;
     pnlTop: TPanel;
     rbAllRows: TRadioButton;
     rbRange: TRadioButton;
@@ -75,9 +84,11 @@ type
     procedure btnAddToQueueClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
+    procedure btnRefreshPresetsClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnDeselectAllClick(Sender: TObject);
     procedure btnPreviewSQLClick(Sender: TObject);
+    procedure cbFormulaPresetChange(Sender: TObject);
     procedure comboxDestDBChange(Sender: TObject);
     procedure comboxDestServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
@@ -87,6 +98,10 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure grBoxFieldsDblClick(Sender: TObject);
+    procedure grBoxFormulaPresetsClick(Sender: TObject);
+    procedure grBoxSourceClick(Sender: TObject);
+    procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
+      var BlobID: TISC_QUAD);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
   private
@@ -115,6 +130,7 @@ type
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
   public
     procedure Init(ANodeInfos: TPNodeInfos);
+    procedure LoadFormulaPresets;
   end;
 
 var
@@ -147,6 +163,8 @@ begin
   FillDestCombos;
 
   comboxSourceServer.OnChange := @comboxSourceServerChange;
+
+  LoadFormulaPresets;
 end;
 
 procedure TfrmCloneTable.Init(ANodeInfos: TPNodeInfos);
@@ -167,7 +185,10 @@ procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 begin
   comboxSourceTables.Items.Clear;
   if ConfigureSourceConnection then
+  begin
     FillSourceTableCombo;
+    comboxSourceTablesChange(nil);
+  end;
 end;
 
 procedure TfrmCloneTable.comboxSourceTablesChange(Sender: TObject);
@@ -851,6 +872,29 @@ begin
     Exit;
   end;
 
+
+  // Quelle konfigurieren
+  if not ConfigureSourceConnection then
+  begin
+    MessageDlg('Could not connect to source database:' + sLineBreak +
+               sLineBreak +
+               'Server: ' + comboxSourceServer.Text + sLineBreak +
+               'Database: ' + comboxSourceDB.Text,
+               mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // Ziel konfigurieren
+  if not ConfigureDestConnection then
+  begin
+    MessageDlg('Could not connect to destination database:' + sLineBreak +
+               sLineBreak +
+               'Server: ' + comboxDestServer.Text + sLineBreak +
+               'Database: ' + comboxDestDB.Text,
+               mtError, [mbOK], 0);
+    Exit;
+  end;
+
   DestTable := Trim(edtDestTable.Text);
   if DestTable = '' then
   begin
@@ -883,6 +927,13 @@ begin
 
   // Felder aus Grid holen
   Fields := GetFieldTransforms;
+
+
+  // Sicherstellen dass Transaktionen aktiv sind
+  if Assigned(IBTransSource) and (not IBTransSource.InTransaction) then
+    IBTransSource.StartTransaction;
+  if Assigned(IBTransDest) and (not IBTransDest.InTransaction) then
+    IBTransDest.StartTransaction;
 
   // Prüfen ob gleiche Datenbank
   if FSourceDBIndex = FDestDBIndex then
@@ -998,9 +1049,26 @@ end;
 procedure TfrmCloneTable.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+  comboxSourceTablesChange(nil);
 end;
 
 procedure TfrmCloneTable.grBoxFieldsDblClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmCloneTable.grBoxFormulaPresetsClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmCloneTable.grBoxSourceClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmCloneTable.IBXScript1GetParamValue(Sender: TObject;
+  ParamName: string; var BlobID: TISC_QUAD);
 begin
 
 end;
@@ -1009,6 +1077,64 @@ procedure TfrmCloneTable.rbAllRowsChange(Sender: TObject);
 begin
   edtFrom.Enabled := not rbAllRows.Checked;
   edtTo.Enabled := not rbAllRows.Checked;
+end;
+
+procedure TfrmCloneTable.LoadFormulaPresets;
+var
+  i: Integer;
+begin
+  cbFormulaPreset.Items.Clear;
+  cbFormulaPreset.Items.Add('None');
+
+  for i := 0 to FormulaPresetManager.PresetCount - 1 do
+    cbFormulaPreset.Items.Add(FormulaPresetManager.PresetName(i));
+
+  cbFormulaPreset.ItemIndex := 0;
+end;
+
+procedure TfrmCloneTable.cbFormulaPresetChange(Sender: TObject);
+var
+  Preset: TFormulaPreset;
+  i: Integer;
+  Formula: string;
+begin
+  // "None" ausgewählt → alle Formeln löschen
+  if cbFormulaPreset.ItemIndex <= 0 then
+  begin
+    for i := 0 to High(FFields) do
+    begin
+      if FFields[i].IsComputed then Continue;
+
+      FFields[i].Formula := '';
+      sgFields.Cells[3, i + 1] := '';
+    end;
+
+    StatusBar1.SimpleText := 'All formulas cleared.';
+    Exit;
+  end;
+
+  // Preset ausgewählt → Formeln anwenden
+  Preset := FormulaPresetManager.GetPreset(cbFormulaPreset.Text);
+  if Preset = nil then Exit;
+
+  for i := 0 to High(FFields) do
+  begin
+    if FFields[i].IsComputed then Continue;
+
+    Formula := Preset.GetFormulaForFieldType(FFields[i].FieldType);
+    FFields[i].Formula := Formula;
+    sgFields.Cells[3, i + 1] := Formula;
+  end;
+
+  StatusBar1.SimpleText := 'Preset "' + Preset.Name + '" applied to ' +
+                           IntToStr(Length(FFields)) + ' fields.';
+end;
+
+procedure TfrmCloneTable.btnRefreshPresetsClick(Sender: TObject);
+begin
+  FormulaPresetManager.Reload;
+  LoadFormulaPresets;
+  StatusBar1.SimpleText := IntToStr(FormulaPresetManager.PresetCount) + ' presets loaded.';
 end;
 
 end.
