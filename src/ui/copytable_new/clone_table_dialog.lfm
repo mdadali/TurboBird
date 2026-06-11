@@ -1,0 +1,466 @@
+object frmCloneTable: TfrmCloneTable
+  Left = 764
+  Height = 644
+  Top = 301
+  Width = 1079
+  Align = alTop
+  Caption = 'Clone Table'
+  ClientHeight = 644
+  ClientWidth = 1079
+  OnClose = FormClose
+  OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 74
+    Top = 570
+    Width = 1079
+    Align = alBottom
+    ClientHeight = 74
+    ClientWidth = 1079
+    TabOrder = 0
+    object btnExecute: TButton
+      Left = 840
+      Height = 35
+      Top = 7
+      Width = 80
+      Caption = 'Execute'
+      OnClick = btnExecuteClick
+      TabOrder = 0
+    end
+    object btnCancel: TButton
+      Left = 944
+      Height = 35
+      Top = 7
+      Width = 80
+      Caption = 'Close'
+      OnClick = btnCancelClick
+      TabOrder = 1
+    end
+    object StatusBar1: TStatusBar
+      Left = 1
+      Height = 22
+      Top = 51
+      Width = 1077
+      Panels = <>
+    end
+    object btnPreviewSQL: TButton
+      Left = 576
+      Height = 35
+      Top = 8
+      Width = 104
+      Caption = 'Preview SQL'
+      OnClick = btnPreviewSQLClick
+      TabOrder = 3
+    end
+    object btnAddToQueue: TButton
+      Left = 696
+      Height = 35
+      Top = 7
+      Width = 115
+      Caption = 'Add to Queue'
+      OnClick = btnAddToQueueClick
+      TabOrder = 4
+    end
+  end
+  object pnlTop: TPanel
+    Left = 0
+    Height = 32
+    Top = 0
+    Width = 1079
+    Align = alTop
+    TabOrder = 1
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 208
+    Top = 32
+    Width = 1079
+    Align = alTop
+    ClientHeight = 208
+    ClientWidth = 1079
+    TabOrder = 2
+    object grBoxSource: TGroupBox
+      Left = 1
+      Height = 206
+      Top = 1
+      Width = 503
+      Align = alLeft
+      Caption = 'Source'
+      ClientHeight = 185
+      ClientWidth = 501
+      TabOrder = 0
+      object lbSourceTable: TLabel
+        Left = 17
+        Height = 20
+        Top = 112
+        Width = 86
+        Caption = 'Source Table'
+        ParentColor = False
+      end
+      object comboxSourceTables: TComboBox
+        Left = 120
+        Height = 36
+        Top = 108
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceTablesChange
+        Style = csDropDownList
+        TabOrder = 0
+      end
+      object comboxSourceServer: TComboBox
+        Left = 120
+        Height = 36
+        Top = 8
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceServerChange
+        Style = csDropDownList
+        TabOrder = 1
+      end
+      object comboxSourceDB: TComboBox
+        Left = 120
+        Height = 36
+        Top = 58
+        Width = 320
+        ItemHeight = 0
+        OnChange = comboxSourceDBChange
+        Style = csDropDownList
+        TabOrder = 2
+      end
+      object Label6: TLabel
+        Left = 17
+        Height = 20
+        Top = 63
+        Width = 63
+        Caption = 'Database'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 17
+        Height = 20
+        Top = 12
+        Width = 43
+        Caption = 'Server'
+        ParentColor = False
+      end
+    end
+    object Destination: TGroupBox
+      Left = 504
+      Height = 206
+      Top = 1
+      Width = 574
+      Align = alClient
+      Caption = 'Destination'
+      ClientHeight = 185
+      ClientWidth = 572
+      TabOrder = 1
+      object Label4: TLabel
+        Left = 17
+        Height = 20
+        Top = 12
+        Width = 43
+        Caption = 'Server'
+        ParentColor = False
+      end
+      object comboxDestServer: TComboBox
+        Left = 120
+        Height = 36
+        Top = 8
+        Width = 382
+        ItemHeight = 0
+        OnChange = comboxDestServerChange
+        Style = csDropDownList
+        TabOrder = 0
+      end
+      object Label5: TLabel
+        Left = 17
+        Height = 20
+        Top = 62
+        Width = 63
+        Caption = 'Database'
+        ParentColor = False
+      end
+      object comboxDestDB: TComboBox
+        Left = 120
+        Height = 36
+        Top = 58
+        Width = 384
+        ItemHeight = 0
+        OnChange = comboxDestDBChange
+        Style = csDropDownList
+        TabOrder = 1
+      end
+      object btnNewDB: TButton
+        Left = 512
+        Height = 25
+        Top = 62
+        Width = 38
+        Caption = 'New'
+        TabOrder = 2
+      end
+      object Label2: TLabel
+        Left = 17
+        Height = 20
+        Top = 112
+        Width = 36
+        Caption = 'Table'
+        ParentColor = False
+      end
+      object edtDestTable: TEdit
+        Left = 120
+        Height = 37
+        Top = 107
+        Width = 382
+        TabOrder = 3
+      end
+      object chkCreateTable: TCheckBox
+        Left = 120
+        Height = 24
+        Top = 152
+        Width = 269
+        Caption = 'Create destination table if not exists'
+        Checked = True
+        State = cbChecked
+        TabOrder = 4
+      end
+    end
+  end
+  object grboxCopyOptions: TGroupBox
+    Left = 0
+    Height = 105
+    Top = 465
+    Width = 1079
+    Align = alBottom
+    Caption = 'Copy Options'
+    ClientHeight = 84
+    ClientWidth = 1077
+    TabOrder = 3
+    object rbAllRows: TRadioButton
+      Left = 22
+      Height = 24
+      Top = 3
+      Width = 82
+      Caption = 'All Rows'
+      Checked = True
+      OnChange = rbAllRowsChange
+      TabOrder = 0
+      TabStop = True
+    end
+    object rbRange: TRadioButton
+      Left = 22
+      Height = 24
+      Top = 40
+      Width = 69
+      Caption = 'Range'
+      TabOrder = 1
+    end
+    object edtBatchSize: TEdit
+      Left = 384
+      Height = 37
+      Top = 40
+      Width = 112
+      TabOrder = 2
+      Text = '1000000'
+    end
+    object Label3: TLabel
+      Left = 384
+      Height = 20
+      Top = 16
+      Width = 69
+      Caption = 'Batch Size'
+      ParentColor = False
+    end
+    object edtFrom: TEdit
+      Left = 120
+      Height = 37
+      Top = 40
+      Width = 88
+      Enabled = False
+      TabOrder = 3
+      Text = '1'
+    end
+    object Label8: TLabel
+      Left = 220
+      Height = 19
+      Top = 48
+      Width = 4
+      Caption = '-'
+      Font.Style = [fsBold]
+      ParentColor = False
+      ParentFont = False
+    end
+    object edtTo: TEdit
+      Left = 240
+      Height = 37
+      Top = 40
+      Width = 96
+      Enabled = False
+      TabOrder = 4
+      Text = '1000'
+    end
+  end
+  object grBoxFields: TGroupBox
+    Left = 0
+    Height = 225
+    Top = 240
+    Width = 1079
+    Align = alClient
+    Caption = 'Fields'
+    ClientHeight = 204
+    ClientWidth = 1077
+    TabOrder = 4
+    OnDblClick = grBoxFieldsDblClick
+    object btnOpenExternalFile: TButton
+      Left = 572
+      Height = 25
+      Top = 186
+      Width = 28
+      Caption = '...'
+      TabOrder = 0
+    end
+    object sgFields: TStringGrid
+      Left = 0
+      Height = 204
+      Top = 0
+      Width = 744
+      Align = alClient
+      ColCount = 0
+      FixedCols = 0
+      FixedRows = 0
+      RowCount = 0
+      TabOrder = 1
+      OnDblClick = sgFieldsDblClick
+    end
+    object pnlFields: TPanel
+      Left = 744
+      Height = 204
+      Top = 0
+      Width = 333
+      Align = alRight
+      ClientHeight = 204
+      ClientWidth = 333
+      TabOrder = 2
+      object chkLstFields: TCheckListBox
+        Left = 1
+        Height = 159
+        Top = 1
+        Width = 331
+        Align = alTop
+        ItemHeight = 0
+        TabOrder = 0
+        TopIndex = -1
+      end
+      object btnSelectAll: TButton
+        Left = 1
+        Height = 25
+        Top = 168
+        Width = 111
+        Caption = 'Select All'
+        OnClick = btnSelectAllClick
+        TabOrder = 1
+      end
+      object btnDeselectAll: TButton
+        Left = 144
+        Height = 25
+        Top = 168
+        Width = 112
+        Caption = 'Deselect All'
+        OnClick = btnDeselectAllClick
+        TabOrder = 2
+      end
+    end
+  end
+  object IBQuerySource: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDBSource
+    Transaction = IBTransSource
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 176
+    Top = 128
+  end
+  object IBDBSource: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransSource
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 176
+    Top = 56
+  end
+  object IBTransSource: TIBTransaction
+    TransactionName = '{892379DA-8E91-4A63-B89E-150D57A96DA3}'
+    Active = False
+    DefaultDatabase = IBDBSource
+    Left = 184
+    Top = 192
+  end
+  object OpenDialog1: TOpenDialog
+    Left = 776
+    Top = 304
+  end
+  object IBXScript1: TIBXScript
+    Database = IBDBSource
+    IgnoreGrants = False
+    IgnoreCreateDatabase = False
+    Transaction = IBTransSource
+    ShowAffectedRows = False
+    ShowPerformanceStats = False
+    Left = 304
+    Top = 56
+  end
+  object IBDBDest: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransDest
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 719
+    Top = 49
+  end
+  object IBQueryDest: TIBQuery
+    AllowAutoActivateTransaction = False
+    Database = IBDBDest
+    Transaction = IBTransDest
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 721
+    Top = 112
+  end
+  object IBTransDest: TIBTransaction
+    TransactionName = '{850AF12D-03D3-4368-AC47-97A5DD513BDE}'
+    Active = False
+    DefaultDatabase = IBDBDest
+    Left = 721
+    Top = 184
+  end
+end

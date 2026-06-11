@@ -195,7 +195,18 @@ type
   );
 
 
+
 type
+
+  TFieldTransform = record
+    SourceField : string;      // Quell-Spaltenname
+    DestField   : string;      // Ziel-Spaltenname
+    Formula     : string;      // SQL-Ausdruck mit $1 als Platzhalter für SourceField
+    CopyField   : Boolean;     // True = kopieren/transformieren, False = überspringen
+  end;
+
+  TFieldTransformArray = array of TFieldTransform;
+
 
   TServerRecord = packed record
     ServerName: string[127];
@@ -1224,7 +1235,7 @@ begin
     IBDatabase := TIBDatabase.Create(nil);
     IBDatabase.DatabaseName := DestRec.DatabaseName;
     IBDatabase.FirebirdLibraryPathName := DestRec.FireBirdClientLibPath;
-    IBDatabase.LoginPrompt := False;
+    IBDatabase.LoginPrompt := True;
     IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
 
     IBTransaction := TIBTransaction.Create(nil);
@@ -2566,7 +2577,6 @@ begin
   if not Assigned(Source) or not Assigned(Target) then
     Exit;
 
-  // Wichtig: erst schließen
   if Target.Connected then
     Target.Close;
 
@@ -2574,26 +2584,15 @@ begin
   Target.DatabaseName   := Source.DatabaseName;
   Target.FirebirdLibraryPathName := Source.FirebirdLibraryPathName;
   Target.Params.Assign(Source.Params);
-  Target.LoginPrompt    := Source.LoginPrompt;
+  Target.LoginPrompt    := True;
+  Target.OnLogin        := @dmSysTables.OnDatabaseLogin;
   Target.SQLDialect     := Source.SQLDialect;
-  //Target.DefaultTransaction := Source.DefaultTransaction; // Achtung: nur Referenz, keine Kopie!
 
   // Provider-Flags und Misc
   Target.TraceFlags     := Source.TraceFlags;
-  //Target.SQLRoleName    := Source.SQLRoleName;
-
-  // In IBX gibt es "IdleTimer", "AllowStreamedConnected" usw. -> falls vorhanden:
   Target.IdleTimer      := Source.IdleTimer;
   Target.AllowStreamedConnected := Source.AllowStreamedConnected;
-
-  // Events nicht übernehmen (da meist fenster-/threadabhängig)
-  {Target.BeforeConnect  := Source.BeforeConnect;
-  Target.AfterConnect   := Source.AfterConnect;
-  Target.BeforeDisconnect := Source.BeforeDisconnect;
-  Target.AfterDisconnect  := Source.AfterDisconnect;
-  Target.OnLogin        := Source.OnLogin;}
 end;
-
 function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
 begin
   Result := False;

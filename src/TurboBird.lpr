@@ -55,10 +55,10 @@ uses
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, jvRuntimeDesign, pascalscript, uPSI_uibconst, fservers,
   fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
-  IBTransactionEdit, bulk_clone, fdataeditor, fSQLParser, u_psstudio,
+  IBTransactionEdit, fdataeditor, fSQLParser, u_psstudio,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
-  clone_table_to_external_table_dialog;
+  clone_table_to_external_table_dialog, clone_table_dialog;
 
 const
   Major = 1;

@@ -6,15 +6,10 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
-  IBDatabase, IBQuery, DateUtils;
+  IBDatabase, IBQuery, DateUtils,
+  turbocommon;
 
 type
-  TFieldTransform = record
-    SourceField : string;      // Quell-Spaltenname
-    DestField   : string;      // Ziel-Spaltenname
-    Formula     : string;      // SQL-Ausdruck mit $1 als Platzhalter für SourceField
-    CopyField   : Boolean;     // True = kopieren/transformieren, False = überspringen
-  end;
 
   { TCopyThread }
 
@@ -26,7 +21,7 @@ type
     FDestTrans     : TIBTransaction;
     FSourceTable   : string;
     FDestTable     : string;
-    FFieldTransforms : array of TFieldTransform;
+    FFieldTransforms : TFieldTransformArray;
     FBatchSize     : Integer;
     FTotalRows     : Integer;
     FFromRow       : Integer;
@@ -50,7 +45,7 @@ type
       ASourceDB, ADestDB : TIBDatabase;
       ASourceTrans, ADestTrans : TIBTransaction;
       const ASourceTable, ADestTable : string;
-      const AFieldTransforms : array of TFieldTransform;
+      const AFieldTransforms : TFieldTransformArray;
       ABatchSize, ATotalRows, AFromRow : Integer);
 
     destructor Destroy; override;
@@ -93,7 +88,7 @@ type
     constructor Create(
       ASourceDBIndex, ADestDBIndex : Integer;
       const ASourceTable, ADestTable : string;
-      const AFieldTransforms : array of TFieldTransform;
+      const AFieldTransforms : TFieldTransformArray;
       ABatchSize : Integer = 500000;
       AFromRow   : Integer = 1;
       AToRow     : Integer = 0);
@@ -108,8 +103,6 @@ type
 
 implementation
 
-uses
-  turbocommon;
 
 { TCopyThread }
 
@@ -117,7 +110,7 @@ constructor TCopyThread.Create(
   ASourceDB, ADestDB : TIBDatabase;
   ASourceTrans, ADestTrans : TIBTransaction;
   const ASourceTable, ADestTable : string;
-  const AFieldTransforms : array of TFieldTransform;
+  const AFieldTransforms : TFieldTransformArray;
   ABatchSize, ATotalRows, AFromRow : Integer);
 var
   i : Integer;
@@ -291,7 +284,7 @@ end;
 constructor TCopyTable.Create(
   ASourceDBIndex, ADestDBIndex : Integer;
   const ASourceTable, ADestTable : string;
-  const AFieldTransforms : array of TFieldTransform;
+  const AFieldTransforms : TFieldTransformArray;
   ABatchSize : Integer;
   AFromRow : Integer;
   AToRow : Integer);

@@ -28,6 +28,7 @@ uses
   fFirebirdConfig,
   fsqlmonitor,
   fSQLParser,
+  clone_table_dialog,
 
   fservers,
 
@@ -90,7 +91,6 @@ uses
 
   ibsqleditor,
   IBTransactionEdit,  //orig
-  bulk_clone,
   fdataeditor,
   db_reader,
 
@@ -145,6 +145,7 @@ type
     lmDropRole: TMenuItem;
     lmCloneDBRegistry: TMenuItem;
     lmCloneServer: TMenuItem;
+    lmCloneTable: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -324,6 +325,7 @@ type
     procedure lmChangePasswordClick(Sender: TObject);
     procedure lmCloneDBRegistryClick(Sender: TObject);
     procedure lmCloneServerClick(Sender: TObject);
+    procedure lmCloneTableClick(Sender: TObject);
     procedure lmCloneToExternalTableClick(Sender: TObject);
     procedure lmCompareClick(Sender: TObject);
     procedure lmCopyRolePermissionClick(Sender: TObject);
@@ -2031,6 +2033,14 @@ end;
 procedure TfmMain.lmCloneServerClick(Sender: TObject);
 begin
   CloneServerRegistryInteractive;
+end;
+
+procedure TfmMain.lmCloneTableClick(Sender: TObject);
+var frmCloneTable: TfrmCloneTable;
+begin
+  frmCloneTable := TfrmCloneTable.Create(Self);
+  frmCloneTable.ShowModal;
+  frmCloneTable.Free;
 end;
 
 procedure TfmMain.lmCompareClick(Sender: TObject);
@@ -8285,13 +8295,13 @@ begin
 end;
 
 procedure TfmMain.mnBulkCloneClick(Sender: TObject);
-var frmBulkClone: TfrmBulkClone;
+var //frmBulkClone: TfrmBulkClone;
     dbIndex: integer;
 begin
   //dbIndex := TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
-  frmBulkClone := TfrmBulkClone.Create(Application);
+  {frmBulkClone := TfrmBulkClone.Create(Application);
   frmBulkClone.Init(nil);
-  frmBulkClone.ShowModal;
+  frmBulkClone.ShowModal;}
 end;
 
 procedure TfmMain.mnCheckForUpdateClick(Sender: TObject);
