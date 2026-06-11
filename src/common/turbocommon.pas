@@ -475,6 +475,32 @@ var
 
 
 
+function ShowServerSelectDialog(
+      const ATitle: string;
+      const ASuggestedDBTitle: string;
+      out ASelectedServer: string;
+      out ADBTitle: string
+    ): Boolean;
+
+function CloneServerRegistry(
+      const ASourceServerName: string;
+      const ADestServerName: string;
+      const ADestServerAlias: string;
+      const ADestPort: string
+    ): Boolean;
+
+function CloneServerRegistryInteractive: Boolean;
+function CloneAllDatabasesForServer(const ASourceServer, ADestServer: string): integer;
+
+
+//CopyDBRegistry Server->Server
+// gibt neuen DBIndex zurück
+function CopyDBRegistry(ASourceDBIndex  : Integer; const ADestServerName : string;
+                        const ADestDBTitle : string = ''; ATemporary: Boolean = False): Integer;
+procedure RemoveDBRegistry(ADBIndex: Integer);
+function CloneDBRegistryInteractive(ANodeInfos: TPNodeInfos): Boolean;
+
+
 // Session-Cache für Passwörter
 var    SessionPasswordCache: TStringList;
   function  GetServerSessionPassword(const AServerName: string): string;
@@ -524,6 +550,9 @@ function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
 function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
 
 function GetDBIndexByDatabase(Database: TIBDatabase): Integer;
+function FindDBIndexByTitleAndServer(const ATitle, AServerName: string): Integer;
+
+
 function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
 
 function LoadClientLibIBX(ALib: string): boolean;
@@ -659,81 +688,678 @@ implementation
 
 uses Reg;
 
-{procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
-                            ATxParams: TStrings);
+function CloneServerRegistry(
+  const ASourceServerName: string;
+  const ADestServerName: string;
+  const ADestServerAlias: string;
+  const ADestPort: string
+): Boolean;
 var
-  Rec: TRegisteredDatabase;
-  CachedPwd: string;
-  ErrMsg: string;
+  SourceRec: TServerRecord;
+  DestRec: TServerRecord;
 begin
-  ErrMsg := '';
+  Result := False;
 
-  try
-    // 1. Validierung
-    if (ADBIndex < 0) or (ADBIndex >= Length(RegisteredDatabases)) then
-      raise Exception.Create('Invalid DBIndex: ' + IntToStr(ADBIndex));
+  // Quell-Server lesen
+  SourceRec := GetServerRecordFromFileByName(ASourceServerName);
+  if SourceRec.ServerName = '' then
+  begin
+    MessageDlg('Source server not found: ' + ASourceServerName, mtError, [mbOK], 0);
+    Exit;
+  end;
 
-    Rec := RegisteredDatabases[ADBIndex].RegRec;
+  // Prüfen ob Ziel-Name bereits existiert
+  DestRec := GetServerRecordFromFileByName(ADestServerName);
+  if DestRec.ServerName <> '' then
+  begin
+    MessageDlg('Server "' + ADestServerName + '" already exists!', mtError, [mbOK], 0);
+    Exit;
+  end;
 
-    // 2. Disconnect (Fehler ignorieren)
-    if Assigned(ATransaction) and ATransaction.InTransaction then
-      try ATransaction.Rollback; except end;
+  // Kopieren
+  DestRec := SourceRec;
+  DestRec.ServerName := ADestServerName;
 
-    if Assigned(ADatabase) and ADatabase.Connected then
-      try ADatabase.Connected := false; except end;
+  // Alias setzen (für Zukunft vorbereitet)
+  if ADestServerAlias <> '' then
+    DestRec.ServerAlias := ADestServerAlias
+  else
+    DestRec.ServerAlias := ADestServerName;
 
-    // 3. Credentials setzen
-    ADatabase.Params.Values['user_name'] := Rec.UserName;
+  // Port
+  if ADestPort <> '' then
+    DestRec.Port := ADestPort;
 
-    if Rec.Password <> '' then
-      ADatabase.Params.Values['password'] := Rec.Password
-    else
+  // Speichern
+  SaveServerDataToFile(DestRec);
+  Result := True;
+end;
+
+function CloneServerRegistryInteractive: Boolean;
+var
+  SourceServer: string;
+  DestServer, DestAlias, DestPort: string;
+  ServerList: TStringList;
+  i: Integer;
+  Form: TForm;
+  lblSource, lblDest, lblAlias, lblPort: TLabel;
+  cbSource: TComboBox;
+  edtDest, edtAlias, edtPort: TEdit;
+  chkCloneDBs: TCheckBox;
+  BtnOK, BtnCancel: TButton;
+  SourceRec: TServerRecord;
+  ServerNode: TTreeNode;
+  SelectedIdx: Integer;
+  DBCount: integer;
+begin
+  Result := False;
+
+  // 1) Server-Liste holen
+  ServerList := GetServerListFromTreeView;
+  if ServerList.Count = 0 then
+  begin
+    MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
+    ServerList.Free;
+    Exit;
+  end;
+
+  // 2) Markierten Server ermitteln
+  SelectedIdx := 0;
+  if Assigned(MainTreeView.Selected) then
+  begin
+    SourceServer := GetAncestorNodeText(MainTreeView.Selected, 0);
+    if SourceServer <> '' then
     begin
-      CachedPwd := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
-      if CachedPwd <> '' then
-        ADatabase.Params.Values['password'] := CachedPwd
-      else
-        ADatabase.Params.Values['password'] := '';
+      for i := 0 to ServerList.Count - 1 do
+      begin
+        if SameText(ServerList[i], SourceServer) then
+        begin
+          SelectedIdx := i;
+          Break;
+        end;
+      end;
+    end;
+  end;
+
+  // 3) Dialog aufbauen
+  Form := TForm.Create(nil);
+  try
+    Form.Caption := 'Clone Server';
+    Form.Width := 460;
+    Form.Height := 340;
+    Form.Position := poScreenCenter;
+    Form.BorderStyle := bsDialog;
+    Form.FormStyle := fsStayOnTop;
+
+    // Source Server
+    lblSource := TLabel.Create(Form);
+    lblSource.Parent := Form;
+    lblSource.Left := 20;
+    lblSource.Top := 15;
+    lblSource.Caption := 'Source Server:';
+
+    cbSource := TComboBox.Create(Form);
+    cbSource.Parent := Form;
+    cbSource.Left := 20;
+    cbSource.Top := 38;
+    cbSource.Width := 400;
+    cbSource.Style := csDropDownList;
+    for i := 0 to ServerList.Count - 1 do
+      cbSource.Items.Add(ServerList[i]);
+    cbSource.ItemIndex := SelectedIdx;  // ← Markierten Server vorauswählen!
+
+    // Destination Server (Edit, nicht Combo!)
+    lblDest := TLabel.Create(Form);
+    lblDest.Parent := Form;
+    lblDest.Left := 20;
+    lblDest.Top := 70;
+    lblDest.Caption := 'New Server Name:';
+
+    edtDest := TEdit.Create(Form);
+    edtDest.Parent := Form;
+    edtDest.Left := 20;
+    edtDest.Top := 93;
+    edtDest.Width := 400;
+    edtDest.Text := Trim(cbSource.Text) + '_Clone';
+
+    // Alias
+    lblAlias := TLabel.Create(Form);
+    lblAlias.Parent := Form;
+    lblAlias.Left := 20;
+    lblAlias.Top := 125;
+    lblAlias.Caption := 'New Server Alias:';
+
+    edtAlias := TEdit.Create(Form);
+    edtAlias.Parent := Form;
+    edtAlias.Left := 20;
+    edtAlias.Top := 148;
+    edtAlias.Width := 400;
+    edtAlias.Text := Trim(cbSource.Text) + 'Alias_Clone';
+
+    // Port
+    lblPort := TLabel.Create(Form);
+    lblPort.Parent := Form;
+    lblPort.Left := 20;
+    lblPort.Top := 180;
+    lblPort.Caption := 'Port:';
+
+    edtPort := TEdit.Create(Form);
+    edtPort.Parent := Form;
+    edtPort.Left := 20;
+    edtPort.Top := 203;
+    edtPort.Width := 100;
+
+    // Port vom Quell-Server laden
+    SourceRec := GetServerRecordFromFileByName(cbSource.Text);
+    edtPort.Text := SourceRec.Port;
+
+    // Clone Databases Checkbox
+    chkCloneDBs := TCheckBox.Create(Form);
+    chkCloneDBs.Parent := Form;
+    chkCloneDBs.Left := 20;
+    chkCloneDBs.Top := 235;
+    chkCloneDBs.Width := 300;
+    chkCloneDBs.Caption := 'Clone all databases of this server';
+    chkCloneDBs.Checked := False;
+
+    // Buttons
+    BtnOK := TButton.Create(Form);
+    BtnOK.Parent := Form;
+    BtnOK.Caption := 'OK';
+    BtnOK.Left := 160;
+    BtnOK.Top := 275;
+    BtnOK.Width := 100;
+    BtnOK.Default := True;
+    BtnOK.ModalResult := mrOK;
+
+    BtnCancel := TButton.Create(Form);
+    BtnCancel.Parent := Form;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left := 280;
+    BtnCancel.Top := 275;
+    BtnCancel.Width := 100;
+    BtnCancel.ModalResult := mrCancel;
+
+    if Form.ShowModal = mrOK then
+    begin
+      SourceServer := cbSource.Text;
+      DestServer := Trim(edtDest.Text);
+
+      if DestServer = '' then
+      begin
+        MessageDlg('Server name cannot be empty.', mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      // Prüfen ob Ziel-Name bereits existiert
+      SourceRec := GetServerRecordFromFileByName(DestServer);
+      if SourceRec.ServerName <> '' then
+      begin
+        MessageDlg('Server "' + DestServer + '" already exists!', mtError, [mbOK], 0);
+        Exit;
+      end;
+
+      DestAlias := Trim(edtAlias.Text);
+      if DestAlias = '' then
+        DestAlias := DestServer;
+
+      DestPort := Trim(edtPort.Text);
+
+      // 4) Server klonen
+      if CloneServerRegistry(SourceServer, DestServer, DestAlias, DestPort) then
+      begin
+        // TreeView aktualisieren
+        ServerNode := MainTreeView.Items.Add(nil, DestServer);
+        ServerNode.ImageIndex := 25;
+        ServerNode.SelectedIndex := 25;
+
+        if not Assigned(ServerNode.Data) then
+        begin
+          ServerNode.Data := AllocMem(SizeOf(TNodeInfos));
+        end;
+
+        TPNodeInfos(ServerNode.Data)^.ObjectType := tvotServer;
+        TPNodeInfos(ServerNode.Data)^.ServerSession := nil;
+
+        // 5) Datenbanken clonen wenn Checkbox aktiv
+        // Erfolgsmeldung
+        if chkCloneDBs.Checked then
+          DBCount := CloneAllDatabasesForServer(SourceServer, DestServer)
+        else
+          DBCount := 0;
+
+        MessageDlg(
+          'Clone completed!' + sLineBreak +
+          sLineBreak +
+          'Server: ' + DestServer + sLineBreak +
+          'Databases: ' + IntToStr(DBCount),
+          mtInformation, [mbOK], 0
+        );
+
+        Result := True;
+      end;
     end;
 
-    if Rec.Role <> '' then
-      ADatabase.Params.Values['sql_role_name'] := Rec.Role;
-    if Rec.Charset <> '' then
-      ADatabase.Params.Values['lc_ctype'] := Rec.Charset;
+  finally
+    Form.Free;
+    ServerList.Free;
+  end;
+end;
 
-    // 4. OnLogin-Handler + LoginPrompt
-    ADatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
-    ADatabase.LoginPrompt := True;
+function CloneAllDatabasesForServer(const ASourceServer, ADestServer: string): integer;
+var
+  i: Integer;
+  SourceTitle: string;
+  NewIndex: Integer;
+  ServerNode, NewDBNode, DummyNode: TTreeNode;
+  Count: Integer;
+begin
+  Count := 0;
 
-    // 5. Connect
-    if not ADatabase.Connected then
-      ADatabase.Connected := true;
-
-    // 6. Transaktionsparameter zuweisen (falls übergeben), dann starten
-    if Assigned(ATransaction) then
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if SameText(RegisteredDatabases[i].RegRec.ServerName, ASourceServer) then
     begin
-      if Assigned(ATxParams) then
-        ATransaction.Params.Assign(ATxParams);  // <-- Parameter übernehmen
+      SourceTitle := RegisteredDatabases[i].RegRec.Title;
 
-      if not ATransaction.InTransaction then
-        ATransaction.StartTransaction;
+      // DB-Registrierung kopieren (ohne Dialog, mit Default-Titel)
+      NewIndex := CopyDBRegistry(i, ADestServer, '', False);
+
+      if NewIndex >= 0 then
+      begin
+        Inc(Count);
+
+        // TreeView aktualisieren
+        ServerNode := GetServerNodeByServerName(ADestServer);
+        if Assigned(ServerNode) then
+        begin
+          NewDBNode := MainTreeView.Items.AddChild(ServerNode, RegisteredDatabases[NewIndex].RegRec.Title);
+          NewDBNode.ImageIndex := 3;
+          NewDBNode.SelectedIndex := 3;
+
+          if not Assigned(NewDBNode.Data) then
+          begin
+            NewDBNode.Data := AllocMem(SizeOf(TNodeInfos));
+          end;
+
+          TPNodeInfos(NewDBNode.Data)^.dbIndex := NewIndex;
+          TPNodeInfos(NewDBNode.Data)^.ObjectType := tvotDatabase;
+          TPNodeInfos(NewDBNode.Data)^.ServerSession := nil;
+          TPNodeInfos(NewDBNode.Data)^.SimpleObjExtractor := nil;
+          TPNodeInfos(NewDBNode.Data)^.UnIntelliSenseCache := nil;
+
+          DummyNode := MainTreeView.Items.AddChild(NewDBNode, 'Loading...');
+        end;
+      end;
+    end;
+  end;
+
+  Result := Count;
+end;
+
+function ShowServerSelectDialog(
+  const ATitle: string;
+  const ASuggestedDBTitle: string;
+  out ASelectedServer: string;
+  out ADBTitle: string
+): Boolean;
+var
+  Form: TForm;
+  ComboBox: TComboBox;
+  edtDBTitle: TEdit;
+  lblServer, lblTitle: TLabel;
+  BtnOK, BtnCancel: TButton;
+  ServerList: TStringList;
+  i: Integer;
+begin
+  Result := False;
+  ASelectedServer := '';
+  ADBTitle := '';
+
+  ServerList := GetServerListFromTreeView;
+  if ServerList.Count = 0 then
+  begin
+    MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
+    ServerList.Free;
+    Exit;
+  end;
+
+  Form := TForm.Create(nil);
+  try
+    Form.Caption := ATitle;
+    Form.Width := 440;
+    Form.Height := 250;
+    Form.Position := poScreenCenter;
+    Form.BorderStyle := bsDialog;
+    Form.FormStyle := fsStayOnTop;
+
+    // Server-Label
+    lblServer := TLabel.Create(Form);
+    lblServer.Parent := Form;
+    lblServer.Left := 20;
+    lblServer.Top := 15;
+    lblServer.Caption := 'Destination Server:';
+
+    // Server-ComboBox
+    ComboBox := TComboBox.Create(Form);
+    ComboBox.Parent := Form;
+    ComboBox.Left := 20;
+    ComboBox.Top := 40;
+    ComboBox.Width := 390;
+    ComboBox.Style := csDropDownList;
+    for i := 0 to ServerList.Count - 1 do
+      ComboBox.Items.Add(ServerList[i]);
+    ComboBox.ItemIndex := 0;
+
+    // Titel-Label
+    lblTitle := TLabel.Create(Form);
+    lblTitle.Parent := Form;
+    lblTitle.Left := 20;
+    lblTitle.Top := 80;
+    lblTitle.Caption := 'Database Title:';
+
+    // Titel-Edit
+    edtDBTitle := TEdit.Create(Form);
+    edtDBTitle.Parent := Form;
+    edtDBTitle.Left := 20;
+    edtDBTitle.Top := 105;
+    edtDBTitle.Width := 390;
+    edtDBTitle.Text := ASuggestedDBTitle;
+
+    // Buttons
+    BtnOK := TButton.Create(Form);
+    BtnOK.Parent := Form;
+    BtnOK.Caption := 'OK';
+    BtnOK.Left := 140;
+    BtnOK.Top := 155;
+    BtnOK.Width := 100;
+    BtnOK.Default := True;
+    BtnOK.ModalResult := mrOK;
+
+    BtnCancel := TButton.Create(Form);
+    BtnCancel.Parent := Form;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left := 260;
+    BtnCancel.Top := 155;
+    BtnCancel.Width := 100;
+    BtnCancel.ModalResult := mrCancel;
+
+    if Form.ShowModal = mrOK then
+    begin
+      ASelectedServer := ComboBox.Text;
+      ADBTitle := Trim(edtDBTitle.Text);
+      if ADBTitle = '' then
+        ADBTitle := ASuggestedDBTitle;
+      Result := True;
+    end;
+
+  finally
+    Form.Free;
+    ServerList.Free;
+  end;
+end;
+
+// --------------------------------------------------------------------------
+// Datenbank‑Registrierung kopieren (evtl. temporär)
+// --------------------------------------------------------------------------
+function CopyDBRegistry(
+  ASourceDBIndex  : Integer;
+  const ADestServerName : string;
+  const ADestDBTitle : string = '';
+  ATemporary      : Boolean = False
+): Integer;
+var
+  SourceRec  : TRegisteredDatabase;
+  DestRec    : TRegisteredDatabase;
+  ServerRec  : TServerRecord;
+  FileName   : string;
+  F          : file of TRegisteredDatabase;
+  NewTitle   : string;
+  Counter    : Integer;
+  DBFilePath : string;
+begin
+  Result := -1;
+
+  // 1) Quell‑Registrierung lesen
+  if (ASourceDBIndex < 0) or (ASourceDBIndex >= Length(RegisteredDatabases)) then
+    raise Exception.Create('CopyDBRegistry: Invalid source DBIndex');
+
+  SourceRec := RegisteredDatabases[ASourceDBIndex].RegRec;
+  ServerRec := GetServerRecordFromFileByName(ADestServerName);
+  if ServerRec.ServerName = '' then
+    raise Exception.Create('CopyDBRegistry: Destination server not found: ' + ADestServerName);
+
+  // 2) Neuen Record vorbereiten
+  DestRec := SourceRec;
+  DestRec.ServerName := ADestServerName;
+  DestRec.Deleted    := False;
+  DestRec.LastOpened := Now;
+  DestRec.ConnectOnApplicationStart := False;
+
+  // Server‑Einstellungen übernehmen
+  DestRec.IsEmbedded            := ServerRec.IsEmbedded;
+  DestRec.FireBirdClientLibPath := ServerRec.ClientLibraryPath;
+  DestRec.OverwriteLoadedClientLib := False;
+  DestRec.Port                  := ServerRec.Port;
+  DestRec.ServerVersionMajor    := ServerRec.VersionMajor;
+  DestRec.ServerVersionMinor    := ServerRec.VersionMinor;
+  DestRec.ServerVersionString   := ServerRec.VersionString;
+
+  // 3) Connection-String je nach Ziel-Server-Typ anpassen
+  DBFilePath := GetDBFileNameFromConnectionString(SourceRec.DatabaseName);
+
+  if ServerRec.IsEmbedded then
+  begin
+    // Ziel ist Local/Embedded → nur Dateipfad
+    DestRec.DatabaseName := DBFilePath;
+
+    // Warnung NUR wenn Datei NICHT existiert
+    if not FileExists(DBFilePath) then
+    begin
+      if MessageDlg(
+           'The destination server is a Local/Embedded server.' + sLineBreak +
+           sLineBreak +
+           'The database file does NOT exist at:' + sLineBreak +
+           DBFilePath + sLineBreak +
+           sLineBreak +
+           'TurboBird will NOT copy the file automatically.' + sLineBreak +
+           'Please ensure the file exists before connecting.' + sLineBreak +
+           sLineBreak +
+           'Continue with registration anyway?',
+           mtWarning, [mbYes, mbNo], 0) <> mrYes then
+        Exit;
+    end;
+  end
+  else if (ServerRec.Port <> '') then
+    DestRec.DatabaseName := ServerRec.ServerName + '/' + ServerRec.Port + ':' + DBFilePath
+  else
+    DestRec.DatabaseName := ServerRec.ServerName + ':' + DBFilePath;
+
+  // 4) Titel setzen (entweder Vorschlag oder Original)
+  if ADestDBTitle <> '' then
+    NewTitle := ADestDBTitle
+  else
+    NewTitle := SourceRec.Title;
+
+  // Eindeutig machen
+  Counter := 1;
+  while FindDBIndexByTitleAndServer(NewTitle, ADestServerName) >= 0 do
+  begin
+    Inc(Counter);
+    if ADestDBTitle <> '' then
+      NewTitle := ADestDBTitle + '_' + IntToStr(Counter)
+    else
+      NewTitle := SourceRec.Title + '_' + IntToStr(Counter);
+  end;
+  DestRec.Title := NewTitle;
+
+  // 5) In Datei speichern
+  FileName := GetConfigurationDirectory + DatabasesRegFile;
+  AssignFile(F, FileName);
+  try
+    if FileExists(FileName) then
+    begin
+      FileMode := 2;
+      Reset(F);
+      Seek(F, System.FileSize(F));
+    end
+    else
+      Rewrite(F);
+
+    Write(F, DestRec);
+    CloseFile(F);
+  except
+    try CloseFile(F); except end;
+    raise;
+  end;
+
+  // 6) Ins RegisteredDatabases‑Array aufnehmen
+  SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
+  with RegisteredDatabases[High(RegisteredDatabases)] do
+  begin
+    RegRec     := DestRec;
+    OrigRegRec := DestRec;
+    Index      := High(RegisteredDatabases);
+
+    IBDatabase := TIBDatabase.Create(nil);
+    IBDatabase.DatabaseName := DestRec.DatabaseName;
+    IBDatabase.FirebirdLibraryPathName := DestRec.FireBirdClientLibPath;
+    IBDatabase.LoginPrompt := False;
+    IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
+
+    IBTransaction := TIBTransaction.Create(nil);
+    IBTransaction.DefaultDatabase := IBDatabase;
+    IBDatabase.DefaultTransaction := IBTransaction;
+
+    IBQuery := TIBQuery.Create(nil);
+    IBQuery.Database := IBDatabase;
+    IBQuery.Transaction := IBTransaction;
+
+    IBDatabaseInfo := TIBDatabaseInfo.Create(nil);
+    IBDatabaseInfo.Database := IBDatabase;
+  end;
+
+  Result := High(RegisteredDatabases);
+end;
+
+// --------------------------------------------------------------------------
+// Datenbank‑Registrierung sauber entfernen
+// --------------------------------------------------------------------------
+procedure RemoveDBRegistry(ADBIndex: Integer);
+var
+  i: Integer;
+begin
+  if (ADBIndex < 0) or (ADBIndex >= Length(RegisteredDatabases)) then
+    Exit;
+
+  // Aus Datei als gelöscht markieren
+  DeleteDBRegistrationFromFile(
+    RegisteredDatabases[ADBIndex].RegRec.Title,
+    RegisteredDatabases[ADBIndex].RegRec.ServerName
+  );
+  RemoveDeletedDBRegistrationsFromFile;
+
+  // Datenbank‑Objekte freigeben
+  with RegisteredDatabases[ADBIndex] do
+  begin
+    if Assigned(IBQuery)         then FreeAndNil(IBQuery);
+    if Assigned(IBDatabaseInfo)  then FreeAndNil(IBDatabaseInfo);
+    if Assigned(IBTransaction)   then FreeAndNil(IBTransaction);
+    if Assigned(IBDatabase)      then FreeAndNil(IBDatabase);
+  end;
+
+  // Aus dem Array entfernen
+  for i := ADBIndex to High(RegisteredDatabases) - 1 do
+    RegisteredDatabases[i] := RegisteredDatabases[i + 1];
+  SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
+end;
+
+// --------------------------------------------------------------------------
+// Interaktiver Aufruf: Rechtsklick → Clone Registry
+// --------------------------------------------------------------------------
+function CloneDBRegistryInteractive(ANodeInfos: TPNodeInfos): Boolean;
+var
+  DestServerName, DestDBTitle: string;
+  NewIndex: Integer;
+  SourceDBName: string;
+  ServerNode, NewDBNode, DummyNode: TTreeNode;
+begin
+  Result := False;
+  if not Assigned(ANodeInfos) then Exit;
+
+  // 1) Quell-DB-Name merken
+  SourceDBName := RegisteredDatabases[ANodeInfos^.dbIndex].RegRec.Title;
+
+  // 2) Server-Auswahldialog mit Titel-Vorschlag
+  if not ShowServerSelectDialog(
+       'Clone Database Registration',
+       SourceDBName + '_Clone',
+       DestServerName,
+       DestDBTitle
+     ) then Exit;
+
+  // 3) Registrierung kopieren
+  try
+    NewIndex := CopyDBRegistry(ANodeInfos^.dbIndex, DestServerName, DestDBTitle, False);
+
+    if NewIndex >= 0 then
+    begin
+      // 4) TreeView direkt aktualisieren – KEIN LoadRegisteredDatabases!
+      ServerNode := GetServerNodeByServerName(DestServerName);
+
+      if Assigned(ServerNode) then
+      begin
+        // Prüfen ob "Loading..."-Node existiert und ggf. löschen
+        if (ServerNode.Count > 0) and (ServerNode.Items[0].Text = 'Loading...') then
+          ServerNode.Items[0].Delete;
+
+        // Neuen DB-Node einfügen
+        NewDBNode := MainTreeView.Items.AddChild(ServerNode, RegisteredDatabases[NewIndex].RegRec.Title);
+        NewDBNode.ImageIndex := 3;
+        NewDBNode.SelectedIndex := 3;
+
+        // NodeInfo initialisieren
+        if not Assigned(NewDBNode.Data) then
+        begin
+          NewDBNode.Data := AllocMem(SizeOf(TNodeInfos));
+        end;
+
+        TPNodeInfos(NewDBNode.Data)^.dbIndex := NewIndex;
+        TPNodeInfos(NewDBNode.Data)^.ObjectType := tvotDatabase;
+        TPNodeInfos(NewDBNode.Data)^.ServerSession := nil;
+        TPNodeInfos(NewDBNode.Data)^.SimpleObjExtractor := nil;
+        TPNodeInfos(NewDBNode.Data)^.UnIntelliSenseCache := nil;
+        TPNodeInfos(NewDBNode.Data)^.ViewForm := nil;
+        TPNodeInfos(NewDBNode.Data)^.EditorForm := nil;
+        TPNodeInfos(NewDBNode.Data)^.NewForm := nil;
+        TPNodeInfos(NewDBNode.Data)^.ExecuteForm := nil;
+
+        // Dummy-Node für Lazy-Loading
+        DummyNode := MainTreeView.Items.AddChild(NewDBNode, 'Loading...');
+
+        // Server expandieren damit der neue DB-Node sichtbar ist
+        ServerNode.Expand(False);
+      end;
+
+      // Erfolgsmeldung
+      MessageDlg(
+        'Database registration cloned successfully!' + sLineBreak +
+        sLineBreak +
+        'Source: ' + SourceDBName + sLineBreak +
+        'Destination: ' + RegisteredDatabases[NewIndex].RegRec.Title +
+        ' on server ' + DestServerName,
+        mtInformation, [mbOK], 0
+      );
+      Result := True;
     end;
 
   except
     on E: Exception do
     begin
-      // Bei Login-Fehler: Session-Cache löschen wenn Passwort daraus kam
-      if (Rec.Password = '') and (ADBIndex >= 0) then
-        ClearDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
-
-      ErrMsg := 'ConnectDBPrepared failed:' + sLineBreak +
-                '  Server: ' + Rec.ServerName + sLineBreak +
-                '  Database: ' + Rec.DatabaseName + sLineBreak +
-                '  Error: ' + E.Message;
-      raise Exception.Create(ErrMsg);
+      MessageDlg('Clone failed:' + sLineBreak + E.Message, mtError, [mbOK], 0);
     end;
   end;
-end;}
+end;
 
 procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
                             ATxParams: TStrings);
@@ -1257,92 +1883,6 @@ begin
   else
     Result := AServerName + '/' + APort + ':' + ADBFileName;
 end;
-
-{function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
-var
-  ServerRecord: TServerRecord;
-  ServerSession: TServerSession;
-  LoginForm: TfrmLoginServiceManager;
-  UserName, Password: string;
-begin
-  Result := False;
-  ErrorStr := '';
-  ServerSession := nil;
-
-  try
-    ServerRecord := GetServerRecordFromFileByName(AServerName);
-
-    UserName := ServerRecord.UserName;
-    Password := ServerRecord.Password;
-
-    // 1. Wenn kein Passwort gespeichert → Session-Cache prüfen
-    if (Password = '') and (UserName <> '') then
-      Password := GetServerSessionPassword(AServerName);
-
-    // 2. Wenn immer noch kein Passwort → Server-Login-Dialog
-    if (Password = '') and (UserName <> '') then
-    begin
-      LoginForm := TfrmLoginServiceManager.Create(nil);
-      try
-        LoginForm.lbSever.Caption := AServerName;
-        LoginForm.edtUserName.Text := UserName;
-        LoginForm.edtPassword.Text := '';
-        LoginForm.chkBoxSavePwd.Checked := False;
-
-        if LoginForm.ShowModal <> mrOK then
-        begin
-          ErrorStr := 'Login cancelled by user.';
-          Exit;
-        end;
-
-        UserName := LoginForm.edtUserName.Text;
-        Password := LoginForm.edtPassword.Text;
-
-        if LoginForm.chkBoxSavePwd.Checked then
-        begin
-          // Dauerhaft in Datei speichern
-          ServerRecord.UserName := UserName;
-          ServerRecord.Password := Password;
-          SaveServerDataToFile(ServerRecord);
-        end
-        else
-        begin
-          // NUR in Session-Cache (temporär)
-          SetServerSessionPassword(AServerName, Password);
-        end;
-      finally
-        LoginForm.Free;
-      end;
-    end;
-
-    // 3. ServerSession erstellen und verbinden
-    ServerSession := TServerSession.Create(
-      AServerName, '', '', '', '', TCP, '', '', '', '', '', 0, 0, False, False, 0, 0, 0
-    );
-
-    ApplyServerRecordToSession(ServerRecord, ServerSession);
-    ServerSession.UserName := UserName;
-    ServerSession.Password := Password;
-
-    if not ServerSession.Connected then
-      if not ServerSession.IBXConnect then
-      begin
-        ErrorStr := ServerSession.ErrorStr;
-        // Bei Fehler: Session-Cache löschen
-        ClearServerSessionPassword(AServerName);
-        Exit;
-      end;
-
-    Result := True;
-
-  finally
-    if Assigned(ServerSession) then
-    begin
-      ServerSession.Disconnect;
-      ServerSession.Free;
-    end;
-  end;
-end;}
 
 function IsServerReachable(AServerName: string; out ErrorStr: string): Boolean;
 var
@@ -3686,75 +4226,6 @@ begin
 end;
 
 (**************  Get Firebird Type name  *****************)
-{function GetFBTypeName(Index: Integer;
-  SubType: integer = -1; FieldLength: integer = -1;
-  Precision: integer = -1; Scale: integer = -1;
-  CharacterSet: string = ''; CharacterLengt: integer = -1
-): string;
-begin
-  case Index of
-    7  : Result := 'SMALLINT';   // SHORT
-    8  : Result := 'INTEGER';    // LONG
-    9  : Result := 'QUAD';       // alt, historisch
-    10 : Result := 'FLOAT';
-    11 : Result := 'D_FLOAT';    // deprecated
-    12 : Result := 'DATE';
-    13 : Result := 'TIME';
-    14 : Result := 'CHAR';       // Hier Länge in Klammern anhängen
-    16 : Result := 'BIGINT';     // INT64 oder DECIMAL/NUMERIC abhängig von SubType
-    23 : Result := 'BOOLEAN';    // Firebird 3+
-    27 : Result := 'DOUBLE PRECISION';
-    35 : Result := 'TIMESTAMP';
-    37 : Result := 'VARCHAR';    // VarCharType
-    40 : Result := 'CSTRING';    // nur für UDFs
-    45 : Result := 'BLOB_ID';    // interner Blob-Identifier
-    261: Result := 'BLOB';       // BlobType
-
-    // Firebird 4.0 / 5.0 neue Typen
-    24: Result := 'DECFLOAT(16)';
-    25: Result := 'DECFLOAT(34)';
-    26: Result := 'INT128';
-    28: Result := 'TIME WITH TIME ZONE';
-    29: Result := 'TIMESTAMP WITH TIME ZONE';
-
-  else
-    Result := 'UNKNOWN_TYPE. CODE = ' + IntToStr(Index);
-  end;
-
-
-  // Numerische Typen mit SubType (NUMERIC/DECIMAL)
-  if Index in [7, 8, 16] then
-  begin
-    if SubType = 0 then
-    begin
-      // Normale Integer-Typen
-      case Index of
-        7: Result := 'SMALLINT';
-        8: Result := 'INTEGER';
-        16: Result := 'BIGINT';
-      end;
-    end
-    else
-    begin
-      // NUMERIC oder DECIMAL mit Präzision und Scale
-      if SubType = 1 then
-        Result := 'NUMERIC('
-      else if SubType = 2 then
-        Result := 'DECIMAL('
-      else
-        Result := 'UNKNOWN_NUMERIC(';
-
-      if Precision < 0 then
-        Precision := 2; // Default-Wert
-
-      Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
-    end;
-  end;
-
-  if (Index = 14) and (CharacterLengt = 63) and (UpperCase(Trim(CharacterSet)) = 'OCTETS') then
-      Result := 'UUID';
-end;}
-
 function GetFBTypeName(Index: Integer;
   SubType: integer = -1; FieldLength: integer = -1;
   Precision: integer = -1; Scale: integer = -1;
@@ -3967,6 +4438,25 @@ begin
   for i := 0 to High(RegisteredDatabases) do
     if RegisteredDatabases[i].IBDatabase = Database then
       Exit(i);
+end;
+
+// --------------------------------------------------------------------------
+// Hilfsfunktion: DB‑Index anhand Title + Servername finden
+// --------------------------------------------------------------------------
+function FindDBIndexByTitleAndServer(const ATitle, AServerName: string): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if SameText(RegisteredDatabases[i].RegRec.Title, ATitle) and
+       SameText(RegisteredDatabases[i].RegRec.ServerName, AServerName) then
+    begin
+      Result := i;
+      Exit;
+    end;
+  end;
 end;
 
 function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean = false): Boolean;

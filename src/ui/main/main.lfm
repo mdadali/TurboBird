@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = -34
+  Left = 424
   Height = 612
-  Top = 193
+  Top = 136
   Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -7690,6 +7690,11 @@ object fmMain: TfmMain
       ImageIndex = 25
       OnClick = lmServerRegistryClick
     end
+    object lmCloneServer: TMenuItem
+      Tag = -2
+      Caption = 'Clone Server...'
+      OnClick = lmCloneServerClick
+    end
     object lmCreateDB: TMenuItem
       Tag = -2
       Caption = 'Create New Database'
@@ -8263,6 +8268,10 @@ object fmMain: TfmMain
     end
     object lmSeparator2: TMenuItem
       Caption = '-'
+    end
+    object lmCloneDBRegistry: TMenuItem
+      Caption = 'Clone DB-Registry'
+      OnClick = lmCloneDBRegistryClick
     end
     object lmEditDBReg: TMenuItem
       Caption = 'Edit DB Registration'
