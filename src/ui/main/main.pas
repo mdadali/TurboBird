@@ -143,6 +143,8 @@ type
     lmExecuteForm: TMenuItem;
     lmCloneToExternalTable: TMenuItem;
     lmDropRole: TMenuItem;
+    lmCloneDBRegistry: TMenuItem;
+    lmCloneServer: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -320,6 +322,8 @@ type
     procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
     procedure lmChangePasswordClick(Sender: TObject);
+    procedure lmCloneDBRegistryClick(Sender: TObject);
+    procedure lmCloneServerClick(Sender: TObject);
     procedure lmCloneToExternalTableClick(Sender: TObject);
     procedure lmCompareClick(Sender: TObject);
     procedure lmCopyRolePermissionClick(Sender: TObject);
@@ -2009,6 +2013,24 @@ begin
         ShowMessage('Error while changing password: ' + e.Message);
     end;
   end;
+end;
+
+procedure TfmMain.lmCloneDBRegistryClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  NodeInfo: TPNodeInfos;
+begin
+  SelNode := tvMain.Selected;
+  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
+  NodeInfo := TPNodeInfos(SelNode.Data);
+
+  CloneDBRegistryInteractive(NodeInfo);
+    //LoadRegisteredDatabases;  // TreeView neu laden
+end;
+
+procedure TfmMain.lmCloneServerClick(Sender: TObject);
+begin
+  CloneServerRegistryInteractive;
 end;
 
 procedure TfmMain.lmCompareClick(Sender: TObject);

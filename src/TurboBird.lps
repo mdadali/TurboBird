@@ -250,8 +250,8 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="5664"/>
-        <CursorPos X="26" Y="5681"/>
+        <TopLine Value="2018"/>
+        <CursorPos X="3" Y="2027"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -260,9 +260,10 @@
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="5595" ID="3"/>
+          <Item0 Y="5617" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="ui\createdb\createdb.pas"/>
@@ -271,10 +272,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="125"/>
-        <CursorPos X="45" Y="153"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="37"/>
+        <CursorPos X="15" Y="54"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="ui\registerdb\reg.pas"/>
@@ -283,10 +285,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="95"/>
-        <CursorPos Y="122"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="122"/>
+        <CursorPos X="21" Y="132"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="ui\querywindow\querywindow.pas"/>
@@ -419,12 +423,13 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="460"/>
-        <CursorPos X="43" Y="486"/>
+        <TopLine Value="917"/>
+        <CursorPos X="22" Y="922"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="1645" ID="4"/>
+          <Item0 Y="2185" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit42>
@@ -1192,10 +1197,9 @@
         <ComponentName Value="fmCloneToExternalTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
         <TopLine Value="351"/>
-        <CursorPos X="3" Y="370"/>
+        <CursorPos X="58" Y="378"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1210,7 +1214,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="81"/>
         <CursorPos X="48" Y="96"/>
-        <UsageCount Value="165"/>
+        <UsageCount Value="172"/>
       </Unit117>
       <Unit118>
         <Filename Value="common\ucopytable.pas"/>
@@ -1218,7 +1222,7 @@
         <UnitName Value="uCopyTable"/>
         <EditorIndex Value="3"/>
         <CursorPos X="43" Y="14"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="36"/>
         <Loaded Value="True"/>
       </Unit118>
       <Unit119>
@@ -1477,126 +1481,126 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="30" HistoryIndex="28">
       <Position1>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="365" Column="3" TopLine="346"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1233" Column="36" TopLine="1216"/>
       </Position1>
       <Position2>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="9" Column="49"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="897" Column="14" TopLine="878"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="327" Column="2" TopLine="327"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="122" TopLine="95"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="332" Column="41" TopLine="325"/>
+        <Filename Value="ui\registerdb\reg.pas"/>
+        <Caret Line="142" Column="16" TopLine="122"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="386" Column="23" TopLine="358"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="2477" Column="19" TopLine="2468"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="133" Column="25" TopLine="116"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8370" Column="3" TopLine="8368"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="199" Column="49" TopLine="171"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="448" Column="21" TopLine="432"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="332" Column="41" TopLine="304"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8371" Column="15" TopLine="8343"/>
       </Position8>
       <Position9>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="7" Column="40"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="916" TopLine="882"/>
       </Position9>
       <Position10>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="19"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1181" Column="27" TopLine="1181"/>
       </Position10>
       <Position11>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="492" Column="22" TopLine="489"/>
       </Position11>
       <Position12>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="281" Column="30" TopLine="253"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="870" Column="17" TopLine="870"/>
       </Position12>
       <Position13>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="635" Column="57" TopLine="627"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="696" Column="17" TopLine="678"/>
       </Position13>
       <Position14>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="880" Column="31" TopLine="852"/>
       </Position14>
       <Position15>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="237" Column="33" TopLine="222"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="8390" Column="14" TopLine="8386"/>
       </Position15>
       <Position16>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="360" Column="32" TopLine="332"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="2033" TopLine="2026"/>
       </Position16>
       <Position17>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="42" Column="33" TopLine="28"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="872" TopLine="863"/>
       </Position17>
       <Position18>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="27"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="873" TopLine="863"/>
       </Position18>
       <Position19>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="2033" TopLine="2026"/>
       </Position19>
       <Position20>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="405" Column="52" TopLine="401"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="494" Column="16" TopLine="479"/>
       </Position20>
       <Position21>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="486" Column="21" TopLine="479"/>
       </Position21>
       <Position22>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="167" Column="23" TopLine="152"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="2033" TopLine="2026"/>
       </Position22>
       <Position23>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="424" Column="46" TopLine="400"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="492" Column="19" TopLine="479"/>
       </Position23>
       <Position24>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="491" Column="28" TopLine="463"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="729" TopLine="729"/>
       </Position24>
       <Position25>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="47" Column="22" TopLine="31"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="493" Column="22" TopLine="477"/>
       </Position25>
       <Position26>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="105" Column="21" TopLine="78"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="926" Column="37" TopLine="898"/>
       </Position26>
       <Position27>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="388" Column="34" TopLine="368"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="947" TopLine="933"/>
       </Position27>
       <Position28>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="43" Column="27" TopLine="28"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="492" Column="21" TopLine="476"/>
       </Position28>
       <Position29>
-        <Filename Value="common\ucopytable.pas"/>
-        <Caret Line="206" Column="50" TopLine="199"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="922" Column="22" TopLine="917"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
-        <Caret Line="352" Column="11" TopLine="351"/>
+        <Filename Value="ui\createdb\createdb.pas"/>
+        <Caret Line="54" Column="15" TopLine="37"/>
       </Position30>
     </JumpHistory>
     <RunParams>
