@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1860"/>
+      <BuildNr Value="1865"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -664,7 +664,7 @@
         <PackageName Value="LCL"/>
       </Item32>
     </RequiredPackages>
-    <Units Count="120">
+    <Units Count="121">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1401,6 +1401,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableCross"/>
       </Unit119>
+      <Unit120>
+        <Filename Value="common/uformulapresets.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uFormulaPresets"/>
+      </Unit120>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

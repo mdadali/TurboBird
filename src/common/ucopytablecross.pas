@@ -218,7 +218,8 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TCopyThreadCross.Execute;
+//IBScript-Version
+{procedure TCopyThreadCross.Execute;
 var
   SourceQuery: TIBQuery;
   DestQuery: TIBQuery;
@@ -424,7 +425,352 @@ begin
     DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
   end;
 
+end;}
+
+//query-version
+{procedure TCopyThreadCross.Execute;
+var
+  SourceQuery, DestQuery: TIBQuery;
+  BatchCount, BatchIndex: Integer;
+  FromRow, ToRow, BatchRows: Integer;
+  SQL: string;
+  i: Integer;
+  DestFields, DestValues: string;
+  FieldValue: string;
+  SelectFields: string;
+  OldDecimalSep: Char;
+  RowsInBatch: Integer;
+begin
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  DefaultFormatSettings.DecimalSeparator := '.';
+  try
+    try
+      // Zielfelder einmalig sammeln
+      DestFields := '';
+      for i := 0 to High(FFieldTransforms) do
+      begin
+        if FFieldTransforms[i].CopyField then
+        begin
+          if DestFields <> '' then
+            DestFields := DestFields + ', ';
+          DestFields := DestFields + FFieldTransforms[i].DestField;
+        end;
+      end;
+
+      // SELECT-Felder mit Formeln einmalig zusammenstellen
+      SelectFields := '';
+      for i := 0 to High(FFieldTransforms) do
+      begin
+        if not FFieldTransforms[i].CopyField then
+          Continue;
+
+        if SelectFields <> '' then
+          SelectFields := SelectFields + ', ';
+
+        if FFieldTransforms[i].Formula <> '' then
+        begin
+          SelectFields := SelectFields + '(' +
+            StringReplace(FFieldTransforms[i].Formula, '$1',
+                          FFieldTransforms[i].SourceField, [rfReplaceAll]) + ')';
+        end
+        else
+        begin
+          SelectFields := SelectFields + FFieldTransforms[i].SourceField;
+        end;
+      end;
+
+      SourceQuery := TIBQuery.Create(nil);
+      DestQuery := TIBQuery.Create(nil);
+      try
+        SourceQuery.Database := FSourceDB;
+        SourceQuery.Transaction := FSourceTrans;
+        DestQuery.Database := FDestDB;
+        DestQuery.Transaction := FDestTrans;
+
+        BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
+        FStartTime := Now;
+
+        for BatchIndex := 0 to BatchCount - 1 do
+        begin
+          if Cancelled then
+            Break;
+
+          FromRow := FFromRow + (BatchIndex * FBatchSize);
+          ToRow := FromRow + FBatchSize - 1;
+          if ToRow > (FFromRow + FTotalRows - 1) then
+            ToRow := FFromRow + FTotalRows - 1;
+          BatchRows := ToRow - FromRow + 1;
+
+          // ============================================================
+          // 1) SELECT auf Quell-DB ausführen
+          // ============================================================
+          SourceQuery.Close;
+          SourceQuery.SQL.Text :=
+            'SELECT FIRST ' + IntToStr(BatchRows) +
+            ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
+            SelectFields +
+            ' FROM ' + FSourceTable;
+
+          if not FSourceTrans.InTransaction then
+            FSourceTrans.StartTransaction;
+
+          SourceQuery.Open;
+
+          // ============================================================
+          // 2) Zeilenweise INSERT auf Ziel-DB
+          // ============================================================
+          RowsInBatch := 0;
+
+          while not SourceQuery.EOF do
+          begin
+            if Cancelled then
+              Break;
+
+            // VALUES für EINE Zeile bauen
+            DestValues := '';
+            for i := 0 to SourceQuery.FieldCount - 1 do
+            begin
+              if DestValues <> '' then
+                DestValues := DestValues + ', ';
+
+              if SourceQuery.Fields[i].IsNull then
+                DestValues := DestValues + 'NULL'
+              else
+              begin
+                FieldValue := SourceQuery.Fields[i].AsString;
+
+                if SourceQuery.Fields[i].DataType in [ftSmallint, ftInteger, ftLargeint,
+                                                       ftFloat, ftCurrency, ftBCD, ftFMTBcd] then
+                  DestValues := DestValues + FieldValue
+                else if SourceQuery.Fields[i].DataType = ftBoolean then
+                  DestValues := DestValues + FieldValue
+                else
+                  DestValues := DestValues + QuotedStr(FieldValue);
+              end;
+            end;
+
+            SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + DestValues + ')';
+
+            DestQuery.Close;
+            DestQuery.SQL.Text := SQL;
+
+            if not FDestTrans.InTransaction then
+              FDestTrans.StartTransaction;
+
+            DestQuery.ExecSQL;
+
+            Inc(FCopiedRows);
+            Inc(RowsInBatch);
+            SourceQuery.Next;
+
+            // ============================================================
+            // 3) CommitRetaining nach FBatchSize Zeilen
+            // ============================================================
+            if (RowsInBatch >= FBatchSize) then
+            begin
+              FDestTrans.CommitRetaining;
+              RowsInBatch := 0;
+
+              Synchronize(@UpdateProgressGUI);
+              //Application.ProcessMessages;
+            end;
+          end;
+
+          SourceQuery.Close;
+
+          // Rest committen
+          if RowsInBatch > 0 then
+          begin
+            FDestTrans.CommitRetaining;
+            Synchronize(@UpdateProgressGUI);
+            Application.ProcessMessages;
+          end;
+        end;
+
+        if not Cancelled then
+          FDestTrans.Commit;
+
+        //Application.ProcessMessages;
+
+      finally
+        SourceQuery.Free;
+        DestQuery.Free;
+      end;
+
+    except
+      on E: Exception do
+      begin
+        FErrorMessage := E.Message;
+        if FDestTrans.InTransaction then
+          FDestTrans.Rollback;
+      end;
+    end;
+  finally
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+  end;
+end;}
+
+procedure TCopyThreadCross.Execute;
+var
+  SourceQuery, DestQuery: TIBQuery;
+  BatchCount, BatchIndex: Integer;
+  FromRow, ToRow, BatchRows: Integer;
+  i: Integer;
+  DestFields, SelectFields, ParamNames: string;
+  FieldValue: string;
+  OldDecimalSep: Char;
+  RowsInBatch: Integer;
+begin
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  DefaultFormatSettings.DecimalSeparator := '.';
+  try
+    try
+      // Zielfelder + Parameter-Namen einmalig sammeln
+      DestFields := '';
+      ParamNames := '';
+      for i := 0 to High(FFieldTransforms) do
+      begin
+        if FFieldTransforms[i].CopyField then
+        begin
+          if DestFields <> '' then
+          begin
+            DestFields := DestFields + ', ';
+            ParamNames := ParamNames + ', ';
+          end;
+          DestFields := DestFields + FFieldTransforms[i].DestField;
+          ParamNames := ParamNames + ':' + FFieldTransforms[i].DestField;
+        end;
+      end;
+
+      // SELECT-Felder mit Formeln
+      SelectFields := '';
+      for i := 0 to High(FFieldTransforms) do
+      begin
+        if not FFieldTransforms[i].CopyField then
+          Continue;
+        if SelectFields <> '' then
+          SelectFields := SelectFields + ', ';
+        if FFieldTransforms[i].Formula <> '' then
+          SelectFields := SelectFields + '(' +
+            StringReplace(FFieldTransforms[i].Formula, '$1',
+                          FFieldTransforms[i].SourceField, [rfReplaceAll]) + ')'
+        else
+          SelectFields := SelectFields + FFieldTransforms[i].SourceField;
+      end;
+
+      SourceQuery := TIBQuery.Create(nil);
+      DestQuery := TIBQuery.Create(nil);
+      try
+        SourceQuery.Database := FSourceDB;
+        SourceQuery.Transaction := FSourceTrans;
+        DestQuery.Database := FDestDB;
+        DestQuery.Transaction := FDestTrans;
+
+        // INSERT EINMAL vorbereiten!
+        DestQuery.SQL.Text := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + ParamNames + ')';
+        DestQuery.Prepare;
+
+        BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
+        FStartTime := Now;
+
+        for BatchIndex := 0 to BatchCount - 1 do
+        begin
+          if Cancelled then Break;
+
+          FromRow := FFromRow + (BatchIndex * FBatchSize);
+          ToRow := FromRow + FBatchSize - 1;
+          if ToRow > (FFromRow + FTotalRows - 1) then
+            ToRow := FFromRow + FTotalRows - 1;
+          BatchRows := ToRow - FromRow + 1;
+
+          // SELECT auf Quell-DB
+          SourceQuery.Close;
+          SourceQuery.SQL.Text :=
+            'SELECT FIRST ' + IntToStr(BatchRows) +
+            ' SKIP ' + IntToStr(FromRow - 1) + ' ' +
+            SelectFields + ' FROM ' + FSourceTable;
+
+          if not FSourceTrans.InTransaction then
+            FSourceTrans.StartTransaction;
+          SourceQuery.Open;
+
+          RowsInBatch := 0;
+
+          while not SourceQuery.EOF do
+          begin
+            if Cancelled then Break;
+
+            // Params aus SourceQuery-Feldern setzen
+            for i := 0 to High(FFieldTransforms) do
+            begin
+              if not FFieldTransforms[i].CopyField then Continue;
+
+              if SourceQuery.Fields[i].IsNull then
+                DestQuery.ParamByName(FFieldTransforms[i].DestField).Clear
+              else
+              begin
+                FieldValue := SourceQuery.Fields[i].AsString;
+                if SourceQuery.Fields[i].DataType in [ftSmallint, ftInteger, ftLargeint,
+                                                       ftFloat, ftCurrency, ftBCD, ftFMTBcd] then
+                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsFloat := StrToFloat(FieldValue)
+                else if SourceQuery.Fields[i].DataType = ftBoolean then
+                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsBoolean := (FieldValue = 'True')
+                else
+                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsString := FieldValue;
+              end;
+            end;
+
+            DestQuery.ExecSQL;
+
+            Inc(FCopiedRows);
+            Inc(RowsInBatch);
+            SourceQuery.Next;
+
+            // Batch-Commit
+            if (RowsInBatch >= FBatchSize) then
+            begin
+              FDestTrans.CommitRetaining;
+              RowsInBatch := 0;
+              Synchronize(@UpdateProgressGUI);
+            end;
+          end;
+
+          SourceQuery.Close;
+
+          // Rest committen
+          if RowsInBatch > 0 then
+          begin
+            FDestTrans.CommitRetaining;
+            Synchronize(@UpdateProgressGUI);
+          end;
+        end;
+
+        if FDestTrans.InTransaction then
+          FDestTrans.Commit;
+
+        if FSourceTrans.InTransaction then
+          FSourceTrans.Rollback;
+
+        DestQuery.UnPrepare;
+
+      finally
+        SourceQuery.Free;
+        DestQuery.Free;
+      end;
+
+    except
+      on E: Exception do
+      begin
+        FErrorMessage := E.Message;
+        if FDestTrans.InTransaction then
+          FDestTrans.Rollback;
+      end;
+    end;
+  finally
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+  end;
 end;
+
 
 { TCopyTableCross }
 

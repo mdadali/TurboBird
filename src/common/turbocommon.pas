@@ -27,6 +27,7 @@ uses
   IBQuery,
   IBCustomDataSet,
   IBTable,
+  IBXScript,
 
   Variants,
 
@@ -500,6 +501,15 @@ function CloneServerRegistry(
       const ADestPort: string
     ): Boolean;
 
+function ShowDBCloneDialog(
+  const ATitle: string;
+  const ASuggestedDBTitle: string;
+  out ASelectedServer: string;
+  out ADBTitle: string;
+  out ACreateDB: Boolean;
+  out AWithMetadata: Boolean
+): Boolean;
+
 function CloneServerRegistryInteractive: Boolean;
 function CloneAllDatabasesForServer(const ASourceServer, ADestServer: string): integer;
 
@@ -509,6 +519,8 @@ function CloneAllDatabasesForServer(const ASourceServer, ADestServer: string): i
 function CopyDBRegistry(ASourceDBIndex  : Integer; const ADestServerName : string;
                         const ADestDBTitle : string = ''; ATemporary: Boolean = False): Integer;
 procedure RemoveDBRegistry(ADBIndex: Integer);
+function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
+function CreateDatabaseWithMetadata(ASourceDBIndex, ADestDBIndex: Integer): Boolean;
 function CloneDBRegistryInteractive(ANodeInfos: TPNodeInfos): Boolean;
 
 
@@ -711,7 +723,6 @@ var
 begin
   Result := False;
 
-  // Quell-Server lesen
   SourceRec := GetServerRecordFromFileByName(ASourceServerName);
   if SourceRec.ServerName = '' then
   begin
@@ -719,7 +730,6 @@ begin
     Exit;
   end;
 
-  // Prüfen ob Ziel-Name bereits existiert
   DestRec := GetServerRecordFromFileByName(ADestServerName);
   if DestRec.ServerName <> '' then
   begin
@@ -727,21 +737,18 @@ begin
     Exit;
   end;
 
-  // Kopieren
   DestRec := SourceRec;
   DestRec.ServerName := ADestServerName;
+  DestRec.ServerAlias := ADestServerAlias;
 
-  // Alias setzen (für Zukunft vorbereitet)
-  if ADestServerAlias <> '' then
-    DestRec.ServerAlias := ADestServerAlias
-  else
-    DestRec.ServerAlias := ADestServerName;
+  // Version zurücksetzen – wird beim ersten Connect neu ermittelt!
+  DestRec.VersionString := '';
+  DestRec.VersionMajor := 0;
+  DestRec.VersionMinor := 0;
 
-  // Port
   if ADestPort <> '' then
     DestRec.Port := ADestPort;
 
-  // Speichern
   SaveServerDataToFile(DestRec);
   Result := True;
 end;
@@ -1110,6 +1117,135 @@ begin
   end;
 end;
 
+function ShowDBCloneDialog(
+  const ATitle: string;
+  const ASuggestedDBTitle: string;
+  out ASelectedServer: string;
+  out ADBTitle: string;
+  out ACreateDB: Boolean;
+  out AWithMetadata: Boolean
+): Boolean;
+var
+  Form: TForm;
+  ComboBox: TComboBox;
+  edtDBTitle: TEdit;
+  lblServer, lblTitle: TLabel;
+  chkCreateDB: TCheckBox;
+  chkWithMetadata: TCheckBox;
+  BtnOK, BtnCancel: TButton;
+  ServerList: TStringList;
+  i: Integer;
+begin
+  Result := False;
+  ASelectedServer := '';
+  ADBTitle := '';
+  ACreateDB := False;
+  AWithMetadata := False;
+
+  ServerList := GetServerListFromTreeView;
+  if ServerList.Count = 0 then
+  begin
+    MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
+    ServerList.Free;
+    Exit;
+  end;
+
+  Form := TForm.Create(nil);
+  try
+    Form.Caption := ATitle;
+    Form.Width := 440;
+    Form.Height := 300;
+    Form.Position := poScreenCenter;
+    Form.BorderStyle := bsDialog;
+    Form.FormStyle := fsStayOnTop;
+
+    // Server-Label
+    lblServer := TLabel.Create(Form);
+    lblServer.Parent := Form;
+    lblServer.Left := 20;
+    lblServer.Top := 15;
+    lblServer.Caption := 'Destination Server:';
+
+    // Server-ComboBox
+    ComboBox := TComboBox.Create(Form);
+    ComboBox.Parent := Form;
+    ComboBox.Left := 20;
+    ComboBox.Top := 40;
+    ComboBox.Width := 390;
+    ComboBox.Style := csDropDownList;
+    for i := 0 to ServerList.Count - 1 do
+      ComboBox.Items.Add(ServerList[i]);
+    ComboBox.ItemIndex := 0;
+
+    // Titel-Label
+    lblTitle := TLabel.Create(Form);
+    lblTitle.Parent := Form;
+    lblTitle.Left := 20;
+    lblTitle.Top := 80;
+    lblTitle.Caption := 'Database Title:';
+
+    // Titel-Edit
+    edtDBTitle := TEdit.Create(Form);
+    edtDBTitle.Parent := Form;
+    edtDBTitle.Left := 20;
+    edtDBTitle.Top := 105;
+    edtDBTitle.Width := 390;
+    edtDBTitle.Text := ASuggestedDBTitle;
+
+    // Create Database Checkbox
+    chkCreateDB := TCheckBox.Create(Form);
+    chkCreateDB.Parent := Form;
+    chkCreateDB.Left := 20;
+    chkCreateDB.Top := 145;
+    chkCreateDB.Width := 250;
+    chkCreateDB.Caption := 'Create database on destination (empty)';
+    chkCreateDB.Checked := False;
+
+    // With Metadata Checkbox
+    chkWithMetadata := TCheckBox.Create(Form);
+    chkWithMetadata.Visible := false;  //sehr fehleranfällig
+    chkWithMetadata.Parent := Form;
+    chkWithMetadata.Left := 45;
+    chkWithMetadata.Top := 175;
+    chkWithMetadata.Width := 280;
+    chkWithMetadata.Caption := 'Include metadata (tables, views...)';
+    chkWithMetadata.Checked := False;
+
+    // Buttons
+    BtnOK := TButton.Create(Form);
+    BtnOK.Parent := Form;
+    BtnOK.Caption := 'OK';
+    BtnOK.Left := 140;
+    BtnOK.Top := 220;
+    BtnOK.Width := 100;
+    BtnOK.Default := True;
+    BtnOK.ModalResult := mrOK;
+
+    BtnCancel := TButton.Create(Form);
+    BtnCancel.Parent := Form;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left := 260;
+    BtnCancel.Top := 220;
+    BtnCancel.Width := 100;
+    BtnCancel.ModalResult := mrCancel;
+
+    if Form.ShowModal = mrOK then
+    begin
+      ASelectedServer := ComboBox.Text;
+      ADBTitle := Trim(edtDBTitle.Text);
+      if ADBTitle = '' then
+        ADBTitle := ASuggestedDBTitle;
+      ACreateDB := chkCreateDB.Checked;
+      AWithMetadata := chkWithMetadata.Checked;
+      Result := True;
+    end;
+
+  finally
+    Form.Free;
+    ServerList.Free;
+  end;
+end;
+
 // --------------------------------------------------------------------------
 // Datenbank‑Registrierung kopieren (evtl. temporär)
 // --------------------------------------------------------------------------
@@ -1285,6 +1421,85 @@ begin
   SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
 end;
 
+function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
+var
+  DBIndex: Integer;
+begin
+  Result := False;
+  DBIndex := FindDBIndexByTitleAndServer(ADBTitle, AServerName);
+  if DBIndex < 0 then Exit;
+
+  with RegisteredDatabases[DBIndex] do
+  begin
+    // Erst verbinden!
+    if not IBDatabase.Connected then
+      ConnectDBPrepared(IBDatabase, IBTransaction, DBIndex, IBTransaction.Params);
+
+    // Dann erstellen
+    if IBDatabase.Connected then
+    begin
+      IBDatabase.Connected := False;
+      IBDatabase.CreateIfNotExists := True;
+      IBDatabase.Connected := True;
+      IBDatabase.Connected := False;
+      IBDatabase.CreateIfNotExists := False;
+      Result := True;
+    end;
+  end;
+end;
+
+function CreateDatabaseWithMetadata(ASourceDBIndex, ADestDBIndex: Integer): Boolean;
+var
+  Extractor: TSimpleObjExtractor;
+  Metadata: TStringList;
+  Script: TIBXScript;
+  DBWasConnected: boolean;
+begin
+  Result := False;
+
+  // 1) Leere DB erstellen
+  if not CreateEmptyDatabase(
+       RegisteredDatabases[ADestDBIndex].RegRec.ServerName,
+       RegisteredDatabases[ADestDBIndex].RegRec.Title) then
+    Exit;
+
+  // 2) Metadaten extrahieren
+  Metadata := TStringList.Create;
+  Extractor := TSimpleObjExtractor.Create(ASourceDBIndex);
+  try
+    Extractor.Extract(otDatabase, '', [], AlwaysQuoteIdentifiers, TStrings(Metadata));
+
+    // 3) Metadaten auf Ziel-DB ausführen
+    Script := TIBXScript.Create(nil);
+    try
+      Script.Database := RegisteredDatabases[ADestDBIndex].IBDatabase;
+
+      DBWasConnected := RegisteredDatabases[ADestDBIndex].IBDatabase.Connected;
+      if not DBWasConnected then
+        RegisteredDatabases[ADestDBIndex].IBDatabase.Connected := true;
+
+      Script.Transaction := RegisteredDatabases[ADestDBIndex].IBTransaction;
+
+      if not Script.Transaction.InTransaction then
+        Script.Transaction.StartTransaction;
+
+      Script.ExecSQLScript(Metadata.Text);
+      Script.Transaction.Commit;
+
+      Result := True;
+    finally
+      Script.Free;
+    end;
+  finally
+    if not DBWasConnected then
+      if RegisteredDatabases[ADestDBIndex].IBDatabase.Connected then
+        RegisteredDatabases[ADestDBIndex].IBDatabase.Connected := false;
+
+    Metadata.Free;
+    Extractor.Free;
+  end;
+end;
+
 // --------------------------------------------------------------------------
 // Interaktiver Aufruf: Rechtsklick → Clone Registry
 // --------------------------------------------------------------------------
@@ -1294,73 +1509,90 @@ var
   NewIndex: Integer;
   SourceDBName: string;
   ServerNode, NewDBNode, DummyNode: TTreeNode;
+  CreateDB, WithMetadata: Boolean;
 begin
   Result := False;
   if not Assigned(ANodeInfos) then Exit;
 
-  // 1) Quell-DB-Name merken
   SourceDBName := RegisteredDatabases[ANodeInfos^.dbIndex].RegRec.Title;
 
-  // 2) Server-Auswahldialog mit Titel-Vorschlag
-  if not ShowServerSelectDialog(
+  // NEU: DB-Clone-Dialog mit Optionen
+  if not ShowDBCloneDialog(
        'Clone Database Registration',
        SourceDBName + '_Clone',
        DestServerName,
-       DestDBTitle
+       DestDBTitle,
+       CreateDB,
+       WithMetadata
      ) then Exit;
 
-  // 3) Registrierung kopieren
   try
     NewIndex := CopyDBRegistry(ANodeInfos^.dbIndex, DestServerName, DestDBTitle, False);
 
     if NewIndex >= 0 then
     begin
-      // 4) TreeView direkt aktualisieren – KEIN LoadRegisteredDatabases!
-      ServerNode := GetServerNodeByServerName(DestServerName);
+      // Datenbank erstellen wenn gewünscht
+      if CreateDB then
+      begin
+        if WithMetadata then
+          CreateDatabaseWithMetadata(ANodeInfos^.dbIndex, NewIndex)
+        else
+          CreateEmptyDatabase(DestServerName, DestDBTitle);
+      end;
 
+      // TreeView aktualisieren
+      ServerNode := GetServerNodeByServerName(DestServerName);
       if Assigned(ServerNode) then
       begin
-        // Prüfen ob "Loading..."-Node existiert und ggf. löschen
         if (ServerNode.Count > 0) and (ServerNode.Items[0].Text = 'Loading...') then
           ServerNode.Items[0].Delete;
 
-        // Neuen DB-Node einfügen
         NewDBNode := MainTreeView.Items.AddChild(ServerNode, RegisteredDatabases[NewIndex].RegRec.Title);
         NewDBNode.ImageIndex := 3;
         NewDBNode.SelectedIndex := 3;
 
-        // NodeInfo initialisieren
         if not Assigned(NewDBNode.Data) then
-        begin
           NewDBNode.Data := AllocMem(SizeOf(TNodeInfos));
-        end;
 
         TPNodeInfos(NewDBNode.Data)^.dbIndex := NewIndex;
         TPNodeInfos(NewDBNode.Data)^.ObjectType := tvotDatabase;
         TPNodeInfos(NewDBNode.Data)^.ServerSession := nil;
         TPNodeInfos(NewDBNode.Data)^.SimpleObjExtractor := nil;
         TPNodeInfos(NewDBNode.Data)^.UnIntelliSenseCache := nil;
-        TPNodeInfos(NewDBNode.Data)^.ViewForm := nil;
-        TPNodeInfos(NewDBNode.Data)^.EditorForm := nil;
-        TPNodeInfos(NewDBNode.Data)^.NewForm := nil;
-        TPNodeInfos(NewDBNode.Data)^.ExecuteForm := nil;
 
-        // Dummy-Node für Lazy-Loading
         DummyNode := MainTreeView.Items.AddChild(NewDBNode, 'Loading...');
-
-        // Server expandieren damit der neue DB-Node sichtbar ist
         ServerNode.Expand(False);
       end;
 
       // Erfolgsmeldung
-      MessageDlg(
-        'Database registration cloned successfully!' + sLineBreak +
-        sLineBreak +
-        'Source: ' + SourceDBName + sLineBreak +
-        'Destination: ' + RegisteredDatabases[NewIndex].RegRec.Title +
-        ' on server ' + DestServerName,
-        mtInformation, [mbOK], 0
-      );
+      if CreateDB then
+      begin
+        if WithMetadata then
+          MessageDlg(
+            'Database cloned successfully with metadata!' + sLineBreak +
+            sLineBreak +
+            'Source: ' + SourceDBName + sLineBreak +
+            'Destination: ' + DestDBTitle + sLineBreak +
+            'Server: ' + DestServerName,
+            mtInformation, [mbOK], 0)
+        else
+          MessageDlg(
+            'Empty database created successfully!' + sLineBreak +
+            sLineBreak +
+            'Source: ' + SourceDBName + sLineBreak +
+            'Destination: ' + DestDBTitle + sLineBreak +
+            'Server: ' + DestServerName,
+            mtInformation, [mbOK], 0);
+      end
+      else
+        MessageDlg(
+          'Database registration cloned successfully!' + sLineBreak +
+          sLineBreak +
+          'Source: ' + SourceDBName + sLineBreak +
+          'Destination: ' + DestDBTitle + sLineBreak +
+          'Server: ' + DestServerName,
+          mtInformation, [mbOK], 0);
+
       Result := True;
     end;
 
