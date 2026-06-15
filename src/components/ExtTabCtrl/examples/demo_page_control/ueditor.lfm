@@ -1,0 +1,20 @@
+object frmEditor: TfrmEditor
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  LCLVersion = '4.6.0.0'
+  TabOrder = 0
+  DesignLeft = 572
+  DesignTop = 241
+  object Memo1: TMemo
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 320
+    Align = alClient
+    TabOrder = 0
+  end
+end

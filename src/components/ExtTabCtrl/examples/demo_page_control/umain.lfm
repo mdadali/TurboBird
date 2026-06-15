@@ -1,0 +1,51 @@
+object Form1: TForm1
+  Left = 655
+  Height = 240
+  Top = 303
+  Width = 320
+  Caption = 'Form1'
+  ClientHeight = 240
+  ClientWidth = 320
+  LCLVersion = '4.6.0.0'
+  OnClose = FormClose
+  OnCreate = FormCreate
+  object ExtTabCtrl1: TExtTabCtrl
+    Left = 0
+    Height = 28
+    Top = 0
+    Width = 320
+    Align = alTop
+    AutoSize = True
+    DoubleBuffered = True
+    Tabs = <    
+      item
+        Caption = 'Style'
+        Color = 16776618
+        ShowCloseButton = False
+      end    
+      item
+        Caption = 'Position'
+        Color = 13631482
+        ShowCloseButton = False
+      end    
+      item
+        Caption = 'Log'
+        Color = 16753145
+        ShowCloseButton = False
+      end>
+    TabIndex = 0
+    TabSize = 28
+    TabOptions = [toActivateNewTab, toShowCloseButton, toShowAddButton, toCloseOnMiddleClick, toAllowDragReorder, toGetFocus, toActiveBold]
+    OnTabReordering = ExtTabCtrl1TabReordering
+    OnTabReordered = ExtTabCtrl1TabReordered
+    OnTabCreating = ExtTabCtrl1TabCreating
+    OnTabCreated = ExtTabCtrl1TabCreated
+    OnTabDeleting = ExtTabCtrl1TabDeleting
+    OnTabDeleted = ExtTabCtrl1TabDeleted
+    OnTabChanging = ExtTabCtrl1TabChanging
+    OnTabChanged = ExtTabCtrl1TabChanged
+    OnTabClick = ExtTabCtrl1TabClick
+    OnTabDblClick = ExtTabCtrl1TabDblClick
+    OnAddButtonClick = ExtTabCtrl1AddButtonClick
+  end
+end

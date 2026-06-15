@@ -10,7 +10,7 @@ uses
 
   turbocommon,
   fsimpleobjextractor,
-  uCopyTable;
+  uCopyTableDataLocal;
 
 
 type
@@ -345,7 +345,7 @@ end;
 procedure TfmCloneToExternalTable.CopyDataWithProgress;
 var
   Fields: array of TFieldTransform;
-  CopyEngine: TCopyTable;
+  CopyEngine: TCopyTableDataLocal;
   i: Integer;
   FromRow: Integer;
   ToRow: Integer;
@@ -385,7 +385,7 @@ begin
     ToRow := 0;
   end;
 
-  CopyEngine := TCopyTable.Create(
+  CopyEngine := TCopyTableDataLocal.Create(
     FDBIndex, FDBIndex,
     FTableName, edtExtTableName.Text,
     Fields,

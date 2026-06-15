@@ -12,7 +12,9 @@ uses
 
   turbocommon,
   uthemeselector,
-  uGenSQLFromCSVDataset, c_json_dataset,
+  uGenSQLFromCSVDataset,
+  c_json_dataset,
+  uCreateTable,
 
   fdataexportersintrf,
 
@@ -44,6 +46,7 @@ type
     btnOpenFile: TButton;
     btnSaveFileAs: TButton;
     btnCreateSQL: TButton;
+    btnCreateTable: TButton;
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
@@ -92,6 +95,7 @@ type
     tsDetail: TTabSheet;
     procedure btnCopySQLClick(Sender: TObject);
     procedure btnCreateSQLClick(Sender: TObject);
+    procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnSaveFileAsClick(Sender: TObject);
     procedure CSVDataset1AfterDelete(DataSet: TDataSet);
@@ -552,6 +556,15 @@ begin
   end;
 
   FreeAndNil(GenSQLFromCSVDataset);
+end;
+
+procedure TfrmDataEditor.btnCreateTableClick(Sender: TObject);
+var frmCreateFirebirdTable: TfrmCreateFirebirdTable;
+begin
+  frmCreateFirebirdTable := TfrmCreateFirebirdTable.Create(self);
+  frmCreateFirebirdTable.Init(DataSource1.DataSet, self.FFileName);
+
+  frmCreateFirebirdTable.ShowModal;
 end;
 
 procedure TfrmDataEditor.CSVDataset1AfterDelete(DataSet: TDataSet);

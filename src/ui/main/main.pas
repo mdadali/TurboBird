@@ -29,6 +29,8 @@ uses
   fsqlmonitor,
   fSQLParser,
   clone_table_dialog,
+  fDataStudio,
+
 
   fservers,
 
@@ -146,6 +148,7 @@ type
     lmCloneDBRegistry: TMenuItem;
     lmCloneServer: TMenuItem;
     lmCloneTable: TMenuItem;
+    mnDataStudio: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -443,6 +446,7 @@ type
     procedure mnBulkCloneClick(Sender: TObject);
     procedure mnCheckForUpdateClick(Sender: TObject);
     procedure mnDataEditorClick(Sender: TObject);
+    procedure mnDataStudioClick(Sender: TObject);
     procedure mnDBReaderClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
     procedure mnExitClick(Sender: TObject);
@@ -8314,6 +8318,14 @@ var frmDataEditor: TfrmDataEditor;
 begin
   frmDataEditor := TfrmDataEditor.Create(self);
   frmDataEditor.ShowModal;
+end;
+
+procedure TfmMain.mnDataStudioClick(Sender: TObject);
+var frmDataStudio: TfrmDataStudio;
+begin
+  frmDataStudio := TfrmDataStudio.Create(Self);
+  frmDataStudio.ShowModal;
+  frmDataStudio.Free;
 end;
 
 procedure TfmMain.mnDBReaderClick(Sender: TObject);

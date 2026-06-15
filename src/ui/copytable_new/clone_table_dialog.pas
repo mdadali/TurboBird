@@ -5,13 +5,15 @@ unit clone_table_dialog;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  Grids, CheckLst, IB, IBQuery, IBDatabase, IBDatabaseInfo, IBExtract, ibxscript,
+  Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, Grids, CheckLst, Menus, IB, IBQuery, IBDatabase, IBDatabaseInfo,
+  IBExtract, ibxscript,
 
   turbocommon,
 
-  uCopyTable,
-  uCopyTableCross,
+  uCopyTableDataLocal,
+  uCopyTableDataCrossExecuteBlock,
+  uCopyTableDataCrossRowByRow,
   uFormulaPresets,
 
   fmetaquerys,
@@ -57,6 +59,7 @@ type
     grBoxFields: TGroupBox;
     grBoxSource: TGroupBox;
     grBoxFormulaPresets: TGroupBox;
+    grBoxCopyMethod: TGroupBox;
     IBDBDest: TIBDatabase;
     IBDBSource: TIBDatabase;
     IBQueryDest: TIBQuery;
@@ -77,6 +80,9 @@ type
     Panel2: TPanel;
     pnlFields: TPanel;
     pnlTop: TPanel;
+    PopupMenu1: TPopupMenu;
+    rbRowByRow: TRadioButton;
+    rbExecuteBlock: TRadioButton;
     rbAllRows: TRadioButton;
     rbRange: TRadioButton;
     StatusBar1: TStatusBar;
@@ -124,6 +130,7 @@ type
 
     procedure LoadFields;
     function GetFieldTransforms: TFieldTransformArray;
+    function GetProblemFieldTransforms: TFieldTransformArray;
     function GenerateCreateTableSQL: string;
     function GenerateInsertSQL: string;
     function TableExists(DB: TIBDatabase; TableName: string): Boolean;
@@ -131,6 +138,7 @@ type
   public
     procedure Init(ANodeInfos: TPNodeInfos);
     procedure LoadFormulaPresets;
+    procedure UpdateCopyMethodAvailability;
   end;
 
 var
@@ -141,6 +149,31 @@ implementation
 {$R *.lfm}
 
 { TfrmCloneTable }
+procedure TfrmCloneTable.UpdateCopyMethodAvailability;
+var
+  SameServer, SameDB: Boolean;
+begin
+  // Prüfen ob Quelle und Ziel auf demselben Server/DB sind
+  SameServer := SameText(comboxSourceServer.Text, comboxDestServer.Text);
+  SameDB := SameText(comboxSourceDB.Text, comboxDestDB.Text) and SameServer;
+
+  if SameDB then
+  begin
+    // Gleiche DB → Keine Cross-Methoden nötig
+    grBoxCopyMethod.Enabled := False;
+    rbExecuteBlock.Checked := False;
+    rbRowByRow.Checked := False;
+    StatusBar1.SimpleText := 'Same database: INSERT...SELECT will be used (fastest).';
+  end
+  else
+  begin
+    // Unterschiedliche DBs → Cross-Methoden verfügbar
+    grBoxCopyMethod.Enabled := True;
+    if not rbExecuteBlock.Checked and not rbRowByRow.Checked then
+      rbExecuteBlock.Checked := True;  // Default: Automatic
+    StatusBar1.SimpleText := 'Cross-database: Select copy method.';
+  end;
+end;
 
 procedure TfrmCloneTable.FormCreate(Sender: TObject);
 begin
@@ -165,6 +198,7 @@ begin
   comboxSourceServer.OnChange := @comboxSourceServerChange;
 
   LoadFormulaPresets;
+  UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.Init(ANodeInfos: TPNodeInfos);
@@ -179,6 +213,7 @@ end;
 procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
 begin
   FillSourceDBCombo;
+  UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
@@ -188,7 +223,9 @@ begin
   begin
     FillSourceTableCombo;
     comboxSourceTablesChange(nil);
-  end;
+    UpdateCopyMethodAvailability;
+  end else
+    grBoxCopyMethod.Enabled := false;
 end;
 
 procedure TfrmCloneTable.comboxSourceTablesChange(Sender: TObject);
@@ -325,11 +362,15 @@ end;
 procedure TfrmCloneTable.comboxDestServerChange(Sender: TObject);
 begin
   FillDestDBCombo;
+  UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxDestDBChange(Sender: TObject);
 begin
-  ConfigureDestConnection;
+  if ConfigureDestConnection then
+    UpdateCopyMethodAvailability
+  else
+    grBoxCopyMethod.Enabled := false;
 end;
 
 procedure TfrmCloneTable.FillDestCombos;
@@ -538,56 +579,6 @@ begin
   StatusBar1.SimpleText := IntToStr(Length(FFields)) + ' fields loaded (with test formulas).';
 end;
 
-{procedure TfrmCloneTable.LoadFields;
-var
-  Iso: TIsolatedQuery;
-  i: Integer;
-  FieldName, FieldType, ComputedSource: string;
-  FSize: Integer;
-begin
-  if FSourceDBIndex < 0 then Exit;
-
-  SetLength(FFields, 0);
-  chkLstFields.Clear;
-  sgFields.RowCount := 1;
-
-  Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase, Trim(comboxSourceTables.Text));
-  try
-    while not Iso.Query.EOF do
-    begin
-      FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
-      GetFieldType(Iso.Query, FieldType, FSize);
-      ComputedSource := Trim(Iso.Query.FieldByName('computed_source').AsString);
-
-      i := Length(FFields);
-      SetLength(FFields, i + 1);
-      FFields[i].FieldName := FieldName;
-      FFields[i].FieldType := FieldType;
-      FFields[i].IsComputed := (ComputedSource <> '');
-      FFields[i].Checked := True;
-      FFields[i].Formula := '';
-
-      chkLstFields.Items.Add(FieldName);
-      chkLstFields.Checked[i] := True;
-
-      sgFields.RowCount := i + 2;
-      sgFields.Cells[0, i + 1] := '1';
-      sgFields.Cells[1, i + 1] := FieldName;
-      sgFields.Cells[2, i + 1] := FieldType;
-      sgFields.Cells[3, i + 1] := '';
-
-      if FFields[i].IsComputed then
-        sgFields.Cells[3, i + 1] := '(computed)';
-
-      Iso.Query.Next;
-    end;
-  finally
-    Iso.Free;
-  end;
-
-  StatusBar1.SimpleText := IntToStr(Length(FFields)) + ' fields loaded.';
-end;}
-
 procedure TfrmCloneTable.btnSelectAllClick(Sender: TObject);
 var
   i: Integer;
@@ -635,8 +626,8 @@ begin
   begin
     Result[i].SourceField := chkLstFields.Items[i];
     Result[i].DestField := chkLstFields.Items[i];
+    Result[i].DestFieldType := FFields[i].FieldType;  // ← DAS FEHLT!
 
-    // COMPUTED-Felder: Keine Formel, nicht in INSERT aufnehmen
     if FFields[i].IsComputed then
     begin
       Result[i].Formula := '';
@@ -646,6 +637,36 @@ begin
     begin
       Result[i].Formula := sgFields.Cells[3, i + 1];
       Result[i].CopyField := chkLstFields.Checked[i];
+    end;
+  end;
+end;
+
+function TfrmCloneTable.GetProblemFieldTransforms: TFieldTransformArray;
+var
+  i, idx: Integer;
+begin
+  SetLength(Result, 0);
+  idx := 0;
+
+  for i := 0 to chkLstFields.Count - 1 do
+  begin
+    if not chkLstFields.Checked[i] then
+      Continue;
+
+    if FFields[i].IsComputed then
+      Continue;
+
+    // Nur ARRAY und BLOB aufnehmen
+    if (Pos('[', FFields[i].FieldType) > 0) or
+       (Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0) then
+    begin
+      SetLength(Result, idx + 1);
+      Result[idx].SourceField := chkLstFields.Items[i];
+      Result[idx].DestField := chkLstFields.Items[i];
+      Result[idx].DestFieldType := FFields[i].FieldType;
+      Result[idx].Formula := '';
+      Result[idx].CopyField := True;
+      Inc(idx);
     end;
   end;
 end;
@@ -757,106 +778,12 @@ begin
   ShowMessage(SQL);
 end;
 
-{procedure TfrmCloneTable.btnExecuteClick(Sender: TObject);
-var
-  Fields: TFieldTransformArray;
-  CopyEngine: TCopyTable;
-  DestTable: string;
-  FromRow, ToRow: Integer;
-  TempSourceDBIndex: Integer;
-  SourceServer, DestServer: string;
-begin
-  if FSourceDBIndex < 0 then
-  begin
-    MessageDlg('Please select a valid source database.', mtWarning, [mbOK], 0);
-    Exit;
-  end;
-
-  if FDestDBIndex < 0 then
-  begin
-    MessageDlg('Please select a valid destination database.', mtWarning, [mbOK], 0);
-    Exit;
-  end;
-
-  DestTable := Trim(edtDestTable.Text);
-  if DestTable = '' then
-  begin
-    MessageDlg('Please enter a destination table name.', mtWarning, [mbOK], 0);
-    Exit;
-  end;
-
-  SourceServer := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
-  DestServer := RegisteredDatabases[FDestDBIndex].RegRec.ServerName;
-
-  // Wenn Quelle und Ziel auf unterschiedlichen Servern liegen:
-  // Quell-DB temporär unter dem Ziel-Server registrieren
-  TempSourceDBIndex := FSourceDBIndex;
-  if not SameText(SourceServer, DestServer) then
-  begin
-    StatusBar1.SimpleText := 'Registering source database on destination server...';
-    Application.ProcessMessages;
-
-    TempSourceDBIndex := CopyDBRegistry(FSourceDBIndex, DestServer, '', True);
-    if TempSourceDBIndex < 0 then
-    begin
-      MessageDlg('Failed to register source database on destination server.', mtError, [mbOK], 0);
-      Exit;
-    end;
-  end;
-
-  try
-    // CREATE TABLE falls gewünscht
-    if chkCreateTable.Checked then
-    begin
-      if not TableExists(IBDBDest, DestTable) then
-      begin
-        StatusBar1.SimpleText := 'Creating table ' + DestTable + '...';
-        Application.ProcessMessages;
-        CreateDestTable(IBDBDest, IBTransDest, DestTable);
-      end;
-    end;
-
-    // From/To
-    if rbRange.Checked then
-    begin
-      FromRow := StrToIntDef(edtFrom.Text, 1);
-      ToRow := StrToIntDef(edtTo.Text, 0);
-    end
-    else
-    begin
-      FromRow := 1;
-      ToRow := 0;
-    end;
-
-    // Kopieren (mit temporärem Quell-Index falls nötig)
-    Fields := GetFieldTransforms;
-    CopyEngine := TCopyTable.Create(
-      TempSourceDBIndex, FDestDBIndex,
-      Trim(comboxSourceTables.Text), DestTable,
-      Fields,
-      StrToIntDef(edtBatchSize.Text, 500000),
-      FromRow, ToRow
-    );
-    try
-      CopyEngine.Execute;
-    finally
-      CopyEngine.Free;
-    end;
-
-    StatusBar1.SimpleText := 'Copy completed: ' + Trim(comboxSourceTables.Text) + ' → ' + DestTable;
-
-  finally
-    // Temporäre Registrierung entfernen
-    if TempSourceDBIndex <> FSourceDBIndex then
-      RemoveDBRegistry(TempSourceDBIndex);
-  end;
-end;}
-
 procedure TfrmCloneTable.btnExecuteClick(Sender: TObject);
 var
   Fields: TFieldTransformArray;
-  CopyEngineDirect: TCopyTable;
-  CopyEngineCross: TCopyTableCross;
+  CopyEngineLocal: TCopyTableDataLocal;
+  CopyEngineCrossExecuteBlock: TCopyTableDataCrossExecuteBlock;
+  CopyEngineCrossRowByRow: TCopyTableDataCrossRowByRow;
   DestTable: string;
   FromRow, ToRow: Integer;
 begin
@@ -871,7 +798,6 @@ begin
     MessageDlg('Please select a valid destination database.', mtWarning, [mbOK], 0);
     Exit;
   end;
-
 
   // Quelle konfigurieren
   if not ConfigureSourceConnection then
@@ -928,23 +854,21 @@ begin
   // Felder aus Grid holen
   Fields := GetFieldTransforms;
 
-
   // Sicherstellen dass Transaktionen aktiv sind
   if Assigned(IBTransSource) and (not IBTransSource.InTransaction) then
     IBTransSource.StartTransaction;
   if Assigned(IBTransDest) and (not IBTransDest.InTransaction) then
     IBTransDest.StartTransaction;
 
-  // Prüfen ob gleiche Datenbank
+  // ============================================================
+  // GLEICHE DATENBANK → Immer INSERT...SELECT
+  // ============================================================
   if FSourceDBIndex = FDestDBIndex then
   begin
-    // ============================================================
-    // GLEICHE DB → INSERT...SELECT (70.000 rows/sec)
-    // ============================================================
-    StatusBar1.SimpleText := 'Copying within same database...';
+    StatusBar1.SimpleText := 'Copying within same database (INSERT...SELECT)...';
     Application.ProcessMessages;
 
-    CopyEngineDirect := TCopyTable.Create(
+    CopyEngineLocal := TCopyTableDataLocal.Create(
       FSourceDBIndex, FDestDBIndex,
       Trim(comboxSourceTables.Text), DestTable,
       Fields,
@@ -952,20 +876,21 @@ begin
       FromRow, ToRow
     );
     try
-      CopyEngineDirect.Execute;
+      CopyEngineLocal.Execute;
     finally
-      CopyEngineDirect.Free;
+      CopyEngineLocal.Free;
     end;
   end
-  else
+
+  // ============================================================
+  // CROSS-DB: Automatic (EXECUTE BLOCK + UPDATE wenn nötig)
+  // ============================================================
+  else if rbExecuteBlock.Checked then
   begin
-    // ============================================================
-    // UNTERSCHIEDLICHE DBs → Batch-INSERT (DB-übergreifend)
-    // ============================================================
-    StatusBar1.SimpleText := 'Copying across databases...';
+    StatusBar1.SimpleText := 'Copying across databases (Execute Block)...';
     Application.ProcessMessages;
 
-    CopyEngineCross := TCopyTableCross.Create(
+    CopyEngineCrossExecuteBlock := TCopyTableDataCrossExecuteBlock.Create(
       FSourceDBIndex, FDestDBIndex,
       Trim(comboxSourceTables.Text), DestTable,
       Fields,
@@ -973,9 +898,31 @@ begin
       FromRow, ToRow
     );
     try
-      CopyEngineCross.Execute;
+      CopyEngineCrossExecuteBlock.Execute;
     finally
-      CopyEngineCross.Free;
+      CopyEngineCrossExecuteBlock.Free;
+    end;
+  end
+
+  // ============================================================
+  // CROSS-DB: Row-by-Row (komplett, alle Felder)
+  // ============================================================
+  else
+  begin
+    StatusBar1.SimpleText := 'Copying across databases (Row-by-Row)...';
+    Application.ProcessMessages;
+
+    CopyEngineCrossRowByRow := TCopyTableDataCrossRowByRow.Create(
+      FSourceDBIndex, FDestDBIndex,
+      Trim(comboxSourceTables.Text), DestTable,
+      Fields,
+      StrToIntDef(edtBatchSize.Text, 10000),
+      FromRow, ToRow
+    );
+    try
+      CopyEngineCrossRowByRow.Execute;
+    finally
+      CopyEngineCrossRowByRow.Free;
     end;
   end;
 

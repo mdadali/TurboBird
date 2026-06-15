@@ -1,0 +1,38 @@
+object frmPosition: TfrmPosition
+  Left = 0
+  Height = 240
+  Top = 0
+  Width = 320
+  ClientHeight = 240
+  ClientWidth = 320
+  LCLVersion = '4.6.0.0'
+  TabOrder = 0
+  DesignLeft = 653
+  DesignTop = 283
+  object RadioGroup1: TRadioGroup
+    Left = 0
+    Height = 240
+    Top = 0
+    Width = 320
+    Align = alClient
+    AutoFill = True
+    Caption = 'Position'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 213
+    ClientWidth = 310
+    ItemIndex = 0
+    Items.Strings = (
+      'Top'
+      'Bottom'
+      'Left'
+      'Right'
+    )
+    TabOrder = 0
+  end
+end

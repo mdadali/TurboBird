@@ -200,10 +200,11 @@ type
 type
 
   TFieldTransform = record
-    SourceField : string;      // Quell-Spaltenname
-    DestField   : string;      // Ziel-Spaltenname
-    Formula     : string;      // SQL-Ausdruck mit $1 als Platzhalter für SourceField
-    CopyField   : Boolean;     // True = kopieren/transformieren, False = überspringen
+    SourceField   : string;      // Quell-Spaltenname
+    DestField     : string;      // Ziel-Spaltenname
+    Formula       : string;      // SQL-Ausdruck mit $1 als Platzhalter für SourceField
+    CopyField     : Boolean;     // True = kopieren/transformieren, False = überspringen
+    DestFieldType : string;      // Firebird-Datentyp für DECLARE (z.B. 'INTEGER', 'VARCHAR(100)')
   end;
 
   TFieldTransformArray = array of TFieldTransform;

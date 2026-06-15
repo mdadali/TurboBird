@@ -5,32 +5,39 @@ unit uGenSQLFromCSVDataset;
 interface
 
 uses
-  Classes, SysUtils, Math, DB, csvdataset;
+  Classes, SysUtils, DB, csvdataset;
 
 type
+  TFBFieldInfo = record
+    FieldName: string;
+    FieldType: string;
+  end;
+
+  TFBFieldInfoArray = array of TFBFieldInfo;
+
   TGenSQLFromCSVDataset = class
   private
     FDataSet: TDataSet;
     FTableName: string;
     FDefaultFieldLength: Integer;
     FSQL: string;
+    FFields: TFBFieldInfoArray;
 
-    function DetectFieldType(const FieldName: string): TFieldType;
     function GetFieldTypeByString(const AStr: string): TFieldType;
+    function DetectFieldType(const FieldName: string): TFieldType;  // nur noch eine Zeile
     function FieldTypeToFirebird(AType: TFieldType; MaxLength: Integer): string;
-
+    procedure AnalyzeFields;
     procedure GenerateSQL;
   public
     constructor Create(ADataSet: TDataSet; const ATableName: string; ADefaultFieldLength: Integer);
     property SQL: string read FSQL;
+    property Fields: TFBFieldInfoArray read FFields;
   end;
 
 implementation
 
 uses
-  StrUtils, TypInfo;
-
-{ Constructor }
+  StrUtils, TypInfo, turbocommon;   // CSVFirstLineAsFieldNames / CSVDefaultFieldLength
 
 constructor TGenSQLFromCSVDataset.Create(
   ADataSet: TDataSet;
@@ -38,17 +45,11 @@ constructor TGenSQLFromCSVDataset.Create(
   ADefaultFieldLength: Integer);
 begin
   inherited Create;
-
   FDataSet := ADataSet;
   FTableName := ATableName;
   FDefaultFieldLength := ADefaultFieldLength;
-
   GenerateSQL;
 end;
-
-{ ============================= }
-{ Type Detection From String }
-{ ============================= }
 
 function TGenSQLFromCSVDataset.GetFieldTypeByString(const AStr: string): TFieldType;
 var
@@ -85,36 +86,33 @@ begin
   Result := ftString;
 end;
 
-{ ============================= }
-{ Analyze Entire Dataset Column }
-{ ============================= }
-
+// ---------------------------------------------------------------
+//  NEU: Nur eine einzige Zeile analysieren!
+// ---------------------------------------------------------------
 function TGenSQLFromCSVDataset.DetectFieldType(const FieldName: string): TFieldType;
 var
   SavedPos: TBookmark;
-  CurrentType: TFieldType;
-  ValueType: TFieldType;
-  MaxLength: Integer;
+  Value: string;
 begin
-  Result := ftString;
-  MaxLength := 0;
-
+  Result := ftString;   // Fallback
   if not FDataSet.Active then Exit;
 
   SavedPos := FDataSet.GetBookmark;
   try
+    // Auf die erste Datenzeile springen
     FDataSet.First;
-    while not FDataSet.EOF do
+    if (FDataSet is TCSVDataset) and
+       TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames then
     begin
-      CurrentType := GetFieldTypeByString(FDataSet.FieldByName(FieldName).AsString);
+      // Erste Zeile enthält Feldnamen → zweite Zeile ist die erste Datenzeile
+      if not FDataSet.EOF then
+        FDataSet.Next;
+    end;
 
-      if CurrentType > Result then
-        Result := CurrentType;
-
-      MaxLength := Max(MaxLength,
-        Length(FDataSet.FieldByName(FieldName).AsString));
-
-      FDataSet.Next;
+    if not FDataSet.EOF then
+    begin
+      Value := FDataSet.FieldByName(FieldName).AsString;
+      Result := GetFieldTypeByString(Value);
     end;
   finally
     if FDataSet.BookmarkValid(SavedPos) then
@@ -122,10 +120,6 @@ begin
     FDataSet.FreeBookmark(SavedPos);
   end;
 end;
-
-{ ============================= }
-{ Firebird Mapping }
-{ ============================= }
 
 function TGenSQLFromCSVDataset.FieldTypeToFirebird(
   AType: TFieldType;
@@ -143,65 +137,66 @@ begin
     ftGuid: Result := 'CHAR(36)';
   else
     begin
-      // 👉 Hier DefaultFieldLength nutzen
       if MaxLength <= 0 then
         MaxLength := FDefaultFieldLength;
-
       Result := 'VARCHAR(' + IntToStr(MaxLength) + ')';
     end;
   end;
 end;
 
-{ ============================= }
-{ SQL Generator }
-{ ============================= }
-procedure TGenSQLFromCSVDataset.GenerateSQL;
+procedure TGenSQLFromCSVDataset.AnalyzeFields;
 var
   i: Integer;
   Field: TField;
-  SL: TStringList;
-  FieldName: string;
-  UseHeader: Boolean;
+  fName: string;
   DetectedType: TFieldType;
-  MaxLen: Integer;
+  UseHeader: Boolean;
 begin
+  SetLength(FFields, 0);
   if not FDataSet.Active then Exit;
 
-  UseHeader := False;
+  UseHeader := (FDataSet is TCSVDataset) and
+               TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames;
 
-  if FDataSet is TCSVDataset then
-    UseHeader := TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames;
+  for i := 0 to FDataSet.FieldCount - 1 do
+  begin
+    Field := FDataSet.Fields[i];
+    if UseHeader then
+      fName := Field.FieldName
+    else
+      fName := 'Column' + IntToStr(i + 1);
+
+    // Nur EINE Zeile ansehen
+    DetectedType := DetectFieldType(fName);
+
+    SetLength(FFields, i + 1);
+    FFields[i].FieldName := fName;
+
+    // VARCHAR-Länge direkt aus der globalen Einstellung
+    if DetectedType in [ftString, ftGuid, ftMemo, ftFmtMemo, ftWideString] then
+      FFields[i].FieldType := FieldTypeToFirebird(DetectedType, CSVDefaultFieldLength)
+    else
+      FFields[i].FieldType := FieldTypeToFirebird(DetectedType, 0);
+  end;
+end;
+
+procedure TGenSQLFromCSVDataset.GenerateSQL;
+var
+  i: Integer;
+  SL: TStringList;
+begin
+  AnalyzeFields;
 
   SL := TStringList.Create;
   try
     SL.Add('CREATE TABLE ' + FTableName + ' (');
-
-    for i := 0 to FDataSet.FieldCount - 1 do
+    for i := 0 to High(FFields) do
     begin
-      Field := FDataSet.Fields[i];
-
-      // Feldname bestimmen
-      if UseHeader then
-        FieldName := Field.FieldName
-      else
-        FieldName := 'Column' + IntToStr(i + 1);
-
-      // Typ erkennen
-      DetectedType := DetectFieldType(Field.FieldName);
-
-      // Länge bestimmen (Fallback später)
-      MaxLen := Field.Size;
-
-      // JETZT richtiges Mapping benutzen
-      SL.Add('  ' + FieldName + ' ' +
-        FieldTypeToFirebird(DetectedType, MaxLen) +
-        IfThen(i < FDataSet.FieldCount - 1, ',', ''));
+      SL.Add('  ' + FFields[i].FieldName + ' ' + FFields[i].FieldType +
+             IfThen(i < High(FFields), ',', ''));
     end;
-
     SL.Add(');');
-
     FSQL := SL.Text;
-
   finally
     SL.Free;
   end;

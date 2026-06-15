@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 399
+  Left = 445
   Height = 575
-  Top = 112
+  Top = 83
   Width = 847
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 575
@@ -21,10 +21,10 @@ object frmDataEditor: TfrmDataEditor
     ClientWidth = 847
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 401
+      Left = 508
       Height = 48
       Top = 1
-      Width = 445
+      Width = 338
       Align = alClient
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -34,7 +34,7 @@ object frmDataEditor: TfrmDataEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 445
+      ClientWidth = 338
       DataSource = DataSource1
       OnClick = DBNavigator1Click
       Options = []
@@ -83,15 +83,25 @@ object frmDataEditor: TfrmDataEditor
       OnClick = btnCopySQLClick
       TabOrder = 4
     end
+    object btnCreateTable: TButton
+      Left = 401
+      Height = 48
+      Top = 1
+      Width = 107
+      Align = alLeft
+      Caption = 'Create Table'
+      OnClick = btnCreateTableClick
+      TabOrder = 5
+    end
   end
   object PageControl1: TPageControl
     Left = 0
     Height = 525
     Top = 50
     Width = 847
-    ActivePage = tsGrid
+    ActivePage = tsCSVSettings
     Align = alClient
-    TabIndex = 0
+    TabIndex = 2
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -805,8 +815,8 @@ object frmDataEditor: TfrmDataEditor
     Top = 336
   end
   object OpenDialog1: TOpenDialog
-    Left = 288
-    Top = 128
+    Left = 480
+    Top = 264
   end
   object CSVDataset1: TCSVDataset
     FieldDefs = <>
@@ -891,8 +901,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = []
     DefaultExt = rdeNone
-    Left = 104
-    Top = 240
+    Left = 240
+    Top = 368
   end
   object RxDBGridExportPDF1: TRxDBGridExportPDF
     Caption = 'Export to PDF file'
@@ -900,8 +910,8 @@ object frmDataEditor: TfrmDataEditor
     Options = []
     PdfOptions.Options = []
     AuthorPdf = 'TurboBird'
-    Left = 104
-    Top = 152
+    Left = 400
+    Top = 384
   end
   object sWorksheetDataset1: TsWorksheetDataset
     FieldDefs = <>
