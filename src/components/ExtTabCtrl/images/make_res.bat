@@ -1,0 +1,1 @@
+lazres ..\component\exttabctrl_images.res @imageslist.txt

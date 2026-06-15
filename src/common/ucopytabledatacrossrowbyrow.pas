@@ -1,4 +1,4 @@
-unit uCopyTableCross;
+unit uCopyTableDataCrossRowByRow;
 
 {$mode objfpc}{$H+}
 
@@ -15,7 +15,7 @@ type
 
   { TCopyThreadCross }
 
-  TCopyThreadCross = class(TThread)
+  TCopyThreadRowByRow = class(TThread)
   private
     FSourceDB      : TIBDatabase;
     FSourceTrans   : TIBTransaction;
@@ -63,9 +63,9 @@ type
     property ErrorMessage : string read FErrorMessage;
   end;
 
-  { TCopyTableCross }
+  { TCopyTableDataCrossRowByRow }
 
-  TCopyTableCross = class
+  TCopyTableDataCrossRowByRow = class
   private
     FSourceDBIndex : Integer;
     FDestDBIndex   : Integer;
@@ -79,7 +79,7 @@ type
     FCopiedRows    : Integer;
     FStartTime     : TDateTime;
     FCancelled     : Boolean;
-    FThread        : TCopyThreadCross;
+    FThread        : TCopyThreadRowByRow;
 
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
@@ -106,9 +106,9 @@ type
 implementation
 
 
-{ TCopyThreadCross }
+{ TCopyThreadRowByRow }
 
-constructor TCopyThreadCross.Create(
+constructor TCopyThreadRowByRow.Create(
   ASourceDB, ADestDB : TIBDatabase;
   ASourceTrans, ADestTrans : TIBTransaction;
   const ASourceTable, ADestTable : string;
@@ -142,12 +142,12 @@ begin
   FBtnCancel := nil;
 end;
 
-destructor TCopyThreadCross.Destroy;
+destructor TCopyThreadRowByRow.Destroy;
 begin
   inherited Destroy;
 end;
 
-procedure TCopyThreadCross.SetProgressControls(
+procedure TCopyThreadRowByRow.SetProgressControls(
   AProgressLabel : TLabel;
   AProgressBar   : TProgressBar;
   ALblElapsed    : TLabel;
@@ -159,7 +159,7 @@ begin
   FBtnCancel     := ABtnCancel;
 end;
 
-procedure TCopyThreadCross.BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
+procedure TCopyThreadRowByRow.BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
 var
   DestFields, RowValues: string;
   i: Integer;
@@ -207,7 +207,7 @@ begin
   SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + RowValues + ')';
 end;
 
-procedure TCopyThreadCross.UpdateProgressGUI;
+procedure TCopyThreadRowByRow.UpdateProgressGUI;
 begin
   if Assigned(FProgressLabel) then
     FProgressLabel.Caption := Format('Copied %d of %d rows...', [FCopiedRows, FTotalRows]);
@@ -219,7 +219,7 @@ begin
 end;
 
 //IBScript-Version
-{procedure TCopyThreadCross.Execute;
+{procedure TCopyThreadRowByRow.Execute;
 var
   SourceQuery: TIBQuery;
   DestQuery: TIBQuery;
@@ -428,7 +428,7 @@ begin
 end;}
 
 //query-version
-{procedure TCopyThreadCross.Execute;
+{procedure TCopyThreadRowByRow.Execute;
 var
   SourceQuery, DestQuery: TIBQuery;
   BatchCount, BatchIndex: Integer;
@@ -610,7 +610,7 @@ begin
   end;
 end;}
 
-procedure TCopyThreadCross.Execute;
+procedure TCopyThreadRowByRow.Execute;
 var
   SourceQuery, DestQuery: TIBQuery;
   BatchCount, BatchIndex: Integer;
@@ -662,8 +662,11 @@ begin
       DestQuery := TIBQuery.Create(nil);
       try
         SourceQuery.Database := FSourceDB;
+        SourceQuery.AllowAutoActivateTransaction := true;
         SourceQuery.Transaction := FSourceTrans;
+
         DestQuery.Database := FDestDB;
+        DestQuery.AllowAutoActivateTransaction := true;
         DestQuery.Transaction := FDestTrans;
 
         // INSERT EINMAL vorbereiten!
@@ -772,9 +775,9 @@ begin
 end;
 
 
-{ TCopyTableCross }
+{ TCopyTableDataCrossRowByRow }
 
-constructor TCopyTableCross.Create(
+constructor TCopyTableDataCrossRowByRow.Create(
   ASourceDBIndex, ADestDBIndex : Integer;
   const ASourceTable, ADestTable : string;
   const AFieldTransforms : TFieldTransformArray;
@@ -803,7 +806,7 @@ begin
     FFieldTransforms[i] := AFieldTransforms[i];
 end;
 
-destructor TCopyTableCross.Destroy;
+destructor TCopyTableDataCrossRowByRow.Destroy;
 begin
   if Assigned(FThread) then
   begin
@@ -814,27 +817,27 @@ begin
   inherited Destroy;
 end;
 
-function TCopyTableCross.GetSourceDB : TIBDatabase;
+function TCopyTableDataCrossRowByRow.GetSourceDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
-function TCopyTableCross.GetSourceTrans : TIBTransaction;
+function TCopyTableDataCrossRowByRow.GetSourceTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
-function TCopyTableCross.GetDestDB : TIBDatabase;
+function TCopyTableDataCrossRowByRow.GetDestDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
-function TCopyTableCross.GetDestTrans : TIBTransaction;
+function TCopyTableDataCrossRowByRow.GetDestTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
-procedure TCopyTableCross.CancelButtonClick(Sender: TObject);
+procedure TCopyTableDataCrossRowByRow.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
   if Assigned(FThread) then
@@ -847,7 +850,7 @@ begin
   end;
 end;
 
-function TCopyTableCross.Execute : Boolean;
+function TCopyTableDataCrossRowByRow.Execute : Boolean;
 var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
@@ -948,7 +951,7 @@ begin
     Application.ProcessMessages;
 
     // Thread starten
-    FThread := TCopyThreadCross.Create(
+    FThread := TCopyThreadRowByRow.Create(
       GetSourceDB, GetDestDB,
       GetSourceTrans, GetDestTrans,
       FSourceTable, FDestTable,

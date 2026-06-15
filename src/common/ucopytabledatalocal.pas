@@ -1,4 +1,4 @@
-unit uCopyTable;
+unit uCopyTableDataLocal;
 
 {$mode objfpc}{$H+}
 
@@ -13,7 +13,7 @@ type
 
   { TCopyThread }
 
-  TCopyThread = class(TThread)
+  TCopyThreadLocal = class(TThread)
   private
     FSourceDB      : TIBDatabase;
     FSourceTrans   : TIBTransaction;
@@ -61,9 +61,9 @@ type
     property ErrorMessage : string read FErrorMessage;
   end;
 
-  { TCopyTable }
+  { TCopyTableDataLocal }
 
-  TCopyTable = class
+  TCopyTableDataLocal = class
   private
     FSourceDBIndex : Integer;
     FDestDBIndex   : Integer;
@@ -77,7 +77,7 @@ type
     FCopiedRows    : Integer;
     FStartTime     : TDateTime;
     FCancelled     : Boolean;
-    FThread        : TCopyThread;
+    FThread        : TCopyThreadLocal;
 
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
@@ -104,9 +104,9 @@ type
 implementation
 
 
-{ TCopyThread }
+{ TCopyThreadLocal }
 
-constructor TCopyThread.Create(
+constructor TCopyThreadLocal.Create(
   ASourceDB, ADestDB : TIBDatabase;
   ASourceTrans, ADestTrans : TIBTransaction;
   const ASourceTable, ADestTable : string;
@@ -140,12 +140,12 @@ begin
   FBtnCancel := nil;
 end;
 
-destructor TCopyThread.Destroy;
+destructor TCopyThreadLocal.Destroy;
 begin
   inherited Destroy;
 end;
 
-procedure TCopyThread.SetProgressControls(
+procedure TCopyThreadLocal.SetProgressControls(
   AProgressLabel : TLabel;
   AProgressBar   : TProgressBar;
   ALblElapsed    : TLabel;
@@ -157,7 +157,7 @@ begin
   FBtnCancel     := ABtnCancel;
 end;
 
-procedure TCopyThread.BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
+procedure TCopyThreadLocal.BuildInsertSQL(FromRow, BatchRows: Integer; out SQL: string);
 var
   DestFields, SourceFields : string;
   i : Integer;
@@ -198,7 +198,7 @@ begin
          'FROM ' + FSourceTable;
 end;
 
-procedure TCopyThread.UpdateProgressGUI;
+procedure TCopyThreadLocal.UpdateProgressGUI;
 begin
   if Assigned(FProgressLabel) then
     FProgressLabel.Caption := Format('Copied %d of %d rows...', [FCopiedRows, FTotalRows]);
@@ -209,7 +209,7 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TCopyThread.Execute;
+procedure TCopyThreadLocal.Execute;
 var
   DestQuery : TIBQuery;
   HasFormula : Boolean;
@@ -231,9 +231,11 @@ begin
     end;
 
     DestQuery := TIBQuery.Create(nil);
+
     try
       DestQuery.Database := FDestDB;
       DestQuery.Transaction := FDestTrans;
+      DestQuery.AllowAutoActivateTransaction := true;
 
       BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
       FStartTime := Now;
@@ -279,9 +281,9 @@ begin
   end;
 end;
 
-{ TCopyTable }
+{ TCopyTableDataLocal }
 
-constructor TCopyTable.Create(
+constructor TCopyTableDataLocal.Create(
   ASourceDBIndex, ADestDBIndex : Integer;
   const ASourceTable, ADestTable : string;
   const AFieldTransforms : TFieldTransformArray;
@@ -310,7 +312,7 @@ begin
     FFieldTransforms[i] := AFieldTransforms[i];
 end;
 
-destructor TCopyTable.Destroy;
+destructor TCopyTableDataLocal.Destroy;
 begin
   if Assigned(FThread) then
   begin
@@ -321,27 +323,27 @@ begin
   inherited Destroy;
 end;
 
-function TCopyTable.GetSourceDB : TIBDatabase;
+function TCopyTableDataLocal.GetSourceDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
-function TCopyTable.GetSourceTrans : TIBTransaction;
+function TCopyTableDataLocal.GetSourceTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
-function TCopyTable.GetDestDB : TIBDatabase;
+function TCopyTableDataLocal.GetDestDB : TIBDatabase;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
-function TCopyTable.GetDestTrans : TIBTransaction;
+function TCopyTableDataLocal.GetDestTrans : TIBTransaction;
 begin
   Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
-procedure TCopyTable.CancelButtonClick(Sender: TObject);
+procedure TCopyTableDataLocal.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
   if Assigned(FThread) then
@@ -353,7 +355,7 @@ begin
   end;
 end;
 
-function TCopyTable.Execute : Boolean;
+function TCopyTableDataLocal.Execute : Boolean;
 var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
@@ -460,7 +462,7 @@ begin
     // ------------------------------------------------------------------
     // Thread starten
     // ------------------------------------------------------------------
-    FThread := TCopyThread.Create(
+    FThread := TCopyThreadLocal.Create(
       GetSourceDB, GetDestDB,
       GetSourceTrans, GetDestTrans,
       FSourceTable, FDestTable,

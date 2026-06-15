@@ -20,14 +20,14 @@ uses
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
   rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
   QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-  EnterPass, CreateTrigger, fedittabledata, UDFInfo,
-  ViewDomain, NewDomain, SysTables, newForeignKey, NewEditField, Calen,
-  Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
-  PermissionManage, SQLHistory, CopyTable, dynlibs, dbInfo, sysutils,
-  Comparison, topologicalsort, turbocommon, importtable, fileimport,
-  csvdocument, fServerSession, uthemeselector, lazdbexport, sdflaz,
-  udb_firebird_struct_helper,
-  udb_udf_Fetcher, udb_udr_func_fetcher, sqldblib, fbcommon, fTestFunction,
+  EnterPass, CreateTrigger, fedittabledata, UDFInfo, ViewDomain, NewDomain,
+  SysTables, newForeignKey, NewEditField, Calen, Scriptdb, UserPermissions,
+  TableManage, CreateUser, ChangePass, PermissionManage, SQLHistory, CopyTable,
+  dynlibs, dbInfo, sysutils, Comparison, topologicalsort, turbocommon,
+  importtable, fileimport, csvdocument, fServerSession, uthemeselector,
+  lazdbexport, sdflaz, udb_firebird_struct_helper, udb_udf_Fetcher,
+  udb_udr_func_fetcher, sqldblib, fbcommon,
+uCopyTableDataCrossRowByRow, fTestFunction,
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
   QBLnkFrm, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
   fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest,
@@ -58,7 +58,8 @@ uses
   IBTransactionEdit, fdataeditor, fSQLParser, u_psstudio,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
-  clone_table_to_external_table_dialog, clone_table_dialog;
+  clone_table_to_external_table_dialog, clone_table_dialog, fDataStudio,
+fdataformbase, uCreateTable;
 
 const
   Major = 1;
@@ -171,5 +172,7 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
+  Application.CreateForm(TfrmDataStudio, frmDataStudio);
+  Application.CreateForm(TfrmDataFormBase, frmDataFormBase);
   Application.Run;
 end.
