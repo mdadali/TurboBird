@@ -1428,6 +1428,7 @@
         <Filename Value="ui/tools/DataEditor/ucreatetable.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmCreateFirebirdTable"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTable"/>
       </Unit124>

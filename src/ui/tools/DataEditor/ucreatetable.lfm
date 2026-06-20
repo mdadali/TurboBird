@@ -1,7 +1,7 @@
 object frmCreateFirebirdTable: TfrmCreateFirebirdTable
-  Left = 279
+  Left = 431
   Height = 652
-  Top = 321
+  Top = 96
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Firebird Table'
@@ -108,7 +108,6 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
         Top = 7
         Width = 134
         Caption = 'Refresh Presets'
-        OnClick = btnRefreshPresetsClick
         TabOrder = 1
       end
     end
@@ -137,7 +136,6 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
       Width = 75
       Caption = 'Cancel'
       ModalResult = 2
-      OnClick = btnMainCancelClick
       TabOrder = 0
     end
     object btnOK: TButton
@@ -179,6 +177,7 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
       FixedRows = 0
       RowCount = 0
       TabOrder = 0
+      OnDblClick = sgFieldsDblClick
     end
     object pnlFields: TPanel
       Left = 681
@@ -228,7 +227,6 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
     ClientHeight = 258
     ClientWidth = 1016
     TabOrder = 3
-    OnClick = Panel1Click
     object Label1: TLabel
       Left = 24
       Height = 20
@@ -379,7 +377,6 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
       Height = 37
       Top = 112
       Width = 360
-      OnChange = edtExternalFileNameChange
       TabOrder = 6
     end
     object btnOpenExternalFile: TButton
