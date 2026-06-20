@@ -74,6 +74,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Panel1Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
+    procedure sgFieldsDblClick(Sender: TObject);
   private
     FDataSet: TDataSet;
     FFileName: string;
@@ -217,6 +218,31 @@ begin
   edtTo.Enabled := not rbAllRows.Checked;
 end;
 
+// ---------------------------------------------------------------
+//  Doppelklick auf StringGrid → Formel eingeben (nur wenn aktiv)
+// ---------------------------------------------------------------
+procedure TfrmCreateFirebirdTable.sgFieldsDblClick(Sender: TObject);
+var
+  NewFormula: string;
+  Row: Integer;
+begin
+  if not chkUseFormula.Checked then
+  begin
+    ShowMessage('Enable "Use Formula" to enter formulas.');
+    Exit;
+  end;
+
+  Row := sgFields.Row;
+  if (Row < 1) or (Row >= sgFields.RowCount) then Exit;
+
+  NewFormula := sgFields.Cells[3, Row];
+  if InputQuery('Formula for ' + sgFields.Cells[1, Row],
+                'Enter SQL expression ($1 = field value):', NewFormula) then
+  begin
+    sgFields.Cells[3, Row] := NewFormula;
+  end;
+end;
+
 procedure TfrmCreateFirebirdTable.btnMainCancelClick(Sender: TObject);
 begin
 
@@ -227,7 +253,7 @@ begin
 
 end;
 
-procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
+{procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
 var
   DBIndex, i: Integer;
   TableName, SQL, FieldList: string;
@@ -334,6 +360,125 @@ begin
     if CopyTarget in [cdtFB, cdtBoth] then
     begin
       // FB-Tabelle muss existieren (ggf. wurde sie weiter oben gebaut)
+      if not FBBuilt then
+      begin
+        ShowMessage('Firebird table not available – cannot copy data.');
+        Exit;
+      end;
+      RunFBInsert(DBIndex, TableName);
+    end;
+
+  finally
+    Script.Free;
+  end;
+end;}
+
+procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
+var
+  DBIndex, i: Integer;
+  TableName, SQL, FieldList: string;
+  DestDB: TIBDatabase;
+  DestTrans: TIBTransaction;
+  Script: TIBXScript;
+  TableTarget: TTableTarget;
+  CopyTarget: TCopyDataTarget;
+  FBBuilt, ExtBuilt: Boolean;
+begin
+  DBIndex := GetTargetDBIndex;
+  if DBIndex < 0 then
+  begin
+    ShowMessage('Please select a valid destination database.');
+    Exit;
+  end;
+
+  TableName := GetTargetTable;
+  if TableName = '' then
+  begin
+    ShowMessage('Please enter a table name.');
+    Exit;
+  end;
+
+  // Checkbox-Status und Formeln aus dem Grid in FFields übernehmen
+  for i := 0 to High(FFields) do
+  begin
+    FFields[i].Checked := chkLstFields.Checked[i];
+    FFields[i].Formula := sgFields.Cells[3, i + 1];
+  end;
+
+  TableTarget := GetTableTarget;
+  CopyTarget := GetCopyDataTarget;
+
+  DestDB := RegisteredDatabases[DBIndex].IBDatabase;
+  DestTrans := RegisteredDatabases[DBIndex].IBTransaction;
+  if not DestDB.Connected then DestDB.Connected := True;
+  if not DestTrans.InTransaction then DestTrans.StartTransaction;
+
+  Script := TIBXScript.Create(nil);
+  try
+    Script.Database := DestDB;
+    Script.Transaction := DestTrans;
+
+    FBBuilt := False;
+    ExtBuilt := False;
+
+    // 1) Firebird-Tabelle erstellen (falls gewünscht)
+    if TableTarget in [ttFB, ttBoth] then
+    begin
+      if TableExists(DestDB, TableName) then
+      begin
+        if MessageDlg('Table "' + TableName + '" already exists. Drop and recreate?',
+                      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+        begin
+          SQL := 'DROP TABLE ' + TableName;
+          Script.ExecSQLScript(SQL);
+          DestTrans.CommitRetaining;
+        end
+        else
+          FBBuilt := True;
+      end;
+
+      if not FBBuilt then
+      begin
+        FieldList := '';
+        for i := 0 to High(FFields) do
+        begin
+          if not FFields[i].Checked then Continue;
+          if FieldList <> '' then FieldList := FieldList + ', ';
+          FieldList := FieldList + FFields[i].FieldName + ' ' + FFields[i].FieldType;
+        end;
+        SQL := 'CREATE TABLE ' + TableName + ' (' + FieldList + ')';
+        Script.ExecSQLScript(SQL);
+        DestTrans.CommitRetaining;
+        FBBuilt := True;
+      end;
+    end;
+
+    // 2) Externe Tabelle erstellen (falls gewünscht)
+    if TableTarget in [ttExternal, ttBoth] then
+    begin
+      if TableExists(DestDB, TableName + '_EXT') then
+      begin
+        if MessageDlg('External table "' + TableName + '_EXT" already exists. Drop and recreate?',
+                      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+        begin
+          SQL := 'DROP TABLE ' + TableName + '_EXT';
+          Script.ExecSQLScript(SQL);
+          DestTrans.CommitRetaining;
+        end
+        else
+          ExtBuilt := True;
+      end;
+
+      if not ExtBuilt then
+      begin
+        RunExternalExport(DBIndex, TableName + '_EXT');
+        ExtBuilt := True;
+      end;
+    end;
+
+    // 3) Daten in FB-Tabelle kopieren (falls gewünscht)
+    if CopyTarget in [cdtFB, cdtBoth] then
+    begin
       if not FBBuilt then
       begin
         ShowMessage('Firebird table not available – cannot copy data.');
