@@ -1,7 +1,7 @@
 object frmCreateFirebirdTable: TfrmCreateFirebirdTable
-  Left = 431
+  Left = 294
   Height = 652
-  Top = 96
+  Top = 314
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Firebird Table'

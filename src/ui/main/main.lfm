@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 449
+  Left = 143
   Height = 612
-  Top = 464
+  Top = 136
   Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -6442,10 +6442,6 @@ object fmMain: TfmMain
     end
     object mnTools: TMenuItem
       Caption = 'Buildin-Tools'
-      object mnDataStudio: TMenuItem
-        Caption = 'Data Studio'
-        OnClick = mnDataStudioClick
-      end
       object mnDataEditor: TMenuItem
         Caption = 'Data Editor'
         OnClick = mnDataEditorClick

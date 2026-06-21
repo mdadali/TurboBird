@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1870"/>
+      <BuildNr Value="1871"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -664,7 +664,7 @@
         <PackageName Value="LCL"/>
       </Item32>
     </RequiredPackages>
-    <Units Count="125">
+    <Units Count="124">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1407,31 +1407,24 @@
         <UnitName Value="uFormulaPresets"/>
       </Unit120>
       <Unit121>
-        <Filename Value="ui/data_studio/fdatastudio.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="frmDataStudio"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="fDataStudio"/>
-      </Unit121>
-      <Unit122>
         <Filename Value="ui/data_studio/fdataformbase.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmDataFormBase"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit122>
-      <Unit123>
+      </Unit121>
+      <Unit122>
         <Filename Value="common/ucopytabledatacrossrowbyrow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossRowByRow"/>
-      </Unit123>
-      <Unit124>
+      </Unit122>
+      <Unit123>
         <Filename Value="ui/tools/DataEditor/ucreatetable.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmCreateFirebirdTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTable"/>
-      </Unit124>
+      </Unit123>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
