@@ -1,7 +1,0 @@
-object frmDataFormBase: TfrmDataFormBase
-  Left = 314
-  Height = 517
-  Top = 351
-  Width = 886
-  LCLVersion = '2.2.6.0'
-end

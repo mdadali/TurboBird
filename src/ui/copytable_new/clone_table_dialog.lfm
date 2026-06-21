@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 529
+  Left = 314
   Height = 644
-  Top = 485
+  Top = 304
   Width = 1079
   Align = alTop
   Caption = 'Clone Table'
