@@ -42,6 +42,8 @@ type
     btnSelectAll: TButton;
     btnDeselectAll: TButton;
     btnRefreshPresets: TButton;
+    btnExternalFile: TButton;
+    chkboxExternalTable: TCheckBox;
     chkCreateTable: TCheckBox;
     chkLstFields: TCheckListBox;
     cbFormulaPreset: TComboBox;
@@ -51,6 +53,7 @@ type
     comboxSourceServer: TComboBox;
     comboxSourceTables: TComboBox;
     Destination: TGroupBox;
+    edtExternalFile: TEdit;
     edtDestTable: TEdit;
     edtBatchSize: TEdit;
     edtFrom: TEdit;
@@ -90,11 +93,13 @@ type
     procedure btnAddToQueueClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
+    procedure btnExternalFileClick(Sender: TObject);
     procedure btnRefreshPresetsClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnDeselectAllClick(Sender: TObject);
     procedure btnPreviewSQLClick(Sender: TObject);
     procedure cbFormulaPresetChange(Sender: TObject);
+    procedure chkboxExternalTableChange(Sender: TObject);
     procedure comboxDestDBChange(Sender: TObject);
     procedure comboxDestServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
@@ -133,6 +138,10 @@ type
     function GetProblemFieldTransforms: TFieldTransformArray;
     function GenerateCreateTableSQL: string;
     function GenerateInsertSQL: string;
+    function GenerateCreateExternalTableSQL: string;
+    function CreateExternalDestTable(DestDB: TIBDatabase;
+                                     DestTrans: TIBTransaction; TableName: string): Boolean;
+
     function TableExists(DB: TIBDatabase; TableName: string): Boolean;
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
   public
@@ -764,6 +773,77 @@ begin
             'FROM ' + Trim(comboxSourceTables.Text) + ';';
 end;
 
+function TfrmCloneTable.GenerateCreateExternalTableSQL: string;
+var
+  SL: TStringList;
+  i: Integer;
+  Line: string;
+  FieldName, FieldType: string;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Add('CREATE TABLE ' + edtDestTable.Text + ' EXTERNAL FILE ''' +
+           edtExternalFile.Text + ''' (');
+
+    for i := 0 to chkLstFields.Count - 1 do
+    begin
+      if not chkLstFields.Checked[i] then Continue;
+
+      FieldName := chkLstFields.Items[i];
+      FieldType := FFields[i].FieldType;   // Firebird-Typ, z. B. 'VARCHAR(50)'
+
+      // Keine BLOBs, Arrays oder Computed Fields in externen Tabellen!
+      if FFields[i].IsComputed then Continue;
+      if Pos('BLOB', UpperCase(FieldType)) > 0 then Continue;
+      if Pos('[', FieldType) > 0 then Continue;  // Arrays
+
+      SL.Add('  ' + FieldName + ' ' + FieldType + ',');
+    end;
+
+    // Letztes Komma entfernen
+    if SL.Count > 1 then
+    begin
+      Line := SL[SL.Count - 1];
+      if (Length(Line) > 0) and (Line[Length(Line)] = ',') then
+        SL[SL.Count - 1] := Copy(Line, 1, Length(Line) - 1);
+    end;
+
+    SL.Add(');');
+    Result := SL.Text;
+  finally
+    SL.Free;
+  end;
+end;
+
+function TfrmCloneTable.CreateExternalDestTable(DestDB: TIBDatabase;
+  DestTrans: TIBTransaction; TableName: string): Boolean;
+var
+  SQL: string;
+begin
+  Result := False;
+  SQL := GenerateCreateExternalTableSQL;
+
+  if SQL = '' then Exit;
+
+  IBXScript1.Database := DestDB;
+  IBXScript1.Transaction := DestTrans;
+
+  try
+    if not DestTrans.InTransaction then
+      DestTrans.StartTransaction;
+
+    IBXScript1.ExecSQLScript(SQL);
+    DestTrans.Commit;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Failed to create external table: ' + E.Message, mtError, [mbOK], 0);
+      DestTrans.Rollback;
+    end;
+  end;
+end;
+
 // ============================================================================
 // AKTIONEN
 // ============================================================================
@@ -785,8 +865,16 @@ var
   CopyEngineCrossExecuteBlock: TCopyTableDataCrossExecuteBlock;
   CopyEngineCrossRowByRow: TCopyTableDataCrossRowByRow;
   DestTable: string;
+  SkippedFields: string;
   FromRow, ToRow: Integer;
+  i: integer;
 begin
+  if chkboxExternalTable.Checked and (Trim(edtExternalFile.Text) = '') then
+  begin
+    MessageDlg('Please select an external file for the external table.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
   if FSourceDBIndex < 0 then
   begin
     MessageDlg('Please select a valid source database.', mtWarning, [mbOK], 0);
@@ -835,8 +923,39 @@ begin
     begin
       StatusBar1.SimpleText := 'Creating table ' + DestTable + '...';
       Application.ProcessMessages;
-      CreateDestTable(IBDBDest, IBTransDest, DestTable);
+
+      if chkboxExternalTable.Checked then
+        CreateExternalDestTable(IBDBDest, IBTransDest, DestTable)
+      else
+        CreateDestTable(IBDBDest, IBTransDest, DestTable);
     end;
+  end;
+
+  // ============================================================
+  // Wenn Ziel externe Tabelle: Problemfelder automatisch abwählen
+  // ============================================================
+  if chkboxExternalTable.Checked then
+  begin
+    SkippedFields := '';
+    for i := 0 to chkLstFields.Count - 1 do
+    begin
+      if chkLstFields.Checked[i] then
+      begin
+        if FFields[i].IsComputed or
+           (Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0) or
+           (Pos('[', FFields[i].FieldType) > 0) then
+        begin
+          chkLstFields.Checked[i] := False;
+          sgFields.Cells[0, i + 1] := '0';
+          if SkippedFields <> '' then SkippedFields := SkippedFields + ', ';
+          SkippedFields := SkippedFields + FFields[i].FieldName;
+        end;
+      end;
+    end;
+    if SkippedFields <> '' then
+      MessageDlg('External tables do not support these field types.' + sLineBreak +
+                 'They have been deselected automatically:' + sLineBreak +
+                 SkippedFields, mtWarning, [mbOK], 0);
   end;
 
   // From/To
@@ -927,6 +1046,12 @@ begin
   end;
 
   StatusBar1.SimpleText := 'Copy completed: ' + Trim(comboxSourceTables.Text) + ' → ' + DestTable;
+end;
+
+procedure TfrmCloneTable.btnExternalFileClick(Sender: TObject);
+begin
+  if OpenDialog1.Execute then
+    edtExternalFile.Text := OpenDialog1.FileName;
 end;
 
 procedure TfrmCloneTable.btnAddToQueueClick(Sender: TObject);
@@ -1075,6 +1200,12 @@ begin
 
   StatusBar1.SimpleText := 'Preset "' + Preset.Name + '" applied to ' +
                            IntToStr(Length(FFields)) + ' fields.';
+end;
+
+procedure TfrmCloneTable.chkboxExternalTableChange(Sender: TObject);
+begin
+  edtExternalFile.Enabled := chkboxExternalTable.Checked;
+  btnExternalFile.Enabled := chkboxExternalTable.Checked;
 end;
 
 procedure TfrmCloneTable.btnRefreshPresetsClick(Sender: TObject);

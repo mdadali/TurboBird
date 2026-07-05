@@ -1,7 +1,7 @@
 object fmCloneToExternalTable: TfmCloneToExternalTable
-  Left = 422
+  Left = 277
   Height = 708
-  Top = 26
+  Top = 311
   Width = 702
   BorderStyle = bsDialog
   Caption = 'Clone to External Table'
