@@ -1,11 +1,11 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 243
-  Height = 644
-  Top = 53
+  Left = 256
+  Height = 688
+  Top = 60
   Width = 1079
   Align = alTop
   Caption = 'Clone Table'
-  ClientHeight = 644
+  ClientHeight = 688
   ClientWidth = 1079
   OnClose = FormClose
   OnCreate = FormCreate
@@ -15,7 +15,7 @@ object frmCloneTable: TfrmCloneTable
   object Panel1: TPanel
     Left = 0
     Height = 52
-    Top = 592
+    Top = 636
     Width = 1079
     Align = alBottom
     ClientHeight = 52
@@ -260,12 +260,12 @@ object frmCloneTable: TfrmCloneTable
   end
   object grboxCopyOptions: TGroupBox
     Left = 0
-    Height = 105
-    Top = 487
+    Height = 132
+    Top = 504
     Width = 1079
     Align = alBottom
     Caption = 'Copy Options'
-    ClientHeight = 84
+    ClientHeight = 111
     ClientWidth = 1077
     TabOrder = 3
     object rbAllRows: TRadioButton
@@ -333,12 +333,12 @@ object frmCloneTable: TfrmCloneTable
     end
     object grBoxFormulaPresets: TGroupBox
       Left = 680
-      Height = 84
+      Height = 111
       Top = 0
       Width = 397
       Align = alRight
       Caption = 'Formula Presets'
-      ClientHeight = 63
+      ClientHeight = 90
       ClientWidth = 395
       TabOrder = 5
       OnClick = grBoxFormulaPresetsClick
@@ -392,15 +392,24 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 1
       end
     end
+    object chkUseFormula: TCheckBox
+      Left = 22
+      Height = 24
+      Top = 87
+      Width = 110
+      Caption = 'Use Formula'
+      OnChange = chkUseFormulaChange
+      TabOrder = 7
+    end
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 207
+    Height = 224
     Top = 280
     Width = 1079
     Align = alClient
     Caption = 'Fields'
-    ClientHeight = 186
+    ClientHeight = 203
     ClientWidth = 1077
     TabOrder = 4
     OnDblClick = grBoxFieldsDblClick
@@ -414,7 +423,7 @@ object frmCloneTable: TfrmCloneTable
     end
     object sgFields: TStringGrid
       Left = 0
-      Height = 186
+      Height = 203
       Top = 0
       Width = 680
       Align = alLeft
@@ -427,11 +436,11 @@ object frmCloneTable: TfrmCloneTable
     end
     object pnlFields: TPanel
       Left = 744
-      Height = 186
+      Height = 203
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 186
+      ClientHeight = 203
       ClientWidth = 333
       TabOrder = 2
       object chkLstFields: TCheckListBox

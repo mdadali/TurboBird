@@ -43,6 +43,7 @@ type
     btnDeselectAll: TButton;
     btnRefreshPresets: TButton;
     btnExternalFile: TButton;
+    chkUseFormula: TCheckBox;
     chkboxExternalTable: TCheckBox;
     chkCreateTable: TCheckBox;
     chkLstFields: TCheckListBox;
@@ -100,6 +101,7 @@ type
     procedure btnPreviewSQLClick(Sender: TObject);
     procedure cbFormulaPresetChange(Sender: TObject);
     procedure chkboxExternalTableChange(Sender: TObject);
+    procedure chkUseFormulaChange(Sender: TObject);
     procedure comboxDestDBChange(Sender: TObject);
     procedure comboxDestServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
@@ -626,7 +628,7 @@ begin
   end;
 end;
 
-function TfrmCloneTable.GetFieldTransforms: TFieldTransformArray;
+{function TfrmCloneTable.GetFieldTransforms: TFieldTransformArray;
 var
   i: Integer;
 begin
@@ -645,6 +647,34 @@ begin
     else
     begin
       Result[i].Formula := sgFields.Cells[3, i + 1];
+      Result[i].CopyField := chkLstFields.Checked[i];
+    end;
+  end;
+end;}
+
+function TfrmCloneTable.GetFieldTransforms: TFieldTransformArray;
+var
+  i: Integer;
+begin
+  SetLength(Result, chkLstFields.Count);
+  for i := 0 to chkLstFields.Count - 1 do
+  begin
+    Result[i].SourceField := chkLstFields.Items[i];
+    Result[i].DestField := chkLstFields.Items[i];
+    Result[i].DestFieldType := FFields[i].FieldType;
+
+    if FFields[i].IsComputed then
+    begin
+      Result[i].Formula := '';
+      Result[i].CopyField := False;
+    end
+    else
+    begin
+      // Nur wenn Checkbox aktiv ist, die Formel aus dem Grid übernehmen
+      if chkUseFormula.Checked then
+        Result[i].Formula := sgFields.Cells[3, i + 1]
+      else
+        Result[i].Formula := '';
       Result[i].CopyField := chkLstFields.Checked[i];
     end;
   end;
@@ -1206,6 +1236,17 @@ procedure TfrmCloneTable.chkboxExternalTableChange(Sender: TObject);
 begin
   edtExternalFile.Enabled := chkboxExternalTable.Checked;
   btnExternalFile.Enabled := chkboxExternalTable.Checked;
+end;
+
+procedure TfrmCloneTable.chkUseFormulaChange(Sender: TObject);
+begin
+  // Optional: Formel-Spalte im Grid ausgrauen, wenn deaktiviert
+  if sgFields.Columns.Count < 4 then Exit;
+
+  if chkUseFormula.Checked then
+    sgFields.Columns[3].Color := clWindow
+  else
+    sgFields.Columns[3].Color := clBtnFace;
 end;
 
 procedure TfrmCloneTable.btnRefreshPresetsClick(Sender: TObject);
