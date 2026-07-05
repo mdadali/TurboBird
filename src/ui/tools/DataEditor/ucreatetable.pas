@@ -69,9 +69,11 @@ type
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnDeselectAllClick(Sender: TObject);
     procedure btnOpenExternalFileClick(Sender: TObject);
+    procedure cbFormulaPresetChange(Sender: TObject);
     procedure cmbBoxServersChange(Sender: TObject);
     procedure edtExternalFileNameChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure grBoxCopyOptionsClick(Sender: TObject);
     procedure Panel1Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
@@ -125,6 +127,11 @@ begin
   sgFields.ColWidths[3] := 250;
 end;
 
+procedure TfrmCreateFirebirdTable.grBoxCopyOptionsClick(Sender: TObject);
+begin
+
+end;
+
 procedure TfrmCreateFirebirdTable.Panel1Click(Sender: TObject);
 begin
 
@@ -171,7 +178,7 @@ begin
     cmbBoxDBs.ItemIndex := 0;
 end;
 
-procedure TfrmCreateFirebirdTable.LoadFieldList;
+{procedure TfrmCreateFirebirdTable.LoadFieldList;
 var
   Gen: TGenSQLFromCSVDataset;
   i: Integer;
@@ -210,6 +217,49 @@ begin
 
   cbFormulaPreset.Items.Clear;
   cbFormulaPreset.Items.Add('None');
+end;}
+
+procedure TfrmCreateFirebirdTable.LoadFieldList;
+var
+  Gen: TGenSQLFromCSVDataset;
+  i: Integer;
+begin
+  Gen := TGenSQLFromCSVDataset.Create(FDataSet,
+           UpperCase(ChangeFileExt(ExtractFileName(FFileName), '')),
+           50);
+  try
+    SetLength(FFields, Length(Gen.Fields));
+    for i := 0 to High(Gen.Fields) do
+    begin
+      FFields[i].FieldName := Gen.Fields[i].FieldName;
+      FFields[i].FieldType := Gen.Fields[i].FieldType;
+      FFields[i].Checked    := True;
+      FFields[i].Formula    := '';
+      FFields[i].CharLength := 0;
+    end;
+
+    chkLstFields.Clear;
+    sgFields.RowCount := 1;
+    for i := 0 to High(FFields) do
+    begin
+      chkLstFields.Items.Add(FFields[i].FieldName);
+      chkLstFields.Checked[i] := True;
+      sgFields.RowCount := i + 2;
+      sgFields.Cells[0, i + 1] := '1';
+      sgFields.Cells[1, i + 1] := FFields[i].FieldName;
+      sgFields.Cells[2, i + 1] := FFields[i].FieldType;
+      sgFields.Cells[3, i + 1] := '';
+    end;
+  finally
+    Gen.Free;
+  end;
+
+  // Formel-Presets laden
+  cbFormulaPreset.Items.Clear;
+  cbFormulaPreset.Items.Add('None');
+  for i := 0 to FormulaPresetManager.PresetCount - 1 do
+    cbFormulaPreset.Items.Add(FormulaPresetManager.PresetName(i));
+  cbFormulaPreset.ItemIndex := 0;
 end;
 
 procedure TfrmCreateFirebirdTable.rbAllRowsChange(Sender: TObject);
@@ -250,7 +300,8 @@ end;
 
 procedure TfrmCreateFirebirdTable.btnRefreshPresetsClick(Sender: TObject);
 begin
-
+  FormulaPresetManager.Reload;
+  LoadFieldList;
 end;
 
 {procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
@@ -529,6 +580,35 @@ begin
   end;
 end;
 
+procedure TfrmCreateFirebirdTable.cbFormulaPresetChange(Sender: TObject);
+var
+  Preset: TFormulaPreset;
+  i: Integer;
+  Formula: string;
+begin
+  // "None" ausgewählt → alle Formeln löschen
+  if cbFormulaPreset.ItemIndex <= 0 then
+  begin
+    for i := 0 to High(FFields) do
+    begin
+      FFields[i].Formula := '';
+      sgFields.Cells[3, i + 1] := '';
+    end;
+    Exit;
+  end;
+
+  // Preset ausgewählt → Formeln anwenden
+  Preset := FormulaPresetManager.GetPreset(cbFormulaPreset.Text);
+  if Preset = nil then Exit;
+
+  for i := 0 to High(FFields) do
+  begin
+    Formula := Preset.GetFormulaForFieldType(FFields[i].FieldType);
+    FFields[i].Formula := Formula;
+    sgFields.Cells[3, i + 1] := Formula;
+  end;
+end;
+
 procedure TfrmCreateFirebirdTable.cmbBoxServersChange(Sender: TObject);
 begin
   if cmbBoxServers.ItemIndex >= 0 then
@@ -789,7 +869,7 @@ begin
 end;
 
 // ---------------------------------------------------------------
-//  Export für externe Tabelle MIT TCopyTableDataLocal
+//  Export für externe Tabelle mit TCopyTableDataLocal
 //  Kopiert die Daten aus der bereits befüllten Firebird-Tabelle
 //  in die externe Tabelle (CSV). Die FB-Tabelle muss existieren.
 // ---------------------------------------------------------------

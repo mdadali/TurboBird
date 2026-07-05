@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 314
+  Left = 294
   Height = 644
-  Top = 304
+  Top = 293
   Width = 1079
   Align = alTop
   Caption = 'Clone Table'
@@ -313,7 +313,6 @@ object frmCloneTable: TfrmCloneTable
       ClientHeight = 63
       ClientWidth = 395
       TabOrder = 5
-      Visible = False
       OnClick = grBoxFormulaPresetsClick
       object cbFormulaPreset: TComboBox
         Left = 16
