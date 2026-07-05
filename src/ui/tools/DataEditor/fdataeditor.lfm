@@ -99,9 +99,9 @@ object frmDataEditor: TfrmDataEditor
     Height = 525
     Top = 50
     Width = 847
-    ActivePage = tsCSVSettings
+    ActivePage = tsGrid
     Align = alClient
-    TabIndex = 2
+    TabIndex = 0
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'

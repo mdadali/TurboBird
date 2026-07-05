@@ -1358,6 +1358,7 @@ begin
 end;
 
 { Create new result tab depending on query type }
+//TRxDBGrid Variante
 function TfmQueryWindow.CreateResultTab(IsSelect: Boolean;
   var aSqlQuery: TIBQuery; var meResult: TMemo;
   AdditionalTitle: string = ''): TTabSheet;
@@ -1443,6 +1444,83 @@ begin
   if Assigned(ATab) then
     frmThemeSelector.btnApplyClick(ATab);
 end;
+
+//TDBGrid Variante
+{function TfmQueryWindow.CreateResultTab(IsSelect: Boolean;
+  var aSqlQuery: TIBQuery; var meResult: TMemo;
+  AdditionalTitle: string = ''): TTabSheet;
+var
+  ATab: TTabSheet;
+  DBGrid: TDBGrid;           // ← Einfaches TDBGrid statt TRxDBGrid
+  DataSource: TDataSource;
+  StatusBar: TStatusBar;
+  Nav: TDBNavigator;
+  Pan: TPanel;
+begin
+  ATab := TTabSheet.Create(nil);
+  OutputTabsList.AddObject('', ATab);
+  Result := ATab;
+  ATab.Parent := pgOutputPageCtl;
+  pgOutputPageCtl.ActivePage := ATab;
+  ATab.Caption := 'Result # ' + GetNewTabNum + ' ' + AdditionalTitle;
+
+  if IsSelect then
+  begin
+    aSqlQuery.AfterPost := @QueryAfterPost;
+    aSqlQuery.AfterScroll := @QueryAfterScroll;
+    aSqlQuery.Tag := ATab.TabIndex;
+    ATab.Tag := PtrInt(aSQLQuery);
+
+    StatusBar := TStatusBar.Create(ATab);
+    StatusBar.Parent := ATab;
+    StatusBar.Tag := aSqlQuery.Tag;
+
+    DataSource := TDataSource.Create(self);
+    DataSource.DataSet := aSqlQuery;
+
+    Pan := TPanel.Create(self);
+    Pan.Parent := ATab;
+    Pan.Height := 30;
+    Pan.Align := alTop;
+
+    DBGrid := TDBGrid.Create(self);         // ← Einfaches TDBGrid
+    DBGrid.Parent := ATab;
+    DBGrid.DataSource := DataSource;
+    DBGrid.Align := alClient;
+    DBGrid.OnDblClick := @DBGrid1DblClick;
+    DBGrid.ReadOnly := True;
+    DBGrid.Options := [dgTitles, dgIndicator, dgColumnResize, dgColLines,
+                       dgRowLines, dgTabs, dgRowSelect, dgAlwaysShowSelection,
+                       dgCancelOnExit];
+
+    pmGrid.PopupComponent := DBGrid;
+    DBGrid.PopupMenu := pmGrid;
+
+    Nav := TDBNavigator.Create(self);
+    Nav.Parent := Pan;
+    Nav.VisibleButtons := [nbFirst, nbNext, nbPrior, nbLast];
+    Nav.DataSource := DataSource;
+    Nav.Visible := QWShowNavigator;
+
+    NewApplyButton(Pan, ATab);
+    NewCommitButton(Pan, ATab);
+
+    // Export-Funktionen mit TDBGrid funktionieren nicht mit Rx-Komponenten
+    RxDBGridExportPDF1.RxDBGrid := nil;
+    RxDBGridPrint1.RxDBGrid := nil;
+    RxDBGridExportSpreadSheet1.RxDBGrid := nil;
+  end
+  else
+  begin
+    meResult := TMemo.Create(self);
+    meResult.Parent := ATab;
+    meResult.ReadOnly := True;
+    meResult.Align := alClient;
+  end;
+
+  if Assigned(ATab) then
+    frmThemeSelector.btnApplyClick(ATab);
+end;}
 
 procedure TfmQueryWindow.SetTransactionButtonsState(AEnabled: Boolean);
 begin
@@ -3167,6 +3245,8 @@ begin
           FTab.ShowHint := True;
           FSQLQuery.SQL.Text := FQueryPart;
           FTab.Caption := 'Running...';
+
+          FSQLQuery.AllowAutoActivateTransaction := true;
           FSQLQuery.Open;
           FTab.Caption := 'Query Result';
           FTab.ImageIndex := 0;

@@ -1,7 +1,7 @@
 object frmCreateFirebirdTable: TfrmCreateFirebirdTable
-  Left = 294
+  Left = 488
   Height = 652
-  Top = 314
+  Top = 197
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Firebird Table'
@@ -92,13 +92,13 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
       ClientHeight = 79
       ClientWidth = 395
       TabOrder = 5
-      Visible = False
       object cbFormulaPreset: TComboBox
         Left = 16
         Height = 36
         Top = 8
         Width = 223
         ItemHeight = 0
+        OnChange = cbFormulaPresetChange
         Style = csDropDownList
         TabOrder = 0
       end
@@ -108,6 +108,7 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
         Top = 7
         Width = 134
         Caption = 'Refresh Presets'
+        OnClick = btnRefreshPresetsClick
         TabOrder = 1
       end
     end
@@ -307,6 +308,7 @@ object frmCreateFirebirdTable: TfrmCreateFirebirdTable
       ClientHeight = 164
       ClientWidth = 199
       TabOrder = 3
+      OnClick = grBoxCopyOptionsClick
       object rbCopyDataToFB: TRadioButton
         Left = 16
         Height = 24
