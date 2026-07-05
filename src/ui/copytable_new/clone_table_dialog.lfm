@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 294
+  Left = 243
   Height = 644
-  Top = 293
+  Top = 53
   Width = 1079
   Align = alTop
   Caption = 'Clone Table'
@@ -75,21 +75,21 @@ object frmCloneTable: TfrmCloneTable
   end
   object Panel2: TPanel
     Left = 0
-    Height = 224
+    Height = 248
     Top = 32
     Width = 1079
     Align = alTop
-    ClientHeight = 224
+    ClientHeight = 248
     ClientWidth = 1079
     TabOrder = 2
     object grBoxSource: TGroupBox
       Left = 1
-      Height = 222
+      Height = 246
       Top = 1
       Width = 503
       Align = alLeft
       Caption = 'Source'
-      ClientHeight = 201
+      ClientHeight = 225
       ClientWidth = 501
       TabOrder = 0
       OnClick = grBoxSourceClick
@@ -150,12 +150,12 @@ object frmCloneTable: TfrmCloneTable
     end
     object Destination: TGroupBox
       Left = 504
-      Height = 222
+      Height = 246
       Top = 1
       Width = 574
       Align = alClient
       Caption = 'Destination'
-      ClientHeight = 201
+      ClientHeight = 225
       ClientWidth = 572
       TabOrder = 1
       object Label4: TLabel
@@ -219,14 +219,42 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 3
       end
       object chkCreateTable: TCheckBox
-        Left = 120
+        Left = 17
         Height = 24
-        Top = 152
+        Top = 144
         Width = 269
         Caption = 'Create destination table if not exists'
         Checked = True
         State = cbChecked
         TabOrder = 4
+      end
+      object chkboxExternalTable: TCheckBox
+        Left = 17
+        Height = 24
+        Top = 176
+        Width = 121
+        Caption = 'External Table'
+        OnChange = chkboxExternalTableChange
+        TabOrder = 5
+      end
+      object edtExternalFile: TEdit
+        Left = 155
+        Height = 37
+        Top = 176
+        Width = 349
+        Enabled = False
+        TabOrder = 6
+        Text = 'edtExternalFile'
+      end
+      object btnExternalFile: TButton
+        Left = 512
+        Height = 25
+        Top = 184
+        Width = 36
+        Caption = '...'
+        Enabled = False
+        OnClick = btnExternalFileClick
+        TabOrder = 7
       end
     end
   end
@@ -325,7 +353,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 0
       end
       object btnRefreshPresets: TButton
-        Left = 264
+        Left = 256
         Height = 37
         Top = 7
         Width = 134
@@ -367,12 +395,12 @@ object frmCloneTable: TfrmCloneTable
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 231
-    Top = 256
+    Height = 207
+    Top = 280
     Width = 1079
     Align = alClient
     Caption = 'Fields'
-    ClientHeight = 210
+    ClientHeight = 186
     ClientWidth = 1077
     TabOrder = 4
     OnDblClick = grBoxFieldsDblClick
@@ -386,7 +414,7 @@ object frmCloneTable: TfrmCloneTable
     end
     object sgFields: TStringGrid
       Left = 0
-      Height = 210
+      Height = 186
       Top = 0
       Width = 680
       Align = alLeft
@@ -399,11 +427,11 @@ object frmCloneTable: TfrmCloneTable
     end
     object pnlFields: TPanel
       Left = 744
-      Height = 210
+      Height = 186
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 210
+      ClientHeight = 186
       ClientWidth = 333
       TabOrder = 2
       object chkLstFields: TCheckListBox
@@ -475,8 +503,8 @@ object frmCloneTable: TfrmCloneTable
     Top = 192
   end
   object OpenDialog1: TOpenDialog
-    Left = 776
-    Top = 304
+    Left = 808
+    Top = 328
   end
   object IBXScript1: TIBXScript
     Database = IBDBSource
@@ -528,7 +556,7 @@ object frmCloneTable: TfrmCloneTable
     Top = 144
   end
   object PopupMenu1: TPopupMenu
-    Left = 1032
-    Top = 504
+    Left = 984
+    Top = 328
   end
 end
