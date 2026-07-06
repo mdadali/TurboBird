@@ -1418,12 +1418,12 @@
         <UnitName Value="uCopyTableDataCrossRowByRow"/>
       </Unit122>
       <Unit123>
-        <Filename Value="ui/tools/DataEditor/ucreatetable.pas"/>
+        <Filename Value="ui/tools/DataEditor/ucreatetablefromdataset.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="frmCreateFirebirdTable"/>
+        <ComponentName Value="frmCreateTableFromDataSet"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="uCreateTable"/>
+        <UnitName Value="uCreateTableFromDataSet"/>
       </Unit123>
     </Units>
   </ProjectOptions>
