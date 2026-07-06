@@ -34,19 +34,19 @@ type
 
   TfrmCloneTable = class(TForm)
     btnCancel: TButton;
+    btnDeselectAll: TButton;
     btnExecute: TButton;
     btnNewDB: TButton;
     btnOpenExternalFile: TButton;
     btnPreviewSQL: TButton;
     btnAddToQueue: TButton;
-    btnSelectAll: TButton;
-    btnDeselectAll: TButton;
     btnRefreshPresets: TButton;
     btnExternalFile: TButton;
+    btnSelectAll: TButton;
+    chkLstFields: TCheckListBox;
     chkUseFormula: TCheckBox;
     chkboxExternalTable: TCheckBox;
     chkCreateTable: TCheckBox;
-    chkLstFields: TCheckListBox;
     cbFormulaPreset: TComboBox;
     comboxDestDB: TComboBox;
     comboxSourceDB: TComboBox;
@@ -89,8 +89,8 @@ type
     rbExecuteBlock: TRadioButton;
     rbAllRows: TRadioButton;
     rbRange: TRadioButton;
-    StatusBar1: TStatusBar;
     sgFields: TStringGrid;
+    StatusBar1: TStatusBar;
     procedure btnAddToQueueClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
@@ -101,12 +101,15 @@ type
     procedure btnPreviewSQLClick(Sender: TObject);
     procedure cbFormulaPresetChange(Sender: TObject);
     procedure chkboxExternalTableChange(Sender: TObject);
+    procedure chkCreateTableChange(Sender: TObject);
     procedure chkUseFormulaChange(Sender: TObject);
     procedure comboxDestDBChange(Sender: TObject);
     procedure comboxDestServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
     procedure comboxSourceServerChange(Sender: TObject);
     procedure comboxSourceTablesChange(Sender: TObject);
+    procedure DestinationClick(Sender: TObject);
+    procedure edtDestTableChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -115,6 +118,7 @@ type
     procedure grBoxSourceClick(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
       var BlobID: TISC_QUAD);
+    procedure Label5Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
   private
@@ -197,7 +201,8 @@ begin
   sgFields.Cells[1, 0] := 'Source Field';
   sgFields.Cells[2, 0] := 'Field Type';
   sgFields.Cells[3, 0] := 'Formula ($1 = value)';
-  sgFields.ColWidths[0] := 45;
+  //sgFields.ColWidths[0] := 45;
+  sgFields.ColWidths[0] := 0; //invisible
   sgFields.ColWidths[1] := 150;
   sgFields.ColWidths[2] := 120;
   sgFields.ColWidths[3] := 250;
@@ -243,6 +248,16 @@ procedure TfrmCloneTable.comboxSourceTablesChange(Sender: TObject);
 begin
   edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
   LoadFields;
+end;
+
+procedure TfrmCloneTable.DestinationClick(Sender: TObject);
+begin
+
+end;
+
+procedure TfrmCloneTable.edtDestTableChange(Sender: TObject);
+begin
+
 end;
 
 procedure TfrmCloneTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -1175,6 +1190,11 @@ begin
 
 end;
 
+procedure TfrmCloneTable.Label5Click(Sender: TObject);
+begin
+
+end;
+
 procedure TfrmCloneTable.rbAllRowsChange(Sender: TObject);
 begin
   edtFrom.Enabled := not rbAllRows.Checked;
@@ -1236,6 +1256,11 @@ procedure TfrmCloneTable.chkboxExternalTableChange(Sender: TObject);
 begin
   edtExternalFile.Enabled := chkboxExternalTable.Checked;
   btnExternalFile.Enabled := chkboxExternalTable.Checked;
+end;
+
+procedure TfrmCloneTable.chkCreateTableChange(Sender: TObject);
+begin
+
 end;
 
 procedure TfrmCloneTable.chkUseFormulaChange(Sender: TObject);

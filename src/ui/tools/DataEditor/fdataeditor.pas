@@ -14,7 +14,7 @@ uses
   uthemeselector,
   uGenSQLFromCSVDataset,
   c_json_dataset,
-  uCreateTable,
+  uCreateTableFromDataSet,
 
   fdataexportersintrf,
 
@@ -559,12 +559,12 @@ begin
 end;
 
 procedure TfrmDataEditor.btnCreateTableClick(Sender: TObject);
-var frmCreateFirebirdTable: TfrmCreateFirebirdTable;
+var frmCreateTable: TfrmCreateTableFromDataSet;
 begin
-  frmCreateFirebirdTable := TfrmCreateFirebirdTable.Create(self);
-  frmCreateFirebirdTable.Init(DataSource1.DataSet, self.FFileName);
+  frmCreateTable := TfrmCreateTableFromDataSet.Create(self);
+  frmCreateTable.Init(DataSource1.DataSet, self.FFileName);
 
-  frmCreateFirebirdTable.ShowModal;
+  frmCreateTable.ShowModal;
 end;
 
 procedure TfrmDataEditor.CSVDataset1AfterDelete(DataSet: TDataSet);

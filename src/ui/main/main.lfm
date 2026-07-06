@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 12
+  Left = 430
   Height = 612
-  Top = 244
+  Top = 423
   Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -8475,13 +8475,13 @@ object fmMain: TfmMain
       OnClick = lmCloneTableClick
     end
     object lmCloneToExternalTable: TMenuItem
-      Tag = 1
+      Tag = -2
       Caption = 'Clone to external Table'
       Visible = False
       OnClick = lmCloneToExternalTableClick
     end
     object lmCopyTable: TMenuItem
-      Tag = 1
+      Tag = -2
       Caption = 'Copy Table'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
@@ -8523,7 +8523,7 @@ object fmMain: TfmMain
       OnClick = lmCopyTableClick
     end
     object lmImportTable: TMenuItem
-      Tag = 1
+      Tag = -2
       Caption = 'Import to Table'
       ImageIndex = 75
       Visible = False

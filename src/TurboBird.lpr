@@ -59,7 +59,7 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-fdataformbase, uCreateTable;
+fdataformbase, uCreateTableFromDataSet;
 
 const
   Major = 1;

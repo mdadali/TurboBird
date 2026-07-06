@@ -1,4 +1,4 @@
-unit uCreateTable;
+unit uCreateTableFromDataSet;
 
 {$mode objfpc}{$H+}
 
@@ -17,9 +17,9 @@ type
   TCopyDataTarget = (cdtNone, cdtFB, cdtExternal, cdtBoth);
   TTableTarget    = (ttFB, ttExternal, ttBoth);
 
-  { TfrmCreateFirebirdTable }
+  { TfrmCreateTableFromDataSet }
 
-  TfrmCreateFirebirdTable = class(TForm)
+  TfrmCreateTableFromDataSet = class(TForm)
     btnMainCancel: TButton;
     btnDeselectAll: TButton;
     btnOK: TButton;
@@ -114,7 +114,7 @@ implementation
 
 {$R *.lfm}
 
-procedure TfrmCreateFirebirdTable.FormCreate(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.FormCreate(Sender: TObject);
 begin
   sgFields.ColCount := 4;
   sgFields.Cells[0, 0] := 'Copy';
@@ -127,17 +127,17 @@ begin
   sgFields.ColWidths[3] := 250;
 end;
 
-procedure TfrmCreateFirebirdTable.grBoxCopyOptionsClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.grBoxCopyOptionsClick(Sender: TObject);
 begin
 
 end;
 
-procedure TfrmCreateFirebirdTable.Panel1Click(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.Panel1Click(Sender: TObject);
 begin
 
 end;
 
-procedure TfrmCreateFirebirdTable.Init(ADataSet: TDataSet; const AFileName: string);
+procedure TfrmCreateTableFromDataSet.Init(ADataSet: TDataSet; const AFileName: string);
 begin
   FDataSet := ADataSet;
   FFileName := AFileName;
@@ -154,7 +154,7 @@ begin
   LoadFieldList;
 end;
 
-procedure TfrmCreateFirebirdTable.FillServerCombo;
+procedure TfrmCreateTableFromDataSet.FillServerCombo;
 var
   List: TStringList;
 begin
@@ -166,7 +166,7 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.FillDBCombo;
+procedure TfrmCreateTableFromDataSet.FillDBCombo;
 var
   i: Integer;
 begin
@@ -178,7 +178,7 @@ begin
     cmbBoxDBs.ItemIndex := 0;
 end;
 
-{procedure TfrmCreateFirebirdTable.LoadFieldList;
+{procedure TfrmCreateTableFromDataSet.LoadFieldList;
 var
   Gen: TGenSQLFromCSVDataset;
   i: Integer;
@@ -219,7 +219,7 @@ begin
   cbFormulaPreset.Items.Add('None');
 end;}
 
-procedure TfrmCreateFirebirdTable.LoadFieldList;
+procedure TfrmCreateTableFromDataSet.LoadFieldList;
 var
   Gen: TGenSQLFromCSVDataset;
   i: Integer;
@@ -262,7 +262,7 @@ begin
   cbFormulaPreset.ItemIndex := 0;
 end;
 
-procedure TfrmCreateFirebirdTable.rbAllRowsChange(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.rbAllRowsChange(Sender: TObject);
 begin
   edtFrom.Enabled := not rbAllRows.Checked;
   edtTo.Enabled := not rbAllRows.Checked;
@@ -271,7 +271,7 @@ end;
 // ---------------------------------------------------------------
 //  Doppelklick auf StringGrid → Formel eingeben (nur wenn aktiv)
 // ---------------------------------------------------------------
-procedure TfrmCreateFirebirdTable.sgFieldsDblClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.sgFieldsDblClick(Sender: TObject);
 var
   NewFormula: string;
   Row: Integer;
@@ -293,18 +293,18 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.btnMainCancelClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnMainCancelClick(Sender: TObject);
 begin
 
 end;
 
-procedure TfrmCreateFirebirdTable.btnRefreshPresetsClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnRefreshPresetsClick(Sender: TObject);
 begin
   FormulaPresetManager.Reload;
   LoadFieldList;
 end;
 
-{procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
+{procedure TfrmCreateTableFromDataSet.btnRunClick(Sender: TObject);
 var
   DBIndex, i: Integer;
   TableName, SQL, FieldList: string;
@@ -424,7 +424,7 @@ begin
   end;
 end;}
 
-procedure TfrmCreateFirebirdTable.btnRunClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnRunClick(Sender: TObject);
 var
   DBIndex, i: Integer;
   TableName, SQL, FieldList: string;
@@ -543,7 +543,7 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.btnSelectAllClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnSelectAllClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -554,7 +554,7 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.btnDeselectAllClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnDeselectAllClick(Sender: TObject);
 var
   i: Integer;
 begin
@@ -565,7 +565,7 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.btnOpenExternalFileClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.btnOpenExternalFileClick(Sender: TObject);
 begin
   with TOpenDialog.Create(nil) do
   try
@@ -580,7 +580,7 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.cbFormulaPresetChange(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.cbFormulaPresetChange(Sender: TObject);
 var
   Preset: TFormulaPreset;
   i: Integer;
@@ -609,18 +609,18 @@ begin
   end;
 end;
 
-procedure TfrmCreateFirebirdTable.cmbBoxServersChange(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.cmbBoxServersChange(Sender: TObject);
 begin
   if cmbBoxServers.ItemIndex >= 0 then
     FillDBCombo;
 end;
 
-procedure TfrmCreateFirebirdTable.edtExternalFileNameChange(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.edtExternalFileNameChange(Sender: TObject);
 begin
   FExternalFileName := edtExternalFileName.Text;
 end;
 
-function TfrmCreateFirebirdTable.GetTargetDBIndex: Integer;
+function TfrmCreateTableFromDataSet.GetTargetDBIndex: Integer;
 var
   i: Integer;
 begin
@@ -631,12 +631,12 @@ begin
       Exit(i);
 end;
 
-function TfrmCreateFirebirdTable.GetTargetTable: string;
+function TfrmCreateTableFromDataSet.GetTargetTable: string;
 begin
   Result := Trim(edtDestTableName.Text);
 end;
 
-function TfrmCreateFirebirdTable.GetCopyDataTarget: TCopyDataTarget;
+function TfrmCreateTableFromDataSet.GetCopyDataTarget: TCopyDataTarget;
 begin
   if rbCopyDataToFB.Checked then Result := cdtFB
   else if rbCopyDataToExternal.Checked then Result := cdtExternal
@@ -644,19 +644,19 @@ begin
   else Result := cdtNone;
 end;
 
-function TfrmCreateFirebirdTable.GetTableTarget: TTableTarget;
+function TfrmCreateTableFromDataSet.GetTableTarget: TTableTarget;
 begin
   if rbTableFB.Checked then Result := ttFB
   else if rbTableExternal.Checked then Result := ttExternal
   else Result := ttBoth;
 end;
 
-function TfrmCreateFirebirdTable.GetBatchSize: Integer;
+function TfrmCreateTableFromDataSet.GetBatchSize: Integer;
 begin
   Result := StrToIntDef(edtBatchSize.Text, 1000000);
 end;
 
-function TfrmCreateFirebirdTable.GetFromRow: Integer;
+function TfrmCreateTableFromDataSet.GetFromRow: Integer;
 begin
   if rbRange.Checked then
     Result := StrToIntDef(edtFrom.Text, 1)
@@ -664,7 +664,7 @@ begin
     Result := 1;
 end;
 
-function TfrmCreateFirebirdTable.GetToRow: Integer;
+function TfrmCreateTableFromDataSet.GetToRow: Integer;
 begin
   if rbRange.Checked then
     Result := StrToIntDef(edtTo.Text, FDataSet.RecordCount)
@@ -672,7 +672,7 @@ begin
     Result := FDataSet.RecordCount;
 end;
 
-procedure TfrmCreateFirebirdTable.CancelButtonClick(Sender: TObject);
+procedure TfrmCreateTableFromDataSet.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
   if Sender is TButton then
@@ -686,7 +686,7 @@ end;
 //  INSERT Zeile für Zeile aus dem Dataset in die FB-Tabelle
 //  MIT eigenem, temporärem Fortschrittsdialog
 // ---------------------------------------------------------------
-procedure TfrmCreateFirebirdTable.RunFBInsert(ADBIndex: Integer; const ATableName: string);
+procedure TfrmCreateTableFromDataSet.RunFBInsert(ADBIndex: Integer; const ATableName: string);
 var
   DestDB: TIBDatabase;
   DestTrans: TIBTransaction;
@@ -873,7 +873,7 @@ end;
 //  Kopiert die Daten aus der bereits befüllten Firebird-Tabelle
 //  in die externe Tabelle (CSV). Die FB-Tabelle muss existieren.
 // ---------------------------------------------------------------
-procedure TfrmCreateFirebirdTable.RunExternalExport(ADBIndex: Integer; const ATableName: string);
+procedure TfrmCreateTableFromDataSet.RunExternalExport(ADBIndex: Integer; const ATableName: string);
 var
   i, Idx: Integer;
   DestDB: TIBDatabase;
@@ -975,7 +975,7 @@ begin
   end;
 end;
 
-function TfrmCreateFirebirdTable.TableExists(ADB: TIBDatabase; const ATableName: string): Boolean;
+function TfrmCreateTableFromDataSet.TableExists(ADB: TIBDatabase; const ATableName: string): Boolean;
 var
   qry: TIBQuery;
 begin
