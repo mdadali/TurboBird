@@ -371,7 +371,7 @@ begin
   if (ssCtrl in Shift) and
     ((Key=VK_F4) or (Key=VK_W)) then
   begin
-    if MessageDlg('Do you want to close this query window?', mtConfirmation, [mbNo, mbYes], 0) = mrYes then
+    if MessageDlg('Do you want to close this window?', mtConfirmation, [mbNo, mbYes], 0) = mrYes then
     begin
       // Close when pressing Ctrl-W or Ctrl-F4 (Cmd-W/Cmd-F4 on OSX)
       Close;

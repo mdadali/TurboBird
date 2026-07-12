@@ -56,7 +56,7 @@ object frmDataEditor: TfrmDataEditor
       Top = 1
       Width = 100
       Align = alLeft
-      Caption = 'Save As'
+      Caption = 'Save...'
       Enabled = False
       OnClick = btnSaveFileAsClick
       TabOrder = 2

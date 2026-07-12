@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 376
+  Left = 302
   Height = 634
-  Top = 114
+  Top = 92
   Width = 1023
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -68,7 +68,7 @@ object fmNewTable: TfmNewTable
     FixedColor = clActiveBorder
     FixedCols = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goEditing, goAutoAddRows, goAlwaysShowEditor, goSmoothScroll]
-    RowCount = 3
+    RowCount = 1
     TabOrder = 1
     OnEditingDone = StringGrid1PickListSelect
     OnKeyUp = StringGrid1KeyUp
