@@ -76,6 +76,7 @@ uses
 
   uExternalTable,
   clone_table_to_external_table_dialog,
+  u_bulk_export,
 
   uthemeselector,
   fsimpleobjextractor,
@@ -150,6 +151,7 @@ type
     lmCloneTable: TMenuItem;
     lmExportTableToDataEditorRO: TMenuItem;
     lmExportTableToDataEditorRW: TMenuItem;
+    lmBulkExport: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -326,6 +328,7 @@ type
     procedure lmAddUserClick(Sender: TObject);
     procedure lmBackupNewClick(Sender: TObject);
     procedure lmBlobEditorClick(Sender: TObject);
+    procedure lmBulkExportClick(Sender: TObject);
     procedure lmChangePasswordClick(Sender: TObject);
     procedure lmCloneDBRegistryClick(Sender: TObject);
     procedure lmCloneServerClick(Sender: TObject);
@@ -1998,6 +2001,15 @@ begin
   PageControl1.ActivePage := ATab;
   frmBlobEdit.Init(nil, NodeInfos);
   frmBlobEdit.Show;}
+end;
+
+procedure TfmMain.lmBulkExportClick(Sender: TObject);
+var
+  frmBulkExport: TfrmBulkExport;
+begin
+  frmBulkExport := TfrmBulkExport.Create(Application);
+  frmBulkExport.ShowModal;
+  frmBulkExport.Free;
 end;
 
 (**********  change user password  **********)

@@ -59,7 +59,7 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-fdataformbase, uCreateTableFromDataSet;
+fdataformbase, uCreateTableFromDataSet, u_bulk_export;
 
 const
   Major = 1;
@@ -173,5 +173,6 @@ begin
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
   Application.CreateForm(TfrmDataFormBase, frmDataFormBase);
+  //Application.CreateForm(TfrmBulkExport, frmBulkExport);
   Application.Run;
 end.
