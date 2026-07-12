@@ -1068,6 +1068,7 @@ begin
         ProgressBar.Position := Exported;
         ProgressLabel.Caption := Format('Exported %d of %d rows...', [Exported, TotalRows]);
         LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
+        //FileStream.Flush;
         Application.ProcessMessages;
 
       until (Exported >= TotalRows) or FCancelled;

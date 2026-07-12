@@ -1429,6 +1429,7 @@
         <Filename Value="ui/bulk_export/u_bulk_export.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmBulkExport"/>
+        <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit124>
     </Units>
