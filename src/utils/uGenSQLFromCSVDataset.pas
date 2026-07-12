@@ -87,37 +87,27 @@ begin
 end;
 
 // ---------------------------------------------------------------
-//  NEU: Nur eine einzige Zeile analysieren!
+//  Nur eine einzige Zeile analysieren!
 // ---------------------------------------------------------------
 function TGenSQLFromCSVDataset.DetectFieldType(const FieldName: string): TFieldType;
 var
   SavedPos: TBookmark;
   Value: string;
 begin
-  Result := ftString;   // Fallback
+  Result := ftString;
   if not FDataSet.Active then Exit;
 
-  SavedPos := FDataSet.GetBookmark;
+  // Für DB-Datasets (TIBQuery) – nur erste Zeile analysieren
   try
-    // Auf die erste Datenzeile springen
     FDataSet.First;
-    if (FDataSet is TCSVDataset) and
-       TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames then
-    begin
-      // Erste Zeile enthält Feldnamen → zweite Zeile ist die erste Datenzeile
-      if not FDataSet.EOF then
-        FDataSet.Next;
-    end;
-
     if not FDataSet.EOF then
     begin
       Value := FDataSet.FieldByName(FieldName).AsString;
       Result := GetFieldTypeByString(Value);
     end;
-  finally
-    if FDataSet.BookmarkValid(SavedPos) then
-      FDataSet.GotoBookmark(SavedPos);
-    FDataSet.FreeBookmark(SavedPos);
+  except
+    // Fallback: Buchmark-Fehler abfangen
+    Result := ftString;
   end;
 end;
 
@@ -155,28 +145,26 @@ begin
   SetLength(FFields, 0);
   if not FDataSet.Active then Exit;
 
+  // CSV-Header-Logik NUR für TCSVDataset anwenden
   UseHeader := (FDataSet is TCSVDataset) and
                TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames;
 
   for i := 0 to FDataSet.FieldCount - 1 do
   begin
     Field := FDataSet.Fields[i];
-    if UseHeader then
-      fName := Field.FieldName
-    else
-      fName := 'Column' + IntToStr(i + 1);
 
-    // Nur EINE Zeile ansehen
+    if UseHeader then
+      fName := Field.FieldName          // CSV mit Header → Feldname aus erster Zeile
+    else if FDataSet is TCSVDataset then
+      fName := 'Column' + IntToStr(i + 1)  // CSV ohne Header → Column1, Column2...
+    else
+      fName := Field.FieldName;         // DB-Dataset → echter Feldname!
+
     DetectedType := DetectFieldType(fName);
 
     SetLength(FFields, i + 1);
     FFields[i].FieldName := fName;
-
-    // VARCHAR-Länge direkt aus der globalen Einstellung
-    if DetectedType in [ftString, ftGuid, ftMemo, ftFmtMemo, ftWideString] then
-      FFields[i].FieldType := FieldTypeToFirebird(DetectedType, CSVDefaultFieldLength)
-    else
-      FFields[i].FieldType := FieldTypeToFirebird(DetectedType, 0);
+    FFields[i].FieldType := FieldTypeToFirebird(DetectedType, CSVDefaultFieldLength);
   end;
 end;
 

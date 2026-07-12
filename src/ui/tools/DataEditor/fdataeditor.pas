@@ -10,7 +10,14 @@ uses
   SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf, RxDBGridPrintGrid,
   RxDBGridExportSpreadSheet, fpsDataset,
 
+
+  IB,
+  IBDatabase,
+  IBQuery,
+  IBTable,
+
   turbocommon,
+  SysTables,
   uthemeselector,
   uGenSQLFromCSVDataset,
   c_json_dataset,
@@ -112,14 +119,21 @@ type
     procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FFileName: string;
+    FOwnDB: TIBDatabase;
+    FOwnTrans: TIBTransaction;
+    FOwnDataset: TDataSet;
+    FIsReadOnly: Boolean;
+
+    procedure CleanupOwnComponents;
     procedure LoadFile(const FileName: string);
     procedure SaveFile(const FileName: string);
-
     procedure SetCSVSettingsFromForm;
     procedure SelectDataSetByFileName(const AFileName: string);
     procedure ReadIni;
     procedure WriteIni;
   public
+    procedure LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
+    procedure LoadFromDataSet(ADataSet: TDataSet; const ATitle: string);  // Bleibt für Dateien
   end;
 
 //var
@@ -193,6 +207,127 @@ end;
 
 
 { TfrmDataEditor }
+
+procedure TfrmDataEditor.LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
+var
+  Rec: TRegisteredDatabase;
+  Password: string;
+begin
+  Screen.Cursor := crSQLWait;
+  Application.ProcessMessages;
+
+  CleanupOwnComponents;
+  if DataSource1.DataSet.Active then
+    DataSource1.DataSet.Close;
+
+  FFileName := '';
+  FIsReadOnly := AReadOnly;
+
+  Rec := RegisteredDatabases[ADBIndex].RegRec;
+
+  // Eigene DB-Verbindung
+  FOwnDB := TIBDatabase.Create(nil);
+  FOwnTrans := TIBTransaction.Create(nil);
+  FOwnDB.DefaultTransaction := FOwnTrans;
+  FOwnTrans.DefaultDatabase := FOwnDB;
+  FOwnTrans.Params.Assign(RegisteredDatabases[ADBIndex].IBTransaction.Params);
+  AssignIBDatabase(RegisteredDatabases[ADBIndex].IBDatabase, FOwnDB);
+
+  // User direkt setzen
+  FOwnDB.Params.Values['user_name'] := Rec.UserName;
+
+  // Passwort aus Cache oder gespeichertem Passwort holen
+  Password := Rec.Password;
+  if Password = '' then
+    Password := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+  FOwnDB.Params.Values['password'] := Password;
+
+  FOwnDB.LoginPrompt := False;
+  FOwnDB.Connected := True;
+  FOwnTrans.StartTransaction;
+
+  // Dataset erstellen
+  if AReadOnly then
+  begin
+    FOwnDataset := TIBQuery.Create(nil);
+    TIBQuery(FOwnDataset).Database := FOwnDB;
+    TIBQuery(FOwnDataset).Transaction := FOwnTrans;
+    TIBQuery(FOwnDataset).SQL.Text := 'SELECT * FROM ' + MakeObjectNameQuoted(ATableName);
+  end
+  else
+  begin
+    FOwnDataset := TIBTable.Create(nil);
+    TIBTable(FOwnDataset).Database := FOwnDB;
+    TIBTable(FOwnDataset).Transaction := FOwnTrans;
+    TIBTable(FOwnDataset).TableName := ATableName;
+  end;
+
+  FOwnDataset.Open;
+
+  DataSource1.DataSet := FOwnDataset;
+  RxDBGrid1.DataSource := DataSource1;
+  DBNavigator1.DataSource := DataSource1;
+  RxDBGrid1.OptimizeColumnsWidthAll;
+
+  if AReadOnly then
+    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RO])'
+  else
+    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RW])';
+
+  btnSaveFileAs.Enabled := True;
+  btnCreateSQL.Enabled := True;
+
+  Screen.Cursor := crDefault;
+  Application.ProcessMessages;
+end;
+
+procedure TfrmDataEditor.CleanupOwnComponents;
+begin
+  if Assigned(FOwnDataset) then
+  begin
+    if FOwnDataset.Active then
+      FOwnDataset.Close;
+    FreeAndNil(FOwnDataset);
+  end;
+  if Assigned(FOwnTrans) then
+  begin
+    if FOwnTrans.InTransaction then
+      FOwnTrans.Rollback;
+    FreeAndNil(FOwnTrans);
+  end;
+  if Assigned(FOwnDB) then
+  begin
+    if FOwnDB.Connected then
+      FOwnDB.Connected := False;
+    FreeAndNil(FOwnDB);
+  end;
+end;
+
+procedure TfrmDataEditor.LoadFromDataSet(ADataSet: TDataSet; const ATitle: string);
+begin
+  Screen.Cursor := crSQLWait;
+  Application.ProcessMessages;
+
+  CleanupOwnComponents;
+  if DataSource1.DataSet.Active then
+    DataSource1.DataSet.Close;
+
+  DataSource1.DataSet := ADataSet;
+  ADataSet.Open;
+
+  RxDBGrid1.DataSource := DataSource1;
+  DBNavigator1.DataSource := DataSource1;
+  RxDBGrid1.OptimizeColumnsWidthAll;
+
+  Caption := 'Turbobird - Data Editor (' + ATitle + ')';
+  btnSaveFileAs.Enabled := True;
+  btnCreateSQL.Enabled := True;
+  FFileName := '';
+
+  Screen.Cursor := crDefault;
+  Application.ProcessMessages;
+end;
+
 procedure  TfrmDataEditor.ReadIni;
 begin
   edtDefaultFieldLength.Text          := IntTostr(CSVDefaultFieldLength);
@@ -303,40 +438,33 @@ begin
 end;
 
 procedure TfrmDataEditor.SaveFile(const FileName: string);
+var
+  P: TPoint;
 begin
   if not DataSource1.DataSet.Active then Exit;
 
-  try
-    if DataSource1.DataSet = CSVDataSet1 then
-      CSVDataSet1.SaveToCSVFile(FileName)
-
-    else if DataSource1.DataSet = JSONDataSet1 then
-    begin
-      SaveJSONToFile(JSONDataSet1, FileName)
-    end
-
-    else if DataSource1.DataSet = sWorksheetDataset1 then
-      sWorksheetDataset1.Flush     //SaveToFile(FileName)
-
-    else if DataSource1.DataSet = Dbf1 then
-    begin
-      Dbf1.FilePathFull := FileName;
-      Dbf1.Close;
-      Dbf1.Open; // ggf. nötig je nach Lib
-    end
-
-    else if DataSource1.DataSet = SdfDataSet1 then
-      SdfDataSet1.SaveFileAs(FileName)
-
-    else if DataSource1.DataSet = FixedFormatDataSet1 then
-      FixedFormatDataSet1.SaveFileAs(FileName)
-
-    else
-      raise Exception.Create('Unbekannter Dataset-Typ beim Speichern');
-
-  except
-    on E: Exception do
-      ShowMessage('Fehler beim Speichern: ' + E.Message);
+  // Für dateibasierte Datasets: direkt speichern
+  if DataSource1.DataSet = CSVDataSet1 then
+    CSVDataSet1.SaveToCSVFile(FileName)
+  else if DataSource1.DataSet = JSONDataSet1 then
+    SaveJSONToFile(JSONDataSet1, FileName)
+  else if DataSource1.DataSet = sWorksheetDataset1 then
+    sWorksheetDataset1.Flush
+  else if DataSource1.DataSet = Dbf1 then
+  begin
+    Dbf1.FilePathFull := FileName;
+    Dbf1.Close;
+    Dbf1.Open;
+  end
+  else if DataSource1.DataSet = SdfDataSet1 then
+    SdfDataSet1.SaveFileAs(FileName)
+  else if DataSource1.DataSet = FixedFormatDataSet1 then
+    FixedFormatDataSet1.SaveFileAs(FileName)
+  else
+  begin
+    // Für DB-Datasets: Export-Popup zeigen
+    P := btnSaveFileAs.ClientToScreen(Point(0, btnSaveFileAs.Height));
+    pmGrid.PopUp(P.X, P.Y);
   end;
 end;
 
@@ -496,73 +624,61 @@ var
   TempTableName: string;
   TempFieldLength: Word;
 begin
-  TempFieldLength := 0;
-  //Dataset prüfen
+  TempFieldLength := 50;
+
   if not DataSource1.DataSet.Active then
   begin
-    MessageDlg('Warning',
-      'Dataset is not active.',
-      mtWarning, [mbOK], 0);
+    MessageDlg('Warning', 'Dataset is not active.', mtWarning, [mbOK], 0);
     Exit;
   end;
 
   if DataSource1.DataSet.FieldCount = 0 then
   begin
-    MessageDlg('Warning',
-      'Dataset has no fields.',
-      mtWarning, [mbOK], 0);
+    MessageDlg('Warning', 'Dataset has no fields.', mtWarning, [mbOK], 0);
     Exit;
   end;
 
-  //Dateiname prüfen
-  if Trim(FFileName) = '' then
+  // Tabellennamen: Aus Dateinamen ODER aus Formular-Titel
+  if FFileName <> '' then
+    TempTableName := UpperCase(ChangeFileExt(ExtractFileName(FFileName), ''))
+  else
   begin
-    MessageDlg('Warning',
-      'No file loaded.',
-      mtWarning, [mbOK], 0);
-    Exit;
+    TempTableName := StringReplace(Caption, 'Turbobird - Data Editor (', '', []);
+    TempTableName := StringReplace(TempTableName, ')', '', []);
   end;
-
-  //Default Field Length absichern
-  //TempFieldLength := CSVDataset1.CSVOptions.DefaultFieldLength;
-  if TempFieldLength = 0 then
-    TempFieldLength := 50;
-
-  //Tabellenname erzeugen
-  TempTableName := UpperCase(ChangeFileExt(ExtractFileName(FFileName), ''));
 
   GenSQLFromCSVDataset := nil;
-
   try
     GenSQLFromCSVDataset := TGenSQLFromCSVDataset.Create(
-      DataSource1.DataSet,
-      TempTableName,
-      TempFieldLength
-    );
+      DataSource1.DataSet, TempTableName, TempFieldLength);
 
-    //SQL Anzeige bewusst einfach lassen
     SynEdit1.Lines.Text := GenSQLFromCSVDataset.SQL;
     PageControl1.ActivePage := tsSQL;
-
     btnCopySQL.Enabled := true;
-
   except
     on E: Exception do
-    begin
-      MessageDlg('Error',
-        'Error generating SQL:'#13#10 + E.Message,
-        mtError, [mbOK], 0);
-    end;
+      MessageDlg('Error', 'Error generating SQL:'#13#10 + E.Message, mtError, [mbOK], 0);
   end;
 
   FreeAndNil(GenSQLFromCSVDataset);
 end;
 
 procedure TfrmDataEditor.btnCreateTableClick(Sender: TObject);
-var frmCreateTable: TfrmCreateTableFromDataSet;
+var
+  frmCreateTable: TfrmCreateTableFromDataSet;
+  TableName: string;
 begin
   frmCreateTable := TfrmCreateTableFromDataSet.Create(self);
-  frmCreateTable.Init(DataSource1.DataSet, self.FFileName);
+
+  if FFileName <> '' then
+    frmCreateTable.Init(DataSource1.DataSet, FFileName)
+  else
+  begin
+    // Aus dem Dataset-Titel einen Tabellennamen generieren
+    TableName := StringReplace(Caption, 'Turbobird - Data Editor (', '', []);
+    TableName := StringReplace(TableName, ')', '', []);
+    frmCreateTable.Init(DataSource1.DataSet, TableName);
+  end;
 
   frmCreateTable.ShowModal;
 end;
@@ -576,19 +692,35 @@ procedure TfrmDataEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButton
 begin
   if Button = nbRefresh then
   begin
-    LoadFile(FFileName);
-    abort;
+    if FFileName <> '' then
+      LoadFile(FFileName)
+    else
+    begin
+      FOwnDataset.Close;
+      FOwnDataset.Open;
+      RxDBGrid1.OptimizeColumnsWidthAll;
+    end;
+    Abort;
   end;
+
   if Button = nbPost then
   begin
-    SaveFile(FFileName);
-    //abort;
+    if FFileName <> '' then
+      SaveFile(FFileName)
+    else
+    begin
+      if FOwnDataset.State in [dsEdit, dsInsert] then
+        FOwnDataset.Post;
+      if FOwnTrans.InTransaction then
+        FOwnTrans.CommitRetaining;
+    end;
   end;
 end;
 
 procedure TfrmDataEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   WriteIni;
+  CleanupOwnComponents;
   CloseAction := caFree;
 end;
 
@@ -627,9 +759,12 @@ begin
 end;
 
 procedure TfrmDataEditor.btnSaveFileAsClick(Sender: TObject);
+var
+  P: TPoint;
 begin
-  if SaveDialog1.Execute then
-    SaveFile(SaveDialog1.FileName);
+  // Popup-Menü unter dem Button anzeigen
+  P := btnSaveFileAs.ClientToScreen(Point(0, btnSaveFileAs.Height));
+  pmGrid.PopUp(P.X, P.Y);
 end;
 
 procedure TfrmDataEditor.lmStdExportFormatsClick(Sender: TObject);

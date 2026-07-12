@@ -19,6 +19,7 @@ uses
   IB,
   IBDatabase,
   IBQuery,
+  IBTable,
   IBLocalDBSupport,
   IBDatabaseInfo,
   ibxscript, IBSQL, IBExtract,
@@ -147,6 +148,8 @@ type
     lmCloneDBRegistry: TMenuItem;
     lmCloneServer: TMenuItem;
     lmCloneTable: TMenuItem;
+    lmExportTableToDataEditorRO: TMenuItem;
+    lmExportTableToDataEditorRW: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -356,6 +359,8 @@ type
     procedure lmEditPackageClick(Sender: TObject);
     procedure lmEditTableDataNewClick(Sender: TObject);
     procedure lmExecuteFormClick(Sender: TObject);
+    procedure lmExportTableToDataEditorROClick(Sender: TObject);
+    procedure lmExportTableToDataEditorRWClick(Sender: TObject);
     procedure lmExtractTableDataClick(Sender: TObject);
     procedure lmExtractTableFieldsClick(Sender: TObject);
     procedure lmExtractTableMetaDataQuotedClick(Sender: TObject);
@@ -3332,6 +3337,42 @@ begin
 
   PSStudio.OpenFileSilent(FormPath);
   PSStudio.acDebugRunExecute(nil);
+end;
+
+procedure TfmMain.lmExportTableToDataEditorROClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  DBIndex: Integer;
+  TableName: string;
+  frmDataEditor: TfrmDataEditor;
+begin
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
+
+  DBIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
+  TableName := GetClearNodeText(SelNode.Text);
+
+  frmDataEditor := TfrmDataEditor.Create(Application);
+  frmDataEditor.Show;
+  frmDataEditor.LoadFromTable(DBIndex, TableName, True);
+end;
+
+procedure TfmMain.lmExportTableToDataEditorRWClick(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  DBIndex: Integer;
+  TableName: string;
+  frmDataEditor: TfrmDataEditor;
+begin
+  SelNode := tvMain.Selected;
+  if SelNode = nil then Exit;
+
+  DBIndex := TPNodeInfos(SelNode.Data)^.dbIndex;
+  TableName := GetClearNodeText(SelNode.Text);
+
+  frmDataEditor := TfrmDataEditor.Create(Application);
+  frmDataEditor.Show;
+  frmDataEditor.LoadFromTable(DBIndex, TableName, False);
 end;
 
 procedure TfmMain.lmEditPackageClick(Sender: TObject);
