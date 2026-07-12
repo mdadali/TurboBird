@@ -50,15 +50,15 @@ object frmDataEditor: TfrmDataEditor
       OnClick = btnOpenFileClick
       TabOrder = 1
     end
-    object btnSaveFileAs: TButton
+    object btnExportAs: TButton
       Left = 101
       Height = 48
       Top = 1
       Width = 100
       Align = alLeft
-      Caption = 'Save...'
+      Caption = 'Export'
       Enabled = False
-      OnClick = btnSaveFileAsClick
+      OnClick = btnExportAsClick
       TabOrder = 2
     end
     object btnCreateSQL: TButton

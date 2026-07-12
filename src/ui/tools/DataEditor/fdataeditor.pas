@@ -51,7 +51,7 @@ type
   TfrmDataEditor = class(TForm)
     btnCopySQL: TButton;
     btnOpenFile: TButton;
-    btnSaveFileAs: TButton;
+    btnExportAs: TButton;
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
@@ -104,7 +104,7 @@ type
     procedure btnCreateSQLClick(Sender: TObject);
     procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
-    procedure btnSaveFileAsClick(Sender: TObject);
+    procedure btnExportAsClick(Sender: TObject);
     procedure CSVDataset1AfterDelete(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -208,7 +208,7 @@ end;
 
 { TfrmDataEditor }
 
-procedure TfrmDataEditor.LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
+{procedure TfrmDataEditor.LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
 var
   Rec: TRegisteredDatabase;
   Password: string;
@@ -274,11 +274,134 @@ begin
   else
     Caption := 'Turbobird - Data Editor (' + ATableName + ' [RW])';
 
-  btnSaveFileAs.Enabled := True;
+  btnExportAs.Enabled := True;
   btnCreateSQL.Enabled := True;
 
   Screen.Cursor := crDefault;
   Application.ProcessMessages;
+end;}
+
+procedure TfrmDataEditor.LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
+var
+  Rec: TRegisteredDatabase;
+  Password: string;
+  WaitForm: TForm;
+  WaitLabel: TLabel;
+  StartTime, EndTime: TDateTime;
+  RowCount: Integer;
+begin
+  Screen.Cursor := crSQLWait;
+  Application.ProcessMessages;
+
+  CleanupOwnComponents;
+  if DataSource1.DataSet.Active then
+    DataSource1.DataSet.Close;
+
+  FFileName := '';
+  FIsReadOnly := AReadOnly;
+
+  Rec := RegisteredDatabases[ADBIndex].RegRec;
+
+  // Eigene DB-Verbindung
+  FOwnDB := TIBDatabase.Create(nil);
+  FOwnTrans := TIBTransaction.Create(nil);
+  FOwnDB.DefaultTransaction := FOwnTrans;
+  FOwnTrans.DefaultDatabase := FOwnDB;
+  FOwnTrans.Params.Assign(RegisteredDatabases[ADBIndex].IBTransaction.Params);
+  AssignIBDatabase(RegisteredDatabases[ADBIndex].IBDatabase, FOwnDB);
+
+  // User direkt setzen
+  FOwnDB.Params.Values['user_name'] := Rec.UserName;
+
+  // Passwort aus Cache oder gespeichertem Passwort holen
+  Password := Rec.Password;
+  if Password = '' then
+    Password := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
+  FOwnDB.Params.Values['password'] := Password;
+
+  FOwnDB.LoginPrompt := False;
+  FOwnDB.Connected := True;
+  FOwnTrans.StartTransaction;
+
+  // Dataset erstellen
+  if AReadOnly then
+  begin
+    FOwnDataset := TIBQuery.Create(nil);
+    TIBQuery(FOwnDataset).Database := FOwnDB;
+    TIBQuery(FOwnDataset).Transaction := FOwnTrans;
+    TIBQuery(FOwnDataset).SQL.Text := 'SELECT * FROM ' + MakeObjectNameQuoted(ATableName);
+  end
+  else
+  begin
+    FOwnDataset := TIBTable.Create(nil);
+    TIBTable(FOwnDataset).Database := FOwnDB;
+    TIBTable(FOwnDataset).Transaction := FOwnTrans;
+    TIBTable(FOwnDataset).TableName := ATableName;
+  end;
+
+  // ============================================================
+  //  Einfaches modales Wartefenster (kein ProgressBar)
+  // ============================================================
+  WaitForm := TForm.Create(nil);
+  try
+    WaitForm.Width := 320;
+    WaitForm.Height := 100;
+    WaitForm.Position := poScreenCenter;
+    WaitForm.BorderStyle := bsDialog;
+    WaitForm.Caption := 'Please wait';
+
+    WaitLabel := TLabel.Create(WaitForm);
+    WaitLabel.Parent := WaitForm;
+    WaitLabel.Align := alClient;
+    WaitLabel.Alignment := taCenter;
+    WaitLabel.Layout := tlCenter;
+    WaitLabel.Caption := 'Loading data, please wait...';
+    WaitLabel.Font.Size := 11;
+
+    WaitForm.Show;
+    Application.ProcessMessages;
+
+    StartTime := Now;
+
+    FOwnDataset.Open;
+    // Genaue Zeilenzählung
+    FOwnDataset.Last;
+    FOwnDataset.First;
+    EndTime := Now;
+
+  finally
+    WaitForm.Free;
+  end;
+
+  RowCount := FOwnDataset.RecordCount;
+
+  DataSource1.DataSet := FOwnDataset;
+  RxDBGrid1.DataSource := DataSource1;
+  DBNavigator1.DataSource := DataSource1;
+  RxDBGrid1.OptimizeColumnsWidthAll;
+
+  if AReadOnly then
+    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RO])'
+  else
+    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RW])';
+
+  btnExportAs.Enabled := True;
+  btnCreateSQL.Enabled := True;
+
+  Screen.Cursor := crDefault;
+  Application.ProcessMessages;
+
+  // ============================================================
+  //  Statistik anzeigen
+  // ============================================================
+  MessageDlg(
+    Format('Table "%s" loaded successfully!', [ATableName]) + sLineBreak + sLineBreak +
+    'Start time : ' + FormatDateTime('hh:nn:ss.zzz', StartTime) + sLineBreak +
+    'End time   : ' + FormatDateTime('hh:nn:ss.zzz', EndTime) + sLineBreak +
+    'Duration   : ' + FormatDateTime('hh:nn:ss', EndTime - StartTime) + sLineBreak +
+    'Records    : ' + IntToStr(RowCount),
+    mtInformation, [mbOK], 0
+  );
 end;
 
 procedure TfrmDataEditor.CleanupOwnComponents;
@@ -320,7 +443,7 @@ begin
   RxDBGrid1.OptimizeColumnsWidthAll;
 
   Caption := 'Turbobird - Data Editor (' + ATitle + ')';
-  btnSaveFileAs.Enabled := True;
+  btnExportAs.Enabled := True;
   btnCreateSQL.Enabled := True;
   FFileName := '';
 
@@ -463,7 +586,7 @@ begin
   else
   begin
     // Für DB-Datasets: Export-Popup zeigen
-    P := btnSaveFileAs.ClientToScreen(Point(0, btnSaveFileAs.Height));
+    P := btnExportAs.ClientToScreen(Point(0, btnExportAs.Height));
     pmGrid.PopUp(P.X, P.Y);
   end;
 end;
@@ -615,7 +738,7 @@ begin
   //FFileName := OpenDialog1.FileName;
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
 
-  btnSaveFileAs.Enabled := True;
+  btnExportAs.Enabled := True;
 end;
 
 procedure TfrmDataEditor.btnCreateSQLClick(Sender: TObject);
@@ -758,12 +881,12 @@ begin
   SynEdit1.Font.Color := QWEditorFontColor;
 end;
 
-procedure TfrmDataEditor.btnSaveFileAsClick(Sender: TObject);
+procedure TfrmDataEditor.btnExportAsClick(Sender: TObject);
 var
   P: TPoint;
 begin
   // Popup-Menü unter dem Button anzeigen
-  P := btnSaveFileAs.ClientToScreen(Point(0, btnSaveFileAs.Height));
+  P := btnExportAs.ClientToScreen(Point(0, btnExportAs.Height));
   pmGrid.PopUp(P.X, P.Y);
 end;
 
