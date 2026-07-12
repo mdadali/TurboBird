@@ -1,7 +1,7 @@
 object frmBulkExport: TfrmBulkExport
-  Left = 284
+  Left = 484
   Height = 692
-  Top = 0
+  Top = 30
   Width = 1067
   Caption = 'Bulk Export'
   ClientHeight = 692
@@ -39,7 +39,7 @@ object frmBulkExport: TfrmBulkExport
       object comboxSourceTables: TComboBox
         Left = 120
         Height = 36
-        Top = 108
+        Top = 104
         Width = 320
         ItemHeight = 0
         OnChange = comboxSourceTablesChange
