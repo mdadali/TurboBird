@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 222
+  Left = 739
   Height = 734
-  Top = 14
+  Top = 164
   Width = 1079
   Align = alTop
   BorderStyle = bsDialog
