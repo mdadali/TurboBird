@@ -1036,7 +1036,8 @@ begin
     Exported := 0;
     StartRow := FromRow;
 
-    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate);
+    //FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate);
+    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, 1048576);
     try
       repeat
         // Batch-SQL: FIRST … SKIP … + die bereits fertige Projektion
@@ -1068,7 +1069,6 @@ begin
         ProgressBar.Position := Exported;
         ProgressLabel.Caption := Format('Exported %d of %d rows...', [Exported, TotalRows]);
         LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
-        //FileStream.Flush;
         Application.ProcessMessages;
 
       until (Exported >= TotalRows) or FCancelled;
