@@ -259,6 +259,16 @@ begin
     chkLstFields.Clear;
     sgFields.RowCount := 1;
 
+    sgFields.ColCount := 3;
+    sgFields.Cells[0, 0] := 'Source Field';
+    sgFields.Cells[1, 0] := 'Field Type';
+    sgFields.Cells[2, 0] := 'Formula ($1 = value)';
+    //sgFields.ColWidths[0] := 45;
+    sgFields.ColWidths[0] := 150;
+    sgFields.ColWidths[1] := 120;
+    sgFields.ColWidths[2] := 250;
+
+
     i := 0;
     while not Iso.Query.EOF do
     begin
@@ -757,177 +767,6 @@ begin
                        [Exported, FormatDateTime('hh:nn:ss', EndTime - StartTime),
                         Exported / Max(1, (EndTime - StartTime) * 86400)]));
 end; }
-
-{procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
-var
-  TotalRows, BatchSize, Exported, StartRow, i: Integer;
-  FromRow, ToRow: Integer;
-  ProgressForm: TForm;
-  ProgressLabel, LblElapsed: TLabel;
-  ProgressBar: TProgressBar;
-  BtnCancel: TButton;
-  StartTime, EndTime: TDateTime;
-  Q: TIBQuery;
-  DB: TIBDatabase;
-  Trans: TIBTransaction;
-  Line: string;
-  SQL: string;
-  FileStream: TFileStream;
-  Buffer: TStringList;
-begin
-  BatchSize := GetBatchSize;
-  FromRow := GetFromRow;
-  ToRow := GetToRow;
-
-  // Eigene Datenbankverbindung aufbauen
-  DB := TIBDatabase.Create(nil);
-  Trans := TIBTransaction.Create(nil);
-  DB.DefaultTransaction := Trans;
-  Trans.DefaultDatabase := DB;
-  AssignIBDatabase(RegisteredDatabases[FSourceDBIndex].IBDatabase, DB);
-  with RegisteredDatabases[FSourceDBIndex] do
-  begin
-    DB.Params.Values['user_name'] := RegRec.UserName;
-    if RegRec.Password <> '' then
-      DB.Params.Values['password'] := RegRec.Password
-    else
-      DB.Params.Values['password'] := GetDBSessionPassword(RegRec.ServerName, RegRec.DatabaseName);
-  end;
-  DB.LoginPrompt := False;
-  DB.Connected := True;
-  Trans.StartTransaction;
-
-  Q := TIBQuery.Create(nil);
-  Q.Database := DB;
-  Q.Transaction := Trans;
-
-  // Gesamtzahl der Zeilen ermitteln (einfach über die Tabelle, nicht über die komplexe Query)
-  TotalRows := 0;
-  try
-    Q.SQL.Text := 'SELECT COUNT(*) FROM ' + Trim(comboxSourceTables.Text);
-    Q.Open;
-    TotalRows := Q.Fields[0].AsInteger;
-    Q.Close;
-  except
-    TotalRows := 0;
-  end;
-
-  // Range anwenden
-  if (FromRow > 1) or (ToRow < TotalRows) then
-  begin
-    if ToRow > TotalRows then ToRow := TotalRows;
-    TotalRows := ToRow - FromRow + 1;
-  end;
-
-  // Fortschrittsdialog
-  ProgressForm := TForm.Create(nil);
-  try
-    ProgressForm.Width := 500;
-    ProgressForm.Height := 200;
-    ProgressForm.Position := poScreenCenter;
-    ProgressForm.BorderStyle := bsDialog;
-    ProgressForm.Caption := 'Bulk Export';
-
-    ProgressLabel := TLabel.Create(ProgressForm);
-    ProgressLabel.Parent := ProgressForm;
-    ProgressLabel.Left := 16;
-    ProgressLabel.Top := 16;
-    ProgressLabel.Caption := 'Preparing...';
-
-    ProgressBar := TProgressBar.Create(ProgressForm);
-    ProgressBar.Parent := ProgressForm;
-    ProgressBar.Left := 16;
-    ProgressBar.Top := 45;
-    ProgressBar.Width := 460;
-    ProgressBar.Height := 20;
-    ProgressBar.Min := 0;
-    ProgressBar.Max := TotalRows;
-    ProgressBar.Style := pbstNormal;
-
-    LblElapsed := TLabel.Create(ProgressForm);
-    LblElapsed.Parent := ProgressForm;
-    LblElapsed.Left := 16;
-    LblElapsed.Top := 80;
-
-    BtnCancel := TButton.Create(ProgressForm);
-    BtnCancel.Parent := ProgressForm;
-    BtnCancel.Caption := 'Cancel';
-    BtnCancel.Left := 190;
-    BtnCancel.Top := 120;
-    BtnCancel.Width := 100;
-    BtnCancel.OnClick := @CancelClick;
-
-    ProgressForm.Show;
-    Application.ProcessMessages;
-
-    FCancelled := False;
-    StartTime := Now;
-    Exported := 0;
-    StartRow := FromRow;
-
-    FileStream := TFileStream.Create(edtExportFileName.Text, fmCreate);
-    try
-      repeat
-        // Batch-SQL: FIRST … SKIP … + die bereits fertige Projektion
-        SQL := 'SELECT FIRST ' + IntToStr(BatchSize) +
-               ' SKIP ' + IntToStr(StartRow - 1) + ' ' +
-               Copy(ASQL, Pos('SELECT ', UpperCase(ASQL)) + 7, MaxInt);
-        Q.Close;
-        Q.SQL.Text := SQL;
-        Q.Open;
-
-        if Q.IsEmpty then Break;
-
-        Buffer := TStringList.Create;
-        try
-          while not Q.EOF do
-          begin
-            if FCancelled then Break;
-            // Die einzige Spalte enthält bereits die fertige Zeile
-            Line := Q.Fields[0].AsString;
-            Buffer.Add(Line);
-            Inc(Exported);
-            Q.Next;
-          end;
-          Buffer.SaveToStream(FileStream);
-        finally
-          Buffer.Free;
-        end;
-
-        StartRow := StartRow + Q.RecordCount;
-        Q.Close;
-
-        ProgressBar.Position := Exported;
-        ProgressLabel.Caption := Format('Exported %d of %d rows...', [Exported, TotalRows]);
-        LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
-        Application.ProcessMessages;
-
-      until (Exported >= TotalRows) or FCancelled;
-
-    finally
-      FileStream.Free;
-    end;
-
-    EndTime := Now;
-  finally
-    Q.Free;
-    Trans.Rollback;
-    DB.Connected := False;
-    DB.Free;
-    Trans.Free;
-    ProgressForm.Free;
-  end;
-
-  if FCancelled then
-    ShowMessage('Export cancelled.')
-  else
-    ShowMessage(Format('Export completed!' + sLineBreak +
-                       'Rows: %d' + sLineBreak +
-                       'Time: %s' + sLineBreak +
-                       'Speed: %.0f rows/sec',
-                       [Exported, FormatDateTime('hh:nn:ss', EndTime - StartTime),
-                        Exported / Max(1, (EndTime - StartTime) * 86400)]));
-end;}
 
 procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
 var

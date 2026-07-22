@@ -204,7 +204,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewTable"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="366"/>
         <CursorPos X="21" Y="391"/>
         <UsageCount Value="200"/>
@@ -419,7 +419,7 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="461"/>
         <CursorPos X="49" Y="473"/>
         <UsageCount Value="200"/>
@@ -640,17 +640,16 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="SysTables"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="1289"/>
-        <CursorPos X="14" Y="1318"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="673"/>
+        <CursorPos X="30" Y="696"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="673"/>
-          <CursorPos X="30" Y="696"/>
+          <TopLine Value="1289"/>
+          <CursorPos X="14" Y="1318"/>
         </ExtraEditor1>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit61>
       <Unit62>
         <Filename Value="ui\openquerybuilder\QBEIBX.pas"/>
@@ -1043,7 +1042,7 @@
         <ComponentName Value="frmDataEditor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="359"/>
         <CursorPos X="87" Y="370"/>
         <UsageCount Value="200"/>
@@ -1053,7 +1052,7 @@
       <Unit102>
         <Filename Value="utils\uGenSQLFromCSVDataset.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="136"/>
         <CursorPos X="36" Y="149"/>
         <UsageCount Value="215"/>
@@ -1176,7 +1175,7 @@
         <Filename Value="common\uexternaltable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uExternalTable"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="121"/>
         <CursorPos X="18" Y="143"/>
         <UsageCount Value="201"/>
@@ -1188,7 +1187,7 @@
         <ComponentName Value="fmCloneToExternalTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="336"/>
         <CursorPos X="65" Y="342"/>
         <UsageCount Value="201"/>
@@ -1210,9 +1209,9 @@
         <Filename Value="common\ucopytabledatalocal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataLocal"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="12"/>
         <CursorPos X="47" Y="6"/>
-        <UsageCount Value="193"/>
+        <UsageCount Value="196"/>
         <Loaded Value="True"/>
       </Unit117>
       <Unit118>
@@ -1221,10 +1220,10 @@
         <ComponentName Value="frmCloneTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="193"/>
-        <CursorPos X="31" Y="207"/>
-        <UsageCount Value="176"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="191"/>
+        <CursorPos X="25" Y="201"/>
+        <UsageCount Value="179"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit118>
@@ -1232,20 +1231,20 @@
         <Filename Value="common\ucopytabledatacrossexecuteblock.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossExecuteBlock"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="410"/>
         <CursorPos X="46" Y="417"/>
-        <UsageCount Value="169"/>
+        <UsageCount Value="172"/>
         <Loaded Value="True"/>
       </Unit119>
       <Unit120>
         <Filename Value="common\uformulapresets.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFormulaPresets"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="14"/>
         <TopLine Value="316"/>
         <CursorPos X="52" Y="323"/>
-        <UsageCount Value="153"/>
+        <UsageCount Value="156"/>
         <Loaded Value="True"/>
       </Unit120>
       <Unit121>
@@ -1255,16 +1254,16 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="81" Y="7"/>
-        <UsageCount Value="141"/>
+        <UsageCount Value="144"/>
       </Unit121>
       <Unit122>
         <Filename Value="common\ucopytabledatacrossrowbyrow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossRowByRow"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="745"/>
         <CursorPos X="35" Y="778"/>
-        <UsageCount Value="128"/>
+        <UsageCount Value="131"/>
         <Loaded Value="True"/>
       </Unit122>
       <Unit123>
@@ -1274,9 +1273,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTableFromDataSet"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="11"/>
         <CursorPos X="20" Y="6"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="79"/>
         <Loaded Value="True"/>
       </Unit123>
       <Unit124>
@@ -1287,9 +1286,9 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="921"/>
-        <CursorPos Y="932"/>
-        <UsageCount Value="31"/>
+        <TopLine Value="249"/>
+        <CursorPos X="27" Y="262"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit124>
@@ -1490,123 +1489,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="574" TopLine="561"/>
+        <Caret Line="616" Column="11" TopLine="603"/>
       </Position1>
       <Position2>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="612" TopLine="603"/>
+        <Caret Line="620" TopLine="603"/>
       </Position2>
       <Position3>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="613" TopLine="603"/>
+        <Caret Line="621" TopLine="603"/>
       </Position3>
       <Position4>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="616" TopLine="603"/>
+        <Caret Line="620" Column="39" TopLine="605"/>
       </Position4>
       <Position5>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="617" TopLine="603"/>
+        <Caret Line="679" TopLine="662"/>
       </Position5>
       <Position6>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="616" Column="11" TopLine="603"/>
+        <Caret Line="680" TopLine="662"/>
       </Position6>
       <Position7>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="620" TopLine="603"/>
+        <Caret Line="681" TopLine="662"/>
       </Position7>
       <Position8>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="621" TopLine="603"/>
+        <Caret Line="682" TopLine="662"/>
       </Position8>
       <Position9>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="620" Column="39" TopLine="605"/>
+        <Caret Line="683" TopLine="662"/>
       </Position9>
       <Position10>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="679" TopLine="662"/>
+        <Caret Line="620" Column="23" TopLine="606"/>
       </Position10>
       <Position11>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="680" TopLine="662"/>
+        <Caret Line="242" TopLine="235"/>
       </Position11>
       <Position12>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="681" TopLine="662"/>
+        <Caret Line="427" Column="17" TopLine="422"/>
       </Position12>
       <Position13>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="682" TopLine="662"/>
+        <Caret Line="444" Column="10" TopLine="422"/>
       </Position13>
       <Position14>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="683" TopLine="662"/>
+        <Caret Line="465" Column="10" TopLine="437"/>
       </Position14>
       <Position15>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="620" Column="23" TopLine="606"/>
+        <Caret Line="470" Column="10" TopLine="442"/>
       </Position15>
       <Position16>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="242" TopLine="235"/>
+        <Caret Line="677" Column="29" TopLine="667"/>
       </Position16>
       <Position17>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="427" Column="17" TopLine="422"/>
+        <Caret Line="678" Column="49" TopLine="673"/>
       </Position17>
       <Position18>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="444" Column="10" TopLine="422"/>
+        <Caret Line="515" Column="38" TopLine="509"/>
       </Position18>
       <Position19>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="465" Column="10" TopLine="437"/>
+        <Caret Line="528" Column="15" TopLine="509"/>
       </Position19>
       <Position20>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="470" Column="10" TopLine="442"/>
+        <Caret Line="1073" Column="24" TopLine="1065"/>
       </Position20>
       <Position21>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="677" Column="29" TopLine="667"/>
+        <Caret Line="944" Column="10" TopLine="925"/>
       </Position21>
       <Position22>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="678" Column="49" TopLine="673"/>
+        <Caret Line="16" Column="13"/>
       </Position22>
       <Position23>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="515" Column="38" TopLine="509"/>
+        <Caret Line="1233" Column="22" TopLine="1225"/>
       </Position23>
       <Position24>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="528" Column="15" TopLine="509"/>
+        <Caret Line="1241" Column="26" TopLine="1229"/>
       </Position24>
       <Position25>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="1073" Column="24" TopLine="1065"/>
+        <Caret Line="1298" Column="14" TopLine="1264"/>
       </Position25>
       <Position26>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="944" Column="10" TopLine="925"/>
+        <Caret Line="943" Column="53" TopLine="921"/>
       </Position26>
       <Position27>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="16" Column="13"/>
+        <Caret Line="456" Column="44" TopLine="456"/>
       </Position27>
       <Position28>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="1233" Column="22" TopLine="1225"/>
+        <Caret Line="519" Column="34" TopLine="510"/>
       </Position28>
       <Position29>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="1241" Column="26" TopLine="1229"/>
+        <Caret Line="927" Column="60" TopLine="912"/>
       </Position29>
       <Position30>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="1298" Column="14" TopLine="1264"/>
+        <Caret Line="137" Column="19" TopLine="134"/>
       </Position30>
     </JumpHistory>
     <RunParams>
