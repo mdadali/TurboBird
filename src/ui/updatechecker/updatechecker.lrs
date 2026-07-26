@@ -1,0 +1,41 @@
+LazarusResources.Add('TfrmUpdateChecker','FORMDATA',[
+  'TPF0'#17'TfrmUpdateChecker'#16'frmUpdateChecker'#4'Left'#3#152#1#6'Height'#3
+  +#167#1#3'Top'#3#134#0#5'Width'#3#144#1#11'BorderIcons'#11#12'biSystemMenu'#0
+  +#7'Caption'#6#16'Check for Update'#12'ClientHeight'#3#167#1#11'ClientWidth'#3
+  +#144#1#7'OnClose'#7#9'FormClose'#8'OnCreate'#7#10'FormCreate'#6'OnShow'#7#8
+  +'FormShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#6
+  +'TLabel'#9'lblStatus'#4'Left'#2#0#6'Height'#2#20#3'Top'#3#147#1#5'Width'#3
+  +#144#1#5'Align'#7#8'alBottom'#7'Caption'#6#11'New Version'#11'ParentColor'#8
+  +#0#0#6'TPanel'#8'pnlColor'#4'Left'#3#152#0#6'Height'#2#25#3'Top'#2'('#5'Widt'
+  +'h'#2#26#10'BevelOuter'#7#6'bvNone'#8'TabOrder'#2#0#0#0#9'TGroupBox'#12'grBo'
+  +'xOptions'#4'Left'#2#0#6'Height'#3#25#1#3'Top'#2#0#5'Width'#3#144#1#5'Align'
+  +#7#8'alClient'#7'Caption'#6#7'Options'#12'ClientHeight'#3#4#1#11'ClientWidth'
+  +#3#142#1#8'TabOrder'#2#1#0#9'TCheckBox'#16'chkBoxAutoSearch'#4'Left'#2#16#6
+  +'Height'#2#24#3'Top'#2#8#5'Width'#3#221#0#7'Caption'#6#27'Auto Search on Pro'
+  +'gramstart'#8'OnChange'#7#22'chkBoxAutoSearchChange'#8'TabOrder'#2#0#0#0#9'T'
+  +'GroupBox'#18'grBoxAfterDownload'#4'Left'#2#16#6'Height'#3#176#0#3'Top'#2'0'
+  +#5'Width'#3'h'#1#7'Caption'#6#14'After Download'#12'ClientHeight'#3#155#0#11
+  +'ClientWidth'#3'f'#1#8'TabOrder'#2#1#0#9'TCheckBox'#11'chkBoxUnzip'#4'Left'#2
+  +#16#6'Height'#2#24#3'Top'#2#8#5'Width'#3#172#0#7'Caption'#6#20'Unzip after D'
+  +'ownload'#7'Checked'#9#8'OnChange'#7#17'chkBoxUnzipChange'#5'State'#7#9'cbCh'
+  +'ecked'#8'TabOrder'#2#0#0#0#9'TCheckBox'#19'chkBoxRunNewVersion'#4'Left'#2#24
+  +#6'Height'#2#24#3'Top'#2'0'#5'Width'#3#220#0#7'Caption'#6#27'Run New Version'
+  +' after Unzip'#8'OnChange'#7#25'chkBoxRunNewVersionChange'#8'TabOrder'#2#1#0
+  +#0#9'TCheckBox%chkBoxDeleteCurrentVersionOnNextStart'#4'Left'#2#16#6'Height'
+  +#2#24#3'Top'#2'p'#5'Width'#3#18#1#7'Caption'#6'$Delete Current Version On Ne'
+  +'xt Start'#8'TabOrder'#2#2#0#0#9'TCheckBox'#26'chkBoxCloseCurrentInstance'#4
+  +'Left'#2'0'#6'Height'#2#24#3'Top'#2'H'#5'Width'#3#180#0#7'Caption'#6#22'Clos'
+  +'e Current Instance'#8'OnChange'#7' chkBoxCloseCurrentInstanceChange'#8'TabO'
+  +'rder'#2#3#0#0#0#0#9'TGroupBox'#11'grBoxSearch'#4'Left'#2#0#6'Height'#2'z'#3
+  +'Top'#3#25#1#5'Width'#3#144#1#5'Align'#7#8'alBottom'#7'Caption'#6#6'Search'
+  +#12'ClientHeight'#2'e'#11'ClientWidth'#3#142#1#8'TabOrder'#2#2#0#7'TButton'#8
+  +'btnCheck'#4'Left'#2#16#6'Height'#2#25#3'Top'#2'0'#5'Width'#2'x'#7'Caption'#6
+  +#5'Check'#7'OnClick'#7#13'btnCheckClick'#8'TabOrder'#2#0#0#0#6'TLabel'#6'Lab'
+  +'el1'#4'Left'#2#16#6'Height'#2#20#3'Top'#2#16#5'Width'#2'j'#7'Caption'#6#15
+  +'Current Version'#11'ParentColor'#8#0#0#6'TLabel'#16'lbCurrentVersion'#4'Lef'
+  +'t'#3#200#0#6'Height'#2#20#3'Top'#2#16#5'Width'#2's'#7'Caption'#6#16'lbCurre'
+  +'ntVersion'#11'ParentColor'#8#0#0#7'TButton'#11'btnDownload'#4'Left'#3#200#0
+  +#6'Height'#2#25#3'Top'#2'0'#5'Width'#2'x'#7'Caption'#6#8'Download'#7'OnClick'
+  +#7#16'btnDownloadClick'#8'TabOrder'#2#1#0#0#0#11'TAbUnZipper'#11'AbUnZipper1'
+  +#4'Left'#3'@'#1#3'Top'#2'`'#0#0#0
+]);
