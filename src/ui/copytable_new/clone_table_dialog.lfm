@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 94
+  Left = 429
   Height = 734
-  Top = 187
+  Top = 0
   Width = 1079
   Align = alTop
   BorderStyle = bsDialog
@@ -398,6 +398,15 @@ object frmCloneTable: TfrmCloneTable
       Caption = 'Use Formula'
       OnChange = chkUseFormulaChange
       TabOrder = 7
+    end
+    object btnGenTestFormulas: TButton
+      Left = 176
+      Height = 25
+      Top = 86
+      Width = 192
+      Caption = 'Generate Test Formulas'
+      OnClick = btnGenTestFormulasClick
+      TabOrder = 8
     end
   end
   object grBoxFields: TGroupBox
