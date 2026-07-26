@@ -44,6 +44,7 @@ type
     btnExternalFile: TButton;
     btnSelectAll: TButton;
     btnGenTestFormulas: TButton;
+    chkCopyData: TCheckBox;
     chkLstFields: TCheckListBox;
     chkUseFormula: TCheckBox;
     chkboxExternalTable: TCheckBox;
@@ -893,6 +894,17 @@ begin
     Exit;
   end;
 
+  // ============================================================
+  // Prüfen ob mindestens eine Aktion gewählt wurde
+  // ============================================================
+  if not chkCreateTable.Checked and not chkCopyData.Checked then
+  begin
+    MessageDlg('No action selected.' + sLineBreak +
+               'Please check at least one option:' + sLineBreak +
+               '"Create Destination Table" or "Copy Data".', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
   // CREATE TABLE falls gewünscht
   if chkCreateTable.Checked then
   begin
@@ -906,6 +918,17 @@ begin
       else
         CreateDestTable(IBDBDest, IBTransDest, DestTable);
     end;
+  end;
+
+  // ============================================================
+  // Wenn chkCopyData NICHT angehakt ist → nur Tabelle, keine Daten
+  // ============================================================
+  if not chkCopyData.Checked then
+  begin
+    StatusBar1.SimpleText := 'Table created: ' + DestTable;
+    ShowMessage('Table "' + DestTable + '" created successfully.' + sLineBreak +
+                'No data copied (Copy Data is unchecked).');
+    Exit;
   end;
 
   // ============================================================
