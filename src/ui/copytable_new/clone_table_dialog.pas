@@ -43,6 +43,7 @@ type
     btnRefreshPresets: TButton;
     btnExternalFile: TButton;
     btnSelectAll: TButton;
+    btnGenTestFormulas: TButton;
     chkLstFields: TCheckListBox;
     chkUseFormula: TCheckBox;
     chkboxExternalTable: TCheckBox;
@@ -95,6 +96,7 @@ type
     procedure btnCancelClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
     procedure btnExternalFileClick(Sender: TObject);
+    procedure btnGenTestFormulasClick(Sender: TObject);
     procedure btnRefreshPresetsClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnDeselectAllClick(Sender: TObject);
@@ -532,77 +534,7 @@ begin
     Iso.Free;
   end;
 
-  // ============================================================
-  // TESTBLOCK: Formeln für alle Felder setzen
-  // ============================================================
-  for i := 0 to High(FFields) do
-  begin
-    if FFields[i].IsComputed then
-      Continue;
-
-    if SameText(FFields[i].FieldName, 'ID') then
-    begin
-      FFields[i].Formula := '$1 + 10000000';
-      sgFields.Cells[3, i + 1] := '$1 + 10000000';
-    end
-    else if SameText(FFields[i].FieldName, 'NAME') then
-    begin
-      FFields[i].Formula := '$1 || ''_CLONED''';
-      sgFields.Cells[3, i + 1] := '$1 || ''_CLONED''';
-    end
-    else if SameText(FFields[i].FieldName, 'DESCRIPTION') then
-    begin
-      FFields[i].Formula := '$1 || '' (cloned)''';
-      sgFields.Cells[3, i + 1] := '$1 || '' (cloned)''';
-    end
-    else if SameText(FFields[i].FieldName, 'PRICE') then
-    begin
-      FFields[i].Formula := '$1 * 1.1';
-      sgFields.Cells[3, i + 1] := '$1 * 1.1';
-    end
-    else if SameText(FFields[i].FieldName, 'QUANTITY') then
-    begin
-      FFields[i].Formula := '$1 * 2';
-      sgFields.Cells[3, i + 1] := '$1 * 2';
-    end
-    else if SameText(FFields[i].FieldName, 'IS_ACTIVE') then
-    begin
-      FFields[i].Formula := '1';
-      sgFields.Cells[3, i + 1] := '1';
-    end
-    else if SameText(FFields[i].FieldName, 'CREATED_DATE') then
-    begin
-      FFields[i].Formula := '$1 + 30';
-      sgFields.Cells[3, i + 1] := '$1 + 30';
-    end
-    else if SameText(FFields[i].FieldName, 'CREATED_AT') then
-    begin
-      FFields[i].Formula := '$1 + 365';
-      sgFields.Cells[3, i + 1] := '$1 + 365';
-    end
-    else if SameText(FFields[i].FieldName, 'SALARY') then
-    begin
-      FFields[i].Formula := '$1 * 1.15 + 500';
-      sgFields.Cells[3, i + 1] := '$1 * 1.15 + 500';
-    end
-    else if SameText(FFields[i].FieldName, 'RATING') then
-    begin
-      FFields[i].Formula := '$1 * 1.05';
-      sgFields.Cells[3, i + 1] := '$1 * 1.05';
-    end
-    else if SameText(FFields[i].FieldName, 'CODE') then
-    begin
-      FFields[i].Formula := 'UPPER($1)';
-      sgFields.Cells[3, i + 1] := 'UPPER($1)';
-    end
-    else if SameText(FFields[i].FieldName, 'DATA_ARRAY') then
-    begin
-      FFields[i].Formula := '';
-      sgFields.Cells[3, i + 1] := '';
-    end;
-  end;
-
-  StatusBar1.SimpleText := IntToStr(Length(FFields)) + ' fields loaded (with test formulas).';
+  //btnGenTestFormulasClick(nil);
 end;
 
 procedure TfrmCloneTable.btnSelectAllClick(Sender: TObject);
@@ -1097,6 +1029,71 @@ procedure TfrmCloneTable.btnExternalFileClick(Sender: TObject);
 begin
   if OpenDialog1.Execute then
     edtExternalFile.Text := OpenDialog1.FileName;
+end;
+
+procedure TfrmCloneTable.btnGenTestFormulasClick(Sender: TObject);
+var
+  i: Integer;
+  FieldType: string;
+begin
+  for i := 0 to High(FFields) do
+  begin
+    if FFields[i].IsComputed then
+      Continue;
+
+    FieldType := UpperCase(FFields[i].FieldType);
+
+    // Standard-Formel: Feldwert unverändert
+    FFields[i].Formula := '$1';
+
+    // Spezifische Testformeln basierend NUR auf Datentypen
+    if Pos('VARCHAR', FieldType) > 0 then
+      FFields[i].Formula := '$1 || ''_CLONED'''
+
+    else if Pos('CHAR', FieldType) > 0 then
+      FFields[i].Formula := 'UPPER($1)'
+
+    else if Pos('BLOB', FieldType) > 0 then
+      FFields[i].Formula := '$1 || '' (cloned)'''
+
+    else if Pos('INTEGER', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 10000000'
+
+    else if Pos('SMALLINT', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 2'
+
+    else if Pos('BIGINT', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 10000000'
+
+    else if Pos('NUMERIC', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.1'
+
+    else if Pos('DECIMAL', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.1'
+
+    else if Pos('FLOAT', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.15 + 500'
+
+    else if Pos('DOUBLE', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.05'
+
+    else if Pos('DATE', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 30'
+
+    else if Pos('TIMESTAMP', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 365'
+
+    else if Pos('TIME', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 3600'
+
+    else if Pos('BOOLEAN', FieldType) > 0 then
+      FFields[i].Formula := 'true';
+
+    // Formel ins Grid schreiben
+    sgFields.Cells[3, i + 1] := FFields[i].Formula;
+  end;
+
+  StatusBar1.SimpleText := IntToStr(Length(FFields)) + ' test formulas generated.';
 end;
 
 procedure TfrmCloneTable.btnAddToQueueClick(Sender: TObject);

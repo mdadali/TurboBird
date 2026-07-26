@@ -1,28 +1,28 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 304
-  Height = 652
-  Top = 43
+  Left = 284
+  Height = 491
+  Top = 154
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
-  ClientHeight = 652
+  ClientHeight = 491
   ClientWidth = 1016
   OnCreate = FormCreate
   LCLVersion = '2.2.6.0'
   object grboxCopyOptions1: TGroupBox
     Left = 0
-    Height = 121
-    Top = 481
+    Height = 112
+    Top = 329
     Width = 1016
     Align = alBottom
     Caption = 'Copy Options'
-    ClientHeight = 100
+    ClientHeight = 91
     ClientWidth = 1014
     TabOrder = 0
     object rbAllRows: TRadioButton
-      Left = 22
+      Left = 16
       Height = 24
-      Top = 3
+      Top = 56
       Width = 82
       Caption = 'All Rows'
       Checked = True
@@ -33,40 +33,40 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     object rbRange: TRadioButton
       Left = 120
       Height = 24
-      Top = 3
+      Top = 56
       Width = 69
       Caption = 'Range'
       TabOrder = 1
     end
     object edtBatchSize: TEdit
-      Left = 503
+      Left = 512
       Height = 37
-      Top = 3
+      Top = 51
       Width = 88
       TabOrder = 2
       Text = '1000000'
     end
     object Label3: TLabel
-      Left = 424
+      Left = 432
       Height = 20
-      Top = 8
+      Top = 56
       Width = 69
       Caption = 'Batch Size'
       ParentColor = False
     end
     object edtFrom: TEdit
-      Left = 200
+      Left = 208
       Height = 37
-      Top = 0
+      Top = 51
       Width = 88
       Enabled = False
       TabOrder = 3
       Text = '1'
     end
     object Label8: TLabel
-      Left = 296
+      Left = 304
       Height = 19
-      Top = 8
+      Top = 64
       Width = 4
       Caption = '-'
       Font.Style = [fsBold]
@@ -74,9 +74,9 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       ParentFont = False
     end
     object edtTo: TEdit
-      Left = 312
+      Left = 320
       Height = 37
-      Top = 3
+      Top = 51
       Width = 96
       Enabled = False
       TabOrder = 4
@@ -84,12 +84,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object grBoxFormulaPresets: TGroupBox
       Left = 617
-      Height = 100
+      Height = 91
       Top = 0
       Width = 397
       Align = alRight
       Caption = 'Formula Presets'
-      ClientHeight = 79
+      ClientHeight = 70
       ClientWidth = 395
       TabOrder = 5
       Visible = False
@@ -109,23 +109,30 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
         Top = 7
         Width = 134
         Caption = 'Refresh Presets'
-        OnClick = btnRefreshPresetsClick
         TabOrder = 1
       end
     end
     object chkUseFormula: TCheckBox
-      Left = 22
+      Left = 128
       Height = 24
-      Top = 48
+      Top = 8
       Width = 110
       Caption = 'Use Formula'
       TabOrder = 6
+    end
+    object chkboxCopyData: TCheckBox
+      Left = 16
+      Height = 24
+      Top = 8
+      Width = 93
+      Caption = 'Copy Data'
+      TabOrder = 7
     end
   end
   object pnlBottom: TPanel
     Left = 0
     Height = 50
-    Top = 602
+    Top = 441
     Width = 1016
     Align = alBottom
     ClientHeight = 50
@@ -161,12 +168,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 185
-    Top = 296
+    Height = 232
+    Top = 96
     Width = 1016
-    Align = alBottom
+    Align = alTop
     Caption = 'Fields'
-    ClientHeight = 164
+    ClientHeight = 211
     ClientWidth = 1014
     TabOrder = 2
     object sgFields: TStringGrid
@@ -183,11 +190,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object pnlFields: TPanel
       Left = 681
-      Height = 164
+      Height = 211
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 164
+      ClientHeight = 211
       ClientWidth = 333
       TabOrder = 1
       object chkLstFields: TCheckListBox
@@ -222,11 +229,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object Panel1: TPanel
     Left = 0
-    Height = 296
+    Height = 96
     Top = 0
     Width = 1016
-    Align = alClient
-    ClientHeight = 296
+    Align = alTop
+    ClientHeight = 96
     ClientWidth = 1016
     TabOrder = 3
     object Label1: TLabel
@@ -264,89 +271,6 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       TabOrder = 1
       Text = 'cmbBoxDBs'
     end
-    object grBoxTableType: TGroupBox
-      Left = 24
-      Height = 185
-      Top = 88
-      Width = 233
-      Caption = 'Table Type'
-      ClientHeight = 164
-      ClientWidth = 231
-      TabOrder = 2
-      Visible = False
-      object rbTableFB: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 8
-        Width = 79
-        Caption = 'Firebird'
-        Checked = True
-        TabOrder = 0
-        TabStop = True
-      end
-      object rbTableExternal: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 48
-        Width = 81
-        Caption = 'External'
-        TabOrder = 1
-      end
-      object rbTableBoth: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 88
-        Width = 57
-        Caption = 'Both'
-        TabOrder = 2
-      end
-    end
-    object grBoxCopyOptions: TGroupBox
-      Left = 328
-      Height = 185
-      Top = 88
-      Width = 201
-      Caption = 'Copy Data to'
-      ClientHeight = 164
-      ClientWidth = 199
-      TabOrder = 3
-      Visible = False
-      OnClick = grBoxCopyOptionsClick
-      object rbCopyDataToFB: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 8
-        Width = 79
-        Caption = 'Firebird'
-        Checked = True
-        TabOrder = 0
-        TabStop = True
-      end
-      object rbCopyDataToExternal: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 48
-        Width = 81
-        Caption = 'External'
-        TabOrder = 1
-      end
-      object rbCopyDataToBothBoth: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 88
-        Width = 57
-        Caption = 'Both'
-        TabOrder = 2
-      end
-      object rbCopyDataToNone: TRadioButton
-        Left = 16
-        Height = 24
-        Top = 128
-        Width = 62
-        Caption = 'None'
-        TabOrder = 3
-      end
-    end
     object Label4: TLabel
       Left = 573
       Height = 20
@@ -360,31 +284,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Height = 37
       Top = 32
       Width = 411
-      TabOrder = 4
-    end
-    object Label5: TLabel
-      Left = 573
-      Height = 20
-      Top = 86
-      Width = 86
-      Caption = 'External File:'
-      ParentColor = False
-    end
-    object edtExternalFileName: TEdit
-      Left = 573
-      Height = 37
-      Top = 112
-      Width = 379
-      TabOrder = 5
-    end
-    object btnOpenExternalFile: TButton
-      Left = 956
-      Height = 33
-      Top = 112
-      Width = 28
-      Caption = '...'
-      OnClick = btnOpenExternalFileClick
-      TabOrder = 6
+      TabOrder = 2
     end
   end
 end

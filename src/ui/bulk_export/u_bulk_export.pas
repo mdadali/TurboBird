@@ -557,7 +557,7 @@ end;
 
 procedure TfrmBulkExport.btnAddToQueueClick(Sender: TObject);
 begin
-
+  MessageDlg('Queue feature coming soon!', mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmBulkExport.CancelClick(Sender: TObject);

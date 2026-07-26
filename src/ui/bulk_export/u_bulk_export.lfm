@@ -741,6 +741,7 @@ object frmBulkExport: TfrmBulkExport
       ClientHeight = 110
       ClientWidth = 384
       TabOrder = 5
+      Visible = False
       object cbFormulaPreset: TComboBox
         Left = 16
         Height = 36
