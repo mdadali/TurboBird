@@ -257,17 +257,16 @@ begin
   try
     SetLength(FFields, 0);
     chkLstFields.Clear;
+
     sgFields.RowCount := 1;
 
     sgFields.ColCount := 3;
     sgFields.Cells[0, 0] := 'Source Field';
     sgFields.Cells[1, 0] := 'Field Type';
     sgFields.Cells[2, 0] := 'Formula ($1 = value)';
-    //sgFields.ColWidths[0] := 45;
     sgFields.ColWidths[0] := 150;
     sgFields.ColWidths[1] := 120;
     sgFields.ColWidths[2] := 250;
-
 
     i := 0;
     while not Iso.Query.EOF do

@@ -1,7 +1,7 @@
 object frmBulkExport: TfrmBulkExport
-  Left = 377
+  Left = 217
   Height = 692
-  Top = 56
+  Top = 26
   Width = 1067
   Caption = 'Bulk Export'
   ClientHeight = 692
