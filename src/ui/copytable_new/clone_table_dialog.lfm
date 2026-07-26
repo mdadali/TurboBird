@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 429
+  Left = 226
   Height = 734
-  Top = 0
+  Top = 14
   Width = 1079
   Align = alTop
   BorderStyle = bsDialog
@@ -15,11 +15,11 @@ object frmCloneTable: TfrmCloneTable
   LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
-    Height = 52
-    Top = 660
+    Height = 40
+    Top = 672
     Width = 1079
     Align = alBottom
-    ClientHeight = 52
+    ClientHeight = 40
     ClientWidth = 1079
     TabOrder = 0
     object btnExecute: TButton
@@ -257,18 +257,18 @@ object frmCloneTable: TfrmCloneTable
   end
   object grboxCopyOptions: TGroupBox
     Left = 0
-    Height = 132
-    Top = 528
+    Height = 152
+    Top = 520
     Width = 1079
     Align = alBottom
     Caption = 'Copy Options'
-    ClientHeight = 111
+    ClientHeight = 131
     ClientWidth = 1077
     TabOrder = 3
     object rbAllRows: TRadioButton
-      Left = 22
+      Left = 24
       Height = 24
-      Top = 3
+      Top = 24
       Width = 82
       Caption = 'All Rows'
       Checked = True
@@ -277,9 +277,9 @@ object frmCloneTable: TfrmCloneTable
       TabStop = True
     end
     object rbRange: TRadioButton
-      Left = 120
+      Left = 112
       Height = 24
-      Top = 3
+      Top = 24
       Width = 69
       Caption = 'Range'
       TabOrder = 1
@@ -287,32 +287,32 @@ object frmCloneTable: TfrmCloneTable
     object edtBatchSize: TEdit
       Left = 503
       Height = 37
-      Top = 3
+      Top = 24
       Width = 88
       TabOrder = 2
       Text = '1000000'
     end
     object Label3: TLabel
-      Left = 424
+      Left = 416
       Height = 20
-      Top = 8
+      Top = 31
       Width = 69
       Caption = 'Batch Size'
       ParentColor = False
     end
     object edtFrom: TEdit
-      Left = 200
+      Left = 192
       Height = 37
-      Top = 0
+      Top = 24
       Width = 88
       Enabled = False
       TabOrder = 3
       Text = '1'
     end
     object Label8: TLabel
-      Left = 296
+      Left = 288
       Height = 19
-      Top = 8
+      Top = 32
       Width = 4
       Caption = '-'
       Font.Style = [fsBold]
@@ -320,9 +320,9 @@ object frmCloneTable: TfrmCloneTable
       ParentFont = False
     end
     object edtTo: TEdit
-      Left = 312
+      Left = 304
       Height = 37
-      Top = 3
+      Top = 24
       Width = 96
       Enabled = False
       TabOrder = 4
@@ -330,12 +330,12 @@ object frmCloneTable: TfrmCloneTable
     end
     object grBoxFormulaPresets: TGroupBox
       Left = 680
-      Height = 111
+      Height = 131
       Top = 0
       Width = 397
       Align = alRight
       Caption = 'Formula Presets'
-      ClientHeight = 90
+      ClientHeight = 110
       ClientWidth = 395
       TabOrder = 5
       Visible = False
@@ -363,7 +363,7 @@ object frmCloneTable: TfrmCloneTable
     object grBoxCopyMethod: TGroupBox
       Left = 22
       Height = 44
-      Top = 32
+      Top = 56
       Width = 650
       Caption = 'CrossDB Copy Method'
       ClientHeight = 23
@@ -393,20 +393,28 @@ object frmCloneTable: TfrmCloneTable
     object chkUseFormula: TCheckBox
       Left = 22
       Height = 24
-      Top = 87
+      Top = 105
       Width = 110
       Caption = 'Use Formula'
       OnChange = chkUseFormulaChange
       TabOrder = 7
     end
     object btnGenTestFormulas: TButton
-      Left = 176
+      Left = 168
       Height = 25
-      Top = 86
+      Top = 105
       Width = 192
       Caption = 'Generate Test Formulas'
       OnClick = btnGenTestFormulasClick
       TabOrder = 8
+    end
+    object chkCopyData: TCheckBox
+      Left = 24
+      Height = 24
+      Top = 0
+      Width = 93
+      Caption = 'Copy Data'
+      TabOrder = 9
     end
   end
   object grBoxFields: TGroupBox
