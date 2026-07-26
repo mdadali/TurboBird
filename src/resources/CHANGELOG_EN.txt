@@ -5,8 +5,74 @@ What's New for TurboBird
 - : removed
 
 
+TurboBird v1.2.1.1280
+Build date & time: 26.07.2026, 22:30
+
++ Clone Table (Universal Copy Tool)
+  - Replaces three old dialogs: ImportTable, CloneToExternal, CopyTable
+  - Copies tables in all directions:
+    FB → FB (local & Cross-Database/Server)
+    FB → External Table (binary format)
+    External Table → FB
+  - Automatic selection of the fastest copy method:
+    INSERT...SELECT (local, up to 220,000 rows/sec)
+    EXECUTE BLOCK (Cross-DB, up to 4,600 rows/sec)
+    Row-by-Row (Cross-DB with all field types)
+  - Formula support with $1 placeholder (e.g. $1 * 1.1, UPPER($1))
+  - Optional data copy (table structure only or including data)
+  - Batch processing with configurable size
+  - Progress display with time measurement and speed
+  - Automatic detection and deselection of problem fields (BLOBs, Arrays)
+    for external target tables
+  - Test formula generator for quick transformations
+
++ Data Editor (significantly enhanced)
+  - Universal interface between Firebird and text files
+  - Direct access to FB tables via right-click:
+    "View in Data Editor" (Read-Only)
+    "Edit in Data Editor" (Read-Write, using TIBTable)
+  - Loading FB tables with progress dialog and statistics
+  - All export formats available (CSV, JSON, HTML, PDF, Spreadsheet, etc.)
+  - Direct editing in the grid (Read-Write mode)
+  - Clean DB encapsulation with own connection and transaction
+  - Session password cache is used automatically
+
++ Create Table from DataSet (New)
+  - Creates a Firebird table directly from CSV/JSON/Excel data
+  - Accessible from Data Editor via "Create Table"
+  - Selection of server, database and table name
+  - Fields selectable via checkbox
+  - Optional data copy (structure only or including data)
+  - Batch processing with progress dialog
+  - Formula support (optional)
+
++ Bulk Export (New)
+  - Exports FB tables as CSV files
+  - Server-side formatting for maximum speed
+  - Batch processing with configurable size
+  - Buffered stream for optimal write speed
+  - Progress display with time measurement and statistics
+  - Formula support for transformed exports
+  - Configurable via INI file
+
+- Removed old dialogs
+  - ImportTable (replaced by Data Editor + CreateTableFromDataSet)
+  - CloneToExternal (replaced by CloneTable)
+  - CopyTable (replaced by CloneTable)
+
++ Session Password Cache
+  - Temporary passwords are stored for the duration of the session
+
+- PascalScript Studio deactivated (currently unstable)
+
+* Several bugs fixed
+
+
+
+
+
 ----------------------------------------------------------------------------------------
-TurboBird v1.2.1.1275
+TurboBird v1.2.1.1277
 Build Date & Time: 04.06.2026, 14:00
 
 + Several bugs fixed
