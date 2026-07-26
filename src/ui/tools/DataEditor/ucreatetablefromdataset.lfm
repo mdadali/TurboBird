@@ -1,7 +1,7 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 278
+  Left = 304
   Height = 652
-  Top = 112
+  Top = 43
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
@@ -92,6 +92,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       ClientHeight = 79
       ClientWidth = 395
       TabOrder = 5
+      Visible = False
       object cbFormulaPreset: TComboBox
         Left = 16
         Height = 36
@@ -160,12 +161,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 223
-    Top = 258
+    Height = 185
+    Top = 296
     Width = 1016
     Align = alBottom
     Caption = 'Fields'
-    ClientHeight = 202
+    ClientHeight = 164
     ClientWidth = 1014
     TabOrder = 2
     object sgFields: TStringGrid
@@ -182,11 +183,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object pnlFields: TPanel
       Left = 681
-      Height = 202
+      Height = 164
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 202
+      ClientHeight = 164
       ClientWidth = 333
       TabOrder = 1
       object chkLstFields: TCheckListBox
@@ -221,11 +222,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object Panel1: TPanel
     Left = 0
-    Height = 258
+    Height = 296
     Top = 0
     Width = 1016
     Align = alClient
-    ClientHeight = 258
+    ClientHeight = 296
     ClientWidth = 1016
     TabOrder = 3
     object Label1: TLabel
@@ -266,12 +267,13 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     object grBoxTableType: TGroupBox
       Left = 24
       Height = 185
-      Top = 72
+      Top = 88
       Width = 233
       Caption = 'Table Type'
       ClientHeight = 164
       ClientWidth = 231
       TabOrder = 2
+      Visible = False
       object rbTableFB: TRadioButton
         Left = 16
         Height = 24
@@ -302,12 +304,13 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     object grBoxCopyOptions: TGroupBox
       Left = 328
       Height = 185
-      Top = 72
+      Top = 88
       Width = 201
       Caption = 'Copy Data to'
       ClientHeight = 164
       ClientWidth = 199
       TabOrder = 3
+      Visible = False
       OnClick = grBoxCopyOptionsClick
       object rbCopyDataToFB: TRadioButton
         Left = 16
@@ -344,13 +347,6 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
         TabOrder = 3
       end
     end
-    object pnlHint: TPanel
-      Left = 576
-      Height = 80
-      Top = 176
-      Width = 408
-      TabOrder = 4
-    end
     object Label4: TLabel
       Left = 573
       Height = 20
@@ -364,7 +360,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Height = 37
       Top = 32
       Width = 411
-      TabOrder = 5
+      TabOrder = 4
     end
     object Label5: TLabel
       Left = 573
@@ -379,7 +375,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Height = 37
       Top = 112
       Width = 379
-      TabOrder = 6
+      TabOrder = 5
     end
     object btnOpenExternalFile: TButton
       Left = 956
@@ -388,7 +384,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Width = 28
       Caption = '...'
       OnClick = btnOpenExternalFileClick
-      TabOrder = 7
+      TabOrder = 6
     end
   end
 end

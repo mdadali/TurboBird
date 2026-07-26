@@ -51,7 +51,6 @@ type
     Panel1: TPanel;
     pnlBottom: TPanel;
     pnlFields: TPanel;
-    pnlHint: TPanel;
     rbAllRows: TRadioButton;
     rbCopyDataToFB: TRadioButton;
     rbCopyDataToExternal: TRadioButton;
