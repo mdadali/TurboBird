@@ -1,22 +1,22 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 284
-  Height = 491
-  Top = 154
+  Left = 408
+  Height = 540
+  Top = 172
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
-  ClientHeight = 491
+  ClientHeight = 540
   ClientWidth = 1016
   OnCreate = FormCreate
   LCLVersion = '2.2.6.0'
   object grboxCopyOptions1: TGroupBox
     Left = 0
-    Height = 112
-    Top = 329
+    Height = 140
+    Top = 328
     Width = 1016
     Align = alBottom
     Caption = 'Copy Options'
-    ClientHeight = 91
+    ClientHeight = 119
     ClientWidth = 1014
     TabOrder = 0
     object rbAllRows: TRadioButton
@@ -84,12 +84,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object grBoxFormulaPresets: TGroupBox
       Left = 617
-      Height = 91
+      Height = 119
       Top = 0
       Width = 397
       Align = alRight
       Caption = 'Formula Presets'
-      ClientHeight = 70
+      ClientHeight = 98
       ClientWidth = 395
       TabOrder = 5
       Visible = False
@@ -128,11 +128,20 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Caption = 'Copy Data'
       TabOrder = 7
     end
+    object btnGenTestFormulas: TButton
+      Left = 264
+      Height = 25
+      Top = 7
+      Width = 192
+      Caption = 'Generate Test Formulas'
+      OnClick = btnGenTestFormulasClick
+      TabOrder = 8
+    end
   end
   object pnlBottom: TPanel
     Left = 0
     Height = 50
-    Top = 441
+    Top = 468
     Width = 1016
     Align = alBottom
     ClientHeight = 50
@@ -177,10 +186,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     ClientWidth = 1014
     TabOrder = 2
     object sgFields: TStringGrid
-      Left = -40
-      Height = 178
-      Top = -16
-      Width = 680
+      Left = 0
+      Height = 211
+      Top = 0
+      Width = 681
+      Align = alClient
       ColCount = 0
       FixedCols = 0
       FixedRows = 0
@@ -208,7 +218,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
         TopIndex = -1
       end
       object btnSelectAll: TButton
-        Left = 1
+        Left = 8
         Height = 25
         Top = 168
         Width = 111
@@ -286,5 +296,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Width = 411
       TabOrder = 2
     end
+  end
+  object StatusBar1: TStatusBar
+    Left = 0
+    Height = 22
+    Top = 518
+    Width = 1016
+    Panels = <>
   end
 end

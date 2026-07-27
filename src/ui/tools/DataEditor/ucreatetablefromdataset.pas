@@ -17,9 +17,11 @@ type
   { TfrmCreateTableFromDataSet }
 
   TfrmCreateTableFromDataSet = class(TForm)
+    btnGenTestFormulas: TButton;
     btnMainCancel: TButton;
     btnDeselectAll: TButton;
     btnOK: TButton;
+    btnRefreshPresets: TButton;
     btnSelectAll: TButton;
     btnRun: TButton;
     cbFormulaPreset: TComboBox;
@@ -34,6 +36,7 @@ type
     edtTo: TEdit;
     grBoxCopyOptions1: TGroupBox;
     grBoxFields: TGroupBox;
+    grBoxFormulaPresets: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -45,7 +48,9 @@ type
     rbAllRows: TRadioButton;
     rbRange: TRadioButton;
     sgFields: TStringGrid;
+    StatusBar1: TStatusBar;
 
+    procedure btnGenTestFormulasClick(Sender: TObject);
     procedure btnMainCancelClick(Sender: TObject);
     procedure btnRunClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
@@ -238,6 +243,68 @@ end;
 procedure TfrmCreateTableFromDataSet.btnMainCancelClick(Sender: TObject);
 begin
   ModalResult := mrCancel;
+end;
+
+procedure TfrmCreateTableFromDataSet.btnGenTestFormulasClick(Sender: TObject);
+var
+  i: Integer;
+  FieldType: string;
+begin
+  for i := 0 to High(FFields) do
+  begin
+    FieldType := UpperCase(FFields[i].FieldType);
+
+    // Standard-Formel: Feldwert unverändert
+    FFields[i].Formula := '$1';
+
+    // Spezifische Testformeln basierend NUR auf Datentypen
+    if Pos('VARCHAR', FieldType) > 0 then
+      FFields[i].Formula := '$1 || ''_CLONED'''
+
+    else if Pos('CHAR', FieldType) > 0 then
+      FFields[i].Formula := 'UPPER($1)'
+
+    else if Pos('BLOB', FieldType) > 0 then
+      FFields[i].Formula := '$1 || '' (cloned)'''
+
+    else if Pos('INTEGER', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 10000000'
+
+    else if Pos('SMALLINT', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 2'
+
+    else if Pos('BIGINT', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 10000000'
+
+    else if Pos('NUMERIC', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.1'
+
+    else if Pos('DECIMAL', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.1'
+
+    else if Pos('FLOAT', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.15 + 500'
+
+    else if Pos('DOUBLE', FieldType) > 0 then
+      FFields[i].Formula := '$1 * 1.05'
+
+    else if Pos('DATE', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 30'
+
+    else if Pos('TIMESTAMP', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 365'
+
+    else if Pos('TIME', FieldType) > 0 then
+      FFields[i].Formula := '$1 + 3600'
+
+    else if Pos('BOOLEAN', FieldType) > 0 then
+      FFields[i].Formula := '1';
+
+    // Formel ins Grid schreiben
+    sgFields.Cells[2, i + 1] := FFields[i].Formula;
+  end;
+
+  StatusBar1.SimpleText := IntToStr(Length(FFields)) + ' test formulas generated.';
 end;
 
 procedure TfrmCreateTableFromDataSet.btnRunClick(Sender: TObject);
@@ -504,16 +571,37 @@ begin
             begin
               if UseFormula and (FFields[f].Formula <> '') then
               begin
+                // Formel mit dem FeldWERT aus dem Dataset füllen (nicht mit dem FeldNAMEN!)
                 Val := StringReplace(FFields[f].Formula, '$1',
                                      FDataSet.FieldByName(FFields[f].FieldName).AsString, [rfReplaceAll]);
-                Param.AsString := Val;
+
+                // Je nach Ziel-Datentyp den Parameter korrekt setzen
+                if Pos('SMALLINT', UpperCase(FFields[f].FieldType)) > 0 then
+                  Param.AsSmallInt := StrToIntDef(Val, 0)
+                else if Pos('INTEGER', UpperCase(FFields[f].FieldType)) > 0 then
+                  Param.AsInteger := StrToIntDef(Val, 0)
+                else if Pos('BIGINT', UpperCase(FFields[f].FieldType)) > 0 then
+                  Param.AsLargeInt := StrToInt64Def(Val, 0)
+                else if (Pos('FLOAT', UpperCase(FFields[f].FieldType)) > 0) or
+                        (Pos('DOUBLE', UpperCase(FFields[f].FieldType)) > 0) then
+                  Param.AsFloat := StrToFloatDef(Val, 0)
+                else if (Pos('NUMERIC', UpperCase(FFields[f].FieldType)) > 0) or
+                        (Pos('DECIMAL', UpperCase(FFields[f].FieldType)) > 0) then
+                  Param.AsFloat := StrToFloatDef(Val, 0)
+                else if Pos('BOOLEAN', UpperCase(FFields[f].FieldType)) > 0 then
+                  Param.AsBoolean := (Val = '1') or SameText(Val, 'True')
+                else
+                  Param.AsString := Val;  // VARCHAR, CHAR, BLOB, etc.
               end
               else
               begin
+                // Ohne Formel: Originalwert aus dem Dataset übernehmen
                 case FDataSet.FieldByName(FFields[f].FieldName).DataType of
+                  ftSmallint: Param.AsSmallInt := FDataSet.FieldByName(FFields[f].FieldName).AsInteger;
+                  ftInteger, ftLargeInt: Param.AsInteger := FDataSet.FieldByName(FFields[f].FieldName).AsInteger;
                   ftFloat, ftCurrency: Param.AsFloat := FDataSet.FieldByName(FFields[f].FieldName).AsFloat;
-                  ftInteger, ftLargeInt, ftSmallint: Param.AsInteger := FDataSet.FieldByName(FFields[f].FieldName).AsInteger;
                   ftDateTime, ftTimeStamp, ftDate: Param.AsDateTime := FDataSet.FieldByName(FFields[f].FieldName).AsDateTime;
+                  ftBoolean: Param.AsBoolean := FDataSet.FieldByName(FFields[f].FieldName).AsBoolean;
                   else Param.AsString := FDataSet.FieldByName(FFields[f].FieldName).AsString;
                 end;
               end;
