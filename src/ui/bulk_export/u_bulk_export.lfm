@@ -1,7 +1,7 @@
 object frmBulkExport: TfrmBulkExport
-  Left = 217
+  Left = 295
   Height = 692
-  Top = 26
+  Top = 56
   Width = 1067
   Caption = 'Bulk Export'
   ClientHeight = 692
@@ -52,6 +52,7 @@ object frmBulkExport: TfrmBulkExport
         Top = 8
         Width = 320
         ItemHeight = 0
+        OnChange = comboxSourceServerChange
         Style = csDropDownList
         TabOrder = 1
       end
@@ -61,6 +62,7 @@ object frmBulkExport: TfrmBulkExport
         Top = 58
         Width = 320
         ItemHeight = 0
+        OnChange = comboxSourceDBChange
         Style = csDropDownList
         TabOrder = 2
       end
@@ -618,6 +620,7 @@ object frmBulkExport: TfrmBulkExport
       FixedRows = 0
       RowCount = 0
       TabOrder = 1
+      OnDblClick = sgFieldsDblClick
     end
     object pnlFields: TPanel
       Left = 732

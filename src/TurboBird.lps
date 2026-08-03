@@ -9,7 +9,7 @@
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="2"/>
         <TopLine Value="141"/>
         <CursorPos Y="175"/>
         <UsageCount Value="200"/>
@@ -192,10 +192,12 @@
         <ComponentName Value="fmEditTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="1"/>
         <TopLine Value="288"/>
-        <CursorPos X="3" Y="290"/>
+        <CursorPos X="21" Y="298"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit23>
       <Unit24>
         <Filename Value="ui\newtable\newtable.pas"/>
@@ -204,11 +206,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewTable"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="366"/>
-        <CursorPos X="21" Y="391"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="65"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="ui\tablemanage\tablemanage.pas"/>
@@ -250,8 +250,8 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <TopLine Value="62"/>
-        <CursorPos X="7" Y="79"/>
+        <TopLine Value="708"/>
+        <CursorPos X="15" Y="718"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -271,10 +271,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="37"/>
-        <CursorPos X="13" Y="40"/>
+        <CursorPos X="13" Y="41"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="ui\registerdb\reg.pas"/>
@@ -295,10 +296,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="-1"/>
         <CursorPos X="13" Y="16"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit31>
       <Unit32>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -419,12 +419,12 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="13"/>
-        <TopLine Value="461"/>
-        <CursorPos X="49" Y="473"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1492"/>
+        <CursorPos X="49" Y="1508"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="2429" ID="4"/>
+          <Item0 Y="2493" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit42>
@@ -593,9 +593,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="12" Y="14"/>
+        <EditorIndex Value="7"/>
+        <CursorPos X="17" Y="15"/>
         <UsageCount Value="201"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit57>
       <Unit58>
         <Filename Value="ui\firebirdconfig\ffirebirdconfig.pas"/>
@@ -1042,21 +1044,18 @@
         <ComponentName Value="frmDataEditor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="359"/>
         <CursorPos X="42" Y="367"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit101>
       <Unit102>
         <Filename Value="utils\uGenSQLFromCSVDataset.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="136"/>
         <CursorPos X="36" Y="149"/>
         <UsageCount Value="215"/>
-        <Loaded Value="True"/>
       </Unit102>
       <Unit103>
         <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
@@ -1175,11 +1174,10 @@
         <Filename Value="common\uexternaltable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uExternalTable"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="121"/>
         <CursorPos X="18" Y="143"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit114>
       <Unit115>
         <Filename Value="ui\dialogs\clone_table_to_external_table_dialog.pas"/>
@@ -1208,9 +1206,8 @@
         <Filename Value="common\ucopytabledatalocal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataLocal"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit117>
       <Unit118>
         <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
@@ -1218,31 +1215,29 @@
         <ComponentName Value="frmCloneTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="1106"/>
         <CursorPos Y="1122"/>
-        <UsageCount Value="187"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
+        <UsageCount Value="194"/>
       </Unit118>
       <Unit119>
         <Filename Value="common\ucopytabledatacrossexecuteblock.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossExecuteBlock"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="410"/>
         <CursorPos X="46" Y="417"/>
-        <UsageCount Value="180"/>
+        <UsageCount Value="187"/>
         <Loaded Value="True"/>
       </Unit119>
       <Unit120>
         <Filename Value="common\uformulapresets.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFormulaPresets"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="316"/>
         <CursorPos X="52" Y="323"/>
-        <UsageCount Value="164"/>
+        <UsageCount Value="171"/>
         <Loaded Value="True"/>
       </Unit120>
       <Unit121>
@@ -1252,16 +1247,16 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="81" Y="7"/>
-        <UsageCount Value="152"/>
+        <UsageCount Value="159"/>
       </Unit121>
       <Unit122>
         <Filename Value="common\ucopytabledatacrossrowbyrow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossRowByRow"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="745"/>
         <CursorPos X="35" Y="778"/>
-        <UsageCount Value="139"/>
+        <UsageCount Value="146"/>
         <Loaded Value="True"/>
       </Unit122>
       <Unit123>
@@ -1271,11 +1266,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTableFromDataSet"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="561"/>
-        <CursorPos X="11" Y="593"/>
-        <UsageCount Value="87"/>
+        <EditorIndex Value="8"/>
+        <CursorPos X="6" Y="7"/>
+        <UsageCount Value="94"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit123>
@@ -1285,11 +1278,13 @@
         <ComponentName Value="frmBulkExport"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="250"/>
-        <CursorPos X="37" Y="274"/>
-        <UsageCount Value="42"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="160"/>
+        <CursorPos X="3" Y="182"/>
+        <UsageCount Value="49"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit124>
       <Unit125>
         <Filename Value="ui\data_studio\fdatastudio.pas"/>
@@ -1418,8 +1413,8 @@
       <Unit139>
         <Filename Value="version.inc"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="21" Y="6"/>
-        <UsageCount Value="7"/>
+        <CursorPos X="17" Y="4"/>
+        <UsageCount Value="10"/>
       </Unit139>
       <Unit140>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBMessages.pas"/>
@@ -1432,8 +1427,8 @@
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\3.0\firebird\FirebirdOOAPI.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="6569"/>
-        <CursorPos X="23" Y="6584"/>
-        <UsageCount Value="6"/>
+        <CursorPos Y="6587"/>
+        <UsageCount Value="11"/>
       </Unit141>
       <Unit142>
         <Filename Value="ui\openquerybuilder\unit1.pas"/>
@@ -1500,127 +1495,91 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="21" HistoryIndex="20">
       <Position1>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="9" Column="12"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="79" Column="7" TopLine="62"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="200" Column="98" TopLine="191"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="462" Column="108" TopLine="461"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="608" TopLine="585"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="525" Column="36" TopLine="497"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="610" TopLine="587"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1516" Column="28" TopLine="1516"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="1103" TopLine="1079"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1378" Column="59" TopLine="1371"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="1196" TopLine="1162"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1469" Column="12" TopLine="1452"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="8" Column="27"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1460" Column="21" TopLine="1444"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="1087" Column="39" TopLine="1082"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1445" Column="34" TopLine="1440"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="145" Column="25" TopLine="130"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="24" Column="15"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="253" Column="13" TopLine="224"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1448" TopLine="1447"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="537" Column="14" TopLine="524"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1509" Column="18" TopLine="1492"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="1095" Column="57" TopLine="1069"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1515" TopLine="1492"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="924" Column="16" TopLine="891"/>
+        <Filename Value="ui\setfirebirdclient\fsetfbclient.pas"/>
+        <Caret Line="29" Column="48"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="925" Column="16" TopLine="892"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="2045" Column="18" TopLine="2038"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="890" TopLine="886"/>
+        <Filename Value="ui\edittabledata\fedittabledata.pas"/>
+        <Caret Line="290" Column="3" TopLine="288"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
-        <Caret Line="274" Column="37" TopLine="250"/>
+        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
+        <Caret Line="94" Column="25" TopLine="80"/>
       </Position16>
       <Position17>
-        <Filename Value="common\ucopytabledatacrossrowbyrow.pas"/>
-        <Caret Line="778" Column="35" TopLine="745"/>
+        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
+        <Caret Line="18" Column="16"/>
       </Position17>
       <Position18>
-        <Filename Value="TurboBird.lpr"/>
-        <Caret Line="62" Column="3" TopLine="44"/>
+        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
+        <Caret Line="252" Column="40" TopLine="250"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="27" Column="39"/>
+        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
+        <Caret Line="370" Column="3" TopLine="355"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\copytable_new\clone_table_dialog.pas"/>
-        <Caret Line="890" TopLine="886"/>
+        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
+        <Caret Line="182" Column="32" TopLine="180"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="29" Column="39"/>
+        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
+        <Caret Line="162" Column="3" TopLine="160"/>
       </Position21>
-      <Position22>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="240" Column="19" TopLine="240"/>
-      </Position22>
-      <Position23>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="2" Column="8"/>
-      </Position23>
-      <Position24>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="306" Column="3" TopLine="289"/>
-      </Position24>
-      <Position25>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="307" Column="3" TopLine="290"/>
-      </Position25>
-      <Position26>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="96" Column="3" TopLine="93"/>
-      </Position26>
-      <Position27>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="319" Column="15" TopLine="310"/>
-      </Position27>
-      <Position28>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="352" Column="7" TopLine="334"/>
-      </Position28>
-      <Position29>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="362" Column="22" TopLine="334"/>
-      </Position29>
-      <Position30>
-        <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.pas"/>
-        <Caret Line="380" Column="18" TopLine="352"/>
-      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

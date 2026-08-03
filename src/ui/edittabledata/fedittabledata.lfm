@@ -1,7 +1,7 @@
 object fmEditTable: TfmEditTable
-  Left = 338
+  Left = 609
   Height = 550
-  Top = 213
+  Top = 444
   Width = 966
   ActiveControl = PageControl1
   ClientHeight = 550
@@ -12,8 +12,8 @@ object fmEditTable: TfmEditTable
   LCLVersion = '2.2.6.0'
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 24
-    Top = 526
+    Height = 22
+    Top = 528
     Width = 966
     Panels = <    
       item
@@ -26,7 +26,7 @@ object fmEditTable: TfmEditTable
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 526
+    Height = 528
     Top = 0
     Width = 966
     ActivePage = tsGridView
@@ -35,18 +35,18 @@ object fmEditTable: TfmEditTable
     TabOrder = 1
     object tsGridView: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 488
-      ClientWidth = 960
+      ClientHeight = 494
+      ClientWidth = 956
       OnShow = tsGridViewShow
       object GroupBox2: TGroupBox
         Left = 0
         Height = 80
         Top = 0
-        Width = 960
+        Width = 956
         Align = alTop
         Caption = 'Tables/Fields Options'
-        ClientHeight = 58
-        ClientWidth = 956
+        ClientHeight = 59
+        ClientWidth = 954
         TabOrder = 0
         object Label3: TLabel
           Left = 24
@@ -58,7 +58,7 @@ object fmEditTable: TfmEditTable
         end
         object cboxTables: TComboBox
           Left = 80
-          Height = 32
+          Height = 36
           Top = 8
           Width = 244
           ItemHeight = 0
@@ -76,7 +76,7 @@ object fmEditTable: TfmEditTable
         end
         object cboxFields: TComboBox
           Left = 488
-          Height = 32
+          Height = 36
           Top = 8
           Width = 244
           ItemHeight = 0
@@ -97,8 +97,8 @@ object fmEditTable: TfmEditTable
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 3
-          ClientHeight = 27
-          ClientWidth = 332
+          ClientHeight = 28
+          ClientWidth = 334
           Columns = 3
           ItemIndex = 0
           Items.Strings = (
@@ -115,34 +115,34 @@ object fmEditTable: TfmEditTable
         Left = 0
         Height = 62
         Top = 80
-        Width = 960
+        Width = 956
         Align = alTop
         Caption = 'Search Options'
-        ClientHeight = 40
-        ClientWidth = 956
+        ClientHeight = 41
+        ClientWidth = 954
         TabOrder = 1
         object Panel1: TPanel
           Left = 0
-          Height = 40
+          Height = 41
           Top = 0
-          Width = 956
+          Width = 954
           Align = alClient
-          ClientHeight = 40
-          ClientWidth = 956
+          ClientHeight = 41
+          ClientWidth = 954
           ParentColor = False
           TabOrder = 0
           object edtSearch: TEdit
             Left = 370
-            Height = 30
+            Height = 37
             Top = 0
             Width = 312
             TabOrder = 0
           end
           object chkBoxUseFilter: TCheckBox
             Left = 8
-            Height = 22
+            Height = 24
             Top = 5
-            Width = 86
+            Width = 89
             Caption = 'Use Filter'
             OnChange = chkBoxUseFilterChange
             ParentShowHint = False
@@ -151,9 +151,9 @@ object fmEditTable: TfmEditTable
           end
           object chkBoxCasesensitive: TCheckBox
             Left = 120
-            Height = 22
+            Height = 24
             Top = 5
-            Width = 119
+            Width = 122
             Caption = 'Case Sensitive'
             OnChange = chkBoxCasesensitiveChange
             TabOrder = 2
@@ -181,16 +181,16 @@ object fmEditTable: TfmEditTable
         Left = 0
         Height = 42
         Top = 142
-        Width = 960
+        Width = 956
         Align = alTop
         ClientHeight = 42
-        ClientWidth = 960
+        ClientWidth = 956
         TabOrder = 2
         object dbnavGrid: TDBNavigator
           Left = 1
           Height = 40
           Top = 1
-          Width = 958
+          Width = 954
           Align = alClient
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -200,7 +200,7 @@ object fmEditTable: TfmEditTable
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 40
-          ClientWidth = 958
+          ClientWidth = 954
           DataSource = dsGrid
           Options = []
           TabOrder = 0
@@ -209,9 +209,9 @@ object fmEditTable: TfmEditTable
       end
       object IBDynamicGrid2: TIBDynamicGrid
         Left = 0
-        Height = 304
+        Height = 310
         Top = 184
-        Width = 960
+        Width = 956
         Align = alClient
         Color = clGray
         Columns = <>
@@ -231,14 +231,14 @@ object fmEditTable: TfmEditTable
     end
     object tsFormView: TTabSheet
       Caption = 'Form View'
-      ClientHeight = 488
-      ClientWidth = 960
+      ClientHeight = 494
+      ClientWidth = 956
       OnShow = tsFormViewShow
       object dbnavForm: TDBNavigator
         Left = 0
         Height = 40
         Top = 0
-        Width = 960
+        Width = 956
         Align = alTop
         BevelOuter = bvNone
         ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -248,7 +248,7 @@ object fmEditTable: TfmEditTable
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 100
         ClientHeight = 40
-        ClientWidth = 960
+        ClientWidth = 956
         DataSource = dsForm
         Options = []
         TabOrder = 0
@@ -256,9 +256,9 @@ object fmEditTable: TfmEditTable
       end
       object pnlRecord: TScrollBox
         Left = 0
-        Height = 448
+        Height = 454
         Top = 40
-        Width = 960
+        Width = 956
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient

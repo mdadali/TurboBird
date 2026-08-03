@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 550
+  Left = 436
   Height = 612
-  Top = 80
+  Top = 108
   Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -6466,7 +6466,7 @@ object fmMain: TfmMain
     end
   end
   object ImageList1: TImageList
-    Left = 400
+    Left = 424
     Top = 104
     Bitmap = {
       4C7A5900000010000000100000001D9400000000000078DAECBD055855CBFB2F
@@ -9707,8 +9707,8 @@ object fmMain: TfmMain
   end
   object ImageList2: TImageList
     DrawingStyle = dsFocus
-    Left = 400
-    Top = 232
+    Left = 424
+    Top = 224
     Bitmap = {
       4C7A060000001000000010000000E00E00000000000078DADD5879785455962F
       1AB0FB730421AC0998B09A854505114509D042B72CCA8E88241A76125141088B
