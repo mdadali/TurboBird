@@ -1,13 +1,15 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 408
+  Left = 360
   Height = 540
-  Top = 172
+  Top = 152
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
   ClientHeight = 540
   ClientWidth = 1016
   OnCreate = FormCreate
+  OnShow = FormShow
+  Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object grboxCopyOptions1: TGroupBox
     Left = 0
@@ -82,60 +84,23 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       TabOrder = 4
       Text = '1000'
     end
-    object grBoxFormulaPresets: TGroupBox
-      Left = 617
-      Height = 119
-      Top = 0
-      Width = 397
-      Align = alRight
-      Caption = 'Formula Presets'
-      ClientHeight = 98
-      ClientWidth = 395
-      TabOrder = 5
-      Visible = False
-      object cbFormulaPreset: TComboBox
-        Left = 16
-        Height = 36
-        Top = 8
-        Width = 223
-        ItemHeight = 0
-        OnChange = cbFormulaPresetChange
-        Style = csDropDownList
-        TabOrder = 0
-      end
-      object btnRefreshPresets: TButton
-        Left = 248
-        Height = 37
-        Top = 7
-        Width = 134
-        Caption = 'Refresh Presets'
-        TabOrder = 1
-      end
-    end
-    object chkUseFormula: TCheckBox
-      Left = 128
-      Height = 24
-      Top = 8
-      Width = 110
-      Caption = 'Use Formula'
-      TabOrder = 6
-    end
     object chkboxCopyData: TCheckBox
       Left = 16
       Height = 24
       Top = 8
       Width = 93
       Caption = 'Copy Data'
-      TabOrder = 7
+      Checked = True
+      State = cbChecked
+      TabOrder = 5
     end
-    object btnGenTestFormulas: TButton
-      Left = 264
-      Height = 25
-      Top = 7
-      Width = 192
-      Caption = 'Generate Test Formulas'
-      OnClick = btnGenTestFormulasClick
-      TabOrder = 8
+    object lblHint: TLabel
+      Left = 640
+      Height = 20
+      Top = 16
+      Width = 45
+      Caption = 'lblHint'
+      ParentColor = False
     end
   end
   object pnlBottom: TPanel
@@ -196,7 +161,6 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       FixedRows = 0
       RowCount = 0
       TabOrder = 0
-      OnDblClick = sgFieldsDblClick
     end
     object pnlFields: TPanel
       Left = 681

@@ -21,6 +21,7 @@ uses
   fpDataExporter,
 
   IB,
+  IBXServices,
   IBDatabase,
   IBDatabaseInfo,
   IBLocalDBSupport,
@@ -1422,7 +1423,7 @@ begin
   SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
 end;
 
-function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
+{function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
 var
   DBIndex: Integer;
 begin
@@ -1445,6 +1446,69 @@ begin
       IBDatabase.Connected := False;
       IBDatabase.CreateIfNotExists := False;
       Result := True;
+    end;
+  end;
+end;}
+
+function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
+var
+  DBIndex: Integer;
+  DBFilePath: string;
+  ServerRecord: TServerRecord;
+  ServiceConn: TIBXServicesConnection;
+  DPB: IDPB;
+  DBName: string;
+begin
+  Result := False;
+  DBIndex := FindDBIndexByTitleAndServer(ADBTitle, AServerName);
+  if DBIndex < 0 then Exit;
+
+  ServerRecord := GetServerRecordFromFileByName(AServerName);
+  DBFilePath := GetDBFileNameFromConnectionString(
+                  RegisteredDatabases[DBIndex].IBDatabase.DatabaseName);
+
+  if ServerRecord.IsEmbedded then
+  begin
+    with RegisteredDatabases[DBIndex] do
+    begin
+      ForceDirectories(ExtractFilePath(DBFilePath));
+      if FileExists(DBFilePath) then
+        DeleteFile(DBFilePath);
+
+      IBDatabase.CreateIfNotExists := True;
+      try
+        IBDatabase.Connected := True;
+        IBDatabase.Connected := False;
+        Result := FileExists(DBFilePath);
+      finally
+        IBDatabase.CreateIfNotExists := False;
+      end;
+    end;
+  end
+  else
+  begin
+    ServiceConn := TIBXServicesConnection.Create(nil);
+    try
+      ServiceConn.ServerName := ServerRecord.ServerName;
+      ServiceConn.PortNo := ServerRecord.Port;
+      ServiceConn.Protocol := ServerRecord.Protocol;
+      ServiceConn.Params.Add('user_name=' + ServerRecord.UserName);
+      ServiceConn.Params.Add('password=' + ServerRecord.Password);
+      ServiceConn.LoginPrompt := False;
+      ServiceConn.Connected := True;
+
+      DPB := ServiceConn.FirebirdAPI.AllocateDPB;
+      DPB.Add(isc_dpb_user_name).AsString := RegisteredDatabases[DBIndex].RegRec.UserName;
+      DPB.Add(isc_dpb_password).AsString := RegisteredDatabases[DBIndex].RegRec.Password;
+      DPB.Add(isc_dpb_page_size).AsInteger := 8192;
+      DPB.Add(isc_dpb_set_db_charset).AsString := 'UTF8';
+
+      DBName := RegisteredDatabases[DBIndex].RegRec.DatabaseName;
+
+      ServiceConn.FirebirdAPI.CreateDatabase(DBName, DPB);
+      Result := True;
+    finally
+      ServiceConn.Free;
     end;
   end;
 end;
