@@ -271,7 +271,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="37"/>
         <CursorPos X="13" Y="41"/>
         <UsageCount Value="200"/>
@@ -307,9 +307,12 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewView"/>
-        <EditorIndex Value="-1"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
         <CursorPos X="23" Y="9"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit32>
       <Unit33>
         <Filename Value="ui\viewtrigger\viewtrigger.pas"/>
@@ -419,7 +422,7 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="1492"/>
         <CursorPos X="49" Y="1508"/>
         <UsageCount Value="200"/>
@@ -593,7 +596,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <CursorPos X="17" Y="15"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -1224,7 +1227,7 @@
         <Filename Value="common\ucopytabledatacrossexecuteblock.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossExecuteBlock"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="410"/>
         <CursorPos X="46" Y="417"/>
         <UsageCount Value="187"/>
@@ -1234,7 +1237,7 @@
         <Filename Value="common\uformulapresets.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFormulaPresets"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="316"/>
         <CursorPos X="52" Y="323"/>
         <UsageCount Value="171"/>
@@ -1253,7 +1256,7 @@
         <Filename Value="common\ucopytabledatacrossrowbyrow.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossRowByRow"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="745"/>
         <CursorPos X="35" Y="778"/>
         <UsageCount Value="146"/>
@@ -1266,7 +1269,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTableFromDataSet"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <CursorPos X="6" Y="7"/>
         <UsageCount Value="94"/>
         <Loaded Value="True"/>
@@ -1278,10 +1281,9 @@
         <ComponentName Value="frmBulkExport"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="160"/>
-        <CursorPos X="3" Y="182"/>
+        <CursorPos X="38" Y="180"/>
         <UsageCount Value="49"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1495,7 +1497,7 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="21" HistoryIndex="20">
+    <JumpHistory Count="22" HistoryIndex="21">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
         <Caret Line="79" Column="7" TopLine="62"/>
@@ -1580,6 +1582,10 @@
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
         <Caret Line="162" Column="3" TopLine="160"/>
       </Position21>
+      <Position22>
+        <Filename Value="ui\viewview\viewview.pas"/>
+        <Caret Line="9" Column="23"/>
+      </Position22>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
