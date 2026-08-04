@@ -601,15 +601,6 @@ object fmViewView: TfmViewView
       ParentFont = False
       ReadOnly = True
       TabOrder = 0
-      Text = 'edGenName'
-    end
-    object CheckBox1: TCheckBox
-      Left = 383
-      Height = 24
-      Top = 47
-      Width = 98
-      Caption = 'CheckBox1'
-      TabOrder = 1
     end
   end
   object Panel2: TPanel

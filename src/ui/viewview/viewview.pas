@@ -16,7 +16,6 @@ type
   { TfmViewView }
 
   TfmViewView = class(TForm)
-    CheckBox1: TCheckBox;
     edName: TEdit;
       GroupBox1: TGroupBox;
       Label1: TLabel;
