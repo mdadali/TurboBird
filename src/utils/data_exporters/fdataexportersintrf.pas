@@ -27,7 +27,7 @@ implementation
 
 procedure ExportStdFormat(ADataSet: TDataSet);
 begin
-   _ExportStdFormat(ADataSet);
+  _ExportStdFormat(ADataSet);
 end;
 
 procedure ExportDataMarkDownTable(ADataSet: TDataSet);
