@@ -20,6 +20,7 @@ uses
   fpstdexports,
   fpDataExporter,
 
+  IBInternals,
   IB,
   IBXServices,
   IBDatabase,
@@ -485,9 +486,16 @@ var
     //Database
     NumBuffers: integer;
 
+
+    //SQLMonitor
+    TraceEnabled: boolean;
+    TraceFlags: string;
+
     //end-Ini.File////////////////////////////////////////////////////////////////
 
 
+function StringToTraceFlags(const S: string): TTraceFlags;
+function TraceFlagsToString(Flags: TTraceFlags): string;
 
 function ShowServerSelectDialog(
       const ATitle: string;
@@ -712,6 +720,55 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses Reg;
+
+function StringToTraceFlags(const S: string): TTraceFlags;
+var
+  SL: TStringList;
+  i: Integer;
+  FlagName: string;
+begin
+  Result := [];
+  SL := TStringList.Create;
+  try
+    SL.CommaText := S;
+    for i := 0 to SL.Count - 1 do
+    begin
+      FlagName := Trim(SL[i]);
+      if SameText(FlagName, 'tfConnect')      then Include(Result, tfConnect)
+      else if SameText(FlagName, 'tfTransact') then Include(Result, tfTransact)
+      else if SameText(FlagName, 'tfQPrepare') then Include(Result, tfQPrepare)
+      else if SameText(FlagName, 'tfQExecute') then Include(Result, tfQExecute)
+      else if SameText(FlagName, 'tfQFetch')   then Include(Result, tfQFetch)
+      else if SameText(FlagName, 'tfBlob')     then Include(Result, tfBlob)
+      else if SameText(FlagName, 'tfStmt')     then Include(Result, tfStmt)
+      else if SameText(FlagName, 'tfService')  then Include(Result, tfService)
+      else if SameText(FlagName, 'tfError')    then Include(Result, tfError)
+      else if SameText(FlagName, 'tfMisc')     then Include(Result, tfMisc)
+      else if SameText(FlagName, 'tfAll')      then
+        Result := [tfConnect,tfTransact,tfQPrepare,tfQExecute,tfQFetch,tfStmt,tfService,tfBlob,tfMisc,tfError];
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+
+function TraceFlagsToString(Flags: TTraceFlags): string;
+begin
+  Result := '';
+  if tfConnect  in Flags then Result := Result + 'tfConnect,';
+  if tfTransact in Flags then Result := Result + 'tfTransact,';
+  if tfQPrepare in Flags then Result := Result + 'tfQPrepare,';
+  if tfQExecute in Flags then Result := Result + 'tfQExecute,';
+  if tfQFetch   in Flags then Result := Result + 'tfQFetch,';
+  if tfService  in Flags then Result := Result + 'tfService,';
+  if tfBlob     in Flags then Result := Result + 'tfBlob,';
+  if tfStmt     in Flags then Result := Result + 'tfStmt,';
+  if tfError    in Flags then Result := Result + 'tfError,';
+  if tfMisc     in Flags then Result := Result + 'tfMisc,';
+  // Letztes Komma entfernen
+  if Result <> '' then
+    Delete(Result, Length(Result), 1);
+end;
 
 function CloneServerRegistry(
   const ASourceServerName: string;
@@ -3366,6 +3423,11 @@ begin
 
   //Database
   NumBuffers := fIniFile.ReadInteger('Database','NumBuffers', 1024);
+
+
+  //SQLMonitor
+  TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', true);
+  TraceFlags   := fIniFile.ReadString('SQLMonitor','TraceFlags', '');
 end;
 
 procedure WriteIniFile;
@@ -3470,6 +3532,10 @@ begin
 
     //Database
     fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
+
+    //SQLMonitor
+    fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
+    fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
 end;
 
 

@@ -301,7 +301,9 @@ begin
   QParamInfo.Close;
   QFuncs.Close;
   IBConnection1.Connected := false;
-  FNodeInfos^.ViewForm := nil;
+
+  FNodeInfos^.ExecuteForm := nil;
+  TTabSheet(Parent).Free;
   CloseAction := caFree;
 end;
 

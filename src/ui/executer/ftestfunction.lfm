@@ -1,7 +1,7 @@
 object frmTestFunction: TfrmTestFunction
-  Left = 917
+  Left = 389
   Height = 608
-  Top = 204
+  Top = 124
   Width = 947
   ActiveControl = Panel13
   BorderIcons = [biSystemMenu]
@@ -35,7 +35,7 @@ object frmTestFunction: TfrmTestFunction
       TabOrder = 0
       object cboxPackages: TComboBox
         Left = 8
-        Height = 32
+        Height = 36
         Top = 24
         Width = 152
         ItemHeight = 0
@@ -76,8 +76,8 @@ object frmTestFunction: TfrmTestFunction
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 303
-        ClientWidth = 177
+        ClientHeight = 304
+        ClientWidth = 179
         ItemIndex = 0
         Items.Strings = (
           'UDF'
@@ -130,8 +130,8 @@ object frmTestFunction: TfrmTestFunction
           Width = 767
           Align = alTop
           Caption = 'Routine'
-          ClientHeight = 113
-          ClientWidth = 763
+          ClientHeight = 114
+          ClientWidth = 765
           TabOrder = 0
           OnClick = rgRoutineTypeClick
           object Label1: TLabel
@@ -152,9 +152,9 @@ object frmTestFunction: TfrmTestFunction
           end
           object DBLookupComboBox1: TDBLookupComboBox
             Left = 0
-            Height = 32
+            Height = 36
             Top = 0
-            Width = 763
+            Width = 765
             Align = alTop
             KeyField = 'NAME'
             ListField = 'NAME'
