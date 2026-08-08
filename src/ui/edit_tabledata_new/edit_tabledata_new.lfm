@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 350
+  Left = 493
   Height = 507
-  Top = 134
+  Top = 141
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507
@@ -251,10 +251,6 @@ object frmEditTableDataNew: TfrmEditTableDataNew
   object pmGrid: TPopupMenu
     Left = 320
     Top = 288
-    object lmCopyCell: TMenuItem
-      Caption = 'Copy field'
-      Visible = False
-    end
     object Separator2: TMenuItem
       Caption = '-'
       Visible = False
@@ -267,18 +263,23 @@ object frmEditTableDataNew: TfrmEditTableDataNew
       end
       object lmExportDataAsPDF: TMenuItem
         Caption = 'PDF'
+        Visible = False
       end
       object lmExportDataAsSpreadSheet: TMenuItem
         Caption = 'Spreadsheet'
+        Visible = False
       end
       object lmExportDataAsMarkDownTable: TMenuItem
         Caption = 'Markdown Table'
+        OnClick = lmExportDataAsMarkDownTableClick
       end
       object lmExportDataAsHtml: TMenuItem
         Caption = 'Html'
+        OnClick = lmExportDataAsHtmlClick
       end
       object lmExportToClipboard: TMenuItem
         Caption = 'Clipboard'
+        OnClick = lmExportToClipboardClick
       end
       object Separator1: TMenuItem
         Caption = '-'
@@ -286,6 +287,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     end
     object lmPrintData: TMenuItem
       Caption = 'Print...'
+      Visible = False
     end
   end
 end

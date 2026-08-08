@@ -5,13 +5,15 @@ What's New for TurboBird
 - : removed
 
 TurboBird v1.2.1.1282
-Build-Date & -Time: 08.08.2026, 15:00
+Build-Date & -Time: 08.08.2026, 17:35
 
 + Local SQLMonitor and new Section in Ini File:
   [SQLMonitor]
   TraceEnabled=1
   TraceFlags=tfConnect,tfTransact,tfQPrepare,tfQExecute,tfQFetch,tfService,tfBlob,tfStmt,tfError,tfMisc
   SlowQueryThreshold=5000
+
++ Tablefilter in Edit Tabledata
 
 * Several bugs fixed
 

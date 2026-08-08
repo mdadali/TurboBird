@@ -607,7 +607,7 @@ implementation
 { TfmMain }
 
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-     EnterPass, CreateTrigger, fedittabledata, CallProc,  UDFInfo, ViewDomain,
+     EnterPass, CreateTrigger, fedittabledata, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, CopyTable, NewEditField, dbInfo, Comparison;
      // About,
