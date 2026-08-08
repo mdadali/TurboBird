@@ -6,37 +6,58 @@ interface
 
 uses
   Math, Variants, Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, DBGrids, DBCtrls, ComCtrls, StdCtrls, Buttons, DBDateTimePicker,
-  RxDBGrid, DB, IBArrayGrid, IBDatabase, IBCustomDataSet, IBQuery, IBTable,
+  ExtCtrls, DBGrids, DBCtrls, ComCtrls, StdCtrls, Buttons, Menus,
+  DBDateTimePicker, RxDBGrid, DB, IBArrayGrid, IBDatabase, IBCustomDataSet,
+  IBQuery, IBTable,
 
   turbocommon,
   uthemeselector,
-  foreign_key_table;
+  foreign_key_table,
+  fdataexportersintrf;
 
 type
 
   { TfrmEditTableDataNew }
 
   TfrmEditTableDataNew = class(TForm)
-    BitBtn1: TBitBtn;
+    chkBoxCasesensitive: TCheckBox;
+    chkBoxUseFilter: TCheckBox;
+    cboxFilterField: TComboBox;
+    DBGridMain: TDBGrid;
     DBNavigator1: TDBNavigator;
     dbnavMainTableFormView: TDBNavigator;
     dsMain: TDataSource;
+    edtFilterValue: TEdit;
     IBDatabaseMain: TIBDatabase;
     IBTableMain: TIBTable;
+    Label1: TLabel;
+    Label2: TLabel;
+    lmCopyCell: TMenuItem;
+    lmExportDataAsHtml: TMenuItem;
+    lmExportDataAsMarkDownTable: TMenuItem;
+    lmExportDataAsPDF: TMenuItem;
+    lmExportDataAsSpreadSheet: TMenuItem;
+    lmExportDataSet: TMenuItem;
+    lmExportToClipboard: TMenuItem;
+    lmPrintData: TMenuItem;
+    lmStdExportFormats: TMenuItem;
     PageControl1: TPageControl;
+    pmGrid: TPopupMenu;
+    pnlTableFilter: TPanel;
     pnlFKTablesCaption: TPanel;
     pnlMainTable: TPanel;
     pnlMainTableCaption: TPanel;
-    RxDBGridMain: TRxDBGrid;
     pnlRecord: TScrollBox;
+    Separator1: TMenuItem;
+    Separator2: TMenuItem;
     tsMainTableGrid: TTabSheet;
     tsFormView: TTabSheet;
     transMain: TIBTransaction;
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
-    procedure BitBtn1Click(Sender: TObject);
+    procedure chkBoxUseFilterChange(Sender: TObject);
     procedure dsMainStateChange(Sender: TObject);
+    procedure edtFilterValueChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -44,6 +65,7 @@ type
     procedure IBTableMainAfterScroll(DataSet: TDataSet);
     procedure IBTableMainBeforePost(DataSet: TDataSet);
     procedure IBTableMainBeforeRefresh(DataSet: TDataSet);
+    procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FDBIndex: Integer;
@@ -52,6 +74,8 @@ type
     FDBInitialized: boolean;
     FForeignKeyInfoArray: TForeignKeyInfoArray;
     FForeignKeyForms: array of TfrmForeignKeyTable;
+
+    FFilterField: string;
 
     function  InitDB: boolean;
     function  OpenDB: boolean;
@@ -68,7 +92,11 @@ type
     procedure CreateDynamicControls;
     function  IsForeignKeyField(const AFieldName: string): Boolean;
 
+    procedure SetTableFilter;
+
     procedure LoacateForeignKeyTablesRecord(DataSet: TDataSet);
+    procedure EnableFKTables(AEnable: Boolean);
+
   public
     procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer; ATableName: string);
   end;
@@ -175,7 +203,7 @@ begin
     IBTableMain.TableName := FTableName;
     IBTableMain.Open;
 
-    RxDBGridMain.OptimizeColumnsWidthAll;
+    //DBGridMain.OptimizeColumnsWidthAll;
 
     Result := True;
   except
@@ -239,6 +267,46 @@ begin
   CloseDB;
   OpenDB;
   Abort;
+end;
+
+procedure TfrmEditTableDataNew.EnableFKTables(AEnable: Boolean);
+var
+  i: Integer;
+begin
+  for i := 0 to High(FForeignKeyForms) do
+  begin
+    if Assigned(FForeignKeyForms[i]) then
+    begin
+      if Assigned(FForeignKeyForms[i].IBTableForeingKey) then
+      begin
+        if AEnable then
+          FForeignKeyForms[i].IBTableForeingKey.Open
+        else
+          FForeignKeyForms[i].IBTableForeingKey.Close;
+      end;
+    end;
+  end;
+end;
+
+procedure TfrmEditTableDataNew.lmStdExportFormatsClick(Sender: TObject);
+begin
+  if IBTableMain.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+
+  EnableFKTables(False);                    // FK-Tabellen schließen
+  try
+    IBTableMain.DisableControls;            // Main-Table von Grids abkoppeln
+    try
+      ExportStdFormat(IBTableMain);
+    finally
+      IBTableMain.EnableControls;
+    end;
+  finally
+    EnableFKTables(True);                   // FK-Tabellen wieder öffnen
+  end;
 end;
 
 procedure TfrmEditTableDataNew.IBTableMainAfterScroll(DataSet: TDataSet);
@@ -337,9 +405,35 @@ begin
   end;
 end;
 
-procedure TfrmEditTableDataNew.BitBtn1Click(Sender: TObject);
+procedure TfrmEditTableDataNew.SetTableFilter;
 begin
-  Close;
+  if chkBoxCasesensitive.Checked then
+    IBTableMain.Filter :=
+      Format('%s LIKE ''%s%%''', [cboxFilterField.Text, edtFilterValue.Text])
+  else
+    IBTableMain.Filter :=
+      Format('UPPER(%s) LIKE ''%s%%''', [cboxFilterField.Text, UpperCase(edtFilterValue.Text)]);
+end;
+
+procedure TfrmEditTableDataNew.edtFilterValueChange(Sender: TObject);
+begin
+  IBTableMain.Close;
+  IBTableMain.Filtered := False;
+
+  SetTableFilter;
+  IBTableMain.Filtered := True;
+  IBTableMain.Open;
+end;
+
+procedure TfrmEditTableDataNew.chkBoxUseFilterChange(Sender: TObject);
+begin
+  IBTableMain.Close;
+  if chkBoxUseFilter.Checked then
+  begin
+    SetTableFilter;
+  end;
+  IBTableMain.Filtered := chkBoxUseFilter.Checked;
+  IBTableMain.Open;
 end;
 
 procedure TfrmEditTableDataNew.FormCreate(Sender: TObject);
@@ -350,6 +444,10 @@ end;
 procedure TfrmEditTableDataNew.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
+
+  IBTableMain.Fields.GetFieldNames(cboxFilterField.Items);
+  if cboxFilterField.Items.Count > 0 then
+    cboxFilterField.ItemIndex := 0;
 end;
 
 procedure TfrmEditTableDataNew.IBTableMainAfterInsert(DataSet: TDataSet);
@@ -362,155 +460,6 @@ begin
       AArrayGrid.DataSource := nil;
     end;}
 end;
-
-{procedure TfrmEditTableDataNew.CreateDynamicControls;
-var
-  ALabel: TLabel;
-  ADBEdit: TDBEdit;
-  ADBMemo: TDBMemo;
-  ADBDateTime: TDBDateTimePicker;
-  AArrayGrid: TIBArrayGrid;
-  i, AWidth, VSpacing: Integer;
-  ATop: Integer;
-begin
-  ATop := 20;
-  VSpacing := 10; // vertikaler Abstand zwischen Controls
-
-  for i := 0 to IBTableMain.FieldCount - 1 do
-  begin
-    // Label für Feldnamen
-    ALabel := TLabel.Create(pnlRecord);
-    ALabel.Parent := pnlRecord;
-    ALabel.Left := 20;
-    ALabel.Top := ATop + VSpacing;
-    ALabel.Caption := IBTableMain.Fields[i].FieldName;
-
-    // FK Felder rot markieren
-    if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
-    begin
-      ALabel.Font.Color := clRed;
-      //ALabel.Font.Style := [fsBold];
-      ALabel.Caption := ALabel.Caption + ' (Foreign Key)';
-    end;
-
-    // Prüfen auf Array-Feld
-    if IBTableMain.Fields[i] is TIBArrayField then
-    begin
-      with TIBArrayField(IBTableMain.Fields[i]) do
-      begin
-        AArrayGrid := TIBArrayGrid.Create(pnlRecord);
-        AArrayGrid.Hint := 'Firebird Array Field';
-        AArrayGrid.ShowHint := true;
-        AArrayGrid.Parent := pnlRecord;
-        AArrayGrid.Left := 230;
-        AArrayGrid.Top := ATop + VSpacing;
-        AArrayGrid.Anchors := [akLeft, akTop, akRight];
-
-        if IsForeignKeyField(FieldName) then
-          AArrayGrid.Enabled := False;
-
-        // 1D-Array: eine Zeile, mehrere Spalten
-        if ArrayDimensions = 1 then
-        begin
-          AArrayGrid.RowCount := 1;
-          AArrayGrid.ColCount := ArrayBounds[0].UpperBound - ArrayBounds[0].LowerBound + 1;
-          AArrayGrid.DefaultColWidth := Max(50, Min(80, 400 div AArrayGrid.ColCount));
-          AArrayGrid.DefaultRowHeight := AArrayGrid.DefaultRowHeight + 20;
-          AArrayGrid.Width := AArrayGrid.DefaultColWidth * AArrayGrid.ColCount;
-          AArrayGrid.Height := AArrayGrid.DefaultRowHeight + 8;
-        end
-        // 2D-Array: klassisches Grid
-        else if ArrayDimensions = 2 then
-        begin
-          AArrayGrid.ColCount := ArrayBounds[1].UpperBound - ArrayBounds[1].LowerBound + 1;
-          AArrayGrid.RowCount := ArrayBounds[0].UpperBound - ArrayBounds[0].LowerBound + 1;
-          AArrayGrid.DefaultColWidth := Max(50, Min(80, 400 div AArrayGrid.ColCount));
-          AArrayGrid.Width := AArrayGrid.DefaultColWidth * AArrayGrid.ColCount;
-          AArrayGrid.Height := AArrayGrid.DefaultRowHeight * AArrayGrid.RowCount + 8;
-        end
-        else
-        begin
-          AArrayGrid.ColCount := 1;
-          AArrayGrid.RowCount := 1;
-          AArrayGrid.Cells[0,0] := Format('%d-dim Array', [ArrayDimensions]);
-          AArrayGrid.Width  := 200;
-          AArrayGrid.Height := 30;
-        end;
-
-        // DataSource + DataField setzen
-        AArrayGrid.DataSource := dsMain;
-        AArrayGrid.DataField := FieldName;
-
-        Inc(ATop, AArrayGrid.Height + 2); // Abstand für Label
-
-        ALabel.Caption := ALabel.Caption +
-                          sLineBreak + '(' +
-                          GetArrayFieldInfo(IBTableMain.Database, TIBArrayField(IBTableMain.Fields[i])) + ')';
-
-        AArrayGrid.Left := ALabel.Left + ALabel.Width + 150;;
-        AArrayGrid.Width := AArrayGrid.Width - 70;
-        inc(ATop, 20);
-        //Inc(ATop, ALabel.Height + VSpacing);
-      end;
-
-      Continue; // nächstes Feld
-    end;
-
-    // Normale Feldtypen
-    case IBTableMain.Fields[i].DataType of
-      ftBlob, ftMemo:
-        begin
-          ADBMemo := TDBMemo.Create(pnlRecord);
-          ADBMemo.Parent := pnlRecord;
-          ADBMemo.Left := 230;
-          ADBMemo.Top := ATop + VSpacing;
-          ADBMemo.Width := ADBMemo.Parent.ClientWidth - ADBMemo.Left - 10;
-          ADBMemo.Height := 200;
-          ADBMemo.Anchors := [akLeft, akTop, akRight];
-          ADBMemo.ScrollBars := ssBoth;
-          ADBMemo.DataSource := dsMain;
-          ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
-
-          Inc(ATop, ADBMemo.Height + VSpacing * 2);
-        end;
-
-      ftDate, ftTime, ftDateTime:
-        begin
-          ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
-          ADBDateTime.Parent := pnlRecord;
-          ADBDateTime.Left := 230;
-          ADBDateTime.Top := ATop + VSpacing;
-          ADBDateTime.Width := 160;
-          ADBDateTime.DataSource := dsMain;
-          ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
-
-          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
-            ADBDateTime.Enabled := False;
-
-          Inc(ATop, ADBDateTime.Height + VSpacing);
-        end;
-
-      else
-        begin
-          ADBEdit := TDBEdit.Create(pnlRecord);
-          ADBEdit.Parent := pnlRecord;
-          ADBEdit.Left := 230;
-          ADBEdit.Top := ATop + VSpacing;
-          ADBEdit.DataSource := dsMain;
-          ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
-
-          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
-            ADBEdit.Enabled := False;
-
-          ADBEdit.Width := ADBEdit.Parent.ClientWidth - ADBEdit.Left - 10;
-
-          Inc(ATop, ADBEdit.Height + VSpacing);
-        end;
-    end;
-  end;
-
-  Height := ATop + VSpacing * 2;
-end;}
 
 procedure TfrmEditTableDataNew.CreateDynamicControls;
 var
