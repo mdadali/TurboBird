@@ -33,6 +33,7 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest,
   fserverregistry, tb_netutils,
 
+
   //DBAdmin
   MainFormUnit,
   DataModule,
@@ -52,6 +53,9 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   //End-DBAdmin
 
   //About,
+
+  IBSQLMonitor,
+
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, jvRuntimeDesign, pascalscript, uPSI_uibconst, fservers,
   fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
@@ -146,7 +150,6 @@ begin
   Application.CreateForm(TfmCreateUser, fmCreateUser);
   Application.CreateForm(TfmChangePass, fmChangePass);
   Application.CreateForm(TfmSQLHistory, fmSQLHistory);
-  //Application.CreateForm(TfmCopyTable, fmCopyTable);
 
 
   //Application.CreateForm(TfrmActivityMonitor, frmActivityMonitor);
@@ -155,7 +158,7 @@ begin
   //Application.CreateForm(TfrmBlobEdit, frmBlobEdit);
   //Application.CreateForm(TfrmArrayTest, frmArrayTest);
   //Application.CreateForm(TfmCheckDBIntegrity, fmCheckDBIntegrity);
-  //Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
+  Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
 
   //DBAdmin
   Application.CreateForm(TMainForm, MainForm);
@@ -172,6 +175,8 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-  Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
+
   Application.Run;
+
+  DisableMonitoring;
 end.
