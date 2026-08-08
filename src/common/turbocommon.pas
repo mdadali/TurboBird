@@ -490,6 +490,7 @@ var
     //SQLMonitor
     TraceEnabled: boolean;
     TraceFlags: string;
+    SlowQueryThreshold: Integer;  // in Millisekunden
 
     //end-Ini.File////////////////////////////////////////////////////////////////
 
@@ -3428,6 +3429,7 @@ begin
   //SQLMonitor
   TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', true);
   TraceFlags   := fIniFile.ReadString('SQLMonitor','TraceFlags', '');
+  SlowQueryThreshold := fIniFile.ReadInteger('SQLMonitor', 'SlowQueryThreshold', 1000);
 end;
 
 procedure WriteIniFile;
@@ -3536,6 +3538,7 @@ begin
     //SQLMonitor
     fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
     fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
+    fIniFile.WriteInteger('SQLMonitor', 'SlowQueryThreshold', SlowQueryThreshold);
 end;
 
 
