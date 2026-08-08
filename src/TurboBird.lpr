@@ -172,5 +172,6 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
+  Application.CreateForm(TfmSQLMonitor, fmSQLMonitor);
   Application.Run;
 end.

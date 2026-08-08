@@ -16,6 +16,8 @@ uses
   dbugintf, turbocommon, importtable, DB,  HtmlView, FramView, FramBrwz,
   IniFiles, Types,   SynEdit,
 
+  IBInternals,
+  IBSQLMonitor,
   IB,
   IBDatabase,
   IBQuery,
@@ -152,6 +154,8 @@ type
     lmExportTableToDataEditorRO: TMenuItem;
     lmExportTableToDataEditorRW: TMenuItem;
     lmBulkExport: TMenuItem;
+    Separator12: TMenuItem;
+    mnSQLMonitor: TMenuItem;
     mnSQLParser: TMenuItem;
     mnCheckForUpdate: TMenuItem;
     PopupMenu1: TPopupMenu;
@@ -464,6 +468,7 @@ type
     procedure lmNewRoleClick(Sender: TObject);
     procedure mnRestoreClick(Sender: TObject);
     procedure mnServerRegistryClick(Sender: TObject);
+    procedure mnSQLMonitorClick(Sender: TObject);
     procedure mnSQLParserClick(Sender: TObject);
     procedure mnThemeClick(Sender: TObject);
     procedure mnuPascalScriptClick(Sender: TObject);
@@ -1708,6 +1713,11 @@ end;
 procedure TfmMain.mnServerRegistryClick(Sender: TObject);
 begin
   lmServerRegistryClick(nil);
+end;
+
+procedure TfmMain.mnSQLMonitorClick(Sender: TObject);
+begin
+  fmSQLMonitor.Visible := (not fmSQLMonitor.Visible);
 end;
 
 procedure TfmMain.mnSQLParserClick(Sender: TObject);
@@ -8940,10 +8950,8 @@ begin
 end;
 
 procedure TfmMain.tbSQLMonitorClick(Sender: TObject);
-//var fmSQLMonitor: TfmSQLMonitor;
 begin
-  //fmSQLMonitor := TfmSQLMonitor.Create(self);
-  fmSQLMonitor.Show;
+  fmSQLMonitor.Visible := (not fmSQLMonitor.Visible);
 end;
 
 procedure TfmMain.tvMainAddition(Sender: TObject; Node: TTreeNode);
@@ -10399,6 +10407,8 @@ begin
             IBTransaction:= TIBTransaction.Create(nil);
             IBTransaction.DefaultDatabase := IBDatabase;
             IBDatabase.DefaultTransaction := IBTransaction;
+
+            IBDatabase.TraceFlags := StringToTraceFlags(turbocommon.TraceFlags);
 
             {if Rec.IsEmbedded then
             begin
