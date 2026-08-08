@@ -32,7 +32,6 @@ type
     IBTableMain: TIBTable;
     Label1: TLabel;
     Label2: TLabel;
-    lmCopyCell: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmExportDataAsPDF: TMenuItem;
@@ -65,6 +64,9 @@ type
     procedure IBTableMainAfterScroll(DataSet: TDataSet);
     procedure IBTableMainBeforePost(DataSet: TDataSet);
     procedure IBTableMainBeforeRefresh(DataSet: TDataSet);
+    procedure lmExportDataAsHtmlClick(Sender: TObject);
+    procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
+    procedure lmExportToClipboardClick(Sender: TObject);
     procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
@@ -269,6 +271,16 @@ begin
   Abort;
 end;
 
+procedure TfrmEditTableDataNew.lmExportDataAsHtmlClick(Sender: TObject);
+begin
+  if IBTableMain.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+  ExportDataHtml(IBTableMain);
+end;
+
 procedure TfrmEditTableDataNew.EnableFKTables(AEnable: Boolean);
 var
   i: Integer;
@@ -306,6 +318,81 @@ begin
     end;
   finally
     EnableFKTables(True);                   // FK-Tabellen wieder öffnen
+  end;
+end;
+
+procedure TfrmEditTableDataNew.lmExportDataAsMarkDownTableClick(Sender: TObject);
+begin
+  if IBTableMain.IsEmpty then
+  begin
+    ShowMessage('DataSet has no records!');
+    exit;
+  end;
+
+  ExportDataMarkDownTable(IBTableMain);
+end;
+
+procedure TfrmEditTableDataNew.lmExportToClipboardClick(Sender: TObject);
+var
+  MaxExportRows, RowCount, CopiedRows: Integer;
+  MsgText: string;
+begin
+
+  if IBTableMain.IsEmpty then
+  begin
+    MessageDlg('DataSet has no records!', mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // --- Max rows load from INI---
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport', 'MaxExportRows', -1);
+  if MaxExportRows <= 0 then
+  begin
+    if MaxExportRows = -1 then
+    begin
+      MaxExportRows := 200;
+      fIniFile.WriteInteger('ClipboardExport', 'MaxExportRows', MaxExportRows);
+      MessageDlg('No valid MaxExportRows entry found in turbobird.ini. Default 200 has been set.', mtWarning, [mbOK], 0);
+    end
+    else
+    begin
+      MessageDlg('MaxExportRows is set to 0 in turbobird.ini. ' +
+                 'Exporting very large tables may cause program or system crash!', mtWarning, [mbOK], 0);
+    end;
+  end;
+
+  RowCount := IBTableMain.RecordCount;
+
+  if (MaxExportRows > 0) and (RowCount > MaxExportRows) then
+  begin
+    MessageDlg(
+      'The result contains ' + IntToStr(RowCount) + ' rows, which exceeds the export limit of ' +
+      IntToStr(MaxExportRows) + ' rows.'#13#10 +
+      'Only the first ' + IntToStr(MaxExportRows) + ' rows will be copied to the clipboard.'#13#10#13#10 +
+      'You can change this limit in turbobird.ini under [ClipboardExport].',
+      mtWarning, [mbOK], 0
+    );
+  end;
+
+  if MaxExportRows = 0 then
+    CopiedRows := RowCount
+  else if RowCount > MaxExportRows then
+    CopiedRows := MaxExportRows
+  else
+    CopiedRows := RowCount;
+
+  // --- Export ---
+  try
+    IBTableMain.DisableControls;
+    ExportDataToClipboard(IBTableMain, MaxExportRows);
+
+    MsgText := 'Successfully copied ' + IntToStr(CopiedRows) + ' records to the clipboard.';
+    if MaxExportRows = 0 then
+      MsgText := MsgText + ' (Warning: no export limit set in turbobird.ini! Large tables may cause program/system crash.)';
+
+    MessageDlg(MsgText, mtInformation, [mbOK], 0);
+  finally
+    IBTableMain.EnableControls;
   end;
 end;
 

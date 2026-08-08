@@ -1511,7 +1511,11 @@ end;}
 function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
 var
   DBIndex: Integer;
+  {$ifdef windows}
+  DBFilePath: PChar;
+  {$else}
   DBFilePath: string;
+  {$endif}
   ServerRecord: TServerRecord;
   ServiceConn: TIBXServicesConnection;
   DPB: IDPB;
@@ -1522,8 +1526,14 @@ begin
   if DBIndex < 0 then Exit;
 
   ServerRecord := GetServerRecordFromFileByName(AServerName);
+
+  {$ifdef windows}
+  DBFilePath := PChar(GetDBFileNameFromConnectionString(
+                  RegisteredDatabases[DBIndex].IBDatabase.DatabaseName));
+  {$else}
   DBFilePath := GetDBFileNameFromConnectionString(
                   RegisteredDatabases[DBIndex].IBDatabase.DatabaseName);
+  {$endif}
 
   if ServerRecord.IsEmbedded then
   begin
@@ -3427,9 +3437,9 @@ begin
 
 
   //SQLMonitor
-  TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', true);
+  TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', false);
   TraceFlags   := fIniFile.ReadString('SQLMonitor','TraceFlags', '');
-  SlowQueryThreshold := fIniFile.ReadInteger('SQLMonitor', 'SlowQueryThreshold', 1000);
+  SlowQueryThreshold := fIniFile.ReadInteger('SQLMonitor', 'SlowQueryThreshold', 5000);
 end;
 
 procedure WriteIniFile;
