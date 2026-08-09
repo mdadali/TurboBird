@@ -54,6 +54,7 @@ type
     transMain: TIBTransaction;
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
+    procedure chkBoxCasesensitiveChange(Sender: TObject);
     procedure chkBoxUseFilterChange(Sender: TObject);
     procedure dsMainStateChange(Sender: TObject);
     procedure edtFilterValueChange(Sender: TObject);
@@ -500,6 +501,16 @@ begin
   else
     IBTableMain.Filter :=
       Format('UPPER(%s) LIKE ''%s%%''', [cboxFilterField.Text, UpperCase(edtFilterValue.Text)]);
+end;
+
+procedure TfrmEditTableDataNew.chkBoxCasesensitiveChange(Sender: TObject);
+begin
+  IBTableMain.Close;
+  IBTableMain.Filtered := False;
+
+  SetTableFilter;
+  IBTableMain.Filtered := True;
+  IBTableMain.Open;
 end;
 
 procedure TfrmEditTableDataNew.edtFilterValueChange(Sender: TObject);
