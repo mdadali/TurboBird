@@ -419,10 +419,9 @@
       <Unit42>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <TopLine Value="3425"/>
-        <CursorPos Y="3442"/>
+        <CursorPos X="29" Y="3434"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="2561" ID="4"/>
@@ -594,7 +593,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <CursorPos X="15" Y="7"/>
         <UsageCount Value="201"/>
         <Loaded Value="True"/>
@@ -1002,9 +1001,8 @@
         <ComponentName Value="frmEditTableDataNew"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
-        <TopLine Value="496"/>
-        <CursorPos Y="515"/>
+        <EditorIndex Value="6"/>
+        <CursorPos Y="5"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1236,7 +1234,7 @@
         <Filename Value="common\uformulapresets.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFormulaPresets"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="316"/>
         <CursorPos X="52" Y="323"/>
         <UsageCount Value="200"/>
@@ -1277,10 +1275,12 @@
         <ComponentName Value="frmBulkExport"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="160"/>
-        <CursorPos X="38" Y="180"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="5"/>
+        <CursorPos X="12" Y="17"/>
         <UsageCount Value="96"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit124>
       <Unit125>
         <Filename Value="ui\data_studio\fdatastudio.pas"/>
@@ -1560,123 +1560,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="368" TopLine="350"/>
+        <Caret Line="364" Column="27" TopLine="357"/>
       </Position1>
       <Position2>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="364" Column="27" TopLine="357"/>
+        <Caret Line="376" Column="27" TopLine="369"/>
       </Position2>
       <Position3>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="376" Column="27" TopLine="369"/>
+        <Caret Line="380" Column="16" TopLine="368"/>
       </Position3>
       <Position4>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="380" Column="16" TopLine="368"/>
+        <Caret Line="272" Column="42" TopLine="255"/>
       </Position4>
       <Position5>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="272" Column="42" TopLine="255"/>
+        <Caret Line="114" Column="32" TopLine="105"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="114" Column="32" TopLine="105"/>
-      </Position6>
-      <Position7>
         <Filename Value="common\turbocommon.pas"/>
         <Caret Line="3424" TopLine="3419"/>
+      </Position6>
+      <Position7>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="293" Column="24" TopLine="292"/>
       </Position7>
       <Position8>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="293" Column="24" TopLine="292"/>
+        <Caret Line="327" Column="48" TopLine="304"/>
       </Position8>
       <Position9>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="327" Column="48" TopLine="304"/>
+        <Caret Line="277" Column="45" TopLine="269"/>
       </Position9>
       <Position10>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="277" Column="45" TopLine="269"/>
+        <Caret Line="387" Column="33" TopLine="375"/>
       </Position10>
       <Position11>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="387" Column="33" TopLine="375"/>
+        <Caret Line="386" Column="30" TopLine="377"/>
       </Position11>
       <Position12>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="386" Column="30" TopLine="377"/>
+        <Caret Line="385" Column="30" TopLine="376"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="385" Column="30" TopLine="376"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1535" Column="27" TopLine="1518"/>
       </Position13>
       <Position14>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1535" Column="27" TopLine="1518"/>
+        <Caret Line="1517" Column="14" TopLine="1510"/>
       </Position14>
       <Position15>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1517" Column="14" TopLine="1510"/>
+        <Caret Line="1566" Column="27" TopLine="1508"/>
       </Position15>
       <Position16>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1566" Column="27" TopLine="1508"/>
+        <Caret Line="1515" Column="20" TopLine="1509"/>
       </Position16>
       <Position17>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1515" Column="20" TopLine="1509"/>
+        <Caret Line="1588" Column="29" TopLine="1518"/>
       </Position17>
       <Position18>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1588" Column="29" TopLine="1518"/>
+        <Caret Line="1515" Column="3" TopLine="1498"/>
       </Position18>
       <Position19>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1515" Column="3" TopLine="1498"/>
+        <Caret Line="1536" Column="12" TopLine="1513"/>
       </Position19>
       <Position20>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1536" Column="12" TopLine="1513"/>
-      </Position20>
-      <Position21>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
         <Caret Line="382" Column="52" TopLine="376"/>
+      </Position20>
+      <Position21>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="13" Column="62"/>
       </Position21>
       <Position22>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="13" Column="62"/>
+        <Caret Line="603" Column="50" TopLine="593"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="603" Column="50" TopLine="593"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="1524" Column="44" TopLine="1479"/>
       </Position23>
       <Position24>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="1524" Column="44" TopLine="1479"/>
+        <Caret Line="3445" Column="22" TopLine="3428"/>
       </Position24>
       <Position25>
         <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="3445" Column="22" TopLine="3428"/>
+        <Caret Line="3551" TopLine="3534"/>
       </Position25>
       <Position26>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="3551" TopLine="3534"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="382" Column="52" TopLine="361"/>
       </Position26>
       <Position27>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="3444" Column="13" TopLine="3532"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="514" Column="38" TopLine="505"/>
       </Position27>
       <Position28>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="382" Column="52" TopLine="361"/>
+        <Caret Line="515" TopLine="496"/>
       </Position28>
       <Position29>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="514" Column="38" TopLine="505"/>
+        <Caret Line="5"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
-        <Caret Line="515" TopLine="496"/>
+        <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
+        <Caret Line="128" Column="31" TopLine="121"/>
       </Position30>
     </JumpHistory>
     <RunParams>
