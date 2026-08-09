@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 493
+  Left = 371
   Height = 507
-  Top = 141
+  Top = 115
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507
@@ -100,7 +100,6 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           Color = clWindow
           Columns = <>
           DataSource = dsMain
-          PopupMenu = pmGrid
           TabOrder = 2
         end
         object pnlTableFilter: TPanel
@@ -122,16 +121,16 @@ object frmEditTableDataNew: TfrmEditTableDataNew
             TabOrder = 0
           end
           object cboxFilterField: TComboBox
-            Left = 296
+            Left = 264
             Height = 36
             Top = 8
-            Width = 392
+            Width = 344
             ItemHeight = 0
             Style = csDropDownList
             TabOrder = 1
           end
           object Label1: TLabel
-            Left = 208
+            Left = 176
             Height = 20
             Top = 56
             Width = 70
@@ -139,10 +138,10 @@ object frmEditTableDataNew: TfrmEditTableDataNew
             ParentColor = False
           end
           object edtFilterValue: TEdit
-            Left = 296
+            Left = 264
             Height = 37
             Top = 56
-            Width = 392
+            Width = 344
             OnChange = edtFilterValueChange
             TabOrder = 2
           end
@@ -152,10 +151,11 @@ object frmEditTableDataNew: TfrmEditTableDataNew
             Top = 56
             Width = 122
             Caption = 'Case Sensitive'
+            OnChange = chkBoxCasesensitiveChange
             TabOrder = 3
           end
           object Label2: TLabel
-            Left = 208
+            Left = 176
             Height = 20
             Top = 8
             Width = 63
@@ -208,8 +208,8 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 64
-    Top = 152
+    Left = 104
+    Top = 296
   end
   object transMain: TIBTransaction
     TransactionName = '{AA661540-ED8B-4EC8-B6F3-55EF1B71B1B1}'
@@ -220,14 +220,14 @@ object frmEditTableDataNew: TfrmEditTableDataNew
       'rec_version'
       'nowait'
     )
-    Left = 176
-    Top = 152
+    Left = 232
+    Top = 304
   end
   object dsMain: TDataSource
     DataSet = IBTableMain
     OnStateChange = dsMainStateChange
-    Left = 176
-    Top = 272
+    Left = 200
+    Top = 384
   end
   object IBTableMain: TIBTable
     AllowAutoActivateTransaction = False
@@ -245,12 +245,12 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     SQLFiltered = False
     GeneratorField.ApplyOnEvent = gaeOnNewRecord
     MasterDetailDelay = 0
-    Left = 64
-    Top = 272
+    Left = 80
+    Top = 384
   end
   object pmGrid: TPopupMenu
-    Left = 320
-    Top = 288
+    Left = 328
+    Top = 392
     object Separator2: TMenuItem
       Caption = '-'
       Visible = False
