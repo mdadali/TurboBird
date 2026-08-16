@@ -68,7 +68,7 @@ end;
 procedure TfrmSetFBClient.FormShow(Sender: TObject);
 begin
   //if Assigned(frmThemeSelector) then
-  frmThemeSelector.btnApplyClick(self);
+  //frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmSetFBClient.lstSuggestionsClick(Sender: TObject);

@@ -3327,8 +3327,11 @@ end;
 procedure ReadIniFile;
 var TempStr: string;
 begin
-  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
+  //FireBird
+  //InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '/opt/firebird/lib/libfbclient.so');
   InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
+  //UI
+  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
 
   //Backup
   CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
@@ -5239,7 +5242,6 @@ begin
   end;
 end;
 
-
 initialization
   SessionPasswordCache := nil;
   MetaDataChanged := false;
@@ -5250,6 +5252,7 @@ initialization
   ExtractResourcesIfNeeded;
 
   ReadIniFile;
+  //WriteIniFile;
 
   //if not LoadClientLibIBX(InitialFBClientLibPath) then
     //SetInitialClientLib;

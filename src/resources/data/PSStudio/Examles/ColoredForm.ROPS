@@ -1,0 +1,32 @@
+//<DESIGNER-VARS-BEGIN>
+var
+  Form2: TForm;
+//<DESIGNER-VARS-END>
+
+//<USER-GLOBAL-VARS-BEGIN>
+//<USER-GLOBAL-VARS-END>
+
+//<USERCODE-BEGIN>
+
+//<USERCODE-END>
+
+//<DESIGNER-BEGIN>
+procedure CreateNewForm;
+begin
+  Form2 := TForm.Create(nil);
+  Form2.SetBounds(95, 85, 790, 386);
+  Form2.Color := -2147483643;
+  Form2.Position := poDesigned;
+  Form2.Caption := 'Form2';
+
+  //<EVENT_BINDINGS-BEGIN>
+  //<EVENT_BINDINGS-END>
+  Form2.Visible := True;
+end;
+//<DESIGNER-END>
+
+//<MAIN-BEGIN>
+begin
+  CreateNewForm;
+end.
+//<MAIN-END>

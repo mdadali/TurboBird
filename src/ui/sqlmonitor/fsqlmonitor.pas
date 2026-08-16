@@ -6,7 +6,7 @@ interface
 
 uses
   LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  SynEdit, SynHighlighterSQL,
+  SynEdit, SynHighlighterSQL,  SynEditMarkupSpecialLine,
 
   DateUtils,
 
@@ -14,7 +14,7 @@ uses
   IBInternals,
 
   turbocommon,
-  uthemeselector, SynEditMarkupSpecialLine;
+  uthemeselector;
 
 type
 
