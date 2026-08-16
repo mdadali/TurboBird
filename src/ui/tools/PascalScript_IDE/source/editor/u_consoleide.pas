@@ -16,6 +16,8 @@ uses
   SynGutterCodeFolding, SynEditMarkupSpecialLine, SynEditRegexSearch,
   SynEditMarks, PrintersDlgs,
 
+  uthemeselector,
+
   uPSComponent_COM,
   uPSComponent_StdCtrls,
   uPSComponent_Forms,
@@ -204,6 +206,7 @@ type
     function  ceNeedFile(Sender: TObject; const OrginFileName: String; var FileName, Output: String): Boolean;
     procedure ceBreakpoint(Sender: TObject; const FileName: String; APosition, Row, Col: Cardinal);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure messagesDblClick(Sender: TObject);
     procedure Gotolinenumber1Click(Sender: TObject);
     procedure Find1Click(Sender: TObject);
@@ -1272,6 +1275,11 @@ end;
 procedure TfrmConsoleIDE.FormDestroy(Sender: TObject);
 begin
   FWatchList.Free;
+end;
+
+procedure TfrmConsoleIDE.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmConsoleIDE.SetActiveFile(const Value: string);

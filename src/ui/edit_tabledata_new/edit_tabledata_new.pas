@@ -20,14 +20,14 @@ type
   { TfrmEditTableDataNew }
 
   TfrmEditTableDataNew = class(TForm)
+    cboxFilterField: TComboBox;
     chkBoxCasesensitive: TCheckBox;
     chkBoxUseFilter: TCheckBox;
-    cboxFilterField: TComboBox;
-    DBGridMain: TDBGrid;
     DBNavigator1: TDBNavigator;
     dbnavMainTableFormView: TDBNavigator;
     dsMain: TDataSource;
     edtFilterValue: TEdit;
+    grboxTableFilter: TGroupBox;
     IBDatabaseMain: TIBDatabase;
     IBTableMain: TIBTable;
     Label1: TLabel;
@@ -42,11 +42,11 @@ type
     lmStdExportFormats: TMenuItem;
     PageControl1: TPageControl;
     pmGrid: TPopupMenu;
-    pnlTableFilter: TPanel;
     pnlFKTablesCaption: TPanel;
     pnlMainTable: TPanel;
     pnlMainTableCaption: TPanel;
     pnlRecord: TScrollBox;
+    DBGridMain: TRxDBGrid;
     Separator1: TMenuItem;
     Separator2: TMenuItem;
     tsMainTableGrid: TTabSheet;

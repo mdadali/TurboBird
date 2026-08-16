@@ -20,7 +20,7 @@ uses
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
   rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
   QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-  EnterPass, CreateTrigger, fedittabledata, UDFInfo, ViewDomain, NewDomain,
+  EnterPass, CreateTrigger, UDFInfo, ViewDomain, NewDomain,
   SysTables, newForeignKey, NewEditField, Calen, Scriptdb, UserPermissions,
   TableManage, CreateUser, ChangePass, PermissionManage, SQLHistory, CopyTable,
   dynlibs, dbInfo, sysutils, Comparison, topologicalsort, turbocommon,

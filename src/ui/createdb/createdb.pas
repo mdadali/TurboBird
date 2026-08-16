@@ -126,6 +126,8 @@ end;
 
 procedure TfmCreateDB.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
+
   UpdateControlsForProtocol;
 
   edUserName.Text := FServerRec.UserName;
@@ -136,7 +138,6 @@ begin
     FServerRec.Password := '';
 
   edtServerVersion.Text := FServerRec.VersionString;
-  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure  TfmCreateDB.Init;

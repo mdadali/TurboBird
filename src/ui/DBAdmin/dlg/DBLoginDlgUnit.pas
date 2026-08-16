@@ -28,7 +28,8 @@ uses
   unix,
 {$ENDIF}
   SysUtils, Classes, Graphics, Controls, Dialogs,
-  Forms, StdCtrls, ExtCtrls, Buttons, IB, IBDialogs;
+  Forms, StdCtrls, ExtCtrls, Buttons, IB, IBDialogs,
+  uthemeselector;
 
 type
   { TDBLoginDlg }
@@ -45,6 +46,7 @@ type
     Password: TEdit;
     UserName: TEdit;
     DatabaseName: TEdit;
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -60,6 +62,11 @@ implementation
 {$R *.lfm}
 
 { TDBLoginDlg }
+
+procedure TDBLoginDlg.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
+end;
 
 function TDBLoginDlg.ShowModal(var aDatabaseName, aUserName, aPassword: string;
   var aCreateIfNotExist: boolean): TModalResult;

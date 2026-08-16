@@ -23,7 +23,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  Buttons, ExtCtrls, ComCtrls, IBXServices;
+  Buttons, ExtCtrls, ComCtrls, IBXServices,
+  uthemeselector;
 
 type
 
@@ -138,6 +139,8 @@ end;
 
 procedure TBackupDlg.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
+
   PageControl1.ActivePage := SelectTab;
   ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;
   DBName.Text := IBXClientSideBackupService1.DatabaseName;

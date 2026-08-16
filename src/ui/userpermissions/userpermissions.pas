@@ -15,11 +15,9 @@ type
   { TfmUserPermissions }
 
   TfmUserPermissions = class(TForm)
-      bbClose: TSpeedButton;
     Label1: TLabel;
     laObject: TLabel;
     StringGrid1: TStringGrid;
-    procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
@@ -69,12 +67,6 @@ end;
 procedure TfmUserPermissions.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
-end;
-
-procedure TfmUserPermissions.bbCloseClick(Sender: TObject);
-begin
-  Close;
-  Parent.Free;
 end;
 
 initialization

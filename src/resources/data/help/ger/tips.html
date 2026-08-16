@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TurboBird — Tips & Tricks</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 10px; }
+  h1 { font-size: 22px; }
+  h2 { font-size: 18px; margin-top: 20px; }
+  p { margin: 5px 0; }
+  code { background: #f5f5f5; padding: 2px 4px; border-radius: 3px; }
+  pre { background: #f5f5f5; padding: 10px; border-radius: 5px; }
+  a { color: #0645AD; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  table { border-collapse: collapse; margin-top: 10px; }
+  th, td { border: 1px solid #ccc; padding: 4px 8px; }
+  th { background: #eee; }
+  ul.toc { margin: 10px 0; padding: 0; list-style: none; }
+  ul.toc li { margin: 4px 0; }
+</style>
+</head>
+<body>
+<a id="top"></a>
+<h1>Tips & Tricks</h1>
+
+<h2>Table of Contents</h2>
+<ul class="toc">
+  <li><a href="#favorites">Verbindungen als Favoriten speichern</a></li>
+  <li><a href="#longquery">Lang laufende Abfragen testen</a></li>
+  <li><a href="#monstate">MON$STATE in MON$STATEMENTS verstehen</a></li>
+</ul>
+
+<h2 id="favorites">Verbindungen als Favoriten speichern</h2>
+<p>Speichern Sie häufig verwendete Verbindungen als Favoriten. Klicken Sie auf eine Datenbank in Ihrer Liste der zuletzt verwendeten Datenbanken, um schnell eine Verbindung herzustellen.</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Zurück zum Anfang</a></p>
+
+<h2 id="longquery">Testen von lang laufenden Abfragen</h2>
+<p>Wenn Sie testen möchten, wie TurboBird das Abbrechen oder Beenden aktiver Anweisungen handhabt, können Sie eine umfangreiche Abfrage ausführen, die Millionen von Zeilen erzeugt:</p>
+<pre><code>SELECT A.RDB$FIELD_NAME, B.RDB$FIELD_NAME
+FROM RDB$FIELDS A
+CROSS JOIN RDB$FIELDS B
+CROSS JOIN RDB$FIELDS C;
+</code></pre>
+<p>Dies kann je nach Größe von <code>RDB$FIELDS</code> mehrere Millionen Zeilen erzeugen.  
+Verwenden Sie dies, um die Schaltfläche <em>Cancel</em> oder die Überwachung über <code>MON$STATEMENTS</code> zu testen.</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Zurück zum Anfang</a></p>
+
+<h2 id="monstate">MON$STATE in MON$STATEMENTS verstehen</h2>
+<p>Die Überwachungstabelle <code>MON$STATEMENTS</code> zeigt den Status jeder aktiven SQL-Anweisung an. Das Feld <code>MON$STATE</code> kann die folgenden Werte annehmen:</p>
+<table>
+  <tr><th>Value</th><th>Meaning</th></tr>
+  <tr><td>0</td><td>Leerlauf / abgeschlossen</td></tr>
+  <tr><td>1</td><td>Aktiv (wird ausgeführt)</td></tr>
+  <tr><td>2</td><td>Abrufen (Cursor ist geöffnet, Zeilen werden abgerufen)</td></tr>
+  <tr><td>3</td><td>Kompilieren / Vorbereiten der Anweisung</td></tr>
+</table>
+<p>Bei lang laufenden Abfragen wird in der Regel <strong>1</strong> oder <strong>2</strong> angezeigt.  
+In Firebird gibt es keinen Status <code>-1</code>; einige ältere Tools verwendeten diesen für  "unbekannt".</p>
+<p><a href="#top" onclick="if(!location.hash){location.reload();}">⬆️ Zurück zum Anfang</a></p>
+
+<hr>
+<p><a href="index.html">Zurück zur Hauptseite</a></p>
+</body>
+</html>

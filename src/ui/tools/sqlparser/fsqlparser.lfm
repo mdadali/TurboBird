@@ -1,7 +1,7 @@
 object fmSQLParser: TfmSQLParser
-  Left = 749
+  Left = 297
   Height = 626
-  Top = 98
+  Top = 136
   Width = 854
   BorderStyle = bsDialog
   Caption = 'SQL Parser'
@@ -9,6 +9,7 @@ object fmSQLParser: TfmSQLParser
   ClientWidth = 854
   DefaultMonitor = dmPrimary
   OnClose = FormClose
+  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object Label1: TLabel

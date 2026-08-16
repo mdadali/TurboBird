@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 526
+  Left = 435
   Height = 507
-  Top = 173
+  Top = 136
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507
@@ -74,7 +74,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         object DBNavigator1: TDBNavigator
           Left = 1
           Height = 26
-          Top = 139
+          Top = 138
           Width = 752
           Align = alTop
           BevelOuter = bvNone
@@ -91,26 +91,16 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           TabOrder = 1
           VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbDelete, nbRefresh]
         end
-        object DBGridMain: TDBGrid
+        object grboxTableFilter: TGroupBox
           Left = 1
-          Height = 307
-          Top = 165
-          Width = 752
-          Align = alClient
-          Color = clWindow
-          Columns = <>
-          DataSource = dsMain
-          TabOrder = 2
-        end
-        object pnlTableFilter: TPanel
-          Left = 1
-          Height = 106
+          Height = 105
           Top = 33
           Width = 752
           Align = alTop
-          ClientHeight = 106
-          ClientWidth = 752
-          TabOrder = 3
+          Caption = 'Tablefilter'
+          ClientHeight = 84
+          ClientWidth = 750
+          TabOrder = 2
           object chkBoxUseFilter: TCheckBox
             Left = 8
             Height = 24
@@ -119,6 +109,14 @@ object frmEditTableDataNew: TfrmEditTableDataNew
             Caption = 'Use Filter'
             OnChange = chkBoxUseFilterChange
             TabOrder = 0
+          end
+          object Label2: TLabel
+            Left = 176
+            Height = 20
+            Top = 12
+            Width = 63
+            Caption = 'Filterfield'
+            ParentColor = False
           end
           object cboxFilterField: TComboBox
             Left = 264
@@ -129,39 +127,108 @@ object frmEditTableDataNew: TfrmEditTableDataNew
             Style = csDropDownList
             TabOrder = 1
           end
-          object Label1: TLabel
-            Left = 176
-            Height = 20
-            Top = 56
-            Width = 70
-            Caption = 'Filtervalue'
-            ParentColor = False
-          end
           object edtFilterValue: TEdit
             Left = 264
             Height = 37
-            Top = 56
+            Top = 43
             Width = 344
             OnChange = edtFilterValueChange
             TabOrder = 2
           end
+          object Label1: TLabel
+            Left = 176
+            Height = 20
+            Top = 48
+            Width = 70
+            Caption = 'Filtervalue'
+            ParentColor = False
+          end
           object chkBoxCasesensitive: TCheckBox
             Left = 8
             Height = 24
-            Top = 56
+            Top = 48
             Width = 122
             Caption = 'Case Sensitive'
             OnChange = chkBoxCasesensitiveChange
             TabOrder = 3
           end
-          object Label2: TLabel
-            Left = 176
-            Height = 20
-            Top = 8
-            Width = 63
-            Caption = 'Filterfield'
-            ParentColor = False
-          end
+        end
+        object DBGridMain: TRxDBGrid
+          Left = 1
+          Height = 308
+          Top = 164
+          Width = 752
+          ColumnDefValues.BlobText = '(blob)'
+          TitleButtons = False
+          AutoSort = True
+          KeyStrokes = <          
+            item
+              Command = rxgcShowFindDlg
+              ShortCut = 16454
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowColumnsDlg
+              ShortCut = 16471
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowFilterDlg
+              ShortCut = 16468
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowSortDlg
+              ShortCut = 16467
+              Enabled = True
+            end          
+            item
+              Command = rxgcShowQuickFilter
+              ShortCut = 16465
+              Enabled = True
+            end          
+            item
+              Command = rxgcHideQuickFilter
+              ShortCut = 16456
+              Enabled = True
+            end          
+            item
+              Command = rxgcSelectAll
+              ShortCut = 16449
+              Enabled = True
+            end          
+            item
+              Command = rxgcDeSelectAll
+              ShortCut = 16429
+              Enabled = True
+            end          
+            item
+              Command = rxgcInvertSelection
+              ShortCut = 16426
+              Enabled = True
+            end          
+            item
+              Command = rxgcOptimizeColumnsWidth
+              ShortCut = 16427
+              Enabled = True
+            end          
+            item
+              Command = rxgcCopyCellValue
+              ShortCut = 16451
+              Enabled = True
+            end>
+          FooterOptions.DrawFullLine = False
+          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
+          SearchOptions.FromStart = False
+          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgDblClickOptimizeColWidth, rdgAllowQuickSearch, rdgAllowToolMenu, rdgCaseInsensitiveSort]
+          Align = alClient
+          Color = clWindow
+          DrawFullLine = False
+          FocusColor = clRed
+          SelectedColor = clHighlight
+          DataSource = dsMain
+          Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
+          TabOrder = 3
         end
       end
     end
