@@ -406,7 +406,6 @@ type
     procedure lmDisplay1000VClick(Sender: TObject);
     procedure lmDropExceptionClick(Sender: TObject);
     procedure lmEditProcClick(Sender: TObject);
-    procedure lmEditTableDataClick(Sender: TObject);
     procedure lmEditTriggerClick(Sender: TObject);
     procedure lmEditViewClick(Sender: TObject);
     procedure lmNewDomainClick(Sender: TObject);
@@ -607,7 +606,7 @@ implementation
 { TfmMain }
 
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-     EnterPass, CreateTrigger, fedittabledata, UDFInfo, ViewDomain,
+     EnterPass, CreateTrigger, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, CopyTable, NewEditField, dbInfo, Comparison;
      // About,
@@ -4630,73 +4629,6 @@ begin
   Rec := RegisteredDatabases[dbIndex];
   TmpQueryStr := GetFirebirdProcedureDeclaration(Rec.IBDatabase, tvMain.Selected.Text, '', true);
   ShowCompleteQueryWindow(dbIndex, 'Edit Procedure#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
-end;
-
-procedure TfmMain.lmEditTableDataClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
-  Rec: TDatabaseRec;
-  EditWindow: TfmEditTable;
-  ATableName, DBAlias, ShortTitle, FullHint: string;
-  dbIndex: Integer;
-  ATab: TTabSheet;
-begin
-  SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
-
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
-
-  // Tabellenname und DB-Index ermitteln
-  ATableName := GetClearNodeText(SelNode.Text);
-  dbIndex := TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
-  Rec := RegisteredDatabases[dbIndex];
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-
-  // Prüfen ob ViewForm schon existiert
-  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmEditTable) then
-    EditWindow := TfmEditTable(NodeInfos^.EditorForm)
-  else
-  begin
-    EditWindow := TfmEditTable.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    EditWindow.Parent := ATab;
-    EditWindow.Align := alClient;
-    EditWindow.BorderStyle := bsNone;
-
-    NodeInfos^.EditorForm := EditWindow;
-  end;
-
-  // Tab vorbereiten
-  ATab := EditWindow.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Kurzer Tab-Titel
-  ShortTitle := ATableName;
-  ATab.Caption := ShortTitle;
-  EditWindow.Caption := ShortTitle;
-
-  // Detaillierte Infos als Hint
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + Rec.IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table' + sLineBreak +
-    'Table name: ' + ATableName  + sLineBreak +
-    'Modus: Edit Tabledata';
-
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Formular initialisieren
-  EditWindow.Rec := Rec;
-  ATableName := GetClearNodeText(ATableName);
-  EditWindow.Init(dbIndex, ATableName, NodeInfos);
-  EditWindow.Show;
 end;
 
 (****************  Edit Trigger  ******************)
