@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 217
+  Left = 401
   Height = 612
-  Top = 367
+  Top = 94
   Width = 1219
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 584
@@ -5668,7 +5668,6 @@ object fmMain: TfmMain
       Enabled = False
       ImageIndex = 1
       OnClick = tbCheckDBIntegrityClick
-      Visible = False
     end
     object tbSQLMonitor: TToolButton
       Left = 145
@@ -8483,29 +8482,29 @@ object fmMain: TfmMain
       Caption = 'Clone Table...'
       OnClick = lmCloneTableClick
     end
+    object lmBulkExport: TMenuItem
+      Tag = 1
+      Caption = 'Bulk Export'
+      OnClick = lmBulkExportClick
+    end
     object lmExportTableToDataEditorRO: TMenuItem
       Tag = 1
       Caption = 'View in Data Editor'
       OnClick = lmExportTableToDataEditorROClick
     end
     object lmExportTableToDataEditorRW: TMenuItem
-      Tag = -2
+      Tag = 1
       Caption = 'Edit in Data Editor'
       OnClick = lmExportTableToDataEditorRWClick
     end
     object lmCloneToExternalTable: TMenuItem
-      Tag = -2
+      Tag = -10
       Caption = 'Clone to external Table'
       Visible = False
       OnClick = lmCloneToExternalTableClick
     end
-    object lmBulkExport: TMenuItem
-      Tag = 1
-      Caption = 'Bulk Export'
-      OnClick = lmBulkExportClick
-    end
     object lmCopyTable: TMenuItem
-      Tag = -2
+      Tag = -10
       Caption = 'Copy Table'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
@@ -8547,7 +8546,7 @@ object fmMain: TfmMain
       OnClick = lmCopyTableClick
     end
     object lmImportTable: TMenuItem
-      Tag = -2
+      Tag = -10
       Caption = 'Import to Table'
       ImageIndex = 75
       Visible = False

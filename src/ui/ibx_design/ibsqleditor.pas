@@ -35,6 +35,7 @@ uses
   Dialogs, StdCtrls, ComCtrls, ibinsertsqleditor, IBSQLEditFrame,
   IBDatabase, IBSQL, IB, db,
 
+  uthemeselector,
   turbocommon;
 
 type
@@ -132,6 +133,7 @@ procedure TIBSQLEditorForm.FormShow(Sender: TObject);
 begin
   inherited;
   SetupFlags;
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TIBSQLEditorForm.FormMouseEnter(Sender: TObject);

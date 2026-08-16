@@ -1,7 +1,7 @@
 object frmConsoleIDE: TfrmConsoleIDE
   Left = 343
   Height = 585
-  Top = 305
+  Top = 163
   Width = 996
   AllowDropFiles = True
   Caption = 'LazCAD ConsoleIDE'
@@ -15,21 +15,22 @@ object frmConsoleIDE: TfrmConsoleIDE
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object Splitter1: TSplitter
     Cursor = crVSplit
     Left = 0
     Height = 3
-    Top = 558
+    Top = 560
     Width = 996
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 24
-    Top = 561
+    Height = 22
+    Top = 563
     Width = 996
     Panels = <    
       item
@@ -653,7 +654,7 @@ object frmConsoleIDE: TfrmConsoleIDE
         end
         object edtFormName: TEdit
           Left = 1
-          Height = 26
+          Height = 33
           Top = 24
           Width = 133
           TabOrder = 0
@@ -724,7 +725,7 @@ object frmConsoleIDE: TfrmConsoleIDE
   end
   object pgcDebug: TPageControl
     Left = 0
-    Height = 121
+    Height = 123
     Top = 437
     Width = 996
     ActivePage = tsMessages
@@ -734,13 +735,13 @@ object frmConsoleIDE: TfrmConsoleIDE
     TabPosition = tpBottom
     object tsMessages: TTabSheet
       Caption = 'Messages'
-      ClientHeight = 84
+      ClientHeight = 93
       ClientWidth = 986
       object messages: TListBox
         Left = 0
-        Height = 91
+        Height = 93
         Top = 0
-        Width = 992
+        Width = 986
         Align = alClient
         ItemHeight = 0
         OnDblClick = messagesDblClick
@@ -750,13 +751,13 @@ object frmConsoleIDE: TfrmConsoleIDE
     end
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ClientHeight = 84
+      ClientHeight = 93
       ClientWidth = 986
       object vleWatches: TValueListEditor
         Left = 122
-        Height = 91
+        Height = 93
         Top = 0
-        Width = 870
+        Width = 864
         Align = alClient
         Enabled = False
         FixedCols = 0
@@ -768,16 +769,16 @@ object frmConsoleIDE: TfrmConsoleIDE
         )
         ColWidths = (
           64
-          806
+          796
         )
       end
       object pnlAddDeleteWatch: TPanel
         Left = 0
-        Height = 91
+        Height = 93
         Top = 0
         Width = 122
         Align = alLeft
-        ClientHeight = 91
+        ClientHeight = 93
         ClientWidth = 122
         TabOrder = 1
         object btnAddWatch: TButton
