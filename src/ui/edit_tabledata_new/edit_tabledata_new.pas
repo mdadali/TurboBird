@@ -80,6 +80,9 @@ type
 
     FFilterField: string;
 
+    FDefaultCache: TStringList; // FieldName -> DefaultValue
+    FComputedCache: TStringList;
+
     function  InitDB: boolean;
     function  OpenDB: boolean;
     function  CloseDB: boolean;
@@ -100,6 +103,8 @@ type
     procedure LoacateForeignKeyTablesRecord(DataSet: TDataSet);
     procedure EnableFKTables(AEnable: Boolean);
 
+    procedure LoadDefaultCache;
+    function IsComputedField(const AFieldName: string): Boolean;
   public
     procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer; ATableName: string);
   end;
@@ -205,6 +210,8 @@ begin
 
     IBTableMain.TableName := FTableName;
     IBTableMain.Open;
+
+    LoadDefaultCache; //Cache for Default Values
 
     //DBGridMain.OptimizeColumnsWidthAll;
 
@@ -476,6 +483,12 @@ end;
 procedure TfrmEditTableDataNew.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  if Assigned(FDefaultCache) then
+    FreeAndNil(FDefaultCache);
+
+  if Assigned(FComputedCache) then
+    FreeAndNil(FComputedCache);
+
   CloseDB;
 
   if Assigned(FNodeInfos) then
@@ -532,6 +545,7 @@ begin
   end;
   IBTableMain.Filtered := chkBoxUseFilter.Checked;
   IBTableMain.Open;
+  LoadDefaultCache; //Cache neu laden
 end;
 
 procedure TfrmEditTableDataNew.FormCreate(Sender: TObject);
@@ -548,21 +562,186 @@ begin
     cboxFilterField.ItemIndex := 0;
 end;
 
+procedure TfrmEditTableDataNew.LoadDefaultCache;
+var
+  Query: TIBQuery;
+  DefaultValue: string;
+  IsComputedValue: string;  // 👈 Name geändert (war: ComputedCheck)
+begin
+  // Cache löschen
+  if Assigned(FDefaultCache) then
+    FreeAndNil(FDefaultCache);
+  if Assigned(FComputedCache) then
+    FreeAndNil(FComputedCache);
+
+  FDefaultCache := TStringList.Create;
+  FComputedCache := TStringList.Create;
+
+  Query := TIBQuery.Create(nil);
+  try
+    Query.Database := IBDatabaseMain;
+    Query.Transaction := transMain;
+
+    // Methode 1: Versuche mit RDB$COMPUTED_SOURCE
+    try
+      Query.SQL.Text :=
+        'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE, RDB$COMPUTED_SOURCE ' +
+        'FROM RDB$RELATION_FIELDS ' +
+        'WHERE RDB$RELATION_NAME = :TABLE_NAME';
+      Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
+      Query.Open;
+
+      while not Query.EOF do
+      begin
+        DefaultValue := Query.Fields[1].AsString;
+        if DefaultValue <> '' then
+          FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
+
+        IsComputedValue := Query.Fields[2].AsString;  // 👈 Geänderter Name
+        if IsComputedValue <> '' then
+          FComputedCache.Values[Query.Fields[0].AsString] := IsComputedValue;
+
+        Query.Next;
+      end;
+    except
+      // Methode 2: Versuche mit RDB$COMPUTED_BLR
+      Query.Close;
+      try
+        Query.SQL.Text :=
+          'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE, RDB$COMPUTED_BLR ' +
+          'FROM RDB$RELATION_FIELDS ' +
+          'WHERE RDB$RELATION_NAME = :TABLE_NAME';
+        Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
+        Query.Open;
+
+        while not Query.EOF do
+        begin
+          DefaultValue := Query.Fields[1].AsString;
+          if DefaultValue <> '' then
+            FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
+
+          IsComputedValue := Query.Fields[2].AsString;  // 👈 Geänderter Name
+          if IsComputedValue <> '' then
+            FComputedCache.Values[Query.Fields[0].AsString] := IsComputedValue;
+
+          Query.Next;
+        end;
+      except
+        // Methode 3: Fallback - Nur DEFAULTS laden
+        Query.Close;
+        Query.SQL.Text :=
+          'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE ' +
+          'FROM RDB$RELATION_FIELDS ' +
+          'WHERE RDB$RELATION_NAME = :TABLE_NAME ' +
+          'AND RDB$DEFAULT_SOURCE IS NOT NULL';
+        Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
+        Query.Open;
+
+        while not Query.EOF do
+        begin
+          DefaultValue := Query.Fields[1].AsString;
+          if DefaultValue <> '' then
+            FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
+
+          Query.Next;
+        end;
+      end;
+    end;
+  finally
+    Query.Free;
+  end;
+end;
+
+function TfrmEditTableDataNew.IsComputedField(const AFieldName: string): Boolean;
+begin
+  Result := Assigned(FComputedCache) and
+            (FComputedCache.Values[AFieldName] <> '');
+end;
+
 procedure TfrmEditTableDataNew.IBTableMainAfterInsert(DataSet: TDataSet);
 var
   i: Integer;
+  DefaultValue: string;
+  CleanDefault: string;
 begin
-  {for i := 0 to DataSet.FieldCount - 1 do
-    if DataSet.Fields[i] is TIBArrayField then
+  for i := 0 to DataSet.FieldCount - 1 do
+  begin
+    with DataSet.Fields[i] do
     begin
-      AArrayGrid.DataSource := nil;
-    end;}
+      if IsNull then
+      begin
+        // Aus dem Cache lesen
+        if Assigned(FDefaultCache) then
+          DefaultValue := FDefaultCache.Values[FieldName]
+        else
+          DefaultValue := '';
+
+        if DefaultValue <> '' then
+        begin
+          // Bereinige den Default-Wert
+          CleanDefault := Trim(DefaultValue);
+
+          // "DEFAULT " entfernen
+          if UpperCase(Copy(CleanDefault, 1, 8)) = 'DEFAULT ' then
+            Delete(CleanDefault, 1, 8);
+
+          // Klammern entfernen
+          CleanDefault := StringReplace(CleanDefault, '(', '', [rfReplaceAll]);
+          CleanDefault := StringReplace(CleanDefault, ')', '', [rfReplaceAll]);
+
+          // Anführungszeichen entfernen
+          CleanDefault := StringReplace(CleanDefault, '''', '', [rfReplaceAll]);
+          CleanDefault := Trim(CleanDefault);
+
+          // Wert setzen
+          case DataType of
+            ftString, ftWideString, ftMemo, ftBlob:
+              AsString := CleanDefault;
+
+            ftInteger, ftSmallint, ftWord, ftLargeint:
+              AsInteger := StrToIntDef(CleanDefault, 0);
+
+            ftBoolean:
+              begin
+                // Firebird 2.5: Boolean als SMALLINT (0/1)
+                // Firebird 3.0+: Boolean als BOOLEAN
+                if FNodeInfos^.ServerVersionMajor < 3 then
+                begin
+                  // Firebird 2.5: 1 = True, 0 = False
+                  AsBoolean := (CleanDefault = '1') or
+                               (UpperCase(CleanDefault) = 'TRUE');
+                end
+                else
+                begin
+                  // Firebird 3.0+: Boolean als Boolean
+                  AsBoolean := (UpperCase(CleanDefault) = 'TRUE') or
+                               (CleanDefault = '1');
+                end;
+              end;
+
+            ftFloat, ftCurrency, ftBCD:
+              AsFloat := StrToFloatDef(CleanDefault, 0);
+
+            ftDateTime:
+              AsDateTime := StrToDateTimeDef(CleanDefault, Now);
+
+            ftDate:
+              AsDateTime := StrToDateDef(CleanDefault, Date);
+
+            ftTime:
+              AsDateTime := StrToTimeDef(CleanDefault, Time);
+          end;
+        end;
+      end;
+    end;
+  end;
 end;
 
 procedure TfrmEditTableDataNew.CreateDynamicControls;
 var
   ALabel: TLabel;
   ADBEdit: TDBEdit;
+  ADBCheckBox: TDBCheckBox;
   ADBMemo: TDBMemo;
   ADBDateTime: TDBDateTimePicker;
   AArrayGrid: TIBArrayGrid;
@@ -570,15 +749,28 @@ var
   ATop: Integer;
   LabelWidth: Integer;
   ControlLeft: Integer;
+  IsComputed: Boolean;
+  IsFK: Boolean;
+  HasDefault: Boolean;
+  DefaultValue: string;
 begin
   ATop := 20;
   VSpacing := 10;
 
-  LabelWidth := 200;        // feste Labelbreite (für sauberes Layout)
+  LabelWidth := 200;
   ControlLeft := 20 + LabelWidth + 10;
 
   for i := 0 to IBTableMain.FieldCount - 1 do
   begin
+    // Feldstatus vorab prüfen
+    IsFK := IsForeignKeyField(IBTableMain.Fields[i].FieldName);
+    IsComputed := IsComputedField(IBTableMain.Fields[i].FieldName);
+    DefaultValue := '';
+    HasDefault := Assigned(FDefaultCache) and
+                  (FDefaultCache.Values[IBTableMain.Fields[i].FieldName] <> '');
+    if HasDefault then
+      DefaultValue := FDefaultCache.Values[IBTableMain.Fields[i].FieldName];
+
     // ===== LABEL =====
     ALabel := TLabel.Create(pnlRecord);
     ALabel.Parent := pnlRecord;
@@ -588,10 +780,21 @@ begin
     ALabel.WordWrap := True;
     ALabel.Caption := IBTableMain.Fields[i].FieldName;
 
-    if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+    // Farbcodierung für Feldtypen
+    if IsComputed then
+    begin
+      ALabel.Font.Color := clBlue;
+      ALabel.Caption := ALabel.Caption + ' (computed)';
+    end
+    else if IsFK then
     begin
       ALabel.Font.Color := clRed;
       ALabel.Caption := ALabel.Caption + ' (Foreign Key)';
+    end
+    else if HasDefault then
+    begin
+      ALabel.Font.Color := clGreen;
+      ALabel.Caption := ALabel.Caption + ' (default)';
     end;
 
     // ===== ARRAY =====
@@ -605,7 +808,7 @@ begin
         AArrayGrid.Top := ATop + VSpacing;
         AArrayGrid.Anchors := [akLeft, akTop, akRight];
 
-        if IsForeignKeyField(FieldName) then
+        if IsFK or IsComputed then
           AArrayGrid.Enabled := False;
 
         if ArrayDimensions = 1 then
@@ -630,9 +833,7 @@ begin
           AArrayGrid.Height := 30;
         end;
 
-        // 👉 volle Breite nutzen
         AArrayGrid.Width := pnlRecord.ClientWidth - ControlLeft - 10;
-
         AArrayGrid.DataSource := dsMain;
         AArrayGrid.DataField := FieldName;
 
@@ -642,65 +843,92 @@ begin
       Continue;
     end;
 
-    // ===== STANDARD FELDER =====
-    case IBTableMain.Fields[i].DataType of
+    // ===== BOOLEAN =====
+    if IBTableMain.Fields[i].DataType = ftBoolean then
+    begin
+      ADBCheckBox := TDBCheckBox.Create(pnlRecord);
+      ADBCheckBox.Parent := pnlRecord;
+      ADBCheckBox.Left := ControlLeft;
+      ADBCheckBox.Top := ATop + VSpacing;
+      ADBCheckBox.Width := 180;
+      ADBCheckBox.Anchors := [akLeft, akTop];
 
-      ftBlob, ftMemo:
-        begin
-          ADBMemo := TDBMemo.Create(pnlRecord);
-          ADBMemo.Parent := pnlRecord;
-          ADBMemo.Left := ControlLeft;
-          ADBMemo.Top := ATop + VSpacing;
-          ADBMemo.Height := 200;
-          ADBMemo.Anchors := [akLeft, akTop, akRight];
+      ADBCheckBox.DataSource := dsMain;
+      ADBCheckBox.DataField := IBTableMain.Fields[i].FieldName;
+      ADBCheckBox.Caption := 'Active';
 
-          // 👉 volle Breite
-          ADBMemo.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+      if IsFK or IsComputed then
+        ADBCheckBox.Enabled := False;
 
-          ADBMemo.ScrollBars := ssBoth;
-          ADBMemo.DataSource := dsMain;
-          ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
+      if HasDefault then
+      begin
+        ADBCheckBox.Color := clInfoBk;
+        ADBCheckBox.Hint := 'Default: ' + DefaultValue;
+        ADBCheckBox.ShowHint := True;
+      end;
 
-          Inc(ATop, ADBMemo.Height + VSpacing * 2);
-        end;
+      Inc(ATop, ADBCheckBox.Height + VSpacing);
+      Continue;
+    end;
 
-      ftDate, ftTime, ftDateTime:
-        begin
-          ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
-          ADBDateTime.Parent := pnlRecord;
-          ADBDateTime.Left := ControlLeft;
-          ADBDateTime.Top := ATop + VSpacing;
-          ADBDateTime.Width := 180; // bewusst fix (UX besser)
-          ADBDateTime.Anchors := [akLeft, akTop];
+    // ===== BLOB / MEMO =====
+    if (IBTableMain.Fields[i].DataType = ftBlob) or
+       (IBTableMain.Fields[i].DataType = ftMemo) then
+    begin
+      ADBMemo := TDBMemo.Create(pnlRecord);
+      ADBMemo.Parent := pnlRecord;
+      ADBMemo.Left := ControlLeft;
+      ADBMemo.Top := ATop + VSpacing;
+      ADBMemo.Height := 200;
+      ADBMemo.Anchors := [akLeft, akTop, akRight];
+      ADBMemo.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+      ADBMemo.ScrollBars := ssBoth;
+      ADBMemo.DataSource := dsMain;
+      ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
 
-          ADBDateTime.DataSource := dsMain;
-          ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
+      if IsFK or IsComputed then
+        ADBMemo.Enabled := False;
 
-          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
-            ADBDateTime.Enabled := False;
+      Inc(ATop, ADBMemo.Height + VSpacing * 2);
+      Continue;
+    end;
 
-          Inc(ATop, ADBDateTime.Height + VSpacing);
-        end;
+    // ===== DATE / TIME / DATETIME =====
+    if (IBTableMain.Fields[i].DataType = ftDate) or
+       (IBTableMain.Fields[i].DataType = ftTime) or
+       (IBTableMain.Fields[i].DataType = ftDateTime) then
+    begin
+      ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
+      ADBDateTime.Parent := pnlRecord;
+      ADBDateTime.Left := ControlLeft;
+      ADBDateTime.Top := ATop + VSpacing;
+      ADBDateTime.Width := 180;
+      ADBDateTime.Anchors := [akLeft, akTop];
+      ADBDateTime.DataSource := dsMain;
+      ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
 
-      else
-        begin
-          ADBEdit := TDBEdit.Create(pnlRecord);
-          ADBEdit.Parent := pnlRecord;
-          ADBEdit.Left := ControlLeft;
-          ADBEdit.Top := ATop + VSpacing;
-          ADBEdit.Anchors := [akLeft, akTop, akRight];
+      if IsFK or IsComputed then
+        ADBDateTime.Enabled := False;
 
-          ADBEdit.DataSource := dsMain;
-          ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
+      Inc(ATop, ADBDateTime.Height + VSpacing);
+      Continue;
+    end;
 
-          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
-            ADBEdit.Enabled := False;
+    // ===== ALLE ANDEREN FELDER (Standard: TDBEdit) =====
+    begin
+      ADBEdit := TDBEdit.Create(pnlRecord);
+      ADBEdit.Parent := pnlRecord;
+      ADBEdit.Left := ControlLeft;
+      ADBEdit.Top := ATop + VSpacing;
+      ADBEdit.Anchors := [akLeft, akTop, akRight];
+      ADBEdit.DataSource := dsMain;
+      ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
+      ADBEdit.Width := pnlRecord.ClientWidth - ControlLeft - 10;
 
-          // 👉 volle Breite
-          ADBEdit.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+      if IsFK or IsComputed then
+        ADBEdit.Enabled := False;
 
-          Inc(ATop, ADBEdit.Height + VSpacing);
-        end;
+      Inc(ATop, ADBEdit.Height + VSpacing);
     end;
   end;
 
