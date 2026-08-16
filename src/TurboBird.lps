@@ -238,10 +238,9 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="3537"/>
-        <CursorPos X="3" Y="3547"/>
+        <TopLine Value="9393"/>
+        <CursorPos X="18" Y="9405"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
@@ -410,13 +409,14 @@
       <Unit41>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="3425"/>
-        <CursorPos X="29" Y="3434"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="287"/>
+        <CursorPos X="32" Y="302"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="2561" ID="4"/>
         </Bookmarks>
+        <Loaded Value="True"/>
       </Unit41>
       <Unit42>
         <Filename Value="libs\topologicalsort.pas"/>
@@ -687,7 +687,7 @@
         <Filename Value="common\checkdbintegrity.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CheckDBIntegrity"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="50"/>
         <CursorPos X="21" Y="68"/>
         <UsageCount Value="200"/>
@@ -700,7 +700,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fCheckDBIntegrity"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="8"/>
         <CursorPos X="29" Y="21"/>
         <UsageCount Value="201"/>
@@ -992,9 +992,13 @@
         <ComponentName Value="frmEditTableDataNew"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="13" Y="19"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="551"/>
+        <CursorPos Y="654"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit96>
       <Unit97>
         <Filename Value="ui\forign_key_table\foreign_key_table.pas"/>
@@ -1247,7 +1251,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="102"/>
         <CursorPos X="3" Y="104"/>
-        <UsageCount Value="155"/>
+        <UsageCount Value="161"/>
       </Unit121>
       <Unit122>
         <Filename Value="ui\bulk_export\u_bulk_export.pas"/>
@@ -1258,7 +1262,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="138"/>
         <CursorPos X="3" Y="140"/>
-        <UsageCount Value="110"/>
+        <UsageCount Value="116"/>
       </Unit122>
       <Unit123>
         <Filename Value="ui\data_studio\fdataformbase.pas"/>
@@ -1439,11 +1443,10 @@
       </Unit143>
       <Unit144>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="479"/>
         <CursorPos Y="508"/>
-        <UsageCount Value="48"/>
-        <Loaded Value="True"/>
+        <UsageCount Value="49"/>
       </Unit144>
       <Unit145>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\rtl\inc\objpash.inc"/>
@@ -1504,10 +1507,10 @@
       </Unit152>
       <Unit153>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\control.inc"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="3576"/>
         <CursorPos Y="3594"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit153>
       <Unit154>
@@ -1537,9 +1540,9 @@
       <Unit157>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.lfm"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="257"/>
-        <CursorPos X="56" Y="276"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="326"/>
+        <CursorPos X="17" Y="333"/>
+        <UsageCount Value="11"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit157>
     </Units>
@@ -1557,123 +1560,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="8942" TopLine="8923"/>
+        <Caret Line="3543" Column="16" TopLine="3537"/>
       </Position1>
       <Position2>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="8943" Column="70" TopLine="8923"/>
+        <Caret Line="9073" Column="21" TopLine="9060"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="236" Column="6" TopLine="219"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9108" Column="28" TopLine="9080"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="61" Column="24" TopLine="45"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9137" Column="21" TopLine="9109"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="117" Column="19" TopLine="104"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9139" Column="31" TopLine="9111"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="134" Column="43" TopLine="130"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9195" Column="23" TopLine="9167"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="64" Column="22" TopLine="48"/>
+        <Filename Value="ui\main\main.pas"/>
+        <Caret Line="9261" Column="17" TopLine="9233"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="119" Column="15" TopLine="106"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="3431" Column="22" TopLine="3425"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="142" Column="17" TopLine="114"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="8" Column="90"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="236" TopLine="220"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="14" Column="45"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="238" TopLine="220"/>
+        <Filename Value="common\turbocommon.pas"/>
+        <Caret Line="45" Column="12" TopLine="17"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="236" TopLine="220"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="1125" Column="36" TopLine="1115"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="232" Column="31" TopLine="232"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="15" Column="27"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="240" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="77" Column="12" TopLine="49"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="241" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="86" Column="19" TopLine="58"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="242" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="110" Column="19" TopLine="100"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="245" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="121" Column="34" TopLine="114"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="244" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="217" Column="21" TopLine="189"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="245" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="551" Column="19" TopLine="523"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="244" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="622" Column="25" TopLine="616"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="240" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="812" Column="42" TopLine="806"/>
       </Position21>
       <Position22>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="241" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="107" Column="34" TopLine="92"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="242" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="568" Column="46" TopLine="564"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="245" Column="9" TopLine="229"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="107" Column="34" TopLine="92"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="182" TopLine="164"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="577" Column="34" TopLine="555"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="219" Column="84" TopLine="215"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="552" TopLine="552"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="226" Column="21" TopLine="211"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="120" Column="36" TopLine="106"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\CheckDBIntegrity\fcheckdbintegrity.pas"/>
-        <Caret Line="24" Column="21" TopLine="7"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="214" Column="21" TopLine="186"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="8943" TopLine="8923"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="548" Column="19" TopLine="520"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="2171" Column="3" TopLine="2162"/>
+        <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.pas"/>
+        <Caret Line="598" Column="32" TopLine="587"/>
       </Position30>
     </JumpHistory>
     <RunParams>
