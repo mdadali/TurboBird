@@ -37,7 +37,7 @@ var
 //<USERCODE-BEGIN>
 // Add your code here (procedures, functions, types, variables)
 
-procedure EnsureComponents;
+{procedure EnsureComponents;
 begin
   if db <> nil then Exit;
 
@@ -93,6 +93,60 @@ begin
     OpenDialog.Free;
     OpenDialog := nil;
   end;
+end;
+}
+
+procedure EnsureComponents;
+begin
+  if db <> nil then Exit;
+
+  OpenDialog := TOpenDialog.Create(Form1);  // Owner = Form1
+
+  db := TUIBDatabase.Create(Form1);
+  db.Username := 'SYSDBA';
+  db.Password := 'masterkey';
+
+  tr := TUIBTransaction.Create(Form1);
+  tr.Database := db;
+
+  qr := TUIBDataSet.Create(Form1);
+  qr.Database := db;
+  qr.Transaction := tr;
+
+  DataSource := TDataSource.Create(Form1);
+  DataSource.DataSet := qr;
+  DBGrid1.DataSource := DataSource;
+end;
+
+procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+begin
+  // Nur die aktiven Zustände clean beenden – das Freigeben erledigt der Owner
+  if qr <> nil then
+  begin
+    if qr.Active then
+      qr.Close;
+    qr.Free;
+    qr := nil;
+  end;
+
+  if tr <> nil then
+  begin
+    //if tr.Intransaction then
+      tr.Commit;
+      tr.Free;
+      tr := nil;
+  end;
+
+  if db <> nil then
+  begin
+    if db.Connected then
+      db.Connected := False;
+    db.Free;
+    db := nil;
+  end;
+
+  //CloseAction := caFree;
+  // KEINE Free-Aufrufe – Form1 ist Owner und zerstört alles sauber
 end;
 
 procedure btnFirst_OnClick(Sender: TObject);

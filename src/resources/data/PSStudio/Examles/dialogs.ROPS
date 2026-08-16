@@ -1,0 +1,166 @@
+//<HEADER_COMMENTS-BEGIN>
+{
+  This script shows how to use Lazarus dialogs in PascalScript Studio.
+}
+//<HEADER_COMMENTS-END>
+
+//<USER-GLOBALS-BEGIN>
+//<USER-GLOBALS-END>
+
+//<DESIGNER-VARS-BEGIN>
+var
+  Form1: TForm;
+  Panel6: TPanel;
+//<DESIGNER-VARS-END>
+
+//<USERCODE-BEGIN>
+//CreateMessageDialog, 'CreateMessageDialog', cdRegister);
+//MessageDlg, 'MessageDlg', cdRegister);
+//MessageDlgPos, 'MessageDlgPos', cdRegister);
+//MessageDlgPosHelp, 'MessageDlgPosHelp', cdRegister);
+//ShowMessage, 'ShowMessage', cdRegister);
+//ShowMessagePos, 'ShowMessagePos', cdRegister);
+//InputBox, 'InputBox', cdRegister);
+//@_InputQuery, 'InputQuery', cdRegister);
+
+procedure ShowMessageDlg;
+begin
+  if MessageDlg('MessageDlg', mtConfirmation, [mbOK, mbCancel], 0) = mrOK then
+    WriteLn('OK Clicked')
+  else
+    WriteLn('Cancel Clicked')
+end;
+
+procedure ShowReplaceDialog;
+var ReplaceDialog: TReplaceDialog;
+begin
+  ReplaceDialog := TReplaceDialog.Create(Form1);
+  if ReplaceDialog.Execute then
+    WriteLn('Replaceprocess executed')
+  else
+   WriteLn('Replaceprocess canceled');
+
+  //ReplaceDialog.Free;
+end;
+
+procedure ShowFindDialog;
+var FindDialog: TFindDialog;
+begin
+  FindDialog := TFindDialog.Create(Form1);
+  if FindDialog.Execute then
+    WriteLn('Findprocess executed')
+  else
+   WriteLn('Findprocess canceled');
+
+  //FindDialog.Free;
+end;
+
+procedure ShowPrinterSetupDialog;
+var PrinterSetupDialog: TPrinterSetupDialog;
+begin
+  PrinterSetupDialog := TPrinterSetupDialog.Create(Form1);
+  if PrinterSetupDialog.Execute then
+    WriteLn('PrinterSetupDialog Process executed')
+  else
+   WriteLn('PrinterSetupDialog Process canceled');
+
+  PrinterSetupDialog.Free;
+end;
+
+procedure ShowPrintDialog;
+var PrintDialog: TPrintDialog;
+begin
+  PrintDialog := TPrintDialog.Create(Form1);
+  if PrintDialog.Execute then
+    WriteLn('Printprocess executed')
+  else
+   WriteLn('Printprocess canceled');
+
+  PrintDialog.Free;
+end;
+
+procedure ShowFontDialog;
+var FontDialog: TFontDialog;
+begin
+  FontDialog := TFontDialog.Create(Form1);
+  if FontDialog.Execute then
+    Form1.Font := FontDialog.Font;
+  FontDialog.Free;
+end;
+
+procedure ShowColorDialog;
+var ColorDialog: TColorDialog;
+begin
+  ColorDialog := TColorDialog.Create(Form1);
+  if ColorDialog.Execute then
+    Form1.Color := ColorDialog.Color;
+  ColorDialog.Free;
+end;
+
+procedure ShowSaveDialog;
+var SaveDialog: TSaveDialog;
+begin
+  SaveDialog := TSaveDialog.Create(Form1);
+  if SaveDialog.Execute then
+    WriteLn(SaveDialog.FileName);
+  SaveDialog.Free;
+end;
+
+procedure ShowOpenDialog;
+var OpenDialog: TOpenDialog;
+begin
+  OpenDialog := TOpenDialog.Create(Form1);
+  if OpenDialog.Execute then
+    WriteLn(OpenDialog.FileName);
+  OpenDialog.Free;
+end;
+
+procedure ExecuteDialogs;
+begin
+  ShowColorDialog;
+  ShowFontDialog;
+  ShowPrinterSetupDialog;
+  ShowPrintDialog;
+  ShowSaveDialog;
+  ShowOpenDialog;
+  ShowMessage('ShowMessage');
+  ShowMessageDlg;
+  ShowReplaceDialog;
+  ShowFindDialog;
+end;
+
+//<USERCODE-END>
+
+//<DESIGNER-BEGIN>
+procedure CreateNewForm;
+begin
+  Form1 := TForm.Create(nil);
+  Form1.SetBounds(95, 85, 790, 386);
+  Form1.Color := -2147483643;
+  Form1.Position := poDesigned;
+  Form1.Caption := 'Form1';
+
+  Panel6 := TPanel.Create(Form1);
+  Panel6.Parent := Form1;
+
+  Panel6.Left := 19;
+  Panel6.Top := 15;
+  Panel6.Width := 150;
+  Panel6.Height := 146;
+  Panel6.Visible := True;
+  Panel6.Enabled := True;
+  Panel6.Tag := 0;
+  Panel6.Caption := 'Font';
+  Panel6.Color := -2147483643;
+  //<EVENT_BINDINGS-BEGIN>
+  //<EVENT_BINDINGS-END>
+  Form1.Visible := True;
+end;
+//<DESIGNER-END>
+
+//<MAIN-BEGIN>
+begin
+  CreateNewForm;
+  ExecuteDialogs;
+end.
+//<MAIN-END>
