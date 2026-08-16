@@ -210,10 +210,9 @@ begin
 
     IBTableMain.TableName := FTableName;
     IBTableMain.Open;
+    DBGridMain.OptimizeColumnsWidthAll;
 
-    LoadDefaultCache; //Cache for Default Values
-
-    //DBGridMain.OptimizeColumnsWidthAll;
+    LoadDefaultCache; //Cache for Default Values  and Computed fields
 
     Result := True;
   except
@@ -566,7 +565,7 @@ procedure TfrmEditTableDataNew.LoadDefaultCache;
 var
   Query: TIBQuery;
   DefaultValue: string;
-  IsComputedValue: string;  // 👈 Name geändert (war: ComputedCheck)
+  FieldName: string;
 begin
   // Cache löschen
   if Assigned(FDefaultCache) then
@@ -582,70 +581,42 @@ begin
     Query.Database := IBDatabaseMain;
     Query.Transaction := transMain;
 
-    // Methode 1: Versuche mit RDB$COMPUTED_SOURCE
-    try
-      Query.SQL.Text :=
-        'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE, RDB$COMPUTED_SOURCE ' +
-        'FROM RDB$RELATION_FIELDS ' +
-        'WHERE RDB$RELATION_NAME = :TABLE_NAME';
-      Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
-      Query.Open;
+    // 1. Alle Felder mit DEFAULT laden
+    Query.SQL.Text :=
+      'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE ' +
+      'FROM RDB$RELATION_FIELDS ' +
+      'WHERE RDB$RELATION_NAME = :TABLE_NAME ' +
+      'AND RDB$DEFAULT_SOURCE IS NOT NULL';
+    Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
+    Query.Open;
 
-      while not Query.EOF do
-      begin
-        DefaultValue := Query.Fields[1].AsString;
-        if DefaultValue <> '' then
-          FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
+    while not Query.EOF do
+    begin
+      FieldName := Query.Fields[0].AsString;
+      DefaultValue := Query.Fields[1].AsString;
+      if DefaultValue <> '' then
+        FDefaultCache.Values[FieldName] := DefaultValue;
+      Query.Next;
+    end;
+    Query.Close;
 
-        IsComputedValue := Query.Fields[2].AsString;  // 👈 Geänderter Name
-        if IsComputedValue <> '' then
-          FComputedCache.Values[Query.Fields[0].AsString] := IsComputedValue;
+    // 2. Computed Fields laden (nur die mit COMPUTED_SOURCE)
+    Query.SQL.Text :=
+      'SELECT ' +
+      '  rf.RDB$FIELD_NAME AS FIELD_NAME ' +
+      'FROM RDB$RELATION_FIELDS rf ' +
+      'JOIN RDB$FIELDS f ON f.RDB$FIELD_NAME = rf.RDB$FIELD_SOURCE ' +
+      'WHERE rf.RDB$RELATION_NAME = :TABLE_NAME ' +
+      '  AND f.RDB$COMPUTED_SOURCE IS NOT NULL ' +
+      'ORDER BY rf.RDB$FIELD_POSITION';
+    Query.ParamByName('TABLE_NAME').AsString := MakeCaseSensitiveAuto(FTableName);
+    Query.Open;
 
-        Query.Next;
-      end;
-    except
-      // Methode 2: Versuche mit RDB$COMPUTED_BLR
-      Query.Close;
-      try
-        Query.SQL.Text :=
-          'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE, RDB$COMPUTED_BLR ' +
-          'FROM RDB$RELATION_FIELDS ' +
-          'WHERE RDB$RELATION_NAME = :TABLE_NAME';
-        Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
-        Query.Open;
-
-        while not Query.EOF do
-        begin
-          DefaultValue := Query.Fields[1].AsString;
-          if DefaultValue <> '' then
-            FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
-
-          IsComputedValue := Query.Fields[2].AsString;  // 👈 Geänderter Name
-          if IsComputedValue <> '' then
-            FComputedCache.Values[Query.Fields[0].AsString] := IsComputedValue;
-
-          Query.Next;
-        end;
-      except
-        // Methode 3: Fallback - Nur DEFAULTS laden
-        Query.Close;
-        Query.SQL.Text :=
-          'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE ' +
-          'FROM RDB$RELATION_FIELDS ' +
-          'WHERE RDB$RELATION_NAME = :TABLE_NAME ' +
-          'AND RDB$DEFAULT_SOURCE IS NOT NULL';
-        Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
-        Query.Open;
-
-        while not Query.EOF do
-        begin
-          DefaultValue := Query.Fields[1].AsString;
-          if DefaultValue <> '' then
-            FDefaultCache.Values[Query.Fields[0].AsString] := DefaultValue;
-
-          Query.Next;
-        end;
-      end;
+    while not Query.EOF do
+    begin
+      FieldName := Trim(Query.Fields[0].AsString);
+      FComputedCache.Values[FieldName] := 'COMPUTED'; // Markierung
+      Query.Next;
     end;
   finally
     Query.Free;
@@ -654,8 +625,12 @@ end;
 
 function TfrmEditTableDataNew.IsComputedField(const AFieldName: string): Boolean;
 begin
-  Result := Assigned(FComputedCache) and
-            (FComputedCache.Values[AFieldName] <> '');
+  Result := False;
+
+  if not Assigned(FComputedCache) then
+    Exit;
+
+  Result := FComputedCache.Values[Trim(AFieldName)] <> '';
 end;
 
 procedure TfrmEditTableDataNew.IBTableMainAfterInsert(DataSet: TDataSet);
