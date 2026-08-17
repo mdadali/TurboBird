@@ -725,8 +725,8 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="367"/>
-        <CursorPos X="26" Y="397"/>
+        <TopLine Value="214"/>
+        <CursorPos X="46" Y="244"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -1575,18 +1575,18 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="29" HistoryIndex="28">
+    <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="610" Column="32" TopLine="592"/>
+        <Caret Line="4639" Column="27" TopLine="4629"/>
       </Position1>
       <Position2>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4639" Column="27" TopLine="4629"/>
+        <Caret Line="4642" Column="29" TopLine="4629"/>
       </Position2>
       <Position3>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4642" Column="29" TopLine="4629"/>
+        <Caret Line="4624" Column="23" TopLine="4617"/>
       </Position3>
       <Position4>
         <Filename Value="ui\main\main.pas"/>
@@ -1594,104 +1594,108 @@
       </Position4>
       <Position5>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4624" Column="23" TopLine="4617"/>
+        <Caret Line="4628" Column="36" TopLine="4618"/>
       </Position5>
       <Position6>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4628" Column="36" TopLine="4618"/>
+        <Caret Line="4627" Column="36" TopLine="4617"/>
       </Position6>
       <Position7>
         <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4627" Column="36" TopLine="4617"/>
+        <Caret Line="4626" Column="27" TopLine="4617"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\main\main.pas"/>
-        <Caret Line="4626" Column="27" TopLine="4617"/>
+        <Filename Value="TurboBird.lpr"/>
+        <Caret Line="104" Column="42" TopLine="98"/>
       </Position8>
       <Position9>
         <Filename Value="TurboBird.lpr"/>
-        <Caret Line="104" Column="42" TopLine="98"/>
+        <Caret Line="106" TopLine="98"/>
       </Position9>
       <Position10>
         <Filename Value="TurboBird.lpr"/>
-        <Caret Line="106" TopLine="98"/>
+        <Caret Line="107" TopLine="98"/>
       </Position10>
       <Position11>
-        <Filename Value="TurboBird.lpr"/>
-        <Caret Line="107" TopLine="98"/>
-      </Position11>
-      <Position12>
         <Filename Value="ui\tablemanage\uniqueconstraints.pas"/>
         <Caret Line="14" Column="26"/>
+      </Position11>
+      <Position12>
+        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
+        <Caret Line="11" Column="19"/>
       </Position12>
       <Position13>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
-        <Caret Line="11" Column="19"/>
+        <Caret Line="352" Column="10" TopLine="350"/>
       </Position13>
       <Position14>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
-        <Caret Line="352" Column="10" TopLine="350"/>
+        <Caret Line="389" Column="28" TopLine="367"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
-        <Caret Line="389" Column="28" TopLine="367"/>
+        <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
+        <Caret Line="161" TopLine="144"/>
       </Position15>
       <Position16>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="161" TopLine="144"/>
+        <Caret Line="162" TopLine="144"/>
       </Position16>
       <Position17>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="162" TopLine="144"/>
+        <Caret Line="163" TopLine="144"/>
       </Position17>
       <Position18>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="163" TopLine="144"/>
+        <Caret Line="164" TopLine="144"/>
       </Position18>
       <Position19>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="164" TopLine="144"/>
+        <Caret Line="165" TopLine="144"/>
       </Position19>
       <Position20>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="165" TopLine="144"/>
+        <Caret Line="166" TopLine="144"/>
       </Position20>
       <Position21>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="166" TopLine="144"/>
+        <Caret Line="167" TopLine="144"/>
       </Position21>
       <Position22>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="167" TopLine="144"/>
+        <Caret Line="168" TopLine="144"/>
       </Position22>
       <Position23>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="168" TopLine="144"/>
+        <Caret Line="169" TopLine="144"/>
       </Position23>
       <Position24>
-        <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
-        <Caret Line="169" TopLine="144"/>
+        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
+        <Caret Line="397" TopLine="367"/>
       </Position24>
       <Position25>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
-        <Caret Line="397" TopLine="367"/>
+        <Caret Line="398" TopLine="367"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
-        <Caret Line="398" TopLine="367"/>
-      </Position26>
-      <Position27>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\customform.inc"/>
         <Caret Line="1005" TopLine="987"/>
-      </Position27>
-      <Position28>
+      </Position26>
+      <Position27>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
         <Caret Line="385" TopLine="368"/>
-      </Position28>
-      <Position29>
+      </Position27>
+      <Position28>
         <Filename Value="utils\gtk_theme_selector\uthemeselector.pas"/>
         <Caret Line="52" Column="25" TopLine="35"/>
+      </Position28>
+      <Position29>
+        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
+        <Caret Line="374" Column="29" TopLine="367"/>
       </Position29>
+      <Position30>
+        <Filename Value="ui\sqlmonitor\fsqlmonitor.pas"/>
+        <Caret Line="201" Column="14" TopLine="192"/>
+      </Position30>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
