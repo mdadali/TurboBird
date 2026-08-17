@@ -241,7 +241,7 @@ begin
   SearchHitLine := -1;
   SearchText := '';                  // NEU: zurücksetzen wenn nichts gefunden
   SynEditMonitor.Invalidate;
-  ShowMessage('"' + SearchText + '" nicht gefunden.');
+  ShowMessage('"' + SearchText + '" not found.');
 end;
 
 procedure TfmSQLMonitor.btnSearchNextClick(Sender: TObject);
