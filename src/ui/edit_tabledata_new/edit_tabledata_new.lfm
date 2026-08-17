@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 549
+  Left = 376
   Height = 507
-  Top = 202
+  Top = 198
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507

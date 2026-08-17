@@ -1,7 +1,7 @@
 object fmSQLMonitor: TfmSQLMonitor
-  Left = 429
+  Left = 320
   Height = 611
-  Top = 111
+  Top = 113
   Width = 955
   Caption = 'SQL Monitor'
   ClientHeight = 611

@@ -576,6 +576,10 @@ begin
   FDefaultCache := TStringList.Create;
   FComputedCache := TStringList.Create;
 
+  // Case-Insensitive
+  FDefaultCache.CaseSensitive := False;
+  FComputedCache.CaseSensitive := False;
+
   Query := TIBQuery.Create(nil);
   try
     Query.Database := IBDatabaseMain;
@@ -592,7 +596,7 @@ begin
 
     while not Query.EOF do
     begin
-      FieldName := Query.Fields[0].AsString;
+      FieldName := Trim(Query.Fields[0].AsString); // 👈 TRIM!
       DefaultValue := Query.Fields[1].AsString;
       if DefaultValue <> '' then
         FDefaultCache.Values[FieldName] := DefaultValue;
@@ -600,7 +604,7 @@ begin
     end;
     Query.Close;
 
-    // 2. Computed Fields laden (nur die mit COMPUTED_SOURCE)
+    // 2. Computed Fields laden
     Query.SQL.Text :=
       'SELECT ' +
       '  rf.RDB$FIELD_NAME AS FIELD_NAME ' +
@@ -609,13 +613,13 @@ begin
       'WHERE rf.RDB$RELATION_NAME = :TABLE_NAME ' +
       '  AND f.RDB$COMPUTED_SOURCE IS NOT NULL ' +
       'ORDER BY rf.RDB$FIELD_POSITION';
-    Query.ParamByName('TABLE_NAME').AsString := MakeCaseSensitiveAuto(FTableName);
+    Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
     Query.Open;
 
     while not Query.EOF do
     begin
-      FieldName := Trim(Query.Fields[0].AsString);
-      FComputedCache.Values[FieldName] := 'COMPUTED'; // Markierung
+      FieldName := Trim(Query.Fields[0].AsString); // 👈 TRIM!
+      FComputedCache.Values[FieldName] := 'COMPUTED';
       Query.Next;
     end;
   finally
@@ -653,10 +657,10 @@ begin
 
         if DefaultValue <> '' then
         begin
-          // Bereinige den Default-Wert
+          // 👇 WICHTIG: Erst Trimmen!
           CleanDefault := Trim(DefaultValue);
 
-          // "DEFAULT " entfernen
+          // Jetzt erst prüfen
           if UpperCase(Copy(CleanDefault, 1, 8)) = 'DEFAULT ' then
             Delete(CleanDefault, 1, 8);
 
@@ -664,11 +668,12 @@ begin
           CleanDefault := StringReplace(CleanDefault, '(', '', [rfReplaceAll]);
           CleanDefault := StringReplace(CleanDefault, ')', '', [rfReplaceAll]);
 
-          // Anführungszeichen entfernen
+          // Anführungszeichen entfernen (für Strings)
           CleanDefault := StringReplace(CleanDefault, '''', '', [rfReplaceAll]);
+
           CleanDefault := Trim(CleanDefault);
 
-          // Wert setzen
+          // Jetzt den Wert setzen
           case DataType of
             ftString, ftWideString, ftMemo, ftBlob:
               AsString := CleanDefault;
@@ -677,22 +682,9 @@ begin
               AsInteger := StrToIntDef(CleanDefault, 0);
 
             ftBoolean:
-              begin
-                // Firebird 2.5: Boolean als SMALLINT (0/1)
-                // Firebird 3.0+: Boolean als BOOLEAN
-                if FNodeInfos^.ServerVersionMajor < 3 then
-                begin
-                  // Firebird 2.5: 1 = True, 0 = False
-                  AsBoolean := (CleanDefault = '1') or
-                               (UpperCase(CleanDefault) = 'TRUE');
-                end
-                else
-                begin
-                  // Firebird 3.0+: Boolean als Boolean
-                  AsBoolean := (UpperCase(CleanDefault) = 'TRUE') or
-                               (CleanDefault = '1');
-                end;
-              end;
+              AsBoolean := (UpperCase(CleanDefault) = 'TRUE') or
+                           (CleanDefault = '1') or
+                           (UpperCase(CleanDefault) = '1');
 
             ftFloat, ftCurrency, ftBCD:
               AsFloat := StrToFloatDef(CleanDefault, 0);
