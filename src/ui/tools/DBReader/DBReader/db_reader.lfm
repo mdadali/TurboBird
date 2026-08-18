@@ -51,11 +51,11 @@ object frmDBReader: TfrmDBReader
     Height = 476
     Top = 74
     Width = 580
-    ActivePage = tsSettings
+    ActivePage = tsGrid
     Align = alClient
     Font.Color = clWindowText
     ParentFont = False
-    TabIndex = 4
+    TabIndex = 1
     TabOrder = 1
     OnChange = pgcMainChange
     object tsTableInfo: TTabSheet
@@ -675,6 +675,8 @@ object frmDBReader: TfrmDBReader
           Top = 72
           Width = 195
           Caption = 'Ignore outer Whiteppace'
+          Checked = True
+          State = cbChecked
           TabOrder = 0
         end
         object chkBoxFirstLineAsFieldName: TCheckBox
@@ -683,6 +685,8 @@ object frmDBReader: TfrmDBReader
           Top = 24
           Width = 180
           Caption = 'First Line as Fieldname'
+          Checked = True
+          State = cbChecked
           TabOrder = 1
         end
         object chkBoxQuoteOuterWhiteSpace: TCheckBox
