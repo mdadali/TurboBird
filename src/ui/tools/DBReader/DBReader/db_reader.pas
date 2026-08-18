@@ -664,54 +664,100 @@ var
   i, ii: Integer;
   s, ss, sSeparator: string;
   TmpRow: TDbRowItem;
-  QuoteChar: char;
+  QuoteChar: Char;
+  UseQuotes: Boolean;
+  FirstLineAsFieldName: Boolean;
+  IgnoreOuterWhiteSpace: Boolean;
+  QuoteOuterWhiteSpace: Boolean;
+
+  // Hilfsfunktion für korrektes Quoting
+  function QuoteString(const AStr: string): string;
+  begin
+    Result := AStr;
+    // Nur in Anführungszeichen setzen, wenn nötig
+    if QuoteOuterWhiteSpace or
+       (Pos(sSeparator, AStr) > 0) or
+       (Pos(QuoteChar, AStr) > 0) or
+       (Pos(#10, AStr) > 0) or
+       (Pos(#13, AStr) > 0) or
+       (Trim(AStr) <> AStr) then
+    begin
+      Result := QuoteChar + StringReplace(AStr, QuoteChar, QuoteChar + QuoteChar, [rfReplaceAll]) + QuoteChar;
+    end;
+  end;
+
 begin
+  // Keine Daten? -> Abbrechen
+  if not Assigned(FRowsList) or (FRowsList.Count = 0) then
+  begin
+    MessageDlg('No data to export!', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+
+  // Speicherort abfragen
+  if not SaveDialog.Execute then
+    Exit;
+  sFileName := SaveDialog.FileName;
+
+  // Einstellungen aus der GUI lesen
   QuoteChar := edtQuoteChar.Text[1];
-
   if chkBoxTabDelimiter.Checked then
-    sSeparator := #09 // TAB
+    sSeparator := #09  // TAB
   else
-   sSeparator := edtDelimiter.Text[1];
+    sSeparator := edtDelimiter.Text[1];
 
-   if SaveDialog.Execute then
-     sFileName := SaveDialog.FileName
-   else
-     Exit;
+  FirstLineAsFieldName := chkBoxFirstLineAsFieldName.Checked;
+  IgnoreOuterWhiteSpace := chkBoxIgnoreOuterWhiteSpace.Checked;
+  QuoteOuterWhiteSpace := chkBoxQuoteOuterWhiteSpace.Checked;
 
-  // export to stream
+  // Export starten
   fs := TFileStream.Create(sFileName, fmCreate);
   try
-    // column names
-    ss := '';
-    for ii := 0 to Length(FRowsList.FieldsDef) - 1 do
+    // 1. Header (Spaltennamen) - nur wenn gewünscht
+    if FirstLineAsFieldName then
     begin
-      s := FRowsList.FieldsDef[ii].Name;
-      if ss <> '' then
-        ss := ss + sSeparator;
-      ss := ss + s;
+      ss := '';
+      for ii := 0 to Length(FRowsList.FieldsDef) - 1 do
+      begin
+        s := FRowsList.FieldsDef[ii].Name;
+        if ss <> '' then
+          ss := ss + sSeparator;
+        ss := ss + QuoteString(s);
+      end;
+      StrToStream(ss, fs);
     end;
-    StrToStream(ss, fs);
 
-    // rows
+    // 2. Daten zeilenweise schreiben
     for i := 0 to FRowsList.Count - 1 do
     begin
       TmpRow := FRowsList.GetItem(i);
       ss := '';
+
       for ii := 0 to Length(FRowsList.FieldsDef) - 1 do
       begin
         s := TmpRow.GetFieldAsStr(ii);
-        if (Pos(sSeparator, s) > 0) then
-          s := QuotedStr(s);
+
+        // Whitespace entfernen (optional)
+        if IgnoreOuterWhiteSpace then
+          s := Trim(s);
+
+        // Wert in Anführungszeichen setzen (falls nötig)
+        s := QuoteString(s);
+
         if ss <> '' then
           ss := ss + sSeparator;
         ss := ss + s;
       end;
-      StrToStream(ss, fs);
 
+      StrToStream(ss, fs);
     end;
   finally
     fs.Free();
   end;
+
+  // Erfolgsmeldung
+  MessageDlg(Format('Export erfolgreich!'#13#10'Datei: %s'#13#10'Zeilen: %d',
+    [sFileName, FRowsList.Count]), mtInformation, [mbOK], 0);
 end;
 
 procedure TfrmDBReader.FillTree();
