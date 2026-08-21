@@ -12318,7 +12318,7 @@ end;
   {$ifend}
 {$endif}
 
-function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer; forward;
+//function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer; forward;
 
 procedure MyAllMethodsHandler;
 {$ifdef CPUX64}
@@ -12345,7 +12345,7 @@ asm
   mov edx, esp
   add edx, 16
   pop ecx
-  call MyAllMethodsHandler2
+ // call MyAllMethodsHandler2
   pop ecx
   mov edx, [esp]
   add esp, eax
