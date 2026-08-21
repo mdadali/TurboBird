@@ -70315,7 +70315,7 @@ object RestoreDlg: TRestoreDlg
     object SelectTab: TTabSheet
       Caption = 'SelectTab'
       ClientHeight = 598
-      ClientWidth = 673
+      ClientWidth = 679
       object Label2: TLabel
         Left = 12
         Height = 20
@@ -70335,7 +70335,7 @@ object RestoreDlg: TRestoreDlg
       end
       object __DBName: TEdit
         Left = 12
-        Height = 37
+        Height = 30
         Top = 136
         Width = 444
         TabOrder = 0
@@ -70351,7 +70351,7 @@ object RestoreDlg: TRestoreDlg
       end
       object SourceArchive: TEdit
         Left = 12
-        Height = 37
+        Height = 30
         Top = 88
         Width = 440
         TabOrder = 3
@@ -70409,7 +70409,7 @@ object RestoreDlg: TRestoreDlg
       end
       object PageSize: TEdit
         Left = 12
-        Height = 37
+        Height = 30
         Top = 400
         Width = 104
         NumbersOnly = True
@@ -70425,49 +70425,49 @@ object RestoreDlg: TRestoreDlg
       end
       object DeActivateIndexes: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 441
-        Width = 153
+        Width = 151
         Caption = 'Deactivate Indexes'
         TabOrder = 4
       end
       object NoShadow: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 464
-        Width = 319
+        Width = 317
         Caption = 'Do not recreate shadow files during restore'
         TabOrder = 5
       end
       object NoValidityCheck: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 488
-        Width = 353
+        Width = 351
         Caption = 'Do not enforce validity conditions during restore'
         TabOrder = 6
       end
       object OneRelationAtATime: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 512
-        Width = 337
+        Width = 335
         Caption = 'Commit after completing restore of each table'
         TabOrder = 7
       end
       object RestoreMetaDataOnly: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 536
-        Width = 181
+        Width = 179
         Caption = 'Restore MetaData Only'
         TabOrder = 8
       end
       object UseAllSpace: TCheckBox
         Left = 12
-        Height = 24
+        Height = 22
         Top = 560
-        Width = 439
+        Width = 437
         Caption = 'Do not reserve 20% of each data page for future rec. versions'
         TabOrder = 9
       end
@@ -70481,7 +70481,7 @@ object RestoreDlg: TRestoreDlg
       end
       object PageBuffers: TEdit
         Left = 205
-        Height = 37
+        Height = 30
         Top = 400
         Width = 107
         NumbersOnly = True
@@ -70489,7 +70489,7 @@ object RestoreDlg: TRestoreDlg
       end
       object cmbBoxServers: TComboBox
         Left = 12
-        Height = 36
+        Height = 32
         Top = 24
         Width = 440
         Enabled = False
@@ -70613,14 +70613,14 @@ object RestoreDlg: TRestoreDlg
         Top = 318
         Width = 248
         Caption = 'Restore'
-        ClientHeight = 27
-        ClientWidth = 246
+        ClientHeight = 26
+        ClientWidth = 244
         TabOrder = 12
         object ServerSideBtn: TRadioButton
           Left = 16
-          Height = 24
+          Height = 22
           Top = 0
-          Width = 102
+          Width = 100
           Caption = 'Server Side'
           Checked = True
           TabOrder = 0
@@ -70628,9 +70628,9 @@ object RestoreDlg: TRestoreDlg
         end
         object ClientSideBtn: TRadioButton
           Left = 136
-          Height = 24
+          Height = 22
           Top = 0
-          Width = 98
+          Width = 96
           Caption = 'Client Side'
           TabOrder = 1
         end
@@ -70641,22 +70641,22 @@ object RestoreDlg: TRestoreDlg
         Top = 318
         Width = 185
         Caption = 'Size'
-        ClientHeight = 27
-        ClientWidth = 183
+        ClientHeight = 26
+        ClientWidth = 181
         TabOrder = 13
         object rbPages: TRadioButton
           Left = 16
-          Height = 24
+          Height = 22
           Top = 0
-          Width = 66
+          Width = 64
           Caption = 'Pages'
           TabOrder = 0
         end
         object rbMBs: TRadioButton
           Left = 112
-          Height = 24
+          Height = 22
           Top = 0
-          Width = 55
+          Width = 53
           Caption = 'MBs'
           Checked = True
           TabOrder = 1
@@ -70667,13 +70667,13 @@ object RestoreDlg: TRestoreDlg
     object ReportTab: TTabSheet
       Caption = 'ReportTab'
       ClientHeight = 598
-      ClientWidth = 673
+      ClientWidth = 679
       OnShow = ReportTabShow
       object Report: TMemo
         Left = 0
         Height = 578
         Top = 0
-        Width = 673
+        Width = 679
         Align = alClient
         Lines.Strings = (
           'Report'
@@ -70685,7 +70685,7 @@ object RestoreDlg: TRestoreDlg
         Left = 0
         Height = 20
         Top = 578
-        Width = 673
+        Width = 679
         Align = alBottom
         Style = pbstMarquee
         TabOrder = 1

@@ -5574,7 +5574,7 @@ object fmMain: TfmMain
   Menu = MainMenu1
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '4.8.0.0'
+  LCLVersion = '4.7.0.0'
   WindowState = wsMaximized
   OnActivate = FormActivate
   OnClose = FormClose
@@ -9758,12 +9758,12 @@ object fmMain: TfmMain
     Font.Name = 'Ubuntu'
     MinFontSize = 0
     MaxFontSize = 0
-    Left = 496
-    Top = 312
+    Left = 424
+    Top = 336
   end
   object ImageList2: TImageList
     DrawingStyle = dsFocus
-    Left = 488
+    Left = 424
     Top = 224
     Bitmap = {
       4C7A060000001000000010000000E00E00000000000078DADD5879785455962F
