@@ -195,8 +195,7 @@ begin
       exit;
 
     if c is TSynEdit then
-      //exit;
-      continue;
+      exit;
 
     {if c is TSynEdit then
     begin

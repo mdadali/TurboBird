@@ -1,7 +1,7 @@
 object frmThemeSelector: TfrmThemeSelector
-  Left = 604
+  Left = 300
   Height = 590
-  Top = 97
+  Top = 591
   Width = 731
   Caption = 'Theme Selector'
   ClientHeight = 590
@@ -14,15 +14,15 @@ object frmThemeSelector: TfrmThemeSelector
   LCLVersion = '2.2.6.0'
   object lblSelectTheme: TLabel
     Left = 16
-    Height = 20
+    Height = 19
     Top = 16
-    Width = 94
+    Width = 87
     Caption = 'Select Theme:'
     ParentColor = False
   end
   object cbThemes: TComboBox
     Left = 16
-    Height = 36
+    Height = 35
     Top = 36
     Width = 448
     ItemHeight = 0
@@ -48,20 +48,20 @@ object frmThemeSelector: TfrmThemeSelector
     Top = 80
     Width = 592
     Caption = 'Preview'
-    ClientHeight = 459
+    ClientHeight = 460
     ClientWidth = 590
     TabOrder = 2
     object lblPreviewText: TLabel
       Left = 52
-      Height = 20
+      Height = 19
       Top = 16
-      Width = 85
+      Width = 77
       Caption = 'Sample Text:'
       ParentColor = False
     end
     object edtPreview: TEdit
       Left = 48
-      Height = 37
+      Height = 31
       Top = 49
       Width = 200
       TabOrder = 0
@@ -96,17 +96,17 @@ object frmThemeSelector: TfrmThemeSelector
     end
     object CheckBox1: TCheckBox
       Left = 48
-      Height = 24
+      Height = 21
       Top = 312
-      Width = 144
+      Width = 133
       Caption = 'Sample CheckBox'
       TabOrder = 4
     end
     object RadioButton1: TRadioButton
       Left = 48
-      Height = 24
+      Height = 21
       Top = 355
-      Width = 163
+      Width = 149
       Caption = 'Sample RadioButton'
       Checked = True
       TabOrder = 5
@@ -122,12 +122,12 @@ object frmThemeSelector: TfrmThemeSelector
         'Sample'
         'ListBox'
       )
-      ItemHeight = 26
+      ItemHeight = 23
       TabOrder = 6
     end
     object ComboBox1: TComboBox
       Left = 280
-      Height = 37
+      Height = 31
       Top = 157
       Width = 180
       ItemHeight = 0
@@ -142,7 +142,7 @@ object frmThemeSelector: TfrmThemeSelector
     end
     object ScrollBar1: TScrollBar
       Left = 280
-      Height = 13
+      Height = 20
       Top = 240
       Width = 172
       PageSize = 0
@@ -150,9 +150,9 @@ object frmThemeSelector: TfrmThemeSelector
     end
     object Label1: TLabel
       Left = 280
-      Height = 20
+      Height = 19
       Top = 219
-      Width = 114
+      Width = 102
       Caption = 'Sample ScrollBar'
       ParentColor = False
     end
@@ -170,7 +170,7 @@ object frmThemeSelector: TfrmThemeSelector
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1
-      ClientHeight = 132
+      ClientHeight = 133
       ClientWidth = 183
       Items.Strings = (
         'Item1'
