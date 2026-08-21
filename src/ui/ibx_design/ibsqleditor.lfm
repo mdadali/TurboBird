@@ -29,8 +29,9 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   inherited QuoteFields: TCheckBox
     Left = 11
+    Height = 19
     Top = 496
-    Width = 138
+    Width = 106
   end
   inherited PageControl: TPageControl
     Left = 68
@@ -38,66 +39,70 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
     ShowTabs = False
     TabIndex = 1
     inherited SelectPage: TTabSheet
-      ClientHeight = 452
+      ClientHeight = 448
+      ClientWidth = 224
       inherited Label1: TLabel
-        Height = 20
-        Width = 80
+        Height = 15
+        Width = 62
       end
       inherited Label2: TLabel
-        Height = 20
-        Width = 141
+        Height = 15
+        Width = 111
       end
       inherited Label4: TLabel
-        Height = 20
-        Width = 87
+        Height = 15
+        Width = 68
       end
       inherited SelectTableNames: TIBLookupComboEditBox
-        Height = 30
+        Height = 23
+        ItemHeight = 15
       end
       inherited FieldNamesGrid: TIBDynamicGrid
         Height = 104
       end
       inherited SelectSelectAll: TCheckBox
+        Height = 19
         Top = 424
-        Width = 147
-      end
-      inherited IncludeSysTables: TCheckBox
-        Width = 174
-      end
-      inherited Label6: TLabel
-        Height = 20
         Width = 115
       end
+      inherited IncludeSysTables: TCheckBox
+        Height = 19
+        Width = 134
+      end
+      inherited Label6: TLabel
+        Width = 91
+      end
       inherited Label5: TLabel
-        Height = 20
-        Width = 153
+        Width = 124
       end
       inherited ReadOnlyGrid: TIBDynamicGrid
         Left = 9
       end
     end
     inherited ExecutePage: TTabSheet
-      ClientHeight = 452
+      ClientHeight = 448
+      ClientWidth = 224
       inherited Label16: TLabel
         Left = 10
-        Height = 20
-        Width = 113
+        Height = 15
+        Width = 89
       end
       inherited Label17: TLabel
-        Height = 20
+        Height = 15
         Top = 128
-        Width = 118
+        Width = 90
       end
       inherited Label18: TLabel
-        Height = 20
+        Height = 15
         Top = 280
-        Width = 129
+        Width = 100
       end
       inherited ProcedureNames: TIBLookupComboEditBox
         Left = 10
-        Height = 32
+        Height = 23
         Top = 72
         Style = csDropDownList
+        ItemHeight = 15
       end
       inherited InputProcGrid: TIBDynamicGrid
         Left = 8
@@ -132,18 +137,19 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
           end>
       end
       inherited PackageNameLabel: TLabel
-        Height = 20
-        Width = 99
+        Height = 15
+        Width = 79
       end
       inherited PackageNames: TIBLookupComboEditBox
-        Height = 32
+        Height = 23
         Style = csDropDownList
+        ItemHeight = 15
       end
       object SelectProcedure: TLabel[8]
         Left = 10
-        Height = 16
-        Top = 103
-        Width = 145
+        Height = 13
+        Top = 102
+        Width = 135
         Anchors = [akLeft, akBottom]
         Caption = 'This is a ''Select Procedure'''
         Font.Height = -11
@@ -156,29 +162,30 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   inherited GenerateParams: TCheckBox
     Left = 11
+    Height = 19
     Top = 472
-    Width = 190
+    Width = 150
   end
   inherited Panel1: TPanel
     Left = 300
     Width = 470
     ClientWidth = 470
     inherited Label3: TLabel
-      Height = 20
+      Height = 15
       Width = 470
     end
     inherited IBSQLEditFrame1: TIBSQLEditFrame
-      Height = 436
-      Top = 20
+      Height = 441
+      Top = 15
       Width = 470
       Align = alClient
       AutoSize = True
-      ClientHeight = 436
+      ClientHeight = 441
       ClientWidth = 470
       DesignLeft = 1974
       DesignTop = 200
       inherited SQLText: TSynEdit
-        Height = 410
+        Height = 415
         Width = 470
       end
       inherited ToolBar1: TToolBar
@@ -191,7 +198,8 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
         end
       end
       inherited UserTables: TIBQuery
-        Top = 60
+        Left = 364
+        Top = 57
       end
       inherited FieldNameList: TIBQuery
         ParamData = <        
@@ -277,9 +285,9 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   object IncludePrimaryKeys: TCheckBox[9]
     Left = 11
-    Height = 22
+    Height = 19
     Top = 520
-    Width = 264
+    Width = 205
     Caption = 'Include Primary keys in Update SQL'
     TabOrder = 9
   end

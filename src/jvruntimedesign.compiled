@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Lazarus Version="4.7"/>
-  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1552186036"/>
-  <Params Value="-MObjFPC -Scghi -O1 -g -gl -l -vewnhibq -FuC:\Users\Admin\Downloads\tb\src\components\jvdesign\ -FuC:\fpcupdeluxe\lazarus\packager\units\i386-win32 -FuC:\fpcupdeluxe\lazarus\components\lazutils\lib\i386-win32 -FuC:\fpcupdeluxe\lazarus\components\freetype\lib\i386-win32 -FuC:\fpcupdeluxe\lazarus\lcl\units\i386-win32 -FuC:\fpcupdeluxe\lazarus\lcl\units\i386-win32\win32 -FUC:\Users\Admin\Downloads\tb\src\components\jvdesign\lib\i386-win32\ -dLCL -dLCLwin32 jvRuntimeDesign.pas"/>
-</CONFIG>
