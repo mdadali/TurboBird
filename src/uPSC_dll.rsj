@@ -1,0 +1,4 @@
+{"version":1,"strings":[
+{"hash":126285180,"name":"upsc_dll.rps_invalid_external","sourcebytes":[73,110,118,97,108,105,100,32,69,120,116,101,114,110,97,108],"value":"Invalid External"},
+{"hash":156316334,"name":"upsc_dll.rps_invalidcallingconvention","sourcebytes":[73,110,118,97,108,105,100,32,67,97,108,108,105,110,103,32,67,111,110,118,101,110,116,105,111,110],"value":"Invalid Calling Convention"}
+]}

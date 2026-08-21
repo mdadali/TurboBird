@@ -1350,7 +1350,7 @@
         <UnitName Value="NotNullConstraints"/>
       </Unit110>
       <Unit111>
-        <Filename Value="components/PascalScript/Source/PascalScript.inc"/>
+        <Filename Value="components/pascalscript/Source/PascalScript.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit111>
       <Unit112>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Lazarus Version="4.7"/>
+  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1552186036"/>
+  <Params Value="-MObjFPC -Scghi -O1 -g -gl -l -vewnibq -vh- -FiC:\Users\Admin\Downloads\tb\src\components\uib\source -FuC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\ -FuC:\Users\Admin\Downloads\tb\src\components\uib\misc\IFPS3 -FuC:\Users\Admin\Downloads\tb\src\components\uib\source -FUC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\lib\fcl\i386-win32\ -dPS_USESSUPPORT PascalScriptFCL.pas"/>
+</CONFIG>
