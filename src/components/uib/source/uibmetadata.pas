@@ -2599,16 +2599,15 @@ procedure TMetaDataBase.LoadFromDatabase(Transaction: TUIBTransaction);
 var
   I: Integer;
   ConStr, Str: string;
-  QNames, QFields, QCharset, QPrimary: TUIBQuery;
-  QIndex, QForeign, QCheck, QTrigger, QArrayDim: TUIBQuery;
-  QDependencies: TUIBQuery;
-  QDefaultCharset, QGrants, QFieldGrants: TUIBQuery;
-  procedure Configure(var Q: TUIBQuery; const Qry: string;
+  QNames, QFields, QCharset, QPrimary: TUIBStatement;
+  QIndex, QForeign, QCheck, QTrigger, QArrayDim: TUIBStatement;
+  QDependencies: TUIBStatement;
+  QDefaultCharset, QGrants, QFieldGrants: TUIBStatement;
+  procedure Configure(var Q: TUIBStatement; const Qry: string;
     CachedFetch: Boolean = False);
   begin
-    Q := TUIBQuery.Create(nil);
+    Q := TUIBStatement.Create{$IFNDEF UIB_NO_COMPONENT}(nil){$ENDIF};
     Q.Transaction := Transaction;
-    Q.Database := Transaction.DataBase;   //WICHTIG
     Q.CachedFetch := CachedFetch;
     Q.SQL.Text := Qry;
   end;
