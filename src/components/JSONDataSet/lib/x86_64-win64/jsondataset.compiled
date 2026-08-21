@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Lazarus Version="4.7"/>
+  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1552186036"/>
+  <Params Value="-Twin64 -Px86_64 -MObjFPC -Scghi -O1 -g -gl -l -vewnhibq -FuC:\Users\Admin\Downloads\tb\src\components\JSONDataSet\ -FuC:\fpcupdeluxe\lazarus\packager\units\x86_64-win64 -FUC:\Users\Admin\Downloads\tb\src\components\JSONDataSet\lib\x86_64-win64\ jsondataset.pas"/>
+</CONFIG>
