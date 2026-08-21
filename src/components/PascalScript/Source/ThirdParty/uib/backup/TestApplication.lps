@@ -17,7 +17,6 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="61"/>
         <CursorPos X="5" Y="76"/>
@@ -46,9 +45,10 @@
       <Unit>
         <Filename Value="uPSI_uiblib.pas"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="244"/>
-        <CursorPos X="17" Y="245"/>
+        <TopLine Value="43"/>
+        <CursorPos X="2" Y="57"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit>
@@ -77,7 +77,7 @@
         <UsageCount Value="10"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="22">
+    <JumpHistory HistoryIndex="21">
       <Position>
         <Filename Value="fMain.pas"/>
       </Position>
@@ -164,10 +164,6 @@
       <Position>
         <Filename Value="uPSI_uiblib.pas"/>
         <Caret Line="11" Column="2"/>
-      </Position>
-      <Position>
-        <Filename Value="uPSI_uiblib.pas"/>
-        <Caret Line="57" Column="2" TopLine="43"/>
       </Position>
     </JumpHistory>
     <RunParams>

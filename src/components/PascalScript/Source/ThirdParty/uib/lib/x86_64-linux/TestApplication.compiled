@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Compiler Value="/usr/bin/fpc" Date="1625802185"/>
+  <Params Value="-MDelphi -Scghi -Cg -O1 -gw3 -gl -l -vewnhibq -Fi/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/ThirdParty/uib/lib/x86_64-linux -Fi/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/source -Fu/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/ThirdParty/uib/ -Fu/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/lib/x86_64-linux -Fu/home/vincenzo/lazarus48/lcl/units/x86_64-linux/gtk2 -Fu/home/vincenzo/lazarus48/lcl/units/x86_64-linux -Fu/home/vincenzo/lazarus48/components/freetype/lib/x86_64-linux -Fu/home/vincenzo/lazarus48/components/lazutils/lib/x86_64-linux -Fu/home/vincenzo/lazarus48/packager/units/x86_64-linux -FE/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/ThirdParty/uib/lib/x86_64-linux/ -o/home/vincenzo/Downloads/tb/src/components/PascalScript/Source/ThirdParty/uib/lib/x86_64-linux/TestApplication -dLCL -dLCLgtk2 -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL TestApplication.lpr"/>
+  <Complete Value="False"/>
+</CONFIG>

@@ -82,7 +82,7 @@ begin
   RIRegister_uibmetadata(x);
   RIRegister_uibsqlparser(x);
   RIRegister_uib(x);
- // RIRegister_DB_Routines(x);  //und auch das wird ausgeführt
+  RIRegister_DB_Routines(x);  //und auch das wird ausgeführt
   RIRegister_TUIBDataSet_Routines(x);
 
   RIRegister_DBControls(x);

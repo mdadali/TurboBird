@@ -54,7 +54,7 @@ uses
   ,uibase
   ,uiberror
   ,uiblib
-
+  ,uibdataset
   ,uib
   ;
 
