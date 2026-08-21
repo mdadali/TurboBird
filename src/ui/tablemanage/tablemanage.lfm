@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 326
+  Left = 178
   Height = 537
-  Top = 97
+  Top = 182
   Width = 1184
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -363,7 +363,7 @@ object fmTableManage: TfmTableManage
         Align = alBottom
         BorderSpacing.Around = 5
         Caption = 'Create New Index'
-        ClientHeight = 213
+        ClientHeight = 194
         ClientWidth = 1152
         TabOrder = 2
         object cbIndexType: TComboBox

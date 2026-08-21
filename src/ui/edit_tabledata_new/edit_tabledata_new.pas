@@ -20,18 +20,19 @@ type
   { TfrmEditTableDataNew }
 
   TfrmEditTableDataNew = class(TForm)
-    cboxFilterField: TComboBox;
     chkBoxCasesensitive: TCheckBox;
     chkBoxUseFilter: TCheckBox;
+    cboxFilterField: TComboBox;
+    DBGridMain: TDBGrid;
     DBNavigator1: TDBNavigator;
     dbnavMainTableFormView: TDBNavigator;
     dsMain: TDataSource;
     edtFilterValue: TEdit;
-    grboxTableFilter: TGroupBox;
     IBDatabaseMain: TIBDatabase;
     IBTableMain: TIBTable;
     Label1: TLabel;
     Label2: TLabel;
+    lmCopyCell: TMenuItem;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmExportDataAsPDF: TMenuItem;
@@ -42,11 +43,11 @@ type
     lmStdExportFormats: TMenuItem;
     PageControl1: TPageControl;
     pmGrid: TPopupMenu;
+    pnlTableFilter: TPanel;
     pnlFKTablesCaption: TPanel;
     pnlMainTable: TPanel;
     pnlMainTableCaption: TPanel;
     pnlRecord: TScrollBox;
-    DBGridMain: TRxDBGrid;
     Separator1: TMenuItem;
     Separator2: TMenuItem;
     tsMainTableGrid: TTabSheet;
@@ -54,7 +55,6 @@ type
     transMain: TIBTransaction;
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
-    procedure chkBoxCasesensitiveChange(Sender: TObject);
     procedure chkBoxUseFilterChange(Sender: TObject);
     procedure dsMainStateChange(Sender: TObject);
     procedure edtFilterValueChange(Sender: TObject);
@@ -65,9 +65,6 @@ type
     procedure IBTableMainAfterScroll(DataSet: TDataSet);
     procedure IBTableMainBeforePost(DataSet: TDataSet);
     procedure IBTableMainBeforeRefresh(DataSet: TDataSet);
-    procedure lmExportDataAsHtmlClick(Sender: TObject);
-    procedure lmExportDataAsMarkDownTableClick(Sender: TObject);
-    procedure lmExportToClipboardClick(Sender: TObject);
     procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
@@ -79,9 +76,6 @@ type
     FForeignKeyForms: array of TfrmForeignKeyTable;
 
     FFilterField: string;
-
-    FDefaultCache: TStringList; // FieldName -> DefaultValue
-    FComputedCache: TStringList;
 
     function  InitDB: boolean;
     function  OpenDB: boolean;
@@ -103,8 +97,6 @@ type
     procedure LoacateForeignKeyTablesRecord(DataSet: TDataSet);
     procedure EnableFKTables(AEnable: Boolean);
 
-    procedure LoadDefaultCache;
-    function IsComputedField(const AFieldName: string): Boolean;
   public
     procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer; ATableName: string);
   end;
@@ -210,9 +202,8 @@ begin
 
     IBTableMain.TableName := FTableName;
     IBTableMain.Open;
-    DBGridMain.OptimizeColumnsWidthAll;
 
-    LoadDefaultCache; //Cache for Default Values  and Computed fields
+    //DBGridMain.OptimizeColumnsWidthAll;
 
     Result := True;
   except
@@ -278,16 +269,6 @@ begin
   Abort;
 end;
 
-procedure TfrmEditTableDataNew.lmExportDataAsHtmlClick(Sender: TObject);
-begin
-  if IBTableMain.IsEmpty then
-  begin
-    ShowMessage('DataSet has no records!');
-    exit;
-  end;
-  ExportDataHtml(IBTableMain);
-end;
-
 procedure TfrmEditTableDataNew.EnableFKTables(AEnable: Boolean);
 var
   i: Integer;
@@ -325,81 +306,6 @@ begin
     end;
   finally
     EnableFKTables(True);                   // FK-Tabellen wieder öffnen
-  end;
-end;
-
-procedure TfrmEditTableDataNew.lmExportDataAsMarkDownTableClick(Sender: TObject);
-begin
-  if IBTableMain.IsEmpty then
-  begin
-    ShowMessage('DataSet has no records!');
-    exit;
-  end;
-
-  ExportDataMarkDownTable(IBTableMain);
-end;
-
-procedure TfrmEditTableDataNew.lmExportToClipboardClick(Sender: TObject);
-var
-  MaxExportRows, RowCount, CopiedRows: Integer;
-  MsgText: string;
-begin
-
-  if IBTableMain.IsEmpty then
-  begin
-    MessageDlg('DataSet has no records!', mtError, [mbOK], 0);
-    Exit;
-  end;
-
-  // --- Max rows load from INI---
-  MaxExportRows := fIniFile.ReadInteger('ClipboardExport', 'MaxExportRows', -1);
-  if MaxExportRows <= 0 then
-  begin
-    if MaxExportRows = -1 then
-    begin
-      MaxExportRows := 200;
-      fIniFile.WriteInteger('ClipboardExport', 'MaxExportRows', MaxExportRows);
-      MessageDlg('No valid MaxExportRows entry found in turbobird.ini. Default 200 has been set.', mtWarning, [mbOK], 0);
-    end
-    else
-    begin
-      MessageDlg('MaxExportRows is set to 0 in turbobird.ini. ' +
-                 'Exporting very large tables may cause program or system crash!', mtWarning, [mbOK], 0);
-    end;
-  end;
-
-  RowCount := IBTableMain.RecordCount;
-
-  if (MaxExportRows > 0) and (RowCount > MaxExportRows) then
-  begin
-    MessageDlg(
-      'The result contains ' + IntToStr(RowCount) + ' rows, which exceeds the export limit of ' +
-      IntToStr(MaxExportRows) + ' rows.'#13#10 +
-      'Only the first ' + IntToStr(MaxExportRows) + ' rows will be copied to the clipboard.'#13#10#13#10 +
-      'You can change this limit in turbobird.ini under [ClipboardExport].',
-      mtWarning, [mbOK], 0
-    );
-  end;
-
-  if MaxExportRows = 0 then
-    CopiedRows := RowCount
-  else if RowCount > MaxExportRows then
-    CopiedRows := MaxExportRows
-  else
-    CopiedRows := RowCount;
-
-  // --- Export ---
-  try
-    IBTableMain.DisableControls;
-    ExportDataToClipboard(IBTableMain, MaxExportRows);
-
-    MsgText := 'Successfully copied ' + IntToStr(CopiedRows) + ' records to the clipboard.';
-    if MaxExportRows = 0 then
-      MsgText := MsgText + ' (Warning: no export limit set in turbobird.ini! Large tables may cause program/system crash.)';
-
-    MessageDlg(MsgText, mtInformation, [mbOK], 0);
-  finally
-    IBTableMain.EnableControls;
   end;
 end;
 
@@ -482,12 +388,6 @@ end;
 procedure TfrmEditTableDataNew.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
-  if Assigned(FDefaultCache) then
-    FreeAndNil(FDefaultCache);
-
-  if Assigned(FComputedCache) then
-    FreeAndNil(FComputedCache);
-
   CloseDB;
 
   if Assigned(FNodeInfos) then
@@ -515,16 +415,6 @@ begin
       Format('UPPER(%s) LIKE ''%s%%''', [cboxFilterField.Text, UpperCase(edtFilterValue.Text)]);
 end;
 
-procedure TfrmEditTableDataNew.chkBoxCasesensitiveChange(Sender: TObject);
-begin
-  IBTableMain.Close;
-  IBTableMain.Filtered := False;
-
-  SetTableFilter;
-  IBTableMain.Filtered := True;
-  IBTableMain.Open;
-end;
-
 procedure TfrmEditTableDataNew.edtFilterValueChange(Sender: TObject);
 begin
   IBTableMain.Close;
@@ -544,7 +434,6 @@ begin
   end;
   IBTableMain.Filtered := chkBoxUseFilter.Checked;
   IBTableMain.Open;
-  LoadDefaultCache; //Cache neu laden
 end;
 
 procedure TfrmEditTableDataNew.FormCreate(Sender: TObject);
@@ -561,154 +450,21 @@ begin
     cboxFilterField.ItemIndex := 0;
 end;
 
-procedure TfrmEditTableDataNew.LoadDefaultCache;
-var
-  Query: TIBQuery;
-  DefaultValue: string;
-  FieldName: string;
-begin
-  // Cache löschen
-  if Assigned(FDefaultCache) then
-    FreeAndNil(FDefaultCache);
-  if Assigned(FComputedCache) then
-    FreeAndNil(FComputedCache);
-
-  FDefaultCache := TStringList.Create;
-  FComputedCache := TStringList.Create;
-
-  // Case-Insensitive
-  FDefaultCache.CaseSensitive := False;
-  FComputedCache.CaseSensitive := False;
-
-  Query := TIBQuery.Create(nil);
-  try
-    Query.Database := IBDatabaseMain;
-    Query.Transaction := transMain;
-
-    // 1. Alle Felder mit DEFAULT laden
-    Query.SQL.Text :=
-      'SELECT RDB$FIELD_NAME, RDB$DEFAULT_SOURCE ' +
-      'FROM RDB$RELATION_FIELDS ' +
-      'WHERE RDB$RELATION_NAME = :TABLE_NAME ' +
-      'AND RDB$DEFAULT_SOURCE IS NOT NULL';
-    Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
-    Query.Open;
-
-    while not Query.EOF do
-    begin
-      FieldName := Trim(Query.Fields[0].AsString); // 👈 TRIM!
-      DefaultValue := Query.Fields[1].AsString;
-      if DefaultValue <> '' then
-        FDefaultCache.Values[FieldName] := DefaultValue;
-      Query.Next;
-    end;
-    Query.Close;
-
-    // 2. Computed Fields laden
-    Query.SQL.Text :=
-      'SELECT ' +
-      '  rf.RDB$FIELD_NAME AS FIELD_NAME ' +
-      'FROM RDB$RELATION_FIELDS rf ' +
-      'JOIN RDB$FIELDS f ON f.RDB$FIELD_NAME = rf.RDB$FIELD_SOURCE ' +
-      'WHERE rf.RDB$RELATION_NAME = :TABLE_NAME ' +
-      '  AND f.RDB$COMPUTED_SOURCE IS NOT NULL ' +
-      'ORDER BY rf.RDB$FIELD_POSITION';
-    Query.ParamByName('TABLE_NAME').AsString := UpperCase(FTableName);
-    Query.Open;
-
-    while not Query.EOF do
-    begin
-      FieldName := Trim(Query.Fields[0].AsString); // 👈 TRIM!
-      FComputedCache.Values[FieldName] := 'COMPUTED';
-      Query.Next;
-    end;
-  finally
-    Query.Free;
-  end;
-end;
-
-function TfrmEditTableDataNew.IsComputedField(const AFieldName: string): Boolean;
-begin
-  Result := False;
-
-  if not Assigned(FComputedCache) then
-    Exit;
-
-  Result := FComputedCache.Values[Trim(AFieldName)] <> '';
-end;
-
 procedure TfrmEditTableDataNew.IBTableMainAfterInsert(DataSet: TDataSet);
 var
   i: Integer;
-  DefaultValue: string;
-  CleanDefault: string;
 begin
-  for i := 0 to DataSet.FieldCount - 1 do
-  begin
-    with DataSet.Fields[i] do
+  {for i := 0 to DataSet.FieldCount - 1 do
+    if DataSet.Fields[i] is TIBArrayField then
     begin
-      if IsNull then
-      begin
-        // Aus dem Cache lesen
-        if Assigned(FDefaultCache) then
-          DefaultValue := FDefaultCache.Values[FieldName]
-        else
-          DefaultValue := '';
-
-        if DefaultValue <> '' then
-        begin
-          // 👇 WICHTIG: Erst Trimmen!
-          CleanDefault := Trim(DefaultValue);
-
-          // Jetzt erst prüfen
-          if UpperCase(Copy(CleanDefault, 1, 8)) = 'DEFAULT ' then
-            Delete(CleanDefault, 1, 8);
-
-          // Klammern entfernen
-          CleanDefault := StringReplace(CleanDefault, '(', '', [rfReplaceAll]);
-          CleanDefault := StringReplace(CleanDefault, ')', '', [rfReplaceAll]);
-
-          // Anführungszeichen entfernen (für Strings)
-          CleanDefault := StringReplace(CleanDefault, '''', '', [rfReplaceAll]);
-
-          CleanDefault := Trim(CleanDefault);
-
-          // Jetzt den Wert setzen
-          case DataType of
-            ftString, ftWideString, ftMemo, ftBlob:
-              AsString := CleanDefault;
-
-            ftInteger, ftSmallint, ftWord, ftLargeint:
-              AsInteger := StrToIntDef(CleanDefault, 0);
-
-            ftBoolean:
-              AsBoolean := (UpperCase(CleanDefault) = 'TRUE') or
-                           (CleanDefault = '1') or
-                           (UpperCase(CleanDefault) = '1');
-
-            ftFloat, ftCurrency, ftBCD:
-              AsFloat := StrToFloatDef(CleanDefault, 0);
-
-            ftDateTime:
-              AsDateTime := StrToDateTimeDef(CleanDefault, Now);
-
-            ftDate:
-              AsDateTime := StrToDateDef(CleanDefault, Date);
-
-            ftTime:
-              AsDateTime := StrToTimeDef(CleanDefault, Time);
-          end;
-        end;
-      end;
-    end;
-  end;
+      AArrayGrid.DataSource := nil;
+    end;}
 end;
 
 procedure TfrmEditTableDataNew.CreateDynamicControls;
 var
   ALabel: TLabel;
   ADBEdit: TDBEdit;
-  ADBCheckBox: TDBCheckBox;
   ADBMemo: TDBMemo;
   ADBDateTime: TDBDateTimePicker;
   AArrayGrid: TIBArrayGrid;
@@ -716,28 +472,15 @@ var
   ATop: Integer;
   LabelWidth: Integer;
   ControlLeft: Integer;
-  IsComputed: Boolean;
-  IsFK: Boolean;
-  HasDefault: Boolean;
-  DefaultValue: string;
 begin
   ATop := 20;
   VSpacing := 10;
 
-  LabelWidth := 200;
+  LabelWidth := 200;        // feste Labelbreite (für sauberes Layout)
   ControlLeft := 20 + LabelWidth + 10;
 
   for i := 0 to IBTableMain.FieldCount - 1 do
   begin
-    // Feldstatus vorab prüfen
-    IsFK := IsForeignKeyField(IBTableMain.Fields[i].FieldName);
-    IsComputed := IsComputedField(IBTableMain.Fields[i].FieldName);
-    DefaultValue := '';
-    HasDefault := Assigned(FDefaultCache) and
-                  (FDefaultCache.Values[IBTableMain.Fields[i].FieldName] <> '');
-    if HasDefault then
-      DefaultValue := FDefaultCache.Values[IBTableMain.Fields[i].FieldName];
-
     // ===== LABEL =====
     ALabel := TLabel.Create(pnlRecord);
     ALabel.Parent := pnlRecord;
@@ -747,21 +490,10 @@ begin
     ALabel.WordWrap := True;
     ALabel.Caption := IBTableMain.Fields[i].FieldName;
 
-    // Farbcodierung für Feldtypen
-    if IsComputed then
-    begin
-      ALabel.Font.Color := clBlue;
-      ALabel.Caption := ALabel.Caption + ' (computed)';
-    end
-    else if IsFK then
+    if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
     begin
       ALabel.Font.Color := clRed;
       ALabel.Caption := ALabel.Caption + ' (Foreign Key)';
-    end
-    else if HasDefault then
-    begin
-      ALabel.Font.Color := clGreen;
-      ALabel.Caption := ALabel.Caption + ' (default)';
     end;
 
     // ===== ARRAY =====
@@ -775,7 +507,7 @@ begin
         AArrayGrid.Top := ATop + VSpacing;
         AArrayGrid.Anchors := [akLeft, akTop, akRight];
 
-        if IsFK or IsComputed then
+        if IsForeignKeyField(FieldName) then
           AArrayGrid.Enabled := False;
 
         if ArrayDimensions = 1 then
@@ -800,7 +532,9 @@ begin
           AArrayGrid.Height := 30;
         end;
 
+        // 👉 volle Breite nutzen
         AArrayGrid.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+
         AArrayGrid.DataSource := dsMain;
         AArrayGrid.DataField := FieldName;
 
@@ -810,92 +544,65 @@ begin
       Continue;
     end;
 
-    // ===== BOOLEAN =====
-    if IBTableMain.Fields[i].DataType = ftBoolean then
-    begin
-      ADBCheckBox := TDBCheckBox.Create(pnlRecord);
-      ADBCheckBox.Parent := pnlRecord;
-      ADBCheckBox.Left := ControlLeft;
-      ADBCheckBox.Top := ATop + VSpacing;
-      ADBCheckBox.Width := 180;
-      ADBCheckBox.Anchors := [akLeft, akTop];
+    // ===== STANDARD FELDER =====
+    case IBTableMain.Fields[i].DataType of
 
-      ADBCheckBox.DataSource := dsMain;
-      ADBCheckBox.DataField := IBTableMain.Fields[i].FieldName;
-      ADBCheckBox.Caption := 'Active';
+      ftBlob, ftMemo:
+        begin
+          ADBMemo := TDBMemo.Create(pnlRecord);
+          ADBMemo.Parent := pnlRecord;
+          ADBMemo.Left := ControlLeft;
+          ADBMemo.Top := ATop + VSpacing;
+          ADBMemo.Height := 200;
+          ADBMemo.Anchors := [akLeft, akTop, akRight];
 
-      if IsFK or IsComputed then
-        ADBCheckBox.Enabled := False;
+          // 👉 volle Breite
+          ADBMemo.Width := pnlRecord.ClientWidth - ControlLeft - 10;
 
-      if HasDefault then
-      begin
-        ADBCheckBox.Color := clInfoBk;
-        ADBCheckBox.Hint := 'Default: ' + DefaultValue;
-        ADBCheckBox.ShowHint := True;
-      end;
+          ADBMemo.ScrollBars := ssBoth;
+          ADBMemo.DataSource := dsMain;
+          ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
 
-      Inc(ATop, ADBCheckBox.Height + VSpacing);
-      Continue;
-    end;
+          Inc(ATop, ADBMemo.Height + VSpacing * 2);
+        end;
 
-    // ===== BLOB / MEMO =====
-    if (IBTableMain.Fields[i].DataType = ftBlob) or
-       (IBTableMain.Fields[i].DataType = ftMemo) then
-    begin
-      ADBMemo := TDBMemo.Create(pnlRecord);
-      ADBMemo.Parent := pnlRecord;
-      ADBMemo.Left := ControlLeft;
-      ADBMemo.Top := ATop + VSpacing;
-      ADBMemo.Height := 200;
-      ADBMemo.Anchors := [akLeft, akTop, akRight];
-      ADBMemo.Width := pnlRecord.ClientWidth - ControlLeft - 10;
-      ADBMemo.ScrollBars := ssBoth;
-      ADBMemo.DataSource := dsMain;
-      ADBMemo.DataField := IBTableMain.Fields[i].FieldName;
+      ftDate, ftTime, ftDateTime:
+        begin
+          ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
+          ADBDateTime.Parent := pnlRecord;
+          ADBDateTime.Left := ControlLeft;
+          ADBDateTime.Top := ATop + VSpacing;
+          ADBDateTime.Width := 180; // bewusst fix (UX besser)
+          ADBDateTime.Anchors := [akLeft, akTop];
 
-      if IsFK or IsComputed then
-        ADBMemo.Enabled := False;
+          ADBDateTime.DataSource := dsMain;
+          ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
 
-      Inc(ATop, ADBMemo.Height + VSpacing * 2);
-      Continue;
-    end;
+          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+            ADBDateTime.Enabled := False;
 
-    // ===== DATE / TIME / DATETIME =====
-    if (IBTableMain.Fields[i].DataType = ftDate) or
-       (IBTableMain.Fields[i].DataType = ftTime) or
-       (IBTableMain.Fields[i].DataType = ftDateTime) then
-    begin
-      ADBDateTime := TDBDateTimePicker.Create(pnlRecord);
-      ADBDateTime.Parent := pnlRecord;
-      ADBDateTime.Left := ControlLeft;
-      ADBDateTime.Top := ATop + VSpacing;
-      ADBDateTime.Width := 180;
-      ADBDateTime.Anchors := [akLeft, akTop];
-      ADBDateTime.DataSource := dsMain;
-      ADBDateTime.DataField := IBTableMain.Fields[i].FieldName;
+          Inc(ATop, ADBDateTime.Height + VSpacing);
+        end;
 
-      if IsFK or IsComputed then
-        ADBDateTime.Enabled := False;
+      else
+        begin
+          ADBEdit := TDBEdit.Create(pnlRecord);
+          ADBEdit.Parent := pnlRecord;
+          ADBEdit.Left := ControlLeft;
+          ADBEdit.Top := ATop + VSpacing;
+          ADBEdit.Anchors := [akLeft, akTop, akRight];
 
-      Inc(ATop, ADBDateTime.Height + VSpacing);
-      Continue;
-    end;
+          ADBEdit.DataSource := dsMain;
+          ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
 
-    // ===== ALLE ANDEREN FELDER (Standard: TDBEdit) =====
-    begin
-      ADBEdit := TDBEdit.Create(pnlRecord);
-      ADBEdit.Parent := pnlRecord;
-      ADBEdit.Left := ControlLeft;
-      ADBEdit.Top := ATop + VSpacing;
-      ADBEdit.Anchors := [akLeft, akTop, akRight];
-      ADBEdit.DataSource := dsMain;
-      ADBEdit.DataField := IBTableMain.Fields[i].FieldName;
-      ADBEdit.Width := pnlRecord.ClientWidth - ControlLeft - 10;
+          if IsForeignKeyField(IBTableMain.Fields[i].FieldName) then
+            ADBEdit.Enabled := False;
 
-      if IsFK or IsComputed then
-        ADBEdit.Enabled := False;
+          // 👉 volle Breite
+          ADBEdit.Width := pnlRecord.ClientWidth - ControlLeft - 10;
 
-      Inc(ATop, ADBEdit.Height + VSpacing);
+          Inc(ATop, ADBEdit.Height + VSpacing);
+        end;
     end;
   end;
 

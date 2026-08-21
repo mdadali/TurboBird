@@ -1,7 +1,7 @@
 object fmCloneToExternalTable: TfmCloneToExternalTable
-  Left = 524
+  Left = 277
   Height = 708
-  Top = 89
+  Top = 311
   Width = 702
   BorderStyle = bsDialog
   Caption = 'Clone to External Table'
@@ -9,7 +9,6 @@ object fmCloneToExternalTable: TfmCloneToExternalTable
   ClientWidth = 702
   OnClose = FormClose
   OnCreate = FormCreate
-  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object grBoxTables: TGroupBox

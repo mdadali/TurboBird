@@ -8,7 +8,7 @@ code implementing the class wrapper is taken from Carlo Kok's conv utility
 
 }
 interface
-{$I ../../source/uib.inc}
+{$I uib.inc}
 uses
    SysUtils
   ,Classes
@@ -49,13 +49,11 @@ procedure Register;
 implementation
 
 uses
-   //Windows
-  Variants
+   Windows
+  ,Variants
   ,uibase
   ,uiberror
   ,uiblib
-  ,uibdataset
-  ,uib
   ;
 
 type
@@ -245,26 +243,6 @@ begin
   end;
 end;
 
-procedure TUIBDataSet_Transaction_R(Self: TUIBDataSet; var T: TUIBTransaction);
-begin
-  T := Self.Transaction;
-end;
-
-procedure TUIBDataSet_Transaction_W(Self: TUIBDataSet; T: TUIBTransaction);
-begin
-  Self.Transaction := T;
-end;
-
-procedure TUIBDataSet_Database_R(Self: TUIBDataSet; var T: TUIBDatabase);
-begin
-  T := Self.Database;
-end;
-
-procedure TUIBDataSet_Database_W(Self: TUIBDataSet; T: TUIBDatabase);
-begin
-  Self.Database := T;
-end;
-
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_uiblib(CL: TPSPascalCompiler);
 begin
@@ -357,7 +335,7 @@ begin T := Self.ByNameAsQuad[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLResultByNameAsWideString_R(Self: TSQLResult; var T: WideString; const t1: String);
-begin {maurog T := Self.ByNameAsWideString[t1];} end;
+begin T := Self.ByNameAsWideString[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLResultByNameAsString_R(Self: TSQLResult; var T: String; const t1: String);
@@ -417,7 +395,7 @@ begin T := Self.AsVariant[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLResultAsWideString_R(Self: TSQLResult; var T: WideString; const t1: Word);
-begin {maurog T := Self.AsWideString[t1];} end;
+begin T := Self.AsWideString[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLResultAsString_R(Self: TSQLResult; var T: String; const t1: Word);
@@ -557,11 +535,11 @@ begin T := Self.ByNameAsQuad[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAByNameAsWideString_W(Self: TSQLDA; const T: WideString; const t1: String);
-begin {maurog Self.ByNameAsWideString[t1] := T;} end;
+begin Self.ByNameAsWideString[t1] := T; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAByNameAsWideString_R(Self: TSQLDA; var T: WideString; const t1: String);
-begin {maurog T := Self.ByNameAsWideString[t1];} end;
+begin T := Self.ByNameAsWideString[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAByNameAsString_W(Self: TSQLDA; const T: String; const t1: String);
@@ -673,11 +651,11 @@ begin T := Self.AsQuad[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAAsWideString_W(Self: TSQLDA; const T: WideString; const t1: Word);
-begin {maurog Self.AsWideString[t1] := T;} end;
+begin Self.AsWideString[t1] := T; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAAsWideString_R(Self: TSQLDA; var T: WideString; const t1: Word);
-begin {maurog T := Self.AsWideString[t1];} end;
+begin T := Self.AsWideString[t1]; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TSQLDAAsString_W(Self: TSQLDA; const T: String; const t1: Word);
@@ -1000,8 +978,7 @@ end;
 procedure TSQLResultOverload.ReadBlobNameWideString(const name: string;
   var str: WideString);
 begin
-  //maurog ReadBlob(name, str);
-  ReadBlob(name, @str);
+  ReadBlob(name, str);
 end;
 
 procedure TSQLResultOverload.ReadBlobStream(const Index: Word;
@@ -1025,8 +1002,7 @@ end;
 procedure TSQLResultOverload.ReadBlobWideString(const Index: Word;
   var str: WideString);
 begin
-  //maurog ReadBlob(Index, str);
-  ReadBlob(Index, @str);
+  ReadBlob(Index, str);
 end;
 
 end.

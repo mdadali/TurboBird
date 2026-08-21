@@ -15,6 +15,7 @@ type
   { TfmUDFInfo }
 
   TfmUDFInfo = class(TForm)
+    bbClose: TSpeedButton;
     edEntry: TEdit;
     edModule: TEdit;
     edName: TEdit;
@@ -25,6 +26,8 @@ type
     Label7: TLabel;
     meBody: TMemo;
     Panel1: TPanel;
+    Panel3: TPanel;
+    procedure bbCloseClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
@@ -66,12 +69,16 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
+procedure TfmUDFInfo.bbCloseClick(Sender: TObject);
+begin
+  TTabSheet(Parent).Free;
+  Close;
+end;
+
 procedure TfmUDFInfo.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
-
-  TTabSheet(Parent).Free;
   CloseAction := caFree;
 end;
 

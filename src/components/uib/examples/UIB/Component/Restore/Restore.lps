@@ -10,7 +10,8 @@
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <CursorPos X="30" Y="15"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos Y="15"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -21,23 +22,38 @@
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="3"/>
         <CursorPos X="28"/>
         <UsageCount Value="23"/>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit>
       <Unit>
         <Filename Value="../../../../../../../../../../../Programme/Lazarus_2.2.6_new/lazarus/ide/lazarus.pp"/>
         <UnitName Value="Lazarus"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="141"/>
         <CursorPos Y="167"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../../../../pascalscript/Source/uPSRuntime.pas"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="9182"/>
+        <CursorPos X="14" Y="9195"/>
+        <UsageCount Value="10"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../../../../pascalscript/Source/uPSCompiler.pas"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="1934"/>
+        <CursorPos X="22" Y="1950"/>
         <UsageCount Value="10"/>
         <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="3">
+    <JumpHistory HistoryIndex="7">
       <Position>
         <Filename Value="Restore.lpr"/>
       </Position>
@@ -53,10 +69,27 @@
         <Filename Value="main.pas"/>
         <Caret Column="28"/>
       </Position>
+      <Position>
+        <Filename Value="Restore.lpr"/>
+        <Caret Line="15" Column="39"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../../../pascalscript/Source/uPSRuntime.pas"/>
+        <Caret Line="9162" Column="18" TopLine="9148"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../../../pascalscript/Source/uPSRuntime.pas"/>
+        <Caret Line="9195" Column="14" TopLine="9182"/>
+      </Position>
+      <Position>
+        <Filename Value="../../../../../pascalscript/Source/uPSCompiler.pas"/>
+        <Caret Line="1950" Column="22" TopLine="1934"/>
+      </Position>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
       <Modes ActiveMode=""/>
     </RunParams>
   </ProjectSession>
+  <SkipCheckLCLInterfaces Value="True"/>
 </CONFIG>

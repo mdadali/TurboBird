@@ -1,16 +1,16 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 376
+  Left = 574
   Height = 507
-  Top = 198
+  Top = 363
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507
   ClientWidth = 1109
+  ShowHint = True
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
-  ShowHint = True
-  LCLVersion = '2.2.6.0'
   object pnlDetailTables: TPanel
     Left = 773
     Height = 507
@@ -51,22 +51,22 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     TabOrder = 2
     object tsMainTableGrid: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 473
-      ClientWidth = 754
+      ClientHeight = 476
+      ClientWidth = 760
       object pnlMainTable: TPanel
         Left = 0
-        Height = 473
+        Height = 476
         Top = 0
-        Width = 754
+        Width = 760
         Align = alClient
-        ClientHeight = 473
-        ClientWidth = 754
+        ClientHeight = 476
+        ClientWidth = 760
         TabOrder = 0
         object pnlMainTableCaption: TPanel
           Left = 1
           Height = 32
           Top = 1
-          Width = 752
+          Width = 758
           Align = alTop
           Caption = 'pnlMainTableCaption'
           TabOrder = 0
@@ -74,8 +74,8 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         object DBNavigator1: TDBNavigator
           Left = 1
           Height = 26
-          Top = 138
-          Width = 752
+          Top = 139
+          Width = 758
           Align = alTop
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -85,162 +85,95 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 26
-          ClientWidth = 752
+          ClientWidth = 758
           DataSource = dsMain
           Options = []
           TabOrder = 1
           VisibleButtons = [nbFirst, nbPrior, nbNext, nbLast, nbDelete, nbRefresh]
         end
-        object grboxTableFilter: TGroupBox
+        object DBGridMain: TDBGrid
           Left = 1
-          Height = 105
-          Top = 33
-          Width = 752
-          Align = alTop
-          Caption = 'Tablefilter'
-          ClientHeight = 84
-          ClientWidth = 750
+          Height = 310
+          Top = 165
+          Width = 758
+          Align = alClient
+          Color = clWindow
+          Columns = <>
+          DataSource = dsMain
+          PopupMenu = pmGrid
           TabOrder = 2
+        end
+        object pnlTableFilter: TPanel
+          Left = 1
+          Height = 106
+          Top = 33
+          Width = 758
+          Align = alTop
+          ClientHeight = 106
+          ClientWidth = 758
+          TabOrder = 3
           object chkBoxUseFilter: TCheckBox
             Left = 8
-            Height = 24
+            Height = 21
             Top = 8
-            Width = 89
+            Width = 85
             Caption = 'Use Filter'
-            OnChange = chkBoxUseFilterChange
             TabOrder = 0
-          end
-          object Label2: TLabel
-            Left = 176
-            Height = 20
-            Top = 12
-            Width = 63
-            Caption = 'Filterfield'
-            ParentColor = False
+            OnChange = chkBoxUseFilterChange
           end
           object cboxFilterField: TComboBox
-            Left = 264
-            Height = 36
+            Left = 296
+            Height = 28
             Top = 8
-            Width = 344
+            Width = 392
             ItemHeight = 0
             Style = csDropDownList
             TabOrder = 1
           end
-          object edtFilterValue: TEdit
-            Left = 264
-            Height = 37
-            Top = 43
-            Width = 344
-            OnChange = edtFilterValueChange
-            TabOrder = 2
-          end
           object Label1: TLabel
-            Left = 176
-            Height = 20
-            Top = 48
-            Width = 70
+            Left = 208
+            Height = 17
+            Top = 56
+            Width = 69
             Caption = 'Filtervalue'
             ParentColor = False
           end
+          object edtFilterValue: TEdit
+            Left = 296
+            Height = 24
+            Top = 56
+            Width = 392
+            TabOrder = 2
+            OnChange = edtFilterValueChange
+          end
           object chkBoxCasesensitive: TCheckBox
             Left = 8
-            Height = 24
-            Top = 48
-            Width = 122
+            Height = 21
+            Top = 56
+            Width = 119
             Caption = 'Case Sensitive'
-            OnChange = chkBoxCasesensitiveChange
             TabOrder = 3
           end
-        end
-        object DBGridMain: TRxDBGrid
-          Left = 1
-          Height = 308
-          Top = 164
-          Width = 752
-          ColumnDefValues.BlobText = '(blob)'
-          TitleButtons = False
-          AutoSort = True
-          KeyStrokes = <          
-            item
-              Command = rxgcShowFindDlg
-              ShortCut = 16454
-              Enabled = True
-            end          
-            item
-              Command = rxgcShowColumnsDlg
-              ShortCut = 16471
-              Enabled = True
-            end          
-            item
-              Command = rxgcShowFilterDlg
-              ShortCut = 16468
-              Enabled = True
-            end          
-            item
-              Command = rxgcShowSortDlg
-              ShortCut = 16467
-              Enabled = True
-            end          
-            item
-              Command = rxgcShowQuickFilter
-              ShortCut = 16465
-              Enabled = True
-            end          
-            item
-              Command = rxgcHideQuickFilter
-              ShortCut = 16456
-              Enabled = True
-            end          
-            item
-              Command = rxgcSelectAll
-              ShortCut = 16449
-              Enabled = True
-            end          
-            item
-              Command = rxgcDeSelectAll
-              ShortCut = 16429
-              Enabled = True
-            end          
-            item
-              Command = rxgcInvertSelection
-              ShortCut = 16426
-              Enabled = True
-            end          
-            item
-              Command = rxgcOptimizeColumnsWidth
-              ShortCut = 16427
-              Enabled = True
-            end          
-            item
-              Command = rxgcCopyCellValue
-              ShortCut = 16451
-              Enabled = True
-            end>
-          FooterOptions.DrawFullLine = False
-          SearchOptions.QuickSearchOptions = [loCaseInsensitive, loPartialKey]
-          SearchOptions.FromStart = False
-          OptionsRx = [rdgAllowColumnsForm, rdgAllowDialogFind, rdgDblClickOptimizeColWidth, rdgAllowQuickSearch, rdgAllowToolMenu, rdgCaseInsensitiveSort]
-          Align = alClient
-          Color = clWindow
-          DrawFullLine = False
-          FocusColor = clRed
-          SelectedColor = clHighlight
-          DataSource = dsMain
-          Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit]
-          TabOrder = 3
+          object Label2: TLabel
+            Left = 208
+            Height = 17
+            Top = 8
+            Width = 61
+            Caption = 'Filterfield'
+            ParentColor = False
+          end
         end
       end
     end
     object tsFormView: TTabSheet
       Caption = 'Form View'
-      ClientHeight = 473
-      ClientWidth = 754
+      ClientHeight = 476
+      ClientWidth = 760
       object dbnavMainTableFormView: TDBNavigator
         Left = 0
         Height = 25
         Top = 0
-        Width = 754
+        Width = 760
         Align = alTop
         BevelOuter = bvNone
         ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -250,16 +183,16 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 100
         ClientHeight = 25
-        ClientWidth = 754
+        ClientWidth = 760
         DataSource = dsMain
         Options = []
         TabOrder = 0
       end
       object pnlRecord: TScrollBox
         Left = 0
-        Height = 448
+        Height = 451
         Top = 25
-        Width = 754
+        Width = 760
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
@@ -275,8 +208,8 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 104
-    Top = 296
+    Left = 64
+    Top = 152
   end
   object transMain: TIBTransaction
     TransactionName = '{AA661540-ED8B-4EC8-B6F3-55EF1B71B1B1}'
@@ -287,14 +220,14 @@ object frmEditTableDataNew: TfrmEditTableDataNew
       'rec_version'
       'nowait'
     )
-    Left = 232
-    Top = 304
+    Left = 176
+    Top = 152
   end
   object dsMain: TDataSource
     DataSet = IBTableMain
     OnStateChange = dsMainStateChange
-    Left = 200
-    Top = 384
+    Left = 176
+    Top = 272
   end
   object IBTableMain: TIBTable
     AllowAutoActivateTransaction = False
@@ -312,12 +245,16 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     SQLFiltered = False
     GeneratorField.ApplyOnEvent = gaeOnNewRecord
     MasterDetailDelay = 0
-    Left = 80
-    Top = 384
+    Left = 64
+    Top = 272
   end
   object pmGrid: TPopupMenu
-    Left = 328
-    Top = 392
+    Left = 320
+    Top = 288
+    object lmCopyCell: TMenuItem
+      Caption = 'Copy field'
+      Visible = False
+    end
     object Separator2: TMenuItem
       Caption = '-'
       Visible = False
@@ -330,23 +267,18 @@ object frmEditTableDataNew: TfrmEditTableDataNew
       end
       object lmExportDataAsPDF: TMenuItem
         Caption = 'PDF'
-        Visible = False
       end
       object lmExportDataAsSpreadSheet: TMenuItem
         Caption = 'Spreadsheet'
-        Visible = False
       end
       object lmExportDataAsMarkDownTable: TMenuItem
         Caption = 'Markdown Table'
-        OnClick = lmExportDataAsMarkDownTableClick
       end
       object lmExportDataAsHtml: TMenuItem
         Caption = 'Html'
-        OnClick = lmExportDataAsHtmlClick
       end
       object lmExportToClipboard: TMenuItem
         Caption = 'Clipboard'
-        OnClick = lmExportToClipboardClick
       end
       object Separator1: TMenuItem
         Caption = '-'
@@ -354,7 +286,6 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     end
     object lmPrintData: TMenuItem
       Caption = 'Print...'
-      Visible = False
     end
   end
 end

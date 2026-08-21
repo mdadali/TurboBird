@@ -34,8 +34,7 @@ interface
 
 uses
   {Windows,} SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
-  StdCtrls, IBDataBase, IB, ExtCtrls, LResources,
-  uthemeselector;
+  StdCtrls, IBDataBase, IB, ExtCtrls, LResources;
 
 type
 
@@ -59,7 +58,6 @@ type
     Label1: TLabel;
     procedure btnLoadFromFileClick(Sender: TObject);
     procedure btnSaveToFileClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure OKBtnClick(Sender: TObject);
     procedure rbSnapShotClick(Sender: TObject);
     procedure rbReadCommittedClick(Sender: TObject);
@@ -264,11 +262,6 @@ begin
       MessageDlg('Fehler beim Speichern: ' + E.Message,
         mtError, [mbOK], 0);
   end;
-end;
-
-procedure TIBTransactionEditForm.FormShow(Sender: TObject);
-begin
-  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TIBTransactionEditForm.FormCreate(Sender: TObject);

@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   DBGrids, Grids, ExtCtrls, StdCtrls, ComCtrls, DB,
   IBDatabase, IBQuery, RxDBGrid,
-  uthemeselector,
   turbocommon, Types;
 
 type
@@ -58,7 +57,6 @@ type
     procedure btnRefreshClick(Sender: TObject);
     procedure btnKillAttachmentClick(Sender: TObject);
     procedure btnKillStatementClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
 
     procedure grdAttachmentsCellClick(Column: TColumn);
 
@@ -416,11 +414,6 @@ begin
   qryStatements.UnPrepare;
 
   LoadStatements;
-end;
-
-procedure TfrmActivityMonitor.FormShow(Sender: TObject);
-begin
-  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmActivityMonitor.grdAttachmentsCellClick(

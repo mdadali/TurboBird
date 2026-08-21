@@ -48,13 +48,12 @@ implementation
 //newlib
 procedure TfmNewDomain.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
-
   cbType.Items.Clear;
   dmSysTables.GetBasicTypes(cbType.Items, FDBIndex);
   if cbType.Items.Count > 0 then
     cbType.ItemIndex:= 0;
 
+  frmThemeSelector.btnApplyClick(self);
 end;
 //end-newlib
 

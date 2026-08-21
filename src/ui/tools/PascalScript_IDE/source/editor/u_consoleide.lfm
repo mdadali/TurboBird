@@ -1,7 +1,7 @@
 object frmConsoleIDE: TfrmConsoleIDE
   Left = 343
   Height = 585
-  Top = 163
+  Top = 305
   Width = 996
   AllowDropFiles = True
   Caption = 'LazCAD ConsoleIDE'
@@ -12,25 +12,24 @@ object frmConsoleIDE: TfrmConsoleIDE
   Font.Height = -11
   Font.Name = 'MS Sans Serif'
   FormStyle = fsStayOnTop
+  Position = poScreenCenter
+  LCLVersion = '4.7.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnShow = FormShow
-  Position = poScreenCenter
-  LCLVersion = '2.2.6.0'
   object Splitter1: TSplitter
     Cursor = crVSplit
     Left = 0
     Height = 3
-    Top = 560
+    Top = 559
     Width = 996
     Align = alBottom
     ResizeAnchor = akBottom
   end
   object StatusBar: TStatusBar
     Left = 0
-    Height = 22
-    Top = 563
+    Height = 23
+    Top = 562
     Width = 996
     Panels = <    
       item
@@ -52,7 +51,7 @@ object frmConsoleIDE: TfrmConsoleIDE
     ParentFont = False
     PopupMenu = PopupMenu1
     TabOrder = 2
-    Gutter.Width = 57
+    Gutter.Width = 55
     Gutter.MouseActions = <>
     RightGutter.Width = 0
     RightGutter.MouseActions = <>
@@ -507,9 +506,13 @@ object frmConsoleIDE: TfrmConsoleIDE
       object SynGutterMarks1: TSynGutterMarks
         Width = 24
         MouseActions = <>
+        MaxExtraMarksColums = 0
+        Options = [sgmoDeDuplicateMarksOnOverflow]
+        MarkupInfo.Background = clBtnFace
+        MarkupInfo.Foreground = clNone
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 17
+        Width = 15
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -523,6 +526,9 @@ object frmConsoleIDE: TfrmConsoleIDE
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
+        MarkupInfo.Background = clNone
+        MarkupInfo.Foreground = clGreen
+        MarkupInfo.FrameColor = 59900
       end
       object SynGutterSeparator1: TSynGutterSeparator
         Width = 2
@@ -654,7 +660,7 @@ object frmConsoleIDE: TfrmConsoleIDE
         end
         object edtFormName: TEdit
           Left = 1
-          Height = 33
+          Height = 21
           Top = 24
           Width = 133
           TabOrder = 0
@@ -725,7 +731,7 @@ object frmConsoleIDE: TfrmConsoleIDE
   end
   object pgcDebug: TPageControl
     Left = 0
-    Height = 123
+    Height = 122
     Top = 437
     Width = 996
     ActivePage = tsMessages
@@ -735,32 +741,30 @@ object frmConsoleIDE: TfrmConsoleIDE
     TabPosition = tpBottom
     object tsMessages: TTabSheet
       Caption = 'Messages'
-      ClientHeight = 93
-      ClientWidth = 986
+      ClientHeight = 96
+      ClientWidth = 988
       object messages: TListBox
         Left = 0
-        Height = 93
+        Height = 96
         Top = 0
-        Width = 986
+        Width = 988
         Align = alClient
         ItemHeight = 0
-        OnDblClick = messagesDblClick
         TabOrder = 0
-        TopIndex = -1
+        OnDblClick = messagesDblClick
       end
     end
     object tsWatches: TTabSheet
       Caption = 'Watches'
-      ClientHeight = 93
-      ClientWidth = 986
+      ClientHeight = 96
+      ClientWidth = 988
       object vleWatches: TValueListEditor
         Left = 122
-        Height = 93
+        Height = 96
         Top = 0
-        Width = 864
+        Width = 866
         Align = alClient
         Enabled = False
-        FixedCols = 0
         RowCount = 2
         TabOrder = 0
         TitleCaptions.Strings = (
@@ -769,17 +773,18 @@ object frmConsoleIDE: TfrmConsoleIDE
         )
         ColWidths = (
           64
-          796
+          798
         )
       end
       object pnlAddDeleteWatch: TPanel
         Left = 0
-        Height = 93
+        Height = 96
         Top = 0
         Width = 122
         Align = alLeft
-        ClientHeight = 93
+        ClientHeight = 96
         ClientWidth = 122
+        ParentBackground = False
         TabOrder = 1
         object btnAddWatch: TButton
           Left = 16
@@ -787,8 +792,8 @@ object frmConsoleIDE: TfrmConsoleIDE
           Top = 16
           Width = 75
           Caption = 'Add Watch'
-          OnClick = btnAddWatchClick
           TabOrder = 0
+          OnClick = btnAddWatchClick
         end
         object btnDeleteWatch: TButton
           Left = 16
@@ -796,8 +801,8 @@ object frmConsoleIDE: TfrmConsoleIDE
           Top = 48
           Width = 75
           Caption = 'Delete Watch'
-          OnClick = btnDeleteWatchClick
           TabOrder = 1
+          OnClick = btnDeleteWatchClick
         end
       end
     end
@@ -860,6 +865,7 @@ object frmConsoleIDE: TfrmConsoleIDE
     CompilerMode = pcmDelphi
     NestedComments = False
     TypeHelpers = True
+    StringMultilineMode = []
     Left = 112
     Top = 368
   end
@@ -1389,16 +1395,16 @@ object frmConsoleIDE: TfrmConsoleIDE
       AutoCheck = True
       Caption = 'acFilePrint'
       ImageIndex = 4
-      OnExecute = acFilePrintExecute
       Visible = False
+      OnExecute = acFilePrintExecute
     end
     object acFileRecent: TAction
       Category = 'File'
       AutoCheck = True
       Caption = 'acFileRecent'
       ImageIndex = 2
-      OnExecute = acFileRecentExecute
       Visible = False
+      OnExecute = acFileRecentExecute
     end
     object acEditUndo: TAction
       Category = 'Edit'

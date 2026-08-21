@@ -10,14 +10,11 @@ uses
   Graphics, StdCtrls, ExtCtrls,
   //StreamIO,
   //Iostream,
-  SynEdit, Grids, CheckLst, ComCtrls, DB,  BufStream,
+  SynEdit, Grids, CheckLst, ComCtrls, DB,
   IBDatabase, IBQuery, IBSQL, IBXScript,
-
-  turbocommon,
-  fbcommon,
-  uthemeselector,
-  uFormulaPresets,
-  fmetaquerys;
+  turbocommon, fbcommon,
+  BufStream,
+  uFormulaPresets, fmetaquerys;
 
 type
 
@@ -137,7 +134,6 @@ end;
 
 procedure TfrmBulkExport.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
   LoadServerList;
 end;
 

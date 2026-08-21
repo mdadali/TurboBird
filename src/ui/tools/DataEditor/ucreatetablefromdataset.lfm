@@ -1,7 +1,7 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 243
+  Left = 229
   Height = 540
-  Top = 142
+  Top = 150
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'

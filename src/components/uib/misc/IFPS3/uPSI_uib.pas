@@ -6,7 +6,6 @@ and updated by NP. v/d Spek and George Birbilis.
 Source Code from Carlo Kok has been used to implement various sections of
 UnitParser. Components of ROPS are used in the construction of UnitParser,
 code implementing the class wrapper is taken from Carlo Kok's conv utility
-
 }
 interface
 
@@ -25,7 +24,6 @@ type
     procedure CompileImport1(CompExec: TPSScript); override;
     procedure ExecImport1(CompExec: TPSScript; const ri: TPSRuntimeClassImporter); override;
   end;
-
 
 { compile-time registration functions }
 procedure SIRegister_TUIBConfig(CL: TPSPascalCompiler);
@@ -70,9 +68,10 @@ procedure RIRegister_uib(CL: TPSRuntimeClassImporter);
 procedure Register;
 
 implementation
+
 uses
-   //Windows
-  SyncObjs
+   Windows
+  ,SyncObjs
   ,Contnrs
   ,uiblib
   ,uibase
@@ -120,7 +119,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBConfig(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBService', 'TUIBConfig') do
   with CL.AddClassN(CL.FindClass('TUIBService'),'TUIBConfig') do
   begin
     RegisterMethod('Procedure ShutdownDatabase( Options : TShutdownMode; Wait : Integer)');
@@ -139,7 +137,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBEventThread(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TThread', 'TUIBEventThread') do
   with CL.AddClassN(CL.FindClass('TThread'),'TUIBEventThread') do
   begin
     RegisterMethod('Constructor Create( Owner : TUIBEvents; Block : Integer; SyncMainThread : boolean)');
@@ -149,7 +146,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBEvents(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBEvents') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBEvents') do
   begin
     RegisterMethod('Procedure RegisterEvents');
@@ -168,7 +164,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBRepair(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBService', 'TUIBRepair') do
   with CL.AddClassN(CL.FindClass('TUIBService'),'TUIBRepair') do
   begin
     RegisterMethod('Procedure Run');
@@ -180,7 +175,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBSecurity(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBService', 'TUIBSecurity') do
   with CL.AddClassN(CL.FindClass('TUIBService'),'TUIBSecurity') do
   begin
     RegisterMethod('Procedure AddUser');
@@ -204,7 +198,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUserInfo(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TObject', 'TUserInfo') do
   with CL.AddClassN(CL.FindClass('TObject'),'TUserInfo') do
   begin
     RegisterProperty('UserName', 'string', iptrw);
@@ -219,7 +212,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBRestore(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBBackupRestore', 'TUIBRestore') do
   with CL.AddClassN(CL.FindClass('TUIBBackupRestore'),'TUIBRestore') do
   begin
     RegisterProperty('Options', 'TRestoreOptions', iptrw);
@@ -230,7 +222,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBBackup(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBBackupRestore', 'TUIBBackup') do
   with CL.AddClassN(CL.FindClass('TUIBBackupRestore'),'TUIBBackup') do
   begin
     RegisterProperty('Options', 'TBackupOptions', iptrw);
@@ -240,7 +231,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBBackupRestore(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBService', 'TUIBBackupRestore') do
   with CL.AddClassN(CL.FindClass('TUIBService'),'TUIBBackupRestore') do
   begin
     RegisterMethod('Procedure Run');
@@ -254,7 +244,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBService(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBService') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBService') do
   begin
     RegisterProperty('UserName', 'string', iptrw);
@@ -268,7 +257,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBScript(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBScript') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBScript') do
   begin
     RegisterMethod('Procedure ExecuteScript');
@@ -283,7 +271,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBQuery(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBStatement', 'TUIBQuery') do
   with CL.AddClassN(CL.FindClass('TUIBStatement'),'TUIBQuery') do
   begin
     RegisterMethod('Procedure BuildStoredProc( const StoredProc : string; forSelect : boolean)');
@@ -293,7 +280,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBStatement(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBStatement') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBStatement') do
   begin
     RegisterMethod('Procedure Close( const Mode : TEndTransMode)');
@@ -345,7 +331,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBTransaction(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBTransaction') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBTransaction') do
   begin
     RegisterMethod('Procedure AddDataBase( ADataBase : TUIBDataBase)');
@@ -374,7 +359,7 @@ begin
     RegisterProperty('LockWrite', 'string', iptrw);
     RegisterProperty('OnStartTransaction', 'TNotifyEvent', iptrw);
     RegisterProperty('OnEndTransaction', 'TOnEndTransaction', iptrw);
-    RegisterProperty('AutoRetain', 'boolean', iptrw);
+    // RegisterProperty('AutoRetain', 'boolean', iptrw);  // <--- COMMENTATO QUI
     RegisterProperty('AutoStart', 'boolean', iptrw);
     RegisterProperty('AutoStop', 'boolean', iptrw);
     RegisterProperty('DefaultAction', 'TEndTransMode', iptrw);
@@ -387,7 +372,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBDataBase(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TUIBComponent', 'TUIBDataBase') do
   with CL.AddClassN(CL.FindClass('TUIBComponent'),'TUIBDataBase') do
   begin
     RegisterMethod('Procedure ExecuteImmediate( const Statement : string)');
@@ -505,7 +489,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TMetaDataOptions(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TPersistent', 'TMetaDataOptions') do
   with CL.AddClassN(CL.FindClass('TPersistent'),'TMetaDataOptions') do
   begin
     RegisterMethod('Constructor Create');
@@ -521,7 +504,6 @@ end;
 (*----------------------------------------------------------------------------*)
 procedure SIRegister_TUIBComponent(CL: TPSPascalCompiler);
 begin
-  //with RegClassS(CL,'TComponent', 'TUIBComponent') do
 {$IFDEF UIB_NO_COMPONENT}
   with CL.AddClassN(CL.FindClass('TObject'),'TUIBComponent') do
 {$ELSE}
@@ -545,73 +527,73 @@ begin
   CL.AddClassN(CL.FindClass('TOBJECT'),'TUIBEvents');
   SIRegister_TMetaDataOptions(CL);
   CL.AddTypeS('TShutdownOption', '( sdCache, sdAttachment, sdTransaction, sdFor'
-   +'ce )');
+    +'ce )');
   CL.AddTypeS('TShutdownOptions', 'set of TShutdownOption');
   CL.AddTypeS('TTableOperation', 'record TableId : Word; Count : Integer; end');
   CL.AddTypeS('TOnInfoTableOpCount', 'Procedure ( Sender : TObject; var TableOp'
-   +' : TTableOperation)');
+    +' : TTableOperation)');
   CL.AddTypeS('TOnInfoIntegerCount', 'Procedure ( Sender : TObject; Value : Int'
-   +'eger)');
+    +'eger)');
   CL.AddTypeS('TOnInfoStringCount', 'Procedure ( Sender : TObject; Value : stri'
-   +'ng)');
+    +'ng)');
   SIRegister_TUIBDataBase(CL);
   CL.AddTypeS('TEndTransMode', '( etmDefault, etmStayIn, etmCommit, etmCommitRe'
-   +'taining, etmRollback, etmRollbackRetaining )');
+    +'taining, etmRollback, etmRollbackRetaining )');
   CL.AddTypeS('TQueryState', '( qsDataBase, qsTransaction, qsExecImme, qsStatem'
-   +'ent, qsPrepare, qsExecute )');
+    +'ent, qsPrepare, qsExecute )');
   CL.AddTypeS('TTransParam', '( tpConsistency, tpConcurrency, tpShared, tpProte'
-   +'cted, tpExclusive, tpWait, tpNowait, tpRead, tpWrite, tpLockRead, tpLockWr'
-   +'ite, tpVerbTime, tpCommitTime, tpIgnoreLimbo, tpReadCommitted, tpAutoCommi'
-   +'t, tpRecVersion, tpNoRecVersion, tpRestartRequests, tpNoAutoUndo'
+    +'cted, tpExclusive, tpWait, tpNowait, tpRead, tpWrite, tpLockRead, tpLockWr'
+    +'ite, tpVerbTime, tpCommitTime, tpIgnoreLimbo, tpReadCommitted, tpAutoCommi'
+    +'t, tpRecVersion, tpNoRecVersion, tpRestartRequests, tpNoAutoUndo'
 {$IFDEF FB20_UP}
-   +', tpLockTimeout'
+    +', tpLockTimeout'
 {$ENDIF}
-   +')');
+    +')');
   CL.AddTypeS('TTransParams', 'set of TTransParam');
   CL.AddTypeS('TOnEndTransaction', 'Procedure ( Sender : TObject; var Mode : TE'
-   +'ndTransMode)');
+    +'ndTransMode)');
   SIRegister_TUIBTransaction(CL);
   SIRegister_TUIBStatement(CL);
   SIRegister_TUIBQuery(CL);
   CL.AddTypeS('TOnParse', 'Procedure ( Sender : TObject; NodeType : TSQLStateme'
-   +'nt; const Statement : string)');
+    +'nt; const Statement : string)');
   SIRegister_TUIBScript(CL);
   CL.AddTypeS('TUIBProtocol', '( proLocalHost, proTCPIP, proNetBEUI )');
   SIRegister_TUIBService(CL);
   CL.AddTypeS('TVerboseEvent', 'Procedure ( Sender : TObject; Message : string)');
   SIRegister_TUIBBackupRestore(CL);
   CL.AddTypeS('TBackupOption', '( boIgnoreChecksums, boIgnoreLimbo, boMetadataO'
-   +'nly, boNoGarbageCollection, boOldMetadataDesc, boNonTransportable, boConve'
-   +'rtExtTables, boExpand )');
+    +'nly, boNoGarbageCollection, boOldMetadataDesc, boNonTransportable, boConve'
+    +'rtExtTables, boExpand )');
   CL.AddTypeS('TBackupOptions', 'set of TBackupOption');
   SIRegister_TUIBBackup(CL);
   CL.AddTypeS('TRestoreOption', '( roDeactivateIndexes, roNoShadow, roNoValidit'
-   +'yCheck, roOneRelationAtATime, roReplace, roCreateNewDB, roUseAllSpace'
+    +'yCheck, roOneRelationAtATime, roReplace, roCreateNewDB, roUseAllSpace'
 {$IFDEF IB71_UP}
-   +', roValidate'
+    +', roValidate'
 {$ENDIF}
-   +')');
+    +')');
   CL.AddTypeS('TRestoreOptions', 'set of TRestoreOption');
   SIRegister_TUIBRestore(CL);
   CL.AddTypeS('TSecurityAction', '( saAddUser, saDeleteUser, saModifyUser, saDi'
-   +'splayUser, saDisplayUsers )');
+    +'splayUser, saDisplayUsers )');
   CL.AddTypeS('TSecurityParam', '( spRole, spUser, spPass, spFirstName, spMiddl'
-   +'eName, spLastName, spUserID, spGroupID )');
+    +'eName, spLastName, spUserID, spGroupID )');
   CL.AddTypeS('TSecurityParams', 'set of TSecurityParam');
   SIRegister_TUserInfo(CL);
   SIRegister_TUIBSecurity(CL);
   CL.AddTypeS('TRepairOption', '( roValidateDB, roValidateFull, roSweepDB, roMe'
-   +'ndDB, roListLimboTrans, roCheckDB, roIgnoreChecksum, roKillShadows )');
+    +'ndDB, roListLimboTrans, roCheckDB, roIgnoreChecksum, roKillShadows )');
   CL.AddTypeS('TRepairOptions', 'set of TRepairOption');
   SIRegister_TUIBRepair(CL);
   CL.AddTypeS('TOnEvent', 'Procedure ( Sender : TObject; const EventName : stri'
-   +'ng; Count : Integer; var Cancel : boolean)');
+    +'ng; Count : Integer; var Cancel : boolean)');
   CL.AddTypeS('TOnExceptionEvent', 'Procedure ( Error : EException)');
   CL.AddClassN(CL.FindClass('TOBJECT'),'TUIBEventThread');
   SIRegister_TUIBEvents(CL);
   SIRegister_TUIBEventThread(CL);
   CL.AddTypeS('TShutdownMode', '( smForced, smDenyTransaction, smDenyAttachment'
-   +' )');
+    +' )');
   SIRegister_TUIBConfig(CL);
 end;
 
@@ -1107,12 +1089,16 @@ procedure TUIBTransactionAutoStart_R(Self: TUIBTransaction; var T: boolean);
 begin T := Self.AutoStart; end;
 
 (*----------------------------------------------------------------------------*)
-procedure TUIBTransactionAutoRetain_W(Self: TUIBTransaction; const T: boolean);
-begin {Maurog Self.AutoRetain := T;} end;
+// COMMENTATO
+// procedure TUIBTransactionAutoRetain_W(Self: TUIBTransaction; const T: boolean);
+// begin
+//  Self.AutoRetain := T;
+// end;
 
 (*----------------------------------------------------------------------------*)
-procedure TUIBTransactionAutoRetain_R(Self: TUIBTransaction; var T: boolean);
-begin {Maurog T := Self.AutoRetain;} end;
+// COMMENTATO
+// procedure TUIBTransactionAutoRetain_R(Self: TUIBTransaction; var T: boolean);
+// begin T := Self.AutoRetain; end;
 
 (*----------------------------------------------------------------------------*)
 procedure TUIBTransactionOnEndTransaction_W(Self: TUIBTransaction; const T: TOnEndTransaction);
@@ -1744,8 +1730,8 @@ procedure RIRegister_TUIBEvents(CL: TPSRuntimeClassImporter);
 begin
   with CL.Add(TUIBEvents) do
   begin
-    //maurog RegisterVirtualMethod(@TUIBEvents.RegisterEvents, 'RegisterEvents');
-    //maurog RegisterVirtualMethod(@TUIBEvents.UnRegisterEvents, 'UnRegisterEvents');
+  // USA RegisterMethod INVECE DI RegisterVirtualMethod
+
     RegisterMethod(@TUIBEvents.SetAutoRegister, 'SetAutoRegister');
     RegisterPropertyHelper(@TUIBEventsAutoRegister_R,@TUIBEventsAutoRegister_W,'AutoRegister');
     RegisterPropertyHelper(@TUIBEventsDatabase_R,@TUIBEventsDatabase_W,'Database');
@@ -1955,7 +1941,7 @@ begin
     RegisterPropertyHelper(@TUIBTransactionLockWrite_R,@TUIBTransactionLockWrite_W,'LockWrite');
     RegisterPropertyHelper(@TUIBTransactionOnStartTransaction_R,@TUIBTransactionOnStartTransaction_W,'OnStartTransaction');
     RegisterPropertyHelper(@TUIBTransactionOnEndTransaction_R,@TUIBTransactionOnEndTransaction_W,'OnEndTransaction');
-    RegisterPropertyHelper(@TUIBTransactionAutoRetain_R,@TUIBTransactionAutoRetain_W,'AutoRetain');
+    // RegisterPropertyHelper(@TUIBTransactionAutoRetain_R,@TUIBTransactionAutoRetain_W,'AutoRetain'); // <--- COMMENTATO QUI
     RegisterPropertyHelper(@TUIBTransactionAutoStart_R,@TUIBTransactionAutoStart_W,'AutoStart');
     RegisterPropertyHelper(@TUIBTransactionAutoStop_R,@TUIBTransactionAutoStop_W,'AutoStop');
     RegisterPropertyHelper(@TUIBTransactionDefaultAction_R,@TUIBTransactionDefaultAction_W,'DefaultAction');
@@ -2112,11 +2098,11 @@ end;
 procedure RIRegister_uib(CL: TPSRuntimeClassImporter);
 begin
   RIRegister_TUIBComponent(CL);
-  with CL.Add(TUIBTransaction) do
-  with CL.Add(TUIBQuery) do
-  with CL.Add(TUIBStatement) do
-  with CL.Add(TUIBDataBase) do
-  with CL.Add(TUIBEvents) do
+  CL.Add(TUIBTransaction);
+  CL.Add(TUIBQuery);
+  CL.Add(TUIBStatement);
+  CL.Add(TUIBDataBase);
+  CL.Add(TUIBEvents);
   RIRegister_TMetaDataOptions(CL);
   RIRegister_TUIBDataBase(CL);
   RIRegister_TUIBTransaction(CL);
@@ -2130,13 +2116,11 @@ begin
   RIRegister_TUserInfo(CL);
   RIRegister_TUIBSecurity(CL);
   RIRegister_TUIBRepair(CL);
-  with CL.Add(TUIBEventThread) do
+  CL.Add(TUIBEventThread);
   RIRegister_TUIBEvents(CL);
   RIRegister_TUIBEventThread(CL);
   RIRegister_TUIBConfig(CL);
 end;
-
-
 
 { TPSImport_uib }
 (*----------------------------------------------------------------------------*)
@@ -2150,7 +2134,6 @@ begin
   RIRegister_uib(ri);
 end;
 (*----------------------------------------------------------------------------*)
-
 
 { TUIBStatementOverload }
 

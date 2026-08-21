@@ -1,0 +1,14 @@
+
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+
+bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.rar
+*.zip

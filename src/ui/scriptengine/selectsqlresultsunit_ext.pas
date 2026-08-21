@@ -24,8 +24,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, db,
-  IBDynamicGrid, IBQuery, IBDatabase, IBXScript,
-  uthemeselector;
+  IBDynamicGrid, IBQuery, IBDatabase, IBXScript;
 
 type
 
@@ -61,7 +60,6 @@ uses IBDataOutput;
 
 procedure TSelectSQLResultsExt.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
   SelectQuery.Active := true;
 end;
 

@@ -29,9 +29,8 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   inherited QuoteFields: TCheckBox
     Left = 11
-    Height = 24
     Top = 496
-    Width = 140
+    Width = 138
   end
   inherited PageControl: TPageControl
     Left = 68
@@ -53,19 +52,17 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
         Width = 87
       end
       inherited SelectTableNames: TIBLookupComboEditBox
-        Height = 37
+        Height = 30
       end
       inherited FieldNamesGrid: TIBDynamicGrid
         Height = 104
       end
       inherited SelectSelectAll: TCheckBox
-        Height = 24
         Top = 424
-        Width = 149
+        Width = 147
       end
       inherited IncludeSysTables: TCheckBox
-        Height = 24
-        Width = 176
+        Width = 174
       end
       inherited Label6: TLabel
         Height = 20
@@ -98,7 +95,7 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
       end
       inherited ProcedureNames: TIBLookupComboEditBox
         Left = 10
-        Height = 36
+        Height = 32
         Top = 72
         Style = csDropDownList
       end
@@ -139,7 +136,7 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
         Width = 99
       end
       inherited PackageNames: TIBLookupComboEditBox
-        Height = 36
+        Height = 32
         Style = csDropDownList
       end
       object SelectProcedure: TLabel[8]
@@ -159,9 +156,8 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   inherited GenerateParams: TCheckBox
     Left = 11
-    Height = 24
     Top = 472
-    Width = 192
+    Width = 190
   end
   inherited Panel1: TPanel
     Left = 300
@@ -281,9 +277,9 @@ inherited IBSQLEditorForm: TIBSQLEditorForm
   end
   object IncludePrimaryKeys: TCheckBox[9]
     Left = 11
-    Height = 24
+    Height = 22
     Top = 520
-    Width = 266
+    Width = 264
     Caption = 'Include Primary keys in Update SQL'
     TabOrder = 9
   end

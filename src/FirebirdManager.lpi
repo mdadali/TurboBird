@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1883"/>
+      <BuildNr Value="1882"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -318,9 +318,11 @@
           <Other>
             <CustomOptions Value="-dDEBUG -O-1"/>
             <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
               <CompileReasons Run="False"/>
             </ExecuteAfter>
           </Other>

@@ -1,13 +1,12 @@
 object frmActivityMonitor: TfrmActivityMonitor
-  Left = 161
+  Left = 262
   Height = 673
-  Top = 161
+  Top = 75
   Width = 1100
   Caption = 'Activity Monitor'
   ClientHeight = 673
   ClientWidth = 1100
   OnClose = FormClose
-  OnShow = FormShow
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
   object pnlTop: TPanel

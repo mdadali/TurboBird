@@ -4,7 +4,7 @@ interface
 
 uses
 {$IFDEF LINUX}
-  Graphics, Controls, Forms, Messages, Dialogs, StdCtrls,
+  libc, QForms, QStdCtrls, QControls, QGraphics, QDialogs, QExtCtrls,
 {$ELSE}
   Windows, Graphics, Controls, Forms, Messages, Dialogs, StdCtrls,
 {$ENDIF}

@@ -19,7 +19,7 @@ SynGutterMarks, SynGutterLineNumber, SynGutterChanges, SynGutter,
 SynGutterCodeFolding, SynEditMarkupSpecialLine, SynEditRegexSearch,
 SynEditMarks, PrintersDlgs,
 
-  uPSDisassembly,
+  //uPSDisassembly,
 
   uCodeGenerator,
   u_consoleide,

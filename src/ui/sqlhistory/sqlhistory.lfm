@@ -1,7 +1,7 @@
 object fmSQLHistory: TfmSQLHistory
-  Left = 459
+  Left = 460
   Height = 550
-  Top = 152
+  Top = 90
   Width = 834
   Caption = 'Querys'
   ClientHeight = 550
@@ -22,16 +22,16 @@ object fmSQLHistory: TfmSQLHistory
     TabOrder = 0
     object tsHistory: TTabSheet
       Caption = 'History'
-      ClientHeight = 516
-      ClientWidth = 824
+      ClientHeight = 512
+      ClientWidth = 828
       object Panel2: TPanel
         Left = 0
         Height = 64
         Top = 0
-        Width = 824
+        Width = 828
         Align = alTop
         ClientHeight = 64
-        ClientWidth = 824
+        ClientWidth = 828
         TabOrder = 0
         object GroupBox2: TGroupBox
           Left = 1
@@ -40,14 +40,14 @@ object fmSQLHistory: TfmSQLHistory
           Width = 320
           Align = alLeft
           Caption = 'Copy Options'
-          ClientHeight = 41
-          ClientWidth = 318
+          ClientHeight = 40
+          ClientWidth = 316
           TabOrder = 0
           object cxOverwrite: TCheckBox
             Left = 8
-            Height = 24
+            Height = 22
             Top = 4
-            Width = 292
+            Width = 289
             Caption = 'Overwrite current SQL in query window'
             TabOrder = 0
           end
@@ -56,24 +56,24 @@ object fmSQLHistory: TfmSQLHistory
           Left = 321
           Height = 62
           Top = 1
-          Width = 502
+          Width = 506
           Align = alClient
           Caption = 'Export to text file'
-          ClientHeight = 41
-          ClientWidth = 500
+          ClientHeight = 40
+          ClientWidth = 502
           TabOrder = 1
           object cxAfterDate: TCheckBox
             Left = 8
-            Height = 24
+            Height = 22
             Top = 4
-            Width = 153
+            Width = 150
             Caption = 'Only after the date'
             OnClick = cxAfterDateClick
             TabOrder = 0
           end
           object DateEdit1: TDateEdit
             Left = 168
-            Height = 37
+            Height = 30
             Top = 0
             Width = 104
             CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
@@ -94,7 +94,7 @@ object fmSQLHistory: TfmSQLHistory
           end
           object cbSQLType: TComboBox
             Left = 376
-            Height = 32
+            Height = 28
             Top = 0
             Width = 104
             ItemHeight = 0
@@ -116,16 +116,16 @@ object fmSQLHistory: TfmSQLHistory
         Left = 0
         Height = 42
         Top = 64
-        Width = 824
+        Width = 828
         Align = alTop
         ClientHeight = 42
-        ClientWidth = 824
+        ClientWidth = 828
         TabOrder = 1
         object DBNavigator1: TDBNavigator
           Left = 217
           Height = 40
           Top = 1
-          Width = 606
+          Width = 610
           Align = alClient
           BevelOuter = bvNone
           ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -135,7 +135,7 @@ object fmSQLHistory: TfmSQLHistory
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
           ClientHeight = 40
-          ClientWidth = 606
+          ClientWidth = 610
           DataSource = Datasource1
           Options = []
           TabOrder = 0
@@ -167,7 +167,7 @@ object fmSQLHistory: TfmSQLHistory
       object bbDelete: TBitBtn
         Left = 448
         Height = 30
-        Top = 414
+        Top = 410
         Width = 81
         Anchors = [akLeft, akBottom]
         Cancel = True
@@ -179,9 +179,9 @@ object fmSQLHistory: TfmSQLHistory
       end
       object DBGrid1: TRxDBGrid
         Left = 0
-        Height = 410
+        Height = 406
         Top = 106
-        Width = 824
+        Width = 828
         ColumnDefValues.BlobText = '(blob)'
         TitleButtons = False
         AutoSort = True
@@ -257,13 +257,13 @@ object fmSQLHistory: TfmSQLHistory
     end
     object tsDetails: TTabSheet
       Caption = 'Edit'
-      ClientHeight = 516
-      ClientWidth = 824
+      ClientHeight = 512
+      ClientWidth = 828
       object DBNavigator2: TDBNavigator
         Left = 0
         Height = 40
         Top = 0
-        Width = 824
+        Width = 828
         Align = alTop
         BevelOuter = bvNone
         ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -273,7 +273,7 @@ object fmSQLHistory: TfmSQLHistory
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 100
         ClientHeight = 40
-        ClientWidth = 824
+        ClientWidth = 828
         DataSource = Datasource1
         Options = []
         TabOrder = 0
@@ -283,11 +283,11 @@ object fmSQLHistory: TfmSQLHistory
         Left = 0
         Height = 128
         Top = 40
-        Width = 824
+        Width = 828
         Align = alTop
         Caption = 'Query Infos'
-        ClientHeight = 126
-        ClientWidth = 822
+        ClientHeight = 124
+        ClientWidth = 824
         TabOrder = 1
         object Label2: TLabel
           Left = 24
@@ -315,7 +315,7 @@ object fmSQLHistory: TfmSQLHistory
         end
         object DBEdit1: TDBEdit
           Left = 120
-          Height = 37
+          Height = 30
           Top = 16
           Width = 680
           DataField = 'Description'
@@ -334,7 +334,7 @@ object fmSQLHistory: TfmSQLHistory
         end
         object DBDateEdit1: TDBDateEdit
           Left = 424
-          Height = 37
+          Height = 30
           Top = 56
           Width = 290
           CalendarDisplaySettings = [dsShowHeadings, dsShowDayNames]
@@ -351,19 +351,19 @@ object fmSQLHistory: TfmSQLHistory
       end
       object GroupBox4: TGroupBox
         Left = 0
-        Height = 343
+        Height = 339
         Top = 173
-        Width = 824
+        Width = 828
         Align = alClient
         Caption = 'Query'
-        ClientHeight = 322
-        ClientWidth = 822
+        ClientHeight = 317
+        ClientWidth = 824
         TabOrder = 2
         object DBMemo1: TDBMemo
           Left = 0
-          Height = 322
+          Height = 317
           Top = 0
-          Width = 822
+          Width = 824
           Align = alClient
           DataField = 'SQLStatement'
           DataSource = Datasource1
@@ -377,7 +377,7 @@ object fmSQLHistory: TfmSQLHistory
         Left = 0
         Height = 5
         Top = 168
-        Width = 824
+        Width = 828
         Align = alTop
         ResizeAnchor = akTop
       end

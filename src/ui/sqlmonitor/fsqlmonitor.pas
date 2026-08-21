@@ -6,7 +6,7 @@ interface
 
 uses
   LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
-  SynEdit, SynHighlighterSQL,  SynEditMarkupSpecialLine,
+  SynEdit, SynHighlighterSQL,
 
   DateUtils,
 
@@ -14,7 +14,7 @@ uses
   IBInternals,
 
   turbocommon,
-  uthemeselector;
+  uthemeselector, SynEditMarkupSpecialLine;
 
 type
 
@@ -241,7 +241,7 @@ begin
   SearchHitLine := -1;
   SearchText := '';                  // NEU: zurücksetzen wenn nichts gefunden
   SynEditMonitor.Invalidate;
-  ShowMessage('"' + SearchText + '" not found.');
+  ShowMessage('"' + SearchText + '" nicht gefunden.');
 end;
 
 procedure TfmSQLMonitor.btnSearchNextClick(Sender: TObject);

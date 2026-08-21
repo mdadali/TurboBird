@@ -11,9 +11,9 @@ uses
 
   jvRuntimeDesign,
   pascalscript,
-  uPSI_IBXConnection,
-  uPSI_uibconst,
 
+  uPSI_uibconst,
+    uPSI_IBXConnection,
   u_psstudio,
   u_consoleide;
 

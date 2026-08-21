@@ -16,15 +16,13 @@ uses
   SynGutterCodeFolding, SynEditMarkupSpecialLine, SynEditRegexSearch,
   SynEditMarks, PrintersDlgs,
 
-  uthemeselector,
-
   uPSComponent_COM,
   uPSComponent_StdCtrls,
   uPSComponent_Forms,
   uPSComponent_Default,
   uPSComponent_Controls,
   uPSRuntime,
-  uPSDisassembly,
+ // uPSDisassembly,
   uPSUtils,
   uPSComponent,
   uPSDebugger,
@@ -41,9 +39,9 @@ uses
   uPSR_dateutils,
   uPSC_dateutils,
   uPSR_dll,
-  uPSC_dll,
+  uPSC_dll;
 
-  MainScriptinterface;
+  //MainScriptinterface;
 
 type
 
@@ -206,7 +204,6 @@ type
     function  ceNeedFile(Sender: TObject; const OrginFileName: String; var FileName, Output: String): Boolean;
     procedure ceBreakpoint(Sender: TObject; const FileName: String; APosition, Row, Col: Cardinal);
     procedure FormDestroy(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure messagesDblClick(Sender: TObject);
     procedure Gotolinenumber1Click(Sender: TObject);
     procedure Find1Click(Sender: TObject);
@@ -415,8 +412,9 @@ begin
   for Line := 1 to ed.Lines.Count  do
   begin
     // Prüfen, ob die Zeile Code enthält oder einen Breakpoint hat
-    HasCode := ce.Exec.HasCode(ce.MainFileName, Line);
-    //{$IFDEF Linux} HasCode := ce.Exec.HasCode(ce.MainFileName, Line); {$ENDIF}
+
+    //HasCode := ce.Exec.HasCode(ce.MainFileName, Line);
+  // {$IFDEF Linux} HasCode := ce.Exec.HasCode(ce.MainFileName, Line); {$ENDIF}
 
     HasBreakpoint := ce.HasBreakPoint(ce.MainFileName, Line);
 
@@ -671,7 +669,7 @@ begin
   if Compile then
   begin
     ce.GetCompiled(s);
-    IFPS3DataToText(s, s);
+   // IFPS3DataToText(s, s);
     //debugoutput.output.Lines.Text := s;
     //debugoutput.visible := true;
     Messages.Items.Add(S);
@@ -867,13 +865,13 @@ end;
 
 procedure TfrmConsoleIDE.ceCompImport(Sender: TObject; x: TPSPascalCompiler);
 begin
-  SIRegister_MainScriptInterface(x);
+ // SIRegister_MainScriptInterface(x);
 end;
 
 procedure TfrmConsoleIDE.ceExecImport(Sender: TObject; se: TPSExec;
   x: TPSRuntimeClassImporter);
 begin
-  RIRegister_MainScriptInterface_Routines(se, x);
+//  RIRegister_MainScriptInterface_Routines(se, x);
 end;
 
 procedure TfrmConsoleIDE.ceLine(Sender: TObject);
@@ -1275,11 +1273,6 @@ end;
 procedure TfrmConsoleIDE.FormDestroy(Sender: TObject);
 begin
   FWatchList.Free;
-end;
-
-procedure TfrmConsoleIDE.FormShow(Sender: TObject);
-begin
-  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmConsoleIDE.SetActiveFile(const Value: string);

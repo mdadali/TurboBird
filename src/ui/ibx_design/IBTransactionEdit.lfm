@@ -11,7 +11,6 @@ object IBTransactionEditForm: TIBTransactionEditForm
   ClientWidth = 396
   HelpFile = 'ibx.hlp'
   OnCreate = FormCreate
-  OnShow = FormShow
   ParentFont = True
   Position = poScreenCenter
   LCLVersion = '2.2.6.0'
@@ -22,8 +21,8 @@ object IBTransactionEditForm: TIBTransactionEditForm
     Width = 386
     Align = alClient
     Caption = 'Transaction Properties'
-    ClientHeight = 136
-    ClientWidth = 384
+    ClientHeight = 135
+    ClientWidth = 382
     TabOrder = 0
     object Label1: TLabel
       Left = 241
@@ -36,18 +35,18 @@ object IBTransactionEditForm: TIBTransactionEditForm
     end
     object rbSnapShot: TRadioButton
       Left = 8
-      Height = 24
+      Height = 22
       Top = 18
-      Width = 89
+      Width = 87
       Caption = '&Snapshot'
       OnClick = rbSnapShotClick
       TabOrder = 0
     end
     object rbReadCommitted: TRadioButton
       Left = 8
-      Height = 24
+      Height = 22
       Top = 42
-      Width = 138
+      Width = 136
       Caption = 'Read &Committed'
       Checked = True
       OnClick = rbReadCommittedClick
@@ -56,18 +55,18 @@ object IBTransactionEditForm: TIBTransactionEditForm
     end
     object rbReadOnlyTableStability: TRadioButton
       Left = 7
-      Height = 24
+      Height = 22
       Top = 66
-      Width = 194
+      Width = 192
       Caption = '&Read-Only Table Stability'
       OnClick = rbReadOnlyTableStabilityClick
       TabOrder = 2
     end
     object rbReadWriteTableStability: TRadioButton
       Left = 7
-      Height = 24
+      Height = 22
       Top = 90
-      Width = 203
+      Width = 201
       Caption = 'Read-&Write Table Stability '
       OnClick = rbReadWriteTableStabilityClick
       TabOrder = 3
@@ -88,9 +87,9 @@ object IBTransactionEditForm: TIBTransactionEditForm
     end
     object rbOtherButton: TRadioButton
       Left = 7
-      Height = 24
+      Height = 22
       Top = 114
-      Width = 105
+      Width = 103
       Caption = 'Unspecified'
       TabOrder = 5
     end

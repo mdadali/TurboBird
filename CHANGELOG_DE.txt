@@ -4,23 +4,14 @@ Neuigkeiten für TurboBird
 *: behoben
 -: entfernt
 
-TurboBird v1.2.1.1284
-Build-Datum & -Zeit: 16.08.2026, 14:00
-
-* Mehrere Bugs behoben
-
-
----------------------------------------------------------------------------------------
 TurboBird v1.2.1.1282
-Build-Datum & -Zeit: 08.08.2026, 17:35
+Build-Datum & -Zeit: 08.08.2026, 15:00
 
 + Local SQLMonitor und neue abschitt in Ini File:
   [SQLMonitor]
   TraceEnabled=1
   TraceFlags=tfConnect,tfTransact,tfQPrepare,tfQExecute,tfQFetch,tfService,tfBlob,tfStmt,tfError,tfMisc
   SlowQueryThreshold=5000
-  
-+ Tabellenfilter in Edit Tabledata
 
 * Mehrere Bugs behoben
 
