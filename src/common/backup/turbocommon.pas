@@ -1530,8 +1530,8 @@ begin
     with RegisteredDatabases[DBIndex] do
     begin
       ForceDirectories(ExtractFilePath(DBFilePath));
-      //zeno
-   //   if FileExists(DBFilePath) then          DeleteFile(DBFilePath);
+      if FileExists(DBFilePath) then
+        DeleteFile(DBFilePath);
 
       IBDatabase.CreateIfNotExists := True;
       try
