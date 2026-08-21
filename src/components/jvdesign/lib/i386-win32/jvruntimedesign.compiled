@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Lazarus Version="4.8"/>
+  <Compiler Value="H:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1557349335"/>
+  <Params Value="-MObjFPC -Scghi -O1 -g -gl -l -vewnhibq &quot;-FuH:\fpcupdeluxe\projects\TurboBird-main (1)\TurboBird-main\src\components\jvdesign\&quot; -FuH:\fpcupdeluxe\lazarus\packager\units\i386-win32 -FuH:\fpcupdeluxe\lazarus\components\lazutils\lib\i386-win32 -FuH:\fpcupdeluxe\lazarus\components\freetype\lib\i386-win32 -FuH:\fpcupdeluxe\lazarus\lcl\units\i386-win32 -FuH:\fpcupdeluxe\lazarus\lcl\units\i386-win32\win32 &quot;-FUH:\fpcupdeluxe\projects\TurboBird-main (1)\TurboBird-main\src\components\jvdesign\lib\i386-win32\&quot; -dLCL -dLCLwin32 jvRuntimeDesign.pas"/>
+</CONFIG>
