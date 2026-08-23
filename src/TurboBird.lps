@@ -239,20 +239,21 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="4617"/>
-        <CursorPos X="29" Y="4633"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="10341"/>
+        <CursorPos X="24" Y="10358"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
           <EditorIndex Value="-1"/>
-          <TopLine Value="10087"/>
-          <CursorPos X="78" Y="10103"/>
+          <TopLine Value="10345"/>
+          <CursorPos X="32" Y="10280"/>
         </ExtraEditor1>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
           <Item0 Y="5623" ID="3"/>
         </Bookmarks>
         <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="ui\createdb\createdb.pas"/>
@@ -261,11 +262,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="37"/>
         <CursorPos X="15" Y="54"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit28>
       <Unit29>
         <Filename Value="ui\registerdb\reg.pas"/>
@@ -286,10 +286,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2117"/>
-        <CursorPos X="3" Y="2120"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="3803"/>
+        <CursorPos Y="3830"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="ui\viewview\viewview.pas"/>
@@ -410,12 +413,12 @@
       <Unit41>
         <Filename Value="common\turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="481"/>
-        <CursorPos X="10" Y="498"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="297"/>
+        <CursorPos Y="319"/>
         <UsageCount Value="200"/>
         <Bookmarks Count="1">
-          <Item0 Y="2655" ID="4"/>
+          <Item0 Y="2690" ID="4"/>
         </Bookmarks>
         <Loaded Value="True"/>
       </Unit41>
@@ -584,11 +587,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-        <EditorIndex Value="1"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="68"/>
         <CursorPos X="17" Y="74"/>
         <UsageCount Value="201"/>
-        <Loaded Value="True"/>
       </Unit56>
       <Unit57>
         <Filename Value="ui\firebirdconfig\ffirebirdconfig.pas"/>
@@ -904,10 +906,11 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="187"/>
-        <CursorPos X="20" Y="201"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="124"/>
+        <CursorPos Y="151"/>
         <UsageCount Value="297092"/>
+        <Loaded Value="True"/>
       </Unit87>
       <Unit88>
         <Filename Value="ui\scriptengine\selectsqlresultsunit_ext.pas"/>
@@ -1054,13 +1057,10 @@
         <ComponentName Value="frmDBReader"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="413"/>
-        <CursorPos X="42" Y="376"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="377"/>
+        <CursorPos X="53" Y="387"/>
         <UsageCount Value="209"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
       </Unit102>
       <Unit103>
         <Filename Value="ui\tools\DBReader\DBReader\DbGridForm.pas"/>
@@ -1261,29 +1261,26 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="138"/>
         <CursorPos X="3" Y="140"/>
-        <UsageCount Value="179"/>
+        <UsageCount Value="190"/>
       </Unit122>
       <Unit123>
-        <Filename Value="ui\tools\DBReader\dbreaderexternalwriter.pas"/>
-        <UnitName Value="DBReaderExternalWriter"/>
-        <EditorIndex Value="5"/>
-        <CursorPos X="23" Y="3"/>
-        <UsageCount Value="53"/>
-        <Loaded Value="True"/>
-      </Unit123>
-      <Unit124>
         <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmServerDBFieldSelector"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ServerDBFieldSelector"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="520"/>
         <CursorPos X="8" Y="545"/>
-        <UsageCount Value="45"/>
-        <Loaded Value="True"/>
-        <LoadedDesigner Value="True"/>
+        <UsageCount Value="56"/>
+      </Unit123>
+      <Unit124>
+        <Filename Value="ui\tools\DBReader\dbreaderexternalwriter.pas"/>
+        <UnitName Value="DBReaderExternalWriter"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="23" Y="3"/>
+        <UsageCount Value="52"/>
       </Unit124>
       <Unit125>
         <Filename Value="ui\data_studio\fdataformbase.pas"/>
@@ -1291,7 +1288,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="81" Y="7"/>
-        <UsageCount Value="193"/>
+        <UsageCount Value="192"/>
       </Unit125>
       <Unit126>
         <Filename Value="ui\edittabledata\fedittabledata.pas"/>
@@ -1300,7 +1297,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="17" Y="15"/>
-        <UsageCount Value="193"/>
+        <UsageCount Value="192"/>
       </Unit126>
       <Unit127>
         <Filename Value="ui\data_studio\fdatastudio.pas"/>
@@ -1309,7 +1306,7 @@
         <UnitName Value="fDataStudio"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="18" Y="18"/>
-        <UsageCount Value="90"/>
+        <UsageCount Value="89"/>
       </Unit127>
       <Unit128>
         <Filename Value="ui\bulk_clone\bulk_clone.pas"/>
@@ -1319,14 +1316,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="825"/>
         <CursorPos X="59" Y="832"/>
-        <UsageCount Value="175"/>
+        <UsageCount Value="174"/>
       </Unit128>
       <Unit129>
         <Filename Value="libs\RunFormula\RunFormula\runformula.pas"/>
         <UnitName Value="RunFormula"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="64" Y="19"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit129>
       <Unit130>
         <Filename Value="ui\callprocedure\callproc.pas"/>
@@ -1336,7 +1333,7 @@
         <UnitName Value="CallProc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="15" Y="46"/>
-        <UsageCount Value="175"/>
+        <UsageCount Value="174"/>
       </Unit130>
       <Unit131>
         <Filename Value="ui\about\about.pas"/>
@@ -1347,21 +1344,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="119"/>
         <CursorPos X="8" Y="140"/>
-        <UsageCount Value="146"/>
+        <UsageCount Value="145"/>
       </Unit131>
       <Unit132>
         <Filename Value="classes\cdbfbfunction.pas"/>
         <UnitName Value="cDBFBFunction"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="16" Y="11"/>
-        <UsageCount Value="99"/>
+        <UsageCount Value="98"/>
       </Unit132>
       <Unit133>
         <Filename Value="utils\unitfirebirdservices.pas"/>
         <UnitName Value="UnitFirebirdServices"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="22" Y="10"/>
-        <UsageCount Value="100"/>
+        <UsageCount Value="99"/>
       </Unit133>
       <Unit134>
         <Filename Value="ui\transaction_config\IBTransactionEditor.pas"/>
@@ -1371,13 +1368,13 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="239"/>
         <CursorPos X="45" Y="253"/>
-        <UsageCount Value="96"/>
+        <UsageCount Value="95"/>
       </Unit134>
       <Unit135>
         <Filename Value="getdeclarations\udb_package_fetcher.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="22" Y="8"/>
-        <UsageCount Value="86"/>
+        <UsageCount Value="85"/>
       </Unit135>
       <Unit136>
         <Filename Value="ui\transconfig\ftransactionconfig.pas"/>
@@ -1387,7 +1384,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="21"/>
         <CursorPos X="71" Y="29"/>
-        <UsageCount Value="83"/>
+        <UsageCount Value="82"/>
       </Unit136>
       <Unit137>
         <Filename Value="datamodules\dmibx.pas"/>
@@ -1396,7 +1393,7 @@
         <ResourceBaseClass Value="DataModule"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="37" Y="24"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="40"/>
       </Unit137>
       <Unit138>
         <Filename Value="ui\blobeditor\fblobedit.pas"/>
@@ -1405,7 +1402,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="42" Y="6"/>
-        <UsageCount Value="48"/>
+        <UsageCount Value="47"/>
       </Unit138>
       <Unit139>
         <Filename Value="ui\backuprestore\backuprestore.pas"/>
@@ -1416,7 +1413,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="28" Y="64"/>
-        <UsageCount Value="18"/>
+        <UsageCount Value="17"/>
       </Unit139>
       <Unit140>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\Rx\rxdb\rxdbgrid.pas"/>
@@ -1424,20 +1421,20 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="735"/>
         <CursorPos X="38" Y="744"/>
-        <UsageCount Value="6"/>
+        <UsageCount Value="5"/>
       </Unit140>
       <Unit141>
         <Filename Value="version.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="7" Y="6"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit141>
       <Unit142>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBMessages.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="382"/>
         <CursorPos Y="410"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit142>
       <Unit143>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\packages\fcl-db\src\base\db.pas"/>
@@ -1445,28 +1442,29 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="90"/>
         <CursorPos Y="114"/>
-        <UsageCount Value="1"/>
+        <UsageCount Value="0"/>
       </Unit143>
       <Unit144>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="479"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="480"/>
         <CursorPos Y="508"/>
         <UsageCount Value="43"/>
+        <Loaded Value="True"/>
       </Unit144>
       <Unit145>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\fpcsrc\rtl\inc\objpash.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="190"/>
         <CursorPos X="34" Y="206"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit145>
       <Unit146>
         <Filename Value="ui\tools\DataEditor\ucreatetablefromdataset.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="257"/>
         <CursorPos X="30" Y="278"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit146>
       <Unit147>
@@ -1474,42 +1472,42 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="27"/>
         <CursorPos X="3" Y="57"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit147>
       <Unit148>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\customform.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="987"/>
         <CursorPos Y="1005"/>
-        <UsageCount Value="8"/>
+        <UsageCount Value="7"/>
       </Unit148>
       <Unit149>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBSQLMonitor.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos X="41" Y="34"/>
-        <UsageCount Value="3"/>
+        <UsageCount Value="2"/>
       </Unit149>
       <Unit150>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBInternals.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="30"/>
         <CursorPos Y="45"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
       </Unit150>
       <Unit151>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3576"/>
         <CursorPos Y="3594"/>
-        <UsageCount Value="41"/>
+        <UsageCount Value="40"/>
       </Unit151>
       <Unit152>
         <Filename Value="ui\sqlmonitor\fsqlmonitor.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="554"/>
         <CursorPos X="34" Y="561"/>
-        <UsageCount Value="2"/>
+        <UsageCount Value="1"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit152>
       <Unit153>
@@ -1518,7 +1516,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="613"/>
         <CursorPos Y="630"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit153>
       <Unit154>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\dbctrls.pp"/>
@@ -1526,14 +1524,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="1486"/>
         <CursorPos X="22" Y="1614"/>
-        <UsageCount Value="4"/>
+        <UsageCount Value="3"/>
       </Unit154>
       <Unit155>
         <Filename Value="ui\edit_tabledata_new\edit_tabledata_new.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="326"/>
         <CursorPos X="17" Y="333"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit155>
       <Unit156>
@@ -1541,21 +1539,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="776"/>
         <CursorPos X="43" Y="786"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="12"/>
       </Unit156>
       <Unit157>
         <Filename Value="..\..\..\..\..\linux\lazarus\components\PascalScript\Source\uPSRuntime.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="12321"/>
         <CursorPos X="28" Y="12348"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
       </Unit157>
       <Unit158>
         <Filename Value="ui\newtable\newtable.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="302"/>
         <CursorPos X="52" Y="316"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit158>
       <Unit159>
@@ -1563,7 +1561,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2646"/>
         <CursorPos X="35" Y="2660"/>
-        <UsageCount Value="5"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit159>
       <Unit160>
@@ -1571,7 +1569,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="972"/>
         <CursorPos Y="990"/>
-        <UsageCount Value="24"/>
+        <UsageCount Value="23"/>
       </Unit160>
       <Unit161>
         <Filename Value="ui\openquerybuilder\unit1.pas"/>
@@ -1579,14 +1577,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="93"/>
         <CursorPos X="27" Y="114"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
       </Unit161>
       <Unit162>
         <Filename Value="ui\copytable_new\clone_table_dialog.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="571"/>
         <CursorPos X="31" Y="584"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit162>
       <Unit163>
@@ -1594,7 +1592,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="199"/>
         <CursorPos X="29" Y="215"/>
-        <UsageCount Value="7"/>
+        <UsageCount Value="6"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit163>
       <Unit164>
@@ -1602,21 +1600,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="645"/>
         <CursorPos Y="663"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="8"/>
       </Unit164>
       <Unit165>
         <Filename Value="ui\tools\DBReader\DBReader\DBReaderBase.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="974"/>
         <CursorPos X="54" Y="991"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="11"/>
       </Unit165>
       <Unit166>
         <Filename Value="ui\tools\DBReader\DBReader\DBReaderFirebird.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="10"/>
         <CursorPos X="52" Y="20"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit166>
       <Unit167>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\lazarus\lcl\dialogs.pp"/>
@@ -1624,7 +1622,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="685"/>
         <CursorPos X="27" Y="702"/>
-        <UsageCount Value="10"/>
+        <UsageCount Value="9"/>
       </Unit167>
     </Units>
     <Debugger>
@@ -1638,126 +1636,126 @@
       <Define4 Value="CONSOLE_SCRIPTER"/>
       <Define5 Value="PS_USESSUPPORT"/>
     </OtherDefines>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="30" HistoryIndex="27">
       <Position1>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1797" Column="44" TopLine="1780"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3549" TopLine="3541"/>
       </Position1>
       <Position2>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="2063" TopLine="2008"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3551" TopLine="3541"/>
       </Position2>
       <Position3>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1793" Column="9" TopLine="1902"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3552" TopLine="3541"/>
       </Position3>
       <Position4>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="2078" TopLine="1987"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3553" TopLine="3541"/>
       </Position4>
       <Position5>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1807" Column="9" TopLine="1791"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3555" TopLine="3541"/>
       </Position5>
       <Position6>
-        <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
-        <Caret Line="574" Column="35" TopLine="565"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3556" TopLine="3541"/>
       </Position6>
       <Position7>
-        <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
-        <Caret Line="98" Column="26" TopLine="83"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3557" Column="22" TopLine="3566"/>
       </Position7>
       <Position8>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="2132" TopLine="1798"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3571" TopLine="3565"/>
       </Position8>
       <Position9>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1829" Column="9" TopLine="1850"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3572" TopLine="3565"/>
       </Position9>
       <Position10>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1799" Column="70" TopLine="1788"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3573" TopLine="3565"/>
       </Position10>
       <Position11>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1794" Column="36" TopLine="13"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3574" TopLine="3565"/>
       </Position11>
       <Position12>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1801" Column="29" TopLine="1791"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3575" TopLine="3565"/>
       </Position12>
       <Position13>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="2141" TopLine="2107"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3576" TopLine="3565"/>
       </Position13>
       <Position14>
-        <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
-        <Caret Line="10" Column="34" TopLine="7"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3577" TopLine="3565"/>
       </Position14>
       <Position15>
-        <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
-        <Caret Line="556" TopLine="533"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3578" TopLine="3565"/>
       </Position15>
       <Position16>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1876" Column="74" TopLine="1859"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3579" TopLine="3565"/>
       </Position16>
       <Position17>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1875" Column="44" TopLine="1859"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3580" TopLine="3565"/>
       </Position17>
       <Position18>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1869" Column="27" TopLine="1865"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3551" TopLine="3534"/>
       </Position18>
       <Position19>
-        <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
-        <Caret Line="566" Column="16" TopLine="536"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3662" TopLine="3645"/>
       </Position19>
       <Position20>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1824" Column="10" TopLine="1766"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3431" TopLine="3413"/>
       </Position20>
       <Position21>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1779" Column="16" TopLine="1762"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3676" TopLine="3660"/>
       </Position21>
       <Position22>
-        <Filename Value="common\turbocommon.pas"/>
-        <Caret Line="776" TopLine="752"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3679" TopLine="3660"/>
       </Position22>
       <Position23>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1779" Column="42" TopLine="1845"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3680" TopLine="3660"/>
       </Position23>
       <Position24>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1821" Column="9" TopLine="1840"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3681" TopLine="3660"/>
       </Position24>
       <Position25>
-        <Filename Value="ui\tools\DBReader\dbreaderexternalwriter.pas"/>
-        <Caret Column="14"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3818" TopLine="3801"/>
       </Position25>
       <Position26>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="2111" Column="13" TopLine="2007"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3822" TopLine="3801"/>
       </Position26>
       <Position27>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="1873" TopLine="1838"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3823" TopLine="3801"/>
       </Position27>
       <Position28>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="958" Column="3" TopLine="954"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3824" Column="27" TopLine="3801"/>
       </Position28>
       <Position29>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="183" Column="25" TopLine="167"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3426" TopLine="3408"/>
       </Position29>
       <Position30>
-        <Filename Value="ui\tools\DBReader\DBReader\db_reader.pas"/>
-        <Caret Line="198" Column="54" TopLine="185"/>
+        <Filename Value="ui\querywindow\querywindow.pas"/>
+        <Caret Line="3452" Column="24" TopLine="3443"/>
       </Position30>
     </JumpHistory>
     <RunParams>

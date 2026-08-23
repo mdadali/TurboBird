@@ -71196,6 +71196,14 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
   end
+  object ToggleBox1: TToggleBox
+    Left = 249
+    Height = 25
+    Top = 58
+    Width = 75
+    Caption = 'ToggleBox1'
+    TabOrder = 4
+  end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.sql'
     Filter = 'SQL Files|*.sql|All Files|*.*'
@@ -72696,8 +72704,8 @@ object fmQueryWindow: TfmQueryWindow
     )
     AfterTransactionEnd = FQueryTransAfterTransactionEnd
     OnStartTransaction = FQueryTransStartTransaction
-    Left = 368
-    Top = 248
+    Left = 320
+    Top = 216
   end
   object SynAutoComplete1: TSynAutoComplete
     AutoCompleteList.Strings = (

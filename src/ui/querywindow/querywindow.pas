@@ -72,6 +72,7 @@ type
     tbRollbackRetaining: TToolButton;
     tbRun: TToolButton;
     tbSave: TToolButton;
+    ToggleBox1: TToggleBox;
     ToolBar1: TToolBar;
     toolbarImages: TImageList;
     imTools: TImageList;
@@ -1066,11 +1067,9 @@ end;
 
 
 { Initialize query window: fill connection parameters from selected registered database }
-
-{procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos = nil);
+procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos = nil);
 var
   i: Integer;
-  TxParams: TStrings;
 begin
   FNodeInfos := ANodeInfos;
   FDBIndex   := dbIndex;
@@ -1092,13 +1091,35 @@ begin
   FIBXScript.Database := FIBConnection;
   FIBXScript.Transaction := FScriptTrans;
 
-  // Transaktionsparameter aus registrierter DB holen
-  TxParams := nil;
+  // 👉 **WICHTIG: Parameter VOR dem Verbinden setzen!**
   if Assigned(RegisteredDatabases[dbIndex].IBTransaction) then
-    TxParams := RegisteredDatabases[dbIndex].IBTransaction.Params;
+  begin
+    FQueryTrans.Params.Assign(RegisteredDatabases[dbIndex].IBTransaction.Params);
+    FScriptTrans.Params.Assign(RegisteredDatabases[dbIndex].IBTransaction.Params);
+  end
+  else
+  begin
+    // Fallback: Default-Parameter
+    FQueryTrans.Params.Clear;
+    FQueryTrans.Params.Add('read_committed');
+    FQueryTrans.Params.Add('rec_version');
+    FQueryTrans.Params.Add('nowait');
 
-  // Verbinden + Transaktion mit Parametern starten
-  ConnectDBPrepared(FIBConnection, FQueryTrans, FDBIndex, TxParams);
+    FScriptTrans.Params.Clear;
+    FScriptTrans.Params.Add('read_committed');
+    FScriptTrans.Params.Add('rec_version');
+    FScriptTrans.Params.Add('nowait');
+  end;
+
+  // Verbindung herstellen
+  if not FIBConnection.Connected then
+  begin
+    FIBConnection.Params.Values['user_name'] := FRegRec.UserName;
+    FIBConnection.Params.Values['password']  := FRegRec.Password;
+    FIBConnection.OnLogin := @dmSysTables.OnDatabaseLogin;
+    FIBConnection.LoginPrompt := True;
+    FIBConnection.Connected := True;
+  end;
 
   // Tabellennamen für Syntax‑Highlighting laden
   SynSQLSyn1.TableNames.CommaText := fmMain.GetTableNames(dbIndex);
@@ -1106,9 +1127,9 @@ begin
     if IsObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
       SynSQLSyn1.TableNames[i] := MakeObjectNameQuoted(SynSQLSyn1.TableNames[i]);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
-end;}
+end;
 
-procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos = nil);
+{procedure TfmQueryWindow.Init(dbIndex: Integer; ANodeInfos: TPNodeInfos = nil);
 var
   i: Integer;
 begin
@@ -1152,7 +1173,7 @@ begin
     if IsObjectNameCaseSensitive(SynSQLSyn1.TableNames[i]) then
       SynSQLSyn1.TableNames[i] := MakeObjectNameQuoted(SynSQLSyn1.TableNames[i]);
   SynCompletion1.ItemList.AddStrings(SynSQLSyn1.TableNames);
-end;
+end;}
 
 function TfmQueryWindow.GetStatementType(const SQL: string): TIBSQLStatementTypes;
 var
@@ -3176,7 +3197,7 @@ begin
   FQuery.Clear;
 end;}
 
-procedure TfmQueryWindow.ExecuteQuery;
+{procedure TfmQueryWindow.ExecuteQuery;
 var
   StartTime: TDateTime;
   SqlType: string;
@@ -3316,9 +3337,11 @@ begin
           if StatementType = SQLDDL then
           begin
             FSQLQuery.ExecSQL;
+
             if cxAutoCommit.Checked then
               if FQueryTrans.InTransaction then
                 FQueryTrans.CommitRetaining;
+
             FTab.Caption := 'DDL Executed';
             FResultMemo.Visible := True;
             FResultMemo.Clear;
@@ -3362,6 +3385,276 @@ begin
             FResultMemo.Font.Color := clRed;
             FTab.Font.Color := clRed;
             FTab.ImageIndex := 3;
+          end;
+        end;
+      end;
+
+      if FModifyCount > 50 then
+        if MessageDlg('Commit',
+            'Too many modifications. Do you want to commit?',
+            mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+        begin
+          if FQueryTrans.InTransaction then
+            FQueryTrans.CommitRetaining;
+          FModifyCount := 0;
+        end
+        else
+          FModifyCount := 0;
+    end;
+
+  finally
+    Statements.Free;
+  end;
+
+  FFinished := True;
+  FQuery.Clear;
+end;}
+
+procedure TfmQueryWindow.ExecuteQuery;
+var
+  StartTime: TDateTime;
+  SqlType: string;
+  Affected: Integer;
+  FSQLQuery: TIBQuery;
+  FSQLTrans_Local: TIBTransaction;
+  StatementType: TIBSQLStatementTypes;
+  Statements: TStringList;
+  i: Integer;
+  DDLSQLQuery: TIBQuery;
+  DDLSQLTrans: TIBTransaction;
+begin
+  if not FIBConnection.Connected then
+    FIBConnection.Connected := true;
+
+  Statements := SplitSQLStatements(FQuery.Text);
+  try
+    for i := 0 to Statements.Count - 1 do
+    begin
+      FQueryPart := Statements[i];
+      if (FQueryPart = '') or IsOnlyComments(FQueryPart) then
+        Continue;
+
+      Inc(FCounter);
+
+      // ============================================================
+      // STATEMENT-TYP ERMITTELN
+      // ============================================================
+      FSQLQuery := TIBQuery.Create(nil);
+      FSQLQuery.AllowAutoActivateTransaction := True;
+
+      FSQLTrans_Local := TIBTransaction.Create(nil);
+      try
+        FSQLTrans_Local.DefaultDatabase := FIBConnection;
+        FSQLTrans_Local.StartTransaction;
+        FSQLQuery.Database := FIBConnection;
+        FSQLQuery.Transaction := FSQLTrans_Local;
+        FSQLQuery.SQL.Text := FQueryPart;
+        try
+          FSQLQuery.Prepare;
+          StatementType := FSQLQuery.StatementType;
+          FSQLQuery.Unprepare;
+        except
+          StatementType := SQLUnknown;
+        end;
+        FSQLTrans_Local.Commit;
+      finally
+        FSQLQuery.Free;
+        FSQLTrans_Local.Free;
+      end;
+
+      // ============================================================
+      // SELECT
+      // ============================================================
+      if StatementType in [SQLSelect, SQLSelectForUpdate] then
+      begin
+        FTab := nil;
+        try
+          FSQLQuery := TIBQuery.Create(Self);
+          FSQLQuery.AllowAutoActivateTransaction := True;  // 👈 NEU!
+
+          FSQLTrans_Local := TIBTransaction.Create(Self);
+          FSQLTrans_Local.DefaultDatabase := FIBConnection;
+          FSQLTrans_Local.Params.Assign(FIBConnection.DefaultTransaction.Params);
+          FSQLTrans_Local.StartTransaction;
+
+          FSQLQuery.Database := FIBConnection;
+          FSQLQuery.Transaction := FSQLTrans_Local;
+          FSQLQuery.AllowAutoActivateTransaction := True;  // 👈 NEU!
+
+          if cxAutoCommit.Checked then
+            if FQueryTrans.InTransaction then
+              FQueryTrans.CommitRetaining;
+
+          FTab := CreateResultTab(True, FSQLQuery, FResultMemo);
+          FTab.ImageIndex := 6;
+          FTab.Hint := FQueryPart;
+          FTab.ShowHint := True;
+          FSQLQuery.SQL.Text := FQueryPart;
+          FTab.Caption := 'Running...';
+
+          FSQLQuery.Open;
+          FTab.Caption := 'Query Result';
+          FTab.ImageIndex := 0;
+
+          SetTransactionButtonsState(False);
+          FLastStatementWasSelect := True;
+
+          fmMain.AddToSQLHistory(FRegRec.Title, 'SELECT', meQuery.Text);
+        except
+          on e: Exception do
+          begin
+            if Assigned(FSQLTrans_Local) then
+            begin
+              if FSQLTrans_Local.InTransaction then
+                FSQLTrans_Local.Rollback;
+              FSQLTrans_Local.Free;
+            end;
+            if Assigned(FTab) then FTab.TabVisible := False;
+            FTab := CreateResultTab(False, FSQLQuery, FResultMemo);
+            pgOutputPageCtl.ActivePage := FTab;
+            FResultMemo.Text := e.Message;
+            FResultMemo.Lines.Add(FQueryPart);
+            FResultMemo.Font.Color := clRed;
+            FTab.Font.Color := clRed;
+            FTab.ImageIndex := 3;
+          end;
+        end;
+      end
+      else
+      // ============================================================
+      // DML / DDL
+      // ============================================================
+      begin
+        if StatementType = SQLDDL then
+        begin
+          // Neue, separate Transaktion für DDL
+          DDLSQLTrans := TIBTransaction.Create(Self);
+          DDLSQLTrans.DefaultDatabase := FIBConnection;
+
+          // Parameter setzen (mit nowait!)
+          DDLSQLTrans.Params.Clear;
+          DDLSQLTrans.Params.Add('read_committed');
+          DDLSQLTrans.Params.Add('rec_version');
+          DDLSQLTrans.Params.Add('nowait');
+
+          DDLSQLTrans.StartTransaction;
+
+          DDLSQLQuery := TIBQuery.Create(Self);
+          DDLSQLQuery.AllowAutoActivateTransaction := True;
+          DDLSQLQuery.Database := FIBConnection;
+          DDLSQLQuery.Transaction := DDLSQLTrans;
+          DDLSQLQuery.SQL.Text := FQueryPart;
+
+          FTab := CreateResultTab(False, DDLSQLQuery, FResultMemo);
+          FTab.ImageIndex := 1;
+
+          try
+            StartTime := Now;
+            DDLSQLQuery.ExecSQL;
+
+            if cxAutoCommit.Checked then
+              if DDLSQLTrans.InTransaction then
+                DDLSQLTrans.CommitRetaining;
+
+            FTab.Caption := 'DDL Executed';
+            FResultMemo.Visible := True;
+            FResultMemo.Clear;
+            FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
+            FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) +
+              ' - DDL Executed. Duration: ' +
+              FormatDateTime('HH:nn:ss.z', Now - StartTime));
+            FResultMemo.Lines.Add('----');
+            FResultMemo.Lines.Add(FQueryPart);
+          except
+            on E: Exception do
+            begin
+              if DDLSQLTrans.InTransaction then
+                DDLSQLTrans.Rollback;
+              if Assigned(FTab) then FTab.TabVisible := False;
+              FTab := CreateResultTab(False, DDLSQLQuery, FResultMemo);
+              pgOutputPageCtl.ActivePage := FTab;
+              FResultMemo.Text := E.Message;
+              FResultMemo.Lines.Add(FQueryPart);
+              FResultMemo.Font.Color := clRed;
+              FTab.Font.Color := clRed;
+              FTab.ImageIndex := 3;
+            end;
+          end;
+        end
+        else
+        begin
+          // DML (INSERT, UPDATE, DELETE) – Haupttransaktion verwenden
+          if FQueryTrans.InTransaction then
+          begin
+            try
+              FQueryTrans.Commit;
+            except
+              FQueryTrans.Rollback;
+            end;
+          end;
+
+          if FQueryTrans.Params.Count = 0 then
+            FQueryTrans.Params.Assign(FIBConnection.DefaultTransaction.Params);
+
+          if not IsTransactionControl(FQueryPart) then
+            FQueryTrans.StartTransaction;
+
+          FTab := nil;
+          FSQLQuery := TIBQuery.Create(Self);
+          FSQLQuery.AllowAutoActivateTransaction := True;  // 👈 NEU!
+          FSQLQuery.Database := FIBConnection;
+          FSQLQuery.Transaction := FQueryTrans;
+          FTab := CreateResultTab(False, FSQLQuery, FResultMemo);
+          FTab.ImageIndex := 1;
+
+          if IsTransactionControl(FQueryPart) and not FQueryTrans.InTransaction then
+          begin
+            FResultMemo.Visible := True;
+            FResultMemo.Clear;
+            FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
+            FResultMemo.Lines.Add('No active transaction to ' +
+              UpperCase(Trim(FQueryPart)) + '.');
+            FResultMemo.Font.Color := clRed;
+            FTab.Font.Color := clRed;
+            FTab.ImageIndex := 3;
+            Continue;
+          end;
+
+          StartTime := Now;
+          Affected := 0;
+          try
+            FSQLQuery.SQL.Text := FQueryPart;
+            FTab.Caption := 'Running...';
+            FSQLQuery.ExecSQL;
+            if cxAutoCommit.Checked then
+              if FQueryTrans.InTransaction then
+                FQueryTrans.CommitRetaining;
+            Affected := FSQLQuery.RowsAffected;
+            FTab.Caption := 'DML Executed';
+            FResultMemo.Visible := True;
+            FResultMemo.Clear;
+            FResultMemo.Lines.Add('Statement #' + IntToStr(FCounter));
+            FResultMemo.Lines.Add(FormatDateTime('hh:nn:ss.z', Now) +
+              ' - DML Executed. Duration: ' +
+              FormatDateTime('HH:nn:ss.z', Now - StartTime));
+            FResultMemo.Lines.Add('Rows affected: ' + IntToStr(Affected));
+            FLastStatementWasSelect := False;
+            Inc(FModifyCount);
+            fmMain.AddToSQLHistory(FRegRec.Title, 'DML', meQuery.Text);
+            FResultMemo.Lines.Add('----');
+            FResultMemo.Lines.Add(FQueryPart);
+          except
+            on E: Exception do
+            begin
+              if Assigned(FTab) then FTab.TabVisible := False;
+              FTab := CreateResultTab(False, FSQLQuery, FResultMemo);
+              pgOutputPageCtl.ActivePage := FTab;
+              FResultMemo.Text := E.Message;
+              FResultMemo.Lines.Add(FQueryPart);
+              FResultMemo.Font.Color := clRed;
+              FTab.Font.Color := clRed;
+              FTab.ImageIndex := 3;
+            end;
           end;
         end;
       end;
@@ -3527,7 +3820,8 @@ begin
                           (not FLastStatementWasSelect);
 
     if cxAutoCommit.Checked and (not FLastStatementWasSelect) then
-      FQueryTrans.Commit;
+      if FQueryTrans.Active then
+        FQueryTrans.Commit;
   end;
 
   SetTransactionButtonsState(EnableTransButtons);

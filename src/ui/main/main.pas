@@ -10361,6 +10361,8 @@ begin
               RegRec.TxConfig := IBTransaction.Params.Text;
             end;
 
+            //ShowMessage(IBTransaction.Params.Text);
+
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;
             IBQuery.Transaction := IBTransaction;
