@@ -1,7 +1,7 @@
 object frmDBReader: TfrmDBReader
-  Left = 393
+  Left = 372
   Height = 572
-  Top = 99
+  Top = 104
   Width = 844
   Caption = 'Database file reader'
   ClientHeight = 572
@@ -898,7 +898,7 @@ object frmDBReader: TfrmDBReader
       end>
     SimplePanel = False
   end
-  object ProgressBar: TProgressBar
+  object ProgressBar1: TProgressBar
     Left = 618
     Height = 17
     Top = 550
@@ -910,11 +910,15 @@ object frmDBReader: TfrmDBReader
     Visible = False
   end
   object pmGrid: TPopupMenu
-    Left = 680
-    Top = 504
+    Left = 648
+    Top = 440
     object miExporttoCSV: TMenuItem
       Caption = 'Export to CSV'
       OnClick = miExporttoCSVClick
+    end
+    object lmExportToFBTable: TMenuItem
+      Caption = 'Export to Firebird  Table'
+      OnClick = lmExportToFBTableClick
     end
     object miDBGrid1: TMenuItem
       Caption = 'TestDBGrid'

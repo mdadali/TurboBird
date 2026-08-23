@@ -1,13 +1,13 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 676
+  Left = 396
   Height = 734
-  Top = 182
-  Width = 1079
+  Top = 466
+  Width = 1281
   Align = alTop
   BorderStyle = bsDialog
   Caption = 'Clone Table'
   ClientHeight = 734
-  ClientWidth = 1079
+  ClientWidth = 1281
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -17,10 +17,10 @@ object frmCloneTable: TfrmCloneTable
     Left = 0
     Height = 40
     Top = 672
-    Width = 1079
+    Width = 1281
     Align = alBottom
     ClientHeight = 40
-    ClientWidth = 1079
+    ClientWidth = 1281
     TabOrder = 0
     object btnExecute: TButton
       Left = 816
@@ -63,32 +63,32 @@ object frmCloneTable: TfrmCloneTable
     Left = 0
     Height = 32
     Top = 0
-    Width = 1079
+    Width = 1281
     Align = alTop
     TabOrder = 1
   end
-  object Panel2: TPanel
+  object pnlSelector: TPanel
     Left = 0
     Height = 264
     Top = 32
-    Width = 1079
+    Width = 1281
     Align = alTop
     ClientHeight = 264
-    ClientWidth = 1079
+    ClientWidth = 1281
     TabOrder = 2
     object grBoxSource: TGroupBox
       Left = 1
       Height = 262
       Top = 1
-      Width = 503
+      Width = 439
       Align = alLeft
       Caption = 'Source'
       ClientHeight = 241
-      ClientWidth = 501
+      ClientWidth = 437
       TabOrder = 0
       OnClick = grBoxSourceClick
       object lbSourceTable: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 112
         Width = 86
@@ -96,7 +96,7 @@ object frmCloneTable: TfrmCloneTable
         ParentColor = False
       end
       object comboxSourceTables: TComboBox
-        Left = 120
+        Left = 110
         Height = 36
         Top = 108
         Width = 320
@@ -106,7 +106,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 0
       end
       object comboxSourceServer: TComboBox
-        Left = 120
+        Left = 110
         Height = 36
         Top = 8
         Width = 320
@@ -116,7 +116,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 1
       end
       object comboxSourceDB: TComboBox
-        Left = 120
+        Left = 110
         Height = 36
         Top = 58
         Width = 320
@@ -126,7 +126,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 2
       end
       object Label6: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 63
         Width = 63
@@ -134,7 +134,7 @@ object frmCloneTable: TfrmCloneTable
         ParentColor = False
       end
       object Label7: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 12
         Width = 43
@@ -143,18 +143,18 @@ object frmCloneTable: TfrmCloneTable
       end
     end
     object Destination: TGroupBox
-      Left = 504
+      Left = 440
       Height = 262
       Top = 1
-      Width = 574
-      Align = alClient
+      Width = 544
+      Align = alLeft
       Caption = 'Destination'
       ClientHeight = 241
-      ClientWidth = 572
+      ClientWidth = 542
       TabOrder = 1
       OnClick = DestinationClick
       object Label4: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 12
         Width = 43
@@ -162,7 +162,7 @@ object frmCloneTable: TfrmCloneTable
         ParentColor = False
       end
       object comboxDestServer: TComboBox
-        Left = 147
+        Left = 140
         Height = 36
         Top = 8
         Width = 355
@@ -172,7 +172,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 0
       end
       object Label5: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 62
         Width = 63
@@ -181,7 +181,7 @@ object frmCloneTable: TfrmCloneTable
         OnClick = Label5Click
       end
       object comboxDestDB: TComboBox
-        Left = 147
+        Left = 140
         Height = 36
         Top = 58
         Width = 357
@@ -191,7 +191,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 1
       end
       object btnNewDB: TButton
-        Left = 512
+        Left = 500
         Height = 30
         Top = 62
         Width = 38
@@ -200,15 +200,16 @@ object frmCloneTable: TfrmCloneTable
         Visible = False
       end
       object Label2: TLabel
-        Left = 17
+        Left = 10
         Height = 20
         Top = 108
         Width = 36
         Caption = 'Table'
         ParentColor = False
+        OnClick = Label2Click
       end
       object edtDestTable: TEdit
-        Left = 147
+        Left = 140
         Height = 37
         Top = 108
         Width = 355
@@ -216,7 +217,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 3
       end
       object chkCreateTable: TCheckBox
-        Left = 16
+        Left = 10
         Height = 24
         Top = 200
         Width = 269
@@ -227,7 +228,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 4
       end
       object chkboxExternalTable: TCheckBox
-        Left = 17
+        Left = 10
         Height = 24
         Top = 160
         Width = 121
@@ -236,7 +237,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 5
       end
       object edtExternalFile: TEdit
-        Left = 147
+        Left = 140
         Height = 37
         Top = 160
         Width = 357
@@ -244,7 +245,7 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 6
       end
       object btnExternalFile: TButton
-        Left = 512
+        Left = 500
         Height = 32
         Top = 160
         Width = 38
@@ -254,16 +255,65 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 7
       end
     end
+    object grboxFields: TGroupBox
+      Left = 984
+      Height = 262
+      Top = 1
+      Width = 296
+      Align = alClient
+      Caption = 'Fields'
+      ClientHeight = 241
+      ClientWidth = 294
+      TabOrder = 2
+      object chkLstFields: TCheckListBox
+        Left = 0
+        Height = 199
+        Top = 0
+        Width = 294
+        Align = alClient
+        ItemHeight = 0
+        TabOrder = 0
+        TopIndex = -1
+      end
+      object pnlFieldsSelectButtons: TPanel
+        Left = 0
+        Height = 42
+        Top = 199
+        Width = 294
+        Align = alBottom
+        ClientHeight = 42
+        ClientWidth = 294
+        TabOrder = 1
+        object btnSelectAll: TButton
+          Left = 8
+          Height = 25
+          Top = 8
+          Width = 111
+          Caption = 'Select All'
+          OnClick = btnSelectAllClick
+          TabOrder = 0
+        end
+        object btnDeselectAll: TButton
+          Left = 128
+          Height = 25
+          Top = 8
+          Width = 112
+          Caption = 'Deselect All'
+          OnClick = btnDeselectAllClick
+          TabOrder = 1
+        end
+      end
+    end
   end
   object grboxCopyOptions: TGroupBox
     Left = 0
     Height = 152
     Top = 520
-    Width = 1079
+    Width = 1281
     Align = alBottom
     Caption = 'Copy Options'
     ClientHeight = 131
-    ClientWidth = 1077
+    ClientWidth = 1279
     TabOrder = 3
     object rbAllRows: TRadioButton
       Left = 24
@@ -329,7 +379,7 @@ object frmCloneTable: TfrmCloneTable
       Text = '1000'
     end
     object grBoxFormulaPresets: TGroupBox
-      Left = 680
+      Left = 882
       Height = 131
       Top = 0
       Width = 397
@@ -417,17 +467,17 @@ object frmCloneTable: TfrmCloneTable
       TabOrder = 9
     end
   end
-  object grBoxFields: TGroupBox
+  object grBoxFormulaFields: TGroupBox
     Left = 0
     Height = 224
     Top = 296
-    Width = 1079
-    Align = alTop
-    Caption = 'Fields'
+    Width = 1281
+    Align = alClient
+    Caption = 'FormulaFields'
     ClientHeight = 203
-    ClientWidth = 1077
+    ClientWidth = 1279
     TabOrder = 4
-    OnDblClick = grBoxFieldsDblClick
+    OnDblClick = grBoxFormulaFieldsDblClick
     object btnOpenExternalFile: TButton
       Left = 572
       Height = 25
@@ -440,7 +490,7 @@ object frmCloneTable: TfrmCloneTable
       Left = 0
       Height = 203
       Top = 0
-      Width = 744
+      Width = 1279
       Align = alClient
       ColCount = 0
       FixedCols = 0
@@ -449,50 +499,12 @@ object frmCloneTable: TfrmCloneTable
       TabOrder = 1
       OnDblClick = sgFieldsDblClick
     end
-    object pnlFields: TPanel
-      Left = 744
-      Height = 203
-      Top = 0
-      Width = 333
-      Align = alRight
-      ClientHeight = 203
-      ClientWidth = 333
-      TabOrder = 2
-      object chkLstFields: TCheckListBox
-        Left = 1
-        Height = 159
-        Top = 1
-        Width = 331
-        Align = alTop
-        ItemHeight = 0
-        TabOrder = 0
-        TopIndex = -1
-      end
-      object btnSelectAll: TButton
-        Left = 56
-        Height = 25
-        Top = 168
-        Width = 111
-        Caption = 'Select All'
-        OnClick = btnSelectAllClick
-        TabOrder = 1
-      end
-      object btnDeselectAll: TButton
-        Left = 192
-        Height = 25
-        Top = 168
-        Width = 112
-        Caption = 'Deselect All'
-        OnClick = btnDeselectAllClick
-        TabOrder = 2
-      end
-    end
   end
   object StatusBar1: TStatusBar
     Left = 0
     Height = 22
     Top = 712
-    Width = 1079
+    Width = 1281
     Panels = <>
   end
   object IBQuerySource: TIBQuery
