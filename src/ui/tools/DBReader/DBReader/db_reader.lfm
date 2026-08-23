@@ -1,7 +1,7 @@
 object frmDBReader: TfrmDBReader
-  Left = 372
+  Left = 636
   Height = 572
-  Top = 104
+  Top = 247
   Width = 844
   Caption = 'Database file reader'
   ClientHeight = 572
@@ -634,7 +634,7 @@ object frmDBReader: TfrmDBReader
         Width = 570
         Align = alTop
         Caption = 'CSV Options'
-        ClientHeight = 243
+        ClientHeight = 262
         ClientWidth = 568
         TabOrder = 0
         object Label1: TLabel

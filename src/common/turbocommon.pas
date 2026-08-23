@@ -494,6 +494,8 @@ var
 
     //end-Ini.File////////////////////////////////////////////////////////////////
 
+//transactions
+function GetTransactionParamsAsString(ATrans: TIBTransaction): string;
 
 //Dialogs
 function ShowInfoDialog(const aMsg: string): TModalResult;
@@ -736,6 +738,39 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses Reg;
+
+//Transactions
+function GetTransactionParamsAsString(ATrans: TIBTransaction): string;
+var
+  i: Integer;
+begin
+  Result := '';
+  if not Assigned(ATrans) then
+  begin
+    Result := 'Transaction is NIL';
+    Exit;
+  end;
+
+  Result := 'Transaction: ' + ATrans.TransactionName + sLineBreak;
+  Result := Result + 'Active: ' + BoolToStr(ATrans.InTransaction, True) + sLineBreak;
+  Result := Result + 'Params Count: ' + IntToStr(ATrans.Params.Count) + sLineBreak;
+  Result := Result + 'Params:' + sLineBreak;
+
+  if ATrans.Params.Count = 0 then
+    Result := Result + '  (empty - using server defaults)' + sLineBreak
+  else
+    for i := 0 to ATrans.Params.Count - 1 do
+      Result := Result + '  ' + ATrans.Params[i] + sLineBreak;
+
+  // Zusätzlich die Connection-Parameter (für den Kontext)
+  if Assigned(ATrans.DefaultDatabase) then
+  begin
+    Result := Result + sLineBreak + 'Database Params:' + sLineBreak;
+    for i := 0 to ATrans.DefaultDatabase.Params.Count - 1 do
+      Result := Result + '  ' + ATrans.DefaultDatabase.Params[i] + sLineBreak;
+  end;
+end;
+
 
 // ========================================================================
 // Zentrale MessageBox-Funktionen für TurboBird
