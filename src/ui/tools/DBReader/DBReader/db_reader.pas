@@ -30,7 +30,14 @@ uses
 
   DbGridForm,
   turbocommon,
-  uthemeselector;
+  uthemeselector,
+
+
+  IBDatabase,
+  IBQuery,
+  IBSQL,
+  ServerDBFieldSelector
+  ;
 
 type
   TMyTreeNode = class(TTreeNode)
@@ -69,11 +76,12 @@ type
     Label6: TLabel;
     lbFileName: TLabel;
     memoLog: TMemo;
+    lmExportToFBTable: TMenuItem;
     pnlTop: TPanel;
     Panel2: TPanel;
     panFile: TPanel;
     panLeft: TPanel;
-    ProgressBar: TProgressBar;
+    ProgressBar1: TProgressBar;
     SaveDialog: TSaveDialog;
     spl1: TSplitter;
     StatusBar1: TStatusBar;
@@ -99,6 +107,7 @@ type
     procedure dgItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect;
       State: TGridDrawState);
     procedure FormShow(Sender: TObject);
+    procedure lmExportToFBTableClick(Sender: TObject);
     procedure pgcMainChange(Sender: TObject);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure btnFileSelectClick(Sender: TObject);
@@ -128,6 +137,25 @@ type
     function GetFieldColor(const AField: TDbFieldDefRec): TColor;
 
     procedure ExportGridToCSV();
+
+    //additinal for Export as Firebird Table
+    function GenerateCreateTableSQL(
+      const TableName, ExternalFile: string;
+      SelectedFields: TStringList;
+      IsExternal: Boolean): string;
+    function BuildInsertStatementPrepared(
+      const TableName: string;
+      SelectedFields: TStringList;
+      Query: TIBQuery): string;
+    function TableExistsInDatabase(ADatabase: TIBDatabase; const ATableName: string): Boolean;
+    function GetFieldIndex(const AFieldName: string): Integer;
+    function GetFieldDefByName(const AFieldName: string): TDbFieldDefRec;
+    // Für TFieldType (original)
+    function MapFieldTypeToSQL(AFieldType: TFieldType): string;
+    // Für TDbFieldDefRec (neuer Name)
+    function MapFieldDefToSQL(const FieldDef: TDbFieldDefRec): string;
+    procedure ExportAsFirebirdTable;
+
     procedure TestDbGrid();
 
     procedure InitReader(AReader: TDBReader); // set reader options
@@ -297,31 +325,6 @@ var
   DbName: string;
   Row: TDbRowItem;
   FieldNames: string;
-
-  // Hilfsfunktion: SQL-Typ Mapping
-  function MapFieldTypeToSQL(const Field: TDbFieldDefRec): string;
-  begin
-    case Field.FieldType of
-      ftString, ftFixedChar, ftWideString, ftFixedWideChar, ftMemo:
-        Result := 'VARCHAR(' + IntToStr(Field.Size) + ')';
-      ftSmallint, ftInteger: Result := 'INTEGER';
-      ftLargeint: Result := 'BIGINT';
-      ftFloat: Result := 'DOUBLE';
-      ftCurrency: Result := 'DECIMAL(18,2)';
-      ftDate: Result := 'DATE';
-      ftTime: Result := 'TIME';
-
-      ftDateTime, ftTimeStamp: Result := 'TIMESTAMP';
-      ftBoolean: Result := 'BOOLEAN';
-      ftBytes, ftVarBytes, ftBlob: Result := 'BLOB';
-    else
-      if Field.TypeName = 'SqlDate' then result := 'DATE'
-      else if Field.TypeName = 'SqlTime' then result := 'TIME'
-      else
-      Result := 'TEXT';
-    end;
-  end;
-
 begin
   Lines.Clear;
 
@@ -347,7 +350,7 @@ begin
     for j := 0 to Length(Table.FieldsDef) - 1 do
     begin
       Field := Table.FieldsDef[j];
-      SqlType := MapFieldTypeToSQL(Field);
+      SqlType := MapFieldTypeToSQL(Field.FieldType);
 
       if j < Length(Table.FieldsDef) - 1 then
         Lines.Add('  ' + MakeCaseSensitiveAuto(Field.Name) + ' ' + SqlType + ',')
@@ -638,6 +641,11 @@ begin
   SynEdit1.Font.Name  := QWEditorFontName;
   SynEdit1.Font.Size  := QWEditorFontSize;
   SynEdit1.Font.Color := QWEditorFontColor;
+end;
+
+procedure TfrmDBReader.lmExportToFBTableClick(Sender: TObject);
+begin
+  ExportAsFirebirdTable;
 end;
 
 procedure TfrmDBReader.pgcMainChange(Sender: TObject);
@@ -1011,7 +1019,7 @@ begin
   if TickDiff(GetTickCount64, FPrevUpdTC) > 1000 then
   begin
     FPrevUpdTC := GetTickCount64;
-    ProgressBar.Position := FDBReader.GetProgress();
+    ProgressBar1.Position := FDBReader.GetProgress();
     Application.ProcessMessages();
   end;
 end;
@@ -1056,7 +1064,7 @@ begin
 
   sExt := LowerCase(ExtractFileExt(FDbFileName));
 
-  ProgressBar.Visible := True;
+  ProgressBar1.Visible := True;
   memoLog.Lines.BeginUpdate();
   memoLog.Lines.Clear();
   FreeAndNil(FDBReader);
@@ -1113,7 +1121,7 @@ begin
   finally
     memoLog.Lines.EndUpdate();
   end;
-  ProgressBar.Visible := False;
+  ProgressBar1.Visible := False;
 end;
 
 procedure TfrmDBReader.OpenDatabase(AFileName: string; AReaderClass: TDBReaderClass);
@@ -1330,13 +1338,13 @@ begin
       if FRowsList.TableName <> ATableName then
       begin
         FRowsList.Clear();
-        ProgressBar.Visible := True;
+        ProgressBar1.Visible := True;
         try
           FDBReader.ReadTable(ATableName, MaxRows, FRowsList);
         except
           on E: Exception do ShowException(E, nil);
         end;
-        ProgressBar.Visible := False;
+        ProgressBar1.Visible := False;
       end;
     end
     else if Assigned(FFSReader) then
@@ -1348,14 +1356,14 @@ begin
       if FRowsList.TableName <> ATableName then
       begin
         FRowsList.Clear();
-        ProgressBar.Visible := True;
+        ProgressBar1.Visible := True;
         try
           if (FFSReader is TFSReaderPst) then
             (FFSReader as TFSReaderPst).ReadTable(ATableName, MaxRows, FRowsList);
         except
           on E: Exception do ShowException(E, nil);
         end;
-        ProgressBar.Visible := False;
+        ProgressBar1.Visible := False;
       end;
     end
     else
@@ -1414,6 +1422,918 @@ begin
   if FDBReader.IsSingleTable then
     FDBReader.OpenFile((Node as TMyTreeNode).FileName);
   ShowTable((Node as TMyTreeNode).TableName);
+end;
+
+
+{procedure TfrmDBReader.ExportAsFirebirdTable;
+var
+  Selector: TfrmServerDBFieldSelector;
+  FieldList: TStringList;
+  i, j: Integer;
+  SourceServer, SourceDB, SourceTable: string;
+  DestServer, DestDB, DestTable, ExternalFile: string;
+  CreateTable, ExternalTable: Boolean;
+  SelectedFields: TStringList;
+
+  TargetDB: TIBDatabase;
+  TargetTrans: TIBTransaction;
+  Query: TIBQuery;
+
+  sSQL: string;
+  StartTime, Elapsed: TDateTime;
+  RowCount: Integer;
+  RowsPerSec: Double;
+  BatchSize: Integer;
+  CommitCounter: Integer;
+  Row: TDbRowItem;
+  FieldDef: TDbFieldDefRec;
+  FieldIndex: Integer;
+  FieldName: string;
+  TableExists: Boolean;
+  OldDecimalSep: Char;
+begin
+  // ========================================================================
+  // 1. Prüfen ob Daten vorhanden sind
+  // ========================================================================
+  if not Assigned(FRowsList) or (FRowsList.Count = 0) then
+  begin
+    MessageDlg('No data to export!', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+
+  // ========================================================================
+  // 2. Feldliste aus FRowsList erstellen
+  // ========================================================================
+  FieldList := TStringList.Create;
+  try
+    for i := 0 to Length(FRowsList.FieldsDef) - 1 do
+      FieldList.Add(FRowsList.FieldsDef[i].Name);
+
+    // ========================================================================
+    // 3. Selector initialisieren
+    // ========================================================================
+    Selector := TfrmServerDBFieldSelector.Create(nil);
+    try
+      Selector.ShowSource := False;
+      //Selector.ShowDestination := True;
+      Selector.ShowFieldSelection := True;
+
+      Selector.SetFieldList(FieldList);
+
+      if not Selector.ShowDialog(SourceServer, SourceDB, SourceTable,
+                                 DestServer, DestDB, DestTable, ExternalFile,
+                                 CreateTable, ExternalTable, SelectedFields) then
+        Exit;
+
+      if SelectedFields = nil then
+      begin
+        MessageDlg('No fields selected!', mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      if SelectedFields.Count = 0 then
+      begin
+        MessageDlg('No fields selected!', mtWarning, [mbOK], 0);
+        Exit;
+      end;
+
+      // ========================================================================
+      // 4. Verbindung zur Zieldatenbank aufbauen
+      // ========================================================================
+      TargetDB := TIBDatabase.Create(nil);
+      TargetTrans := TIBTransaction.Create(nil);
+      Query := TIBQuery.Create(nil);
+      try
+        TargetDB.DatabaseName := Format('%s:%s', [DestServer, DestDB]);
+        TargetDB.Params.Add('user_name=sysdba');
+        TargetDB.Params.Add('password=masterkey');
+        TargetTrans.DefaultDatabase := TargetDB;
+        Query.Database := TargetDB;
+        Query.Transaction := TargetTrans;
+
+        TargetDB.Connected := True;
+        TargetTrans.StartTransaction;
+
+        // ========================================================================
+        // 5. Prüfen ob Tabelle existiert
+        // ========================================================================
+        TableExists := TableExistsInDatabase(TargetDB, DestTable);
+
+        // ========================================================================
+        // 6. Tabelle erstellen (NUR wenn CreateTable = True)
+        // ========================================================================
+        if CreateTable then
+        begin
+          if TableExists then
+          begin
+            if MessageDlg('Table "' + DestTable + '" already exists!' + sLineBreak +
+                          'Do you want to drop and recreate it?' + sLineBreak +
+                          '(Click "No" to skip creation and only insert data)',
+                          mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+            begin
+              Query.SQL.Text := 'DROP TABLE "' + DestTable + '"';
+              Query.ExecSQL;
+              TargetTrans.Commit;
+              TargetTrans.StartTransaction;
+              TableExists := False;
+            end
+            else
+            begin
+              CreateTable := False;
+              StatusBar1.SimpleText := 'Table exists, inserting data only...';
+            end;
+          end;
+
+          if not TableExists then
+          begin
+            StatusBar1.SimpleText := 'Creating table...';
+            Application.ProcessMessages;
+
+            sSQL := GenerateCreateTableSQL(DestTable, ExternalFile, SelectedFields, ExternalTable);
+
+            if sSQL = '' then
+            begin
+              MessageDlg('Could not generate CREATE TABLE SQL!', mtError, [mbOK], 0);
+              Exit;
+            end;
+
+            Query.SQL.Text := sSQL;
+            Query.ExecSQL;
+            TargetTrans.Commit;
+            TargetTrans.StartTransaction;
+            TableExists := True;
+          end;
+        end
+        else
+        begin
+          if not TableExists then
+          begin
+            if ExternalTable then
+              MessageDlg('Error: External Table "' + DestTable + '" does not exist!' + sLineBreak +
+                         'Please check the "Create Table" option to create it.',
+                         mtError, [mbOK], 0)
+            else
+              MessageDlg('Error: Table "' + DestTable + '" does not exist!' + sLineBreak +
+                         'Please check the "Create Table" option to create it.',
+                         mtError, [mbOK], 0);
+            Exit;
+          end;
+
+          if ExternalTable then
+            StatusBar1.SimpleText := 'External Table exists, inserting data...'
+          else
+            StatusBar1.SimpleText := 'Table exists, inserting data...';
+        end;
+
+        // ========================================================================
+        // 7. Daten Row-by-Row einfügen (mit Prepared Query + CommitRetaining)
+        // ========================================================================
+        OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+        DefaultFormatSettings.DecimalSeparator := '.';
+        try
+          RowCount := FRowsList.Count;
+          BatchSize := 22500;
+          CommitCounter := 0;
+          StartTime := Now;
+
+          // ============================================================
+          // INSERT-Statement mit Parametern vorbereiten
+          // ============================================================
+          sSQL := 'INSERT INTO "' + DestTable + '" (';
+          for j := 0 to SelectedFields.Count - 1 do
+          begin
+            if j > 0 then sSQL := sSQL + ', ';
+            sSQL := sSQL + '"' + SelectedFields[j] + '"';
+          end;
+          sSQL := sSQL + ') VALUES (';
+          for j := 0 to SelectedFields.Count - 1 do
+          begin
+            if j > 0 then sSQL := sSQL + ', ';
+            sSQL := sSQL + ':' + SelectedFields[j];  // 👈 Parameter!
+          end;
+          sSQL := sSQL + ')';
+
+          Query.SQL.Text := sSQL;
+          Query.Prepare;  // 👈 Einmal vorbereiten!
+
+          StatusBar1.SimpleText := Format('Inserting %d rows...', [RowCount]);
+          ProgressBar1.Max := RowCount;
+          ProgressBar1.Position := 0;
+          ProgressBar1.Visible := True;
+
+          for i := 0 to RowCount - 1 do
+          begin
+            Row := FRowsList.GetItem(i);
+
+            // ============================================================
+            // Parameter setzen (für jedes ausgewählte Feld)
+            // ============================================================
+            for j := 0 to SelectedFields.Count - 1 do
+            begin
+              FieldName := SelectedFields[j];
+              FieldIndex := GetFieldIndex(FieldName);
+              FieldDef := GetFieldDefByName(FieldName);
+
+              if (FieldIndex < 0) or (FieldDef.FieldType = ftUnknown) or VarIsNull(Row.Values[FieldIndex]) then
+                Query.ParamByName(FieldName).Clear
+              else
+              begin
+                case FieldDef.FieldType of
+                  ftString, ftWideString, ftFixedChar, ftFixedWideChar, ftMemo:
+                    Query.ParamByName(FieldName).AsString := Row.GetFieldAsStr(FieldIndex);
+
+                  ftDate, ftTime, ftDateTime, ftTimeStamp:
+                    Query.ParamByName(FieldName).AsDateTime := Row.Values[FieldIndex];
+
+                  ftBoolean:
+                    Query.ParamByName(FieldName).AsBoolean := Row.Values[FieldIndex];
+
+                  ftSmallint, ftInteger, ftLargeint:
+                    Query.ParamByName(FieldName).AsInteger := Row.Values[FieldIndex];
+
+                  ftFloat, ftCurrency:
+                    Query.ParamByName(FieldName).AsFloat := Row.Values[FieldIndex];
+                else
+                  Query.ParamByName(FieldName).AsString := Row.GetFieldAsStr(FieldIndex);
+                end;
+              end;
+            end;
+
+            Query.ExecSQL;
+
+            Inc(CommitCounter);
+            ProgressBar1.Position := i + 1;
+
+            // ============================================================
+            // Batch-Commit mit CommitRetaining
+            // ============================================================
+            if CommitCounter >= BatchSize then
+            begin
+              TargetTrans.CommitRetaining;
+              CommitCounter := 0;
+
+              Elapsed := Now - StartTime;
+              if Elapsed > 0 then
+              begin
+                RowsPerSec := i / (Elapsed * 24 * 60 * 60);
+                StatusBar1.SimpleText := Format('Inserting: %d / %d rows (%.0f rows/sec)',
+                                                [i, RowCount, RowsPerSec]);
+              end;
+              Application.ProcessMessages;
+            end;
+          end;
+
+          // Letzten Batch committen
+          if CommitCounter > 0 then
+            TargetTrans.CommitRetaining;
+
+          TargetTrans.Commit;
+          Query.UnPrepare;
+
+          ProgressBar1.Visible := False;
+
+        finally
+          DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+        end;
+
+        // ========================================================================
+        // 8. Fertig!
+        // ========================================================================
+        Elapsed := Now - StartTime;
+        if Elapsed = 0 then
+          RowsPerSec := 0
+        else
+          RowsPerSec := RowCount / (Elapsed * 24 * 60 * 60);
+
+        StatusBar1.SimpleText := Format('Export completed: %d rows in %s (%.0f rows/sec)',
+                                        [RowCount, FormatDateTime('HH:NN:SS', Elapsed), RowsPerSec]);
+
+        if ExternalTable then
+          MessageDlg(Format('External Table created/updated successfully!' + sLineBreak +
+                            'Table: %s' + sLineBreak +
+                            'File: %s' + sLineBreak +
+                            'Rows inserted: %d' + sLineBreak +
+                            'Duration: %s' + sLineBreak +
+                            'Speed: %.0f rows/sec',
+                            [DestTable, ExternalFile, RowCount, FormatDateTime('HH:NN:SS', Elapsed), RowsPerSec]),
+                     mtInformation, [mbOK], 0)
+        else
+          MessageDlg(Format('Table created/updated successfully!' + sLineBreak +
+                            'Table: %s' + sLineBreak +
+                            'Rows inserted: %d' + sLineBreak +
+                            'Duration: %s' + sLineBreak +
+                            'Speed: %.0f rows/sec',
+                            [DestTable, RowCount, FormatDateTime('HH:NN:SS', Elapsed), RowsPerSec]),
+                     mtInformation, [mbOK], 0);
+
+      finally
+        Query.Free;
+        TargetTrans.Free;
+        TargetDB.Free;
+      end;
+
+    finally
+      Selector.Free;
+    end;
+  finally
+    FieldList.Free;
+  end;
+end;}
+
+procedure TfrmDBReader.ExportAsFirebirdTable;
+var
+  Selector: TfrmServerDBFieldSelector;
+  FieldList: TStringList;
+  FieldInfos: array of TSelectorFieldInfo;
+  SkippedFields: TStringList;
+  i, j: Integer;
+  SourceServer, SourceDB, SourceTable: string;
+  DestServer, DestDB, DestTable, ExternalFile: string;
+  CreateTable, ExternalTable: Boolean;
+  SelectedFields: TStringList;
+
+  DestDBIndex: Integer;
+  DBRec: TDatabaseRec;
+  TargetDB: TIBDatabase;
+  TargetTrans: TIBTransaction;
+  Query: TIBSQL;
+
+  sSQL: string;
+  StartTime, Elapsed: TDateTime;
+  RowCount: Integer;
+  RowsPerSec: Double;
+  BatchSize: Integer;
+  CommitCounter: Integer;
+  Row: TDbRowItem;
+  FieldDef: TDbFieldDefRec;
+  FieldIndex: Integer;
+  FieldName: string;
+  TableExists: Boolean;
+  OldDecimalSep: Char;
+begin
+  // ========================================================================
+  // 1. Prüfen ob Daten vorhanden sind
+  // ========================================================================
+  if not Assigned(FRowsList) or (FRowsList.Count = 0) then
+  begin
+    ShowInfoDialog('No data to export!');
+    Exit;
+  end;
+
+  // ========================================================================
+  // 2. Feldliste + Feld-Infos aus FRowsList erstellen
+  // ========================================================================
+  FieldList := TStringList.Create;
+  try
+    for i := 0 to Length(FRowsList.FieldsDef) - 1 do
+      FieldList.Add(FRowsList.FieldsDef[i].Name);
+
+    // ============================================================
+    // Feld-Infos für External Table Erkennung erstellen
+    // ============================================================
+    SetLength(FieldInfos, Length(FRowsList.FieldsDef));
+    for i := 0 to Length(FRowsList.FieldsDef) - 1 do
+    begin
+      FieldInfos[i].Name := FRowsList.FieldsDef[i].Name;
+      FieldInfos[i].FieldType := FRowsList.FieldsDef[i].TypeName;
+
+      // Array-Erkennung
+      FieldInfos[i].IsArray := (Pos('[', FRowsList.FieldsDef[i].TypeName) > 0) or
+                               (Pos('ARRAY', UpperCase(FRowsList.FieldsDef[i].TypeName)) > 0);
+
+      // Blob-Erkennung
+      FieldInfos[i].IsBlob := (FRowsList.FieldsDef[i].FieldType in [ftBlob, ftMemo, ftBytes, ftVarBytes]) or
+                              (Pos('BLOB', UpperCase(FRowsList.FieldsDef[i].TypeName)) > 0);
+
+      // Computed-Erkennung (wird später nur für Hinweis verwendet)
+      FieldInfos[i].IsComputed := (Pos('COMPUTED', UpperCase(FRowsList.FieldsDef[i].TypeName)) > 0) or
+                                  (Pos('COMPUTED BY', UpperCase(FRowsList.FieldsDef[i].TypeName)) > 0);
+
+      FieldInfos[i].IsBoolean := (UpperCase(FRowsList.FieldsDef[i].TypeName) = 'BOOLEAN');
+    end;
+
+    // ========================================================================
+    // 3. Selector initialisieren
+    // ========================================================================
+    Selector := TfrmServerDBFieldSelector.Create(nil);
+    try
+      Selector.ShowSource := False;
+      //Selector.ShowDestination := True;
+      Selector.ShowFieldSelection := True;
+
+      // Feldliste + Infos übergeben
+      Selector.SetFieldList(FieldList, FieldInfos);
+
+      if not Selector.ShowDialog(SourceServer, SourceDB, SourceTable,
+                                 DestServer, DestDB, DestTable, ExternalFile,
+                                 CreateTable, ExternalTable, SelectedFields) then
+        Exit;
+
+      if SelectedFields = nil then
+      begin
+        ShowWarningDialog('No fields selected!');
+        Exit;
+      end;
+
+      if SelectedFields.Count = 0 then
+      begin
+        ShowWarningDialog('No fields selected!');
+        Exit;
+      end;
+
+      // ============================================================
+      // 3.5 Info: Ausgeschlossene Problemfelder anzeigen
+      // ============================================================
+      if ExternalTable then
+      begin
+        SkippedFields := TStringList.Create;
+        try
+          for i := 0 to Length(FieldInfos) - 1 do
+          begin
+            if FieldInfos[i].IsArray or FieldInfos[i].IsBlob then
+            begin
+              if SelectedFields.IndexOf(FieldInfos[i].Name) < 0 then
+                SkippedFields.Add('  - ' + FieldInfos[i].Name + ' (' + FieldInfos[i].FieldType + ')');
+            end;
+          end;
+
+          if SkippedFields.Count > 0 then
+          begin
+            ShowInfoDialog(
+              'The following fields have been automatically excluded from the External Table:' + sLineBreak +
+              sLineBreak +
+              SkippedFields.Text +
+              sLineBreak +
+              'Reason: External Tables do not support BLOB, ARRAY, or COMPUTED fields.'
+            );
+          end;
+        finally
+          SkippedFields.Free;
+        end;
+      end;
+
+      // ========================================================================
+      // 4. Verbindung zur Zieldatenbank aus RegisteredDatabases holen
+      // ========================================================================
+      DestDBIndex := -1;
+      for i := 0 to High(RegisteredDatabases) do
+      begin
+        if SameText(RegisteredDatabases[i].RegRec.ServerName, DestServer) and
+           SameText(RegisteredDatabases[i].RegRec.Title, DestDB) then
+        begin
+          DestDBIndex := i;
+          Break;
+        end;
+      end;
+
+      if DestDBIndex < 0 then
+      begin
+        ShowErrorDialog('Destination database not found in registry!' + sLineBreak +
+                        'Server: ' + DestServer + sLineBreak +
+                        'Database: ' + DestDB);
+        Exit;
+      end;
+
+      //Bestehende Verbindung aus RegisteredDatabases verwenden
+      DBRec := RegisteredDatabases[DestDBIndex];
+      TargetDB := DBRec.IBDatabase;
+      TargetTrans := DBRec.IBTransaction;
+
+      if not TargetDB.Connected then
+      begin
+        ShowErrorDialog('Destination database is not connected!');
+        Exit;
+      end;
+
+      if not TargetTrans.InTransaction then
+        TargetTrans.StartTransaction;
+
+      Query := TIBSQL.Create(nil);
+      Query.Database := TargetDB;
+      Query.Transaction := TargetTrans;
+
+      try
+        // ========================================================================
+        // 5. Prüfen ob Tabelle existiert
+        // ========================================================================
+        TableExists := TableExistsInDatabase(TargetDB, DestTable);
+
+        // ========================================================================
+        // 6. Tabelle erstellen (NUR wenn CreateTable = True)
+        // ========================================================================
+        if CreateTable then
+        begin
+          if TableExists then
+          begin
+            if ShowConfirmDialog('Table "' + DestTable + '" already exists!' + sLineBreak +
+                                 'Do you want to drop and recreate it?' + sLineBreak +
+                                 '(Click "No" to skip creation and only insert data)') = mrYes then
+            begin
+              Query.SQL.Text := 'DROP TABLE "' + DestTable + '"';
+              Query.ExecQuery;
+              TargetTrans.Commit;
+              TargetTrans.StartTransaction;
+              TableExists := False;
+            end
+            else
+            begin
+              CreateTable := False;
+              StatusBar1.SimpleText := 'Table exists, inserting data only...';
+            end;
+          end;
+
+          if not TableExists then
+          begin
+            StatusBar1.SimpleText := 'Creating table...';
+            Application.ProcessMessages;
+
+            sSQL := GenerateCreateTableSQL(DestTable, ExternalFile, SelectedFields, ExternalTable);
+
+            if sSQL = '' then
+            begin
+              ShowErrorDialog('Could not generate CREATE TABLE SQL!');
+              Exit;
+            end;
+
+            Query.SQL.Text := sSQL;
+            Query.ExecQuery;
+            TargetTrans.Commit;
+            TargetTrans.StartTransaction;
+            TableExists := True;
+          end;
+        end
+        else
+        begin
+          if not TableExists then
+          begin
+            if ExternalTable then
+              ShowErrorDialog('Error: External Table "' + DestTable + '" does not exist!' + sLineBreak +
+                              'Please check the "Create Table" option to create it.')
+            else
+              ShowErrorDialog('Error: Table "' + DestTable + '" does not exist!' + sLineBreak +
+                              'Please check the "Create Table" option to create it.');
+            Exit;
+          end;
+
+          if ExternalTable then
+            StatusBar1.SimpleText := 'External Table exists, inserting data...'
+          else
+            StatusBar1.SimpleText := 'Table exists, inserting data...';
+        end;
+
+        // ========================================================================
+        // 7. Daten Row-by-Row einfügen (mit TIBSQL + Prepared + CommitRetaining)
+        // ========================================================================
+        OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+        DefaultFormatSettings.DecimalSeparator := '.';
+        try
+          RowCount := FRowsList.Count;
+          BatchSize := DefaultBatchSize;  // Aus INI
+          CommitCounter := 0;
+          StartTime := Now;
+
+          // ============================================================
+          // INSERT-Statement mit Parametern vorbereiten (TIBSQL)
+          // ============================================================
+          sSQL := 'INSERT INTO "' + DestTable + '" (';
+          for j := 0 to SelectedFields.Count - 1 do
+          begin
+            if j > 0 then sSQL := sSQL + ', ';
+            sSQL := sSQL + '"' + SelectedFields[j] + '"';
+          end;
+          sSQL := sSQL + ') VALUES (';
+          for j := 0 to SelectedFields.Count - 1 do
+          begin
+            if j > 0 then sSQL := sSQL + ', ';
+            sSQL := sSQL + ':' + SelectedFields[j];
+          end;
+          sSQL := sSQL + ')';
+
+          Query.SQL.Text := sSQL;
+          Query.Prepare;
+
+          StatusBar1.SimpleText := Format('Inserting %d rows...', [RowCount]);
+          ProgressBar1.Max := RowCount;
+          ProgressBar1.Position := 0;
+          ProgressBar1.Visible := True;
+
+          for i := 0 to RowCount - 1 do
+          begin
+            Row := FRowsList.GetItem(i);
+
+            // ============================================================
+            // Parameter setzen (für jedes ausgewählte Feld)
+            // ============================================================
+            for j := 0 to SelectedFields.Count - 1 do
+            begin
+              FieldName := SelectedFields[j];
+              FieldIndex := GetFieldIndex(FieldName);
+              FieldDef := GetFieldDefByName(FieldName);
+
+              if (FieldIndex < 0) or (FieldDef.FieldType = ftUnknown) or VarIsNull(Row.Values[FieldIndex]) then
+                Query.ParamByName(FieldName).Clear
+              else
+              begin
+                case FieldDef.FieldType of
+                  ftString, ftWideString, ftFixedChar, ftFixedWideChar, ftMemo:
+                    Query.ParamByName(FieldName).AsString := Row.GetFieldAsStr(FieldIndex);
+
+                  ftDate, ftTime, ftDateTime, ftTimeStamp:
+                    Query.ParamByName(FieldName).AsDateTime := Row.Values[FieldIndex];
+
+                  ftBoolean:
+                    Query.ParamByName(FieldName).AsBoolean := Row.Values[FieldIndex];
+
+                  ftSmallint, ftInteger, ftLargeint:
+                    Query.ParamByName(FieldName).AsInteger := Row.Values[FieldIndex];
+
+                  ftFloat, ftCurrency:
+                    Query.ParamByName(FieldName).AsFloat := Row.Values[FieldIndex];
+                else
+                  Query.ParamByName(FieldName).AsString := Row.GetFieldAsStr(FieldIndex);
+                end;
+              end;
+            end;
+
+            Query.ExecQuery;
+
+            Inc(CommitCounter);
+            ProgressBar1.Position := i + 1;
+
+            // ============================================================
+            // Fortschritt aktualisieren (alle 100 Zeilen)
+            // ============================================================
+            if i mod 100 = 0 then
+            begin
+              Elapsed := Now - StartTime;
+              if Elapsed > 0 then
+              begin
+                RowsPerSec := i / (Elapsed * 24 * 60 * 60);
+                StatusBar1.SimpleText := Format('Inserting: %d / %d rows (%.0f rows/sec)',
+                                                [i, RowCount, RowsPerSec]);
+              end;
+              Application.ProcessMessages;
+            end;
+
+            // ============================================================
+            // Batch-Commit mit CommitRetaining
+            // ============================================================
+            if CommitCounter >= BatchSize then
+            begin
+              TargetTrans.CommitRetaining;
+              CommitCounter := 0;
+            end;
+          end;
+
+          // Letzten Batch committen
+          if CommitCounter > 0 then
+            TargetTrans.CommitRetaining;
+
+          TargetTrans.Commit;
+          //Query.UnPrepare;
+
+          ProgressBar1.Visible := False;
+
+        finally
+          DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+        end;
+
+        // ========================================================================
+        // 8. Fertig!
+        // ========================================================================
+        Elapsed := Now - StartTime;
+        if Elapsed = 0 then
+          RowsPerSec := 0
+        else
+          RowsPerSec := RowCount / (Elapsed * 24 * 60 * 60);
+
+        StatusBar1.SimpleText := Format('Export completed: %d rows in %s (%.0f rows/sec)',
+                                        [RowCount, FormatDateTime('HH:NN:SS', Elapsed), RowsPerSec]);
+
+        if ExternalTable then
+          ShowInfoDialog(
+            'External Table created/updated successfully!' + sLineBreak +
+            'Table: ' + DestTable + sLineBreak +
+            'File: ' + ExternalFile + sLineBreak +
+            'Rows inserted: ' + IntToStr(RowCount) + sLineBreak +
+            'Duration: ' + FormatDateTime('HH:NN:SS', Elapsed) + sLineBreak +
+            'Speed: ' + Format('%.0f', [RowsPerSec]) + ' rows/sec'
+          )
+        else
+          ShowInfoDialog(
+            'Table created/updated successfully!' + sLineBreak +
+            'Table: ' + DestTable + sLineBreak +
+            'Rows inserted: ' + IntToStr(RowCount) + sLineBreak +
+            'Duration: ' + FormatDateTime('HH:NN:SS', Elapsed) + sLineBreak +
+            'Speed: ' + Format('%.0f', [RowsPerSec]) + ' rows/sec'
+          );
+
+      finally
+        Query.Free;
+      end;
+
+    finally
+      Selector.Free;
+    end;
+  finally
+    FieldList.Free;
+  end;
+end;
+
+// ============================================================================
+// HILFSFUNKTIONEN FÜR EXTERNAL TABLE EXPORT
+// ============================================================================
+
+function TfrmDBReader.TableExistsInDatabase(ADatabase: TIBDatabase; const ATableName: string): Boolean;
+var
+  Query: TIBQuery;
+  Trans: TIBTransaction;
+begin
+  Result := False;
+  Query := TIBQuery.Create(nil);
+  Trans := TIBTransaction.Create(nil);
+  try
+    Trans.DefaultDatabase := ADatabase;
+    Query.Database := ADatabase;
+    Query.Transaction := Trans;
+
+    if not Trans.InTransaction then
+      Trans.StartTransaction;
+
+    Query.SQL.Text :=
+      'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+      'WHERE UPPER(RDB$RELATION_NAME) = UPPER(:TABLE_NAME) ' +
+      'AND RDB$SYSTEM_FLAG = 0';
+    Query.ParamByName('TABLE_NAME').AsString := ATableName;
+    Query.Open;
+    Result := not Query.EOF;
+    Query.Close;
+  finally
+    Query.Free;
+    Trans.Free;
+  end;
+end;
+
+function TfrmDBReader.GetFieldIndex(const AFieldName: string): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  for i := 0 to Length(FRowsList.FieldsDef) - 1 do
+  begin
+    if SameText(FRowsList.FieldsDef[i].Name, AFieldName) then
+    begin
+      Result := i;
+      Exit;
+    end;
+  end;
+  // Debug: Wenn nicht gefunden
+  if Result = -1 then
+    ShowMessage('Field not found: ' + AFieldName);
+end;
+
+function TfrmDBReader.GetFieldDefByName(const AFieldName: string): TDbFieldDefRec;
+var
+  i: Integer;
+  CleanName: string;
+begin
+  Result.Name := '';
+  Result.TypeName := '';
+  Result.FieldType := ftUnknown;
+  Result.Size := 0;
+  Result.RawOffset := 0;
+
+  CleanName := Trim(AFieldName);
+  for i := 0 to Length(FRowsList.FieldsDef) - 1 do
+    if SameText(Trim(FRowsList.FieldsDef[i].Name), CleanName) then
+    begin
+      Result := FRowsList.FieldsDef[i];
+      Exit;
+    end;
+end;
+
+// ===== MAPFIELD TYPES =====
+
+// Für TFieldType (original, unverändert)
+function TfrmDBReader.MapFieldTypeToSQL(AFieldType: TFieldType): string;
+begin
+  case AFieldType of
+    ftString, ftWideString, ftFixedChar, ftFixedWideChar, ftMemo:
+      Result := 'VARCHAR(255)';
+    ftSmallint, ftInteger: Result := 'INTEGER';
+    ftLargeint: Result := 'BIGINT';
+    ftFloat: Result := 'DOUBLE PRECISION';
+    ftCurrency: Result := 'DECIMAL(18,2)';
+    ftDate: Result := 'DATE';
+    ftTime: Result := 'TIME';
+    ftDateTime, ftTimeStamp: Result := 'TIMESTAMP';
+    ftBoolean: Result := 'BOOLEAN';
+    ftBytes, ftVarBytes, ftBlob: Result := 'BLOB';
+  else
+    Result := 'VARCHAR(255)';
+  end;
+end;
+
+// Für TDbFieldDefRec
+function TfrmDBReader.MapFieldDefToSQL(const FieldDef: TDbFieldDefRec): string;
+begin
+  case FieldDef.FieldType of
+    ftString, ftWideString, ftFixedChar, ftFixedWideChar, ftMemo:
+      if FieldDef.Size > 0 then
+        Result := 'VARCHAR(' + IntToStr(FieldDef.Size) + ')'
+      else
+        Result := 'VARCHAR(255)';
+
+    ftSmallint:  Result := 'SMALLINT';
+    ftInteger:   Result := 'INTEGER';
+    ftLargeint:  Result := 'BIGINT';
+    ftFloat:     Result := 'DOUBLE PRECISION';
+    ftCurrency:  Result := 'DECIMAL(18,2)';
+    ftDate:      Result := 'DATE';
+    ftTime:      Result := 'TIME';
+    ftDateTime:  Result := 'TIMESTAMP';
+    ftBoolean:   Result := 'BOOLEAN';
+    ftBytes, ftVarBytes, ftBlob: Result := 'BLOB';
+  else
+    Result := 'VARCHAR(255)';
+  end;
+end;
+
+function TfrmDBReader.GenerateCreateTableSQL(
+  const TableName, ExternalFile: string;
+  SelectedFields: TStringList;
+  IsExternal: Boolean): string;
+var
+  i: Integer;
+  FieldDef: TDbFieldDefRec;
+begin
+  if SelectedFields = nil then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  if SelectedFields.Count = 0 then
+  begin
+    Result := '';
+    Exit;
+  end;
+
+  // ========================================================================
+  // CREATE TABLE Kopf
+  // ========================================================================
+  Result := 'CREATE TABLE "' + TableName + '"';
+
+  if IsExternal then
+    Result := Result + sLineBreak + 'EXTERNAL FILE ''' + ExternalFile + '''';
+
+  Result := Result + sLineBreak + '(' + sLineBreak;
+
+  // ========================================================================
+  // Felder
+  // ========================================================================
+  for i := 0 to SelectedFields.Count - 1 do
+  begin
+    FieldDef := GetFieldDefByName(SelectedFields[i]);
+
+    if FieldDef.Name = '' then
+      Continue;
+
+    Result := Result + '  "' + FieldDef.Name + '" ' + MapFieldDefToSQL(FieldDef);
+
+    if i < SelectedFields.Count - 1 then
+      Result := Result + ',' + sLineBreak
+    else
+      Result := Result + sLineBreak;
+  end;
+
+  Result := Result + ');';
+end;
+
+function TfrmDBReader.BuildInsertStatementPrepared(
+  const TableName: string;
+  SelectedFields: TStringList;
+  Query: TIBQuery): string;
+var
+  i: Integer;
+begin
+  Result := 'INSERT INTO "' + TableName + '" (';
+
+  // Feldnamen
+  for i := 0 to SelectedFields.Count - 1 do
+  begin
+    if i > 0 then Result := Result + ', ';
+    Result := Result + '"' + SelectedFields[i] + '"';
+  end;
+  Result := Result + ') VALUES (';
+
+  // Parameter (mit Doppelpunkt)
+  for i := 0 to SelectedFields.Count - 1 do
+  begin
+    if i > 0 then Result := Result + ', ';
+    Result := Result + ':' + SelectedFields[i];
+  end;
+  Result := Result + ')';
 end;
 
 end.

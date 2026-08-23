@@ -63,7 +63,7 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, u_bulk_export;
+  uCreateTableFromDataSet, u_bulk_export, ServerDBFieldSelector;
 
 const
   Major = 1;
@@ -175,7 +175,7 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-
+  Application.CreateForm(TfrmServerDBFieldSelector, frmServerDBFieldSelector);
   Application.Run;
 
   DisableMonitoring;

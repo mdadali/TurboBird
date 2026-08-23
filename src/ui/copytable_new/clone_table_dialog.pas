@@ -42,8 +42,8 @@ type
     btnAddToQueue: TButton;
     btnRefreshPresets: TButton;
     btnExternalFile: TButton;
-    btnSelectAll: TButton;
     btnGenTestFormulas: TButton;
+    btnSelectAll: TButton;
     chkCopyData: TCheckBox;
     chkLstFields: TCheckListBox;
     chkUseFormula: TCheckBox;
@@ -62,10 +62,11 @@ type
     edtFrom: TEdit;
     edtTo: TEdit;
     grboxCopyOptions: TGroupBox;
-    grBoxFields: TGroupBox;
+    grBoxFormulaFields: TGroupBox;
     grBoxSource: TGroupBox;
     grBoxFormulaPresets: TGroupBox;
     grBoxCopyMethod: TGroupBox;
+    grboxFields: TGroupBox;
     IBDBDest: TIBDatabase;
     IBDBSource: TIBDatabase;
     IBQueryDest: TIBQuery;
@@ -83,8 +84,8 @@ type
     lbSourceTable: TLabel;
     OpenDialog1: TOpenDialog;
     Panel1: TPanel;
-    Panel2: TPanel;
-    pnlFields: TPanel;
+    pnlSelector: TPanel;
+    pnlFieldsSelectButtons: TPanel;
     pnlTop: TPanel;
     PopupMenu1: TPopupMenu;
     rbRowByRow: TRadioButton;
@@ -116,11 +117,12 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure grBoxFieldsDblClick(Sender: TObject);
+    procedure grBoxFormulaFieldsDblClick(Sender: TObject);
     procedure grBoxFormulaPresetsClick(Sender: TObject);
     procedure grBoxSourceClick(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
       var BlobID: TISC_QUAD);
+    procedure Label2Click(Sender: TObject);
     procedure Label5Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
@@ -1189,7 +1191,7 @@ begin
   comboxSourceTablesChange(nil);
 end;
 
-procedure TfrmCloneTable.grBoxFieldsDblClick(Sender: TObject);
+procedure TfrmCloneTable.grBoxFormulaFieldsDblClick(Sender: TObject);
 begin
 
 end;
@@ -1206,6 +1208,11 @@ end;
 
 procedure TfrmCloneTable.IBXScript1GetParamValue(Sender: TObject;
   ParamName: string; var BlobID: TISC_QUAD);
+begin
+
+end;
+
+procedure TfrmCloneTable.Label2Click(Sender: TObject);
 begin
 
 end;

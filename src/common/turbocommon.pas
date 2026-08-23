@@ -495,6 +495,21 @@ var
     //end-Ini.File////////////////////////////////////////////////////////////////
 
 
+//Dialogs
+function ShowInfoDialog(const aMsg: string): TModalResult;
+function ShowInfoDialog(const aCaption, aMsg: string): TModalResult;
+function ShowWarningDialog(const aMsg: string): TModalResult;
+function ShowWarningDialog(const aCaption, aMsg: string): TModalResult;
+function ShowErrorDialog(const aMsg: string): TModalResult;
+function ShowErrorDialog(const aCaption, aMsg: string): TModalResult;
+function ShowConfirmDialog(const aMsg: string): TModalResult;
+function ShowConfirmDialog(const aCaption, aMsg: string): TModalResult;
+function ShowMessageDialog(const aMsg: string; DlgType: TMsgDlgType;
+      Buttons: TMsgDlgButtons): TModalResult; overload;
+function ShowMessageDialog(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+      Buttons: TMsgDlgButtons): TModalResult; overload;
+
+
 function StringToTraceFlags(const S: string): TTraceFlags;
 function TraceFlagsToString(Flags: TTraceFlags): string;
 
@@ -721,6 +736,85 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses Reg;
+
+// ========================================================================
+// Zentrale MessageBox-Funktionen für TurboBird
+// (immer im Vordergrund, einheitliches Verhalten)
+// ========================================================================
+
+function ShowInfoDialog(const aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aMsg, mtInformation, [mbOK]);
+end;
+
+function ShowInfoDialog(const aCaption, aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aCaption, aMsg, mtInformation, [mbOK]);
+end;
+
+function ShowWarningDialog(const aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aMsg, mtWarning, [mbOK]);
+end;
+
+function ShowWarningDialog(const aCaption, aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aCaption, aMsg, mtWarning, [mbOK]);
+end;
+
+function ShowErrorDialog(const aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aMsg, mtError, [mbOK]);
+end;
+
+function ShowErrorDialog(const aCaption, aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aCaption, aMsg, mtError, [mbOK]);
+end;
+
+function ShowConfirmDialog(const aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aMsg, mtConfirmation, [mbYes, mbNo]);
+end;
+
+function ShowConfirmDialog(const aCaption, aMsg: string): TModalResult;
+begin
+  Result := ShowMessageDialog(aCaption, aMsg, mtConfirmation, [mbYes, mbNo]);
+end;
+
+function ShowMessageDialog(const aMsg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons): TModalResult; overload;
+var
+  Dlg: TForm;
+begin
+  Dlg := CreateMessageDialog(aMsg, DlgType, Buttons);
+  try
+    Dlg.Position := poScreenCenter;
+    Dlg.FormStyle := fsSystemStayOnTop;
+    Dlg.PopupMode := pmExplicit;
+    Dlg.PopupParent := Application.MainForm;
+    Result := Dlg.ShowModal;
+  finally
+    Dlg.Free;
+  end;
+end;
+
+function ShowMessageDialog(const aCaption, aMsg: string; DlgType: TMsgDlgType;
+  Buttons: TMsgDlgButtons): TModalResult; overload;
+var
+  Dlg: TForm;
+begin
+  Dlg := CreateMessageDialog(aCaption, aMsg, DlgType, Buttons);
+  try
+    Dlg.Position := poScreenCenter;
+    Dlg.FormStyle := fsSystemStayOnTop;
+    Dlg.PopupMode := pmExplicit;
+    Dlg.PopupParent := Application.MainForm;
+    Result := Dlg.ShowModal;
+  finally
+    Dlg.Free;
+  end;
+end;
 
 function StringToTraceFlags(const S: string): TTraceFlags;
 var
