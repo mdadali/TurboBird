@@ -1,0 +1,41 @@
+Change Log
+[*] fixes, changes
+[+] feature added
+[-] feature removed
+[!] important change
+
+2020.03.12 (v0.5.7)
+* fixed getting text from selection
+* fixed controls placement after format
+* fixed zero division for scroll
+
+2019.11.19 (v0.5.6)
+* fixed selection by mouse
+
+2019.10.02 (v0.5.5)
+* FormatTail() correctly append text to same line
+* fixed text lenght calculation for UTF8
++ Option for auto-scroll to bottom of appended text
+
+18.12.19 (v0.5.4)
+! Lines property renamed to Items. Text items can have subitems - parts, that autowrapped to next line. Definitions for items moved to RVItems.pas
++ DisplayOption for clear background before paint. It cause flickering, but can be useful on some systems
++ Option for keep subitems created between formatting. Work faster, but consume memory
+
+17.06.01 (v0.5.3)
+* printer properties
+* improved performance
+
+06.09.08 - Fixes and portability (v0.5.2.2)
+- Windows dependency.
+* text selection highlight.
+* text position.
++ component palette icons.
+* mouse cursor disappear when hovering links.
++ Printer4Lazarus requeriment.
++ Demo
+* flicker
+* Scrolling in linux
+* etc.
+
+05.12.30 - First Release (v0.5.2.1)

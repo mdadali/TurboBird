@@ -8,7 +8,7 @@ code implementing the class wrapper is taken from Carlo Kok's conv utility
 
 }
 interface
-
+{$I uib.inc}
 uses
    SysUtils
   ,Classes
@@ -54,7 +54,7 @@ uses
   ,uibase
   ,uiberror
   ,uiblib
-
+  ,uibdataset
   ,uib
   ;
 

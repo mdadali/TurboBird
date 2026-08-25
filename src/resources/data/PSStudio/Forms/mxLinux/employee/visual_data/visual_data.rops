@@ -18,6 +18,8 @@ var
 var
   Form1: TForm;
   DBGrid1: TDBGrid;
+  Panel6: TPanel;
+  btnFirst: TButton;
   Label2: TLabel;
   edtLibrary: TEdit;
   btnLibrary: TButton;
@@ -30,17 +32,6 @@ var
   btnExecute: TButton;
   btnConnect: TButton;
   btnDisconnect: TButton;
-  DBNavigator1: TDBNavigator;
-  DBNavFirst: TDBNavButton;
-  DBNavPrior: TDBNavButton;
-  DBNavNext: TDBNavButton;
-  DBNavLast: TDBNavButton;
-  DBNavInsert: TDBNavButton;
-  DBNavDelete: TDBNavButton;
-  DBNavEdit: TDBNavButton;
-  DBNavPost: TDBNavButton;
-  DBNavCancel: TDBNavButton;
-  DBNavRefresh: TDBNavButton;
 //<DESIGNER-VARS-END>
 
 //<USERCODE-BEGIN>
@@ -66,7 +57,6 @@ begin
   DataSource := TDataSource.Create(nil);
   DataSource.DataSet := qr;
   DBGrid1.DataSource := DataSource;
-  DBNavigator1.DataSource := DataSource;
 end;
 
 procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -103,6 +93,12 @@ begin
     OpenDialog.Free;
     OpenDialog := nil;
   end;
+end;
+
+procedure btnFirst_OnClick(Sender: TObject);
+begin
+  if (qr <> nil) and qr.Active then
+    qr.First;
 end;
 
 procedure btnLibrary_OnClick(Sender: TObject);
@@ -173,6 +169,12 @@ begin
   DBGrid1 := TDBGrid.Create(Form1);
   DBGrid1.Parent := Form1;
 
+  Panel6 := TPanel.Create(Form1);
+  Panel6.Parent := Form1;
+
+  btnFirst := TButton.Create(Panel6);
+  btnFirst.Parent := Panel6;
+
   Label2 := TLabel.Create(Form1);
   Label2.Parent := Form1;
 
@@ -209,47 +211,31 @@ begin
   btnDisconnect := TButton.Create(Panel7);
   btnDisconnect.Parent := Panel7;
 
-  DBNavigator1 := TDBNavigator.Create(Form1);
-  DBNavigator1.Parent := Form1;
-
-  DBNavFirst := TDBNavButton.Create(DBNavigator1);
-  DBNavFirst.Parent := DBNavigator1;
-
-  DBNavPrior := TDBNavButton.Create(DBNavigator1);
-  DBNavPrior.Parent := DBNavigator1;
-
-  DBNavNext := TDBNavButton.Create(DBNavigator1);
-  DBNavNext.Parent := DBNavigator1;
-
-  DBNavLast := TDBNavButton.Create(DBNavigator1);
-  DBNavLast.Parent := DBNavigator1;
-
-  DBNavInsert := TDBNavButton.Create(DBNavigator1);
-  DBNavInsert.Parent := DBNavigator1;
-
-  DBNavDelete := TDBNavButton.Create(DBNavigator1);
-  DBNavDelete.Parent := DBNavigator1;
-
-  DBNavEdit := TDBNavButton.Create(DBNavigator1);
-  DBNavEdit.Parent := DBNavigator1;
-
-  DBNavPost := TDBNavButton.Create(DBNavigator1);
-  DBNavPost.Parent := DBNavigator1;
-
-  DBNavCancel := TDBNavButton.Create(DBNavigator1);
-  DBNavCancel.Parent := DBNavigator1;
-
-  DBNavRefresh := TDBNavButton.Create(DBNavigator1);
-  DBNavRefresh.Parent := DBNavigator1;
-
   DBGrid1.Left := 1;
-  DBGrid1.Top := 214;
+  DBGrid1.Top := 241;
   DBGrid1.Width := 808;
-  DBGrid1.Height := 244;
+  DBGrid1.Height := 216;
   DBGrid1.Visible := True;
   DBGrid1.Enabled := True;
   DBGrid1.Tag := 0;
   DBGrid1.Color := -2147483643;
+  Panel6.Left := 1;
+  Panel6.Top := 457;
+  Panel6.Width := 808;
+  Panel6.Height := 50;
+  Panel6.Visible := True;
+  Panel6.Enabled := True;
+  Panel6.Tag := 0;
+  Panel6.Caption := '';
+  Panel6.Color := -2147483643;
+  btnFirst.Left := 1;
+  btnFirst.Top := -29;
+  btnFirst.Width := 43;
+  btnFirst.Height := 48;
+  btnFirst.Visible := True;
+  btnFirst.Enabled := True;
+  btnFirst.Tag := 0;
+  btnFirst.Caption := '<<';
   Label2.Left := 30;
   Label2.Top := 23;
   Label2.Width := 141;
@@ -318,15 +304,15 @@ begin
   edtQuery.Color := 536870912;
   edtQuery.Text := 'select * from employee';
   Panel7.Left := 1;
-  Panel7.Top := 156;
+  Panel7.Top := 175;
   Panel7.Width := 808;
-  Panel7.Height := 58;
+  Panel7.Height := 66;
   Panel7.Visible := True;
   Panel7.Enabled := True;
   Panel7.Tag := 0;
   Panel7.Caption := '';
   Panel7.Color := -2147483643;
-  btnExecute.Left := 452;
+  btnExecute.Left := 256;
   btnExecute.Top := 0;
   btnExecute.Width := 75;
   btnExecute.Height := 25;
@@ -334,7 +320,7 @@ begin
   btnExecute.Enabled := True;
   btnExecute.Tag := 0;
   btnExecute.Caption := 'Execute';
-  btnConnect.Left := 201;
+  btnConnect.Left := 29;
   btnConnect.Top := 0;
   btnConnect.Width := 75;
   btnConnect.Height := 25;
@@ -342,7 +328,7 @@ begin
   btnConnect.Enabled := True;
   btnConnect.Tag := 0;
   btnConnect.Caption := 'Connect';
-  btnDisconnect.Left := 316;
+  btnDisconnect.Left := 132;
   btnDisconnect.Top := 0;
   btnDisconnect.Width := 75;
   btnDisconnect.Height := 25;
@@ -350,86 +336,9 @@ begin
   btnDisconnect.Enabled := True;
   btnDisconnect.Tag := 0;
   btnDisconnect.Caption := 'Disconnect';
-  DBNavigator1.Left := 1;
-  DBNavigator1.Top := 458;
-  DBNavigator1.Width := 808;
-  DBNavigator1.Height := 49;
-  DBNavigator1.Visible := True;
-  DBNavigator1.Enabled := True;
-  DBNavigator1.Tag := 0;
-  DBNavigator1.Color := -2147483643;
-  DBNavFirst.Left := 0;
-  DBNavFirst.Top := -30;
-  DBNavFirst.Width := 81;
-  DBNavFirst.Height := 49;
-  DBNavFirst.Visible := True;
-  DBNavFirst.Enabled := False;
-  DBNavFirst.Tag := 0;
-  DBNavPrior.Left := 81;
-  DBNavPrior.Top := -30;
-  DBNavPrior.Width := 81;
-  DBNavPrior.Height := 49;
-  DBNavPrior.Visible := True;
-  DBNavPrior.Enabled := False;
-  DBNavPrior.Tag := 0;
-  DBNavNext.Left := 162;
-  DBNavNext.Top := -30;
-  DBNavNext.Width := 81;
-  DBNavNext.Height := 49;
-  DBNavNext.Visible := True;
-  DBNavNext.Enabled := False;
-  DBNavNext.Tag := 0;
-  DBNavLast.Left := 243;
-  DBNavLast.Top := -30;
-  DBNavLast.Width := 81;
-  DBNavLast.Height := 49;
-  DBNavLast.Visible := True;
-  DBNavLast.Enabled := False;
-  DBNavLast.Tag := 0;
-  DBNavInsert.Left := 324;
-  DBNavInsert.Top := -30;
-  DBNavInsert.Width := 81;
-  DBNavInsert.Height := 49;
-  DBNavInsert.Visible := True;
-  DBNavInsert.Enabled := False;
-  DBNavInsert.Tag := 0;
-  DBNavDelete.Left := 405;
-  DBNavDelete.Top := -30;
-  DBNavDelete.Width := 81;
-  DBNavDelete.Height := 49;
-  DBNavDelete.Visible := True;
-  DBNavDelete.Enabled := False;
-  DBNavDelete.Tag := 0;
-  DBNavEdit.Left := 486;
-  DBNavEdit.Top := -30;
-  DBNavEdit.Width := 81;
-  DBNavEdit.Height := 49;
-  DBNavEdit.Visible := True;
-  DBNavEdit.Enabled := False;
-  DBNavEdit.Tag := 0;
-  DBNavPost.Left := 567;
-  DBNavPost.Top := -30;
-  DBNavPost.Width := 81;
-  DBNavPost.Height := 49;
-  DBNavPost.Visible := True;
-  DBNavPost.Enabled := False;
-  DBNavPost.Tag := 0;
-  DBNavCancel.Left := 648;
-  DBNavCancel.Top := -30;
-  DBNavCancel.Width := 81;
-  DBNavCancel.Height := 49;
-  DBNavCancel.Visible := True;
-  DBNavCancel.Enabled := False;
-  DBNavCancel.Tag := 0;
-  DBNavRefresh.Left := 729;
-  DBNavRefresh.Top := -30;
-  DBNavRefresh.Width := 79;
-  DBNavRefresh.Height := 49;
-  DBNavRefresh.Visible := True;
-  DBNavRefresh.Enabled := False;
-  DBNavRefresh.Tag := 0;
   //<EVENT_BINDINGS-BEGIN>
   Form1.OnClose := @FormClose;
+  btnFirst.OnClick := @btnFirst_OnClick;
   btnLibrary.OnClick := @btnLibrary_OnClick;
   Button1.OnClick := @Button1_OnClick;
   btnExecute.OnClick := @btnExecute_OnClick;
@@ -443,7 +352,6 @@ end;
 //<MAIN-BEGIN>
 begin
   CreateNewForm;
-  Form1.Position := poScreenCenter;
   EnsureComponents;
 end.
 //<MAIN-END>

@@ -2,6 +2,21 @@
 # gen_versions_scripts.sh
 set -e
 
+# ==============================================================================
+# [MODIFICA PER MACOS]: Creazione della funzione 'sedi' (sed in-place).
+# Il comando 'uname' restituisce "Darwin" su macOS.
+# Se siamo su Mac, aggiungiamo l'argomento vuoto '' richiesto da BSD sed.
+# Se siamo su Linux (o altri), usiamo il normale -i di GNU sed.
+# ==============================================================================
+sedi() {
+  if [ "$(uname)" = "Darwin" ]; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
+}
+# ==============================================================================
+
 LPI_FILE="TurboBird.lpi"
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"       # Assumption: script is located in src/
 HANDLE_SCRIPTS_DIR="$SRC_DIR/handle_scripts"
@@ -10,6 +25,7 @@ VERSION_INC="$SRC_DIR/version.inc"
 mkdir -p "$HANDLE_SCRIPTS_DIR"
 
 # 🔍 Helper function: extract value from LPI file
+# (La lettura con sed standard o grep funziona allo stesso modo su entrambi gli OS, nessuna modifica qui)
 get_value() {
   grep "$1" "$LPI_FILE" | sed -n 's/.*Value="\([^"]*\)".*/\1/p' | head -n1
 }
@@ -58,9 +74,13 @@ for ((i=1; i<=MODE_COUNT; i++)); do
 
   if [ -f "$SCRIPT_PATH" ]; then
     echo "♻️ Updating handle script: $SCRIPT_PATH (Version & Project name)"
-    sed -i "s/^PROJECT_NAME=\"[^\"]*\"/PROJECT_NAME=\"${PROJECT_NAME}\"/" "$SCRIPT_PATH"
-    sed -i "s/^BUILD_MODE=\"[^\"]*\"/BUILD_MODE=\"${MODE}\"/" "$SCRIPT_PATH"
-    sed -i "s/^FULL_VERSION=\"[^\"]*\"/FULL_VERSION=\"${FULL_VERSION}\"/" "$SCRIPT_PATH"
+    # ==========================================================================
+    # [MODIFICA PER MACOS]: Qui veniva usato "sed -i". 
+    # Ora usiamo la nostra funzione "sedi" per evitare l'errore su macOS.
+    # ==========================================================================
+    sedi "s/^PROJECT_NAME=\"[^\"]*\"/PROJECT_NAME=\"${PROJECT_NAME}\"/" "$SCRIPT_PATH"
+    sedi "s/^BUILD_MODE=\"[^\"]*\"/BUILD_MODE=\"${MODE}\"/" "$SCRIPT_PATH"
+    sedi "s/^FULL_VERSION=\"[^\"]*\"/FULL_VERSION=\"${FULL_VERSION}\"/" "$SCRIPT_PATH"
     continue
   fi
 
@@ -100,6 +120,20 @@ if [ ! -f "$CHOOSE_SCRIPT" ]; then
   cat > "$CHOOSE_SCRIPT" <<'EOF'
 #!/bin/bash
 set -e
+
+# ==============================================================================
+# [MODIFICA PER MACOS]: Iniettiamo la funzione 'sedi' anche nello script 
+# autogenerato 'choose_target_script.sh', così se in futuro decommenti 
+# la logica di aggiornamento della versione, funzionerà sia su Mac che su Linux.
+# ==============================================================================
+sedi() {
+  if [ "$(uname)" = "Darwin" ]; then
+    sed -i '' "$@"
+  else
+    sed -i "$@"
+  fi
+}
+# ==============================================================================
 
 VERSION_INC="$(dirname "$0")/version.inc"
 HANDLE_SCRIPTS_DIR="$(dirname "$0")/handle_scripts"
@@ -167,12 +201,17 @@ else
   echo "ℹ️ No build number change"
 fi
 
+# ==============================================================================
+# [MODIFICA PER MACOS]: Anche in queste righe commentate, "sed -i" è stato 
+# sostituito con "sedi". Se decidi di rimuovere i commenti (#), il codice 
+# non andrà in crash su macOS.
+# ==============================================================================
 #if (( new_build != current_build )); then
 #  echo "🔄 Updating version.inc → $new_build"
-#  sed -i "s/^\(\s*VERSION_BUILD\s*=\s*\)[0-9]*;/\1${new_build};/" "$VERSION_INC"
+#  sedi "s/^\(\s*VERSION_BUILD\s*=\s*\)[0-9]*;/\1${new_build};/" "$VERSION_INC"
 #
 #  new_version="${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}.${new_build}"
-#  sed -i "s/^\(\s*VERSION\s*=\s*'\)[0-9.]*\(';\)/\1${new_version}\2/" "$VERSION_INC"
+#  sedi "s/^\(\s*VERSION\s*=\s*'\)[0-9.]*\(';\)/\1${new_version}\2/" "$VERSION_INC"
 #fi
 
 filename=$(basename "$TARGET_FILE")

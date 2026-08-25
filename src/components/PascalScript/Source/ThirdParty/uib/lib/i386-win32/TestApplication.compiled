@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1552186036"/>
-  <Params Value="-MDelphi -Scghi -O1 -gw3 -gl -WG -l -vewnhibq -FiC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\ThirdParty\uib\lib\i386-win32 -FiC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\source -FuC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\ThirdParty\uib\ -FuC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\lib\i386-win32 -FuC:\fpcupdeluxe\lazarus\lcl\units\i386-win32\win32 -FuC:\fpcupdeluxe\lazarus\lcl\units\i386-win32 -FuC:\fpcupdeluxe\lazarus\components\freetype\lib\i386-win32 -FuC:\fpcupdeluxe\lazarus\components\lazutils\lib\i386-win32 -FuC:\fpcupdeluxe\lazarus\packager\units\i386-win32 -FEC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\ThirdParty\uib\lib\i386-win32\ -oC:\Users\Admin\Downloads\tb\src\components\pascalscript\Source\ThirdParty\uib\lib\i386-win32\TestApplication.exe -dLCL -dLCLwin32 -dBorland -dVer150 -dDelphi7 -dCompiler6_Up -dPUREPASCAL TestApplication.lpr"/>
-  <Complete Value="False"/>
-</CONFIG>

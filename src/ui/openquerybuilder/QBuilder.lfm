@@ -10,9 +10,9 @@ object OQBForm: TOQBForm
   Color = clBtnFace
   Font.Color = clWindowText
   Font.Name = 'Tahoma'
-  OnShow = FormShow
   Position = poMainFormCenter
-  LCLVersion = '2.2.6.0'
+  LCLVersion = '4.7.0.0'
+  OnShow = FormShow
   object QBPanel: TPanel
     Left = 0
     Height = 508
@@ -22,6 +22,7 @@ object OQBForm: TOQBForm
     BevelOuter = bvNone
     ClientHeight = 508
     ClientWidth = 996
+    ParentBackground = False
     TabOrder = 0
     object VSplitter: TSplitter
       Left = 818
@@ -58,13 +59,13 @@ object OQBForm: TOQBForm
       end
       object TabSQL: TTabSheet
         Caption = 'SQL'
-        ClientHeight = 122
-        ClientWidth = 992
+        ClientHeight = 128
+        ClientWidth = 988
         inline SynSQL: TSynEdit
           Left = 0
-          Height = 122
+          Height = 128
           Top = 0
-          Width = 992
+          Width = 988
           Align = alClient
           Font.Height = 13
           Font.Name = 'DejaVu Sans Mono'
@@ -73,7 +74,7 @@ object OQBForm: TOQBForm
           ParentColor = False
           ParentFont = False
           TabOrder = 0
-          Gutter.Width = 57
+          Gutter.Width = 55
           Gutter.MouseActions = <>
           RightGutter.Width = 0
           RightGutter.MouseActions = <>
@@ -525,9 +526,13 @@ object OQBForm: TOQBForm
             object SynGutterMarks1: TSynGutterMarks
               Width = 24
               MouseActions = <>
+              MaxExtraMarksColums = 0
+              Options = [sgmoDeDuplicateMarksOnOverflow]
+              MarkupInfo.Background = clBtnFace
+              MarkupInfo.Foreground = clNone
             end
             object SynGutterLineNumber1: TSynGutterLineNumber
-              Width = 17
+              Width = 15
               MouseActions = <>
               MarkupInfo.Background = clBtnFace
               MarkupInfo.Foreground = clNone
@@ -541,6 +546,9 @@ object OQBForm: TOQBForm
               MouseActions = <>
               ModifiedColor = 59900
               SavedColor = clGreen
+              MarkupInfo.Background = clNone
+              MarkupInfo.Foreground = clGreen
+              MarkupInfo.FrameColor = 59900
             end
             object SynGutterSeparator1: TSynGutterSeparator
               Width = 2
@@ -560,13 +568,13 @@ object OQBForm: TOQBForm
       end
       object TabResults: TTabSheet
         Caption = 'Results'
-        ClientHeight = 122
-        ClientWidth = 992
+        ClientHeight = 128
+        ClientWidth = 988
         object ResDBGrid: TIBDynamicGrid
           Left = 0
-          Height = 122
+          Height = 128
           Top = 0
-          Width = 992
+          Width = 988
           Align = alClient
           Color = clWindow
           Columns = <>
@@ -593,7 +601,6 @@ object OQBForm: TOQBForm
       ScrollWidth = 119
       TabOrder = 1
       TabStop = False
-      TopIndex = -1
     end
   end
   object pnlTop: TPanel
@@ -604,6 +611,7 @@ object OQBForm: TOQBForm
     Align = alTop
     ClientHeight = 42
     ClientWidth = 996
+    ParentBackground = False
     TabOrder = 1
     object ToolBar1: TToolBar
       Left = 1
@@ -659,8 +667,8 @@ object OQBForm: TOQBForm
         Caption = 'Show Pages'
         Down = True
         ImageIndex = 4
-        OnClick = btnPagesClick
         Style = tbsCheck
+        OnClick = btnPagesClick
       end
       object btnTables: TToolButton
         Left = 161
@@ -669,8 +677,8 @@ object OQBForm: TOQBForm
         Caption = 'Show Tables'
         Down = True
         ImageIndex = 3
-        OnClick = btnTablesClick
         Style = tbsCheck
+        OnClick = btnTablesClick
       end
       object btnSQL: TToolButton
         Left = 241
@@ -731,13 +739,14 @@ object OQBForm: TOQBForm
       ClientHeight = 40
       ClientWidth = 291
       Color = clForm
+      ParentBackground = False
       ParentColor = False
       TabOrder = 1
       object chkBoxCreateView: TCheckBox
-        Left = 8
-        Height = 22
+        Left = 19
+        Height = 18
         Top = 8
-        Width = 96
+        Width = 85
         Anchors = [akTop, akRight]
         Caption = 'Create View'
         TabOrder = 0
@@ -755,7 +764,7 @@ object OQBForm: TOQBForm
   end
   object mnuTbl: TPopupMenu
     AutoPopup = False
-    Left = 696
+    Left = 676
     Top = 328
     object Remove1: TMenuItem
       Caption = 'Remove'

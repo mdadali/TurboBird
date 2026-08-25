@@ -1,0 +1,252 @@
+object DefLayersForm: TDefLayersForm
+  Left = 200
+  Height = 453
+  Top = 112
+  Width = 245
+  Caption = 'Layers'
+  ClientHeight = 453
+  ClientWidth = 245
+  LCLVersion = '3.7.0.0'
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Owner
+    Left = 8
+    Height = 15
+    Top = 8
+    Width = 33
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 2
+    Caption = 'Layers'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = NameEdt
+    Left = 8
+    Height = 15
+    Top = 237
+    Width = 32
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 2
+    Caption = 'Name'
+    ParentColor = False
+  end
+  object Label3: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = PenColorButton
+    Left = 8
+    Height = 15
+    Top = 285
+    Width = 50
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 2
+    Caption = 'Pen color'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    AnchorSideLeft.Control = PenColorButton
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = NameEdt
+    AnchorSideTop.Side = asrBottom
+    Left = 149
+    Height = 15
+    Top = 285
+    Width = 42
+    BorderSpacing.Left = 66
+    Caption = 'Pen size'
+    ParentColor = False
+  end
+  object Label5: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = ActiveLayerCBox
+    Left = 8
+    Height = 15
+    Top = 405
+    Width = 61
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 2
+    Caption = 'Active layer'
+    ParentColor = False
+  end
+  object Label6: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = BrushColorButton
+    Left = 8
+    Height = 15
+    Top = 345
+    Width = 60
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 2
+    Caption = 'Brush color'
+    ParentColor = False
+  end
+  object LayersList: TListBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Label2
+    Left = 8
+    Height = 204
+    Top = 25
+    Width = 229
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 2
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    ExtendedSelect = False
+    ItemHeight = 0
+    TabOrder = 0
+    OnClick = LayersListClick
+  end
+  object TransparentChk: TCheckBox
+    AnchorSideLeft.Control = Label4
+    AnchorSideTop.Control = PenSizeEdt
+    AnchorSideTop.Side = asrBottom
+    Left = 149
+    Height = 19
+    Top = 333
+    Width = 80
+    BorderSpacing.Top = 8
+    BorderSpacing.Bottom = 4
+    Caption = 'Transparent'
+    TabOrder = 1
+  end
+  object OKBtn: TBitBtn
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 161
+    Height = 25
+    Top = 420
+    Width = 76
+    Anchors = [akRight, akBottom]
+    BorderSpacing.Around = 8
+    Caption = 'OK'
+    Default = True
+    Glyph.Data = {
+      76010000424D7601000000000000760000002800000020000000100000000100
+      0400000000000001000000000000000000001000000010000000000000000000
+      80000080000000808000800000008000800080800000C0C0C000808080000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00555555555555
+      555555555555555555555555555555555555555555FF5555555555555A055555
+      55555555588FF55555555555AAA05555555555558888F55555555555AAA05555
+      555555558888FF555555555AAAAA05555555555888888F55555555AAAAAA0555
+      5555558888888FF5555558AA05AAA05555555888858888F555558A05555AA055
+      55558885555888FF55555555555AAA05555555555558888F555555555555AA05
+      555555555555888FF555555555555AA05555555555555888FF5555555555558A
+      05555555555555888FF5555555555558A05555555555555888FF555555555555
+      5AA0555555555555588855555555555555555555555555555555
+    }
+    ModalResult = 1
+    NumGlyphs = 2
+    OnClick = OKBtnClick
+    TabOrder = 2
+  end
+  object NameEdt: TEdit
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Label3
+    Left = 8
+    Height = 23
+    Top = 254
+    Width = 229
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    TabOrder = 3
+    Text = 'NameEdt'
+  end
+  object PenSizeEdt: TSpinEdit
+    AnchorSideLeft.Control = Label4
+    AnchorSideTop.Control = Label4
+    AnchorSideTop.Side = asrBottom
+    Left = 149
+    Height = 23
+    Top = 302
+    Width = 86
+    BorderSpacing.Top = 2
+    MaxValue = 10
+    MinValue = 1
+    TabOrder = 4
+    Value = 1
+  end
+  object ActiveLayerCBox: TComboBox
+    AnchorSideLeft.Control = Owner
+    AnchorSideRight.Control = OKBtn
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 8
+    Height = 23
+    Top = 422
+    Width = 145
+    Anchors = [akLeft, akRight, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    ItemHeight = 15
+    Style = csDropDownList
+    TabOrder = 6
+  end
+  object ActiveChk: TCheckBox
+    AnchorSideLeft.Control = Label4
+    AnchorSideTop.Control = TransparentChk
+    AnchorSideTop.Side = asrBottom
+    Left = 149
+    Height = 19
+    Top = 356
+    Width = 51
+    BorderSpacing.Bottom = 4
+    Caption = 'Active'
+    TabOrder = 5
+  end
+  object VisibleChk: TCheckBox
+    AnchorSideLeft.Control = Label4
+    AnchorSideTop.Control = ActiveChk
+    AnchorSideTop.Side = asrBottom
+    Left = 149
+    Height = 19
+    Top = 379
+    Width = 52
+    Caption = 'Visible'
+    TabOrder = 7
+  end
+  object PenColorButton: TColorButton
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = Label6
+    Left = 8
+    Height = 25
+    Top = 302
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 18
+    BorderWidth = 2
+    ButtonColorSize = 16
+    ButtonColor = clBlack
+  end
+  object BrushColorButton: TColorButton
+    AnchorSideLeft.Control = Owner
+    AnchorSideBottom.Control = Label5
+    Left = 8
+    Height = 25
+    Top = 362
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
+    BorderSpacing.Bottom = 18
+    BorderWidth = 2
+    ButtonColorSize = 16
+    ButtonColor = clBlack
+  end
+end

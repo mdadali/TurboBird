@@ -24,7 +24,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, Buttons, ComCtrls, Grids, IBXServices,
-  turbocommon;
+  turbocommon,
+  uthemeselector;
 
 type
 
@@ -253,6 +254,7 @@ end;
 
 procedure TRestoreDlg.FormShow(Sender: TObject);
 begin
+  frmThemeSelector.btnApplyClick(self);
   PageControl1.ActivePage := SelectTab;
   //ServerName.Text := IBXClientSideRestoreService1.ServicesConnection.ServerName;
   //__DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];

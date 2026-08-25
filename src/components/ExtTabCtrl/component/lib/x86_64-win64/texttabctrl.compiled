@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <Lazarus Version="4.8"/>
-  <Compiler Value="H:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1557349335"/>
-  <Params Value="-Twin64 -Px86_64 -MObjFPC -Scghi -O1 -g -gl -l -vewnhibq &quot;-FuH:\fpcupdeluxe\projects\TurboBird-main (1)\TurboBird-main\src\components\ExtTabCtrl\component\&quot; -FuH:\fpcupdeluxe\lazarus\packager\units\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\components\lazdebuggers\lazdebuggerintf\lib\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\components\lazutils\lib\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\components\buildintf\units\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\components\debuggerintf\lib\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\components\freetype\lib\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\lcl\units\x86_64-win64 -FuH:\fpcupdeluxe\lazarus\lcl\units\x86_64-win64\gtk2 -FuH:\fpcupdeluxe\lazarus\components\lazcontrols\lib\x86_64-win64\gtk2 -FuH:\fpcupdeluxe\lazarus\components\ideintf\units\x86_64-win64\gtk2 &quot;-FUH:\fpcupdeluxe\projects\TurboBird-main (1)\TurboBird-main\src\components\ExtTabCtrl\component\lib\x86_64-win64\&quot; -dLCL -dLCLgtk2 -dLCLDesign texttabctrl.pas"/>
-  <Complete Value="False" MainPPUExists="False"/>
-</CONFIG>

@@ -1,9 +1,14 @@
 unit fMain;
 
+{$MODE Delphi}
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  {$IFDEF Windows}
+  Windows,
+  {$ENDIF}
+  Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   ExtCtrls, StdCtrls, uPSComponent, uPSCompiler, Menus, uPSRuntime;
 
 type
@@ -52,7 +57,7 @@ uses
   uPSI_uibsqlparser,
   uPSI_uib;
 
-{$R *.DFM}
+{$R *.lfm}
 
 procedure TForm1.IFPS3ClassesPlugin1CompImport(Sender: TObject;
   x: TIFPSPascalcompiler);

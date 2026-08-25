@@ -12,8 +12,7 @@ Data format guessed from sample databases
 interface
 
 uses
-  SysUtils, Classes, Types, Variants, DB,// RFUtils,
-  DBReaderBase ;
+  SysUtils, Classes, Types, Variants, DB, DBReaderBase, RFUtils;
 
 type
   TSybaseFieldDef = record
@@ -1102,45 +1101,6 @@ begin
 end;
 
 procedure TSybaseTableInfo.SetSQL(ASql: string);
-function ExtractFirstWord(var AText: string; ADelimiter: Char = #0): string;
-var
-  Len, I: Integer;
-begin
-  // Rimuove eventuali spazi iniziali
-  AText := TrimLeft(AText);
-  Len := Length(AText);
-
-  if Len = 0 then
-  begin
-    Result := '';
-    Exit;
-  end;
-
-  I := 1;
-  // Se è stato specificato un delimitatore (es. '(' o ',')
-  if ADelimiter <> #0 then
-  begin
-    while (I <= Len) and (AText[I] <> ADelimiter) do
-      Inc(I);
-
-    Result := Copy(AText, 1, I - 1);
-
-    // Rimuove la parola estratta e il delimitatore dal testo originale
-    if I <= Len then
-      AText := Copy(AText, I + 1, Len - I)
-    else
-      AText := '';
-  end
-  else
-  begin
-    // Comportamento standard: separatore basato su spazi o caratteri di controllo
-    while (I <= Len) and (AText[I] > ' ') do
-      Inc(I);
-
-    Result := Copy(AText, 1, I - 1);
-    AText := TrimLeft(Copy(AText, I, Len - I + 1));
-  end;
-end;
 var
   s, ss, sField: string;
   i, n: Integer;

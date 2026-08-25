@@ -6,9 +6,11 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Buttons,
-  ComCtrls, StdCtrls, Menus, Grids, Math, SynEdit, ATBinHex, HtmlView, GifAnim,
-  RichView, PtblRV, AbZBrows, IBDynamicGrid, DB, IBDatabase, IBQuery, IBTable,
-  CADSys4, turbocommon, DBGrids, DBCtrls, LCLIntf,
+  ComCtrls, StdCtrls, Menus, Grids, Math, SynEdit, SynGutterBase, ATBinHex,
+  HtmlView, GifAnim, RichView, PtblRV, AbZBrows, IBDynamicGrid, DB, IBDatabase,
+  IBQuery, IBTable,
+   CADSys4,
+  turbocommon, DBGrids, DBCtrls, LCLIntf,
   uthemeselector; // LCLIntf für OpenDocument
 
 type

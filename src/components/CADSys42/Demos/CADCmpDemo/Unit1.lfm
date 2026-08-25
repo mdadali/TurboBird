@@ -1,0 +1,83 @@
+object Form1: TForm1
+  Left = 31
+  Height = 413
+  Top = 233
+  Width = 576
+  Caption = 'Form1'
+  ClientHeight = 413
+  ClientWidth = 576
+  OnCreate = FormCreate
+  LCLVersion = '3.7.0.0'
+  object CSViewport: TCADViewport2D
+    Left = 5
+    Height = 375
+    Top = 5
+    Width = 449
+    ControlPointsColor = clBlack
+    BackGroundColor = clBlack
+    GridColor = clSilver
+    GridDeltaX = 10
+    GridDeltaY = 10
+    ShowGrid = True
+    OnPaint = CSViewportPaint
+    CADCmp2D = CSCAD
+  end
+  object Button1: TButton
+    Left = 463
+    Height = 31
+    Top = 10
+    Width = 92
+    Caption = 'Drawing test'
+    TabOrder = 1
+    OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 463
+    Height = 31
+    Top = 49
+    Width = 92
+    Caption = 'Layers test'
+    TabOrder = 2
+    OnClick = Button2Click
+  end
+  object Button3: TButton
+    Left = 463
+    Height = 30
+    Top = 84
+    Width = 92
+    Caption = 'List test'
+    TabOrder = 3
+    OnClick = Button3Click
+  end
+  object Button4: TButton
+    Left = 463
+    Height = 31
+    Top = 118
+    Width = 92
+    Caption = 'Blocks Test'
+    TabOrder = 4
+    OnClick = Button4Click
+  end
+  object Button5: TButton
+    Left = 462
+    Height = 31
+    Top = 206
+    Width = 92
+    Caption = 'Streams demo'
+    TabOrder = 5
+    OnClick = Button5Click
+  end
+  object Button6: TButton
+    Left = 463
+    Height = 31
+    Top = 167
+    Width = 92
+    Caption = 'Shapes test'
+    TabOrder = 6
+    OnClick = Button6Click
+  end
+  object CSCAD: TCADCmp2D
+    Left = 8
+    Top = 8
+  end
+end

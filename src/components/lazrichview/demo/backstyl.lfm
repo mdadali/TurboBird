@@ -1,0 +1,60 @@
+object frmBackStyle: TfrmBackStyle
+  Left = 129
+  Height = 147
+  Top = 130
+  Width = 350
+  HorzScrollBar.Page = 349
+  VertScrollBar.Page = 146
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Background Styles'
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  object RadioGroup1: TRadioGroup
+    Left = 8
+    Height = 106
+    Top = 4
+    Width = 335
+    AutoFill = True
+    Caption = 'Background Style'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ItemIndex = 0
+    Items.Strings = (
+      'No bitmap'
+      'Stretched bitmap'
+      'Tiled bitmap'
+      'Scrolled and tiled bitmap'
+    )
+    TabOrder = 0
+  end
+  object btnOk: TButton
+    Left = 186
+    Height = 25
+    Top = 115
+    Width = 75
+    BorderSpacing.InnerBorder = 4
+    Caption = 'Okay'
+    Default = True
+    ModalResult = 1
+    OnClick = btnOkClick
+    TabOrder = 1
+  end
+  object btnCancel: TButton
+    Left = 266
+    Height = 25
+    Top = 115
+    Width = 75
+    BorderSpacing.InnerBorder = 4
+    Cancel = True
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+end

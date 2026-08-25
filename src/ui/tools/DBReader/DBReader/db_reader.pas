@@ -21,10 +21,7 @@ uses
   {$endif}
   SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, Dialogs, Clipbrd,
   StdCtrls, ComCtrls, ExtCtrls, Grids, DBCtrls, DBGrids, SynEdit,
-  SynHighlighterSQL, ValueViewForm, DB,
-  //RFUtils,
-
-  DBReaderBase, DBReaderFirebird,
+  SynHighlighterSQL, ValueViewForm, DB, RFUtils, DBReaderBase, DBReaderFirebird,
   DBReaderBerkley, DBReaderMidas, DBReaderParadox, DBReaderDbf, FSReaderMtf,
   DBReaderMdf, DBReaderMdb, DBReaderEdb, DBReaderInno, DBReaderSqlite,
   DBReaderSybase, DBReaderDbisam, DBReaderTps, DBReaderRaima, DBReaderClarion,
@@ -964,14 +961,6 @@ begin
 end;
 
 procedure TfrmDBReader.OnPageReadedHandler(Sender: TObject);
-function TickDiff(const CurrentTick, PreviousTick: QWord): QWord;
-begin
-  if CurrentTick >= PreviousTick then
-    Result := CurrentTick - PreviousTick
-  else
-    // Gestione dell'eventuale overflow a 64 bit (rarissimo ma corretto)
-    Result := (Low(QWord) - PreviousTick) + CurrentTick + 1;
-end;
 begin
   if TickDiff(GetTickCount64, FPrevUpdTC) > 1000 then
   begin

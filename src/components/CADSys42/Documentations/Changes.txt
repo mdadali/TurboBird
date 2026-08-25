@@ -1,0 +1,71 @@
+CADSYS 4.2 Changes
+------------------
+These are the main changes from version 4.1 to 4.2
+
+- TOnChangeVect changed to TOnChangePointsSet
+- TVect2D and TVect3D changed to TPointsSet2D e TPointsSet3D
+- Added OwnerCAD to TGraphicObject
+- Added TDecorativePen and TDecorativeCanvas
+- Changed type of Idx in TLayer to Word instead of Byte
+- Added DecorativePen in TLayer
+- Deleted the LoadOld... and CreateFromOldStream methods also for graphical objects
+- Added WritableBox in TObject2D/TObject3Dal instead of fBox
+- Added the interface IRenderObject3D
+- Deleted GetObjectFace from TObject3D
+- Changed EVectOutOfBound into ECADOutOfBound
+- Changed ECADSourceBlockReferenced into ECADSourceBlockIsReferenced
+- Changed ECADSys into ECADSysException
+- Deleted ECADCmpException
+- Deleted ECADList
+- Deleted ECADPrg
+- Deleted WhereToDraw
+- Changed Panning into PanWindow
+- Changed Equal?2D into IsSame?2D
+- Added:
+   PICK_ONCTRLPOINT = -3;
+   PICK_ONHANDLEPOINT = -4;
+- Deleted MIN_BOX_FILL
+- Modified the OnBadVersion event
+- Added the concept of object handler.
+- Deleted PointInPolygon3D
+- Changed Size property of TPointsSet?D to Capacity.
+- Changed OutPos3D and OutCode3D in OutPos and OutCode
+- Added CS4BaseTypes that contains the base types
+  of CADSys. 
+  INCLUDE IT IN ALL OF YOUR UNITS, BECAUSE IT IS NOT ADDED
+  BY THE DELPHI IDE.
+- The method SetCanvas is added to TLayer
+- The method SetLayer is added to TCADViewport
+- The property BufferCanvas of TCADViewport is changed to 
+  OffScreenCanvas
+- The property OnScreenCanvas of TCADViewport is added to
+  draw directly on the canvas using a DecorativeCanvas
+- The protected property BufferBitmap of TCADViewport is changed 
+  to OffScreenBitmap
+- Added the ClipRect2D parameter to all Draw methods of TObject2D
+- Removed the ClipRect parameter to DrawLine3D and DrawBoundingBox3D
+- Added the ClipRect2D parameter to DrawObject and 
+  DrawObjectWithRubber of TCADViewport and its descendant
+- All the base 2D/3D engine code is now moved to a dll that must be
+  installed in the System directory of Windows. So now all the
+  sources, except the code in the DLL, are avaiable to the developer
+  that can customize the components/controls/shapes of CADSys.
+- Fixed the format for the version of CADSys drawing files. Now the
+  version string must follow the rule: CAD<MajorVer><MinorVer><Build>
+  The library has now the following marker: CAD422
+- The grid property is now subdivided in four different parts:
+  - GridDeltaX, GridDeltaY are equivalent to GridStep property
+  - GridSubX, GridSubY are the number of subdivision of GridDelta?
+  For example the following configuration:
+  - GridDeltaX=10, GridDeltaY=10, GridSubX=5, GridSubY=5
+  means a grid with a step of 10units along X and Y, and every 2
+  units a dotted line.
+- FreeSourceBlocks changed to DeleteAllBlocks.
+- Changed the behaviour of RemoveSavedSourceBlocks and changed to DeleteSavedSourceBlocks
+- Added DeleteLibrarySourceBlocks
+- Added ControlPointsColor property
+- Added CADSysUnregister* procedures
+- Added the Tag property to TPointsSet?D
+- Added ScaleFactor to TBitmap2D
+- Added AspectRatio to TBitmap2D
+- Added CopyMode to TBitmap2D

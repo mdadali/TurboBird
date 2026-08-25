@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
-  <Lazarus Version="4.8"/>
-  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1561559417"/>
-  <Params Value="-MObjFPC -Scghi -O1 -g -gl -l -vewnhibq -FuC:\fpcupdeluxe\FirebirdManager\tb\src\components\JSONDataSet\ -FuC:\fpcupdeluxe\lazarus\packager\units\i386-win32 -FUC:\fpcupdeluxe\FirebirdManager\tb\src\components\JSONDataSet\lib\i386-win32\ jsondataset.pas"/>
+  <Lazarus Version="4.7"/>
+  <Compiler Value="C:\fpcupdeluxe\fpc\bin\i386-win32\fpc.exe" Date="1552186036"/>
+  <Params Value="-MObjFPC -Scghi -O1 -g -gl -l -vewnhibq -FuC:\fpcupdeluxe\projects\TurboBird-TurboBird_v1.2.1.1284\src\components\JSONDataSet\ -FuC:\fpcupdeluxe\lazarus\packager\units\i386-win32 -FUC:\fpcupdeluxe\projects\TurboBird-TurboBird_v1.2.1.1284\src\components\JSONDataSet\lib\i386-win32\ jsondataset.pas"/>
 </CONFIG>

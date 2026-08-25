@@ -70278,10 +70278,10 @@ object fmReg: TfmReg
     0C80B85F866DD7CAA55DF0B79B2AC58E735DDDFFA2E3FAE285EB5EBBFCEEFBBD
     D5F25FFA5DDF97B75DFE04761A10822ADB2BEE0000000049454E44AE426082
   }
+  Position = poScreenCenter
+  LCLVersion = '4.7.0.0'
   OnCreate = FormCreate
   OnShow = FormShow
-  Position = poScreenCenter
-  LCLVersion = '2.2.6.0'
   object Image1: TImage
     Left = 512
     Height = 138
@@ -70779,6 +70779,7 @@ object fmReg: TfmReg
     Align = alBottom
     ClientHeight = 49
     ClientWidth = 683
+    ParentBackground = False
     TabOrder = 0
     object bbTest: TBitBtn
       Left = 16
@@ -70788,8 +70789,8 @@ object fmReg: TfmReg
       Caption = 'Test connection'
       Color = clForm
       Kind = bkAll
-      OnClick = bbTestClick
       TabOrder = 0
+      OnClick = bbTestClick
     end
     object bbCancel: TBitBtn
       Left = 216
@@ -70887,8 +70888,8 @@ object fmReg: TfmReg
         FF00FFFFFF00A2AFA8279CA3A33C80808006FFFFFF00FFFFFF00FFFFFF00FFFF
         FF00FFFFFF00000000020000000400000002FFFFFF00FFFFFF00
       }
-      OnClick = bbRegClick
       TabOrder = 2
+      OnClick = bbRegClick
     end
   end
   object GroupBox1: TGroupBox
@@ -70897,37 +70898,38 @@ object fmReg: TfmReg
     Top = 16
     Width = 480
     Caption = 'Database'
-    ClientHeight = 403
-    ClientWidth = 478
+    ClientHeight = 404
+    ClientWidth = 476
+    ParentBackground = False
     TabOrder = 1
     OnClick = GroupBox1Click
     object Label1: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 160
-      Width = 63
+      Width = 48
       Caption = 'Database'
       ParentColor = False
     end
     object Label4: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 88
-      Width = 29
+      Width = 22
       Caption = 'Title'
       ParentColor = False
     end
     object Label5: TLabel
       Left = 192
-      Height = 20
+      Height = 15
       Top = 227
-      Width = 52
+      Width = 40
       Caption = 'Charset'
       ParentColor = False
     end
     object edDatabaseName: TEdit
       Left = 16
-      Height = 37
+      Height = 23
       Top = 184
       Width = 411
       TabOrder = 0
@@ -70938,22 +70940,22 @@ object fmReg: TfmReg
       Top = 184
       Width = 27
       Caption = '....'
-      OnClick = btBrowseDBClick
       TabOrder = 1
+      OnClick = btBrowseDBClick
     end
     object edTitle: TEdit
       Left = 16
-      Height = 37
+      Height = 23
       Top = 112
       Width = 411
       TabOrder = 2
     end
     object cbCharset: TComboBox
       Left = 256
-      Height = 32
+      Height = 24
       Top = 224
       Width = 168
-      ItemHeight = 0
+      ItemHeight = 16
       ItemIndex = 0
       Items.Strings = (
         'NONE'
@@ -71015,18 +71017,18 @@ object fmReg: TfmReg
     end
     object Label9: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 227
-      Width = 76
+      Width = 60
       Caption = 'SQL Dialect'
       ParentColor = False
     end
     object cboxSQLDialect: TComboBox
       Left = 104
-      Height = 32
+      Height = 24
       Top = 224
       Width = 55
-      ItemHeight = 0
+      ItemHeight = 16
       ItemIndex = 2
       Items.Strings = (
         '1'
@@ -71039,38 +71041,38 @@ object fmReg: TfmReg
     end
     object Label2: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 288
-      Width = 73
+      Width = 56
       Caption = 'User name'
       ParentColor = False
     end
     object lbPassword: TLabel
       Left = 184
-      Height = 20
+      Height = 15
       Top = 288
-      Width = 64
+      Width = 50
       Caption = 'Password'
       ParentColor = False
     end
     object lbRole: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 368
-      Width = 29
+      Width = 23
       Caption = 'Role'
       ParentColor = False
     end
     object edtUserName: TEdit
       Left = 16
-      Height = 37
+      Height = 23
       Top = 320
       Width = 153
       TabOrder = 5
     end
     object edtPassword: TEdit
       Left = 184
-      Height = 37
+      Height = 23
       Top = 320
       Width = 139
       EchoMode = emPassword
@@ -71079,42 +71081,42 @@ object fmReg: TfmReg
     end
     object cxSavePassword: TCheckBox
       Left = 184
-      Height = 24
+      Height = 19
       Top = 368
-      Width = 125
+      Width = 95
       Caption = 'Save Password'
       TabOrder = 7
     end
     object edtRole: TEdit
       Left = 72
-      Height = 37
+      Height = 23
       Top = 360
       Width = 93
       TabOrder = 8
     end
     object Label10: TLabel
       Left = 16
-      Height = 20
+      Height = 15
       Top = 8
-      Width = 43
+      Width = 32
       Caption = 'Server'
       ParentColor = False
     end
     object cboxServers: TComboBox
       Left = 16
-      Height = 36
+      Height = 24
       Top = 40
       Width = 408
-      ItemHeight = 0
-      OnChange = cboxServersChange
+      ItemHeight = 16
       Style = csOwnerDrawFixed
       TabOrder = 9
+      OnChange = cboxServersChange
     end
     object chkBoxConnectDBOnStart: TCheckBox
       Left = 320
-      Height = 24
+      Height = 19
       Top = 370
-      Width = 152
+      Width = 118
       Caption = 'ConnectDBOnStart'
       TabOrder = 10
       Visible = False
@@ -71126,8 +71128,9 @@ object fmReg: TfmReg
     Top = 496
     Width = 480
     Caption = 'Firebird Client library'
-    ClientHeight = 107
-    ClientWidth = 478
+    ClientHeight = 108
+    ClientWidth = 476
+    ParentBackground = False
     TabOrder = 2
     object btnBrowseClient: TButton
       Left = 427
@@ -71135,12 +71138,12 @@ object fmReg: TfmReg
       Top = 16
       Width = 27
       Caption = '....'
-      OnClick = btnBrowseClientClick
       TabOrder = 0
+      OnClick = btnBrowseClientClick
     end
     object edtPort: TEdit
       Left = 56
-      Height = 37
+      Height = 23
       Top = 64
       Width = 64
       TabOrder = 1
@@ -71148,7 +71151,7 @@ object fmReg: TfmReg
     end
     object edtFBClient: TEdit
       Left = 8
-      Height = 37
+      Height = 23
       Top = 16
       Width = 408
       ReadOnly = True
@@ -71156,17 +71159,17 @@ object fmReg: TfmReg
     end
     object Label8: TLabel
       Left = 8
-      Height = 20
+      Height = 15
       Top = 64
-      Width = 27
+      Width = 22
       Caption = 'Port'
       ParentColor = False
     end
     object chkboxOverwriteServerClientLib: TCheckBox
       Left = 144
-      Height = 24
+      Height = 19
       Top = 64
-      Width = 172
+      Width = 131
       Caption = 'Use own client library'
       TabOrder = 3
     end
@@ -71185,6 +71188,10 @@ object fmReg: TfmReg
     Connected = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
+    DatabaseName = '10.144.217.52:D:\Delphi\Dati Fib 5\iet\T6-DATI001.FDB'
+    Params.Strings = (
+      'user_name=SYSDBA'
+    )
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False

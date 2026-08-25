@@ -75,8 +75,9 @@ const
   btVariant         = 16;
 
 
+{$IFNDEF PS_NOINT64}
   btS64             = 17;
-
+{$ENDIF}
 
   btChar            = 18;
 

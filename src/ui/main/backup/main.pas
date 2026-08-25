@@ -71,7 +71,7 @@ uses
   floginservicemanager,
   fserverregistry,
 
-  //fblobedit,
+  fblobedit,
   HTMLUn2, HtmlGlobals, RxDBGrid,
 
   fmetaquerys,
@@ -99,7 +99,7 @@ uses
   fdataeditor,
   db_reader,
 
-//  u_psstudio,
+  u_psstudio,
   u_consoleide,
 
   UpdateChecker
@@ -114,10 +114,10 @@ type
   TfmMain = class(TForm)
     Button1: TButton;
     CheckBoxFilter: TCheckBox;
-    edtFilter: TEdit;
     editorFontDialog: TFontDialog;
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
+    edtFilter: TEdit;
     grBoxObjectFilter: TGroupBox;
     HtmlViewer1: THtmlViewer;
     Image1: TImage;
@@ -154,6 +154,9 @@ type
     lmExportTableToDataEditorRO: TMenuItem;
     lmExportTableToDataEditorRW: TMenuItem;
     lmBulkExport: TMenuItem;
+    PanelDataBaseCurrent: TPanel;
+    PanelToolsBar: TPanel;
+    pnlLeft: TPanel;
     Separator12: TMenuItem;
     mnSQLMonitor: TMenuItem;
     mnSQLParser: TMenuItem;
@@ -166,7 +169,6 @@ type
     mnBulkClone: TMenuItem;
     mnDataEditor: TMenuItem;
     mnTools: TMenuItem;
-    pnlLeft: TPanel;
     Separator9: TMenuItem;
     Separator8: TMenuItem;
     Separator7: TMenuItem;
@@ -180,6 +182,7 @@ type
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
     Panel1: TPanel;
+    Splitter2: TSplitter;
     SQLQuery1: TIBQuery;
     ImageList1: TImageList;
     ImageList2: TImageList;
@@ -235,6 +238,14 @@ type
     lmServerRegistry: TMenuItem;
     mnOptions: TMenuItem;
     mnEditorFont: TMenuItem;
+    tbCheckDBIntegrity: TToolButton;
+    tbSQLMonitor: TToolButton;
+    tbtnAbout: TToolButton;
+    tbtnCreateNewDB: TToolButton;
+    tbtnEditorFont: TToolButton;
+    tbtnRegDatabase: TToolButton;
+    tbtnRestoreDatabase: TToolButton;
+    ToolBar1: TToolBar;
     toolbarImages: TImageList;
     MainMenu1: TMainMenu;
     mdsHistory: TMemDataset;
@@ -305,15 +316,10 @@ type
     pmDatabase: TPopupMenu;
     Splitter1: TSplitter;
     StatusBar1: TStatusBar;
-    ToolBar1: TToolBar;
-    tbtnCreateNewDB: TToolButton;
-    tbtnRegDatabase: TToolButton;
-    tbtnRestoreDatabase: TToolButton;
-    tbtnAbout: TToolButton;
-    tbCheckDBIntegrity: TToolButton;
-    tbSQLMonitor: TToolButton;
-    ToolButton3: TToolButton;
-    tbtnEditorFont: TToolButton;
+    ToolButton1: TToolButton;
+    tbtnBackup: TToolButton;
+    tbtnRestore: TToolButton;
+    tbtnSqlScript: TToolButton;
     tsMain: TTabSheet;
     tvMain: TTreeView;
     procedure Button1Click(Sender: TObject);
@@ -406,7 +412,6 @@ type
     procedure lmDisplay1000VClick(Sender: TObject);
     procedure lmDropExceptionClick(Sender: TObject);
     procedure lmEditProcClick(Sender: TObject);
-    procedure lmEditTableDataClick(Sender: TObject);
     procedure lmEditTriggerClick(Sender: TObject);
     procedure lmEditViewClick(Sender: TObject);
     procedure lmNewDomainClick(Sender: TObject);
@@ -607,11 +612,7 @@ implementation
 { TfmMain }
 
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
-     EnterPass, CreateTrigger, fedittabledata,
-
-     //CallProc,
-
-     UDFInfo, ViewDomain,
+     EnterPass, CreateTrigger, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, CopyTable, NewEditField, dbInfo, Comparison;
      // About,
@@ -731,16 +732,18 @@ end;
 procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
 var htmlPath: string;
+FilePathHtml:String;
 begin
   htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
 
   if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
+    filePathHtml := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html';
     if FileExists(htmlPath + SRC) then
       HtmlViewer1.LoadFromFile(htmlPath + SRC)
     else
-    HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
+    HtmlViewer1.LoadFromFile( filePathHtml
+      );
   end
   else
   begin
@@ -1736,7 +1739,7 @@ end;
 
 procedure TfmMain.mnuPascalScriptClick(Sender: TObject);
 begin
-  {
+
   {$IFDEF CONSOLE_SCRIPTER}
   if ConsoleIDE = nil then
   begin
@@ -1750,8 +1753,9 @@ begin
     PSStudio := TfrmPSStudio.Create(Self);
   PSStudio.ShowModal;
   {$ENDIF}
-  }
-//  if PSStudio <> nil then      PSStudio.ShowModal;
+
+  if PSStudio <> nil then
+    PSStudio.ShowModal;
 end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
@@ -1959,10 +1963,10 @@ var
   Rec: TDatabaseRec;
   dbIndex: Integer;
   ATab: TTabSheet;
-  //frmBlobEdit: TfrmBlobEdit;
+  frmBlobEdit: TfrmBlobEdit;
   Server, DBAlias, ShortTitle, FullHint: string;
 begin
-  {SelNode := tvMain.Selected;
+   SelNode := tvMain.Selected;
   if SelNode = nil then Exit;
 
   ServerNode := TTreeNode(GetAncestorAtLevel(SelNode, 0));
@@ -2013,7 +2017,7 @@ begin
   // Tab aktivieren + Initialisierung
   PageControl1.ActivePage := ATab;
   frmBlobEdit.Init(nil, NodeInfos);
-  frmBlobEdit.Show;}
+  frmBlobEdit.Show;
 end;
 
 procedure TfmMain.lmBulkExportClick(Sender: TObject);
@@ -3323,24 +3327,56 @@ end;
 // ============================================================
 procedure TfmMain.lmNewFormClick(Sender: TObject);
 begin
+  if PSStudio = nil then
+   PSStudio := TfrmPSStudio.Create(Self);
 
-    exit;
+  mnuPascalScriptClick(nil);
+  PSStudio.acFileNewExecute(nil);
 
+   FreeAndNil(PSStudio);
 end;
 
 procedure TfmMain.lmEditFormClick(Sender: TObject);
 var FormPath: string;
 begin
+ // if PSStudio = nil then      exit;
 
-    exit;
+    if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(Self);
 
+  FormPath := GetFormFilePath;
+  if FormPath = '' then
+  begin
+    ShowMessage('Could not determine form file path.');
+    Exit;
+  end;
+
+  PSStudio.OpenFileSilent(FormPath);
+  PSStudio.ShowModal;
+  FreeAndNil(PSStudio);
 end;
 
 procedure TfmMain.lmExecuteFormClick(Sender: TObject);
 var FormPath: string;
 begin
 
-    exit;
+   // if PSStudio = nil then      exit;
+
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(Self);
+
+
+  FormPath := GetFormFilePath;
+  if FormPath = '' then
+  begin
+    ShowMessage('Could not determine form file path.');
+    Exit;
+  end;
+
+  PSStudio.OpenFileSilent(FormPath);
+  PSStudio.acDebugRunExecute(nil);
+
+    FreeAndNil(PSStudio);
 
 end;
 
@@ -4613,73 +4649,6 @@ begin
   Rec := RegisteredDatabases[dbIndex];
   TmpQueryStr := GetFirebirdProcedureDeclaration(Rec.IBDatabase, tvMain.Selected.Text, '', true);
   ShowCompleteQueryWindow(dbIndex, 'Edit Procedure#' + IntToStr(dbIndex) + ':' + tvMain.Selected.Text, TmpQueryStr, nil);
-end;
-
-procedure TfmMain.lmEditTableDataClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
-  Rec: TDatabaseRec;
-  EditWindow: TfmEditTable;
-  ATableName, DBAlias, ShortTitle, FullHint: string;
-  dbIndex: Integer;
-  ATab: TTabSheet;
-begin
-  SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
-
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
-
-  // Tabellenname und DB-Index ermitteln
-  ATableName := GetClearNodeText(SelNode.Text);
-  dbIndex := TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex;
-  Rec := RegisteredDatabases[dbIndex];
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-
-  // Prüfen ob ViewForm schon existiert
-  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmEditTable) then
-    EditWindow := TfmEditTable(NodeInfos^.EditorForm)
-  else
-  begin
-    EditWindow := TfmEditTable.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    EditWindow.Parent := ATab;
-    EditWindow.Align := alClient;
-    EditWindow.BorderStyle := bsNone;
-
-    NodeInfos^.EditorForm := EditWindow;
-  end;
-
-  // Tab vorbereiten
-  ATab := EditWindow.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Kurzer Tab-Titel
-  ShortTitle := ATableName;
-  ATab.Caption := ShortTitle;
-  EditWindow.Caption := ShortTitle;
-
-  // Detaillierte Infos als Hint
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + Rec.IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table' + sLineBreak +
-    'Table name: ' + ATableName  + sLineBreak +
-    'Modus: Edit Tabledata';
-
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Formular initialisieren
-  EditWindow.Rec := Rec;
-  ATableName := GetClearNodeText(ATableName);
-  EditWindow.Init(dbIndex, ATableName, NodeInfos);
-  EditWindow.Show;
 end;
 
 (****************  Edit Trigger  ******************)
@@ -8993,6 +8962,8 @@ end;
 
 procedure TfmMain.tvMainChange(Sender: TObject; Node: TTreeNode);
 var dbIndex: integer;
+     DBRec: TDatabaseRec;
+
 begin
   if tvMain.Selected = nil then
     exit;
@@ -9002,6 +8973,8 @@ begin
     //dbIndex:= TPNodeInfos(tvMain.Selected.Data)^.dbIndex;
     dbIndex:= TPNodeInfos(Node.Data)^.dbIndex;
     SetConnection(dbIndex);
+    DBRec := RegisteredDatabases[dbIndex];
+    PanelDataBaseCurrent.Caption:=dbrec.RegRec.DatabaseName;
   end;
 end;
 

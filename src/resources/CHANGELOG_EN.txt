@@ -4,8 +4,14 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+TurboBird v1.2.1.1284
+Build-Date & -Time: 16.08.2026, 14:00
+
+* Several bugs fixed
+
+--------------------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1282
-Build-Date & -Time: 08.08.2026, 15:00
+Build-Date & -Time: 08.08.2026, 17:35
 
 + Local SQLMonitor and new Section in Ini File:
   [SQLMonitor]
@@ -13,9 +19,13 @@ Build-Date & -Time: 08.08.2026, 15:00
   TraceFlags=tfConnect,tfTransact,tfQPrepare,tfQExecute,tfQFetch,tfService,tfBlob,tfStmt,tfError,tfMisc
   SlowQueryThreshold=5000
 
++ Tablefilter in Edit Tabledata
+
 * Several bugs fixed
 
 
+
+-----------------------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1280
 Build date & time: 26.07.2026, 22:30
 

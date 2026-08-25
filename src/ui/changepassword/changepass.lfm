@@ -4,7 +4,7 @@ object fmChangePass: TfmChangePass
   Top = 253
   Width = 320
   BorderStyle = bsSingle
-  Caption = 'fmChangePass'
+  Caption = 'Change Password'
   ClientHeight = 141
   ClientWidth = 320
   OnShow = FormShow
@@ -12,15 +12,15 @@ object fmChangePass: TfmChangePass
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 14
-    Height = 19
+    Height = 20
     Top = 40
-    Width = 88
+    Width = 98
     Caption = 'New Password'
     ParentColor = False
   end
   object edPassword: TEdit
     Left = 126
-    Height = 31
+    Height = 37
     Top = 34
     Width = 186
     EchoMode = emPassword
@@ -29,15 +29,15 @@ object fmChangePass: TfmChangePass
   end
   object Label2: TLabel
     Left = 16
-    Height = 19
+    Height = 20
     Top = 72
-    Width = 50
+    Width = 53
     Caption = 'Confirm'
     ParentColor = False
   end
   object edConfirm: TEdit
     Left = 126
-    Height = 31
+    Height = 37
     Top = 66
     Width = 186
     EchoMode = emPassword

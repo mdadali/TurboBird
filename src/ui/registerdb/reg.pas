@@ -158,6 +158,8 @@ procedure TfmReg.bbTestClick(Sender: TObject);
 var Rec: TServerRecord;
     ConnMessage: string;
 begin
+
+  //10.144.217.52:D:\Delphi\Dati Fib 5\iet\T6-DATI001.FDB
   Rec := GetServerRecordFromFileByName(Trim(cboxServers.Text));
   if TestDBConnection(edDatabaseName.Text, edtUserName.Text, edtPassword.Text, cbCharset.Text, edtFBClient.Text,
                      cboxSQLDialect.Text, edtPort.Text, cboxServers.Text,

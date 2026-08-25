@@ -1,0 +1,74 @@
+object frmPrint: TfrmPrint
+  Left = 7
+  Height = 449
+  Top = 9
+  Width = 624
+  HorzScrollBar.Page = 623
+  VertScrollBar.Page = 448
+  Caption = 'Preview of 1st Page'
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  object ScrollBox1: TScrollBox
+    Height = 416
+    Width = 624
+    HorzScrollBar.Page = 619
+    VertScrollBar.Page = 411
+    Align = alClient
+    Color = clWhite
+    ParentColor = False
+    TabOrder = 0
+    object Image1: TImage
+      Left = 1
+      Height = 91
+      Width = 111
+      AutoSize = True
+    end
+  end
+  object Panel1: TPanel
+    Height = 33
+    Top = 416
+    Width = 624
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 1
+    object Label1: TLabel
+      Left = 3
+      Height = 13
+      Top = 6
+      Width = 186
+      Caption = 'You can provide code to stretch bitmap'
+      Color = clNone
+      ParentColor = False
+    end
+    object Panel2: TPanel
+      Left = 439
+      Height = 33
+      Width = 185
+      Align = alRight
+      BevelOuter = bvNone
+      TabOrder = 0
+      object btnOk: TButton
+        Left = 19
+        Height = 25
+        Top = 5
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Caption = 'Print'
+        Default = True
+        ModalResult = 1
+        TabOrder = 0
+      end
+      object btnCancel: TButton
+        Left = 99
+        Height = 25
+        Top = 5
+        Width = 75
+        BorderSpacing.InnerBorder = 4
+        Cancel = True
+        Caption = 'Cancel'
+        ModalResult = 2
+        TabOrder = 1
+      end
+    end
+  end
+end

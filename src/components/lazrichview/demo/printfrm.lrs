@@ -1,0 +1,20 @@
+LazarusResources.Add('TfrmPrint','FORMDATA',[
+  'TPF0'#9'TfrmPrint'#8'frmPrint'#4'Left'#2#7#6'Height'#3#193#1#3'Top'#2#9#5'Wi'
+  +'dth'#3'p'#2#18'HorzScrollBar.Page'#3'o'#2#18'VertScrollBar.Page'#3#192#1#7
+  +'Caption'#6#19'Preview of 1st Page'#11'Font.Height'#2#245#9'Font.Name'#6#13
+  +'MS Sans Serif'#0#10'TScrollBox'#10'ScrollBox1'#6'Height'#3#160#1#5'Width'#3
+  +'p'#2#18'HorzScrollBar.Page'#3'k'#2#18'VertScrollBar.Page'#3#155#1#5'Align'#7
+  +#8'alClient'#5'Color'#7#7'clWhite'#11'ParentColor'#8#8'TabOrder'#2#0#0#6'TIm'
+  +'age'#6'Image1'#4'Left'#2#1#6'Height'#2'['#5'Width'#2'o'#8'AutoSize'#9#0#0#0
+  +#6'TPanel'#6'Panel1'#6'Height'#2'!'#3'Top'#3#160#1#5'Width'#3'p'#2#5'Align'#7
+  +#8'alBottom'#10'BevelOuter'#7#6'bvNone'#8'TabOrder'#2#1#0#6'TLabel'#6'Label1'
+  +#4'Left'#2#3#6'Height'#2#13#3'Top'#2#6#5'Width'#3#186#0#7'Caption'#6'&You ca'
+  +'n provide code to stretch bitmap'#5'Color'#7#6'clNone'#11'ParentColor'#8#0#0
+  +#6'TPanel'#6'Panel2'#4'Left'#3#183#1#6'Height'#2'!'#5'Width'#3#185#0#5'Align'
+  +#7#7'alRight'#10'BevelOuter'#7#6'bvNone'#8'TabOrder'#2#0#0#7'TButton'#5'btnO'
+  +'k'#4'Left'#2#19#6'Height'#2#25#3'Top'#2#5#5'Width'#2'K'#25'BorderSpacing.In'
+  +'nerBorder'#2#4#7'Caption'#6#5'Print'#7'Default'#9#11'ModalResult'#2#1#8'Tab'
+  +'Order'#2#0#0#0#7'TButton'#9'btnCancel'#4'Left'#2'c'#6'Height'#2#25#3'Top'#2
+  +#5#5'Width'#2'K'#25'BorderSpacing.InnerBorder'#2#4#6'Cancel'#9#7'Caption'#6#6
+  +'Cancel'#11'ModalResult'#2#2#8'TabOrder'#2#1#0#0#0#0#0
+]);

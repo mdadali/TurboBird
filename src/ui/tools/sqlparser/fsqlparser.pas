@@ -32,7 +32,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, SynEdit, SynHighlighterSQL, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, ExtCtrls;
+  Graphics, Dialogs, StdCtrls, ExtCtrls,
+  uthemeselector;
 
 type
 
@@ -61,6 +62,7 @@ type
     procedure btnCloseClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormShow(Sender: TObject);
   private
     { private declarations }
   public
@@ -100,6 +102,11 @@ procedure TfmSQLParser.FormClose(Sender: TObject; var CloseAction: TCloseAction
 begin
   FStrings := nil;
   CloseAction := caFree;
+end;
+
+procedure TfmSQLParser.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmSQLParser.btnCloseClick(Sender: TObject);

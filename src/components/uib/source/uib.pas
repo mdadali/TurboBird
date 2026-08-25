@@ -2190,7 +2190,8 @@ begin
     CloseCursor;
 
   if FetchFirst then
-    InternalNext else
+    InternalNext
+  else
     BeginExecute;
 end;
 

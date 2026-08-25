@@ -1,0 +1,643 @@
+object MainForm: TMainForm
+  Left = 244
+  Height = 795
+  Top = 38
+  Width = 1125
+  Caption = 'A very simple CAD 3d - CADSys 4.0 v 1.0'
+  ClientHeight = 795
+  ClientWidth = 1125
+  Color = clBtnFace
+  DesignTimePPI = 120
+  Font.CharSet = ANSI_CHARSET
+  Font.Color = clBlack
+  Font.Height = -13
+  Font.Name = 'Arial'
+  Font.Pitch = fpVariable
+  Font.Quality = fqDraft
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnPaint = FormPaint
+  Position = poScreenCenter
+  LCLVersion = '3.4.0.0'
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 3
+    Top = 699
+    Width = 1125
+    Align = alBottom
+    MinSize = 1
+    ResizeAnchor = akBottom
+  end
+  object InfoPnl: TPanel
+    Left = 0
+    Height = 93
+    Top = 702
+    Width = 1125
+    Align = alBottom
+    BevelOuter = bvLowered
+    ClientHeight = 93
+    ClientWidth = 1125
+    Font.CharSet = ANSI_CHARSET
+    Font.Color = clBlack
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    ParentBackground = False
+    ParentFont = False
+    TabOrder = 0
+    object CurPosLbl: TLabel
+      Left = 7
+      Height = 16
+      Top = 7
+      Width = 87
+      Caption = 'Cursor position'
+    end
+    object WPlanePosLbl: TLabel
+      Left = 7
+      Height = 16
+      Top = 32
+      Width = 118
+      Caption = 'Working plane origin'
+    end
+    object WPlaneNrmLbl: TLabel
+      Left = 207
+      Height = 16
+      Top = 32
+      Width = 126
+      Caption = 'Working plane normal'
+    end
+    object WPlaneUP: TLabel
+      Left = 407
+      Height = 16
+      Top = 32
+      Width = 105
+      Caption = 'Working plane UP'
+    end
+    object SnapLbl: TLabel
+      Left = 332
+      Height = 16
+      Top = 7
+      Width = 30
+      Caption = 'Snap'
+    end
+    object GridStepLbl: TLabel
+      Left = 500
+      Height = 16
+      Top = 7
+      Width = 53
+      Caption = 'Grid step'
+    end
+    object Bevel1: TBevel
+      Left = 700
+      Height = 83
+      Top = 7
+      Width = 183
+    end
+    object TaskInfoLbl: TLabel
+      Left = 7
+      Height = 1
+      Top = 75
+      Width = 1
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -12
+      Font.Name = 'Arial'
+      ParentFont = False
+    end
+    object CursorPosSLbl: TStaticText
+      Left = 100
+      Height = 22
+      Top = 7
+      Width = 213
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'CursorPosSLbl'
+      Color = 13425629
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -14
+      Font.Name = 'Arial'
+      ParentFont = False
+      ParentColor = False
+      TabOrder = 0
+    end
+    object UseSnapChk: TCheckBox
+      Left = 707
+      Height = 20
+      Top = 13
+      Width = 76
+      Caption = 'Use snap'
+      TabOrder = 1
+      OnClick = ModeModifiersChkClick
+    end
+    object UseOrtoChk: TCheckBox
+      Left = 707
+      Height = 20
+      Top = 38
+      Width = 158
+      Caption = 'Use ortogonal constrain'
+      TabOrder = 2
+      OnClick = ModeModifiersChkClick
+    end
+    object ShowGrdChk: TCheckBox
+      Left = 707
+      Height = 20
+      Top = 63
+      Width = 78
+      Caption = 'Show grid'
+      Checked = True
+      State = cbChecked
+      TabOrder = 3
+      OnClick = ModeModifiersChkClick
+    end
+    object SnapSLbl: TStaticText
+      Left = 368
+      Height = 22
+      Top = 7
+      Width = 127
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'SnapSLbl'
+      Color = 13425629
+      ParentColor = False
+      TabOrder = 4
+    end
+    object GridStepSLbl: TStaticText
+      Left = 563
+      Height = 23
+      Top = 7
+      Width = 133
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'GridStepSLbl'
+      Color = 13425629
+      ParentColor = False
+      TabOrder = 5
+    end
+    object WPlanePosSLbl: TStaticText
+      Left = 7
+      Height = 23
+      Top = 50
+      Width = 188
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'WPlanePosSLbl'
+      Color = 13425629
+      ParentColor = False
+      TabOrder = 6
+    end
+    object WPlaneNrmSLbl: TStaticText
+      Left = 207
+      Height = 23
+      Top = 50
+      Width = 188
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'WPlaneNrmSLbl'
+      Color = 13425629
+      ParentColor = False
+      TabOrder = 7
+    end
+    object WPlaneUpSLbl: TStaticText
+      Left = 407
+      Height = 23
+      Top = 50
+      Width = 188
+      Alignment = taCenter
+      BorderStyle = sbsSunken
+      Caption = 'WPlaneUpSLbl'
+      Color = 13425629
+      ParentColor = False
+      TabOrder = 8
+    end
+  end
+  object ToolPnl: TPanel
+    Left = 0
+    Height = 661
+    Top = 38
+    Width = 60
+    Align = alLeft
+    ClientHeight = 661
+    ClientWidth = 60
+    ParentBackground = False
+    TabOrder = 1
+    object ToolsBar: TToolBar
+      Left = 1
+      Height = 659
+      Top = 1
+      Width = 58
+      Align = alClient
+      ButtonHeight = 38
+      ButtonWidth = 40
+      Images = ToolsImages
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      object MoveBtn: TToolButton
+        Left = 1
+        Hint = 'Move object'
+        Top = 244
+        Caption = 'MoveBtn'
+        ImageIndex = 1
+        OnClick = MoveBtnClick
+      end
+      object RotateBtn: TToolButton
+        Left = 1
+        Hint = 'Rotate object'
+        Top = 327
+        Caption = 'RotateBtn'
+        ImageIndex = 2
+        OnClick = RotateBtnClick
+        Wrap = True
+      end
+      object ScaleBtn: TToolButton
+        Left = 1
+        Hint = 'scale object'
+        Top = 282
+        Caption = 'ScaleBtn'
+        ImageIndex = 3
+        OnClick = ScaleBtnClick
+      end
+      object EditPrimBtn: TToolButton
+        Left = 1
+        Hint = 'Edit object'
+        Top = 365
+        Caption = 'EditPrimBtn'
+        ImageIndex = 17
+        OnClick = EditPrimBtnClick
+      end
+      object ToolButton8: TToolButton
+        Left = 1
+        Top = 230
+        Width = 40
+        Caption = 'ToolButton8'
+        ImageIndex = 8
+        Style = tbsSeparator
+        Wrap = True
+      end
+      object FaceBtn: TToolButton
+        Left = 1
+        Hint = 'Create a planar face'
+        Top = 192
+        Caption = 'FaceBtn'
+        ImageIndex = 5
+        OnClick = FaceBtnClick
+      end
+      object PolyExtrBtn: TToolButton
+        Left = 1
+        Hint = 'Create an extruded profile'
+        Top = 116
+        Caption = 'PolyExtrBtn'
+        ImageIndex = 6
+        OnClick = PolyExtrBtnClick
+        Wrap = True
+      end
+      object CuboBtn: TToolButton
+        Left = 1
+        Hint = 'Create a cube'
+        Top = 40
+        Caption = 'CuboBtn'
+        ImageIndex = 7
+        OnClick = CuboBtnClick
+      end
+      object CilBtn: TToolButton
+        Left = 1
+        Hint = 'Create a cilinder'
+        Top = 154
+        Caption = 'CilBtn'
+        ImageIndex = 8
+        OnClick = CilBtnClick
+        Wrap = True
+      end
+      object SplineExtrBtn: TToolButton
+        Left = 1
+        Hint = 'Create an extruded spline'
+        Top = 78
+        Caption = 'SplineExtrBtn'
+        ImageIndex = 9
+        OnClick = SplineExtrBtnClick
+      end
+      object SphereBtn: TToolButton
+        Left = 1
+        Hint = 'Create a sphere'
+        Top = 2
+        Caption = 'SphereBtn'
+        ImageIndex = 10
+        OnClick = SphereBtnClick
+      end
+      object ToolButton1: TToolButton
+        Left = 1
+        Top = 237
+        Width = 40
+        Caption = 'ToolButton1'
+        ImageIndex = 11
+        Style = tbsSeparator
+        Wrap = True
+      end
+      object ZoomInBtn: TToolButton
+        Left = 1
+        Hint = 'Zoom in'
+        Top = 403
+        Caption = 'ZoomInBtn'
+        ImageIndex = 11
+        OnClick = ZoomInBtnClick
+      end
+      object ZoomOutBtn: TToolButton
+        Left = 1
+        Hint = 'Zoom out'
+        Top = 441
+        Caption = 'ZoomOutBtn'
+        ImageIndex = 12
+        OnClick = ZoomOutBtnClick
+        Wrap = True
+      end
+      object PanBtn: TToolButton
+        Left = 1
+        Hint = 'Pan'
+        Top = 593
+        Caption = 'PanBtn'
+        ImageIndex = 16
+        OnClick = PanBtnClick
+      end
+      object ZoomAllBtn: TToolButton
+        Left = 1
+        Hint = 'Zoom all'
+        Top = 479
+        Caption = 'ZoomAllBtn'
+        ImageIndex = 13
+        OnClick = ZoomAllBtnClick
+        Wrap = True
+      end
+      object DollyBtn: TToolButton
+        Left = 1
+        Hint = 'Dolly'
+        Top = 555
+        Caption = 'DollyBtn'
+        ImageIndex = 15
+        OnClick = DollyBtnClick
+      end
+      object OrbitBtn: TToolButton
+        Left = 1
+        Hint = 'Orbit'
+        Top = 517
+        Caption = 'OrbitBtn'
+        ImageIndex = 14
+        OnClick = OrbitBtnClick
+      end
+      object ToolButton2: TToolButton
+        Left = 1
+        Top = 320
+        Width = 40
+        Caption = 'ToolButton2'
+        ImageIndex = 15
+        Style = tbsSeparator
+        Wrap = True
+      end
+    end
+  end
+  object CmdPnl: TPanel
+    Left = 0
+    Height = 38
+    Top = 0
+    Width = 1125
+    Align = alTop
+    ClientHeight = 38
+    ClientWidth = 1125
+    ParentBackground = False
+    TabOrder = 2
+    object CmdsBar: TToolBar
+      Left = 1
+      Height = 36
+      Top = 1
+      Width = 1123
+      Align = alClient
+      ButtonHeight = 32
+      ButtonWidth = 32
+      Images = CmdsImages
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 0
+      object NewBtn: TToolButton
+        Left = 1
+        Hint = 'New file'
+        Top = 2
+        Caption = 'NewBtn'
+        ImageIndex = 0
+        OnClick = NewBtnClick
+      end
+      object LoadBtn: TToolButton
+        Left = 33
+        Hint = 'Open file'
+        Top = 2
+        Caption = 'LoadBtn'
+        ImageIndex = 1
+        OnClick = LoadBtnClick
+      end
+      object SaveBtn: TToolButton
+        Left = 65
+        Hint = 'Save file'
+        Top = 2
+        Caption = 'SaveBtn'
+        ImageIndex = 2
+        OnClick = SaveBtnClick
+      end
+      object ImportBtn: TToolButton
+        Left = 97
+        Hint = 'Import DXF'
+        Top = 2
+        Caption = 'ImportBtn'
+        ImageIndex = 3
+        OnClick = ImportBtnClick
+      end
+      object ToolButton3: TToolButton
+        Left = 129
+        Top = 2
+        Caption = 'ToolButton3'
+      end
+    end
+  end
+  object ViewPnl: TPanel
+    Left = 60
+    Height = 661
+    Top = 38
+    Width = 1065
+    Align = alClient
+    Caption = 'ViewPnl'
+    ClientHeight = 661
+    ClientWidth = 1065
+    ParentBackground = False
+    TabOrder = 3
+    object PageControl1: TPageControl
+      Left = 1
+      Height = 659
+      Top = 1
+      Width = 1063
+      ActivePage = TabOrto
+      Align = alClient
+      AutoSize = True
+      Font.CharSet = ANSI_CHARSET
+      Font.Color = clBlack
+      Font.Height = -12
+      Font.Name = 'Arial'
+      Font.Pitch = fpVariable
+      Font.Quality = fqDraft
+      ParentFont = False
+      TabIndex = 1
+      TabOrder = 0
+      OnChange = PageControl1Change
+      object TabPerspective: TTabSheet
+        AutoSize = True
+        Caption = 'Perspective'
+        ClientHeight = 631
+        ClientWidth = 1055
+        object LocalPerspView: TCADPerspectiveViewport3D
+          Left = 0
+          Height = 631
+          Top = 0
+          Width = 1055
+          Align = alClient
+          AspectRatio = 1
+          ControlPointsColor = clBlack
+          BackGroundColor = 14542824
+          OnBeginRedraw = LocalViewBeginRedraw
+          OnEndRedraw = LocalViewEndRedraw
+          OnMouseEnter = LocalViewMouseEnter
+          Axis.Size = 15
+          CADCmp3D = LocalCAD
+          OnMouseMove3D = LocalViewMouseMove3D
+          OnMouseUp3D = LocalViewMouseUp3D
+        end
+      end
+      object TabOrto: TTabSheet
+        Caption = 'TabOrto'
+        ClientHeight = 631
+        ClientWidth = 1055
+        object LocalOrtoView: TCADParallelViewport3D
+          Left = 0
+          Height = 631
+          Top = 0
+          Width = 1055
+          Align = alClient
+          AspectRatio = 1
+          ControlPointsColor = clBlack
+          BackGroundColor = 14542824
+          OnBeginRedraw = LocalViewBeginRedraw
+          OnEndRedraw = LocalViewEndRedraw
+          OnMouseEnter = LocalViewMouseEnter
+          Axis.Size = 15
+          CADCmp3D = LocalCAD
+          OnMouseMove3D = LocalViewMouseMove3D
+          OnMouseUp3D = LocalViewMouseUp3D
+        end
+      end
+    end
+  end
+  object LocalCAD: TCADCmp3D
+    OnLoadProgress = LocalCADLoadProgress
+    OnSaveProgress = LocalCADSaveProgress
+    Left = 130
+    Top = 100
+  end
+  object LocalCADPrg: TCADPrg3D
+    UseSnap = True
+    XSnap = 1
+    YSnap = 1
+    ShowCursorCross = True
+    OnEnterState = LocalCADPrgEnterState
+    OnExitState = LocalCADPrgExitState
+    OnIdle = LocalCADPrgIdle
+    OnDescriptionChanged = LocalCADPrgDescriptionChanged
+    CursorSize = 10
+    Left = 250
+    Top = 100
+  end
+  object ToolsImages: TImageList
+    Height = 25
+    Width = 25
+    Left = 400
+    Top = 100
+    Bitmap = {
+      4C7A1200000019000000190000007C0500000000000078DAED9DC191DB300C45
+      554A4A49292E654BF12975E89C1A727009E90089E5A55722090A203E68C90BCC
+      7026E3B5F14412043E29479EA6B013197D3657C63CCFDE9C85E1CC79321C391B
+      8613A7603870AA0C30876500392DDF045A3FC3E6235DAF1723F3E732E72F58F7
+      C3F38B775F06E4FCB0B0A3C5E6C3F77C7B342C6BEB3B6FA03A315D57BE72DFD7
+      19C7486DED3B3534237182F13A466DDEB7FEB1EBE47A43EA275C2EB9FCBFAECB
+      4D793D442ADF69DD8A5977FFA9097DE74DC4A2F6785D3E6383EBC73D56E46347
+      4DC63563ADE35D373F54F072C6D5CC28630DCF28D78B4F3F562C2247C636AE2F
+      0D46D79A64D6E7339E56B165F28DCE25A1E142C385860B4668B8511AEEE3E383
+      D4BEE5BA8A3856C18568B82FDFA981341CA919460DB7F6FF601042FB90586763
+      B50FB17AA48BB1D90BD06ECCAA19823D472D76D51A8EF47923345C98D1AA790B
+      EC3BF947B2725FB95F0B8BFB2CE74FC3DA7BEF9E1F096B6FBC25FD90322A9F5D
+      9A643EB48CB5EF9CD5EA939051DDF3E42C3383D9F32CEF69E85F35A3B2E77163
+      AC34F63B328CB1ABEA87760D6E62936330B1DB99B78A3D0F976300F9F779DD79
+      AEF7A823AC8E3F41AD0D8B73B838873BDBF915912F83DDBB42185FB98C087D0E
+      A7CC93EA7338431ED6FB06EF9D37FEBBEFA576F8369CC3B1630EBC97CACE29E0
+      1C6E375E4C67648AB3A5EE3332E119D6A1FBD17936E6722F35CEE1C2E05292FC
+      FD2BCEB2BB6B2379DD0BFB5F1B7E960DF4FD76D6FF96432EBE6D2C9D6FF1F8AD
+      E6D1E2BFE81351118F08FF4F4E1EE784E943A12D1BBAB7DFB77D3D74CDF54BE3
+      17D027F21DBBFEDC291BBB626DC0F3239D28CF8FAA5783EA6E5898F9EC92DC7C
+      D7CEE63C7CD7CE9C6C3C12716CBCCAB9E54DCBEB3B1FADB57E56E52CEE567F8D
+      E320195C3FBF5EC731B83E0603C1989A3E708CF67AC7316A79B7E46218BA7EFA
+      D48211DF5D0D0BFBAE3A6B6F2DFB6AAC7E964EEBF4B1FA74958EC5DC7B16EA44
+      6DFDDB63B5EA570F83BB66FE3DFD8C96360C4630AC7B411B639F65DB3FC9F7CF
+      3E9AADDC9F799F0B841E0C3BA77EE39ACDA7FE8CC99E7BE5CCD7323063A5EB87
+      64CE8F3856C10846308261678CA851A36A6DD8B1F4B9D73313EA0CDC77F4F719
+      784E9D81E5BC9681E3BC9E01FBBF200318633832D6D83843E49DFDB13B532C8C
+      8A83F760BC535E1E55C746D5E4293463D8C163E8F17CF83F73D1207589F10D62
+      897C332C18E3EFEF5FCFD6C150F9EFE4A8FDAF3992BDB964DC5BFD1070C4F3CB
+      F947320CF1358261E620E20AB80E0FB1CE018C113971546E0F9D13167600CB9E
+      21C43EAB08B0B6A5AFABFDDFAF37D97CF9B1B44AFF4CE393ECFE5ACE585F8761
+      8CA6E4BFC19826DBFF0379FAE5DA59186B438F552D661CE6BCF83C3A76156B10
+      C2D9C925A36AFBDB71E27968616161DF45C349EAB155C339E4DA42C36934CC77
+      D770E8B152C40C54C3A16337345C68B8B0B0B0D07047D770F78710A57B67D9C3
+      A09686D0702DFF641FB7E573C97FE58FEBD76D3A71EB2B182DDDBED3101A4EC2
+      080D171A2E2A5558D85B1852635573FA3CCF4B9B00DFC3A8E5F6F4EFAC0FDA5A
+      428DF38AC759D03CEF71B4673135FF5365AC54B9BD52F736FD4BF3C1FCDE8F7A
+      8E6A75D6A11E55351420AEAA71D6980B8F7AEDF98CED51396484AE19F5BBB9AE
+      E3063C0B0D0B0BFBC6B6DC2F74DC9325FFA9A139B97F0FCECE7906BA80B8F91E
+      C918BCFF387B074E3DE723D607B7CECF96AF46E5DDB0B0B0D070A1E17CEB60BA
+      7609A3A74FEBB19132341C4D5DED9D23813620C57B5FD68F11F3312AAE5EA113
+      43C38585851D6F032EF9AEB9E177DBEEFE3F1B5FDF8CBF3F97FAD0ECCB86D1CD
+      D9CFD9947F47A6AB0E09FF4E5E1C864183187D9CCAFCD718DD356B15CB0D8669
+      EEB95826E61EBBA92FB2B9829F27BBA7B411E7A27B79938CBF75C9C49AF8EFCA
+      58ABE665515E3DC05885BD85FD03BFA6C76E
+    }
+  end
+  object CmdsImages: TImageList
+    Left = 570
+    Top = 100
+    Bitmap = {
+      4C7A040000001000000010000000110100000000000078DAED560B0E85200CE3
+      E61C8DA361780282ECD301C6BCC4258B3AEC808D565D8CD171268DB5E3E94ABD
+      6B899FCF9CEB39EB686F5D0E19CBE26B1EAD1E02BE598B192FD6A3DF57D4ACEE
+      83722B1E583F85F7DEC3FDFB1BBC7C7E7BA7CE7E8EA5DCC54BBC8DB5718798C6
+      EF8FFF033E5D4308AFF1BFACF92DFEDFE723EBF020FFB9FD7FFC7F80FF08E7E6
+      BF59BFE1D10D9CCB76D69CCC61E01C8FC73887CD3FAE477290737C1D31CE4FEC
+      3FF5E3DEC07C68F2BD5335471ADF855F74F57CEFC0A75AB63E836FF358F159B3
+      2E0DA1F116DE9352B096E3E28405C4F10AEC97CA4D5AD710BCAE6BD6F9095D83
+      7405FB97E86B87EB0AD9FF4ED7795D63CFDFC4FCF67F09CB776D66FE15FC26FD
+      12ED00A5BD58CC
+    }
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.cs4'
+    Filter = 'CADSys 4.0 drawing file|*.cs4'
+    Left = 130
+    Top = 220
+  end
+  object SaveDialog1: TSaveDialog
+    DefaultExt = '.cs4'
+    Filter = 'CADSys 4.0 drawing file|*.cs4'
+    Left = 250
+    Top = 220
+  end
+  object OpenDialog2: TOpenDialog
+    DefaultExt = '.dxf'
+    Filter = 'DXF drawing file|*.dxf'
+    Left = 400
+    Top = 220
+  end
+end

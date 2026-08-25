@@ -7,6 +7,7 @@
       <Unit>
         <Filename Value="TestApplication.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <CursorPos X="3" Y="9"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
@@ -17,7 +18,6 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="61"/>
         <CursorPos X="5" Y="76"/>
@@ -47,8 +47,8 @@
         <Filename Value="uPSI_uiblib.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="244"/>
-        <CursorPos X="17" Y="245"/>
+        <TopLine Value="983"/>
+        <CursorPos X="20" Y="1007"/>
         <UsageCount Value="20"/>
         <Loaded Value="True"/>
       </Unit>
@@ -71,13 +71,14 @@
       </Unit>
       <Unit>
         <Filename Value="../../source/uibconst.pas"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="24"/>
         <CursorPos X="19" Y="37"/>
         <UsageCount Value="10"/>
+        <Loaded Value="True"/>
       </Unit>
     </Units>
-    <JumpHistory HistoryIndex="22">
+    <JumpHistory HistoryIndex="19">
       <Position>
         <Filename Value="fMain.pas"/>
       </Position>
@@ -156,18 +157,6 @@
       <Position>
         <Filename Value="fMain.pas"/>
         <Caret Line="20" Column="10" TopLine="9"/>
-      </Position>
-      <Position>
-        <Filename Value="TestApplication.lpr"/>
-        <Caret Line="9" Column="3"/>
-      </Position>
-      <Position>
-        <Filename Value="uPSI_uiblib.pas"/>
-        <Caret Line="11" Column="2"/>
-      </Position>
-      <Position>
-        <Filename Value="uPSI_uiblib.pas"/>
-        <Caret Line="57" Column="2" TopLine="43"/>
       </Position>
     </JumpHistory>
     <RunParams>

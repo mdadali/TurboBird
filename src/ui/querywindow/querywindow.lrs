@@ -2,7 +2,7 @@
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3'#'#2#6'Height'#3#236#2#3
-  +'Top'#2'%'#5'Width'#3#167#2#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'#3
+  +'Top'#2#0#5'Width'#3#167#2#7'Caption'#6#13'fmQueryWindow'#12'ClientHeight'#3
   +#236#2#11'ClientWidth'#3#167#2#5'Color'#7#6'clForm'#9'Icon.Data'#10#127'O"'#0
   +'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0#22#0#0#0#137'PNG'#13#10#26#10#0#0
   +#0#13'IHDR'#0#0#4#0#0#0#4#0#8#6#0#0#0#127#29'+'#131#0'"O,IDATx'#156#236#189

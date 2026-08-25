@@ -8,6 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, IBDatabase,
   IBQuery, SynEdit, SynHighlighterSQL, ComCtrls, ExtCtrls,
 
+  uthemeselector,
   turbocommon,
   fsimpleobjextractor,
   uCopyTableDataLocal;
@@ -53,6 +54,7 @@ type
     procedure btnResetClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure grBoxQueryClick(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
   private
@@ -85,6 +87,11 @@ begin
   FUsedFieldNames := TStringList.Create;
   SaveDialog1.Filter := 'External Table Files|*.dat;*.txt;*.csv|All Files|*.*';
   SaveDialog1.DefaultExt := 'dat';
+end;
+
+procedure TfmCloneToExternalTable.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCloneToExternalTable.grBoxQueryClick(Sender: TObject);
