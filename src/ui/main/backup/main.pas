@@ -487,6 +487,7 @@ type
     procedure pmDatabasePopup(Sender: TObject);
     procedure tbCheckDBIntegrityClick(Sender: TObject);
     procedure tbSQLMonitorClick(Sender: TObject);
+    procedure tbtnRestoreClick(Sender: TObject);
     procedure tvMainAddition(Sender: TObject; Node: TTreeNode);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure tvMainClick(Sender: TObject);
@@ -8904,6 +8905,11 @@ end;
 procedure TfmMain.tbSQLMonitorClick(Sender: TObject);
 begin
   fmSQLMonitor.Visible := (not fmSQLMonitor.Visible);
+end;
+
+procedure TfmMain.tbtnRestoreClick(Sender: TObject);
+begin
+    mnRestoreClick(nil);
 end;
 
 procedure TfmMain.tvMainAddition(Sender: TObject; Node: TTreeNode);

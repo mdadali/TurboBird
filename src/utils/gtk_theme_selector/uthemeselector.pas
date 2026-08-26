@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ComCtrls, ExtCtrls, Buttons,
   IniFiles, StrUtils,
-
   SynEdit,
   Spin,
   Grids,
@@ -16,7 +15,6 @@ uses
   DBCtrls,
   IBDynamicGrid,
   HTMLView;
-
 
 type
 
@@ -61,9 +59,9 @@ type
     procedure LoadLastTheme;
     procedure SaveLastTheme(const ThemeName: string);
     procedure ApplyThemeNextStart(const ThemeName: string);
-    function  ReadLastThemeFromIni: string;
+    function ReadLastThemeFromIni: string;
     procedure SaveLastThemeToIni(const ThemeName: string);
-    function  LoadThemesFromIni(const FileName: string): Integer;
+    function LoadThemesFromIni(const FileName: string): integer;
   public
     procedure ApplyThemePreview(const Theme: TSimpleTheme; AParentControl: TWinControl);
   end;
@@ -73,18 +71,19 @@ var
   frmThemeSelector: TfrmThemeSelector;
 
   Themes: array of TSimpleTheme;
-  Count, idx: Integer;
+  Count, idx: integer;
 
 
 implementation
 
 uses turbocommon;  // for inifile
 
-{$R *.lfm}
+  {$R *.lfm}
 
 { === Letztes Theme laden === }
 procedure TfrmThemeSelector.LoadLastTheme;
-var theme: string;
+var
+  theme: string;
 begin
   try
     theme := turbocommon.fIniFile.ReadString('UI', 'Theme', '');
@@ -117,14 +116,12 @@ begin
   Caption := 'Theme Selector';
   FThemeIniPath :=
     IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
-    'data' + DirectorySeparator +
-    'config' + DirectorySeparator +
-    ThemesIniFile;
+    'data' + DirectorySeparator + 'config' + DirectorySeparator + ThemesIniFile;
 
   if not FileExists(FThemeIniPath) then
     exit;
 
-  FThemeIni :=  TIniFile.Create(FThemeIniPath, []);
+  FThemeIni := TIniFile.Create(FThemeIniPath, []);
   LoadThemesFromIni(FThemeIniPath);
 
   cbThemes.Items.Clear;
@@ -132,7 +129,7 @@ begin
   for idx := 0 to Length(Themes) - 1 do
     cbThemes.Items.Add(Themes[idx].Name);
 
-    // Letztes Theme laden
+  // Letztes Theme laden
   idx := cbThemes.Items.IndexOf(ReadLastThemeFromIni());
 
   if idx >= 0 then
@@ -140,7 +137,7 @@ begin
   else
     cbThemes.ItemIndex := 0;
 
-    // Live Preview beim Wechsel
+  // Live Preview beim Wechsel
   ApplyThemePreview(Themes[cbThemes.ItemIndex], Self);
 end;
 
@@ -159,13 +156,32 @@ procedure TfrmThemeSelector.btnApplyClick(Sender: TObject);
 var
   theme: string;
 begin
-//  if cbThemes.ItemIndex < 0 then Exit;
-//  theme := cbThemes.Text;
-//  SaveLastTheme(theme);
-//  ApplyThemeNextStart(theme);
-//  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
-//  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
-//  Close;
+  {$IFDEF Windows}
+     if cbThemes.ItemIndex < 0 then Exit;
+     theme := cbThemes.Text;
+     SaveLastTheme(theme);
+     ApplyThemeNextStart(theme);
+     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
+     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
+     Close;
+  {$ENDIF}
+
+  {$IFDEF Linux}
+     if cbThemes.ItemIndex < 0 then Exit;
+     theme := cbThemes.Text;
+     SaveLastTheme(theme);
+     ApplyThemeNextStart(theme);
+     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
+     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
+     Close;
+  {$ENDIF}
+
+
+  // Non previsto codice per il momento
+  {$IFDEF Darwin}
+
+  {$ENDIF}
+
 end;
 
 procedure TfrmThemeSelector.cbThemesChange(Sender: TObject);
@@ -174,15 +190,15 @@ begin
   SaveLastThemeToIni(cbThemes.Text);
 end;
 
-procedure TfrmThemeSelector.FormClose(Sender: TObject;
-  var CloseAction: TCloseAction);
+procedure TfrmThemeSelector.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   CloseAction := caHide;
 end;
 
-procedure TfrmThemeSelector.ApplyThemePreview(const Theme: TSimpleTheme; AParentControl: TWinControl);
+procedure TfrmThemeSelector.ApplyThemePreview(const Theme: TSimpleTheme;
+  AParentControl: TWinControl);
 var
-  i: Integer;
+  i: integer;
   c: TControl;
 begin
   if AParentControl = nil then Exit;
@@ -205,10 +221,10 @@ begin
 
     if c is TForm then
     begin
-      TForm(c).Font.Size  := Theme.FontSize;
+      TForm(c).Font.Size := Theme.FontSize;
       TForm(c).Font.Style := Theme.FontStyle;
       TForm(c).Font.Color := Theme.TextColor;
-      TForm(c).Color      := Theme.BackgroundColor;
+      TForm(c).Color := Theme.BackgroundColor;
     end;
 
     // === Globale Font-Anpassung ===
@@ -247,7 +263,7 @@ begin
     end;
 
 
-      if c is TButton then
+    if c is TButton then
     begin
       TButton(c).Font.Color := AdjustColorByBrightness(TButton(c).Color);
       TButton(c).Repaint;
@@ -255,7 +271,8 @@ begin
 
     if c is TTreeView then
     begin
-      MainTreeView.ExpandSignColor := AdjustColorByBrightness(turbocommon.MainTreeView.Color);
+      MainTreeView.ExpandSignColor :=
+        AdjustColorByBrightness(turbocommon.MainTreeView.Color);
       {TTreeView(c).Font.Size  := Theme.FontSize;
       TTreeView(c).Font.Style := Theme.FontStyle;
       TTreeView(c).Font.Color := Theme.TextColor;
@@ -268,10 +285,10 @@ begin
   end;
 end;
 
-function TfrmThemeSelector.LoadThemesFromIni(const FileName: string): Integer;
+function TfrmThemeSelector.LoadThemesFromIni(const FileName: string): integer;
 var
   Sections: TStringList;
-  i, Count: Integer;
+  i, Count: integer;
   FontStyleStr: string;
 begin
   Result := 0;
@@ -288,23 +305,26 @@ begin
     begin
       Themes[i].Name := Sections[i];
 
-      Themes[i].BackgroundColor := StringToColor(
-        FThemeIni.ReadString(Sections[i], 'BackgroundColor', '$00FFFFFF'));
+      Themes[i].BackgroundColor :=
+        StringToColor(FThemeIni.ReadString(Sections[i], 'BackgroundColor',
+        '$00FFFFFF'));
       Themes[i].TextColor := StringToColor(
         FThemeIni.ReadString(Sections[i], 'TextColor', '$00000000'));
-      Themes[i].ButtonColor := StringToColor(
-        FThemeIni.ReadString(Sections[i], 'ButtonColor', '$00C0C0C0'));
+      Themes[i].ButtonColor :=
+        StringToColor(FThemeIni.ReadString(Sections[i], 'ButtonColor', '$00C0C0C0'));
 
       Themes[i].FontName := FThemeIni.ReadString(Sections[i], 'FontName', 'Segoe UI');
       Themes[i].FontSize := FThemeIni.ReadInteger(Sections[i], 'FontSize', 10);
 
       // FontStyle: erlaubt mehrere Werte, z.B. "Bold,Italic" oder "bold italic"
-      FontStyleStr := LowerCase(Trim(FThemeIni.ReadString(Sections[i], 'FontStyle', 'normal')));
+      FontStyleStr := LowerCase(Trim(FThemeIni.ReadString(Sections[i],
+        'FontStyle', 'normal')));
 
       Themes[i].FontStyle := []; // leeres Set = normale Schrift
       if Pos('bold', FontStyleStr) > 0 then Include(Themes[i].FontStyle, fsBold);
       if Pos('italic', FontStyleStr) > 0 then Include(Themes[i].FontStyle, fsItalic);
-      if Pos('underline', FontStyleStr) > 0 then Include(Themes[i].FontStyle, fsUnderline);
+      if Pos('underline', FontStyleStr) > 0 then
+        Include(Themes[i].FontStyle, fsUnderline);
       if Pos('strike', FontStyleStr) > 0 then Include(Themes[i].FontStyle, fsStrikeOut);
     end;
 

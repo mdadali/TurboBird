@@ -415,7 +415,11 @@ begin
   for Line := 1 to ed.Lines.Count  do
   begin
     // Prüfen, ob die Zeile Code enthält oder einen Breakpoint hat
+    {$IFDEF Windows}
     HasCode := ce.Exec.HasCode(ce.MainFileName, Line);
+    {$ENDIF}
+    {$IFDEF Linux} HasCode := false; {$ENDIF}
+
     //{$IFDEF Linux} HasCode := ce.Exec.HasCode(ce.MainFileName, Line); {$ENDIF}
 
     HasBreakpoint := ce.HasBreakPoint(ce.MainFileName, Line);
