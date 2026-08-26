@@ -1,0 +1,58 @@
+Bekannte Einschränkungen / Bugs
+------------------------------
+[PascalScript Studio]
+- Bei Verwendung von {$I} Include-Direktiven oder zusätzlichen Units in der uses-Klausel
+  stimmen die Debug-Zeilennummern nicht mehr korrekt.
+  Dadurch werden bei der schrittweisen Skriptausführung falsche Zeilen im Editor farbig markiert. 
+  Ursache ist, dass eingebundene Include-Dateien die internen Zeilenoffsets des Debuggers verändern.
+
+[Edit Table Data]
+- Case-sensitive Tabellennamen werden derzeit nicht unterstützt.
+
+[Embedded Connections]
+- Der Usermanager ist ausgeblendet.
+  Anmeldung aktuell nur mit SYSDBA möglich.
+
+[DB-Tools → DB Info → Register "Pages"]
+- Die Werte für "Used Pages" und "Free Pages" sind vertauscht.
+- Dieses Verhalten tritt auch im IBX DBAdmin auf.
+  → Vermutlich ein IBX-Problem.
+
+[RTF-Export]
+- Die RTF-Datei wird erzeugt.
+- Öffnung:
+  - AbiWord: funktioniert
+  - LibreOffice: funktioniert nicht
+- Vermutlich wird ein veraltetes RTF-Format erzeugt.
+- Issue wurde gemeldet (08.09.2025).
+
+[Data Editor]
+- Derzeit instabil und in aktiver Entwicklung.
+
+
+[Sortierung bei berechneten Spalten ohne Alias]
+- Problem: Der Versuch, eine berechnete Spalte ohne Alias (systemgenerierter Name wie CONCATENATION)
+  im Grid zu sortieren, führt zum     SQL‑Fehler -206 (Column unknown - CONCATENATION). 
+  Das tritt auch bei der Mehrspaltensortierung (selbstgebaut) auf, da Firebird den internen Spaltennamen nicht für ORDER BY akzeptiert.
+
+  Betroffene Query (erzeugt Fehler bei Sortierung):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1'),
+    '2' || ' = ' || ASCII_VAL('2'),
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z')
+  FROM RDB$DATABASE;
+
+  Workaround: Jeder berechneten Spalte einen eindeutigen Alias geben, z. B. AS COL1, AS COL2, … 
+  Danach funktioniert die Sortierung sowohl einzeln als auch mehrspaltig problemlos.
+
+ Korrigierte Query (funktioniert mit Sortierung):
+  SELECT
+    '1' || ' = ' || ASCII_VAL('1') AS COL1,
+    '2' || ' = ' || ASCII_VAL('2') AS COL2,
+    ...
+    'Z' || ' = ' || ASCII_VAL('Z') AS COL16
+  FROM RDB$DATABASE;
+
+ Betrifft: Selbstgebaute Sortier‑Prozeduren in QueryWindow.
+ Status: Wird in einer späteren Version möglicherweise behoben.

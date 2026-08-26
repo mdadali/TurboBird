@@ -159,13 +159,13 @@ procedure TfrmThemeSelector.btnApplyClick(Sender: TObject);
 var
   theme: string;
 begin
-  if cbThemes.ItemIndex < 0 then Exit;
-  theme := cbThemes.Text;
-  SaveLastTheme(theme);
-  ApplyThemeNextStart(theme);
-  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
-  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
-  Close;
+//  if cbThemes.ItemIndex < 0 then Exit;
+//  theme := cbThemes.Text;
+//  SaveLastTheme(theme);
+//  ApplyThemeNextStart(theme);
+//  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
+//  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
+//  Close;
 end;
 
 procedure TfrmThemeSelector.cbThemesChange(Sender: TObject);
