@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 547
+  Left = 568
   Height = 748
-  Top = 0
+  Top = 85
   Width = 679
   Caption = 'fmQueryWindow'
   ClientHeight = 748
@@ -70279,14 +70279,14 @@ object fmQueryWindow: TfmQueryWindow
   }
   KeyPreview = True
   Menu = MainMenu1
+  PopupMenu = pmTab
+  Position = poScreenCenter
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnShow = FormShow
-  PopupMenu = pmTab
-  Position = poScreenCenter
-  LCLVersion = '2.2.6.0'
   object Splitter1: TSplitter
     Cursor = crVSplit
     Left = 0
@@ -70305,6 +70305,7 @@ object fmQueryWindow: TfmQueryWindow
     BevelOuter = bvNone
     ClientHeight = 440
     ClientWidth = 679
+    ParentBackground = False
     TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
@@ -70878,6 +70879,10 @@ object fmQueryWindow: TfmQueryWindow
       object TSynGutterMarks
         Width = 24
         MouseActions = <>
+        MaxExtraMarksColums = 0
+        Options = [sgmoDeDuplicateMarksOnOverflow]
+        MarkupInfo.Background = clBtnFace
+        MarkupInfo.Foreground = clNone
       end
       object TSynGutterLineNumber
         Width = 21
@@ -70894,6 +70899,9 @@ object fmQueryWindow: TfmQueryWindow
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
+        MarkupInfo.Background = clNone
+        MarkupInfo.Foreground = clGreen
+        MarkupInfo.FrameColor = 59900
       end
       object TSynGutterSeparator
         Width = 2
@@ -70977,11 +70985,11 @@ object fmQueryWindow: TfmQueryWindow
       Top = 2
       AutoSize = True
       ImageIndex = 0
+      ParentShowHint = False
+      ShowHint = True
       OnClick = tbNewClick
       OnMouseEnter = tbNewMouseEnter
       OnMouseLeave = tbNewMouseLeave
-      ParentShowHint = False
-      ShowHint = True
     end
     object tbOpen: TToolButton
       Left = 1
@@ -70990,10 +70998,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbOpen'
       ImageIndex = 1
-      OnClick = tbOpenClick
-      OnMouseEnter = tbOpenMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbOpenClick
+      OnMouseEnter = tbOpenMouseEnter
     end
     object tbSave: TToolButton
       Left = 73
@@ -71002,10 +71010,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbSave'
       ImageIndex = 2
-      OnClick = tbSaveClick
-      OnMouseEnter = tbSaveMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbSaveClick
+      OnMouseEnter = tbSaveMouseEnter
     end
     object tbRun: TToolButton
       Left = 109
@@ -71013,10 +71021,10 @@ object fmQueryWindow: TfmQueryWindow
       Top = 2
       AutoSize = True
       ImageIndex = 5
-      OnClick = tbRunClick
-      OnMouseEnter = tbRunMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbRunClick
+      OnMouseEnter = tbRunMouseEnter
     end
     object tbCommit: TToolButton
       Left = 186
@@ -71026,10 +71034,10 @@ object fmQueryWindow: TfmQueryWindow
       Caption = 'tbCommit'
       Enabled = False
       ImageIndex = 4
-      OnClick = tbCommitClick
-      OnMouseEnter = tbCommitMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbCommitClick
+      OnMouseEnter = tbCommitMouseEnter
     end
     object tbRollback: TToolButton
       Left = 258
@@ -71038,10 +71046,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbRollback'
       ImageIndex = 7
-      OnClick = tbRollbackClick
-      OnMouseEnter = tbRollbackMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbRollbackClick
+      OnMouseEnter = tbRollbackMouseEnter
     end
     object ToolButton2: TToolButton
       Left = 294
@@ -71064,10 +71072,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbHistory'
       ImageIndex = 8
-      OnClick = tbHistoryClick
-      OnMouseEnter = tbHistoryMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbHistoryClick
+      OnMouseEnter = tbHistoryMouseEnter
     end
     object ToolButton5: TToolButton
       Left = 145
@@ -71083,10 +71091,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbMenu'
       ImageIndex = 9
-      OnClick = tbMenuClick
-      OnMouseEnter = tbMenuMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbMenuClick
+      OnMouseEnter = tbMenuMouseEnter
     end
     object tbRollbackRetaining: TToolButton
       Left = 222
@@ -71095,10 +71103,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbRollbackRetaining'
       ImageIndex = 3
-      OnClick = tbRollbackRetainingClick
-      OnMouseEnter = tbRollbackRetainingMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbRollbackRetainingClick
+      OnMouseEnter = tbRollbackRetainingMouseEnter
     end
     object ToolButton1: TToolButton
       Left = 454
@@ -71109,17 +71117,17 @@ object fmQueryWindow: TfmQueryWindow
     end
     object cxAutoCommit: TCheckBox
       Left = 530
-      Height = 24
+      Height = 19
       Hint = 'Auto Commit ON/OFF'
       Top = 2
-      Width = 113
+      Width = 91
       Caption = 'Auto Commit'
       Checked = True
+      State = cbChecked
+      TabOrder = 0
       OnChange = cxAutoCommitChange
       OnMouseEnter = cxAutoCommitMouseEnter
       OnMouseLeave = cxAutoCommitMouseLeave
-      State = cbChecked
-      TabOrder = 0
     end
     object tbQueryDesign: TToolButton
       Left = 382
@@ -71127,10 +71135,10 @@ object fmQueryWindow: TfmQueryWindow
       Top = 2
       Caption = 'tbQueryDesign'
       ImageIndex = 11
-      OnClick = tbQueryDesignClick
-      OnMouseEnter = tbQueryDesignMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbQueryDesignClick
+      OnMouseEnter = tbQueryDesignMouseEnter
     end
     object rgScreenModes: TRadioGroup
       Left = 664
@@ -71148,8 +71156,8 @@ object fmQueryWindow: TfmQueryWindow
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
-      ClientHeight = 30
-      ClientWidth = 183
+      ClientHeight = 12
+      ClientWidth = 181
       Columns = 3
       ItemIndex = 0
       Items.Strings = (
@@ -71157,9 +71165,10 @@ object fmQueryWindow: TfmQueryWindow
         'CFS'
         'RFS'
       )
+      ParentBackground = False
+      TabOrder = 1
       OnClick = rgScreenModesClick
       OnMouseEnter = rgScreenModesMouseEnter
-      TabOrder = 1
     end
     object ToolButton4: TToolButton
       Left = 338
@@ -71190,10 +71199,10 @@ object fmQueryWindow: TfmQueryWindow
       AutoSize = True
       Caption = 'tbCommitRetaining'
       ImageIndex = 6
-      OnClick = tbCommitRetainingClick
-      OnMouseEnter = tbCommitRetainingMouseEnter
       ParentShowHint = False
       ShowHint = True
+      OnClick = tbCommitRetainingClick
+      OnMouseEnter = tbCommitRetainingMouseEnter
     end
   end
   object OpenDialog1: TOpenDialog
@@ -71898,7 +71907,7 @@ object fmQueryWindow: TfmQueryWindow
     end
   end
   object SynCompletion1: TSynCompletion
-    Position = -1
+    Position = 0
     LinesInWindow = 6
     SelectedColor = clHighlight
     CaseSensitive = True
