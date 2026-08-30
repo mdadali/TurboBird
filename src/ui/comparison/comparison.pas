@@ -334,7 +334,7 @@ end;
 
 procedure TfmComparison.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmComparison.laScriptClick(Sender: TObject);

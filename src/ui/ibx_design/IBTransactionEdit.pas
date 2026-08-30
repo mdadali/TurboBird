@@ -268,7 +268,7 @@ end;
 
 procedure TIBTransactionEditForm.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TIBTransactionEditForm.FormCreate(Sender: TObject);

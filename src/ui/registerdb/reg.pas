@@ -11,8 +11,7 @@ uses
 
   turbocommon,
   fbcommon,
-  fServerSession,
-  uthemeselector;
+  fServerSession; //,      uthemeselector;
 
 type
 
@@ -239,7 +238,7 @@ end;
 procedure TfmReg.FormShow(Sender: TObject);
 begin
   UpdateControlsForProtocol;
-  frmThemeSelector.btnApplyClick(self);
+  ////////frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmReg.GroupBox1Click(Sender: TObject);

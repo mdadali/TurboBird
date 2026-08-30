@@ -76,7 +76,7 @@ end;
 
 procedure TOQBDirForm.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 end.

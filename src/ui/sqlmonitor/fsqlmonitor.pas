@@ -392,7 +392,7 @@ end;
 
 procedure TfmSQLMonitor.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  // frmThemeSelector.btnApplyClick(self);
 
   Application.ProcessMessages;
 end;

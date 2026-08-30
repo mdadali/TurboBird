@@ -6,8 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons,
-  uthemeselector;
+  StdCtrls, Buttons; //,   uthemeselector;
 
 type
 
@@ -54,7 +53,7 @@ end;
 
 procedure TfmEnterPass.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////////frmThemeSelector.btnApplyClick(self);
 end;
 
 

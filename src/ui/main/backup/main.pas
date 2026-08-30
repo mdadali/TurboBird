@@ -80,7 +80,7 @@ uses
   clone_table_to_external_table_dialog,
   u_bulk_export,
 
-  uthemeselector,
+ // uthemeselector,
   fsimpleobjextractor,
   cUnIntelliSenseCache,
 
@@ -154,6 +154,7 @@ type
     lmExportTableToDataEditorRO: TMenuItem;
     lmExportTableToDataEditorRW: TMenuItem;
     lmBulkExport: TMenuItem;
+    mnTheme: TMenuItem;
     PanelDataBaseCurrent: TPanel;
     PanelToolsBar: TPanel;
     pnlLeft: TPanel;
@@ -178,7 +179,7 @@ type
     Separator3: TMenuItem;
     Separator2: TMenuItem;
     Separator1: TMenuItem;
-    mnTheme: TMenuItem;
+    //mnTheme: TMenuItem;
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
     Panel1: TPanel;
@@ -475,7 +476,7 @@ type
     procedure mnServerRegistryClick(Sender: TObject);
     procedure mnSQLMonitorClick(Sender: TObject);
     procedure mnSQLParserClick(Sender: TObject);
-    procedure mnThemeClick(Sender: TObject);
+   // procedure mnThemeClick(Sender: TObject);
     procedure mnuPascalScriptClick(Sender: TObject);
     procedure PageControl1CloseTabClicked(Sender: TObject);
     procedure PageControl1MouseDown(Sender: TObject; Button: TMouseButton;
@@ -488,6 +489,7 @@ type
     procedure tbCheckDBIntegrityClick(Sender: TObject);
     procedure tbSQLMonitorClick(Sender: TObject);
     procedure tbtnRestoreClick(Sender: TObject);
+    procedure ToolButton2Click(Sender: TObject);
     procedure tvMainAddition(Sender: TObject; Node: TTreeNode);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
     procedure tvMainClick(Sender: TObject);
@@ -524,6 +526,7 @@ type
     Version: string;
     VersionDate: string;
     Major, Minor, ReleaseVersion: word;
+    htmlPathFull : String;
     procedure AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
     Function RetrieveInputParamFromSP(Body: string): string;
     function LoadRegisteredServers: Boolean;
@@ -678,23 +681,43 @@ begin
   end;
 end;
 
+
 procedure TfmMain.FormCreate(Sender: TObject);
-var htmlPath: string;
+var
+     HtmlList: TStringList;
+  BasePath: string;
+        htmlPath: string;
 begin
   turbocommon.MainTreeView := tvMain;
 
-  DefaultTransactionFile :=
-      IncludeTrailingPathDelimiter(
-        ExtractFilePath(Application.ExeName)
-      ) + 'data' + PathDelim +
-        'transaction_presets' +  PathDelim + DefTxFileName;   ;
+  // --- LOGICA DI RISOLUZIONE PERCORSO ---
+  BasePath := ExtractFilePath(ParamStr(0));
+
+  {$IFDEF Darwin}
+  if Pos('/Contents', BasePath) > 0 then
+  begin
+    // Taglia il percorso fino all'estensione .app
+    BasePath := Copy(BasePath, 1, Pos('/Contents', BasePath) - 1);
+    // Aggiunge il percorso specifico in cui si trova la tua cartella data in TurboBird
+    BasePath := BasePath + '/Contents/MacOS/';
+  end;
+  {$ENDIF}
+
+  // Assicura che ci sia sempre il delimitatore finale (per Windows, Linux e Mac)
+  BasePath := IncludeTrailingPathDelimiter(BasePath);
+  // ---------------------------------------
+
+  DefaultTransactionFile := BasePath + 'data' + PathDelim +
+                            'transaction_presets' + PathDelim + DefTxFileName;
 
   {$IFNDEF DEBUG}
   // Do not log to debug server if built as release instead of debug
   SetDebuggingEnabled(false);
   {$ENDIF}
+
   Application.OnException:= @GlobalException;
   FActivated:= False;
+
   //LoadRegisteredServers;
   LoadRegisteredDatabases;
   StatusBar1.Panels[0].Text:= 'TurboBird for ' + Target + '-' + Arch;
@@ -705,24 +728,38 @@ begin
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
 
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'index.html';
+  htmlPath := BasePath + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'index.html';
+
+
+   htmlPathFull := htmlPath;
+
 
   if FileExists(htmlPath) then
-    HtmlViewer1.LoadFromFile(htmlPath)
+  begin
+    HtmlList := TStringList.Create;
+    try
+      // Lazarus carica il file nativamente senza problemi di percorsi
+      HtmlList.LoadFromFile(htmlPath);
+
+      // Passiamo l'HTML al componente. Il secondo parametro (Reference)
+      // indica il percorso base per fargli trovare eventuali immagini/CSS collegati
+      HtmlViewer1.LoadFromString(HtmlList.Text, ExtractFilePath(htmlPath));
+    finally
+      HtmlList.Free;
+    end;
+  end
   else
-    HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
-    );
+    HtmlViewer1.LoadFromFile(BasePath + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
 
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
-var frmThemeSelectorLocal: TfrmThemeSelector;
+//var frmThemeSelectorLocal: TfrmThemeSelector;
 begin
-  frmThemeSelectorLocal := TfrmThemeSelector.Create(self);
+//  frmThemeSelectorLocal := TfrmThemeSelector.Create(self);
 
-  frmThemeSelectorLocal.btnApplyClick(fmMain);
-  frmThemeSelectorLocal.Free;
+//  frmThemeSelectorLocal.btnApplyClick(fmMain);
+//  frmThemeSelectorLocal.Free;
   //Repaint;
 
   DeleteOldVersionsOnStart;
@@ -1733,10 +1770,10 @@ begin
   CreateSQLParser(false, nil);
 end;
 
-procedure TfmMain.mnThemeClick(Sender: TObject);
-begin
-  frmThemeSelector.ShowModal;
-end;
+//procedure TfmMain.mnThemeClick(Sender: TObject);
+//begin
+ // frmThemeSelector.ShowModal;
+//end;
 
 procedure TfmMain.mnuPascalScriptClick(Sender: TObject);
 begin
@@ -6503,7 +6540,7 @@ var
 begin
   QWindow:= ShowQueryWindow(DatabaseIndex, ATitle, ANodeInfos);
 
-  frmThemeSelector.btnApplyClick(QWindow);
+  //frmThemeSelector.btnApplyClick(QWindow);
 
   QWindow.meQuery.ClearAll;
   QWindow.OnCommit:= OnCommitProcedure;
@@ -8501,12 +8538,25 @@ end;
 
 (**********  About  ****************)
 procedure TfmMain.mnAboutClick(Sender: TObject);
-//var fmAbout: TfmAbout;
+var
+  HtmlList: TStringList;
 begin
-  {fmAbout := TfmAbout.Create(self);
-  fmAbout.bbtnClose.Visible := true;
-  fmAbout.ShowModal;
-  fmAbout.Free;}
+  PageControl1.ActivePageIndex := 0;
+
+  if FileExists(htmlPathFull) then
+  begin
+    HtmlList := TStringList.Create;
+    try
+      // Lazarus carica il file nativamente senza problemi di percorsi
+      HtmlList.LoadFromFile(htmlPathFull);
+
+      // Passiamo l'HTML al componente. Il secondo parametro (Reference)
+      // indica il percorso base per fargli trovare eventuali immagini/CSS collegati
+      HtmlViewer1.LoadFromString(HtmlList.Text, ExtractFilePath(htmlPathFull));
+    finally
+      HtmlList.Free;
+    end;
+  end;
 end;
 
 (****************  Unregister database *************)
@@ -8910,6 +8960,12 @@ end;
 procedure TfmMain.tbtnRestoreClick(Sender: TObject);
 begin
     mnRestoreClick(nil);
+end;
+
+procedure TfmMain.ToolButton2Click(Sender: TObject);
+
+begin
+
 end;
 
 procedure TfmMain.tvMainAddition(Sender: TObject; Node: TTreeNode);

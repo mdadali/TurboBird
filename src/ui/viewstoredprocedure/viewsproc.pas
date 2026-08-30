@@ -78,7 +78,7 @@ end;
 
 procedure TfmViewSProc.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmViewSProc.bbCloseClick(Sender: TObject);

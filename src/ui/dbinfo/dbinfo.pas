@@ -224,7 +224,7 @@ end;
 procedure TfmDBInfo.FormShow(Sender: TObject);
 //var MainForm: TMainForm;
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //frmThemeSelector.btnApplyClick(self);
 
   //DBDataModule.IBXServicesConnection1.FirebirdLibraryPathName := RegisteredDatabases[self.FDBIndex].IBDatabase.FirebirdLibraryPathName;
 

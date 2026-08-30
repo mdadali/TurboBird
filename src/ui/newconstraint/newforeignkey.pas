@@ -71,7 +71,7 @@ end;
 
 procedure TfmNewForeignKey.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmNewForeignKey.bbScriptClick(Sender: TObject);

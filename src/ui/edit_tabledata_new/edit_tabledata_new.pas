@@ -554,7 +554,7 @@ end;
 
 procedure TfrmEditTableDataNew.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+//  frmThemeSelector.btnApplyClick(self);
 
   IBTableMain.Fields.GetFieldNames(cboxFilterField.Items);
   if cboxFilterField.Items.Count > 0 then

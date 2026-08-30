@@ -139,7 +139,7 @@ end;
 
 procedure TBackupDlg.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 
   PageControl1.ActivePage := SelectTab;
   ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;

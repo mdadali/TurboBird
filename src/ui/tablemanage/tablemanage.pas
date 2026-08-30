@@ -214,7 +214,7 @@ end;
 
 procedure TfmTableManage.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmTableManage.sgFieldsDblClick(Sender: TObject);

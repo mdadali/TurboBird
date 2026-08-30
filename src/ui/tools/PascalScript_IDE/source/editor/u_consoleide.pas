@@ -1283,7 +1283,7 @@ end;
 
 procedure TfrmConsoleIDE.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 procedure TfrmConsoleIDE.SetActiveFile(const Value: string);

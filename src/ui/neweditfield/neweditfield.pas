@@ -407,7 +407,7 @@ end;
 
 procedure TfmNewEditField.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //frmThemeSelector.btnApplyClick(self);
   EnableDisableControls;
 end;
 

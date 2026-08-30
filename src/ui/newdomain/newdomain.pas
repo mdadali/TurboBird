@@ -48,7 +48,7 @@ implementation
 //newlib
 procedure TfmNewDomain.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 
   cbType.Items.Clear;
   dmSysTables.GetBasicTypes(cbType.Items, FDBIndex);

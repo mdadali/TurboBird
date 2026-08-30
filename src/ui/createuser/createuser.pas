@@ -51,7 +51,7 @@ end;
 
 procedure TfmCreateUser.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmCreateUser.Init(dbIndex: Integer);

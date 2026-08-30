@@ -167,7 +167,7 @@ end;
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
 var BasePath, SqlPath: string;
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 
   BasePath := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
   SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;

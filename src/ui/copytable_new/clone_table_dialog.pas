@@ -1185,7 +1185,7 @@ end;
 
 procedure TfrmCloneTable.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
   comboxSourceTablesChange(nil);
 end;
 

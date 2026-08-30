@@ -14,8 +14,11 @@ program TurboBird;
 uses
   {$IFDEF UNIX}
   cthreads,
-  cmem,
   {$ENDIF}
+  {$IFDEF HASAMIGA}
+  athreads,
+  {$ENDIF}
+
   Interfaces, // this includes the LCL widgetset
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
   rxnew, memdslaz, datetimectrls, runtimetypeinfocontrols, main, CreateDb, Reg,
@@ -24,7 +27,7 @@ uses
   SysTables, newForeignKey, NewEditField, Calen, Scriptdb, UserPermissions,
   TableManage, CreateUser, ChangePass, PermissionManage, SQLHistory, CopyTable,
   dynlibs, dbInfo, sysutils, Comparison, topologicalsort, turbocommon,
-  importtable, fileimport, csvdocument, fServerSession, uthemeselector,
+  importtable, fileimport, csvdocument, fServerSession,
   lazdbexport, sdflaz, udb_firebird_struct_helper, udb_udf_Fetcher,
   udb_udr_func_fetcher, sqldblib, fbcommon,
 uCopyTableDataCrossRowByRow, fTestFunction,
@@ -109,7 +112,7 @@ begin
   Application.CreateForm(TdmSystem, dmSystem);
 
   Application.CreateForm(TfmMain, fmMain);
-  frmThemeSelector := TfrmThemeSelector.Create(fmMain);
+//  frmThemeSelector := TfrmThemeSelector.Create(fmMain);
   Application.CreateForm(TdmSysTables, dmSysTables);
 
   //Application.CreateForm(TfrmPSStudio, PSStudio);
@@ -180,3 +183,4 @@ begin
 
   DisableMonitoring;
 end.
+

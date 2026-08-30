@@ -378,7 +378,7 @@ end;
 
 procedure TfmCheckConstraints.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(Self);
+  ////frmThemeSelector.btnApplyClick(self);    
   //FillCheckConstraints;
 end;
 

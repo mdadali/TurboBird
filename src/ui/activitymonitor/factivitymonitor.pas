@@ -420,7 +420,7 @@ end;
 
 procedure TfrmActivityMonitor.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfrmActivityMonitor.grdAttachmentsCellClick(

@@ -316,7 +316,7 @@ var idx: Integer;
 begin
   UpdateControlsForProtocol;
 
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 
   cbServerName.SetFocus;
 

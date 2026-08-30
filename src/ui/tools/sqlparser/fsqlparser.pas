@@ -106,7 +106,7 @@ end;
 
 procedure TfmSQLParser.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 procedure TfmSQLParser.btnCloseClick(Sender: TObject);

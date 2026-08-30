@@ -157,13 +157,13 @@ var
   theme: string;
 begin
   {$IFDEF Windows}
-     if cbThemes.ItemIndex < 0 then Exit;
-     theme := cbThemes.Text;
-     SaveLastTheme(theme);
-     ApplyThemeNextStart(theme);
-     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
-     ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
-     Close;
+   //  if cbThemes.ItemIndex < 0 then Exit;
+   //  theme := cbThemes.Text;
+   //  SaveLastTheme(theme);
+   //  ApplyThemeNextStart(theme);
+   //  ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(self.Owner));
+    // ApplyThemePreview(Themes[cbThemes.ItemIndex], TWinControl(Sender));
+   //  Close;
   {$ENDIF}
 
   {$IFDEF Linux}

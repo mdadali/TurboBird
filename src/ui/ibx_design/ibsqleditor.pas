@@ -133,7 +133,7 @@ procedure TIBSQLEditorForm.FormShow(Sender: TObject);
 begin
   inherited;
   SetupFlags;
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TIBSQLEditorForm.FormMouseEnter(Sender: TObject);

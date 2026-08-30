@@ -126,7 +126,7 @@ end;
 
 procedure TfmNewGen.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmNewGen.Init(dbIndex: Integer);

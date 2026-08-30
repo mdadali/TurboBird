@@ -5,8 +5,8 @@ unit floginservicemanager;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  uthemeselector;
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls;
+//,  uthemeselector;
 
 type
 
@@ -40,7 +40,7 @@ implementation
 
 procedure TfrmLoginServiceManager.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////////frmThemeSelector.btnApplyClick(self);
   edtPassword.SetFocus;
 end;
 

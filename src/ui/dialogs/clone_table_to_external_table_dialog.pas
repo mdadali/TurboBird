@@ -91,7 +91,7 @@ end;
 
 procedure TfmCloneToExternalTable.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+ // frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfmCloneToExternalTable.grBoxQueryClick(Sender: TObject);

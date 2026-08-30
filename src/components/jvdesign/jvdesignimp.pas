@@ -9,7 +9,7 @@ uses
   JclUnitVersioning,
   {$ENDIF UNITVERSIONING}
   LCLProc, LCLType, LResources, LCLIntf, LMessages, SysUtils, Classes, Controls, Graphics,
-  Forms, ExtCtrls, Contnrs, JvDesignUtils,
+  Forms, ExtCtrls, Contnrs, JvDesignUtils, types,
   JvDesignSurface;
 
 const
@@ -1068,6 +1068,7 @@ var
   Delta: TPoint;
   I: Integer;
 begin
+  SetLength(FDragRects, Surface.Count); // Assicura la corretta dimensione
   Delta := GetMouseDelta;
   for I := 0 to Surface.Count - 1 do
     with Surface.Selection[I] do

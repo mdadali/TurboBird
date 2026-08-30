@@ -1,11 +1,11 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 568
+  Left = 614
   Height = 748
-  Top = 85
-  Width = 679
+  Top = 216
+  Width = 1296
   Caption = 'fmQueryWindow'
   ClientHeight = 748
-  ClientWidth = 679
+  ClientWidth = 1296
   Color = clForm
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
@@ -70291,27 +70291,27 @@ object fmQueryWindow: TfmQueryWindow
     Cursor = crVSplit
     Left = 0
     Height = 12
-    Top = 296
-    Width = 679
+    Top = 300
+    Width = 1296
     Align = alTop
     ResizeAnchor = akTop
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 440
-    Top = 308
-    Width = 679
+    Height = 436
+    Top = 312
+    Width = 1296
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 440
-    ClientWidth = 679
+    ClientHeight = 436
+    ClientWidth = 1296
     ParentBackground = False
     TabOrder = 2
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 440
+      Height = 436
       Top = 0
-      Width = 679
+      Width = 1296
       Align = alClient
       Images = imTabs
       TabOrder = 0
@@ -70321,11 +70321,11 @@ object fmQueryWindow: TfmQueryWindow
   inline meQuery: TSynEdit
     Left = 0
     Height = 262
-    Top = 34
-    Width = 679
+    Top = 38
+    Width = 1296
     Align = alTop
     BlockIndent = 3
-    Color = clMedGray
+    Color = clWindow
     Font.Height = -16
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
@@ -70964,9 +70964,9 @@ object fmQueryWindow: TfmQueryWindow
   end
   object ToolBar1: TToolBar
     Left = 0
-    Height = 34
+    Height = 38
     Top = 0
-    Width = 679
+    Width = 1296
     BorderWidth = 2
     ButtonHeight = 32
     ButtonWidth = 32
@@ -71117,10 +71117,10 @@ object fmQueryWindow: TfmQueryWindow
     end
     object cxAutoCommit: TCheckBox
       Left = 530
-      Height = 19
+      Height = 18
       Hint = 'Auto Commit ON/OFF'
       Top = 2
-      Width = 91
+      Width = 100
       Caption = 'Auto Commit'
       Checked = True
       State = cbChecked
@@ -71142,10 +71142,10 @@ object fmQueryWindow: TfmQueryWindow
     end
     object rgScreenModes: TRadioGroup
       Left = 664
-      Height = 32
+      Height = 40
       Hint = 'Screen Modes'
       Top = 0
-      Width = 185
+      Width = 233
       Align = alRight
       Anchors = [akTop, akLeft, akBottom]
       AutoFill = True
@@ -71156,8 +71156,8 @@ object fmQueryWindow: TfmQueryWindow
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
-      ClientHeight = 12
-      ClientWidth = 181
+      ClientHeight = 13
+      ClientWidth = 223
       Columns = 3
       ItemIndex = 0
       Items.Strings = (

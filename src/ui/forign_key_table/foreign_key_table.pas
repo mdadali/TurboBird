@@ -79,7 +79,7 @@ end;
 
 procedure TfrmForeignKeyTable.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfrmForeignKeyTable.Init(AIBDatabase: TIBDatabase;

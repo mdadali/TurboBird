@@ -223,7 +223,7 @@ end;
 
 procedure TfmNotNullConstraints.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(Self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 end.

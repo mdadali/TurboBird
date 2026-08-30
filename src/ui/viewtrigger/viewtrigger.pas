@@ -89,7 +89,7 @@ end;
 
 procedure TfmViewTrigger.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmViewTrigger.bbCloseClick(Sender: TObject);

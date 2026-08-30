@@ -415,7 +415,7 @@ end;
 
 procedure TfmFirebirdConfig.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmFirebirdConfig.SynEdit1Change(Sender: TObject);

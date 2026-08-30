@@ -298,7 +298,7 @@ end;
 
 procedure TfmEditTable.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 procedure TfmEditTable.RefreshTable(ATable: TIBTable);

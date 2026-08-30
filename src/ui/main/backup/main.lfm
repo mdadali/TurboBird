@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 565
+  Left = 548
   Height = 630
-  Top = 199
+  Top = 9
   Width = 736
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 630
@@ -6239,8 +6239,6 @@ object fmMain: TfmMain
       Top = 64
       Width = 331
       Align = alClient
-      BackgroundColor = clMedGray
-      Color = clMedGray
       ExpandSignColor = clMaroon
       ExpandSignType = tvestPlusMinus
       Font.Name = 'Sans'
@@ -6482,7 +6480,6 @@ object fmMain: TfmMain
       Caption = 'Options'
       object mnTheme: TMenuItem
         Caption = 'Theme'
-        OnClick = mnThemeClick
       end
       object mnCheckForUpdate: TMenuItem
         Caption = 'Check for Update...'

@@ -1441,8 +1441,7 @@ begin
     meResult.Align := alClient;
   end;
 
-  if Assigned(ATab) then
-    frmThemeSelector.btnApplyClick(ATab);
+ // if Assigned(ATab) then         frmThemeSelector.btnApplyClick(ATab);
 end;
 
 //TDBGrid Variante
@@ -2086,7 +2085,7 @@ begin
   meQuery.Font.Size  := turbocommon.QWEditorFontSize;
   meQuery.Font.Style := turbocommon.QWEditorFontStyle;
 
-  meQuery.Color := turbocommon.QWEditorBackgroundColor;
+  meQuery.Color :=  clWindow ; //    turbocommon.QWEditorBackgroundColor;
 end;
 
 procedure TfmQueryWindow.FormDestroy(Sender: TObject);
@@ -2117,7 +2116,7 @@ end;
 
 procedure TfmQueryWindow.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //frmThemeSelector.btnApplyClick(self);
   meQuery.SetFocus;
   SetTransactionButtonsState(False);
 

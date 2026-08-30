@@ -126,7 +126,7 @@ end;
 
 procedure TfmCreateDB.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 
   UpdateControlsForProtocol;
 

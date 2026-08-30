@@ -7,12 +7,12 @@ object fmSQLMonitor: TfmSQLMonitor
   ClientHeight = 611
   ClientWidth = 955
   FormStyle = fsStayOnTop
+  Position = poMainFormCenter
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
-  Position = poMainFormCenter
-  LCLVersion = '2.2.6.0'
   inline SynEditMonitor: TSynEdit
     Left = 0
     Height = 485
@@ -480,6 +480,10 @@ object fmSQLMonitor: TfmSQLMonitor
       object SynGutterMarks1: TSynGutterMarks
         Width = 24
         MouseActions = <>
+        MaxExtraMarksColums = 0
+        Options = [sgmoDeDuplicateMarksOnOverflow]
+        MarkupInfo.Background = clBtnFace
+        MarkupInfo.Foreground = clNone
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
         Width = 17
@@ -496,6 +500,9 @@ object fmSQLMonitor: TfmSQLMonitor
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
+        MarkupInfo.Background = clNone
+        MarkupInfo.Foreground = clGreen
+        MarkupInfo.FrameColor = 59900
       end
       object SynGutterSeparator1: TSynGutterSeparator
         Width = 2
@@ -537,8 +544,8 @@ object fmSQLMonitor: TfmSQLMonitor
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 5
-      ClientHeight = 57
-      ClientWidth = 951
+      ClientHeight = 51
+      ClientWidth = 943
       Columns = 5
       Items.Strings = (
         'Connect'
@@ -552,8 +559,8 @@ object fmSQLMonitor: TfmSQLMonitor
         'Misc'
         'Error'
       )
-      OnItemClick = chkgrboxTraceFlagsItemClick
       TabOrder = 0
+      OnItemClick = chkgrboxTraceFlagsItemClick
       Data = {
         0A00000002020202020202020202
       }
@@ -574,8 +581,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 75
       Caption = 'Start/Stop'
-      OnClick = btnStartStopMonitorClick
       TabOrder = 0
+      OnClick = btnStartStopMonitorClick
     end
     object btnSaveLog: TButton
       Left = 152
@@ -583,8 +590,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 75
       Caption = 'Save Log...'
-      OnClick = btnSaveLogClick
       TabOrder = 1
+      OnClick = btnSaveLogClick
     end
     object btnClearLog: TButton
       Left = 416
@@ -592,8 +599,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 75
       Caption = 'Clear Log'
-      OnClick = btnClearLogClick
       TabOrder = 2
+      OnClick = btnClearLogClick
     end
     object btnCopyLog: TButton
       Left = 240
@@ -601,8 +608,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 144
       Caption = 'Copy to Clipboard'
-      OnClick = btnCopyLogClick
       TabOrder = 3
+      OnClick = btnCopyLogClick
     end
     object btnClose: TButton
       Left = 864
@@ -610,8 +617,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 75
       Caption = 'Close'
-      OnClick = btnCloseClick
       TabOrder = 4
+      OnClick = btnCloseClick
     end
     object btnSearch: TButton
       Left = 528
@@ -619,8 +626,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 123
       Caption = 'Search...'
-      OnClick = btnSearchClick
       TabOrder = 5
+      OnClick = btnSearchClick
     end
     object btnSearchNext: TButton
       Left = 664
@@ -628,8 +635,8 @@ object fmSQLMonitor: TfmSQLMonitor
       Top = 8
       Width = 104
       Caption = 'Search Next'
-      OnClick = btnSearchNextClick
       TabOrder = 6
+      OnClick = btnSearchNextClick
     end
   end
   object IBSQLMonitor1: TIBSQLMonitor

@@ -353,7 +353,7 @@ end;
 procedure TIBTransactionEditorForm.FormShow(Sender: TObject);
 begin
   cbReadConsistency.Visible := (FFirebirVersionMajor > 3);
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 end.

@@ -254,7 +254,7 @@ end;
 
 procedure TRestoreDlg.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
   PageControl1.ActivePage := SelectTab;
   //ServerName.Text := IBXClientSideRestoreService1.ServicesConnection.ServerName;
   //__DBName.Text := IBXClientSideRestoreService1.DatabaseFiles[0];

@@ -65,7 +65,7 @@ implementation
 
 procedure TDBLoginDlg.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 function TDBLoginDlg.ShowModal(var aDatabaseName, aUserName, aPassword: string;

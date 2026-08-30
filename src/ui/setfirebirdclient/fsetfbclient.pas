@@ -10,9 +10,7 @@ uses
   {$IFDEF WINDOWS} Windows, {$ENDIF}
   {$IFDEF UNIX} Unix, {$ENDIF}
   {$IFDEF DARWIN} MacOSAll, {$ENDIF}
-  StrUtils,
-
-  uthemeselector;
+  StrUtils; //, uthemeselector;
 
 
 type
@@ -67,8 +65,7 @@ end;
 
 procedure TfrmSetFBClient.FormShow(Sender: TObject);
 begin
-  //if Assigned(frmThemeSelector) then
-  frmThemeSelector.btnApplyClick(self);
+  //if Assigned(frmThemeSelector) then   //frmThemeSelector.btnApplyClick(self);
 end;
 
 procedure TfrmSetFBClient.lstSuggestionsClick(Sender: TObject);

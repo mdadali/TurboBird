@@ -101,7 +101,7 @@ end;
 
 procedure TfrmCreateTableFromDataSet.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  ////frmThemeSelector.btnApplyClick(self);    
 end;
 
 procedure TfrmCreateTableFromDataSet.Init(ADataSet: TDataSet; const AFileName: string);

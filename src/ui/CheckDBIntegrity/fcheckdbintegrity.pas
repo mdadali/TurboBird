@@ -103,7 +103,7 @@ end;
 
 procedure TfmCheckDBIntegrity.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(Self);
+//  frmThemeSelector.btnApplyClick(Self);
 end;
 
 procedure TfmCheckDBIntegrity.Init(ADBTitle: string);

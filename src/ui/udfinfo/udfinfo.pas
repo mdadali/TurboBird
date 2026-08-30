@@ -63,7 +63,7 @@ end;
 
 procedure TfmUDFInfo.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmUDFInfo.FormClose(Sender: TObject; var CloseAction: TCloseAction);

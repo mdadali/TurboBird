@@ -632,7 +632,7 @@ end;
 
 procedure TfrmDBReader.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //frmThemeSelector.btnApplyClick(self);
 
   SynEdit1.Color      := QWEditorBackgroundColor;
   SynEdit1.Font.Name  := QWEditorFontName;

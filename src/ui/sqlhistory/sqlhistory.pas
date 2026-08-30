@@ -89,7 +89,7 @@ end;
 procedure TfmSQLHistory.FormShow(Sender: TObject);
 begin
   DBGrid1.OptimizeColumnsWidthAll;
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 {procedure TfmSQLHistory.bbInsertClick(Sender: TObject);

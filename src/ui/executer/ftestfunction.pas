@@ -157,7 +157,7 @@ end;
 
 procedure TfrmTestFunction.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
   //if DBGridParams.Columns.Count > 0 then
   //begin
     DBGridParams.Columns[0].Width := 100;

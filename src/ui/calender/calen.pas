@@ -59,7 +59,7 @@ end;
 
 procedure TfmCalen.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  //////frmThemeSelector.btnApplyClick(self);      
 end;
 
 procedure TfmCalen.bbOkClick(Sender: TObject);
