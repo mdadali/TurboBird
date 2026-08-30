@@ -1,11 +1,12 @@
 object frmServerDBFieldSelector: TfrmServerDBFieldSelector
-  Left = 774
+  Left = 916
   Height = 316
-  Top = 400
+  Top = 380
   Width = 1250
   Caption = 'frmServerDBFieldSelector'
   ClientHeight = 316
   ClientWidth = 1250
+  Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object pnlSelector: TPanel
     Left = 0

@@ -72,7 +72,6 @@ type
     tbRollbackRetaining: TToolButton;
     tbRun: TToolButton;
     tbSave: TToolButton;
-    ToggleBox1: TToggleBox;
     ToolBar1: TToolBar;
     toolbarImages: TImageList;
     imTools: TImageList;
@@ -1815,67 +1814,6 @@ begin
   meQuery.SearchReplace(FindDialog1.FindText, '', FOptions);
 end;
 
-{procedure TfmQueryWindow.RemovePreviousResultTabs;
-var
-  i: Integer;
-begin
-  for i:= OutputTabsList.Count - 1 downto 0 do
-  begin
-    OutputTabsList.Objects[i].Free;
-    OutputTabsList.Delete(i);
-  end;
-end;}
-
-{procedure TfmQueryWindow.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-var
-  i: Integer;
-begin
-  RxDBGridExportPDF1.RxDBGrid := nil;
-  RxDBGridPrint1.RxDBGrid := nil;
-  RxDBGridExportSpreadSheet1.RxDBGrid := nil;
-
-  if Assigned(FNodeInfos) then
-    if Assigned(FNodeInfos^.ViewForm) then
-      FNodeInfos^.ViewForm := nil;
-
-  // Alle TIBQuery-Komponenten freigeben
-  for i := ComponentCount - 1 downto 0 do
-  begin
-    if Components[i] is TIBQuery then
-    begin
-      if TIBQuery(Components[i]).Active then
-        TIBQuery(Components[i]).Close;
-      Components[i].Free;
-    end;
-  end;
-
-  // Aktive globale Transaktion sauber beenden
-  {if FQueryTrans.InTransaction then
-  begin
-    FQueryTrans.Commit;
-    if OnCommit <> nil then
-      OnCommit(Self);
-    OnCommit := nil;
-  end;}
-
-  //locale transactionen freigeben
-  for i := ComponentCount - 1 downto 0 do
-  begin
-    if Components[i] is TIBTransaction then
-    begin
-      if TIBTransaction(Components[i]).InTransaction then
-        TIBTransaction(Components[i]).Commit;
-      Components[i].Free;
-    end;
-  end;
-
-  // Tabs schließen
-  RemovePreviousResultTabs;
-  OutputTabsList.Free;
-
-  CloseAction := caFree;
-end;}
-
 procedure TfmQueryWindow.RemovePreviousResultTabs;
 var
   i, j: Integer;
@@ -1934,75 +1872,6 @@ begin
     OutputTabsList.Delete(i);
   end;
 end;
-
-{procedure TfmQueryWindow.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-var
-  DlgResult: Integer;
-  DBName: string;
-begin
-  // Datenbankname aus der registrierten Datenbank holen
-  DBName := RegisteredDatabases[FDBIndex].IBDatabase.DatabaseName;
-
-  // Nur nachfragen, wenn wirklich eine Transaktion aktiv ist
-  if FQueryTrans.InTransaction or FScriptTrans.InTransaction then
-  begin
-    DlgResult := MessageDlg(
-      'There is still an active transaction with uncommitted work' + sLineBreak +
-      'in database ''' + DBName + '''.' + sLineBreak + sLineBreak +
-      'Do you want to commit the changes before closing?',
-      mtConfirmation, [mbYes, mbNo, mbCancel], 0
-    );
-
-    case DlgResult of
-      mrYes:
-        begin
-          try
-            if FQueryTrans.InTransaction then
-              FQueryTrans.Commit;
-            if FScriptTrans.InTransaction then
-              FScriptTrans.Commit;
-          except
-            on E: Exception do
-            begin
-              MessageDlg('Commit failed: ' + E.Message, mtError, [mbOK], 0);
-              CloseAction := caNone;
-              Exit;
-            end;
-          end;
-        end;
-      mrNo:
-        begin
-          try
-            if FQueryTrans.InTransaction then
-              FQueryTrans.Rollback;
-            if FScriptTrans.InTransaction then
-              FScriptTrans.Rollback;
-          except
-            on E: Exception do
-            begin
-              MessageDlg('Rollback failed: ' + E.Message, mtError, [mbOK], 0);
-              CloseAction := caNone;
-              Exit;
-            end;
-          end;
-        end;
-      mrCancel:
-        begin
-          CloseAction := caNone;
-          Exit;
-        end;
-    end;
-  end;
-
-  // Ergebnis‑Tabs aufräumen
-  RemovePreviousResultTabs;
-  OutputTabsList.Free;
-
-  if Assigned(FNodeInfos) and Assigned(FNodeInfos^.ViewForm) then
-    FNodeInfos^.ViewForm := nil;
-
-  CloseAction := caFree;
-end;}
 
 procedure TfmQueryWindow.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var

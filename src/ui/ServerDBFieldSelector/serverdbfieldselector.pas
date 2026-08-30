@@ -153,6 +153,9 @@ procedure TfrmServerDBFieldSelector.SetShowSource(AValue: Boolean);
 begin
   FShowSource := AValue;
   grBoxSource.Visible := AValue;
+  if not AValue then
+    Self.Width := Self.Width - 400;
+
 end;
 
 constructor TfrmServerDBFieldSelector.Create(AOwner: TComponent);

@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 547
+  Left = 445
   Height = 748
-  Top = 0
+  Top = 62
   Width = 679
   Caption = 'fmQueryWindow'
   ClientHeight = 748
@@ -71196,14 +71196,6 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
   end
-  object ToggleBox1: TToggleBox
-    Left = 249
-    Height = 25
-    Top = 58
-    Width = 75
-    Caption = 'ToggleBox1'
-    TabOrder = 4
-  end
   object OpenDialog1: TOpenDialog
     DefaultExt = '.sql'
     Filter = 'SQL Files|*.sql|All Files|*.*'
@@ -72756,8 +72748,8 @@ object fmQueryWindow: TfmQueryWindow
   object FontDialogEditor: TFontDialog
     MinFontSize = 0
     MaxFontSize = 0
-    Left = 832
-    Top = 80
+    Left = 864
+    Top = 152
   end
   object FIBXScript: TIBXScript
     Database = FIBConnection
