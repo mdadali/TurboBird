@@ -26,7 +26,7 @@ uses
   IBDatabaseInfo,
   ibxscript, IBSQL, IBExtract,
 
-  //About,
+  About,
   fSetFBClient, fTestFunction, fCheckDBIntegrity,
   fFirebirdConfig,
   fsqlmonitor,
@@ -1731,7 +1731,6 @@ end;
 
 procedure TfmMain.mnuPascalScriptClick(Sender: TObject);
 begin
-  {
   {$IFDEF CONSOLE_SCRIPTER}
   if ConsoleIDE = nil then
   begin
@@ -1742,12 +1741,10 @@ begin
 
   {$ELSE}
   if PSStudio = nil then
-    PSStudio := TfrmPSStudio.Create(Self);
+    PSStudio := TfrmPSStudio.Create(nil);
   PSStudio.ShowModal;
   {$ENDIF}
-  }
-  if PSStudio <> nil then
-    PSStudio.ShowModal;
+
 end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
@@ -3319,42 +3316,42 @@ end;
 // ============================================================
 procedure TfmMain.lmNewFormClick(Sender: TObject);
 begin
-  if PSStudio = nil then
-    exit;
-
   mnuPascalScriptClick(nil);
   PSStudio.acFileNewExecute(nil);
 end;
 
 procedure TfmMain.lmEditFormClick(Sender: TObject);
-var FormPath: string;
+var
+  FormPath: string;
 begin
-  if PSStudio = nil then
-    exit;
-
   FormPath := GetFormFilePath;
   if FormPath = '' then
   begin
     ShowMessage('Could not determine form file path.');
     Exit;
   end;
+
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(nil);
 
   PSStudio.OpenFileSilent(FormPath);
   PSStudio.ShowModal;
 end;
 
 procedure TfmMain.lmExecuteFormClick(Sender: TObject);
-var FormPath: string;
+var
+  FormPath: string;
 begin
-  if PSStudio = nil then
-    exit;
-
   FormPath := GetFormFilePath;
   if FormPath = '' then
   begin
     ShowMessage('Could not determine form file path.');
     Exit;
   end;
+
+  if PSStudio = nil then
+    PSStudio := TfrmPSStudio.Create(nil);
+  PSStudio.Visible := false;
 
   PSStudio.OpenFileSilent(FormPath);
   PSStudio.acDebugRunExecute(nil);
@@ -8482,6 +8479,8 @@ end;
 procedure TfmMain.mnAboutClick(Sender: TObject);
 //var fmAbout: TfmAbout;
 begin
+  fmAbout.bbtnClose.Visible := true;
+  fmAbout.ShowModal;
   {fmAbout := TfmAbout.Create(self);
   fmAbout.bbtnClose.Visible := true;
   fmAbout.ShowModal;

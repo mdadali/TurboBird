@@ -63,7 +63,7 @@ uCopyTableDataCrossRowByRow, fTestFunction,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, u_bulk_export, ServerDBFieldSelector;
+  uCreateTableFromDataSet, u_bulk_export, ServerDBFieldSelector, About;
 
 const
   Major = 1;
@@ -113,12 +113,12 @@ begin
   Application.CreateForm(TdmSysTables, dmSysTables);
 
   //Application.CreateForm(TfrmPSStudio, PSStudio);
-  //PSStudio := TfrmPSStudio.Create(nil);
+  PSStudio := nil; //TfrmPSStudio.Create(nil);
 
   Application.CreateForm(TfrmUpdateChecker, frmUpdateChecker);
   //frmUpdateChecker.PerformAutoSearch;
 
-  {Application.CreateForm(TfmAbout, fmAbout);
+  Application.CreateForm(TfmAbout, fmAbout);
   fmAbout.Init;
   fmAbout.bbtnClose.Visible:= False;
   fmAbout.ProgressBar1.Align := alClient;
@@ -126,14 +126,13 @@ begin
 
   Application.ProcessMessages;
 
-  for i := 0 to 5000 do
+  for i := 0 to 200000 do
   begin
     Application.ProcessMessages;
   end;
 
   fmAbout.Hide;
   fmAbout.ProgressBar1.Visible := false;
-  }
 
 
   Application.CreateForm(TfmCreateDB, fmCreateDB);
@@ -175,8 +174,25 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
-  Application.CreateForm(TfrmServerDBFieldSelector, frmServerDBFieldSelector);
+  //Application.CreateForm(TfrmServerDBFieldSelector, frmServerDBFieldSelector);
   Application.Run;
 
   DisableMonitoring;
+
+  //Verursacht Call Abstract method
+  {{$IFDEF CONSOLE_SCRIPTER}
+  if LocalConsoleIDE <> nil then
+  begin
+    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
+    LocalConsoleIDE.Free;
+  end;
+  {$ELSE}
+  if PSStudio <> nil then
+  begin
+    LocalConsoleIDE.acDebugResetExecute(nil); //terminate any running script
+    LocalConsoleIDE.Free;
+    PSStudio.JvDesignPanel1.Active := false;
+    PSStudio.Free;
+  end;
+  {$ENDIF}}
 end.
