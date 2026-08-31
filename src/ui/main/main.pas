@@ -1744,7 +1744,6 @@ begin
     PSStudio := TfrmPSStudio.Create(nil);
   PSStudio.ShowModal;
   {$ENDIF}
-
 end;
 
 procedure TfmMain.lmRestoreClick(Sender: TObject);
@@ -3316,8 +3315,15 @@ end;
 // ============================================================
 procedure TfmMain.lmNewFormClick(Sender: TObject);
 begin
-  mnuPascalScriptClick(nil);
-  PSStudio.acFileNewExecute(nil);
+  if PSStudio <> nil then
+  begin
+    PSStudio.acFileNewExecute(nil);
+    PSStudio.ShowModal;
+  end else
+  begin
+    mnuPascalScriptClick(nil);
+    PSStudio.acFileNewExecute(nil);
+  end;
 end;
 
 procedure TfmMain.lmEditFormClick(Sender: TObject);
