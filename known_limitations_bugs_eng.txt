@@ -1,5 +1,13 @@
 Known Limitations / Bugs
 -----------------------
+[Tablelock]
+- When a table is opened and the corresponding tab is closed afterwards, 
+  the table lock remains active until the database connection is fully closed 
+  (e.g., by disconnecting the database or closing the entire application). 
+  This may prevent DDL operations such as DROP TABLE or ALTER TABLE on the same table.
+
+  Workaround: Use "Disconnect and Close All Windows" from the database node context menu 
+  to release all locks.
 
 [PascalScript Studio]
 - When using {$I} include directives or additional units in the uses clause,

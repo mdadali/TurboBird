@@ -1,5 +1,16 @@
 Bekannte Einschränkungen / Bugs
 ------------------------------
+
+[Tablelock]
+- Wenn eine Tabelle geöffnet und der entsprechende Tab anschließend geschlossen wird, 
+  bleibt der Tabellen-Lock erhalten, bis die Datenbankverbindung vollständig getrennt wird 
+  (z. B. durch Trennen der Datenbank oder Schließen der gesamten Anwendung). 
+  Dies kann DDL-Operationen wie DROP TABLE oder ALTER TABLE auf derselben Tabelle verhindern.
+
+  Workaround: Verwenden Sie "Disconnect and Close All Windows" aus dem Kontextmenü des Datenbank-Knotens, 
+  um alle Locks freizugeben.
+  
+
 [PascalScript Studio]
 - Bei Verwendung von {$I} Include-Direktiven oder zusätzlichen Units in der uses-Klausel
   stimmen die Debug-Zeilennummern nicht mehr korrekt.
