@@ -67,6 +67,10 @@
             </Debugging>
           </Linking>
           <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Run="False"/>
@@ -264,6 +268,10 @@
             </Debugging>
           </Linking>
           <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
               <CompileReasons Run="False"/>

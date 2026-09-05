@@ -4,7 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <ManyBuildModesSelection Value="x86_64-linux64-gtk2-release,x86_64-win64-win-release"/>
-    <BuildModes Active="x86_64-linux64-gtk2-debug"/>
+    <BuildModes Active="x86_64-win64-win-release"/>
     <Units Count="171">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
@@ -1259,7 +1259,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="138"/>
         <CursorPos X="3" Y="140"/>
-        <UsageCount Value="198"/>
+        <UsageCount Value="201"/>
       </Unit122>
       <Unit123>
         <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
@@ -1271,7 +1271,7 @@
         <EditorIndex Value="3"/>
         <TopLine Value="151"/>
         <CursorPos X="19" Y="167"/>
-        <UsageCount Value="64"/>
+        <UsageCount Value="68"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit123>
@@ -1285,7 +1285,7 @@
         <EditorIndex Value="5"/>
         <TopLine Value="119"/>
         <CursorPos X="8" Y="140"/>
-        <UsageCount Value="150"/>
+        <UsageCount Value="154"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit124>
@@ -1430,8 +1430,8 @@
         <Filename Value="version.inc"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="23" Y="5"/>
-        <UsageCount Value="11"/>
+        <CursorPos X="36" Y="6"/>
+        <UsageCount Value="13"/>
         <Loaded Value="True"/>
       </Unit141>
       <Unit142>
@@ -1454,7 +1454,7 @@
         <EditorIndex Value="10"/>
         <TopLine Value="487"/>
         <CursorPos Y="508"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit144>
       <Unit145>
@@ -1634,7 +1634,7 @@
         <UnitName Value="uCodeGenerator"/>
         <EditorIndex Value="7"/>
         <CursorPos X="12" Y="13"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit168>
       <Unit169>
@@ -1642,7 +1642,7 @@
         <EditorIndex Value="8"/>
         <TopLine Value="43"/>
         <CursorPos X="9" Y="59"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
       </Unit169>
       <Unit170>
@@ -1650,7 +1650,7 @@
         <EditorIndex Value="9"/>
         <TopLine Value="268"/>
         <CursorPos X="11" Y="271"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="14"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Delphi"/>
       </Unit170>
@@ -1658,14 +1658,6 @@
     <Debugger>
       <Backend Value="{F437EEEC-1F4C-463D-8FF8-38AA474CF2F8}"/>
     </Debugger>
-    <OtherDefines Count="6">
-      <Define0 Value="DEBUG"/>
-      <Define1 Value="UseCThreads"/>
-      <Define2 Value="WITH_GTK2_IM"/>
-      <Define3 Value="SCRIPTER_EMBEDDED"/>
-      <Define4 Value="CONSOLE_SCRIPTER"/>
-      <Define5 Value="PS_USESSUPPORT"/>
-    </OtherDefines>
     <JumpHistory Count="30" HistoryIndex="25">
       <Position1>
         <Filename Value="ui\ServerDBFieldSelector\serverdbfieldselector.pas"/>
