@@ -1,7 +1,7 @@
 object frmServerDBFieldSelector: TfrmServerDBFieldSelector
-  Left = 916
+  Left = 390
   Height = 316
-  Top = 380
+  Top = 226
   Width = 1250
   Caption = 'frmServerDBFieldSelector'
   ClientHeight = 316
@@ -27,6 +27,7 @@ object frmServerDBFieldSelector: TfrmServerDBFieldSelector
       ClientHeight = 241
       ClientWidth = 437
       TabOrder = 0
+      OnClick = grBoxSourceClick
       object lbSourceTable: TLabel
         Left = 10
         Height = 20

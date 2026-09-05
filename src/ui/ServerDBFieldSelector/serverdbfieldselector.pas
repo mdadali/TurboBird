@@ -62,6 +62,7 @@ type
 
     // ===== CONTAINER =====
     pnlSelector: TPanel;
+    procedure grBoxSourceClick(Sender: TObject);
 
   private
     FSourceDBIndex: Integer;
@@ -675,6 +676,11 @@ begin
                        CreateTable, ExternalTable, DummyFields);
 
   DummyFields.Free;
+end;
+
+procedure TfrmServerDBFieldSelector.grBoxSourceClick(Sender: TObject);
+begin
+
 end;
 
 function TfrmServerDBFieldSelector.GetSelectedFieldsList: TStringList;
