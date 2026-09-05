@@ -6,7 +6,10 @@ Neuigkeiten für TurboBird
 
 
 TurboBird v1.2.1.1286
+
 Build-Datum & -Zeit: 05.09.2026, 12:30
+
+! IBX4Lazarus auf Version 2.7.12 aktualisiert.
 
 + DBReader: Firebird-Tabelle aus gelesenen Daten erstellen
   - Aus bereits gelesenen/geretteten Daten kann jetzt direkt eine Firebird-Tabelle erstellt werden
