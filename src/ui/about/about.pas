@@ -27,6 +27,8 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
+    Label13: TLabel;
+    Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
@@ -60,6 +62,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure GifAnim1Click(Sender: TObject);
     procedure Image4Click(Sender: TObject);
+    procedure Label2Click(Sender: TObject);
     procedure Label6Click(Sender: TObject);
     procedure laWebSiteClick(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
@@ -162,6 +165,11 @@ end;
 procedure TfmAbout.Image4Click(Sender: TObject);
 begin
   OpenURL('https://www.mwasoftware.co.uk');
+end;
+
+procedure TfmAbout.Label2Click(Sender: TObject);
+begin
+
 end;
 
 procedure TfmAbout.bbtnCloseClick(Sender: TObject);
