@@ -4,6 +4,43 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+TurboBird v1.2.1.1286
+Build-Date & -Time: 05.09.2026, 12:30
+
++ DBReader: Create Firebird table from read data
+  - Directly create a Firebird table from already read/recovered data
+  - Includes appropriate field types and data transfer
+
++ PascalScript-Studio (Runtime Form Designer + PascalScript) reactivated
+  - The existing but inactive FormDesigner has been reactivated
+  - Own "Forms" node in the database tree
+  - Forms can be created per database
+  - Forms are saved as .cfrm + .rops files
+  - "New Form" opens the visual designer
+  - "Edit Form" loads an existing form into the designer
+  - "Execute Form" runs a form directly
+  - Double-click on a form starts execution
+  - Storage location: data/PSStudio/Forms/<Server>/<Database>/
+  - Several example forms (PascalScript-Studio) for the localhost/employee database have been added.
+
+* QueryWindow: Transaction-Config fixed
+  - Transaction parameters (read_committed, rec_version, nowait) are now correctly loaded from the database registration
+  - DDL operations (DROP TABLE etc.) use a separate transaction
+  - nowait is always used – lock conflicts now return an immediate error message
+  - GUI no longer freezes
+
+* DBReader: CSV-Export improved
+  - Quote-Char, Delimiter and other settings are now correctly applied
+
++ EditTableData: Improvements
+  - BOOLEAN fields are now displayed as TDBCheckBox (instead of TDBEdit)
+  - Computed fields are detected and set to read-only
+  - Default values are now correctly loaded from the database
+
+* Several bugs fixed
+
+------------------------------------------------------------------------------------------------------
+
 TurboBird v1.2.1.1284
 Build-Date & -Time: 16.08.2026, 14:00
 

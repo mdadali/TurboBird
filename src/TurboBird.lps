@@ -239,9 +239,8 @@
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="3322"/>
+        <TopLine Value="3320"/>
         <CursorPos X="21" Y="3320"/>
         <ExtraEditorCount Value="1"/>
         <ExtraEditor1>
@@ -903,7 +902,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="124"/>
         <CursorPos Y="151"/>
         <UsageCount Value="297092"/>
@@ -1054,7 +1053,7 @@
         <ComponentName Value="frmDBReader"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="4"/>
         <TopLine Value="1404"/>
         <CursorPos Y="1426"/>
         <UsageCount Value="209"/>
@@ -1074,7 +1073,7 @@
         <ComponentName Value="frmPSStudio"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="254"/>
         <CursorPos X="3" Y="267"/>
         <UsageCount Value="216"/>
@@ -1269,7 +1268,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ServerDBFieldSelector"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="3"/>
         <TopLine Value="151"/>
         <CursorPos X="19" Y="167"/>
         <UsageCount Value="64"/>
@@ -1283,7 +1282,7 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="119"/>
         <CursorPos X="8" Y="140"/>
         <UsageCount Value="150"/>
@@ -1429,9 +1428,11 @@
       </Unit140>
       <Unit141>
         <Filename Value="version.inc"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="7" Y="6"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="2"/>
+        <CursorPos X="23" Y="5"/>
         <UsageCount Value="11"/>
+        <Loaded Value="True"/>
       </Unit141>
       <Unit142>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\FBIntf\client\FBMessages.pas"/>
@@ -1450,7 +1451,7 @@
       </Unit143>
       <Unit144>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\IBX4Lazarus\runtime\nongui\IBMessages.pas"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="10"/>
         <TopLine Value="487"/>
         <CursorPos Y="508"/>
         <UsageCount Value="45"/>
@@ -1631,14 +1632,14 @@
       <Unit168>
         <Filename Value="ui\tools\PascalScript_IDE\source\common\ucodegenerator.pas"/>
         <UnitName Value="uCodeGenerator"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <CursorPos X="12" Y="13"/>
         <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit168>
       <Unit169>
         <Filename Value="components\PascalScript\Source\ThirdParty\uib\uPSI_uiblib.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="43"/>
         <CursorPos X="9" Y="59"/>
         <UsageCount Value="12"/>
@@ -1646,7 +1647,7 @@
       </Unit169>
       <Unit170>
         <Filename Value="..\..\..\..\..\..\..\..\Programme\Lazarus_2.2.6_new\config_lazarus\onlinepackagemanager\packages\Indy10\Core\IdTCPClient.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="9"/>
         <TopLine Value="268"/>
         <CursorPos X="11" Y="271"/>
         <UsageCount Value="12"/>
