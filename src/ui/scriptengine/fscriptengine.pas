@@ -35,24 +35,6 @@ uses
   Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls,
   ibxscript, IBDatabase, IB,
 
-  EncConv,
-  ATStrings,
-  ATStringProc,
-  ATSynEdit,
-  ATSynEdit_Globals,
-  ATSynEdit_LineParts,
-  ATSynEdit_Carets,
-  ATSynEdit_Bookmarks,
-  ATSynEdit_Markers,
-  ATSynEdit_Gaps,
-  ATSynEdit_Finder,
-  ATSynEdit_Export_HTML,
-  ATSynEdit_Gutter_Decor,
-  ATScrollBar,
-  //formkey,
-  //formopt,
-  //formfind,
-
   turbocommon,
   uthemeselector;
 
@@ -61,7 +43,6 @@ type
   { TfrmScriptEngine }
 
   TfrmScriptEngine = class(TForm)
-    ed: TATSynEdit;
     Button1: TButton;
     Button2: TButton;
     btnClose: TButton;
@@ -84,6 +65,8 @@ type
     OpenDialog1: TOpenDialog;
     Splitter1: TSplitter;
     chkBoxStopOnError: TCheckBox;
+    ed: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
     Timer1: TTimer;
     procedure btnCloseClick(Sender: TObject);
     procedure chkBoxEchoInputChange(Sender: TObject);
@@ -215,13 +198,16 @@ end;
 procedure TfrmScriptEngine.FormCreate(Sender: TObject);
 begin
   ed.Font.Name := QWEditorFontName;
-  ed.Colors.TextBG := QWEditorBackgroundColor;
-  ed.OptUnprintedVisible := False;
+  ed.Font.Size := QWEditorFontSize;
+  ed.Font.Color := QWEditorFontColor;
+  ed.Font.Style := QWEditorFontStyle;
 
-  ed.Micromap.Columns:= nil;
-  ed.Micromap.ColumnAdd(1, 100, clRed);
-  ed.Micromap.ColumnAdd(2, 100, clBlue);
-  ed.Micromap.ColumnAdd(3, 100, clGreen);
+  // Hintergrundfarbe (TATSynEdit: Colors.TextBG)
+  ed.Color := QWEditorBackgroundColor;
+
+  // Sonderzeichen (Leerzeichen, Tabs, Zeilenenden) ausblenden
+  // TATSynEdit: OptUnprintedVisible := False
+  //ed.Options := ed.Options - [eoShowSpecialChars];
 end;
 
 procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);
@@ -293,11 +279,12 @@ begin
   if OpenDialog1.Execute then
   begin
     ed.BeginUpdate;
-
-    ed.Strings.EncodingCodepage:= eidUTF8;
-    ed.LoadFromFile(OpenDialog1.FileName, []);
-    ed.Strings.EncodingDetect:= true;
-    ed.EndUpdate;
+    try
+      // UTF8-Datei laden; TSynEdit erkennt BOM automatisch
+      ed.Lines.LoadFromFile(OpenDialog1.FileName, TEncoding.UTF8);
+    finally
+      ed.EndUpdate;
+    end;
   end;
 end;
 
@@ -312,7 +299,7 @@ begin
     IBTransaction1.StartTransaction;
 
   ResultsLog.Lines.Clear;
-  IBXScript1.ExecSQLScript(ed.Strings.TextString_Unicode(0));
+  IBXScript1.ExecSQLScript(StringReplace(ed.Lines.Text, #10, #13#10, [rfReplaceAll, rfIgnoreCase]));
   Timer1.Interval := 1000;
   chkBoxEchoInput.Checked := IBXScript1.Echo;
   chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;

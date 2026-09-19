@@ -13,7 +13,7 @@ uses
   LCLType, LCLIntf, Classes, SysUtils,
   memds, FileUtil, LResources, Forms, Controls, Graphics, Dialogs, Menus,
   ComCtrls, Reg, QueryWindow, Grids, ExtCtrls, Buttons, StdCtrls, TableManage,
-  dbugintf, turbocommon, importtable, DB,  HtmlView, FramView, FramBrwz,
+  dbugintf, turbocommon, importtable, DB,
   IniFiles, Types,   SynEdit,
 
   IBInternals,
@@ -71,8 +71,8 @@ uses
   floginservicemanager,
   fserverregistry,
 
-  //fblobedit,
-  HTMLUn2, HtmlGlobals, RxDBGrid,
+
+  RxDBGrid,
 
   fmetaquerys,
 
@@ -119,10 +119,7 @@ type
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
     grBoxObjectFilter: TGroupBox;
-    HtmlViewer1: THtmlViewer;
-    Image1: TImage;
     Label1: TLabel;
-    Memo1: TMemo;
     lmMaintenance: TMenuItem;
     lmBackupNew: TMenuItem;
     lmRestoreNew: TMenuItem;
@@ -179,7 +176,6 @@ type
     mnTheme: TMenuItem;
     mnServerRegistry: TMenuItem;
     PageControl1: TPageControl;
-    Panel1: TPanel;
     SQLQuery1: TIBQuery;
     ImageList1: TImageList;
     ImageList2: TImageList;
@@ -323,8 +319,6 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
-      var Handled: Boolean);
     procedure ImNewFBFunctionClick(Sender: TObject);
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
@@ -672,7 +666,6 @@ begin
 end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
-var htmlPath: string;
 begin
   turbocommon.MainTreeView := tvMain;
 
@@ -697,16 +690,6 @@ begin
   NoDragTab := 0;
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
-
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'index.html';
-
-  if FileExists(htmlPath) then
-    HtmlViewer1.LoadFromFile(htmlPath)
-  else
-    HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
-    );
-
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
@@ -721,28 +704,6 @@ begin
   DeleteOldVersionsOnStart;
   if AutoSearchOnProgramStart then
     frmUpdateChecker.PerformAutoSearch;
-end;
-
-procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
-  const SRC: ThtString; var Handled: Boolean);
-var htmlPath: string;
-begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
-
-  if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
-  begin
-    if FileExists(htmlPath + SRC) then
-      HtmlViewer1.LoadFromFile(htmlPath + SRC)
-    else
-    HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
-  end
-  else
-  begin
-    // Externe Links öffnen im Standardbrowser
-    OpenURL(SRC);
-  end;
-  Handled := true;
 end;
 
 procedure TfmMain.AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
