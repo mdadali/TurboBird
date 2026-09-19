@@ -14,8 +14,7 @@ uses
   Grids,
   DBGrids,
   DBCtrls,
-  IBDynamicGrid,
-  HTMLView;
+  IBDynamicGrid;
 
 
 type
@@ -190,9 +189,6 @@ begin
   for i := 0 to AParentControl.ControlCount - 1 do
   begin
     c := AParentControl.Controls[i];
-
-    if c is THTMLViewer then
-      exit;
 
     if c is TSynEdit then
       //exit;

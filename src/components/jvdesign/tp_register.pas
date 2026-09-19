@@ -20,7 +20,7 @@ begin
 end;
 
 initialization
-  {$I test.lrs}
+  //{$I test.lrs}
 
 end.
 
