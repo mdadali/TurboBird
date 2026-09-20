@@ -2,10 +2,10 @@ object fmQueryWindow: TfmQueryWindow
   Left = 503
   Height = 748
   Top = 149
-  Width = 679
+  Width = 1232
   Caption = 'fmQueryWindow'
-  ClientHeight = 748
-  ClientWidth = 679
+  ClientHeight = 742
+  ClientWidth = 1232
   Color = clForm
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
@@ -70279,87 +70279,308 @@ object fmQueryWindow: TfmQueryWindow
   }
   KeyPreview = True
   Menu = MainMenu1
-  PopupMenu = pmTab
-  Position = poScreenCenter
-  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnShow = FormShow
+  PopupMenu = pmTab
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
   object Splitter1: TSplitter
     Cursor = crVSplit
     Left = 0
     Height = 12
-    Top = 296
-    Width = 679
+    Top = 34
+    Width = 1232
     Align = alTop
     ResizeAnchor = akTop
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 440
-    Top = 308
-    Width = 679
+    Height = 366
+    Top = 376
+    Width = 1232
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 440
-    ClientWidth = 679
+    ClientHeight = 366
+    ClientWidth = 1232
     ParentBackground = False
-    TabOrder = 2
+    TabOrder = 1
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 440
+      Height = 366
       Top = 0
-      Width = 679
+      Width = 1232
       Align = alClient
       Images = imTabs
       TabOrder = 0
       OnChange = pgOutputPageCtlChange
     end
   end
+  object ToolBar1: TToolBar
+    Left = 0
+    Height = 34
+    Top = 0
+    Width = 1232
+    BorderWidth = 2
+    ButtonHeight = 32
+    ButtonWidth = 32
+    Caption = 'ToolBar1'
+    Color = clForm
+    Images = toolbarImages
+    ParentColor = False
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 2
+    OnMouseEnter = ToolBar1MouseEnter
+    OnMouseLeave = ToolBar1MouseLeave
+    object tbNew: TToolButton
+      Left = 37
+      Hint = 'Open New SQL Query Window'
+      Top = 2
+      AutoSize = True
+      ImageIndex = 0
+      OnClick = tbNewClick
+      OnMouseEnter = tbNewMouseEnter
+      OnMouseLeave = tbNewMouseLeave
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbOpen: TToolButton
+      Left = 1
+      Hint = 'Open SQL file'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbOpen'
+      ImageIndex = 1
+      OnClick = tbOpenClick
+      OnMouseEnter = tbOpenMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbSave: TToolButton
+      Left = 73
+      Hint = 'Save SQL to file'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbSave'
+      ImageIndex = 2
+      OnClick = tbSaveClick
+      OnMouseEnter = tbSaveMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRun: TToolButton
+      Left = 109
+      Hint = 'Run Query (F5)'
+      Top = 2
+      AutoSize = True
+      ImageIndex = 5
+      OnClick = tbRunClick
+      OnMouseEnter = tbRunMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbCommit: TToolButton
+      Left = 186
+      Hint = 'Commit Transaction'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbCommit'
+      Enabled = False
+      ImageIndex = 4
+      OnClick = tbCommitClick
+      OnMouseEnter = tbCommitMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRollback: TToolButton
+      Left = 258
+      Hint = 'Rollback Transaction'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbRollback'
+      ImageIndex = 7
+      OnClick = tbRollbackClick
+      OnMouseEnter = tbRollbackMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton2: TToolButton
+      Left = 294
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton2'
+      Style = tbsSeparator
+    end
+    object ToolButton3: TToolButton
+      Left = 374
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton3'
+      Style = tbsSeparator
+    end
+    object tbHistory: TToolButton
+      Left = 302
+      Hint = 'SQL History'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbHistory'
+      ImageIndex = 8
+      OnClick = tbHistoryClick
+      OnMouseEnter = tbHistoryMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton5: TToolButton
+      Left = 145
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton5'
+      Style = tbsDivider
+    end
+    object tbMenu: TToolButton
+      Left = 462
+      Hint = 'Menu'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbMenu'
+      ImageIndex = 9
+      OnClick = tbMenuClick
+      OnMouseEnter = tbMenuMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object tbRollbackRetaining: TToolButton
+      Left = 222
+      Hint = 'Rollback Retaining'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbRollbackRetaining'
+      ImageIndex = 3
+      OnClick = tbRollbackRetainingClick
+      OnMouseEnter = tbRollbackRetainingMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object ToolButton1: TToolButton
+      Left = 454
+      Height = 32
+      Top = 2
+      Caption = 'ToolButton1'
+      Style = tbsSeparator
+    end
+    object cxAutoCommit: TCheckBox
+      Left = 530
+      Height = 21
+      Hint = 'Auto Commit ON/OFF'
+      Top = 2
+      Width = 105
+      Caption = 'Auto Commit'
+      Checked = True
+      OnChange = cxAutoCommitChange
+      OnMouseEnter = cxAutoCommitMouseEnter
+      OnMouseLeave = cxAutoCommitMouseLeave
+      State = cbChecked
+      TabOrder = 0
+    end
+    object tbQueryDesign: TToolButton
+      Left = 382
+      Hint = 'Query Designer'
+      Top = 2
+      Caption = 'tbQueryDesign'
+      ImageIndex = 11
+      OnClick = tbQueryDesignClick
+      OnMouseEnter = tbQueryDesignMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+    object rgScreenModes: TRadioGroup
+      Left = 664
+      Height = 32
+      Hint = 'Screen Modes'
+      Top = 0
+      Width = 185
+      Align = alRight
+      Anchors = [akTop, akLeft, akBottom]
+      AutoFill = True
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 3
+      ClientHeight = 30
+      ClientWidth = 183
+      Columns = 3
+      ItemIndex = 0
+      Items.Strings = (
+        'NFS'
+        'CFS'
+        'RFS'
+      )
+      OnClick = rgScreenModesClick
+      OnMouseEnter = rgScreenModesMouseEnter
+      ParentBackground = False
+      TabOrder = 1
+    end
+    object ToolButton4: TToolButton
+      Left = 338
+      Hint = 'MWA ScriptEngine'
+      Top = 2
+      Caption = 'ToolButton4'
+      ImageIndex = 12
+      OnClick = ToolButton4Click
+    end
+    object tbIBSQL: TToolButton
+      Left = 418
+      Hint = 'IBX SQLBuilder'
+      Top = 2
+      Caption = 'tbIBSQL'
+      ImageIndex = 14
+      OnClick = tbIBSQLClick
+    end
+    object ToolButton6: TToolButton
+      Left = 498
+      Top = 2
+      Caption = 'ToolButton6'
+      Enabled = False
+    end
+    object tbCommitRetaining: TToolButton
+      Left = 150
+      Hint = 'Commit Retaining'
+      Top = 2
+      AutoSize = True
+      Caption = 'tbCommitRetaining'
+      ImageIndex = 6
+      OnClick = tbCommitRetainingClick
+      OnMouseEnter = tbCommitRetainingMouseEnter
+      ParentShowHint = False
+      ShowHint = True
+    end
+  end
   inline meQuery: TSynEdit
     Left = 0
-    Height = 262
-    Top = 34
-    Width = 679
+    Height = 330
+    Top = 46
+    Width = 1232
     Align = alTop
-    BlockIndent = 3
-    Color = clMedGray
-    Font.Height = -16
-    Font.Name = 'Courier New'
+    Font.Height = 13
+    Font.Name = 'DejaVu Sans Mono'
     Font.Pitch = fpFixed
-    Font.Quality = fqAntialiased
+    Font.Quality = fqNonAntialiased
     ParentColor = False
     ParentFont = False
-    ParentShowHint = False
     PopupMenu = pmMemo
-    TabOrder = 0
+    TabOrder = 3
     OnKeyDown = meQueryKeyDown
     OnMouseEnter = meQueryMouseEnter
-    Gutter.Color = clSilver
-    Gutter.Width = 61
-    Gutter.MouseActions = <    
-      item
-        ClickCount = ccAny
-        ClickDir = cdDown
-        Command = emcOnMainGutterClick
-      end    
-      item
-        Button = mbRight
-        Command = emcContextMenu
-      end>
+    Gutter.Width = 57
+    Gutter.MouseActions = <>
     RightGutter.Width = 0
-    RightGutter.MouseActions = <    
-      item
-        ClickCount = ccAny
-        ClickDir = cdDown
-        Command = emcOnMainGutterClick
-      end    
-      item
-        Button = mbRight
-        Command = emcContextMenu
-      end>
+    RightGutter.MouseActions = <>
     Highlighter = SynSQLSyn1
     Keystrokes = <    
       item
@@ -70667,15 +70888,15 @@ object fmQueryWindow: TfmQueryWindow
         ShortCut = 41010
       end    
       item
-        Command = EcFoldLevel1
+        Command = EcFoldLevel3
         ShortCut = 41011
       end    
       item
-        Command = EcFoldLevel1
+        Command = EcFoldLevel4
         ShortCut = 41012
       end    
       item
-        Command = EcFoldLevel1
+        Command = EcFoldLevel5
         ShortCut = 41013
       end    
       item
@@ -70782,79 +71003,13 @@ object fmQueryWindow: TfmQueryWindow
         Command = ecColSelEditorBottom
         ShortCut = 57379
       end>
-    MouseActions = <    
-      item
-        ShiftMask = [ssShift, ssAlt]
-        ClickDir = cdDown
-        Command = emcStartSelections
-        MoveCaret = True
-      end    
-      item
-        Shift = [ssShift]
-        ShiftMask = [ssShift, ssAlt]
-        ClickDir = cdDown
-        Command = emcStartSelections
-        MoveCaret = True
-        Option = 1
-      end    
-      item
-        Shift = [ssAlt]
-        ShiftMask = [ssShift, ssAlt]
-        ClickDir = cdDown
-        Command = emcStartColumnSelections
-        MoveCaret = True
-      end    
-      item
-        Shift = [ssShift, ssAlt]
-        ShiftMask = [ssShift, ssAlt]
-        ClickDir = cdDown
-        Command = emcStartColumnSelections
-        MoveCaret = True
-        Option = 1
-      end    
-      item
-        Button = mbRight
-        Command = emcContextMenu
-      end    
-      item
-        ClickCount = ccDouble
-        ClickDir = cdDown
-        Command = emcSelectWord
-        MoveCaret = True
-      end    
-      item
-        ClickCount = ccTriple
-        ClickDir = cdDown
-        Command = emcSelectLine
-        MoveCaret = True
-      end    
-      item
-        ClickCount = ccQuad
-        ClickDir = cdDown
-        Command = emcSelectPara
-        MoveCaret = True
-      end    
-      item
-        Button = mbMiddle
-        ClickDir = cdDown
-        Command = emcPasteSelection
-        MoveCaret = True
-      end    
-      item
-        Shift = [ssCtrl]
-        ShiftMask = [ssShift, ssAlt, ssCtrl]
-        Command = emcMouseLink
-      end>
+    MouseActions = <>
     MouseTextActions = <>
-    MouseSelActions = <    
-      item
-        ClickDir = cdDown
-        Command = emcStartDragMove
-      end>
-    MouseOptions = [emDragDropEditing, emCtrlWheelZoom]
+    MouseSelActions = <>
+    Lines.Strings = (
+      'meQuery'
+    )
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
-    RightEdge = 120
-    ScrollBars = ssAutoBoth
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
     SelectedColor.FramePriority = 50
@@ -70873,336 +71028,41 @@ object fmQueryWindow: TfmQueryWindow
     MouseLinkColor.Foreground = clBlue
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
-    OnChange = meQueryChange
     OnChangeUpdating = meQueryChangeUpdating
-    inline TSynGutterPartList
-      object TSynGutterMarks
+    inline SynLeftGutterPartList1: TSynGutterPartList
+      object SynGutterMarks1: TSynGutterMarks
         Width = 24
         MouseActions = <>
-        MaxExtraMarksColums = 0
-        Options = [sgmoDeDuplicateMarksOnOverflow]
-        MarkupInfo.Background = clBtnFace
-        MarkupInfo.Foreground = clNone
       end
-      object TSynGutterLineNumber
-        Width = 21
+      object SynGutterLineNumber1: TSynGutterLineNumber
+        Width = 17
         MouseActions = <>
-        MarkupInfo.Background = 16710387
+        MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
         DigitCount = 2
         ShowOnlyLineNumbersMultiplesOf = 1
         ZeroStart = False
         LeadingZeros = False
       end
-      object TSynGutterChanges
+      object SynGutterChanges1: TSynGutterChanges
         Width = 4
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
-        MarkupInfo.Background = clNone
-        MarkupInfo.Foreground = clGreen
-        MarkupInfo.FrameColor = 59900
       end
-      object TSynGutterSeparator
+      object SynGutterSeparator1: TSynGutterSeparator
         Width = 2
         MouseActions = <>
         MarkupInfo.Background = clWhite
         MarkupInfo.Foreground = clGray
       end
-      object TSynGutterCodeFolding
-        MouseActions = <        
-          item
-            Button = mbRight
-            Command = emcCodeFoldContextMenu
-          end        
-          item
-            ShiftMask = [ssShift]
-            Button = mbMiddle
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-          end        
-          item
-            Shift = [ssShift]
-            ShiftMask = [ssShift]
-            Button = mbMiddle
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-            Option = 1
-          end        
-          item
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcNone
-          end>
+      object SynGutterCodeFolding1: TSynGutterCodeFolding
+        MouseActions = <>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
-        MouseActionsExpanded = <        
-          item
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldCollaps
-          end>
-        MouseActionsCollapsed = <        
-          item
-            Shift = [ssCtrl]
-            ShiftMask = [ssCtrl]
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldExpand
-          end        
-          item
-            ShiftMask = [ssCtrl]
-            ClickCount = ccAny
-            ClickDir = cdDown
-            Command = emcCodeFoldExpand
-            Option = 1
-          end>
+        MouseActionsExpanded = <>
+        MouseActionsCollapsed = <>
       end
-    end
-  end
-  object ToolBar1: TToolBar
-    Left = 0
-    Height = 34
-    Top = 0
-    Width = 679
-    BorderWidth = 2
-    ButtonHeight = 32
-    ButtonWidth = 32
-    Caption = 'ToolBar1'
-    Color = clForm
-    Images = toolbarImages
-    ParentColor = False
-    ParentShowHint = False
-    ShowHint = True
-    TabOrder = 3
-    OnMouseEnter = ToolBar1MouseEnter
-    OnMouseLeave = ToolBar1MouseLeave
-    object tbNew: TToolButton
-      Left = 37
-      Hint = 'Open New SQL Query Window'
-      Top = 2
-      AutoSize = True
-      ImageIndex = 0
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbNewClick
-      OnMouseEnter = tbNewMouseEnter
-      OnMouseLeave = tbNewMouseLeave
-    end
-    object tbOpen: TToolButton
-      Left = 1
-      Hint = 'Open SQL file'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbOpen'
-      ImageIndex = 1
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbOpenClick
-      OnMouseEnter = tbOpenMouseEnter
-    end
-    object tbSave: TToolButton
-      Left = 73
-      Hint = 'Save SQL to file'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbSave'
-      ImageIndex = 2
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbSaveClick
-      OnMouseEnter = tbSaveMouseEnter
-    end
-    object tbRun: TToolButton
-      Left = 109
-      Hint = 'Run Query (F5)'
-      Top = 2
-      AutoSize = True
-      ImageIndex = 5
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbRunClick
-      OnMouseEnter = tbRunMouseEnter
-    end
-    object tbCommit: TToolButton
-      Left = 186
-      Hint = 'Commit Transaction'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbCommit'
-      Enabled = False
-      ImageIndex = 4
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbCommitClick
-      OnMouseEnter = tbCommitMouseEnter
-    end
-    object tbRollback: TToolButton
-      Left = 258
-      Hint = 'Rollback Transaction'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbRollback'
-      ImageIndex = 7
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbRollbackClick
-      OnMouseEnter = tbRollbackMouseEnter
-    end
-    object ToolButton2: TToolButton
-      Left = 294
-      Height = 32
-      Top = 2
-      Caption = 'ToolButton2'
-      Style = tbsSeparator
-    end
-    object ToolButton3: TToolButton
-      Left = 374
-      Height = 32
-      Top = 2
-      Caption = 'ToolButton3'
-      Style = tbsSeparator
-    end
-    object tbHistory: TToolButton
-      Left = 302
-      Hint = 'SQL History'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbHistory'
-      ImageIndex = 8
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbHistoryClick
-      OnMouseEnter = tbHistoryMouseEnter
-    end
-    object ToolButton5: TToolButton
-      Left = 145
-      Height = 32
-      Top = 2
-      Caption = 'ToolButton5'
-      Style = tbsDivider
-    end
-    object tbMenu: TToolButton
-      Left = 462
-      Hint = 'Menu'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbMenu'
-      ImageIndex = 9
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbMenuClick
-      OnMouseEnter = tbMenuMouseEnter
-    end
-    object tbRollbackRetaining: TToolButton
-      Left = 222
-      Hint = 'Rollback Retaining'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbRollbackRetaining'
-      ImageIndex = 3
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbRollbackRetainingClick
-      OnMouseEnter = tbRollbackRetainingMouseEnter
-    end
-    object ToolButton1: TToolButton
-      Left = 454
-      Height = 32
-      Top = 2
-      Caption = 'ToolButton1'
-      Style = tbsSeparator
-    end
-    object cxAutoCommit: TCheckBox
-      Left = 530
-      Height = 21
-      Hint = 'Auto Commit ON/OFF'
-      Top = 2
-      Width = 105
-      Caption = 'Auto Commit'
-      Checked = True
-      State = cbChecked
-      TabOrder = 0
-      OnChange = cxAutoCommitChange
-      OnMouseEnter = cxAutoCommitMouseEnter
-      OnMouseLeave = cxAutoCommitMouseLeave
-    end
-    object tbQueryDesign: TToolButton
-      Left = 382
-      Hint = 'Query Designer'
-      Top = 2
-      Caption = 'tbQueryDesign'
-      ImageIndex = 11
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbQueryDesignClick
-      OnMouseEnter = tbQueryDesignMouseEnter
-    end
-    object rgScreenModes: TRadioGroup
-      Left = 664
-      Height = 32
-      Hint = 'Screen Modes'
-      Top = 0
-      Width = 185
-      Align = alRight
-      Anchors = [akTop, akLeft, akBottom]
-      AutoFill = True
-      ChildSizing.LeftRightSpacing = 6
-      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-      ChildSizing.EnlargeVertical = crsHomogenousChildResize
-      ChildSizing.ShrinkHorizontal = crsScaleChilds
-      ChildSizing.ShrinkVertical = crsScaleChilds
-      ChildSizing.Layout = cclLeftToRightThenTopToBottom
-      ChildSizing.ControlsPerLine = 3
-      ClientHeight = 30
-      ClientWidth = 183
-      Columns = 3
-      ItemIndex = 0
-      Items.Strings = (
-        'NFS'
-        'CFS'
-        'RFS'
-      )
-      ParentBackground = False
-      TabOrder = 1
-      OnClick = rgScreenModesClick
-      OnMouseEnter = rgScreenModesMouseEnter
-    end
-    object ToolButton4: TToolButton
-      Left = 338
-      Hint = 'MWA ScriptEngine'
-      Top = 2
-      Caption = 'ToolButton4'
-      ImageIndex = 12
-      OnClick = ToolButton4Click
-    end
-    object tbIBSQL: TToolButton
-      Left = 418
-      Hint = 'IBX SQLBuilder'
-      Top = 2
-      Caption = 'tbIBSQL'
-      ImageIndex = 14
-      OnClick = tbIBSQLClick
-    end
-    object ToolButton6: TToolButton
-      Left = 498
-      Top = 2
-      Caption = 'ToolButton6'
-      Enabled = False
-    end
-    object tbCommitRetaining: TToolButton
-      Left = 150
-      Hint = 'Commit Retaining'
-      Top = 2
-      AutoSize = True
-      Caption = 'tbCommitRetaining'
-      ImageIndex = 6
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = tbCommitRetainingClick
-      OnMouseEnter = tbCommitRetainingMouseEnter
     end
   end
   object OpenDialog1: TOpenDialog
@@ -71917,7 +71777,6 @@ object fmQueryWindow: TfmQueryWindow
     EndOfTokenChr = '()[].'
     OnCodeCompletion = SynCompletion1CodeCompletion
     ExecCommandID = ecSynCompletionExecute
-    Editor = meQuery
     ToggleReplaceWhole = False
     Left = 736
     Top = 400
@@ -72716,14 +72575,13 @@ object fmQueryWindow: TfmQueryWindow
     EndOfTokenChr = '()[].'
     ShortCut = 16429
     ExecCommandID = ecSynAutoCompletionExecute
-    Editor = meQuery
     Left = 539
-    Top = 320
+    Top = 296
   end
   object pmUnIntelliSense: TPopupMenu
     OnPopup = pmUnIntelliSensePopup
     Left = 336
-    Top = 320
+    Top = 304
   end
   object RxDBGridPrint1: TRxDBGridPrint
     Caption = 'Print grid'
