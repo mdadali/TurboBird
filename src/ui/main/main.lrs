@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3#215#3#6'Height'#3#137#2#3'Top'#3'='#2#5
+  'TPF0'#7'TfmMain'#6'fmMain'#4'Left'#3'h'#1#6'Height'#3#137#2#3'Top'#3#139#0#5
   +'Width'#3#206#5#7'Caption'#6#28'TurboBird Admin for Firebird'#12'ClientHeigh'
   +'t'#3'l'#2#11'ClientWidth'#3#206#5#5'Color'#7#6'clForm'#8'DragMode'#7#11'dmA'
   +'utomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10#239#182#2#0#235#182#2#0#0#0
@@ -9827,15 +9827,15 @@ LazarusResources.Add('TfmMain','FORMDATA',[
   +#0#0#0#9'TMenuItem'#18'ImCreateNewPackage'#3'Tag'#2' '#7'Caption'#6#18'Creat'
   +'e new Package'#7'OnClick'#7#23'ImCreateNewPackageClick'#0#0#9'TMenuItem'#13
   +'lmEditPackage'#3'Tag'#2'!'#7'Caption'#6#12'Edit Package'#7'OnClick'#7#18'lm'
-  +'EditPackageClick'#0#0#9'TMenuItem'#15'lmPackageEditor'#3'Tag'#2'!'#7'Captio'
-  +'n'#6#14'Package Editor'#0#0#9'TMenuItem'#13'lmDropPackage'#3'Tag'#2'!'#7'Ca'
-  +'ption'#6#12'Drop Package'#7'OnClick'#7#18'lmDropPackageClick'#0#0#9'TMenuIt'
-  +'em'#17'lmPackageFunction'#3'Tag'#3'L'#1#7'Caption'#6#19'Package-Function...'
-  +#0#9'TMenuItem'#20'lmGetPackageFunction'#7'Caption'#6#20'Get Package-Functio'
-  +'n'#7'OnClick'#7#25'lmGetPackageFunctionClick'#0#0#9'TMenuItem'#22'lmDropPac'
-  +'kagesFunction'#7'Caption'#6#22'Drop Packages-Function'#0#0#9'TMenuItem'#21
-  +'lmTestPackageFunction'#7'Caption'#6#21'Test Package-Function'#7'OnClick'#7
-  +#26'lmTestPackageFunctionClick'#0#0#0#9'TMenuItem'#18'lmPackageProcedure'#3
+  +'EditPackageClick'#0#0#9'TMenuItem'#15'lmPackageEditor'#3'Tag'#2#246#7'Capti'
+  +'on'#6#14'Package Editor'#0#0#9'TMenuItem'#13'lmDropPackage'#3'Tag'#2'!'#7'C'
+  +'aption'#6#12'Drop Package'#7'OnClick'#7#18'lmDropPackageClick'#0#0#9'TMenuI'
+  +'tem'#17'lmPackageFunction'#3'Tag'#3'L'#1#7'Caption'#6#19'Package-Function..'
+  +'.'#0#9'TMenuItem'#20'lmGetPackageFunction'#7'Caption'#6#20'Get Package-Func'
+  +'tion'#7'OnClick'#7#25'lmGetPackageFunctionClick'#0#0#9'TMenuItem'#22'lmDrop'
+  +'PackagesFunction'#7'Caption'#6#22'Drop Packages-Function'#0#0#9'TMenuItem'
+  +#21'lmTestPackageFunction'#7'Caption'#6#21'Test Package-Function'#7'OnClick'
+  +#7#26'lmTestPackageFunctionClick'#0#0#0#9'TMenuItem'#18'lmPackageProcedure'#3
   +'Tag'#3'N'#1#7'Caption'#6#20'Package-Procedure...'#0#9'TMenuItem'#21'lmGetPa'
   +'ckageProcedure'#7'Caption'#6#21'Get Package-Procedure'#7'OnClick'#7#26'lmGe'
   +'tPackageProcedureClick'#0#0#9'TMenuItem'#22'lmDropPackageProcedure'#7'Capti'
