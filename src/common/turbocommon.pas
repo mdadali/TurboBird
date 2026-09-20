@@ -3499,7 +3499,7 @@ begin
   ExtractCheck   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractCheck', true);
   ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
   ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
-  ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', true);
+  ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', false);
 
 
   //Theme

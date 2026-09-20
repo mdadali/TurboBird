@@ -8553,7 +8553,7 @@ LazarusResources.Add('TfmMain','FORMDATA',[
   +#223#170#158#191#238'lJmm'#237'w'#251'fx{{o%'#225'}'#219'='#31'7<|nVV'#214
   +#200#255#219'6'#199'K'#255#31#18'F,'#156#0#0#10'TPopupMenu'#10'pmDatabase'#3
   +'Tag'#3#245#1#6'Images'#7#10'ImageList1'#7'OnPopup'#7#15'pmDatabasePopup'#4
-  +'Left'#3#152#0#3'Top'#3#224#1#0#9'TMenuItem'#9'lmNewForm'#3'Tag'#3#245#1#7'C'
+  +'Left'#3#153#0#3'Top'#3#224#1#0#9'TMenuItem'#9'lmNewForm'#3'Tag'#3#245#1#7'C'
   +'aption'#6#8'New Form'#7'OnClick'#7#14'lmNewFormClick'#0#0#9'TMenuItem'#10'l'
   +'mEditForm'#3'Tag'#3#244#1#7'Caption'#6#9'Edit Form'#7'OnClick'#7#15'lmEditF'
   +'ormClick'#0#0#9'TMenuItem'#13'lmExecuteForm'#3'Tag'#3#244#1#7'Caption'#6#12
