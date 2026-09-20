@@ -889,7 +889,7 @@ begin
     Exit;
   end;
 
-  DestTable := Trim(edtDestTable.Text);
+  DestTable := MakeCaseSensitiveAuto(Trim(edtDestTable.Text));
   if DestTable = '' then
   begin
     MessageDlg('Please enter a destination table name.', mtWarning, [mbOK], 0);
@@ -991,7 +991,7 @@ begin
 
     CopyEngineLocal := TCopyTableDataLocal.Create(
       FSourceDBIndex, FDestDBIndex,
-      Trim(comboxSourceTables.Text), DestTable,
+      MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
       StrToIntDef(edtBatchSize.Text, 500000),
       FromRow, ToRow
@@ -1013,7 +1013,7 @@ begin
 
     CopyEngineCrossExecuteBlock := TCopyTableDataCrossExecuteBlock.Create(
       FSourceDBIndex, FDestDBIndex,
-      Trim(comboxSourceTables.Text), DestTable,
+      MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
       StrToIntDef(edtBatchSize.Text, 10000),
       FromRow, ToRow
@@ -1035,7 +1035,7 @@ begin
 
     CopyEngineCrossRowByRow := TCopyTableDataCrossRowByRow.Create(
       FSourceDBIndex, FDestDBIndex,
-      Trim(comboxSourceTables.Text), DestTable,
+      MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
       StrToIntDef(edtBatchSize.Text, 10000),
       FromRow, ToRow
