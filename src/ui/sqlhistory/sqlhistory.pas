@@ -17,8 +17,9 @@ type
 
   TfmSQLHistory = class(TForm)
     bbDelete: TBitBtn;
-    bbExport: TBitBtn;
+    bbExportToTextFile: TBitBtn;
     bbInsert: TBitBtn;
+    btnClearHistory: TButton;
     cbSQLType: TComboBox;
     cxAfterDate: TCheckBox;
     cxOverwrite: TCheckBox;
@@ -31,10 +32,10 @@ type
     DBNavigator2: TDBNavigator;
     DBText1: TDBText;
     GroupBox1: TGroupBox;
-    GroupBox2: TGroupBox;
+    grboxInsertOption: TGroupBox;
     GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
-    Label1: TLabel;
+    grboxSQLType: TGroupBox;
     Label2: TLabel;
     PageControl1: TPageControl;
     Panel1: TPanel;
@@ -48,8 +49,10 @@ type
     tsHistory: TTabSheet;
     procedure bbCloseClick(Sender: TObject);
     procedure bbDeleteClick(Sender: TObject);
-    procedure bbExportClick(Sender: TObject);
+    procedure bbExportToTextFileClick(Sender: TObject);
     procedure bbInsertClick(Sender: TObject);
+    procedure btnClearHistoryClick(Sender: TObject);
+    procedure cbSQLTypeChange(Sender: TObject);
     procedure cxAfterDateClick(Sender: TObject);
     procedure DBGrid1DblClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -58,7 +61,12 @@ type
   private
     FNodeInfos: TPNodeInfos;
     FQueryForm: TForm;
-    { private declarations }
+    FFilterType: string;
+
+    procedure ApplyHistoryFilter;
+    procedure mdsHistoryFilterRecord(DataSet: TDataSet;
+          var Accept: Boolean);
+
   public
     { public declarations }
     procedure Init(DatabaseTitle: string; QueryForm: TForm; ANodeInfos: TPNodeInfos);
@@ -73,8 +81,55 @@ implementation
 
 uses Main, QueryWindow;
 
+procedure TfmSQLHistory.mdsHistoryFilterRecord(DataSet: TDataSet;
+  var Accept: Boolean);
+var
+  CurrType: string;
+begin
+  if FFilterType = '' then
+  begin
+    Accept := True;
+    Exit;
+  end;
+
+  CurrType := UpperCase(DataSet.FieldByName('SQLType').AsString);
+  Accept := (FFilterType = CurrType) or
+            ((FFilterType = 'DDL,DML') and ((CurrType = 'DDL') or (CurrType = 'DML')));
+end;
+
+procedure TfmSQLHistory.ApplyHistoryFilter;
+begin
+  case cbSQLType.ItemIndex of
+    0: FFilterType := '';         // All
+    1: FFilterType := 'DDL,DML';
+    2: FFilterType := 'DDL';
+    3: FFilterType := 'DML';
+    4: FFilterType := 'SELECT';
+    5: FFilterType := 'SCRIPT';
+  else
+    FFilterType := '';
+  end;
+
+  fmMain.mdsHistory.DisableControls;
+  try
+    fmMain.mdsHistory.Close;
+    fmMain.mdsHistory.Filtered := False;
+    if FFilterType <> '' then
+      fmMain.mdsHistory.Filtered := True;
+  finally
+    fmMain.mdsHistory.Open;
+    fmMain.mdsHistory.EnableControls;
+  end;
+end;
+
+procedure TfmSQLHistory.cbSQLTypeChange(Sender: TObject);
+begin
+  ApplyHistoryFilter;
+end;
+
 procedure TfmSQLHistory.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  fmMain.mdsHistory.SaveToFile(fmMain.CurrentHistoryFile);
   Datasource1.DataSet:= nil;
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
@@ -84,6 +139,9 @@ end;
 procedure TfmSQLHistory.FormCreate(Sender: TObject);
 begin
   DateEdit1.Date:= Now - 7;
+
+  fmMain.mdsHistory.OnFilterRecord := @mdsHistoryFilterRecord;
+  FFilterType := '';
 end;
 
 procedure TfmSQLHistory.FormShow(Sender: TObject);
@@ -91,29 +149,6 @@ begin
   DBGrid1.OptimizeColumnsWidthAll;
   frmThemeSelector.btnApplyClick(self);
 end;
-
-{procedure TfmSQLHistory.bbInsertClick(Sender: TObject);
-var
-  SQLStatement: string;
-  i: Integer;
-  aStatement: string;
-begin
-//  SQLStatement:= (fmMain.mdsHistory.FieldByName('SQLStatement').AsString);
-  for i:= 0 to DBGrid1.SelectedRows.Count - 1 do
-  begin
-    Datasource1.DataSet.GotoBookmark(DBGrid1.SelectedRows.Items[i]);
-    aStatement := fmMain.mdsHistory.FieldByName('SQLStatement').AsString;
-    if Pos(';', aStatement) = 0 then
-      aStatement:= aStatement + ';';
-    SQLStatement += aStatement;
-  end;
-
-  if cxOverwrite.Checked then
-    (FQueryForm as TfmQueryWindow).meQuery.Lines.Clear;
-
-  (FQueryForm as TfmQueryWindow).meQuery.Lines.Text:= (FQueryForm as TfmQueryWindow).meQuery.Lines.Text + SQLStatement;
-  Close;
-end;}
 
 procedure TfmSQLHistory.bbInsertClick(Sender: TObject);
 var
@@ -136,6 +171,30 @@ begin
 
   (FQueryForm as TfmQueryWindow).meQuery.Lines.Text:= (FQueryForm as TfmQueryWindow).meQuery.Lines.Text + SQLStatement;
   Close;
+end;
+
+procedure TfmSQLHistory.btnClearHistoryClick(Sender: TObject);
+begin
+  if MessageDlg('Clear complete SQL history for this database?',
+       mtConfirmation, [mbYes, mbNo], 0) <> mrYes then
+    Exit;
+
+  try
+    fmMain.mdsHistory.DisableControls;
+    try
+      fmMain.mdsHistory.First;
+      while not fmMain.mdsHistory.EOF do
+        fmMain.mdsHistory.Delete;
+
+      fmMain.mdsHistory.SaveToFile(fmMain.CurrentHistoryFile);
+    finally
+      fmMain.mdsHistory.EnableControls;
+    end;
+  except
+    on E: Exception do
+      MessageDlg('Failed to clear history:' + sLineBreak + E.Message,
+        mtError, [mbOK], 0);
+  end;
 end;
 
 procedure TfmSQLHistory.cxAfterDateClick(Sender: TObject);
@@ -161,7 +220,7 @@ begin
   Parent.Free;
 end;
 
-procedure TfmSQLHistory.bbExportClick(Sender: TObject);
+procedure TfmSQLHistory.bbExportToTextFileClick(Sender: TObject);
 var
   CurrType: string;
   List: TStringList;

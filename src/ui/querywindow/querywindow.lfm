@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 861
+  Left = 499
   Height = 748
-  Top = 157
+  Top = 259
   Width = 1232
   Caption = 'fmQueryWindow'
   ClientHeight = 742
@@ -71006,9 +71006,6 @@ object fmQueryWindow: TfmQueryWindow
     MouseActions = <>
     MouseTextActions = <>
     MouseSelActions = <>
-    Lines.Strings = (
-      'meQuery'
-    )
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
