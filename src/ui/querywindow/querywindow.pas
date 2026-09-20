@@ -61,6 +61,7 @@ type
     Separator2: TMenuItem;
     Separator1: TMenuItem;
     SynAutoComplete1: TSynAutoComplete;
+    meQuery: TSynEdit;
     tbCommit: TToolButton;
     tbCommitRetaining: TToolButton;
     tbHistory: TToolButton;
@@ -104,7 +105,6 @@ type
     pmGrid: TPopupMenu;
     SaveDialog1: TSaveDialog;
     Splitter1: TSplitter;
-    meQuery: TSynEdit;
     SynCompletion1: TSynCompletion;
     SynSQLSyn1: TSynSQLSyn;
     ToolButton1: TToolButton;
@@ -152,7 +152,6 @@ type
     procedure lmUndoClick(Sender: TObject);
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
-    procedure meQueryChange(Sender: TObject);
     procedure meQueryChangeUpdating(ASender: TObject; AnUpdating: Boolean);
     procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure meQueryMouseEnter(Sender: TObject);
@@ -2404,11 +2403,6 @@ end;
 procedure TfmQueryWindow.lmFindAgainClick(Sender: TObject);
 begin
   meQuery.SearchReplace(FindDialog1.FindText, '', FOptions);
-end;
-
-procedure TfmQueryWindow.meQueryChange(Sender: TObject);
-begin
-
 end;
 
 procedure TfmQueryWindow.meQueryChangeUpdating(ASender: TObject;

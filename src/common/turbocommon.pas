@@ -5380,6 +5380,9 @@ initialization
 
   ExtractResourcesIfNeeded;
 
+  // temp-Verzeichnis für embedded connections sicherstellen
+  ForceDirectories(IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName)) + TmpDir);
+
   ReadIniFile;
   //WriteIniFile;
 

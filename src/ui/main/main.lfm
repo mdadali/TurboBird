@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 415
+  Left = 983
   Height = 649
-  Top = 131
+  Top = 573
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 649
+  ClientHeight = 620
   ClientWidth = 1486
   Color = clForm
   DragMode = dmAutomatic
@@ -5572,17 +5572,17 @@ object fmMain: TfmMain
     0045FFF00F4EFF000034FFFC7F33FF
   }
   Menu = MainMenu1
-  Position = poScreenCenter
-  ShowHint = True
-  LCLVersion = '4.8.0.0'
-  WindowState = wsMaximized
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
+  Position = poScreenCenter
+  ShowHint = True
+  LCLVersion = '2.2.6.0'
+  WindowState = wsMaximized
   object Splitter1: TSplitter
     Left = 360
-    Height = 594
+    Height = 565
     Top = 34
     Width = 14
     Beveled = True
@@ -5590,7 +5590,7 @@ object fmMain: TfmMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 21
-    Top = 628
+    Top = 599
     Width = 1486
     Panels = <    
       item
@@ -5667,8 +5667,8 @@ object fmMain: TfmMain
       Caption = 'tbCheckDBIntegrity'
       Enabled = False
       ImageIndex = 1
-      Visible = False
       OnClick = tbCheckDBIntegrityClick
+      Visible = False
     end
     object tbSQLMonitor: TToolButton
       Left = 145
@@ -5681,7 +5681,7 @@ object fmMain: TfmMain
   end
   object PageControl1: TPageControl
     Left = 377
-    Height = 587
+    Height = 558
     Top = 37
     Width = 1106
     ActivePage = tsMain
@@ -5694,7 +5694,6 @@ object fmMain: TfmMain
     BorderSpacing.InnerBorder = 1
     Font.Name = 'Sans'
     Images = ImageList1
-    Options = [nboShowCloseButtons, nboHidePageListPopup]
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -5704,6 +5703,7 @@ object fmMain: TfmMain
     OnMouseDown = PageControl1MouseDown
     OnMouseMove = PageControl1MouseMove
     OnMouseUp = PageControl1MouseUp
+    Options = [nboShowCloseButtons, nboHidePageListPopup]
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
@@ -5714,27 +5714,27 @@ object fmMain: TfmMain
   end
   object Button1: TButton
     Left = 0
-    Height = 594
+    Height = 565
     Top = 34
     Width = 27
     Align = alLeft
     Caption = '<>'
-    TabOrder = 4
     OnClick = Button1Click
+    TabOrder = 4
   end
   object pnlLeft: TPanel
     Left = 27
-    Height = 594
+    Height = 565
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 594
+    ClientHeight = 565
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 5
     object tvMain: TTreeView
       Left = 1
-      Height = 529
+      Height = 500
       Top = 64
       Width = 331
       Align = alClient
@@ -5751,7 +5751,6 @@ object fmMain: TfmMain
       RightClickSelect = True
       ShowLines = False
       TabOrder = 0
-      Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
       OnAddition = tvMainAddition
       OnChange = tvMainChange
       OnClick = tvMainClick
@@ -5760,6 +5759,7 @@ object fmMain: TfmMain
       OnExpanded = tvMainExpanded
       OnExpanding = tvMainExpanding
       OnKeyDown = tvMainKeyDown
+      Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
     end
     object grBoxObjectFilter: TGroupBox
       Left = 1
@@ -5777,8 +5777,8 @@ object fmMain: TfmMain
         Height = 31
         Top = 2
         Width = 285
-        TabOrder = 0
         OnChange = edtFilterChange
+        TabOrder = 0
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
@@ -5786,9 +5786,9 @@ object fmMain: TfmMain
         Top = 5
         Width = 21
         Checked = True
+        OnChange = CheckBoxFilterChange
         State = cbChecked
         TabOrder = 1
-        OnChange = CheckBoxFilterChange
       end
     end
     object Label1: TLabel
