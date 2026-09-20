@@ -122,8 +122,8 @@ begin
   FSourceTrans := ASourceTrans;
   FDestDB := ADestDB;
   FDestTrans := ADestTrans;
-  FSourceTable := ASourceTable;
-  FDestTable := ADestTable;
+  FSourceTable := MakeCaseSensitiveAuto(ASourceTable);
+  FDestTable := MakeCaseSensitiveAuto(ADestTable);
   FBatchSize := ABatchSize;
   FTotalRows := ATotalRows;
   FFromRow := AFromRow;
