@@ -1030,6 +1030,8 @@ begin
     QWindow.meQuery.Lines.Add('    part   varchar(8191) character set UTF8');
     QWindow.meQuery.Lines.Add(');');
 
+    // --- regex_* UDRs disabled: fb_regex not installed by default ---
+    QWindow.meQuery.Lines.Add('/*');
     QWindow.meQuery.Lines.Add('procedure regex_matches(');
     QWindow.meQuery.Lines.Add('    text    varchar(8191) character set UTF8,');
     QWindow.meQuery.Lines.Add('    pattern varchar(8191) character set UTF8');
@@ -1084,6 +1086,7 @@ begin
     QWindow.meQuery.Lines.Add('    number integer,');
     QWindow.meQuery.Lines.Add('    part   varchar(8191) character set UTF8');
     QWindow.meQuery.Lines.Add(');');
+    QWindow.meQuery.Lines.Add('*/');
 
     QWindow.meQuery.Lines.Add('end^');
     QWindow.meQuery.Lines.Add('');
@@ -1388,6 +1391,8 @@ begin
     QWindow.meQuery.Lines.Add('  end');
     QWindow.meQuery.Lines.Add('end');
 
+    // --- regex_* UDR bodies disabled: fb_regex not installed by default ---
+    QWindow.meQuery.Lines.Add('/*');
     QWindow.meQuery.Lines.Add('procedure regex_matches(');
     QWindow.meQuery.Lines.Add('    text    varchar(8191) character set UTF8,');
     QWindow.meQuery.Lines.Add('    pattern varchar(8191) character set UTF8');
@@ -1465,6 +1470,7 @@ begin
     QWindow.meQuery.Lines.Add('    ''fb_regex!split''');
     QWindow.meQuery.Lines.Add('engine');
     QWindow.meQuery.Lines.Add('    udr;');
+    QWindow.meQuery.Lines.Add('*/');
 
     QWindow.meQuery.Lines.Add('end^');
 

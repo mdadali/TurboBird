@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 983
+  Left = 360
   Height = 649
-  Top = 573
+  Top = 139
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 620
@@ -8525,7 +8525,7 @@ object fmMain: TfmMain
       OnClick = lmEditPackageClick
     end
     object lmPackageEditor: TMenuItem
-      Tag = 33
+      Tag = -10
       Caption = 'Package Editor'
     end
     object lmDropPackage: TMenuItem
