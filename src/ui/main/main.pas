@@ -582,6 +582,8 @@ type
 
     //ExternalTable
     procedure CloneTableAsExternal(const ATableName: string; ADBIndex: Integer);
+
+    property CurrentHistoryFile: string read FCurrentHistoryFile;
   end;
 
 
