@@ -1898,7 +1898,19 @@ begin
     if not ADatabase.Connected then
       ADatabase.Connected := true;
 
-    // 7. Transaktionsparameter zuweisen (falls übergeben), dann starten
+    // 7. NEU: Nach erfolgreicher Verbindung Session-Cache füllen.
+    //    Nur wenn das Passwort NICHT im RegRec gespeichert ist – dann
+    //    hat der User es über den Login-Dialog eingegeben und wir
+    //    halten es für die restliche Session im Cache (z.B. für CloneTable).
+    if (not Rec.SavePassword) and (ADatabase.Params.Values['password'] <> '') then
+    begin
+      SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName,
+                           ADatabase.Params.Values['password']);
+      SetServerSessionPassword(Rec.ServerName,
+                               ADatabase.Params.Values['password']);
+    end;
+
+    // 8. Transaktionsparameter zuweisen (falls übergeben), dann starten
     if Assigned(ATransaction) then
     begin
       if Assigned(ATxParams) then

@@ -9,6 +9,7 @@ uses
   ExtCtrls, Grids, CheckLst, Menus, IB, IBQuery, IBDatabase, IBDatabaseInfo,
   IBExtract, ibxscript,
 
+  SysTables,
   turbocommon,
 
   uCopyTableDataLocal,
@@ -115,13 +116,6 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure grBoxFormulaFieldsDblClick(Sender: TObject);
-    procedure grBoxFormulaPresetsClick(Sender: TObject);
-    procedure grBoxSourceClick(Sender: TObject);
-    procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
-      var BlobID: TISC_QUAD);
-    procedure Label2Click(Sender: TObject);
-    procedure Label5Click(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
   private
@@ -217,6 +211,9 @@ begin
   try
     FillSourceCombos;
     FillDestCombos;
+
+    if Trim(comboxSourceTables.Text) <> '' then
+      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
   finally
     // Guard bleibt AN bis FormShow!
     // FUpdatingCombos wird erst in FormShow auf False gesetzt,
@@ -248,7 +245,7 @@ begin
   UpdateCopyMethodAvailability;
 end;
 
-procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
+{procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 begin
   if FUpdatingCombos then Exit;
   FUpdatingCombos := True;
@@ -257,11 +254,53 @@ begin
     if ConfigureSourceConnection then
     begin
       FillSourceTableCombo;
-      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
+      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
       LoadFields;
     end
     else
       grBoxCopyMethod.Enabled := False;
+  finally
+    FUpdatingCombos := False;
+  end;
+  UpdateCopyMethodAvailability;
+end;}
+
+procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
+var
+  i: Integer;
+begin
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    comboxSourceTables.Items.Clear;
+
+    // FSourceDBIndex frisch ermitteln (falls noch -1)
+    FSourceDBIndex := -1;
+    for i := 0 to High(RegisteredDatabases) do
+      if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxSourceServer.Text)) and
+         SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxSourceDB.Text)) then
+      begin
+        FSourceDBIndex := i;
+        Break;
+      end;
+
+    // Wenn die geteilte DB nicht verbunden ist → Login-Flow auslösen
+    if (FSourceDBIndex >= 0) and
+       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       (not RegisteredDatabases[FSourceDBIndex].IBDatabase.Connected) then
+      ConnectToDBAs(FSourceDBIndex);
+
+    if ConfigureSourceConnection then
+    begin
+      FillSourceTableCombo;
+      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
+      LoadFields;
+    end
+    else
+    begin
+      grBoxCopyMethod.Enabled := False;
+      StatusBar1.SimpleText := 'Source database not connected.';
+    end;
   finally
     FUpdatingCombos := False;
   end;
@@ -273,7 +312,7 @@ begin
   if FUpdatingCombos then Exit;
   if Trim(comboxSourceTables.Text) = '' then Exit;   // Schutz gegen leeren Namen
 
-  edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
+  edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
   LoadFields;
 end;
 
@@ -365,6 +404,10 @@ begin
       comboxSourceTables.ItemIndex := 0;
       //edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
       Result := True;
+    end else
+    begin
+      chkLstFields.Items.Clear;
+      sgFields.RowCount := 0;
     end;
   except
   end;
@@ -374,13 +417,15 @@ function TfrmCloneTable.ConfigureSourceConnection: boolean;
 var
   i: Integer;
   DBRec: TDatabaseRec;
+  Pwd: string;
 begin
   Result := False;
   FSourceDBIndex := -1;
+  Pwd := '';
 
   for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxSourceServer.Text) and
-       SameText(RegisteredDatabases[i].RegRec.Title, comboxSourceDB.Text) then
+    if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxSourceServer.Text)) and
+       SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxSourceDB.Text)) then
     begin
       FSourceDBIndex := i;
       Break;
@@ -400,10 +445,28 @@ begin
     // --- Einstellungen von der geteilten DB in die Form-Component kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBSource);
 
+    // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
+    if Trim(IBDBSource.Params.Values['user_name']) = '' then
+      IBDBSource.Params.Values['user_name'] := DBRec.RegRec.UserName;
+
+    if Trim(IBDBSource.Params.Values['password']) = '' then
+    begin
+      Pwd := DBRec.RegRec.Password;
+
+      if Pwd = '' then
+        Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
+
+      if Pwd = '' then
+        Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
+
+      if (Pwd = '') and DBRec.RegRec.IsEmbedded then
+        Pwd := 'embedded_local';
+
+      if Pwd <> '' then
+        IBDBSource.Params.Values['password'] := Pwd;
+    end;
+
     // --- Transaktion: Params kopieren, DefaultDatabase auf Form-DB setzen ---
-
-    ShowMessage('DBRec.IBTransaction.Params.Text = ' + DBRec.IBTransaction.Params.Text);
-
     if DBRec.IBTransaction.Params.Count > 0 then
       IBTransSource.Params.Assign(DBRec.IBTransaction.Params)
     else
@@ -413,14 +476,6 @@ begin
       IBTransSource.Params.Add('rec_version');
       IBTransSource.Params.Add('nowait');
     end;
-
-    ShowMessage('IBTransSource.Params.Text = ' + IBTransSource.Params.Text);
-
-    IBTransSource.DefaultDatabase := IBDBSource;
-
-    // --- Query an die Form-eigenen Komponenten binden ---
-    IBQuerySource.Database := IBDBSource;
-    IBQuerySource.Transaction := IBTransSource;
 
     // --- Jetzt verbinden (Form-eigene Verbindung!) ---
     if not IBDBSource.Connected then
@@ -442,13 +497,15 @@ function TfrmCloneTable.ConfigureDestConnection: boolean;
 var
   i: Integer;
   DBRec: TDatabaseRec;
+  Pwd: string;
 begin
   Result := False;
   FDestDBIndex := -1;
+  Pwd := '';
 
   for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxDestServer.Text) and
-       SameText(RegisteredDatabases[i].RegRec.Title, comboxDestDB.Text) then
+    if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxDestServer.Text)) and
+       SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxDestDB.Text)) then
     begin
       FDestDBIndex := i;
       Break;
@@ -467,6 +524,27 @@ begin
 
     // --- Einstellungen kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBDest);
+
+    // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
+    if Trim(IBDBDest.Params.Values['user_name']) = '' then
+      IBDBDest.Params.Values['user_name'] := DBRec.RegRec.UserName;
+
+    if Trim(IBDBDest.Params.Values['password']) = '' then
+    begin
+      Pwd := DBRec.RegRec.Password;
+
+      if Pwd = '' then
+        Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
+
+      if Pwd = '' then
+        Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
+
+      if (Pwd = '') and DBRec.RegRec.IsEmbedded then
+        Pwd := 'embedded_local';
+
+      if Pwd <> '' then
+        IBDBDest.Params.Values['password'] := Pwd;
+    end;
 
     if DBRec.IBTransaction.Params.Count > 0 then
       IBTransDest.Params.Assign(DBRec.IBTransaction.Params)
@@ -682,30 +760,6 @@ begin
   end;
 end;
 
-{function TfrmCloneTable.GetFieldTransforms: TFieldTransformArray;
-var
-  i: Integer;
-begin
-  SetLength(Result, chkLstFields.Count);
-  for i := 0 to chkLstFields.Count - 1 do
-  begin
-    Result[i].SourceField := chkLstFields.Items[i];
-    Result[i].DestField := chkLstFields.Items[i];
-    Result[i].DestFieldType := FFields[i].FieldType;  // ← DAS FEHLT!
-
-    if FFields[i].IsComputed then
-    begin
-      Result[i].Formula := '';
-      Result[i].CopyField := False;
-    end
-    else
-    begin
-      Result[i].Formula := sgFields.Cells[3, i + 1];
-      Result[i].CopyField := chkLstFields.Checked[i];
-    end;
-  end;
-end;}
-
 function TfrmCloneTable.GetFieldTransforms: TFieldTransformArray;
 var
   i: Integer;
@@ -799,8 +853,17 @@ begin
           else
           begin
             Line := '  ' + FieldName + ' ' + FieldType;
+
             if DefaultSource <> '' then
-              Line := Line + ' DEFAULT ' + DefaultSource;
+            begin
+              // Firebird liefert DefaultSource MIT dem Wort "DEFAULT" davor.
+              // Nur ein "DEFAULT" anhängen, wenn noch nicht vorhanden.
+              if UpperCase(Copy(DefaultSource, 1, 7)) = 'DEFAULT' then
+                Line := Line + ' ' + DefaultSource
+              else
+                Line := Line + ' DEFAULT ' + DefaultSource;
+            end;
+
             if NullFlag = '1' then
               Line := Line + ' NOT NULL';
             Line := Line + ',';
@@ -1094,12 +1157,13 @@ begin
     Application.ProcessMessages;
 
     CopyEngineLocal := TCopyTableDataLocal.Create(
-      FSourceDBIndex, FDestDBIndex,
-      MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
-      Fields,
-      StrToIntDef(edtBatchSize.Text, 500000),
-      FromRow, ToRow
-    );
+          FSourceDBIndex, FDestDBIndex,
+          MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
+          Fields,
+          StrToIntDef(edtBatchSize.Text, 500000),
+          FromRow, ToRow
+        );
+
     try
       CopyEngineLocal.Execute;
     finally
@@ -1120,8 +1184,10 @@ begin
       MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
       StrToIntDef(edtBatchSize.Text, 10000),
-      FromRow, ToRow
+      FromRow, ToRow,
+      IBDBSource, IBTransSource, IBDBDest, IBTransDest
     );
+
     try
       CopyEngineCrossExecuteBlock.Execute;
     finally
@@ -1142,8 +1208,10 @@ begin
       MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
       StrToIntDef(edtBatchSize.Text, 10000),
-      FromRow, ToRow
+      FromRow, ToRow,
+      IBDBSource, IBTransSource, IBDBDest, IBTransDest
     );
+
     try
       CopyEngineCrossRowByRow.Execute;
     finally
@@ -1293,45 +1361,8 @@ procedure TfrmCloneTable.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(Self);
 
-  // Jetzt Guard AUS und die Kaskade bewusst EINMAL auslösen
+  // Jetzt Guard AUS
   FUpdatingCombos := False;
-
-  if comboxSourceServer.Items.Count > 0 then
-    comboxSourceServerChange(nil);
-
-  if comboxDestServer.Items.Count > 0 then
-    comboxDestServerChange(nil);
-end;
-
-procedure TfrmCloneTable.grBoxFormulaFieldsDblClick(Sender: TObject);
-begin
-
-end;
-
-procedure TfrmCloneTable.grBoxFormulaPresetsClick(Sender: TObject);
-begin
-
-end;
-
-procedure TfrmCloneTable.grBoxSourceClick(Sender: TObject);
-begin
-
-end;
-
-procedure TfrmCloneTable.IBXScript1GetParamValue(Sender: TObject;
-  ParamName: string; var BlobID: TISC_QUAD);
-begin
-
-end;
-
-procedure TfrmCloneTable.Label2Click(Sender: TObject);
-begin
-
-end;
-
-procedure TfrmCloneTable.Label5Click(Sender: TObject);
-begin
-
 end;
 
 procedure TfrmCloneTable.rbAllRowsChange(Sender: TObject);

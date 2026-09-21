@@ -94,6 +94,12 @@ type
     FCancelled     : Boolean;
     FThread        : TCopyThreadCrossExecuteBlock;
 
+    // Form-eigene Verbindungen (optional – wenn nil, Fallback auf RegisteredDatabases)
+    FSourceDB      : TIBDatabase;
+    FSourceTrans   : TIBTransaction;
+    FDestDB        : TIBDatabase;
+    FDestTrans     : TIBTransaction;
+
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
     function  GetDestDB : TIBDatabase;
@@ -106,7 +112,11 @@ type
       const AFieldTransforms : TFieldTransformArray;
       ABatchSize : Integer = 10000;
       AFromRow   : Integer = 1;
-      AToRow     : Integer = 0);
+      AToRow     : Integer = 0;
+      ASourceDB  : TIBDatabase = nil;
+      ASourceTrans : TIBTransaction = nil;
+      ADestDB    : TIBDatabase = nil;
+      ADestTrans : TIBTransaction = nil);
 
     destructor Destroy; override;
 
@@ -380,7 +390,7 @@ var
   BatchCount, BatchIndex: Integer;
   FromRow, ToRow, BatchRows: Integer;
   SQL: string;
-  RowByRowThread: TCopyThreadRowByRow;  // ← Der THREAD, nicht der Wrapper!
+  RowByRowThread: TCopyThreadRowByRow;
   OldDecimalSep: Char;
 begin
   OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
@@ -477,7 +487,11 @@ constructor TCopyTableDataCrossExecuteBlock.Create(
   const AFieldTransforms : TFieldTransformArray;
   ABatchSize : Integer;
   AFromRow : Integer;
-  AToRow : Integer);
+  AToRow : Integer;
+  ASourceDB : TIBDatabase;
+  ASourceTrans : TIBTransaction;
+  ADestDB : TIBDatabase;
+  ADestTrans : TIBTransaction);
 var
   i : Integer;
 begin
@@ -494,6 +508,12 @@ begin
   FCancelled     := False;
   FCopiedRows    := 0;
   FTotalRows     := 0;
+
+  // Form-eigene Verbindungen speichern
+  FSourceDB      := ASourceDB;
+  FSourceTrans   := ASourceTrans;
+  FDestDB        := ADestDB;
+  FDestTrans     := ADestTrans;
 
   SetLength(FFieldTransforms, Length(AFieldTransforms));
   for i := 0 to High(AFieldTransforms) do
@@ -513,22 +533,34 @@ end;
 
 function TCopyTableDataCrossExecuteBlock.GetSourceDB : TIBDatabase;
 begin
-  Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
+  if Assigned(FSourceDB) then
+    Result := FSourceDB
+  else
+    Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
 function TCopyTableDataCrossExecuteBlock.GetSourceTrans : TIBTransaction;
 begin
-  Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
+  if Assigned(FSourceTrans) then
+    Result := FSourceTrans
+  else
+    Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
 function TCopyTableDataCrossExecuteBlock.GetDestDB : TIBDatabase;
 begin
-  Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
+  if Assigned(FDestDB) then
+    Result := FDestDB
+  else
+    Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
 function TCopyTableDataCrossExecuteBlock.GetDestTrans : TIBTransaction;
 begin
-  Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
+  if Assigned(FDestTrans) then
+    Result := FDestTrans
+  else
+    Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
 procedure TCopyTableDataCrossExecuteBlock.CancelButtonClick(Sender: TObject);
@@ -563,10 +595,40 @@ begin
   FCopiedRows := 0;
   FCancelled := False;
 
+  // ============================================================
+  // Credentials für ON EXTERNAL DATA SOURCE sammeln.
+  // Reihenfolge: RegRec → Session-Cache (DB) → Session-Cache (Server) → Embedded
+  // ============================================================
   SourceConnStr := RegisteredDatabases[FSourceDBIndex].RegRec.DatabaseName;
-  SourceUser := RegisteredDatabases[FSourceDBIndex].RegRec.UserName;
+  SourceUser    := RegisteredDatabases[FSourceDBIndex].RegRec.UserName;
+
+  // Passwort: erst im RegRec, dann im Session-Cache
   SourcePwd := RegisteredDatabases[FSourceDBIndex].RegRec.Password;
 
+  if SourcePwd = '' then
+    SourcePwd := GetDBSessionPassword(
+      RegisteredDatabases[FSourceDBIndex].RegRec.ServerName,
+      RegisteredDatabases[FSourceDBIndex].RegRec.DatabaseName);
+
+  if SourcePwd = '' then
+    SourcePwd := GetServerSessionPassword(
+      RegisteredDatabases[FSourceDBIndex].RegRec.ServerName);
+
+  // Letzter Fallback – Passwort live aus der bereits verbundenen Connection lesen.
+  //      CloneTable erfordert eine verbundene DB, also ist das Passwort hier garantiert drin.
+
+  if SourcePwd = '' then
+    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       RegisteredDatabases[FSourceDBIndex].IBDatabase.Connected then
+      SourcePwd := RegisteredDatabases[FSourceDBIndex].IBDatabase.Params.Values['password'];
+
+  // Embedded-Sonderfall: Dummy-Passwort
+  if (SourcePwd = '') and RegisteredDatabases[FSourceDBIndex].RegRec.IsEmbedded then
+    SourcePwd := 'embedded_local';
+
+  // ============================================================
+  // Progress-Fenster
+  // ============================================================
   ProgressForm := TForm.Create(nil);
   try
     ProgressForm.FormStyle := fsNormal;
@@ -610,6 +672,9 @@ begin
     ProgressForm.Show;
     Application.ProcessMessages;
 
+    // ============================================================
+    // Record Count
+    // ============================================================
     CountQuery := TIBQuery.Create(nil);
     try
       CountQuery.Database := GetSourceDB;
@@ -642,6 +707,9 @@ begin
     BtnCancel.Enabled := True;
     Application.ProcessMessages;
 
+    // ============================================================
+    // Thread starten
+    // ============================================================
     FThread := TCopyThreadCrossExecuteBlock.Create(
       GetSourceDB, GetDestDB,
       GetSourceTrans, GetDestTrans,
@@ -677,6 +745,9 @@ begin
     ProgressForm.Free;
   end;
 
+  // ============================================================
+  // Fehler anzeigen
+  // ============================================================
   if ErrorMsg <> '' then
   begin
     ShowMessage('Copy error: ' + ErrorMsg);
@@ -684,6 +755,9 @@ begin
     Exit;
   end;
 
+  // ============================================================
+  // Statistik
+  // ============================================================
   EndTime := Now;
   if EndTime > FStartTime then
     RowsPerSec := FCopiedRows / ((EndTime - FStartTime) * 24 * 60 * 60)

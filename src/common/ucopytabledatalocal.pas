@@ -11,7 +11,7 @@ uses
 
 type
 
-  { TCopyThread }
+  { TCopyThreadLocal }
 
   TCopyThreadLocal = class(TThread)
   private
@@ -79,6 +79,12 @@ type
     FCancelled     : Boolean;
     FThread        : TCopyThreadLocal;
 
+    // Form-eigene Verbindungen (optional – wenn nil, Fallback auf RegisteredDatabases)
+    FSourceDB      : TIBDatabase;
+    FSourceTrans   : TIBTransaction;
+    FDestDB        : TIBDatabase;
+    FDestTrans     : TIBTransaction;
+
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
     function  GetDestDB : TIBDatabase;
@@ -91,7 +97,11 @@ type
       const AFieldTransforms : TFieldTransformArray;
       ABatchSize : Integer = 500000;
       AFromRow   : Integer = 1;
-      AToRow     : Integer = 0);
+      AToRow     : Integer = 0;
+      ASourceDB  : TIBDatabase = nil;
+      ASourceTrans : TIBTransaction = nil;
+      ADestDB    : TIBDatabase = nil;
+      ADestTrans : TIBTransaction = nil);
 
     destructor Destroy; override;
 
@@ -289,7 +299,11 @@ constructor TCopyTableDataLocal.Create(
   const AFieldTransforms : TFieldTransformArray;
   ABatchSize : Integer;
   AFromRow : Integer;
-  AToRow : Integer);
+  AToRow : Integer;
+  ASourceDB : TIBDatabase;
+  ASourceTrans : TIBTransaction;
+  ADestDB : TIBDatabase;
+  ADestTrans : TIBTransaction);
 var
   i : Integer;
 begin
@@ -306,6 +320,12 @@ begin
   FCancelled     := False;
   FCopiedRows    := 0;
   FTotalRows     := 0;
+
+  // Form-eigene Verbindungen speichern (können nil sein → Fallback auf RegisteredDatabases)
+  FSourceDB      := ASourceDB;
+  FSourceTrans   := ASourceTrans;
+  FDestDB        := ADestDB;
+  FDestTrans     := ADestTrans;
 
   SetLength(FFieldTransforms, Length(AFieldTransforms));
   for i := 0 to High(AFieldTransforms) do
@@ -325,22 +345,34 @@ end;
 
 function TCopyTableDataLocal.GetSourceDB : TIBDatabase;
 begin
-  Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
+  if Assigned(FSourceDB) then
+    Result := FSourceDB
+  else
+    Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
 function TCopyTableDataLocal.GetSourceTrans : TIBTransaction;
 begin
-  Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
+  if Assigned(FSourceTrans) then
+    Result := FSourceTrans
+  else
+    Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
 function TCopyTableDataLocal.GetDestDB : TIBDatabase;
 begin
-  Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
+  if Assigned(FDestDB) then
+    Result := FDestDB
+  else
+    Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
 function TCopyTableDataLocal.GetDestTrans : TIBTransaction;
 begin
-  Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
+  if Assigned(FDestTrans) then
+    Result := FDestTrans
+  else
+    Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
 procedure TCopyTableDataLocal.CancelButtonClick(Sender: TObject);
