@@ -1,7 +1,7 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 391
+  Left = 619
   Height = 734
-  Top = 151
+  Top = 158
   Width = 1281
   Align = alTop
   BorderStyle = bsDialog
@@ -25,7 +25,7 @@ object frmCloneTable: TfrmCloneTable
     object btnExecute: TButton
       Left = 816
       Height = 35
-      Top = 7
+      Top = 8
       Width = 104
       Caption = 'Execute'
       OnClick = btnExecuteClick
@@ -86,7 +86,6 @@ object frmCloneTable: TfrmCloneTable
       ClientHeight = 242
       ClientWidth = 437
       TabOrder = 0
-      OnClick = grBoxSourceClick
       object lbSourceTable: TLabel
         Left = 10
         Height = 19
@@ -177,7 +176,6 @@ object frmCloneTable: TfrmCloneTable
         Width = 58
         Caption = 'Database'
         ParentColor = False
-        OnClick = Label5Click
       end
       object comboxDestDB: TComboBox
         Left = 140
@@ -205,7 +203,6 @@ object frmCloneTable: TfrmCloneTable
         Width = 32
         Caption = 'Table'
         ParentColor = False
-        OnClick = Label2Click
       end
       object edtDestTable: TEdit
         Left = 140
@@ -387,7 +384,6 @@ object frmCloneTable: TfrmCloneTable
       ClientWidth = 395
       TabOrder = 5
       Visible = False
-      OnClick = grBoxFormulaPresetsClick
       object cbFormulaPreset: TComboBox
         Left = 16
         Height = 35
@@ -475,7 +471,6 @@ object frmCloneTable: TfrmCloneTable
     ClientHeight = 205
     ClientWidth = 1279
     TabOrder = 4
-    OnDblClick = grBoxFormulaFieldsDblClick
     object btnOpenExternalFile: TButton
       Left = 572
       Height = 25
@@ -554,7 +549,6 @@ object frmCloneTable: TfrmCloneTable
     Transaction = IBTransSource
     ShowAffectedRows = False
     ShowPerformanceStats = False
-    GetParamValue = IBXScript1GetParamValue
     Left = 304
     Top = 56
   end
