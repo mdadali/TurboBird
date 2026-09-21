@@ -2476,6 +2476,7 @@ end;
 procedure TfmMain.ReleaseRegisteredDatabase(dbIndex: Integer);
 begin
   if (dbIndex < 0) or (dbIndex >= Length(RegisteredDatabases)) then Exit;
+  if RegisteredDatabases[dbIndex].RegRec.Deleted then Exit;
 
   // CloseDB kümmert sich um Transaktionsabschluss und DB-Trennung
   if RegisteredDatabases[dbIndex].IBDatabase.Connected then
@@ -8487,7 +8488,7 @@ begin
       Title := RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.Title;
       DeleteDBRegistrationFromFile(Title, RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.ServerName);
       tvMain.Items.Delete(DBNode);
-      //LoadRegisteredDatabases;
+      LoadRegisteredDatabases;
       ServerNode := GetServerNodeByServerName(ServerName);
       if ServerNode <> nil then
         ServerNode.Expand(false);
