@@ -152,7 +152,6 @@ object frmCloneTable: TfrmCloneTable
       ClientHeight = 242
       ClientWidth = 542
       TabOrder = 1
-      OnClick = DestinationClick
       object Label4: TLabel
         Left = 10
         Height = 19
@@ -213,7 +212,6 @@ object frmCloneTable: TfrmCloneTable
         Height = 31
         Top = 108
         Width = 355
-        OnChange = edtDestTableChange
         TabOrder = 3
       end
       object chkCreateTable: TCheckBox

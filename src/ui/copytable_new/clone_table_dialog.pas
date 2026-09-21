@@ -112,8 +112,6 @@ type
     procedure comboxSourceDBChange(Sender: TObject);
     procedure comboxSourceServerChange(Sender: TObject);
     procedure comboxSourceTablesChange(Sender: TObject);
-    procedure DestinationClick(Sender: TObject);
-    procedure edtDestTableChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -273,20 +271,10 @@ end;
 procedure TfrmCloneTable.comboxSourceTablesChange(Sender: TObject);
 begin
   if FUpdatingCombos then Exit;
-  if Trim(comboxSourceTables.Text) = '' then Exit;   // 👈 Schutz gegen leeren Namen
+  if Trim(comboxSourceTables.Text) = '' then Exit;   // Schutz gegen leeren Namen
 
   edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
   LoadFields;
-end;
-
-procedure TfrmCloneTable.DestinationClick(Sender: TObject);
-begin
-
-end;
-
-procedure TfrmCloneTable.edtDestTableChange(Sender: TObject);
-begin
-
 end;
 
 procedure TfrmCloneTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -352,7 +340,15 @@ begin
     comboxSourceDB.ItemIndex := 0;
     Result := True;
     if ConfigureSourceConnection then
+    begin
       FillSourceTableCombo;
+      LoadFields;
+    end;
+  end else
+  begin
+    chkLstFields.Items.Clear;
+    sgFields.RowCount := 0;
+    comboxSourceTables.Items.Clear;
   end;
 end;
 
