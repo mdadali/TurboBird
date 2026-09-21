@@ -546,7 +546,6 @@ function CloneAllDatabasesForServer(const ASourceServer, ADestServer: string): i
 // gibt neuen DBIndex zurück
 function CopyDBRegistry(ASourceDBIndex  : Integer; const ADestServerName : string;
                         const ADestDBTitle : string = ''; ATemporary: Boolean = False): Integer;
-procedure RemoveDBRegistry(ADBIndex: Integer);
 function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
 function CreateDatabaseWithMetadata(ASourceDBIndex, ADestDBIndex: Integer): Boolean;
 function CloneDBRegistryInteractive(ANodeInfos: TPNodeInfos): Boolean;
@@ -1576,38 +1575,6 @@ begin
   end;
 
   Result := High(RegisteredDatabases);
-end;
-
-// --------------------------------------------------------------------------
-// Datenbank‑Registrierung sauber entfernen
-// --------------------------------------------------------------------------
-procedure RemoveDBRegistry(ADBIndex: Integer);
-var
-  i: Integer;
-begin
-  if (ADBIndex < 0) or (ADBIndex >= Length(RegisteredDatabases)) then
-    Exit;
-
-  // Aus Datei als gelöscht markieren
-  DeleteDBRegistrationFromFile(
-    RegisteredDatabases[ADBIndex].RegRec.Title,
-    RegisteredDatabases[ADBIndex].RegRec.ServerName
-  );
-  RemoveDeletedDBRegistrationsFromFile;
-
-  // Datenbank‑Objekte freigeben
-  with RegisteredDatabases[ADBIndex] do
-  begin
-    if Assigned(IBQuery)         then FreeAndNil(IBQuery);
-    if Assigned(IBDatabaseInfo)  then FreeAndNil(IBDatabaseInfo);
-    if Assigned(IBTransaction)   then FreeAndNil(IBTransaction);
-    if Assigned(IBDatabase)      then FreeAndNil(IBDatabase);
-  end;
-
-  // Aus dem Array entfernen
-  for i := ADBIndex to High(RegisteredDatabases) - 1 do
-    RegisteredDatabases[i] := RegisteredDatabases[i + 1];
-  SetLength(RegisteredDatabases, Length(RegisteredDatabases) - 1);
 end;
 
 {function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;

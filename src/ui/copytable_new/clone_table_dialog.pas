@@ -213,20 +213,17 @@ begin
   sgFields.ColWidths[2] := 120;
   sgFields.ColWidths[3] := 250;
 
-  // Combos initial füllen – OnChange-Handler sind durch FUpdatingCombos gesperrt
+  // Guard AN – alle OnChange-Events blockieren während der Initialisierung
   FUpdatingCombos := True;
+
   try
     FillSourceCombos;
     FillDestCombos;
   finally
-    FUpdatingCombos := False;
+    // Guard bleibt AN bis FormShow!
+    // FUpdatingCombos wird erst in FormShow auf False gesetzt,
+    // damit die Kaskade einmalig und kontrolliert ausgelöst wird.
   end;
-
-  // Initial-Zustand explizit auslösen (da OnChange während der Initialisierung gesperrt war)
-  if comboxSourceServer.Items.Count > 0 then
-    comboxSourceServerChange(nil);
-  if comboxDestServer.Items.Count > 0 then
-    comboxDestServerChange(nil);
 
   LoadFormulaPresets;
   UpdateCopyMethodAvailability;
@@ -314,8 +311,8 @@ end;
 procedure TfrmCloneTable.FillSourceCombos;
 begin
   FillSourceServerCombo;
-  FillSourceDBCombo;
-  FillSourceTableCombo;
+  //FillSourceDBCombo;
+  //FillSourceTableCombo;
 end;
 
 function TfrmCloneTable.FillSourceServerCombo: boolean;
@@ -370,7 +367,7 @@ begin
     if comboxSourceTables.Items.Count > 0 then
     begin
       comboxSourceTables.ItemIndex := 0;
-      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
+      //edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
       Result := True;
     end;
   except
@@ -542,7 +539,7 @@ end;
 procedure TfrmCloneTable.FillDestCombos;
 begin
   FillDestServerCombo;
-  FillDestDBCombo;
+
 end;
 
 function TfrmCloneTable.FillDestServerCombo: boolean;
@@ -558,6 +555,7 @@ begin
     if comboxDestServer.Items.Count > 0 then
     begin
       comboxDestServer.ItemIndex := 0;
+      FillDestDBCombo;
       Result := True;
     end;
   finally
@@ -1297,8 +1295,16 @@ end;
 
 procedure TfrmCloneTable.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
-  comboxSourceTablesChange(nil);
+  frmThemeSelector.btnApplyClick(Self);
+
+  // Jetzt Guard AUS und die Kaskade bewusst EINMAL auslösen
+  FUpdatingCombos := False;
+
+  if comboxSourceServer.Items.Count > 0 then
+    comboxSourceServerChange(nil);
+
+  if comboxDestServer.Items.Count > 0 then
+    comboxDestServerChange(nil);
 end;
 
 procedure TfrmCloneTable.grBoxFormulaFieldsDblClick(Sender: TObject);
