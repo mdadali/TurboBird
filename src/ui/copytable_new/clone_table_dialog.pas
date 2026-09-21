@@ -233,7 +233,7 @@ end;
 // SOURCE
 // ============================================================================
 
-procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
+{procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
 begin
   if FUpdatingCombos then Exit;
   FUpdatingCombos := True;
@@ -243,7 +243,7 @@ begin
     FUpdatingCombos := False;
   end;
   UpdateCopyMethodAvailability;
-end;
+end;}
 
 {procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 begin
@@ -264,6 +264,31 @@ begin
   end;
   UpdateCopyMethodAvailability;
 end;}
+
+procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
+begin
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    FillSourceDBCombo;
+
+    // Nach dem Füllen explizit die Kaskade auslösen,
+    // damit auch bei nur einer DB der Login-/Lade-Flow läuft.
+    if comboxSourceDB.Items.Count > 0 then
+    begin
+      comboxSourceDB.ItemIndex := 0;
+      // Handler explizit aufrufen, weil OnChange durch den Guard blockiert wird
+    end;
+  finally
+    FUpdatingCombos := False;
+  end;
+
+  // Jetzt Guard ist aus → explizit auslösen
+  if comboxSourceDB.Items.Count > 0 then
+    comboxSourceDBChange(nil);
+
+  UpdateCopyMethodAvailability;
+end;
 
 procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 var
@@ -591,19 +616,48 @@ begin
   FUpdatingCombos := True;
   try
     FillDestDBCombo;
+
+    if comboxDestDB.Items.Count > 0 then
+      comboxDestDB.ItemIndex := 0;
   finally
     FUpdatingCombos := False;
   end;
+
+  // Explizit die Kaskade auslösen – auch bei nur einer DB
+  if comboxDestDB.Items.Count > 0 then
+    comboxDestDBChange(nil);
+
   UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxDestDBChange(Sender: TObject);
+var
+  i: Integer;
 begin
   if FUpdatingCombos then Exit;
   FUpdatingCombos := True;
   try
+    // FDestDBIndex frisch ermitteln (falls noch -1)
+    FDestDBIndex := -1;
+    for i := 0 to High(RegisteredDatabases) do
+      if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxDestServer.Text)) and
+         SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxDestDB.Text)) then
+      begin
+        FDestDBIndex := i;
+        Break;
+      end;
+
+    // Wenn die geteilte DB nicht verbunden ist → Login-Flow auslösen
+    if (FDestDBIndex >= 0) and
+       Assigned(RegisteredDatabases[FDestDBIndex].IBDatabase) and
+       (not RegisteredDatabases[FDestDBIndex].IBDatabase.Connected) then
+      ConnectToDBAs(FDestDBIndex);
+
     if not ConfigureDestConnection then
+    begin
       grBoxCopyMethod.Enabled := False;
+      StatusBar1.SimpleText := 'Destination database not connected.';
+    end;
   finally
     FUpdatingCombos := False;
   end;
