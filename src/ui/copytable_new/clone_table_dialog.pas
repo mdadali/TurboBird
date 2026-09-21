@@ -131,6 +131,7 @@ type
     FSourceDBIndex: Integer;
     FDestDBIndex: Integer;
     FFields: array of TFieldInfo;
+    FUpdatingCombos: Boolean;
 
     function  FillSourceServerCombo: boolean;
     function  FillSourceDBCombo: boolean;
@@ -212,11 +213,20 @@ begin
   sgFields.ColWidths[2] := 120;
   sgFields.ColWidths[3] := 250;
 
-  comboxSourceServer.OnChange := nil;
-  FillSourceCombos;
-  FillDestCombos;
+  // Combos initial füllen – OnChange-Handler sind durch FUpdatingCombos gesperrt
+  FUpdatingCombos := True;
+  try
+    FillSourceCombos;
+    FillDestCombos;
+  finally
+    FUpdatingCombos := False;
+  end;
 
-  comboxSourceServer.OnChange := @comboxSourceServerChange;
+  // Initial-Zustand explizit auslösen (da OnChange während der Initialisierung gesperrt war)
+  if comboxSourceServer.Items.Count > 0 then
+    comboxSourceServerChange(nil);
+  if comboxDestServer.Items.Count > 0 then
+    comboxDestServerChange(nil);
 
   LoadFormulaPresets;
   UpdateCopyMethodAvailability;
@@ -233,24 +243,41 @@ end;
 
 procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
 begin
-  FillSourceDBCombo;
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    FillSourceDBCombo;
+  finally
+    FUpdatingCombos := False;
+  end;
   UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 begin
-  comboxSourceTables.Items.Clear;
-  if ConfigureSourceConnection then
-  begin
-    FillSourceTableCombo;
-    comboxSourceTablesChange(nil);
-    UpdateCopyMethodAvailability;
-  end else
-    grBoxCopyMethod.Enabled := false;
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    comboxSourceTables.Items.Clear;
+    if ConfigureSourceConnection then
+    begin
+      FillSourceTableCombo;
+      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
+      LoadFields;
+    end
+    else
+      grBoxCopyMethod.Enabled := False;
+  finally
+    FUpdatingCombos := False;
+  end;
+  UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxSourceTablesChange(Sender: TObject);
 begin
+  if FUpdatingCombos then Exit;
+  if Trim(comboxSourceTables.Text) = '' then Exit;   // 👈 Schutz gegen leeren Namen
+
   edtDestTable.Text := Trim(comboxSourceTables.Text) + '_COPY';
   LoadFields;
 end;
@@ -273,11 +300,11 @@ begin
     IBQueryDest.Close;
 
   if Assigned(IBTransSource) and IBTransSource.InTransaction then
-    IBTransSource.Commit;
+    IBTransSource.Rollback;
   if Assigned(IBTransDest) and IBTransDest.InTransaction then
-    IBTransDest.Commit;
+    IBTransDest.Rollback;
 
-  // JETZT SICHER – das sind eigene Kopien!
+  // Jetzt SICHER: das sind Form-eigene Verbindungen, nicht die geteilten!
   if Assigned(IBDBSource) and IBDBSource.Connected then
     IBDBSource.Connected := False;
   if Assigned(IBDBDest) and IBDBDest.Connected then
@@ -369,20 +396,117 @@ begin
   if FSourceDBIndex < 0 then Exit;
 
   try
+    DBRec := RegisteredDatabases[FSourceDBIndex];
+
+    // Trenne die Form-eigene Verbindung, falls sie noch offen ist
     if IBDBSource.Connected then
       IBDBSource.Connected := False;
+    if IBTransSource.InTransaction then
+      IBTransSource.Rollback;
 
-    DBRec := RegisteredDatabases[FSourceDBIndex];
-    IBDBSource := DBRec.IBDatabase;
-    IBTransSource := DBRec.IBTransaction;
-    IBQuerySource := DBRec.IBQuery;
+    // --- Einstellungen von der geteilten DB in die Form-Component kopieren ---
+    AssignIBDatabase(DBRec.IBDatabase, IBDBSource);
 
-    IBDBSource.Connected := True;
+    // --- Transaktion: Params kopieren, DefaultDatabase auf Form-DB setzen ---
+
+    ShowMessage('DBRec.IBTransaction.Params.Text = ' + DBRec.IBTransaction.Params.Text);
+
+    if DBRec.IBTransaction.Params.Count > 0 then
+      IBTransSource.Params.Assign(DBRec.IBTransaction.Params)
+    else
+    begin
+      IBTransSource.Params.Clear;
+      IBTransSource.Params.Add('read_committed');
+      IBTransSource.Params.Add('rec_version');
+      IBTransSource.Params.Add('nowait');
+    end;
+
+    ShowMessage('IBTransSource.Params.Text = ' + IBTransSource.Params.Text);
+
+    IBTransSource.DefaultDatabase := IBDBSource;
+
+    // --- Query an die Form-eigenen Komponenten binden ---
+    IBQuerySource.Database := IBDBSource;
+    IBQuerySource.Transaction := IBTransSource;
+
+    // --- Jetzt verbinden (Form-eigene Verbindung!) ---
+    if not IBDBSource.Connected then
+      IBDBSource.Connected := True;
     if not IBTransSource.InTransaction then
       IBTransSource.StartTransaction;
 
     Result := True;
   except
+    on E: Exception do
+    begin
+      StatusBar1.SimpleText := 'Could not configure source connection: ' + E.Message;
+      Result := False;
+    end;
+  end;
+end;
+
+function TfrmCloneTable.ConfigureDestConnection: boolean;
+var
+  i: Integer;
+  DBRec: TDatabaseRec;
+begin
+  Result := False;
+  FDestDBIndex := -1;
+
+  for i := 0 to High(RegisteredDatabases) do
+    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxDestServer.Text) and
+       SameText(RegisteredDatabases[i].RegRec.Title, comboxDestDB.Text) then
+    begin
+      FDestDBIndex := i;
+      Break;
+    end;
+
+  if FDestDBIndex < 0 then Exit;
+
+  try
+    DBRec := RegisteredDatabases[FDestDBIndex];
+
+    // Trenne die Form-eigene Verbindung, falls sie noch offen ist
+    if IBDBDest.Connected then
+      IBDBDest.Connected := False;
+    if IBTransDest.InTransaction then
+      IBTransDest.Rollback;
+
+    // --- Einstellungen kopieren ---
+    AssignIBDatabase(DBRec.IBDatabase, IBDBDest);
+
+    if DBRec.IBTransaction.Params.Count > 0 then
+      IBTransDest.Params.Assign(DBRec.IBTransaction.Params)
+    else
+    begin
+      IBTransDest.Params.Clear;
+      IBTransDest.Params.Add('read_committed');
+      IBTransDest.Params.Add('rec_version');
+      IBTransDest.Params.Add('nowait');
+    end;
+    IBTransDest.DefaultDatabase := IBDBDest;
+
+    // --- Query an die Form-eigenen Komponenten binden ---
+    IBQueryDest.Database := IBDBDest;
+    IBQueryDest.Transaction := IBTransDest;
+
+    // --- Verbinden ---
+    if not IBDBDest.Connected then
+      IBDBDest.Connected := True;
+    if not IBTransDest.InTransaction then
+      IBTransDest.StartTransaction;
+
+    // --- Skript-Component an die Form-eigenen Komponenten binden ---
+    IBXScript1.Database := IBDBDest;
+    IBXScript1.Transaction := IBTransDest;
+
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      StatusBar1.SimpleText := 'Could not configure destination connection: ' + E.Message;
+      Result := False;
+    end;
   end;
 end;
 
@@ -392,16 +516,27 @@ end;
 
 procedure TfrmCloneTable.comboxDestServerChange(Sender: TObject);
 begin
-  FillDestDBCombo;
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    FillDestDBCombo;
+  finally
+    FUpdatingCombos := False;
+  end;
   UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.comboxDestDBChange(Sender: TObject);
 begin
-  if ConfigureDestConnection then
-    UpdateCopyMethodAvailability
-  else
-    grBoxCopyMethod.Enabled := false;
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    if not ConfigureDestConnection then
+      grBoxCopyMethod.Enabled := False;
+  finally
+    FUpdatingCombos := False;
+  end;
+  UpdateCopyMethodAvailability;
 end;
 
 procedure TfrmCloneTable.FillDestCombos;
@@ -448,45 +583,6 @@ begin
   end;
 end;
 
-function TfrmCloneTable.ConfigureDestConnection: boolean;
-var
-  i: Integer;
-  DBRec: TDatabaseRec;
-begin
-  Result := False;
-  FDestDBIndex := -1;
-
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxDestServer.Text) and
-       SameText(RegisteredDatabases[i].RegRec.Title, comboxDestDB.Text) then
-    begin
-      FDestDBIndex := i;
-      Break;
-    end;
-
-  if FDestDBIndex < 0 then Exit;
-
-  try
-    if IBDBDest.Connected then
-      IBDBDest.Connected := False;
-
-    DBRec := RegisteredDatabases[FDestDBIndex];
-    IBDBDest := DBRec.IBDatabase;
-    IBTransDest := DBRec.IBTransaction;
-    IBQueryDest := DBRec.IBQuery;
-
-    IBDBDest.Connected := True;
-    if not IBTransDest.InTransaction then
-      IBTransDest.StartTransaction;
-
-    IBXScript1.Database := IBDBDest;
-    IBXScript1.Transaction := IBTransDest;
-
-    Result := True;
-  except
-  end;
-end;
-
 // ============================================================================
 // FIELDER
 // ============================================================================
@@ -497,44 +593,58 @@ var
   FieldName, FieldType, ComputedSource: string;
   FSize: Integer;
 begin
+  // === Absicherung: ungültige Ausgangslage verhindern ===
   if FSourceDBIndex < 0 then Exit;
+  if Trim(comboxSourceTables.Text) = '' then Exit;
+  if not Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) then Exit;
 
   SetLength(FFields, 0);
   chkLstFields.Clear;
   sgFields.RowCount := 1;
 
-  Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase, Trim(comboxSourceTables.Text));
   try
-    while not Iso.Query.EOF do
-    begin
-      FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
-      GetFieldType(Iso.Query, FieldType, FSize);
-      ComputedSource := Trim(Iso.Query.FieldByName('computed_source').AsString);
+    Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase,
+                             Trim(comboxSourceTables.Text));
+    try
+      while not Iso.Query.EOF do
+      begin
+        FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
+        GetFieldType(Iso.Query, FieldType, FSize);
+        ComputedSource := Trim(Iso.Query.FieldByName('computed_source').AsString);
 
-      i := Length(FFields);
-      SetLength(FFields, i + 1);
-      FFields[i].FieldName := FieldName;
-      FFields[i].FieldType := FieldType;
-      FFields[i].IsComputed := (ComputedSource <> '');
-      FFields[i].Checked := True;
-      FFields[i].Formula := '';
+        i := Length(FFields);
+        SetLength(FFields, i + 1);
+        FFields[i].FieldName := FieldName;
+        FFields[i].FieldType := FieldType;
+        FFields[i].IsComputed := (ComputedSource <> '');
+        FFields[i].Checked := True;
+        FFields[i].Formula := '';
 
-      chkLstFields.Items.Add(FieldName);
-      chkLstFields.Checked[i] := True;
+        chkLstFields.Items.Add(FieldName);
+        chkLstFields.Checked[i] := True;
 
-      sgFields.RowCount := i + 2;
-      sgFields.Cells[0, i + 1] := '1';
-      sgFields.Cells[1, i + 1] := FieldName;
-      sgFields.Cells[2, i + 1] := FieldType;
-      sgFields.Cells[3, i + 1] := '';
+        sgFields.RowCount := i + 2;
+        sgFields.Cells[0, i + 1] := '1';
+        sgFields.Cells[1, i + 1] := FieldName;
+        sgFields.Cells[2, i + 1] := FieldType;
+        sgFields.Cells[3, i + 1] := '';
 
-      if FFields[i].IsComputed then
-        sgFields.Cells[3, i + 1] := '(computed)';
+        if FFields[i].IsComputed then
+          sgFields.Cells[3, i + 1] := '(computed)';
 
-      Iso.Query.Next;
+        Iso.Query.Next;
+      end;
+    finally
+      Iso.Free;
     end;
-  finally
-    Iso.Free;
+  except
+    on E: Exception do
+    begin
+      StatusBar1.SimpleText := 'Could not load fields: ' + E.Message;
+      SetLength(FFields, 0);
+      chkLstFields.Clear;
+      sgFields.RowCount := 1;
+    end;
   end;
 
   //btnGenTestFormulasClick(nil);
