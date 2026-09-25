@@ -93,6 +93,7 @@ type
     pnlFieldsSelectButtons: TPanel;
     pnlTop: TPanel;
     PopupMenu1: TPopupMenu;
+    rbInsertSelect: TRadioButton;
     rbRowByRow: TRadioButton;
     rbExecuteBlock: TRadioButton;
     rbAllRows: TRadioButton;
@@ -204,25 +205,51 @@ procedure TfrmCloneTable.UpdateCopyMethodAvailability;
 var
   SameServer, SameDB: Boolean;
 begin
-  // Prüfen ob Quelle und Ziel auf demselben Server/DB sind
-  SameServer := SameText(comboxSourceServer.Text, comboxDestServer.Text);
-  SameDB := SameText(comboxSourceDB.Text, comboxDestDB.Text) and SameServer;
+  SameServer := SameText(Trim(comboxSourceServer.Text), Trim(comboxDestServer.Text));
+  SameDB := SameServer and SameText(Trim(comboxSourceDB.Text), Trim(comboxDestDB.Text));
 
+  // GroupBox ist IMMER enabled
+  grBoxCopyMethod.Enabled := True;
+
+  // Insert Select: nur bei SameDB möglich
+  rbInsertSelect.Enabled := SameDB;
+
+  // Execute Block: nur bei Cross-DB sinnvoll
+  rbExecuteBlock.Enabled := not SameDB;
+
+  // Row-by-Row: immer möglich
+  rbRowByRow.Enabled := True;
+
+  // Sicherstellen, dass eine gültige Option ausgewählt ist
   if SameDB then
   begin
-    // Gleiche DB → Keine Cross-Methoden nötig
-    grBoxCopyMethod.Enabled := False;
-    rbExecuteBlock.Checked := False;
-    rbRowByRow.Checked := False;
-    StatusBar1.SimpleText := 'Same database: INSERT...SELECT will be used (fastest).';
+    // Insert Select ist der Default
+    if not rbInsertSelect.Checked and not rbRowByRow.Checked then
+      rbInsertSelect.Checked := True;
+
+    // Falls eine ungültige Option ausgewählt war → korrigieren
+    if rbExecuteBlock.Checked then
+    begin
+      rbExecuteBlock.Checked := False;
+      rbInsertSelect.Checked := True;
+    end;
+
+    StatusBar1.SimpleText := 'Same database: Insert Select (default) or Row-by-Row.';
   end
   else
   begin
-    // Unterschiedliche DBs → Cross-Methoden verfügbar
-    grBoxCopyMethod.Enabled := True;
+    // Cross-DB: Default = Execute Block
     if not rbExecuteBlock.Checked and not rbRowByRow.Checked then
-      rbExecuteBlock.Checked := True;  // Default: Automatic
-    StatusBar1.SimpleText := 'Cross-database: Select copy method.';
+      rbExecuteBlock.Checked := True;
+
+    // Falls Insert Select ausgewählt war → korrigieren
+    if rbInsertSelect.Checked then
+    begin
+      rbInsertSelect.Checked := False;
+      rbExecuteBlock.Checked := True;
+    end;
+
+    StatusBar1.SimpleText := 'Cross-database: Execute Block (default) or Row-by-Row.';
   end;
 end;
 
@@ -1113,8 +1140,13 @@ var
   FromRow, ToRow: Integer;
   i: integer;
 
+  NeedsProblemCheck: Boolean;
+  IsProblemField: Boolean;
+  TmpMethodName: string;
+
   ReportForm: TfrmCopyReport;
   Stats: TCopyStatistics;
+  FormulasText: string;
 begin
   if chkboxExternalTable.Checked and (Trim(edtExternalFile.Text) = '') then
   begin
@@ -1200,47 +1232,6 @@ begin
     Exit;
   end;
 
-  // ============================================================
-  // Wenn Ziel externe Tabelle: Problemfelder automatisch abwählen
-  // ============================================================
-  if chkboxExternalTable.Checked then
-  begin
-    SkippedFields := '';
-    for i := 0 to chkLstFields.Count - 1 do
-    begin
-      if chkLstFields.Checked[i] then
-      begin
-        if FFields[i].IsComputed or
-           (Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0) or
-           (Pos('[', FFields[i].FieldType) > 0) then
-        begin
-          chkLstFields.Checked[i] := False;
-          sgFields.Cells[0, i + 1] := '0';
-          if SkippedFields <> '' then SkippedFields := SkippedFields + sLineBreak;
-          SkippedFields := SkippedFields + '  • ' + FFields[i].FieldName +
-                           '  (' + FFields[i].FieldType + ')';
-        end;
-      end;
-    end;
-
-    if SkippedFields <> '' then
-    begin
-      if MessageDlg(
-           'External tables do not support these field types.' + sLineBreak +
-           sLineBreak +
-           'The following fields have been deselected:' + sLineBreak +
-           sLineBreak +
-           SkippedFields + sLineBreak +
-           sLineBreak +
-           'Start the copy operation anyway?',
-           mtWarning, [mbYes, mbNo], 0) <> mrYes then
-      begin
-        StatusBar1.SimpleText := 'Copy cancelled by user.';
-        Exit;
-      end;
-    end;
-  end;
-
   // From/To
   if rbRange.Checked then
   begin
@@ -1253,6 +1244,80 @@ begin
     ToRow := 0;
   end;
 
+  // ============================================================
+  // Problemfelder prüfen – abhängig von der Engine
+  //   External / Execute Block: BLOB, Array, Computed
+  //   Row-by-Row:               nur Array
+  // ============================================================
+  NeedsProblemCheck := chkboxExternalTable.Checked or
+                       ((FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked) or
+                       rbRowByRow.Checked;
+
+  if NeedsProblemCheck then
+  begin
+    SkippedFields := '';
+    for i := 0 to chkLstFields.Count - 1 do
+    begin
+      if chkLstFields.Checked[i] then
+      begin
+        IsProblemField := False;
+
+        // Arrays sind immer problematisch (außer bei Insert Select)
+        if Pos('[', FFields[i].FieldType) > 0 then
+          IsProblemField := True;
+
+        // BLOB und Computed nur bei External/Execute Block
+        if chkboxExternalTable.Checked or
+           ((FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked) then
+        begin
+          if FFields[i].IsComputed or
+             (Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0) then
+            IsProblemField := True;
+        end;
+
+        if IsProblemField then
+        begin
+          chkLstFields.Checked[i] := False;
+          sgFields.Cells[0, i + 1] := '0';
+          if SkippedFields <> '' then SkippedFields := SkippedFields + sLineBreak;
+          SkippedFields := SkippedFields + '  • ' + FFields[i].FieldName +
+                           '  (' + FFields[i].FieldType + ')';
+        end;
+      end;
+    end;
+
+    if SkippedFields <> '' then
+    begin
+      // Methode ermitteln für die Meldung
+      if chkboxExternalTable.Checked then
+        TmpMethodName := 'External Table'
+      else if (FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked then
+        TmpMethodName := 'Execute Block'
+      else if rbRowByRow.Checked then
+        TmpMethodName := 'Row-by-Row'
+      else
+        TmpMethodName := 'The selected method';
+
+      if MessageDlg(
+           TmpMethodName + ' cannot copy the following field types:' + sLineBreak +
+           sLineBreak +
+           SkippedFields + sLineBreak +
+           sLineBreak +
+           'These fields have been deselected.' + sLineBreak +
+           sLineBreak +
+           'Hint:' + sLineBreak +
+           '  • Arrays       → use Insert Select (same DB) or gbak' + sLineBreak +
+           '  • BLOB/Computed → use Insert Select or Row-by-Row' + sLineBreak +
+           sLineBreak +
+           'Start the copy operation anyway?',
+           mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      begin
+        StatusBar1.SimpleText := 'Copy cancelled by user.';
+        Exit;
+      end;
+    end;
+  end;
+
   // Felder aus Grid holen
   Fields := GetFieldTransforms;
 
@@ -1263,9 +1328,9 @@ begin
     IBTransDest.StartTransaction;
 
   // ============================================================
-  // GLEICHE DATENBANK → Immer INSERT...SELECT
+  // SAME-DB: Insert Select (alle Feldtypen)
   // ============================================================
-  if FSourceDBIndex = FDestDBIndex then
+  if (FSourceDBIndex = FDestDBIndex) and rbInsertSelect.Checked then
   begin
     StatusBar1.SimpleText := 'Copying within same database (INSERT...SELECT)...';
     Application.ProcessMessages;
@@ -1286,6 +1351,27 @@ begin
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
 
+    // --- Formeln sammeln ---
+    Stats.FormulasApplied := '';
+    if chkUseFormula.Checked then
+    begin
+      FormulasText := '';
+      for i := 0 to chkLstFields.Count - 1 do
+      begin
+        if chkLstFields.Checked[i] and (Trim(sgFields.Cells[3, i + 1]) <> '') then
+          FormulasText := FormulasText +
+            '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[3, i + 1] + sLineBreak;
+      end;
+      Stats.FormulasApplied := FormulasText;
+    end;
+
+    // --- CREATE TABLE ---
+    if chkCreateTable.Checked then
+      Stats.CreateTableSQL := GenerateCreateTableSQL
+    else
+      Stats.CreateTableSQL := '';
+
+    // --- Report anzeigen ---
     ReportForm := TfrmCopyReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
@@ -1296,9 +1382,9 @@ begin
   end
 
   // ============================================================
-  // CROSS-DB: Automatic (EXECUTE BLOCK + UPDATE wenn nötig)
+  // CROSS-DB: Execute Block (keine Arrays, BLOBs, Computed)
   // ============================================================
-  else if rbExecuteBlock.Checked then
+  else if (FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked then
   begin
     StatusBar1.SimpleText := 'Copying across databases (Execute Block)...';
     Application.ProcessMessages;
@@ -1320,6 +1406,27 @@ begin
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
 
+    // --- Formeln sammeln ---
+    Stats.FormulasApplied := '';
+    if chkUseFormula.Checked then
+    begin
+      FormulasText := '';
+      for i := 0 to chkLstFields.Count - 1 do
+      begin
+        if chkLstFields.Checked[i] and (Trim(sgFields.Cells[3, i + 1]) <> '') then
+          FormulasText := FormulasText +
+            '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[3, i + 1] + sLineBreak;
+      end;
+      Stats.FormulasApplied := FormulasText;
+    end;
+
+    // --- CREATE TABLE ---
+    if chkCreateTable.Checked then
+      Stats.CreateTableSQL := GenerateCreateTableSQL
+    else
+      Stats.CreateTableSQL := '';
+
+    // --- Report anzeigen ---
     ReportForm := TfrmCopyReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
@@ -1330,7 +1437,7 @@ begin
   end
 
   // ============================================================
-  // CROSS-DB: Row-by-Row (komplett, alle Felder)
+  // CROSS-DB: Row-by-Row (keine Arrays)
   // ============================================================
   else
   begin
@@ -1348,12 +1455,34 @@ begin
 
     try
       CopyEngineCrossRowByRow.Execute;
+      Stats := CopyEngineCrossRowByRow.Statistics;
     finally
       CopyEngineCrossRowByRow.Free;
     end;
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
 
+    // --- Formeln sammeln ---
+    Stats.FormulasApplied := '';
+    if chkUseFormula.Checked then
+    begin
+      FormulasText := '';
+      for i := 0 to chkLstFields.Count - 1 do
+      begin
+        if chkLstFields.Checked[i] and (Trim(sgFields.Cells[3, i + 1]) <> '') then
+          FormulasText := FormulasText +
+            '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[3, i + 1] + sLineBreak;
+      end;
+      Stats.FormulasApplied := FormulasText;
+    end;
+
+    // --- CREATE TABLE ---
+    if chkCreateTable.Checked then
+      Stats.CreateTableSQL := GenerateCreateTableSQL
+    else
+      Stats.CreateTableSQL := '';
+
+    // --- Report anzeigen ---
     ReportForm := TfrmCopyReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
@@ -1361,7 +1490,6 @@ begin
     finally
       ReportForm.Free;
     end;
-
   end;
 
   StatusBar1.SimpleText := 'Copy completed: ' + Trim(comboxSourceTables.Text) + ' → ' + DestTable;
