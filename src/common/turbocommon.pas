@@ -30,6 +30,7 @@ uses
   IBCustomDataSet,
   IBTable,
   IBXScript,
+  IBExtract,
 
   Variants,
 
@@ -88,6 +89,8 @@ type
   tvotIndex,
 
   tvotTableReferencesRoot,
+  tvotTableReference,
+
   tvotTablePermissionsRoot,
 
   tvotGeneratorRoot,
@@ -2560,28 +2563,8 @@ begin
 end;
 
 procedure ParseFBVersion(AFBVersionString: string; out AFBVersionMajor: word; out AFBVersionMinor: word);
-var
-  S: string;
-  DotPos: Integer;
-  MajorStr, MinorStr: string;
 begin
-  AFBVersionMajor := 0;
-  AFBVersionMinor := 0;
-
-  S := AFBVersionString;
-  if Pos('Firebird', S) > 0 then
-    S := Trim(Copy(S, Pos('Firebird', S) + Length('Firebird'), MaxInt));
-
-  DotPos := Pos('.', S);
-  if DotPos > 0 then
-  begin
-    MajorStr := Copy(S, 1, DotPos-1);
-    MinorStr := Copy(S, DotPos+1, MaxInt);
-    AFBVersionMajor := StrToIntDef(MajorStr, 0);
-    AFBVersionMinor := StrToIntDef(MinorStr, 0);
-  end
-  else
-    AFBVersionMajor := StrToIntDef(S, 0);
+  ParseFBVersionString(AFBVersionString, AFBVersionMajor, AFBVersionMinor);
 end;
 
 function TestEmbeddedConnection(AServerRec: TServerRecord; out AFBVersionMajor: word;
@@ -4167,30 +4150,141 @@ end;
 function GetRootObjectTypeFor(AObjectType: TTreeViewObjectType): TTreeViewObjectType;
 begin
   case AObjectType of
-    tvotFunction:            Result := tvotFunctionRoot;
-    tvotProcedure:           Result := tvotProcedureRoot;
-    tvotUDF:                 Result := tvotUDFRoot;
-    tvotUDRFunction:         Result := tvotUDRFunctionRoot;
-    tvotUDRProcedure:        Result := tvotUDRProcedureRoot;
-    tvotPackageFunction:     Result := tvotPackageFunctionRoot;
-    tvotPackageProcedure:    Result := tvotPackageProcedureRoot;
-    tvotPackageUDRFunction:  Result := tvotPackageUDRFunctionRoot;
-    tvotPackageUDRProcedure: Result := tvotPackageUDRProcedureRoot;
-    tvotTable:               Result := tvotTableRoot;
-    tvotTableField:          Result := tvotTableFieldRoot;
-    tvotView:                Result := tvotViewRoot;
-    tvotSystemTable:         Result := tvotSystemTableRoot;
 
-    tvotSystemTableField:     Result := tvotSystemTableFieldRoot;
+    // ============================================================
+    // Root-Typen auf sich selbst (Idempotenz)
+    // ============================================================
+    tvotServer:                     Result := tvotServer;
+    tvotEmbeddedServer:             Result := tvotEmbeddedServer;
+    tvotDatabase:                   Result := tvotDatabase;
+    tvotQueryWindow:                Result := tvotQueryWindow;
 
+    tvotTableRoot:                  Result := tvotTableRoot;
+    tvotTableFieldRoot:             Result := tvotTableFieldRoot;
+    tvotConstraintRoot:             Result := tvotConstraintRoot;
+    tvotPrimaryKeyRoot:             Result := tvotPrimaryKeyRoot;
+    tvotForeignKeyRoot:             Result := tvotForeignKeyRoot;
+    tvotUniqueConstraintRoot:       Result := tvotUniqueConstraintRoot;
+    tvotCheckConstraintRoot:        Result := tvotCheckConstraintRoot;
+    tvotNotNullConstraintRoot:      Result := tvotNotNullConstraintRoot;
+    tvotIndexRoot:                  Result := tvotIndexRoot;
+    tvotTableReferencesRoot:        Result := tvotTableReferencesRoot;
+    tvotTablePermissionsRoot:       Result := tvotTablePermissionsRoot;
 
-    // Constraints (NEU)
-    tvotPrimaryKey:          Result := tvotPrimaryKeyRoot;
-    tvotForeignKey:          Result := tvotForeignKeyRoot;
-    tvotUniqueConstraint:    Result := tvotUniqueConstraintRoot;
-    tvotCheckConstraint:     Result := tvotCheckConstraintRoot;
-    tvotNotNullConstraint:   Result := tvotNotNullConstraintRoot;
-    tvotConstraint:          Result := tvotConstraintRoot;
+    tvotGeneratorRoot:              Result := tvotGeneratorRoot;
+    tvotTriggerRoot:                Result := tvotTriggerRoot;
+    tvotTableTriggerRoot:           Result := tvotTableTriggerRoot;
+    tvotDBTriggerRoot:              Result := tvotDBTriggerRoot;
+    tvotDDLTriggerRoot:             Result := tvotDDLTriggerRoot;
+    tvotUDRTriggerRoot:             Result := tvotUDRTriggerRoot;
+    tvotUDRTableTriggerRoot:        Result := tvotUDRTableTriggerRoot;
+    tvotUDRDBTriggerRoot:           Result := tvotUDRDBTriggerRoot;
+    tvotUDRDDLTriggerRoot:          Result := tvotUDRDDLTriggerRoot;
+
+    tvotViewRoot:                   Result := tvotViewRoot;
+    tvotDomainRoot:                 Result := tvotDomainRoot;
+    tvotRoleRoot:                   Result := tvotRoleRoot;
+    tvotExceptionRoot:              Result := tvotExceptionRoot;
+    tvotUserRoot:                   Result := tvotUserRoot;
+
+    tvotProcedureRoot:              Result := tvotProcedureRoot;
+    tvotFunctionRoot:               Result := tvotFunctionRoot;
+    tvotUDRoot:                     Result := tvotUDRoot;
+    tvotUDFRoot:                    Result := tvotUDFRoot;
+    tvotUDRRoot:                    Result := tvotUDRRoot;
+    tvotUDRFunctionRoot:            Result := tvotUDRFunctionRoot;
+    tvotUDRProcedureRoot:           Result := tvotUDRProcedureRoot;
+
+    tvotPackageRoot:                Result := tvotPackageRoot;
+    tvotPackageUDFFunctionRoot:     Result := tvotPackageUDFFunctionRoot;
+    tvotPackageFunctionRoot:        Result := tvotPackageFunctionRoot;
+    tvotPackageProcedureRoot:       Result := tvotPackageProcedureRoot;
+    tvotPackageUDRFunctionRoot:     Result := tvotPackageUDRFunctionRoot;
+    tvotPackageUDRProcedureRoot:    Result := tvotPackageUDRProcedureRoot;
+    tvotPackageTriggerRoot:         Result := tvotPackageTriggerRoot;
+    tvotPackageUDRTriggerRoot:      Result := tvotPackageUDRTriggerRoot;
+
+    tvotDatabaseRoot:               Result := tvotDatabaseRoot;
+    tvotBLOBFilterRoot:             Result := tvotBLOBFilterRoot;
+    tvotCommentRoot:                Result := tvotCommentRoot;
+    tvotDataRoot:                   Result := tvotDataRoot;
+
+    tvotSystemObjectRoot:           Result := tvotSystemObjectRoot;
+    tvotSystemTableRoot:            Result := tvotSystemTableRoot;
+    tvotSystemTableFieldRoot:       Result := tvotSystemTableFieldRoot;
+    tvotSystemDomainRoot:           Result := tvotSystemDomainRoot;
+    tvotSystemGeneratorRoot:        Result := tvotSystemGeneratorRoot;
+    tvotSystemTriggerRoot:          Result := tvotSystemTriggerRoot;
+    tvotSystemConstraintRoot:       Result := tvotSystemConstraintRoot;
+    tvotSystemIndexRoot:            Result := tvotSystemIndexRoot;
+    tvotSystemRoleRoot:             Result := tvotSystemRoleRoot;
+    tvotSystemUserRoot:             Result := tvotSystemUserRoot;
+    tvotSystemExceptionRoot:        Result := tvotSystemExceptionRoot;
+
+    tvotFormRoot:                   Result := tvotFormRoot;
+
+    // ============================================================
+    // Einzel-Objekte → ihr Root
+    // ============================================================
+    tvotTable:                      Result := tvotTableRoot;
+    tvotTableField:                 Result := tvotTableFieldRoot;
+    tvotConstraint:                 Result := tvotConstraintRoot;
+    tvotPrimaryKey:                 Result := tvotPrimaryKeyRoot;
+    tvotForeignKey:                 Result := tvotForeignKeyRoot;
+    tvotUniqueConstraint:           Result := tvotUniqueConstraintRoot;
+    tvotCheckConstraint:            Result := tvotCheckConstraintRoot;
+    tvotNotNullConstraint:          Result := tvotNotNullConstraintRoot;
+    tvotIndex:                      Result := tvotIndexRoot;
+    tvotTableReference:             Result := tvotTableReferencesRoot;   // ← NEU
+
+    tvotGenerator:                  Result := tvotGeneratorRoot;
+    tvotTrigger:                    Result := tvotTriggerRoot;
+    tvotTableTrigger:               Result := tvotTableTriggerRoot;
+    tvotDBTrigger:                  Result := tvotDBTriggerRoot;
+    tvotDDLTrigger:                 Result := tvotDDLTriggerRoot;
+    tvotUDRTrigger:                 Result := tvotUDRTriggerRoot;
+    tvotUDRTableTrigger:            Result := tvotUDRTableTriggerRoot;
+    tvotUDRDBTrigger:               Result := tvotUDRDBTriggerRoot;
+    tvotUDRDDLTrigger:              Result := tvotUDRDDLTriggerRoot;
+
+    tvotView:                       Result := tvotViewRoot;
+    tvotDomain:                     Result := tvotDomainRoot;
+    tvotRole:                       Result := tvotRoleRoot;
+    tvotException:                  Result := tvotExceptionRoot;
+    tvotUser:                       Result := tvotUserRoot;
+
+    tvotProcedure:                  Result := tvotProcedureRoot;
+    tvotFunction:                   Result := tvotFunctionRoot;
+    tvotUDF:                        Result := tvotUDFRoot;
+    tvotUDRFunction:                Result := tvotUDRFunctionRoot;
+    tvotUDRProcedure:               Result := tvotUDRProcedureRoot;
+
+    tvotPackage:                    Result := tvotPackageRoot;
+    tvotPackageUDFFunction:         Result := tvotPackageUDFFunctionRoot;
+    tvotPackageFunction:            Result := tvotPackageFunctionRoot;
+    tvotPackageProcedure:           Result := tvotPackageProcedureRoot;
+    tvotPackageUDRFunction:         Result := tvotPackageUDRFunctionRoot;
+    tvotPackageUDRProcedure:        Result := tvotPackageUDRProcedureRoot;
+    tvotPackageTrigger:             Result := tvotPackageTriggerRoot;
+    tvotPackageUDRTrigger:          Result := tvotPackageUDRTriggerRoot;
+
+    tvotBLOBFilter:                 Result := tvotBLOBFilterRoot;
+    tvotComment:                    Result := tvotCommentRoot;
+    tvotData:                       Result := tvotDataRoot;
+
+    tvotSystemTable:                Result := tvotSystemTableRoot;
+    tvotSystemTableField:           Result := tvotSystemTableFieldRoot;
+    tvotSystemDomain:               Result := tvotSystemDomainRoot;
+    tvotSystemGenerator:            Result := tvotSystemGeneratorRoot;
+    tvotSystemTrigger:              Result := tvotSystemTriggerRoot;
+    tvotSystemConstraint:           Result := tvotSystemConstraintRoot;
+    tvotSystemIndex:                Result := tvotSystemIndexRoot;
+    tvotSystemRole:                 Result := tvotSystemRoleRoot;
+    tvotSystemUser:                 Result := tvotSystemUserRoot;
+    tvotSystemException:            Result := tvotSystemExceptionRoot;
+
+    tvotForm:                       Result := tvotFormRoot;
+
   else
     Result := tvotNone;
   end;
@@ -4219,6 +4313,7 @@ begin
     otUsers:                 Result := 'User';
     otDomains:               Result := 'Domain';
     otIndexes:               Result := 'Index';
+    otTableReferences:       Result := 'Reference';
     otExceptions:            Result := 'Exception';
 
     otConstraints:           Result := 'Constraint';
@@ -4294,6 +4389,7 @@ begin
 
     // --- Indexes / Constraints ---
     otIndexes:               Result := tvotIndex;
+    otTableReferences:       Result := tvotTableReference;
     otConstraints:           Result := tvotConstraint;
     otPrimaryKeys:           Result := tvotPrimaryKey;
     otForeignKeys:           Result := tvotForeignKey;
@@ -4368,6 +4464,7 @@ begin
 
     // --- Indexes / Constraints ---
     tvotIndex:                   Result := otIndexes;
+    tvotTableReference:          Result := otTableReferences;
     tvotConstraint:              Result := otConstraints;
     tvotPrimaryKey:              Result := otPrimaryKeys;
     tvotForeignKey:              Result := otForeignKeys;
@@ -4465,6 +4562,9 @@ begin
     // --- Indexes / Constraints ---
     tvotIndexRoot:             Result := 'Indexes';
     tvotIndex:                 Result := 'Index';
+    tvotTableReferencesRoot:   Result := 'Table References';
+    tvotTableReference:        Result := 'Table Reference';
+
     tvotConstraintRoot:        Result := 'Constraints';
     tvotConstraint:            Result := 'Constraint';
     tvotPrimaryKeyRoot:        Result := 'Primary Keys';
@@ -4555,6 +4655,80 @@ begin
     tvotSystemException:       Result := 'System Exception';
   else
     Result := 'Unknown';
+  end;
+end;
+
+function TBTypeToIBXType(AObjectType: TObjectType): TExtractObjectTypes;
+begin
+  case AObjectType of
+    // --- Tabellen / Views ---
+    otTables:                Result := eoTable;
+    otTableFields:           Result := eoTable;
+    otViews:                 Result := eoView;
+
+    // --- Triggers ---
+    otTriggers,
+    otTableTriggers,
+    otDBTriggers,
+    otDDLTriggers,
+    otUDRTriggers:           Result := eoTrigger;
+
+    // --- Procedures / Functions ---
+    otProcedures:            Result := eoProcedure;
+    otUDRProcedures:         Result := eoProcedure;
+    otFunctions:             Result := eoFunction;
+    otUDRFunctions:          Result := eoFunction;
+    otUDF:                   Result := eoFunction;
+
+    // --- Package-Objekte ---
+    otPackages,
+    otPackageFunctions,
+    otPackageProcedures,
+    otPackageUDFFunctions,
+    otPackageUDRFunctions,
+    otPackageUDRProcedures,
+    otPackageUDRTriggers:    Result := eoPackage;
+
+    // --- Generators / Sequences ---
+    otGenerators,
+    otSequences:             Result := eoGenerator;
+
+    // --- Domains / Roles / Exceptions ---
+    otDomains,
+    otSystemDomains:         Result := eoDomain;
+    otRoles,
+    otSystemRoles:           Result := eoRole;
+    otExceptions,
+    otSystemExceptions:      Result := eoException;
+
+    // --- Indexes / Constraints ---
+    otIndexes:               Result := eoIndexes;
+    otSystemIndexes:         Result := eoIndexes;
+    otForeignKeys:           Result := eoForeign;
+    otCheckConstraints:      Result := eoChecks;
+
+    // Diese Typen werden MANUELL per SQL behandelt (kein IBX-Support)
+    // Dummy-Wert, wird nie für FIBExtract.ExtractObject verwendet
+    otPrimaryKeys:           Result := eoTable;       // Dummy
+    otUniqueConstraints:     Result := eoTable;       // Dummy
+    otNotNullConstraints:    Result := eoTable;       // Dummy
+    otConstraints:           Result := eoTable;       // Dummy
+
+    // --- System Tables ---
+    otSystemTables:          Result := eoTable;
+
+    // --- Data / BLOBs / Comments ---
+    otData:                  Result := eoData;
+    otBLOBFilters:           Result := eoBLOBFilter;
+    otComments:              Result := eoComments;
+
+    // --- Datenbank selbst ---
+    otDatabase:              Result := eoDatabase;
+
+  else
+    raise Exception.Create(
+      'Unknown ObjectType in function TBTypeToIBXType'
+    );
   end;
 end;
 

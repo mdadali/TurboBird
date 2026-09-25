@@ -480,7 +480,6 @@ type
     procedure tvMainClick(Sender: TObject);
     procedure tvMainDblClick(Sender: TObject);
     procedure tvMainDeletion(Sender: TObject; Node: TTreeNode);
-    procedure tvMainExpanded(Sender: TObject; Node: TTreeNode);
     procedure GlobalException(Sender: TObject; E : Exception);
     procedure tvMainExpanding(Sender: TObject; Node: TTreeNode;
       var AllowExpansion: Boolean);
@@ -2028,11 +2027,25 @@ begin
 end;
 
 procedure TfmMain.lmCloneTableClick(Sender: TObject);
-var frmCloneTable: TfrmCloneTable;
+var
+  frmCloneTable: TfrmCloneTable;
+  ANodeInfos: TPNodeInfos;
+  TableName: string;
 begin
+  if tvMain.Selected = nil then Exit;
+
+  if not Assigned(tvMain.Selected.Data) then Exit;
+  ANodeInfos := TPNodeInfos(tvMain.Selected.Data);
+
+  TableName := GetClearNodeText(tvMain.Selected.Text);
+
   frmCloneTable := TfrmCloneTable.Create(Self);
-  frmCloneTable.ShowModal;
-  frmCloneTable.Free;
+  try
+    frmCloneTable.Init(ANodeInfos, TableName);
+    frmCloneTable.ShowModal;
+  finally
+    frmCloneTable.Free;
+  end;
 end;
 
 procedure TfmMain.lmCompareClick(Sender: TObject);
@@ -6509,8 +6522,22 @@ var
   //HasCFrm, HasRops: Boolean;
   //FileSearchRec: TSearchRec;
   //Ext, BaseName, FormBaseName: string;
+
+  ServerNode: TTreeNode;
+  ServerSession: TServerSession;
+  IsEmbedded: Boolean;
 begin
-  DBIndex:= TPNodeInfos(Node.Data)^.dbIndex;
+  DBIndex := TPNodeInfos(Node.Data)^.dbIndex;
+
+  // Embedded-Status ermitteln
+  IsEmbedded := False;
+  ServerNode := turbocommon.GetAncestorAtLevel(Node, 0);
+  if Assigned(ServerNode) and Assigned(ServerNode.Data) then
+  begin
+    ServerSession := TPNodeInfos(ServerNode.Data)^.ServerSession;
+    if Assigned(ServerSession) then
+      IsEmbedded := ServerSession.IsEmbedded;
+  end;
 
   /////////////////////////////////////
   ExtractorNode := turbocommon.GetAncestorAtLevel(Node, 1);
@@ -6627,18 +6654,19 @@ begin
           DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
 
 
-          // 10. Permissions Root
-          Item := tvMain.Items.AddChild(Node, 'Permissions');
-          Item.ImageIndex := 31;
-          Item.SelectedIndex := 31;
-          TPNodeInfos(Item.Data)^.ObjectType := tvotTablePermissionsRoot;
-          TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
-          TPNodeInfos(Item.Data)^.Refreshable := true;
-          DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+          // 10. Permissions Root — nur bei Remote-Verbindungen
+          // Action-Node ohne Unterknoten (Doppelklick öffnet Dialog)
+          if not IsEmbedded then
+          begin
+            Item := tvMain.Items.AddChild(Node, 'Permissions');
+            Item.ImageIndex := 31;
+            Item.SelectedIndex := 31;
+            TPNodeInfos(Item.Data)^.ObjectType := tvotTablePermissionsRoot;
+            TPNodeInfos(Item.Data)^.dbIndex := DBIndex;
+            TPNodeInfos(Item.Data)^.Refreshable := false;
+           // DummyNode := tvMain.Items.AddChild(Item, 'Loading...');
+          end;
 
-
-          // Node-Text mit Gesamtzahl aktualisieren
-          //Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
 
         // Fields Root unter Tabelle
@@ -6735,6 +6763,22 @@ begin
             AlwaysQuoteIdentifiers,
             Node,
             82
+          );
+          Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
+        end;
+
+
+        // Table References unter Tabelle
+        tvotTableReferencesRoot: begin
+          Node.DeleteChildren;
+          Node.Text := ANodeText;
+          SimpleObjExtractor.ExtractToTreeNode(
+            otTableReferences,
+            GetClearNodeText(Node.Parent.Text),
+            [],
+            AlwaysQuoteIdentifiers,
+            Node,
+            75
           );
           Node.Text := ANodeText + ' (' + IntToStr(Node.Count) + ')';
         end;
@@ -9306,7 +9350,6 @@ procedure TfmMain.tvMainExpanding(Sender: TObject; Node: TTreeNode; var AllowExp
 var
   Rec: TRegisteredDatabase;
   NodeInfo: TPNodeInfos;
-  ServerNode: TTreeNode;
   ServerSession: TServerSession;
   ServerErrStr: string;
   WasDBConnectedOnEntry: Boolean;
@@ -9336,7 +9379,7 @@ begin
         Exit;
       end;
 
-      // Server-Session im Node speichern
+      // Server-Session im Node speichern (einmalig)
       if TPNodeInfos(Node.Data)^.ServerSession = nil then
       begin
         ServerSession := CreateServerSessionFromRegistry(Node.Text);
@@ -9344,17 +9387,15 @@ begin
 
         if ServerSession.IBXConnect then
         begin
-          TPNodeInfos(Node.Data)^.ServerVersionMajor := ServerSession.FBVersionMajor;
-          TPNodeInfos(Node.Data)^.ServerVersionMinor := ServerSession.FBVersionMinor;
+          TPNodeInfos(Node.Data)^.ServerVersionMajor  := ServerSession.FBVersionMajor;
+          TPNodeInfos(Node.Data)^.ServerVersionMinor  := ServerSession.FBVersionMinor;
           TPNodeInfos(Node.Data)^.ServerVersionString := ServerSession.FBVersionString;
           ServerSession.Disconnect;
         end;
       end;
 
       if (Node.Count > 0) and (Node.Items[0].Text = 'Loading...') then
-      begin
         Node.Items[0].Delete;
-      end;
 
       Exit;
     end;
@@ -9371,8 +9412,8 @@ begin
       begin
         // DB-Params setzen
         RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
-        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := Rec.Password;
-        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := true;
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password']  := Rec.Password;
+        RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := True;
         RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
 
         try
@@ -9392,35 +9433,16 @@ begin
       // Neu lesen (kann durch OnLogin geändert worden sein)
       Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
-      // Server-Version holen
-      ServerNode := GetAncestorAtLevel(Node, 0);
-      if Assigned(ServerNode) and Assigned(ServerNode.Data) then
-      begin
-        ServerSession := TServerSession(TPNodeInfos(ServerNode.Data)^.ServerSession);
-        if Assigned(ServerSession) then
-        begin
-          Rec.ServerVersionMajor := ServerSession.FBVersionMajor;
-          Rec.ServerVersionMinor := ServerSession.FBVersionMinor;
-          Rec.ServerVersionString := ServerSession.FBVersionString;
-          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionMajor := ServerSession.FBVersionMajor;
-          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionMinor := ServerSession.FBVersionMinor;
-          RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionString := ServerSession.FBVersionString;
-        end;
-      end;
-
-      // Root-Objekte laden
+      // Root-Objekte laden — Version aus RegRec (immer korrekt vorhanden)
       if (Node.Count > 0) and (Node.Items[0].Text = 'Loading...') then
       begin
         Node.Items[0].Delete;
-        if Assigned(ServerSession) then
-          AddRootObjects(Node, ServerSession.FBVersionMajor)
-        else
-          AddRootObjects(Node, 0);
+        AddRootObjects(Node, RegisteredDatabases[NodeInfo^.dbIndex].RegRec.ServerVersionMajor);
       end;
 
       SetConnection(NodeInfo^.dbIndex);
 
-      RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened := Now;
+      RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened     := Now;
       RegisteredDatabases[NodeInfo^.dbIndex].OrigRegRec.LastOpened := Now;
 
       // Extractor initialisieren
@@ -9477,47 +9499,6 @@ begin
   end;
 end;
 
-// ============================================================================
-// Called when a child node (e.g. Tables, Procedures) is expanded.
-// Here we populate the database objects.
-// ============================================================================
-procedure TfmMain.tvMainExpanded(Sender: TObject; Node: TTreeNode);
-var
-  BracketPos: Integer;
-  NodeInfo: TPNodeInfos;
-begin
-  //if Node = nil then
-   // Exit;
-
- // NodeInfo := TPNodeInfos(Node.Data);
-
-  {if not RegisteredDatabases[NodeInfo^.dbIndex].IBConnection.Connected then
-    RegisteredDatabases[NodeInfo^.dbIndex].IBConnection.Connected := true;
-
-  if not RegisteredDatabases[NodeInfo^.dbIndex].SQLTrans.Active then
-    RegisteredDatabases[NodeInfo^.dbIndex].SQLTrans.StartTransaction;
- }
-
-  // Only child nodes (below the database node)
-  {if (Node.Level > 1) and (not Node.Expanded) then
-  begin
-    if Node.HasChildren then
-    begin
-      //Node.DeleteChildren;
-      BracketPos := Pos('(', Node.Text);
-      if BracketPos > 0 then
-        Node.Text := Trim(Copy(Node.Text, 1, BracketPos - 1));
-    end;
-
-    try
-      FillObjectRoot(Node);
-    except
-      on E: Exception do
-        ShowMessage('Error while loading objects: ' + E.Message);
-    end;
-  end; }
-end;
-
 (**********************            Double click        *********************************)
 procedure TfmMain.tvMainDblClick(Sender: TObject);
 var
@@ -9559,7 +9540,7 @@ try
         //QWindow.tbCommit.Enabled := true;
       end else // Expand object
       begin
-        tvMainExpanded(nil, Node);
+        //
       end;
       Exit;
     except
@@ -10062,192 +10043,256 @@ begin
 end;
 
 procedure TfmMain.AddRootObjects(ANode: TTreeNode; AServerVersion: word);
-var CNode: TTreeNode;
-    ServerNode: TTreeNode;
-    ServerSession: TServerSession;
-    DummyNode: TTreeNode;
-    IsEmbedded: boolean;
+var
+  CNode: TTreeNode;
+  ServerNode: TTreeNode;
+  ServerSession: TServerSession;
+  DummyNode: TTreeNode;
+  IsEmbedded: boolean;
+  DBIndex: Integer;
 begin
   if ANode = nil then exit;
 
   ServerNode := turbocommon.GetAncestorAtLevel(ANode, 0);
-  ServerSession := TPNodeInfos(ServerNode.Data)^.ServerSession;
-  IsEmbedded := ServerSession.IsEmbedded;
+  if not Assigned(ServerNode) or not Assigned(ServerNode.Data) then
+    exit;
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Query Window');
-  CNode.ImageIndex:= 1;
-  CNode.SelectedIndex:= 1;
+  ServerSession := TPNodeInfos(ServerNode.Data)^.ServerSession;
+  if Assigned(ServerSession) then
+    IsEmbedded := ServerSession.IsEmbedded
+  else
+    IsEmbedded := False;
+
+  DBIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+
+  // ============================================================
+  // QUERY WINDOW — immer verfügbar
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Query Window');
+  CNode.ImageIndex := 1;
+  CNode.SelectedIndex := 1;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotQueryWindow;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := false;
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Tables');
+  // ============================================================
+  // TABLES — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Tables');
+  CNode.ImageIndex := 2;
+  CNode.SelectedIndex := 2;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotTableRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
-  CNode.ImageIndex:= 2;
-  CNode.SelectedIndex:= 2;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Sequences');
+  // ============================================================
+  // SEQUENCES / GENERATORS — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Sequences');
+  CNode.ImageIndex := 6;
+  CNode.SelectedIndex := 6;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotGeneratorRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
-  CNode.ImageIndex:= 6;
-  CNode.SelectedIndex:= 6;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  //Triggers
-  CNode:= tvMain.Items.AddChild(ANode, 'Triggers');
+  // ============================================================
+  // TRIGGERS — Root immer, Sub-Typen je nach Version
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Triggers');
+  CNode.ImageIndex := 8;
+  CNode.SelectedIndex := 8;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotTriggerRoot;
-  CNode.ImageIndex:= 8;
-  CNode.SelectedIndex:= 8;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotTriggerRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
-  //DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-    CNode:= tvMain.Items.AddChild(CNode, 'Table-Triggers');
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotTableTriggerRoot;
-    CNode.ImageIndex:= 8;
-    CNode.SelectedIndex:= 8;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotTableTriggerRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-    CNode := CNode.Parent;
+  // --- Table-Triggers — immer verfügbar (FB 1.0+) ---
+  DummyNode := tvMain.Items.AddChild(CNode, 'Table-Triggers');
+  TPNodeInfos(DummyNode.Data)^.ObjectType := tvotTableTriggerRoot;
+  TPNodeInfos(DummyNode.Data)^.dbIndex := DBIndex;
+  TPNodeInfos(DummyNode.Data)^.Refreshable := true;
+  DummyNode.ImageIndex := 8;
+  DummyNode.SelectedIndex := 8;
+  tvMain.Items.AddChild(DummyNode, 'Loading...');
 
-    CNode:= tvMain.Items.AddChild(CNode, 'DB-Triggers');
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotDBTriggerRoot;
-    CNode.ImageIndex:= 8;
-    CNode.SelectedIndex:= 8;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotDBTriggerRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-    CNode := CNode.Parent;
-
-    CNode:= tvMain.Items.AddChild(CNode, 'DDL-Triggers');
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotDDLTriggerRoot;
-    CNode.ImageIndex:= 8;
-    CNode.SelectedIndex:= 8;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotDDLTriggerRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-    CNode := CNode.Parent;
-
-    CNode:= tvMain.Items.AddChild(CNode, 'UDR-Triggers');
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRTriggerRoot;
-    CNode.ImageIndex:= 8;
-    CNode.SelectedIndex:= 8;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRTriggerRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-    CNode := CNode.Parent;
-    /////END.Triggers
-
-  CNode:= tvMain.Items.AddChild(ANode, 'Views');
-  CNode.ImageIndex:= 10;
-  CNode.SelectedIndex:= 10;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotViewRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-  TPNodeInfos(CNode.Data)^.Refreshable := true;
-  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
-  CNode:= tvMain.Items.AddChild(ANode, 'UDFs');
-  CNode.ImageIndex:= 14;
-  CNode.SelectedIndex:= 14;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotUDFRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-  TPNodeInfos(CNode.Data)^.Refreshable := true;
-  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
-  CNode:= tvMain.Items.AddChild(ANode, 'Procedures');
-  CNode.ImageIndex:= 12;
-  CNode.SelectedIndex:= 12;
-  TPNodeInfos(CNode.Data)^.ObjectType := tvotProcedureRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-  TPNodeInfos(CNode.Data)^.Refreshable := true;
-  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
-
-   if AServerVersion >= 3 then
+  // --- DB-Triggers — ab FB 2.0 ---
+  if AServerVersion >= 2 then
   begin
-    CNode:= tvMain.Items.AddChild(ANode, 'Functions');
-    CNode.ImageIndex:= 52;
-    CNode.SelectedIndex:= 52;
+    DummyNode := tvMain.Items.AddChild(CNode, 'DB-Triggers');
+    TPNodeInfos(DummyNode.Data)^.ObjectType := tvotDBTriggerRoot;
+    TPNodeInfos(DummyNode.Data)^.dbIndex := DBIndex;
+    TPNodeInfos(DummyNode.Data)^.Refreshable := true;
+    DummyNode.ImageIndex := 8;
+    DummyNode.SelectedIndex := 8;
+    tvMain.Items.AddChild(DummyNode, 'Loading...');
+  end;
+
+  // --- DDL-Triggers — ab FB 2.0 (praktisch 2.1+) ---
+  if AServerVersion >= 2 then
+  begin
+    DummyNode := tvMain.Items.AddChild(CNode, 'DDL-Triggers');
+    TPNodeInfos(DummyNode.Data)^.ObjectType := tvotDDLTriggerRoot;
+    TPNodeInfos(DummyNode.Data)^.dbIndex := DBIndex;
+    TPNodeInfos(DummyNode.Data)^.Refreshable := true;
+    DummyNode.ImageIndex := 8;
+    DummyNode.SelectedIndex := 8;
+    tvMain.Items.AddChild(DummyNode, 'Loading...');
+  end;
+
+  // --- UDR-Triggers — ab FB 3.0 ---
+  if AServerVersion >= 3 then
+  begin
+    DummyNode := tvMain.Items.AddChild(CNode, 'UDR-Triggers');
+    TPNodeInfos(DummyNode.Data)^.ObjectType := tvotUDRTriggerRoot;
+    TPNodeInfos(DummyNode.Data)^.dbIndex := DBIndex;
+    TPNodeInfos(DummyNode.Data)^.Refreshable := true;
+    DummyNode.ImageIndex := 8;
+    DummyNode.SelectedIndex := 8;
+    tvMain.Items.AddChild(DummyNode, 'Loading...');
+  end;
+
+  // ============================================================
+  // VIEWS — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Views');
+  CNode.ImageIndex := 10;
+  CNode.SelectedIndex := 10;
+  TPNodeInfos(CNode.Data)^.ObjectType := tvotViewRoot;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
+  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+
+  // ============================================================
+  // UDFs — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'UDFs');
+  CNode.ImageIndex := 14;
+  CNode.SelectedIndex := 14;
+  TPNodeInfos(CNode.Data)^.ObjectType := tvotUDFRoot;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
+  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+
+  // ============================================================
+  // PROCEDURES — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Procedures');
+  CNode.ImageIndex := 12;
+  CNode.SelectedIndex := 12;
+  TPNodeInfos(CNode.Data)^.ObjectType := tvotProcedureRoot;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
+  TPNodeInfos(CNode.Data)^.Refreshable := true;
+  DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+
+  // ============================================================
+  // FUNCTIONS — ab FB 3.0 (PSQL Functions)
+  // ============================================================
+  if AServerVersion >= 3 then
+  begin
+    CNode := tvMain.Items.AddChild(ANode, 'Functions');
+    CNode.ImageIndex := 52;
+    CNode.SelectedIndex := 52;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotFunctionRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
-    CNode:= tvMain.Items.AddChild(ANode, 'UDRs');
-    CNode.ImageIndex:= 66;
-    CNode.SelectedIndex:= 66;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
-    TPNodeInfos(CNode.Data)^.Refreshable := true;
-    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
-
-    CNode:= tvMain.Items.AddChild(ANode, 'Packages');
-    CNode.ImageIndex:= 60;
-    CNode.SelectedIndex:= 60;
-    TPNodeInfos(CNode.Data)^.ObjectType := tvotPackageRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
     TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
   end;
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Domains');
-  CNode.ImageIndex:= 17;
-  CNode.SelectedIndex:= 17;
+  // ============================================================
+  // UDRs — ab FB 3.0 (User Defined Routines)
+  // ============================================================
+  if AServerVersion >= 3 then
+  begin
+    CNode := tvMain.Items.AddChild(ANode, 'UDRs');
+    CNode.ImageIndex := 66;
+    CNode.SelectedIndex := 66;
+    TPNodeInfos(CNode.Data)^.ObjectType := tvotUDRRoot;
+    TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
+    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+  end;
+
+  // ============================================================
+  // PACKAGES — ab FB 3.0
+  // ============================================================
+  if AServerVersion >= 3 then
+  begin
+    CNode := tvMain.Items.AddChild(ANode, 'Packages');
+    CNode.ImageIndex := 60;
+    CNode.SelectedIndex := 60;
+    TPNodeInfos(CNode.Data)^.ObjectType := tvotPackageRoot;
+    TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
+    TPNodeInfos(CNode.Data)^.Refreshable := true;
+    DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
+  end;
+
+  // ============================================================
+  // DOMAINS — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Domains');
+  CNode.ImageIndex := 17;
+  CNode.SelectedIndex := 17;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotDomainRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Exceptions');
-  CNode.ImageIndex:= 22;
-  CNode.SelectedIndex:= 22;
+  // ============================================================
+  // EXCEPTIONS — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Exceptions');
+  CNode.ImageIndex := 22;
+  CNode.SelectedIndex := 22;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotExceptionRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Roles');
-  CNode.ImageIndex:= 19;
-  CNode.SelectedIndex:= 19;
+  // ============================================================
+  // ROLES — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Roles');
+  CNode.ImageIndex := 19;
+  CNode.SelectedIndex := 19;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotRoleRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
+  // ============================================================
+  // USERS — nur bei Remote-Verbindung (nicht Embedded)
+  // ============================================================
   if not IsEmbedded then
   begin
-    CNode:= tvMain.Items.AddChild(ANode, 'Users');
-    CNode.ImageIndex:= 30;
-    CNode.SelectedIndex:= 30;
+    CNode := tvMain.Items.AddChild(ANode, 'Users');
+    CNode.ImageIndex := 30;
+    CNode.SelectedIndex := 30;
     TPNodeInfos(CNode.Data)^.ObjectType := tvotUserRoot;
-    TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+    TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
     TPNodeInfos(CNode.Data)^.Refreshable := true;
     DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
   end;
 
-  CNode:= tvMain.Items.AddChild(ANode, 'Forms');
-  CNode.ImageIndex:= 84;
-  CNode.SelectedIndex:= 84;
+  // ============================================================
+  // FORMS — immer verfügbar (TurboBird-Feature)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'Forms');
+  CNode.ImageIndex := 84;
+  CNode.SelectedIndex := 84;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotFormRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 
-  CNode:= tvMain.Items.AddChild(ANode, 'System Objects');
-  CNode.ImageIndex:= 39;
-  CNode.SelectedIndex:= 39;
+  // ============================================================
+  // SYSTEM OBJECTS — immer verfügbar (FB 1.0+)
+  // ============================================================
+  CNode := tvMain.Items.AddChild(ANode, 'System Objects');
+  CNode.ImageIndex := 39;
+  CNode.SelectedIndex := 39;
   TPNodeInfos(CNode.Data)^.ObjectType := tvotSystemObjectRoot;
-  TPNodeInfos(CNode.Data)^.dbIndex := TPNodeInfos(ANode.Data)^.dbIndex;
+  TPNodeInfos(CNode.Data)^.dbIndex := DBIndex;
   TPNodeInfos(CNode.Data)^.Refreshable := true;
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 end;

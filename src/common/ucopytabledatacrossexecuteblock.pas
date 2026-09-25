@@ -9,7 +9,8 @@ uses
   IBDatabase, IBQuery, DateUtils,
 
   turbocommon,
-  uCopyTableDataCrossRowByRow;
+  uCopyTableDataCrossRowByRow,
+  uCopyStatistics;
 
 
 type
@@ -100,6 +101,8 @@ type
     FDestDB        : TIBDatabase;
     FDestTrans     : TIBTransaction;
 
+    FStatistics: TCopyStatistics;
+
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
     function  GetDestDB : TIBDatabase;
@@ -124,6 +127,7 @@ type
 
     property TotalRows : Integer read FTotalRows;
     property CopiedRows : Integer read FCopiedRows;
+    property Statistics: TCopyStatistics read FStatistics;
   end;
 
 implementation
@@ -461,13 +465,30 @@ begin
 end;
 
 procedure TCopyThreadCrossExecuteBlock.UpdateProgressGUI;
+var
+  Elapsed: TDateTime;
+  ElapsedSeconds: Double;
+  RowsPerSec: Double;
 begin
   if Assigned(FProgressLabel) then
     FProgressLabel.Caption := Format('Copied %d of %d rows...', [FCopiedRows, FTotalRows]);
   if Assigned(FProgressBar) then
     FProgressBar.Position := FCopiedRows;
+
   if Assigned(FLblElapsed) then
-    FLblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - FStartTime);
+  begin
+    Elapsed := Now - FStartTime;
+    ElapsedSeconds := Elapsed * 24 * 60 * 60;
+
+    if ElapsedSeconds > 0 then
+      RowsPerSec := FCopiedRows / ElapsedSeconds
+    else
+      RowsPerSec := 0;
+
+    FLblElapsed.Caption := Format('Elapsed: %s   |   %.0f rows/sec',
+      [FormatDateTime('hh:nn:ss', Elapsed), RowsPerSec]);
+  end;
+
   Application.ProcessMessages;
 end;
 
@@ -764,20 +785,30 @@ begin
   else
     RowsPerSec := 0;
 
+  // ------------------------------------------------------------------
+  // Statistik-Record füllen
+  // ------------------------------------------------------------------
+  FStatistics.Method          := cmCrossExecuteBlock;
+  FStatistics.SourceServer    := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
+  FStatistics.SourceDatabase  := RegisteredDatabases[FSourceDBIndex].RegRec.Title;
+  FStatistics.SourceTable     := FSourceTable;
+  FStatistics.SourceIsExternal := False;
+  FStatistics.DestServer      := RegisteredDatabases[FDestDBIndex].RegRec.ServerName;
+  FStatistics.DestDatabase    := RegisteredDatabases[FDestDBIndex].RegRec.Title;
+  FStatistics.DestTable       := FDestTable;
+  FStatistics.DestIsExternal  := False;
+  FStatistics.RowsCopied      := FCopiedRows;
+  FStatistics.BatchSize       := FBatchSize;
+  FStatistics.FromRow         := FFromRow;
+  FStatistics.ToRow           := FToRow;
+  FStatistics.UseRowRange     := (FFromRow > 1) or (FToRow > 0);
+  FStatistics.ElapsedSeconds  := (EndTime - FStartTime) * SecsPerDay;
+
   if FCancelled then
     StatusStr := 'cancelled'
   else
     StatusStr := 'completed';
 
-  Msg := Format('Data copy %s!' + sLineBreak + sLineBreak +
-                'Rows copied: %d' + sLineBreak +
-                'Time: %s' + sLineBreak +
-                'Speed: %.0f rows/sec',
-                [StatusStr, FCopiedRows,
-                 FormatDateTime('hh:nn:ss', EndTime - FStartTime),
-                 RowsPerSec]);
-
-  ShowMessage(Msg);
   Result := True;
 end;
 

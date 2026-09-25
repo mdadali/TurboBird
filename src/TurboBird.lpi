@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1928"/>
+      <BuildNr Value="1933"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -798,7 +798,7 @@
         <PackageName Value="LCL"/>
       </Item29>
     </RequiredPackages>
-    <Units Count="125">
+    <Units Count="127">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1569,6 +1569,18 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
       </Unit124>
+      <Unit125>
+        <Filename Value="common/ucopystatistics.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyStatistics"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="common/frmCopyReport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCopyReport"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit126>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

@@ -51,6 +51,7 @@ type
     otUsers,
     otDomains,
     otIndexes,
+    otTableReferences,
 
     otExceptions,
 
@@ -161,6 +162,9 @@ const
     'PrimaryKeys', 'ForeignKeys', 'UniqueConstraints',
     'CheckConstraints', 'NotNullConstraints');
 
+procedure ParseFBVersionString(const AVersionString: string;
+                               out AMajor, AMinor: Word);
+
 function ConnectFirebirdService(
     const AServer: string;
     APort: Integer;
@@ -210,6 +214,81 @@ uses turbocommon;
 
 
 
+procedure ParseFBVersionString(const AVersionString: string;
+                               out AMajor, AMinor: Word);
+var
+  S: string;
+  P, StartPos: Integer;
+begin
+  AMajor := 0;
+  AMinor := 0;
+
+  S := Trim(AVersionString);
+  if S = '' then
+    Exit;
+
+  // ------------------------------------------------------------
+  // Schritt 1: Präfix entfernen
+  //   "LI-V"  → Release-Version (Firebird 1.x - 5.x)
+  //   "LI-T"  → Trunk/Test-Version (Firebird 6.x+)
+  //   "Firebird X.Y" → Fallback (z.B. aus TIBDatabaseInfo)
+  // ------------------------------------------------------------
+  P := Pos('LI-V', S);
+  if P > 0 then
+  begin
+    S := Copy(S, P + 4, MaxInt);
+  end
+  else
+  begin
+    P := Pos('LI-T', S);
+    if P > 0 then
+    begin
+      S := Copy(S, P + 4, MaxInt);
+    end
+    else
+    begin
+      // Fallback: "Firebird X.Y" suchen
+      P := Pos('Firebird', S);
+      if P > 0 then
+        S := Trim(Copy(S, P + Length('Firebird'), MaxInt));
+    end;
+  end;
+
+  S := Trim(S);
+  if S = '' then
+    Exit;
+
+  // ------------------------------------------------------------
+  // Schritt 2: Major-Version = erste Zahl im String
+  // ------------------------------------------------------------
+  StartPos := 1;
+  while (StartPos <= Length(S)) and not (S[StartPos] in ['0'..'9']) do
+    Inc(StartPos);
+
+  if StartPos > Length(S) then
+    Exit;  // keine Ziffer gefunden → Unknown
+
+  P := StartPos;
+  while (P <= Length(S)) and (S[P] in ['0'..'9']) do
+    Inc(P);
+
+  AMajor := StrToIntDef(Copy(S, StartPos, P - StartPos), 0);
+
+  // ------------------------------------------------------------
+  // Schritt 3: Minor-Version = Zahl nach dem ersten Punkt
+  // ------------------------------------------------------------
+  if (P <= Length(S)) and (S[P] = '.') then
+  begin
+    Inc(P);  // Punkt überspringen
+    StartPos := P;
+    while (P <= Length(S)) and (S[P] in ['0'..'9']) do
+      Inc(P);
+
+    if P > StartPos then
+      AMinor := StrToIntDef(Copy(S, StartPos, P - StartPos), 0);
+  end;
+end;
+
 function ConnectFirebirdService(
   const AServer: string;
   APort: Integer;
@@ -247,11 +326,12 @@ begin
       with TIBXServerProperties.Create(nil) do
       try
         ServicesConnection := AServiceConn;
-        FBVersionString := VersionInfo.ServerVersion;
-        // Grobe Extraktion der Versionsnummern
-        FBVersionMajor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 1, 1), 0);
-        FBVersionMinor := StrToIntDef(Copy(FBVersionString, Pos('V', FBVersionString) + 3, 1), 0);
 
+        FBVersionString := VersionInfo.ServerVersion;
+        ParseFBVersionString(FBVersionString, FBVersionMajor, FBVersionMinor);
+
+        ErrMessage := IBXProtocolToString(AServiceConn.Protocol) + ' Connection successful!' + sLineBreak +
+                      'Server version: ' + FBVersionString;
         ErrMessage := IBXProtocolToString(AServiceConn.Protocol) + ' Connection successful!' + sLineBreak +
                       'Server version: ' + FBVersionString;
       finally

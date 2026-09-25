@@ -303,6 +303,449 @@ var
   ExtractObjectType: TExtractObjectTypes;
   SQL: string;
   Qry: TIBSQL;
+  LastConstraint: string;
+  CurrConstraint: string;
+  FieldsList: string;
+  RefConstraint: string;
+  IsUnique: boolean;
+  RefTable: string;
+
+begin
+  tmpQuoted := FIBExtract.AlwaysQuoteIdentifiers;
+  FIBExtract.AlwaysQuoteIdentifiers := Quoted;
+
+  ResetExtract;
+
+  try
+    if not FIBTransaction.InTransaction then
+      FIBTransaction.StartTransaction;
+
+    case ObjectType of
+      otUDRFunctions:
+        GetUDRFunction(FIBDatabase, ObjectName, AItems);
+
+      otUDRProcedures:
+        begin
+          // TODO
+        end;
+
+      // ============================================================
+      // Primary Keys — Baseline-Query + Pascal-Aggregation
+      // Läuft auf FB 1.5 bis FB 6 ohne Versions-Check!
+      // ============================================================
+      otPrimaryKeys:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME, ' +
+            '  isg.RDB$FIELD_NAME, ' +
+            '  isg.RDB$FIELD_POSITION ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''PRIMARY KEY'' ' +
+            'ORDER BY rc.RDB$CONSTRAINT_NAME, isg.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            LastConstraint := '';
+            FieldsList := '';
+
+            while not Qry.EOF do
+            begin
+              CurrConstraint := Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString);
+
+              if CurrConstraint <> LastConstraint then
+              begin
+                // Vorherige Constraint abschließen
+                if LastConstraint <> '' then
+                  AItems.Add('PRIMARY KEY (' + FieldsList + ')');
+                LastConstraint := CurrConstraint;
+                FieldsList := '';
+              end;
+
+              if FieldsList <> '' then
+                FieldsList := FieldsList + ', ';
+              FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+              Qry.Next;
+            end;
+
+            // Letzte Constraint abschließen
+            if LastConstraint <> '' then
+              AItems.Add('PRIMARY KEY (' + FieldsList + ')');
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+
+// Foreign Keys - gruppiert
+// ============================================================
+// Foreign Keys — ANSI SQL + Pascal-Aggregation
+// Läuft auf FB 1.0 bis FB 6, keine Versionsabfrage
+// ============================================================
+otForeignKeys:
+  begin
+    SQL :=
+      'SELECT ' +
+      '  rc.RDB$CONSTRAINT_NAME, ' +
+      '  isg.RDB$FIELD_NAME, ' +
+      '  isg.RDB$FIELD_POSITION, ' +
+      '  refc.RDB$CONST_NAME_UQ ' +
+      'FROM RDB$RELATION_CONSTRAINTS rc ' +
+      'JOIN RDB$REF_CONSTRAINTS refc ON rc.RDB$CONSTRAINT_NAME = refc.RDB$CONSTRAINT_NAME ' +
+      'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+      'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+      'AND rc.RDB$CONSTRAINT_TYPE = ''FOREIGN KEY'' ' +
+      'ORDER BY rc.RDB$CONSTRAINT_NAME, isg.RDB$FIELD_POSITION';
+
+    Qry := TIBSQL.Create(FIBDatabase);
+    try
+      Qry.Transaction := FIBTransaction;
+      Qry.SQL.Text := SQL;
+      Qry.ExecQuery;
+
+      LastConstraint := '';
+      FieldsList := '';
+      RefConstraint := '';
+
+      while not Qry.EOF do
+      begin
+        CurrConstraint := Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString);
+
+        if CurrConstraint <> LastConstraint then
+        begin
+          // Vorherige Constraint abschließen
+          if LastConstraint <> '' then
+            AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefConstraint);
+
+          LastConstraint := CurrConstraint;
+          FieldsList := '';
+          RefConstraint := Trim(Qry.FieldByName('RDB$CONST_NAME_UQ').AsString);
+        end;
+
+        if FieldsList <> '' then
+          FieldsList := FieldsList + ', ';
+        FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+        Qry.Next;
+      end;
+
+      // Letzte Constraint abschließen
+      if LastConstraint <> '' then
+        AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefConstraint);
+
+    finally
+      Qry.Free;
+    end;
+  end;
+
+// Unique Constraints - gruppiert
+// ============================================================
+// Unique Constraints — ANSI SQL + Pascal-Aggregation
+// Läuft auf FB 1.0 bis FB 6, keine Versionsabfrage
+// ============================================================
+otUniqueConstraints:
+  begin
+    SQL :=
+      'SELECT ' +
+      '  rc.RDB$CONSTRAINT_NAME, ' +
+      '  isg.RDB$FIELD_NAME, ' +
+      '  isg.RDB$FIELD_POSITION ' +
+      'FROM RDB$RELATION_CONSTRAINTS rc ' +
+      'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+      'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+      'AND rc.RDB$CONSTRAINT_TYPE = ''UNIQUE'' ' +
+      'ORDER BY rc.RDB$CONSTRAINT_NAME, isg.RDB$FIELD_POSITION';
+
+    Qry := TIBSQL.Create(FIBDatabase);
+    try
+      Qry.Transaction := FIBTransaction;
+      Qry.SQL.Text := SQL;
+      Qry.ExecQuery;
+
+      LastConstraint := '';
+      FieldsList := '';
+
+      while not Qry.EOF do
+      begin
+        CurrConstraint := Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString);
+
+        if CurrConstraint <> LastConstraint then
+        begin
+          // Vorherige Constraint abschließen
+          if LastConstraint <> '' then
+            AItems.Add(LastConstraint + ': UNIQUE (' + FieldsList + ')');
+
+          LastConstraint := CurrConstraint;
+          FieldsList := '';
+        end;
+
+        if FieldsList <> '' then
+          FieldsList := FieldsList + ', ';
+        FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+        Qry.Next;
+      end;
+
+      // Letzte Constraint abschließen
+      if LastConstraint <> '' then
+        AItems.Add(LastConstraint + ': UNIQUE (' + FieldsList + ')');
+
+    finally
+      Qry.Free;
+    end;
+  end;
+
+      // Check Constraints - einfach
+      // ============================================================
+      // Check Constraints — ANSI SQL + Pascal
+      // Läuft auf FB 1.0 bis FB 6, keine Versionsabfrage
+      // ============================================================
+      otCheckConstraints:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rc.RDB$CONSTRAINT_TYPE = ''CHECK'' ' +
+            'ORDER BY rc.RDB$CONSTRAINT_NAME';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString) + ': CHECK');
+              Qry.Next;
+            end;
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Not Null Constraints - einfach
+      // ============================================================
+      // Not Null Constraints — ANSI SQL + Pascal
+      // Läuft auf FB 1.0 bis FB 6, keine Versionsabfrage
+      // ============================================================
+      otNotNullConstraints:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rf.RDB$FIELD_NAME, ' +
+            '  rf.RDB$FIELD_POSITION ' +
+            'FROM RDB$RELATION_FIELDS rf ' +
+            'WHERE rf.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND rf.RDB$NULL_FLAG = 1 ' +
+            'ORDER BY rf.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            while not Qry.EOF do
+            begin
+              AItems.Add(Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString) + ': NOT NULL');
+              Qry.Next;
+            end;
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+      // Indices - gruppiert
+      // ============================================================
+      // Indices — ANSI SQL + Pascal-Aggregation
+      // Läuft auf FB 1.0 bis FB 6, keine Versionsabfrage
+      // ============================================================
+      otIndexes:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  i.RDB$INDEX_NAME, ' +
+            '  i.RDB$UNIQUE_FLAG, ' +
+            '  isg.RDB$FIELD_NAME, ' +
+            '  isg.RDB$FIELD_POSITION ' +
+            'FROM RDB$INDICES i ' +
+            'JOIN RDB$INDEX_SEGMENTS isg ON i.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
+            'WHERE i.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'AND NOT EXISTS (' +
+            '  SELECT 1 FROM RDB$RELATION_CONSTRAINTS rc ' +
+            '  WHERE rc.RDB$INDEX_NAME = i.RDB$INDEX_NAME ' +
+            '  AND rc.RDB$CONSTRAINT_TYPE IS NOT NULL' +
+            ') ' +
+            'ORDER BY i.RDB$INDEX_NAME, isg.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            LastConstraint := '';
+            FieldsList := '';
+            IsUnique := False;
+
+            while not Qry.EOF do
+            begin
+              CurrConstraint := Trim(Qry.FieldByName('RDB$INDEX_NAME').AsString);
+
+              if CurrConstraint <> LastConstraint then
+              begin
+                // Vorherige Index abschließen
+                if LastConstraint <> '' then
+                begin
+                  if IsUnique then
+                    AItems.Add(LastConstraint + ': UNIQUE ON (' + FieldsList + ')')
+                  else
+                    AItems.Add(LastConstraint + ': ON (' + FieldsList + ')');
+                end;
+
+                LastConstraint := CurrConstraint;
+                FieldsList := '';
+                IsUnique := (Qry.FieldByName('RDB$UNIQUE_FLAG').AsInteger = 1);
+              end;
+
+              if FieldsList <> '' then
+                FieldsList := FieldsList + ', ';
+              FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+              Qry.Next;
+            end;
+
+            // Letzte Index abschließen
+            if LastConstraint <> '' then
+            begin
+              if IsUnique then
+                AItems.Add(LastConstraint + ': UNIQUE ON (' + FieldsList + ')')
+              else
+                AItems.Add(LastConstraint + ': ON (' + FieldsList + ')');
+            end;
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+
+
+      // ============================================================
+      // Table References (eingehende FKs) — ANSI SQL + Pascal
+      // Läuft auf FB 1.0 bis FB 6
+      // ============================================================
+      otTableReferences:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME, ' +
+            '  flds_fk.RDB$FIELD_NAME, ' +
+            '  flds_fk.RDB$FIELD_POSITION, ' +
+            '  rc.RDB$RELATION_NAME ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$REF_CONSTRAINTS rfc ON rc.RDB$CONSTRAINT_NAME = rfc.RDB$CONSTRAINT_NAME ' +
+            'JOIN RDB$INDEX_SEGMENTS flds_fk ON rc.RDB$INDEX_NAME = flds_fk.RDB$INDEX_NAME ' +
+            'JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = rfc.RDB$CONST_NAME_UQ ' +
+            'WHERE rc.RDB$CONSTRAINT_TYPE = ''FOREIGN KEY'' ' +
+            '  AND rc2.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'ORDER BY rc.RDB$CONSTRAINT_NAME, flds_fk.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            LastConstraint := '';
+            FieldsList := '';
+            RefTable := '';
+
+            while not Qry.EOF do
+            begin
+              CurrConstraint := Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString);
+
+              if CurrConstraint <> LastConstraint then
+              begin
+                if LastConstraint <> '' then
+                  AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefTable);
+
+                LastConstraint := CurrConstraint;
+                FieldsList := '';
+                RefTable := Trim(Qry.FieldByName('RDB$RELATION_NAME').AsString);
+              end;
+
+              if FieldsList <> '' then
+                FieldsList := FieldsList + ', ';
+              FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+              Qry.Next;
+            end;
+
+            if LastConstraint <> '' then
+              AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefTable);
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+
+
+      else
+        // Standard IBExtract für alle anderen Typen
+        ExtractObjectType := TBTypeToIBXType(ObjectType);
+        FIBExtract.ExtractObject(ExtractObjectType, ObjectName, ExtractTypes);
+        if FIBExtract.Items.Count > 0 then
+        begin
+          FixArraySyntax(FIBExtract.Items);
+          AItems.Assign(FIBExtract.Items);
+        end;
+    end;
+
+    if Assigned(FIBDatabase) and Assigned(FIBDatabase.DefaultTransaction) then
+    begin
+      if FIBDatabase.DefaultTransaction.InTransaction then
+        FIBDatabase.DefaultTransaction.Rollback;
+    end;
+
+  finally
+    FIBExtract.AlwaysQuoteIdentifiers := tmpQuoted;
+  end;
+end;
+
+
+{
+procedure TSimpleObjExtractor.Extract(
+  ObjectType: TObjectType;
+  ObjectName : String;
+  ExtractTypes: TExtractTypes;
+  Quoted: boolean;
+  var AItems: TStrings);
+var
+    tmpQuoted: boolean;
+    ExtractObjectType: TExtractObjectTypes;
+    SQL: string;
+    Qry: TIBSQL;
+    LastConstraint: string;
+    CurrConstraint: string;
+    FieldsList: string;
+    RefConstraint: string;
+    IsUnique: boolean;
+    RefTable: string;
 begin
   tmpQuoted := FIBExtract.AlwaysQuoteIdentifiers;
   FIBExtract.AlwaysQuoteIdentifiers := Quoted;
@@ -493,6 +936,69 @@ begin
           end;
         end;
 
+
+      // ============================================================
+      // Table References (eingehende FKs) — ANSI SQL + Pascal
+      // Läuft auf FB 1.0 bis FB 6
+      // ============================================================
+      otTableReferences:
+        begin
+          SQL :=
+            'SELECT ' +
+            '  rc.RDB$CONSTRAINT_NAME, ' +
+            '  flds_fk.RDB$FIELD_NAME, ' +
+            '  flds_fk.RDB$FIELD_POSITION, ' +
+            '  rc.RDB$RELATION_NAME ' +
+            'FROM RDB$RELATION_CONSTRAINTS rc ' +
+            'JOIN RDB$REF_CONSTRAINTS rfc ON rc.RDB$CONSTRAINT_NAME = rfc.RDB$CONSTRAINT_NAME ' +
+            'JOIN RDB$INDEX_SEGMENTS flds_fk ON rc.RDB$INDEX_NAME = flds_fk.RDB$INDEX_NAME ' +
+            'JOIN RDB$RELATION_CONSTRAINTS rc2 ON rc2.RDB$CONSTRAINT_NAME = rfc.RDB$CONST_NAME_UQ ' +
+            'WHERE rc.RDB$CONSTRAINT_TYPE = ''FOREIGN KEY'' ' +
+            '  AND rc2.RDB$RELATION_NAME = ' + QuotedStr(ObjectName) + ' ' +
+            'ORDER BY rc.RDB$CONSTRAINT_NAME, flds_fk.RDB$FIELD_POSITION';
+
+          Qry := TIBSQL.Create(FIBDatabase);
+          try
+            Qry.Transaction := FIBTransaction;
+            Qry.SQL.Text := SQL;
+            Qry.ExecQuery;
+
+            LastConstraint := '';
+            FieldsList := '';
+            RefTable := '';
+
+            while not Qry.EOF do
+            begin
+              CurrConstraint := Trim(Qry.FieldByName('RDB$CONSTRAINT_NAME').AsString);
+
+              if CurrConstraint <> LastConstraint then
+              begin
+                if LastConstraint <> '' then
+                  AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefTable);
+
+                LastConstraint := CurrConstraint;
+                FieldsList := '';
+                RefTable := Trim(Qry.FieldByName('RDB$RELATION_NAME').AsString);
+              end;
+
+              if FieldsList <> '' then
+                FieldsList := FieldsList + ', ';
+              FieldsList := FieldsList + Trim(Qry.FieldByName('RDB$FIELD_NAME').AsString);
+
+              Qry.Next;
+            end;
+
+            if LastConstraint <> '' then
+              AItems.Add(LastConstraint + ': ' + FieldsList + ' -> ' + RefTable);
+
+          finally
+            Qry.Free;
+          end;
+        end;
+
+
+
+
       else
         // Standard IBExtract für alle anderen Typen
         ExtractObjectType := TBTypeToIBXType(ObjectType);
@@ -514,7 +1020,7 @@ begin
     FIBExtract.AlwaysQuoteIdentifiers := tmpQuoted;
   end;
 end;
-
+}
 procedure TSimpleObjExtractor.ExtractToTreeNode(
   ObjectType: TObjectType;
   ObjectName : String;
