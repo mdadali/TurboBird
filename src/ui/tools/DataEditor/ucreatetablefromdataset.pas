@@ -27,7 +27,7 @@ type
     cmbBoxServers: TComboBox;
     cmbBoxDBs: TComboBox;
     edtDestTableName: TEdit;
-    edtBatchSize: TEdit;
+    edtCommitInterval: TEdit;
     edtFrom: TEdit;
     edtTo: TEdit;
     grBoxCopyOptions1: TGroupBox;
@@ -70,10 +70,11 @@ type
     procedure FillDBCombo;
     function  GetTargetDBIndex: Integer;
     function  GetTargetTable: string;
-    function  GetBatchSize: Integer;
+    function  GetCommitInterval: Integer;
     function  GetFromRow: integer;
     function  GetToRow: Integer;
-    procedure RunFBInsert(ADBIndex: Integer; const ATableName: string);
+    procedure RunFBInsertBatched(ADBIndex: Integer; const ATableName: string);
+    procedure AssignParamFromField(Param: TParam; SourceField: TField);
     procedure CancelButtonClick(Sender: TObject);
     function  TableExists(ADB: TIBDatabase; const ATableName: string): Boolean;
   public
@@ -83,6 +84,35 @@ type
 implementation
 
 {$R *.lfm}
+
+procedure TfrmCreateTableFromDataSet.AssignParamFromField(Param: TParam; SourceField: TField);
+begin
+  if SourceField.IsNull then
+  begin
+    Param.Clear;
+    Exit;
+  end;
+
+  case SourceField.DataType of
+    ftSmallint, ftWord:
+      Param.AsSmallInt := SourceField.AsInteger;
+
+    ftInteger, ftLargeint, ftAutoInc:
+      Param.AsInteger := SourceField.AsInteger;
+
+    ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+      Param.AsFloat := SourceField.AsFloat;
+
+    ftDateTime, ftTimeStamp, ftDate, ftTime:
+      Param.AsDateTime := SourceField.AsDateTime;
+
+    ftBoolean:
+      Param.AsBoolean := SourceField.AsBoolean;
+
+  else
+    Param.AsString := SourceField.AsString;
+  end;
+end;
 
 procedure TfrmCreateTableFromDataSet.FormCreate(Sender: TObject);
 begin
@@ -237,7 +267,8 @@ begin
       else
       begin
         if chkboxCopyData.Checked then
-          RunFBInsert(DBIndex, TableName);
+          //RunFBInsert(DBIndex, TableName);
+          RunFBInsertBatched(DBIndex, TableName);
         Exit;
       end;
     end;
@@ -255,7 +286,8 @@ begin
 
     // Daten kopieren, falls Checkbox aktiv
     if chkboxCopyData.Checked then
-      RunFBInsert(DBIndex, TableName);
+      //RunFBInsert(DBIndex, TableName);
+      RunFBInsertBatched(DBIndex, TableName);
 
   finally
     Script.Free;
@@ -300,9 +332,9 @@ begin
   Result := Trim(edtDestTableName.Text);
 end;
 
-function TfrmCreateTableFromDataSet.GetBatchSize: Integer;
+function TfrmCreateTableFromDataSet.GetCommitInterval: Integer;
 begin
-  Result := StrToIntDef(edtBatchSize.Text, 1000000);
+  Result := StrToIntDef(edtCommitInterval.Text, 1000000);
 end;
 
 function TfrmCreateTableFromDataSet.GetFromRow: Integer;
@@ -332,155 +364,295 @@ begin
 end;
 
 // ---------------------------------------------------------------
-//  INSERT Zeile für Zeile aus dem Dataset in die FB-Tabelle
+//  BATCHED INSERT via EXECUTE BLOCK mit Literal-Werten
+//
+//  - 256 Zeilen pro EXECUTE BLOCK (Firebird 256-Kontext-Limit)
+//  - Commit-Intervall kommt aus edtCommitInterval (User-Eingabe)
+//  - Progress zeigt Zeilen UND Commits
 // ---------------------------------------------------------------
-procedure TfrmCreateTableFromDataSet.RunFBInsert(ADBIndex: Integer; const ATableName: string);
+procedure TfrmCreateTableFromDataSet.RunFBInsertBatched(
+  ADBIndex: Integer; const ATableName: string);
+const
+  ROWS_PER_BATCH = 256;
 var
   DestDB: TIBDatabase;
   DestTrans: TIBTransaction;
   Query: TIBQuery;
   StartTime, EndTime: TDateTime;
   ProgressForm: TForm;
-  ProgressLabel, LblElapsed: TLabel;
-  ProgressBar: TProgressBar;
+  ProgressLabel, LblElapsed, LblCommit: TLabel;
+  ProgressBar, CommitBar: TProgressBar;
   BtnCancel: TButton;
-  FieldNames, Params, SQL: string;
-  i, f, Total, Current, FromRow, ToRow, BatchSize, BatchCounter: Integer;
-  Param: TParam;
+  FieldNames: string;
+  CheckedFields: array of Integer;
+  FieldsPerRow: Integer;
+  FromRow, ToRow, TotalRows: Integer;
+  TotalBatches, TotalCommits: Integer;
+  CommitsDone: Integer;
+  RowsThisBatch, RowsInThisBatch: Integer;
+  BatchIdx, i, f: Integer;
+  CurrentRow: Integer;
+  CommitInterval: Integer;
+  RowsSinceLastCommit: Integer;
+  SourceField: TField;
+  SQLBody: TStringList;
+  SQL, OneInsert: string;
+  OldDecimalSep: Char;
 begin
   DestDB := RegisteredDatabases[ADBIndex].IBDatabase;
   DestTrans := RegisteredDatabases[ADBIndex].IBTransaction;
   if not DestDB.Connected then DestDB.Connected := True;
   if not DestTrans.InTransaction then DestTrans.StartTransaction;
 
+  // Commit-Intervall aus dem Formular
+  CommitInterval := GetCommitInterval;
+  if CommitInterval < 1 then
+    CommitInterval := 100000;
+
+  // 1. Felder sammeln
+  SetLength(CheckedFields, 0);
   FieldNames := '';
-  Params := '';
   for i := 0 to High(FFields) do
     if FFields[i].Checked then
     begin
+      SetLength(CheckedFields, Length(CheckedFields) + 1);
+      CheckedFields[High(CheckedFields)] := i;
       if FieldNames <> '' then FieldNames := FieldNames + ', ';
       FieldNames := FieldNames + FFields[i].FieldName;
-      if Params <> '' then Params := Params + ', ';
-      Params := Params + ':' + FFields[i].FieldName;
     end;
 
-  SQL := 'INSERT INTO ' + ATableName + ' (' + FieldNames + ') VALUES (' + Params + ')';
+  FieldsPerRow := Length(CheckedFields);
+  if FieldsPerRow = 0 then
+  begin
+    ShowMessage('No fields selected.');
+    Exit;
+  end;
+
+  // 2. Range
+  FromRow := GetFromRow;
+  ToRow := GetToRow;
+  if ToRow > FDataSet.RecordCount then ToRow := FDataSet.RecordCount;
+  TotalRows := ToRow - FromRow + 1;
+  if TotalRows <= 0 then
+  begin
+    ShowMessage('No rows to copy.');
+    Exit;
+  end;
+
+  TotalBatches := (TotalRows + ROWS_PER_BATCH - 1) div ROWS_PER_BATCH;
+  TotalCommits := (TotalRows + CommitInterval - 1) div CommitInterval;
+  CommitsDone := 0;
+
+  // 3. Progress + Query
   Query := TIBQuery.Create(nil);
+  ProgressForm := TForm.Create(nil);
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
   try
+    DefaultFormatSettings.DecimalSeparator := '.';
+
     Query.Database := DestDB;
     Query.Transaction := DestTrans;
-    Query.AllowAutoActivateTransaction := true;
-    Query.SQL.Text := SQL;
-    Query.Prepare;
+    Query.AllowAutoActivateTransaction := True;
 
-    FromRow := GetFromRow;
-    ToRow := GetToRow;
-    Total := ToRow - FromRow + 1;
-    BatchSize := GetBatchSize;
+    ProgressForm.FormStyle := fsNormal;
+    ProgressForm.Caption := 'Copying data to ' + ATableName;
+    ProgressForm.Width := 540;
+    ProgressForm.Height := 300;
+    ProgressForm.Position := poScreenCenter;
+    ProgressForm.BorderStyle := bsDialog;
 
-    ProgressForm := TForm.Create(nil);
+    // === Zeilen-Label ===
+    ProgressLabel := TLabel.Create(ProgressForm);
+    ProgressLabel.Parent := ProgressForm;
+    ProgressLabel.Left := 16;
+    ProgressLabel.Top := 16;
+    ProgressLabel.Caption := Format('Total: %d rows   |   Batch: %d rows',
+      [TotalRows, ROWS_PER_BATCH]);
+    ProgressLabel.Width := 500;
+
+    // === Zeilen-ProgressBar ===
+    ProgressBar := TProgressBar.Create(ProgressForm);
+    ProgressBar.Parent := ProgressForm;
+    ProgressBar.Left := 16;
+    ProgressBar.Top := 40;
+    ProgressBar.Width := 500;
+    ProgressBar.Height := 20;
+    ProgressBar.Min := 0;
+    ProgressBar.Max := TotalRows;
+    ProgressBar.Position := 0;
+
+    // === Commit-Label ===
+    LblCommit := TLabel.Create(ProgressForm);
+    LblCommit.Parent := ProgressForm;
+    LblCommit.Left := 16;
+    LblCommit.Top := 75;
+    LblCommit.Caption := Format('Commits: 0 of %d   (every %d rows)',
+      [TotalCommits, CommitInterval]);
+    LblCommit.Width := 500;
+
+    // === Commit-ProgressBar ===
+    CommitBar := TProgressBar.Create(ProgressForm);
+    CommitBar.Parent := ProgressForm;
+    CommitBar.Left := 16;
+    CommitBar.Top := 100;
+    CommitBar.Width := 500;
+    CommitBar.Height := 20;
+    CommitBar.Min := 0;
+    CommitBar.Max := TotalCommits;
+    CommitBar.Position := 0;
+
+    // === Elapsed-Label ===
+    LblElapsed := TLabel.Create(ProgressForm);
+    LblElapsed.Parent := ProgressForm;
+    LblElapsed.Left := 16;
+    LblElapsed.Top := 135;
+    LblElapsed.Caption := 'Elapsed: 00:00:00   |   0 rows/sec';
+    LblElapsed.Width := 500;
+
+    // === Cancel-Button ===
+    BtnCancel := TButton.Create(ProgressForm);
+    BtnCancel.Parent := ProgressForm;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left := 210;
+    BtnCancel.Top := 180;
+    BtnCancel.Width := 100;
+    BtnCancel.OnClick := @CancelButtonClick;
+
+    ProgressForm.Show;
+    Application.ProcessMessages;
+
+    FCancelled := False;
+    RowsSinceLastCommit := 0;
+
+    FDataSet.DisableControls;
     try
-      ProgressForm.FormStyle := fsNormal;
-      ProgressForm.Caption := 'Copying data to ' + ATableName;
-      ProgressForm.Width := 520;
-      ProgressForm.Height := 230;
-      ProgressForm.Position := poScreenCenter;
-      ProgressForm.BorderStyle := bsDialog;
+      FDataSet.First;
+      for i := 1 to FromRow - 1 do
+        FDataSet.Next;
 
-      ProgressLabel := TLabel.Create(ProgressForm);
-      ProgressLabel.Parent := ProgressForm;
-      ProgressLabel.Left := 16;
-      ProgressLabel.Top := 16;
-      ProgressLabel.Caption := 'Total Records: ' + IntToStr(Total);
-      ProgressLabel.Width := 460;
+      StartTime := Now;
+      CurrentRow := 0;
 
-      ProgressBar := TProgressBar.Create(ProgressForm);
-      ProgressBar.Parent := ProgressForm;
-      ProgressBar.Left := 16;
-      ProgressBar.Top := 45;
-      ProgressBar.Width := 470;
-      ProgressBar.Height := 20;
-      ProgressBar.Min := 0;
-      ProgressBar.Max := Total;
-      ProgressBar.Position := 0;
+      // ============================================================
+      // Batch-Schleife
+      // ============================================================
+      for BatchIdx := 0 to TotalBatches - 1 do
+      begin
+        if FCancelled then Break;
 
-      LblElapsed := TLabel.Create(ProgressForm);
-      LblElapsed.Parent := ProgressForm;
-      LblElapsed.Left := 16;
-      LblElapsed.Top := 80;
+        RowsThisBatch := ROWS_PER_BATCH;
+        if (BatchIdx + 1) * ROWS_PER_BATCH > TotalRows then
+          RowsThisBatch := TotalRows - (BatchIdx * ROWS_PER_BATCH);
 
-      BtnCancel := TButton.Create(ProgressForm);
-      BtnCancel.Parent := ProgressForm;
-      BtnCancel.Caption := 'Cancel';
-      BtnCancel.Left := 200;
-      BtnCancel.Top := 120;
-      BtnCancel.Width := 100;
-      BtnCancel.OnClick := @CancelButtonClick;
+        // EXECUTE BLOCK aufbauen
+        SQLBody := TStringList.Create;
+        try
+          SQLBody.Add('EXECUTE BLOCK AS');
+          SQLBody.Add('BEGIN');
 
-      ProgressForm.Show;
-      Application.ProcessMessages;
-
-      FCancelled := False;
-
-      FDataSet.DisableControls;
-      try
-        FDataSet.First;
-        for i := 1 to FromRow - 1 do FDataSet.Next;
-
-        StartTime := Now;
-        Current := 0;
-        BatchCounter := 0;
-
-        for i := FromRow to ToRow do
-        begin
-          if FCancelled then Break;
-
-          for f := 0 to High(FFields) do
+          RowsInThisBatch := 0;
+          for i := 0 to RowsThisBatch - 1 do
           begin
-            if not FFields[f].Checked then Continue;
-            Param := Query.ParamByName(FFields[f].FieldName);
-            if FDataSet.FieldByName(FFields[f].FieldName).IsNull then
-              Param.Clear
-            else
+            if FDataSet.EOF then Break;
+
+            OneInsert := '  INSERT INTO ' + ATableName + ' (' + FieldNames + ') VALUES (';
+
+            for f := 0 to FieldsPerRow - 1 do
             begin
-              case FDataSet.FieldByName(FFields[f].FieldName).DataType of
-                ftSmallint: Param.AsSmallInt := FDataSet.FieldByName(FFields[f].FieldName).AsInteger;
-                ftInteger, ftLargeInt: Param.AsInteger := FDataSet.FieldByName(FFields[f].FieldName).AsInteger;
-                ftFloat, ftCurrency: Param.AsFloat := FDataSet.FieldByName(FFields[f].FieldName).AsFloat;
-                ftDateTime, ftTimeStamp, ftDate: Param.AsDateTime := FDataSet.FieldByName(FFields[f].FieldName).AsDateTime;
-                ftBoolean: Param.AsBoolean := FDataSet.FieldByName(FFields[f].FieldName).AsBoolean;
-                else Param.AsString := FDataSet.FieldByName(FFields[f].FieldName).AsString;
-              end;
+              if f > 0 then OneInsert := OneInsert + ', ';
+
+              SourceField := FDataSet.FieldByName(FFields[CheckedFields[f]].FieldName);
+              if SourceField.IsNull then
+                OneInsert := OneInsert + 'NULL'
+              else
+                case SourceField.DataType of
+                  ftSmallint, ftInteger, ftLargeint, ftAutoInc, ftWord:
+                    OneInsert := OneInsert + SourceField.AsString;
+
+                  ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+                    OneInsert := OneInsert + FloatToStr(SourceField.AsFloat);
+
+                  ftDateTime, ftTimeStamp:
+                    OneInsert := OneInsert + QuotedStr(FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', SourceField.AsDateTime));
+
+                  ftDate:
+                    OneInsert := OneInsert + QuotedStr(FormatDateTime('yyyy-mm-dd', SourceField.AsDateTime));
+
+                  ftTime:
+                    OneInsert := OneInsert + QuotedStr(FormatDateTime('hh:nn:ss.zzz', SourceField.AsDateTime));
+
+                  ftBoolean:
+                    if SourceField.AsBoolean then
+                      OneInsert := OneInsert + 'TRUE'
+                    else
+                      OneInsert := OneInsert + 'FALSE';
+                else
+                  OneInsert := OneInsert + QuotedStr(SourceField.AsString);
+                end;
             end;
+
+            OneInsert := OneInsert + ');';
+            SQLBody.Add(OneInsert);
+
+            FDataSet.Next;
+            Inc(CurrentRow);
+            Inc(RowsInThisBatch);
           end;
 
-          Query.ExecSQL;
-          Inc(Current);
-          Inc(BatchCounter);
-
-          if BatchCounter >= BatchSize then
-          begin
-            DestTrans.CommitRetaining;
-            BatchCounter := 0;
-          end;
-
-          ProgressBar.Position := Current;
-          ProgressLabel.Caption := Format('Copying row %d of %d', [Current, Total]);
-          LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime);
-          Application.ProcessMessages;
-          FDataSet.Next;
+          SQLBody.Add('END');
+          SQL := SQLBody.Text;
+        finally
+          SQLBody.Free;
         end;
 
-        if BatchCounter > 0 then
-          DestTrans.CommitRetaining;
+        // Batch ausführen
+        Query.Close;
+        Query.SQL.Text := SQL;
+        Query.ExecSQL;
 
-      finally
-        FDataSet.EnableControls;
+        // ============================================================
+        // Commit nur alle CommitInterval Zeilen
+        // ============================================================
+        Inc(RowsSinceLastCommit, RowsInThisBatch);
+
+        if RowsSinceLastCommit >= CommitInterval then
+        begin
+          DestTrans.CommitRetaining;
+          RowsSinceLastCommit := 0;
+          Inc(CommitsDone);
+
+          // Commit-ProgressBar aktualisieren
+          CommitBar.Position := CommitsDone;
+          LblCommit.Caption := Format('Commits: %d of %d   (every %d rows)',
+            [CommitsDone, TotalCommits, CommitInterval]);
+        end;
+
+        // Zeilen-Progress
+        ProgressBar.Position := CurrentRow;
+        ProgressLabel.Caption := Format('Total: %d rows   |   Batch: %d rows   |   Current: %d',
+          [TotalRows, ROWS_PER_BATCH, CurrentRow]);
+        LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime) +
+          '   |   ' + Format('%.0f rows/sec',
+            [CurrentRow / Max(1, (Now - StartTime) * 86400)]);
+        Application.ProcessMessages;
+      end;
+
+      // ============================================================
+      // Finaler Commit für den Rest
+      // ============================================================
+      if (not FCancelled) and DestTrans.InTransaction then
+      begin
+        DestTrans.Commit;
+        Inc(CommitsDone);
+        CommitBar.Position := CommitsDone;
+        LblCommit.Caption := Format('Commits: %d of %d   (every %d rows)',
+          [CommitsDone, TotalCommits, CommitInterval]);
       end;
 
       EndTime := Now;
+
     finally
-      ProgressForm.Free;
+      FDataSet.EnableControls;
     end;
 
     if not FCancelled then
@@ -488,15 +660,27 @@ begin
       ShowMessage(Format('Data copy completed!' + sLineBreak +
                          'Rows: %d' + sLineBreak +
                          'Time: %s' + sLineBreak +
-                         'Speed: %.0f rows/sec',
-                         [Current, FormatDateTime('hh:nn:ss', EndTime - StartTime),
-                          Current / Max(1, (EndTime - StartTime) * 86400)]));
+                         'Speed: %.0f rows/sec' + sLineBreak +
+                         'Batch: %d rows' + sLineBreak +
+                         'Commits: %d (every %d rows)',
+                         [CurrentRow,
+                          FormatDateTime('hh:nn:ss', EndTime - StartTime),
+                          CurrentRow / Max(1, (EndTime - StartTime) * 86400),
+                          ROWS_PER_BATCH,
+                          CommitsDone,
+                          CommitInterval]));
     end
     else
+    begin
+      if DestTrans.InTransaction then
+        DestTrans.Rollback;
       ShowMessage('Copy cancelled by user.');
+    end;
+
   finally
-    Query.Unprepare;
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
     Query.Free;
+    ProgressForm.Free;
   end;
 end;
 
