@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1933"/>
+      <BuildNr Value="1935"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -73,11 +73,11 @@
 -dPS_USESSUPPORT"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -1625,14 +1625,6 @@
 -dWITH_GTK2_IM
 -dSCRIPTER_EMBEDDED
 -dPS_USESSUPPORT"/>
-      <OtherDefines Count="6">
-        <Define0 Value="DEBUG"/>
-        <Define1 Value="UseCThreads"/>
-        <Define2 Value="WITH_GTK2_IM"/>
-        <Define3 Value="SCRIPTER_EMBEDDED"/>
-        <Define4 Value="CONSOLE_SCRIPTER"/>
-        <Define5 Value="PS_USESSUPPORT"/>
-      </OtherDefines>
       <ExecuteBefore>
         <Command Value="./gen_versions_scripts.sh"/>
         <CompileReasons Compile="False" Run="False"/>

@@ -25,7 +25,7 @@ object frmCloneTable: TfrmCloneTable
     object btnExecute: TButton
       Left = 808
       Height = 35
-      Top = 7
+      Top = 8
       Width = 104
       Caption = 'Execute'
       OnClick = btnExecuteClick
@@ -408,10 +408,10 @@ object frmCloneTable: TfrmCloneTable
       Left = 22
       Height = 44
       Top = 56
-      Width = 650
-      Caption = 'CrossDB Copy Method'
+      Width = 826
+      Caption = 'Copy Method'
       ClientHeight = 24
-      ClientWidth = 648
+      ClientWidth = 824
       TabOrder = 6
       object rbExecuteBlock: TRadioButton
         Left = 16
@@ -420,18 +420,26 @@ object frmCloneTable: TfrmCloneTable
         Top = 0
         Width = 312
         Caption = 'Execute Block (ignore Arrays und BLOB''s - Fast)'
-        Checked = True
         TabOrder = 0
-        TabStop = True
       end
       object rbRowByRow: TRadioButton
-        Left = 384
+        Left = 360
         Height = 21
         Hint = 'All fields copied individually, supports all data types'
         Top = 0
         Width = 217
         Caption = 'Row by Row (All Columns - Slow)'
+        Checked = True
         TabOrder = 1
+        TabStop = True
+      end
+      object rbInsertSelect: TRadioButton
+        Left = 600
+        Height = 21
+        Top = 0
+        Width = 205
+        Caption = 'Insert Select (same database)'
+        TabOrder = 2
       end
     end
     object chkUseFormula: TCheckBox
