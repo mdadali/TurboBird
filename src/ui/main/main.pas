@@ -1979,10 +1979,22 @@ end;
 procedure TfmMain.lmBulkExportClick(Sender: TObject);
 var
   frmBulkExport: TfrmBulkExport;
+  ANodeInfos: TPNodeInfos;
+  TableName: string;
 begin
-  frmBulkExport := TfrmBulkExport.Create(Application);
-  frmBulkExport.ShowModal;
-  frmBulkExport.Free;
+  if tvMain.Selected = nil then Exit;
+  if not Assigned(tvMain.Selected.Data) then Exit;
+
+  ANodeInfos := TPNodeInfos(tvMain.Selected.Data);
+  TableName := GetClearNodeText(tvMain.Selected.Text);
+
+  frmBulkExport := TfrmBulkExport.Create(Self);
+  try
+    frmBulkExport.Init(ANodeInfos, TableName);
+    frmBulkExport.ShowModal;
+  finally
+    frmBulkExport.Free;
+  end;
 end;
 
 (**********  change user password  **********)

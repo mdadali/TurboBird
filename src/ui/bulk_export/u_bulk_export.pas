@@ -75,11 +75,14 @@ type
     procedure comboxSourceServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
     procedure comboxSourceTablesChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
   private
+    FNodeInfos: TPNodeInfos;
+
     FFields: array of record
       FieldName: string;
       FieldType: string;
@@ -91,17 +94,24 @@ type
     FTrans: TIBTransaction;
     FCancelled: Boolean;
 
+    FInitialTableName: string;
+    FInitialDBIndex: Integer;
+    FUpdatingCombos: Boolean;
+
+
     procedure LoadServerList;
     procedure LoadDBList;
     procedure LoadTableList;
     procedure LoadFields;
+    procedure LoadServerListFillOnly;
+    procedure ApplyInitialSelection;
     function  GetBatchSize: Integer;
     function  GetFromRow: Integer;
     function  GetToRow: Integer;
     procedure CancelClick(Sender: TObject);
     procedure DoBulkExport(const ASQL: string);
   public
-
+    procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
   end;
 
 //var
@@ -112,6 +122,96 @@ implementation
 {$R *.lfm}
 
 { TfrmBulkExport }
+
+// ------------------------------------------------------------------
+// Source-Auswahl – nur FÜLLEN, keine Kaskade
+// ------------------------------------------------------------------
+procedure TfrmBulkExport.LoadServerListFillOnly;
+var
+  List: TStringList;
+begin
+  List := GetServerListFromTreeView;
+  try
+    comboxSourceServer.Items.Assign(List);
+  finally
+    List.Free;
+  end;
+end;
+
+// ------------------------------------------------------------------
+// Vorbelegung anwenden
+// ------------------------------------------------------------------
+procedure TfrmBulkExport.Init(ANodeInfos: TPNodeInfos; const ATableName: string);
+begin
+  FInitialTableName := Trim(ATableName);
+  FInitialDBIndex := -1;
+  if Assigned(ANodeInfos) then
+    FInitialDBIndex := ANodeInfos^.dbIndex;
+end;
+
+procedure TfrmBulkExport.ApplyInitialSelection;
+var
+  ServerName, DBTitle: string;
+  Idx: Integer;
+begin
+  // Guard AN – Events werden blockiert
+  FUpdatingCombos := True;
+  try
+    // 1. Server-Liste füllen
+    LoadServerListFillOnly;
+
+    // 2. Initial-Server oder Default = 0
+    if (FInitialDBIndex >= 0) and (FInitialDBIndex < Length(RegisteredDatabases)) then
+    begin
+      ServerName := RegisteredDatabases[FInitialDBIndex].RegRec.ServerName;
+
+      Idx := comboxSourceServer.Items.IndexOf(ServerName);
+      if Idx >= 0 then
+        comboxSourceServer.ItemIndex := Idx;
+    end
+    else if comboxSourceServer.Items.Count > 0 then
+      comboxSourceServer.ItemIndex := 0;
+  finally
+    FUpdatingCombos := False;
+  end;
+
+  // 3. Kaskade explizit auslösen (füllt die DB-Liste)
+  if comboxSourceServer.ItemIndex >= 0 then
+    comboxSourceServerChange(nil);
+
+  // 4. Initial-DB auswählen
+  if (FInitialDBIndex >= 0) and (FInitialDBIndex < Length(RegisteredDatabases)) then
+  begin
+    DBTitle := RegisteredDatabases[FInitialDBIndex].RegRec.Title;
+
+    Idx := comboxSourceDB.Items.IndexOf(DBTitle);
+    if Idx >= 0 then
+    begin
+      comboxSourceDB.ItemIndex := Idx;
+      comboxSourceDBChange(nil);   // lädt Tabellen
+    end;
+  end;
+
+  // 5. Initial-Tabelle auswählen
+  if (FInitialTableName <> '') and (comboxSourceTables.Items.Count > 0) then
+  begin
+    Idx := comboxSourceTables.Items.IndexOf(FInitialTableName);
+    if Idx >= 0 then
+    begin
+      comboxSourceTables.ItemIndex := Idx;
+      comboxSourceTablesChange(nil);   // lädt Felder
+    end;
+  end;
+end;
+
+// ------------------------------------------------------------------
+// Neue Methode: nur Server-Liste füllen, kein Cascade
+// ------------------------------------------------------------------
+procedure TfrmBulkExport.LoadServerList;
+begin
+  ApplyInitialSelection;
+end;
+
 
 procedure TfrmBulkExport.FormCreate(Sender: TObject);
 begin
@@ -132,37 +232,23 @@ begin
   FDB := nil;
   FTrans := nil;
 
+  FInitialTableName := '';
+  FInitialDBIndex := -1;
+  FUpdatingCombos := False;
+
   edtBatchSize.Text := IntToStr(DefaultBatchSize);
 end;
 
 procedure TfrmBulkExport.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
-  LoadServerList;
+  ApplyInitialSelection;
 end;
 
-// ------------------------------------------------------------------
-// Source-Auswahl
-// ------------------------------------------------------------------
-procedure TfrmBulkExport.LoadServerList;
-var
-  List: TStringList;
-begin
-  List := GetServerListFromTreeView;
-  try
-    comboxSourceServer.Items.Assign(List);
-    if comboxSourceServer.Items.Count > 0 then
-    begin
-      comboxSourceServer.ItemIndex := 0;
-      comboxSourceServerChange(nil);
-    end;
-  finally
-    List.Free;
-  end;
-end;
 
 procedure TfrmBulkExport.comboxSourceServerChange(Sender: TObject);
 begin
+  if FUpdatingCombos then Exit;
   LoadDBList;
 end;
 
@@ -183,6 +269,7 @@ end;
 
 procedure TfrmBulkExport.comboxSourceDBChange(Sender: TObject);
 begin
+  if FUpdatingCombos then Exit;
   LoadTableList;
 end;
 
@@ -240,9 +327,17 @@ end;
 
 procedure TfrmBulkExport.comboxSourceTablesChange(Sender: TObject);
 begin
+  if FUpdatingCombos then Exit;
   LoadFields;
-  syneditGenerateQuery.Clear;      // Alte Abfrage löschen
-  btnExecute.Enabled := False;     // Execute erst wieder nach Preview möglich
+  syneditGenerateQuery.Clear;
+  btnExecute.Enabled := False;
+end;
+
+procedure TfrmBulkExport.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  //if Assigned(FNodeInfos) then
+
 end;
 
 // ------------------------------------------------------------------
@@ -498,7 +593,12 @@ begin
       FieldExpr := FFields[i].FieldName;
 
     // CAST zu VARCHAR, damit die Konkatenation sicher klappt
-    FieldExpr := 'CAST(' + FieldExpr + ' AS VARCHAR(' + IntToStr(CSVDefaultFieldLength) + '))';
+    // BLOB-Felder: erst SUBSTRING, dann CAST
+    if Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0 then
+      FieldExpr := 'CAST(SUBSTRING(' + FieldExpr + ' FROM 1 FOR 8191) AS VARCHAR(8191))'
+    else
+      // Alle anderen: großzügige Länge, damit nichts abgeschnitten wird
+      FieldExpr := 'CAST(' + FieldExpr + ' AS VARCHAR(8191))';
 
     // Spaltenwert in Hochkommas einschließen und Komma anhängen
     if ConcatStr <> '' then
