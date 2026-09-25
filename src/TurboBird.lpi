@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1936"/>
+      <BuildNr Value="1937"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -1575,11 +1575,12 @@
         <UnitName Value="uCopyStatistics"/>
       </Unit125>
       <Unit126>
-        <Filename Value="common/frmCopyReport.pas"/>
+        <Filename Value="common/ureport.pas"/>
         <IsPartOfProject Value="True"/>
-        <ComponentName Value="frmCopyReport"/>
+        <ComponentName Value="frmReport"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uReport"/>
       </Unit126>
     </Units>
   </ProjectOptions>

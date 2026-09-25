@@ -6,6 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
+  Graphics,
   IBDatabase, IBQuery, DateUtils,
 
   turbocommon,
@@ -601,6 +602,7 @@ var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
   ProgressForm : TForm;
+  LblPhase : TLabel;
   ProgressLabel : TLabel;
   ProgressBar : TProgressBar;
   LblElapsed : TLabel;
@@ -617,13 +619,11 @@ begin
   FCancelled := False;
 
   // ============================================================
-  // Credentials für ON EXTERNAL DATA SOURCE sammeln.
-  // Reihenfolge: RegRec → Session-Cache (DB) → Session-Cache (Server) → Embedded
+  // Credentials für ON EXTERNAL DATA SOURCE
   // ============================================================
   SourceConnStr := RegisteredDatabases[FSourceDBIndex].RegRec.DatabaseName;
   SourceUser    := RegisteredDatabases[FSourceDBIndex].RegRec.UserName;
 
-  // Passwort: erst im RegRec, dann im Session-Cache
   SourcePwd := RegisteredDatabases[FSourceDBIndex].RegRec.Password;
 
   if SourcePwd = '' then
@@ -635,15 +635,11 @@ begin
     SourcePwd := GetServerSessionPassword(
       RegisteredDatabases[FSourceDBIndex].RegRec.ServerName);
 
-  // Letzter Fallback – Passwort live aus der bereits verbundenen Connection lesen.
-  //      CloneTable erfordert eine verbundene DB, also ist das Passwort hier garantiert drin.
-
   if SourcePwd = '' then
     if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
        RegisteredDatabases[FSourceDBIndex].IBDatabase.Connected then
       SourcePwd := RegisteredDatabases[FSourceDBIndex].IBDatabase.Params.Values['password'];
 
-  // Embedded-Sonderfall: Dummy-Passwort
   if (SourcePwd = '') and RegisteredDatabases[FSourceDBIndex].RegRec.IsEmbedded then
     SourcePwd := 'embedded_local';
 
@@ -653,49 +649,73 @@ begin
   ProgressForm := TForm.Create(nil);
   try
     ProgressForm.FormStyle := fsNormal;
-    ProgressForm.Caption := 'Copying data...';
+    ProgressForm.Caption := 'Copying data (Execute Block)...';
     ProgressForm.Width := 520;
-    ProgressForm.Height := 230;
+    ProgressForm.Height := 260;
     ProgressForm.Position := poScreenCenter;
     ProgressForm.BorderStyle := bsDialog;
 
+    // === Phase-Label ===
+    LblPhase := TLabel.Create(ProgressForm);
+    LblPhase.Parent := ProgressForm;
+    LblPhase.Left := 16;
+    LblPhase.Top := 16;
+    LblPhase.Caption := 'Preparing...';
+    LblPhase.Font.Style := [fsBold];
+    LblPhase.Font.Size := 10;
+    LblPhase.Width := 480;
+
+    // === Zeilen-Info ===
     ProgressLabel := TLabel.Create(ProgressForm);
     ProgressLabel.Parent := ProgressForm;
     ProgressLabel.Left := 16;
-    ProgressLabel.Top := 16;
-    ProgressLabel.Caption := 'Please wait, counting records...';
-    ProgressLabel.Width := 460;
+    ProgressLabel.Top := 42;
+    ProgressLabel.Caption := 'Please wait...';
+    ProgressLabel.Width := 480;
 
+    // === Progressbar ===
     ProgressBar := TProgressBar.Create(ProgressForm);
     ProgressBar.Parent := ProgressForm;
     ProgressBar.Left := 16;
-    ProgressBar.Top := 45;
-    ProgressBar.Width := 470;
+    ProgressBar.Top := 70;
+    ProgressBar.Width := 480;
     ProgressBar.Height := 20;
     ProgressBar.Min := 0;
     ProgressBar.Max := 100;
     ProgressBar.Style := pbstMarquee;
 
+    // === Elapsed ===
     LblElapsed := TLabel.Create(ProgressForm);
     LblElapsed.Parent := ProgressForm;
     LblElapsed.Left := 16;
-    LblElapsed.Top := 80;
+    LblElapsed.Top := 100;
+    LblElapsed.Caption := 'Elapsed: 00:00:00';
+    LblElapsed.Width := 480;
 
+    // === Cancel ===
     BtnCancel := TButton.Create(ProgressForm);
     BtnCancel.Parent := ProgressForm;
     BtnCancel.Caption := 'Cancel';
     BtnCancel.Left := 200;
-    BtnCancel.Top := 120;
+    BtnCancel.Top := 140;
     BtnCancel.Width := 100;
     BtnCancel.Enabled := False;
     BtnCancel.OnClick := @CancelButtonClick;
 
+    // === SOFORT SICHTBAR ===
     ProgressForm.Show;
+    ProgressForm.BringToFront;
+    Application.ProcessMessages;
+    Sleep(100);
     Application.ProcessMessages;
 
     // ============================================================
-    // Record Count
+    // Phase 1: Datensätze zählen
     // ============================================================
+    LblPhase.Caption := 'Counting records...';
+    ProgressLabel.Caption := 'Please wait...';
+    Application.ProcessMessages;
+
     CountQuery := TIBQuery.Create(nil);
     try
       CountQuery.Database := GetSourceDB;
@@ -721,16 +741,23 @@ begin
     if FToRow > TotalInSource then FToRow := TotalInSource;
     FTotalRows := FToRow - FFromRow + 1;
 
+    // ============================================================
+    // Phase 2: Vorbereitung
+    // ============================================================
+    LblPhase.Caption := 'Preparing copy...';
+    ProgressLabel.Caption := Format('Total Records: %s', [FormatFloat('#,##0', FTotalRows)]);
     ProgressBar.Style := pbstNormal;
     ProgressBar.Max := FTotalRows;
     ProgressBar.Position := 0;
-    ProgressLabel.Caption := Format('Total Records: %d', [FTotalRows]);
     BtnCancel.Enabled := True;
     Application.ProcessMessages;
 
     // ============================================================
-    // Thread starten
+    // Phase 3: Kopieren
     // ============================================================
+    LblPhase.Caption := 'Copying data...';
+    Application.ProcessMessages;
+
     FThread := TCopyThreadCrossExecuteBlock.Create(
       GetSourceDB, GetDestDB,
       GetSourceTrans, GetDestTrans,
@@ -762,6 +789,14 @@ begin
     FThread.Free;
     FThread := nil;
 
+    // ============================================================
+    // Phase 4: Abschluss
+    // ============================================================
+    LblPhase.Caption := 'Finalizing...';
+    ProgressLabel.Caption := Format('Copied %s of %s rows',
+      [FormatFloat('#,##0', FCopiedRows), FormatFloat('#,##0', FTotalRows)]);
+    Application.ProcessMessages;
+
   finally
     ProgressForm.Free;
   end;
@@ -785,9 +820,6 @@ begin
   else
     RowsPerSec := 0;
 
-  // ------------------------------------------------------------------
-  // Statistik-Record füllen
-  // ------------------------------------------------------------------
   FStatistics.Method          := cmCrossExecuteBlock;
   FStatistics.SourceServer    := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
   FStatistics.SourceDatabase  := RegisteredDatabases[FSourceDBIndex].RegRec.Title;

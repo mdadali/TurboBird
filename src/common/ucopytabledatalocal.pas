@@ -6,6 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
+  Graphics,
   IBDatabase, IBQuery, DateUtils,
   turbocommon,
   uCopyStatistics;
@@ -413,6 +414,7 @@ var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
   ProgressForm : TForm;
+  LblPhase : TLabel;          // ← NEU: Phase-Label
   ProgressLabel : TLabel;
   ProgressBar : TProgressBar;
   LblElapsed : TLabel;
@@ -435,47 +437,71 @@ begin
     ProgressForm.FormStyle := fsNormal;
     ProgressForm.Caption := 'Copying data...';
     ProgressForm.Width := 520;
-    ProgressForm.Height := 230;
+    ProgressForm.Height := 260;
     ProgressForm.Position := poScreenCenter;
     ProgressForm.BorderStyle := bsDialog;
 
+    // === Phase-Label (oberste Zeile, fett) ===
+    LblPhase := TLabel.Create(ProgressForm);
+    LblPhase.Parent := ProgressForm;
+    LblPhase.Left := 16;
+    LblPhase.Top := 16;
+    LblPhase.Caption := 'Preparing...';
+    LblPhase.Font.Style := [fsBold];
+    LblPhase.Font.Size := 10;
+    LblPhase.Width := 480;
+
+    // === Zeilen-Info (zweite Zeile) ===
     ProgressLabel := TLabel.Create(ProgressForm);
     ProgressLabel.Parent := ProgressForm;
     ProgressLabel.Left := 16;
-    ProgressLabel.Top := 16;
-    ProgressLabel.Caption := 'Please wait, counting records...';
-    ProgressLabel.Width := 460;
+    ProgressLabel.Top := 42;
+    ProgressLabel.Caption := 'Please wait...';
+    ProgressLabel.Width := 480;
 
+    // === Progressbar (dritte Zeile) ===
     ProgressBar := TProgressBar.Create(ProgressForm);
     ProgressBar.Parent := ProgressForm;
     ProgressBar.Left := 16;
-    ProgressBar.Top := 45;
-    ProgressBar.Width := 470;
+    ProgressBar.Top := 70;
+    ProgressBar.Width := 480;
     ProgressBar.Height := 20;
     ProgressBar.Min := 0;
     ProgressBar.Max := 100;
     ProgressBar.Style := pbstMarquee;
 
+    // === Elapsed-Label (vierte Zeile) ===
     LblElapsed := TLabel.Create(ProgressForm);
     LblElapsed.Parent := ProgressForm;
     LblElapsed.Left := 16;
-    LblElapsed.Top := 80;
+    LblElapsed.Top := 100;
+    LblElapsed.Caption := 'Elapsed: 00:00:00';
+    LblElapsed.Width := 480;
 
+    // === Cancel-Button ===
     BtnCancel := TButton.Create(ProgressForm);
     BtnCancel.Parent := ProgressForm;
     BtnCancel.Caption := 'Cancel';
     BtnCancel.Left := 200;
-    BtnCancel.Top := 120;
+    BtnCancel.Top := 140;
     BtnCancel.Width := 100;
     BtnCancel.Enabled := False;
     BtnCancel.OnClick := @CancelButtonClick;
 
+    // === SOFORT SICHTBAR ===
     ProgressForm.Show;
+    ProgressForm.BringToFront;
+    Application.ProcessMessages;
+    Sleep(100);
     Application.ProcessMessages;
 
     // ------------------------------------------------------------------
-    // Datensätze zählen
+    // Phase 1: Datensätze zählen
     // ------------------------------------------------------------------
+    LblPhase.Caption := 'Counting records...';
+    ProgressLabel.Caption := 'Please wait...';
+    Application.ProcessMessages;
+
     CountQuery := TIBQuery.Create(nil);
     try
       CountQuery.Database := GetSourceDB;
@@ -505,11 +531,21 @@ begin
 
     FTotalRows := FToRow - FFromRow + 1;
 
+    // ------------------------------------------------------------------
+    // Phase 2: Vorbereitung
+    // ------------------------------------------------------------------
+    LblPhase.Caption := 'Preparing copy...';
+    ProgressLabel.Caption := Format('Total Records: %s', [FormatFloat('#,##0', FTotalRows)]);
     ProgressBar.Style := pbstNormal;
     ProgressBar.Max := FTotalRows;
     ProgressBar.Position := 0;
-    ProgressLabel.Caption := Format('Total Records: %d', [FTotalRows]);
     BtnCancel.Enabled := True;
+    Application.ProcessMessages;
+
+    // ------------------------------------------------------------------
+    // Phase 3: Kopieren
+    // ------------------------------------------------------------------
+    LblPhase.Caption := 'Copying data...';
     Application.ProcessMessages;
 
     // ------------------------------------------------------------------
@@ -543,6 +579,14 @@ begin
     ErrorMsg := FThread.ErrorMessage;
     FThread.Free;
     FThread := nil;
+
+    // ------------------------------------------------------------------
+    // Phase 4: Abschluss
+    // ------------------------------------------------------------------
+    LblPhase.Caption := 'Finalizing...';
+    ProgressLabel.Caption := Format('Copied %s of %s rows',
+      [FormatFloat('#,##0', FCopiedRows), FormatFloat('#,##0', FTotalRows)]);
+    Application.ProcessMessages;
 
   finally
     ProgressForm.Free;

@@ -1,4 +1,4 @@
-unit frmCopyReport;
+unit uReport;
 
 {$mode objfpc}{$H+}
 
@@ -10,9 +10,9 @@ uses
     uthemeselector;
 
 type
-  { TfrmCopyReport }
+  { TfrmReport }
 
-  TfrmCopyReport = class(TForm)
+  TfrmReport = class(TForm)
     btnCopy: TButton;
     btnSave: TButton;
     btnClose: TButton;
@@ -30,26 +30,26 @@ procedure SetReportText(const AText: string);
 end;
 
 //var
-    //frmCopyReport: TfrmCopyReport;
+    //frmReport: TfrmReport;
 
 implementation
 
 {$R *.lfm}
 
-{ TfrmCopyReport }
+{ TfrmReport }
 
-procedure TfrmCopyReport.SetReportText(const AText: string);
+procedure TfrmReport.SetReportText(const AText: string);
 begin
     meReport.Text := AText;
 end;
 
-procedure TfrmCopyReport.btnCopyClick(Sender: TObject);
+procedure TfrmReport.btnCopyClick(Sender: TObject);
 begin
     Clipboard.AsText := meReport.Text;
     ShowMessage('Report copied to clipboard.');
 end;
 
-procedure TfrmCopyReport.btnSaveClick(Sender: TObject);
+procedure TfrmReport.btnSaveClick(Sender: TObject);
 var
     SD: TSaveDialog;
 begin
@@ -69,12 +69,12 @@ begin
 end;
 end;
 
-procedure TfrmCopyReport.btnCloseClick(Sender: TObject);
+procedure TfrmReport.btnCloseClick(Sender: TObject);
 begin
     Close;
 end;
 
-procedure TfrmCopyReport.FormShow(Sender: TObject);
+procedure TfrmReport.FormShow(Sender: TObject);
 begin
     frmThemeSelector.btnApplyClick(Self);
 end;

@@ -1,7 +1,7 @@
-object frmCopyReport: TfrmCopyReport
-  Left = 350
+object frmReport: TfrmReport
+  Left = 791
   Height = 520
-  Top = 180
+  Top = 192
   Width = 640
   Caption = 'Copy Report'
   ClientHeight = 520
