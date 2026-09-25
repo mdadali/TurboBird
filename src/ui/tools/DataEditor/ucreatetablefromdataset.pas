@@ -73,6 +73,7 @@ type
     function  GetCommitInterval: Integer;
     function  GetFromRow: integer;
     function  GetToRow: Integer;
+
     procedure RunFBInsertBatched(ADBIndex: Integer; const ATableName: string);
     procedure AssignParamFromField(Param: TParam; SourceField: TField);
     procedure CancelButtonClick(Sender: TObject);
@@ -368,7 +369,8 @@ end;
 //
 //  - 256 Zeilen pro EXECUTE BLOCK (Firebird 256-Kontext-Limit)
 //  - Commit-Intervall kommt aus edtCommitInterval (User-Eingabe)
-//  - Progress zeigt Zeilen UND Commits
+//  - Zwei Progressbars: Zeilen + Commits
+//  - Aussagekräftige Statistik auch bei Abbruch
 // ---------------------------------------------------------------
 procedure TfrmCreateTableFromDataSet.RunFBInsertBatched(
   ADBIndex: Integer; const ATableName: string);
@@ -394,6 +396,7 @@ var
   CurrentRow: Integer;
   CommitInterval: Integer;
   RowsSinceLastCommit: Integer;
+  RemainingRows: Integer;
   SourceField: TField;
   SQLBody: TStringList;
   SQL, OneInsert: string;
@@ -447,6 +450,12 @@ begin
   Query := TIBQuery.Create(nil);
   ProgressForm := TForm.Create(nil);
   OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  StartTime := Now;
+  EndTime := StartTime;
+  CurrentRow := 0;
+  RowsSinceLastCommit := 0;
+  FCancelled := False;
+
   try
     DefaultFormatSettings.DecimalSeparator := '.';
 
@@ -457,7 +466,7 @@ begin
     ProgressForm.FormStyle := fsNormal;
     ProgressForm.Caption := 'Copying data to ' + ATableName;
     ProgressForm.Width := 540;
-    ProgressForm.Height := 300;
+    ProgressForm.Height := 320;
     ProgressForm.Position := poScreenCenter;
     ProgressForm.BorderStyle := bsDialog;
 
@@ -466,8 +475,8 @@ begin
     ProgressLabel.Parent := ProgressForm;
     ProgressLabel.Left := 16;
     ProgressLabel.Top := 16;
-    ProgressLabel.Caption := Format('Total: %d rows   |   Batch: %d rows',
-      [TotalRows, ROWS_PER_BATCH]);
+    ProgressLabel.Caption := Format('Total: %s rows   |   Batch: %d rows',
+      [FormatFloat('#,##0', TotalRows), ROWS_PER_BATCH]);
     ProgressLabel.Width := 500;
 
     // === Zeilen-ProgressBar ===
@@ -486,8 +495,8 @@ begin
     LblCommit.Parent := ProgressForm;
     LblCommit.Left := 16;
     LblCommit.Top := 75;
-    LblCommit.Caption := Format('Commits: 0 of %d   (every %d rows)',
-      [TotalCommits, CommitInterval]);
+    LblCommit.Caption := Format('Commits: 0 of %d   (every %s rows)',
+      [TotalCommits, FormatFloat('#,##0', CommitInterval)]);
     LblCommit.Width := 500;
 
     // === Commit-ProgressBar ===
@@ -521,17 +530,11 @@ begin
     ProgressForm.Show;
     Application.ProcessMessages;
 
-    FCancelled := False;
-    RowsSinceLastCommit := 0;
-
     FDataSet.DisableControls;
     try
       FDataSet.First;
       for i := 1 to FromRow - 1 do
         FDataSet.Next;
-
-      StartTime := Now;
-      CurrentRow := 0;
 
       // ============================================================
       // Batch-Schleife
@@ -621,19 +624,18 @@ begin
           RowsSinceLastCommit := 0;
           Inc(CommitsDone);
 
-          // Commit-ProgressBar aktualisieren
           CommitBar.Position := CommitsDone;
-          LblCommit.Caption := Format('Commits: %d of %d   (every %d rows)',
-            [CommitsDone, TotalCommits, CommitInterval]);
+          LblCommit.Caption := Format('Commits: %d of %d   (every %s rows)',
+            [CommitsDone, TotalCommits, FormatFloat('#,##0', CommitInterval)]);
         end;
 
         // Zeilen-Progress
         ProgressBar.Position := CurrentRow;
-        ProgressLabel.Caption := Format('Total: %d rows   |   Batch: %d rows   |   Current: %d',
-          [TotalRows, ROWS_PER_BATCH, CurrentRow]);
+        ProgressLabel.Caption := Format('Total: %s rows   |   Batch: %d rows   |   Current: %s',
+          [FormatFloat('#,##0', TotalRows), ROWS_PER_BATCH, FormatFloat('#,##0', CurrentRow)]);
         LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime) +
-          '   |   ' + Format('%.0f rows/sec',
-            [CurrentRow / Max(1, (Now - StartTime) * 86400)]);
+          '   |   ' + FormatFloat('#,##0', Round(CurrentRow / Max(0.001, (Now - StartTime) * 86400))) +
+          ' rows/sec';
         Application.ProcessMessages;
       end;
 
@@ -645,36 +647,60 @@ begin
         DestTrans.Commit;
         Inc(CommitsDone);
         CommitBar.Position := CommitsDone;
-        LblCommit.Caption := Format('Commits: %d of %d   (every %d rows)',
-          [CommitsDone, TotalCommits, CommitInterval]);
+        LblCommit.Caption := Format('Commits: %d of %d   (every %s rows)',
+          [CommitsDone, TotalCommits, FormatFloat('#,##0', CommitInterval)]);
       end;
 
-      EndTime := Now;
-
     finally
+      EndTime := Now;
       FDataSet.EnableControls;
     end;
 
+    // ============================================================
+    // Statistik-Dialog
+    // ============================================================
     if not FCancelled then
     begin
+      // === Erfolgreich abgeschlossen ===
       ShowMessage(Format('Data copy completed!' + sLineBreak +
-                         'Rows: %d' + sLineBreak +
-                         'Time: %s' + sLineBreak +
-                         'Speed: %.0f rows/sec' + sLineBreak +
-                         'Batch: %d rows' + sLineBreak +
-                         'Commits: %d (every %d rows)',
-                         [CurrentRow,
+                         sLineBreak +
+                         'Rows:     %s' + sLineBreak +
+                         'Time:     %s' + sLineBreak +
+                         'Speed:    %s rows/sec' + sLineBreak +
+                         'Batch:    %d rows' + sLineBreak +
+                         'Commits:  %d (every %s rows)',
+                         [FormatFloat('#,##0', CurrentRow),
                           FormatDateTime('hh:nn:ss', EndTime - StartTime),
-                          CurrentRow / Max(1, (EndTime - StartTime) * 86400),
+                          FormatFloat('#,##0', Round(CurrentRow / Max(0.001, (EndTime - StartTime) * 86400))),
                           ROWS_PER_BATCH,
                           CommitsDone,
-                          CommitInterval]));
+                          FormatFloat('#,##0', CommitInterval)]));
     end
     else
     begin
+      // === Abgebrochen ===
       if DestTrans.InTransaction then
         DestTrans.Rollback;
-      ShowMessage('Copy cancelled by user.');
+
+      RemainingRows := TotalRows - CurrentRow;
+
+      ShowMessage(Format('Copy cancelled by user!' + sLineBreak +
+                         sLineBreak +
+                         'Rows copied:  %s of %s' + sLineBreak +
+                         'Rows skipped: %s' + sLineBreak +
+                         sLineBreak +
+                         'Time:     %s' + sLineBreak +
+                         'Speed:    %s rows/sec' + sLineBreak +
+                         'Commits:  %d' + sLineBreak +
+                         sLineBreak +
+                         'Note: Not-committed data has been rolled back.' + sLineBreak +
+                         'Please check the destination table.',
+                         [FormatFloat('#,##0', CurrentRow),
+                          FormatFloat('#,##0', TotalRows),
+                          FormatFloat('#,##0', RemainingRows),
+                          FormatDateTime('hh:nn:ss', EndTime - StartTime),
+                          FormatFloat('#,##0', Round(CurrentRow / Max(0.001, (EndTime - StartTime) * 86400))),
+                          CommitsDone]));
     end;
 
   finally

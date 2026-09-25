@@ -915,6 +915,7 @@ object frmDataEditor: TfrmDataEditor
     Top = 384
   end
   object sWorksheetDataset1: TsWorksheetDataset
+    AutoCalcFields = False
     FieldDefs = <>
     Left = 736
     Top = 264
@@ -923,6 +924,7 @@ object frmDataEditor: TfrmDataEditor
     FileMustExist = True
     ReadOnly = False
     FieldDefs = <>
+    AutoCalcFields = False
     AllowMultiLine = False
     Delimiter = ','
     FirstLineAsSchema = False
@@ -934,6 +936,7 @@ object frmDataEditor: TfrmDataEditor
     FileMustExist = True
     ReadOnly = False
     FieldDefs = <>
+    AutoCalcFields = False
     Left = 736
     Top = 496
   end
@@ -945,7 +948,9 @@ object frmDataEditor: TfrmDataEditor
     Top = 352
   end
   object JSONDataSet1: TJSONDataSet
+    PacketRecords = 10000
     FieldDefs = <>
+    AutoCalcFields = False
     Left = 720
     Top = 192
   end
