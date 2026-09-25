@@ -5,7 +5,8 @@ unit uCopyStatistics;
 interface
 
 uses
-  Classes, SysUtils, DateUtils;
+  Classes, SysUtils, DateUtils,
+  uSystemInfo;
 
 type
   TCopyMethod = (cmLocal, cmCrossExecuteBlock, cmCrossRowByRow);
@@ -30,6 +31,7 @@ type
     UseRowRange: Boolean;
 
     ElapsedSeconds: Double;
+    SystemInfo: TSystemInfo;
 
     CreateTableSQL: string;      // Die CREATE TABLE-Anweisung (leer, wenn nicht erstellt)
     FormulasApplied: string;
@@ -131,6 +133,13 @@ begin
       SL.Add('Table Structure:');
       SL.Add(Stats.CreateTableSQL);
       SL.Add('');
+
+      if Stats.SystemInfo.CPUModel <> '' then
+      begin
+        SL.Add('');
+        SL.AddStrings(FormatSystemInfo(Stats.SystemInfo));
+      end;
+
     end;
     SL.Add('═══════════════════════════════════════════════════');
 

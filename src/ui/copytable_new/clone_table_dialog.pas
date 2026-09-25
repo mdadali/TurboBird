@@ -21,7 +21,8 @@ uses
   uthemeselector,
 
   uCopyStatistics,
-  uReport
+  uReport,
+  uSystemInfo
   ;
 
 
@@ -1350,6 +1351,7 @@ begin
     end;
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
+    Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';
@@ -1405,6 +1407,7 @@ begin
     end;
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
+    Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';
@@ -1461,6 +1464,7 @@ begin
     end;
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
+    Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';

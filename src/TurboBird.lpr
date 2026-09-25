@@ -63,7 +63,8 @@ uses
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
   CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, u_bulk_export, ServerDBFieldSelector, About;
+  uCreateTableFromDataSet, u_bulk_export, ServerDBFieldSelector, About,
+uSystemInfo;
 
 const
   Major = 1;
