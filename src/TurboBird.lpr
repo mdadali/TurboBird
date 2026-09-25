@@ -27,7 +27,7 @@ uses
   importtable, fileimport, csvdocument, fServerSession, uthemeselector,
   lazdbexport, sdflaz, udb_firebird_struct_helper, udb_udf_Fetcher,
   udb_udr_func_fetcher, sqldblib, fbcommon,
-uCopyTableDataCrossRowByRow, fTestFunction,
+uCopyTableDataCrossRowByRow, frmCopyReport, fTestFunction,
   fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder, QBDirFrm,
   QBLnkFrm, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
   fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest,

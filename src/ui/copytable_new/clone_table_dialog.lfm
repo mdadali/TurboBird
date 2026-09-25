@@ -23,9 +23,9 @@ object frmCloneTable: TfrmCloneTable
     ClientWidth = 1281
     TabOrder = 0
     object btnExecute: TButton
-      Left = 816
+      Left = 808
       Height = 35
-      Top = 8
+      Top = 7
       Width = 104
       Caption = 'Execute'
       OnClick = btnExecuteClick
@@ -518,7 +518,7 @@ object frmCloneTable: TfrmCloneTable
     TZTextOption = tzOffset
     DefaultTZDate = 43831
     Left = 174
-    Top = 126
+    Top = 168
   end
   object IBDBSource: TIBDatabase
     Connected = False

@@ -1,0 +1,65 @@
+object frmCopyReport: TfrmCopyReport
+  Left = 350
+  Height = 520
+  Top = 180
+  Width = 640
+  Caption = 'Copy Report'
+  ClientHeight = 520
+  ClientWidth = 640
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
+  object pnlBottom: TPanel
+    Left = 0
+    Height = 50
+    Top = 470
+    Width = 640
+    Align = alBottom
+    BevelOuter = bvNone
+    ClientHeight = 50
+    ClientWidth = 640
+    TabOrder = 0
+    object btnCopy: TButton
+      Left = 10
+      Height = 30
+      Top = 10
+      Width = 150
+      Caption = 'Copy to Clipboard'
+      OnClick = btnCopyClick
+      TabOrder = 0
+    end
+    object btnSave: TButton
+      Left = 170
+      Height = 30
+      Top = 10
+      Width = 150
+      Caption = 'Save to File...'
+      OnClick = btnSaveClick
+      TabOrder = 1
+    end
+    object btnClose: TButton
+      Left = 530
+      Height = 30
+      Top = 10
+      Width = 100
+      Anchors = [akTop, akRight]
+      Caption = 'Close'
+      OnClick = btnCloseClick
+      TabOrder = 2
+    end
+  end
+  object meReport: TMemo
+    Left = 0
+    Height = 470
+    Top = 0
+    Width = 640
+    Align = alClient
+    Font.Height = -14
+    Font.Name = 'Noto Sans Mono'
+    ParentFont = False
+    ReadOnly = True
+    ScrollBars = ssBoth
+    TabOrder = 1
+    WordWrap = False
+  end
+end

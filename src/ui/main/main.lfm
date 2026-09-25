@@ -5756,7 +5756,6 @@ object fmMain: TfmMain
       OnClick = tvMainClick
       OnDblClick = tvMainDblClick
       OnDeletion = tvMainDeletion
-      OnExpanded = tvMainExpanded
       OnExpanding = tvMainExpanding
       OnKeyDown = tvMainKeyDown
       Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]

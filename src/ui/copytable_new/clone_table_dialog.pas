@@ -18,7 +18,11 @@ uses
   uFormulaPresets,
 
   fmetaquerys,
-  uthemeselector;
+  uthemeselector,
+
+  uCopyStatistics,
+  frmCopyReport
+  ;
 
 
 type
@@ -125,6 +129,10 @@ type
     FFields: array of TFieldInfo;
     FUpdatingCombos: Boolean;
 
+    FInitialTableName: string;
+    FInitialDBIndex: Integer;
+
+    procedure ApplyInitialSelection;
     function  FillSourceServerCombo: boolean;
     function  FillSourceDBCombo: boolean;
     function  FillSourceTableCombo: boolean;
@@ -149,7 +157,7 @@ type
     function TableExists(DB: TIBDatabase; TableName: string): Boolean;
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
   public
-    procedure Init(ANodeInfos: TPNodeInfos);
+    procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
     procedure LoadFormulaPresets;
     procedure UpdateCopyMethodAvailability;
   end;
@@ -162,6 +170,36 @@ implementation
 {$R *.lfm}
 
 { TfrmCloneTable }
+procedure TfrmCloneTable.ApplyInitialSelection;
+var
+  i: Integer;
+  ServerName, DBTitle: string;
+begin
+  // Nur wenn eine Vorbelegung gewünscht ist
+  if (FInitialDBIndex < 0) or (FInitialDBIndex >= Length(RegisteredDatabases)) then
+    Exit;
+
+  // Server + DB-Titel aus dem Registrierungseintrag holen
+  ServerName := RegisteredDatabases[FInitialDBIndex].RegRec.ServerName;
+  DBTitle    := RegisteredDatabases[FInitialDBIndex].RegRec.Title;
+
+  // --- Source-Server setzen ---
+  i := comboxSourceServer.Items.IndexOf(ServerName);
+  if i >= 0 then
+    comboxSourceServer.ItemIndex := i;
+
+  // --- Source-DB-Combo neu füllen und DB setzen ---
+  FillSourceDBCombo;
+  i := comboxSourceDB.Items.IndexOf(DBTitle);
+  if i >= 0 then
+    comboxSourceDB.ItemIndex := i;
+
+  // --- Dest-Server: gleicher Server wie Source (sinnvoller Default) ---
+  i := comboxDestServer.Items.IndexOf(ServerName);
+  if i >= 0 then
+    comboxDestServer.ItemIndex := i;
+end;
+
 procedure TfrmCloneTable.UpdateCopyMethodAvailability;
 var
   SameServer, SameDB: Boolean;
@@ -224,9 +262,14 @@ begin
   UpdateCopyMethodAvailability;
 end;
 
-procedure TfrmCloneTable.Init(ANodeInfos: TPNodeInfos);
+procedure TfrmCloneTable.Init(ANodeInfos: TPNodeInfos; const ATableName: string);
 begin
   FNodeInfos := ANodeInfos;
+  FInitialTableName := Trim(ATableName);
+  FInitialDBIndex := -1;
+
+  if Assigned(ANodeInfos) then
+    FInitialDBIndex := ANodeInfos^.dbIndex;
 end;
 
 // ============================================================================
@@ -1069,6 +1112,9 @@ var
   SkippedFields: string;
   FromRow, ToRow: Integer;
   i: integer;
+
+  ReportForm: TfrmCopyReport;
+  Stats: TCopyStatistics;
 begin
   if chkboxExternalTable.Checked and (Trim(edtExternalFile.Text) = '') then
   begin
@@ -1170,15 +1216,29 @@ begin
         begin
           chkLstFields.Checked[i] := False;
           sgFields.Cells[0, i + 1] := '0';
-          if SkippedFields <> '' then SkippedFields := SkippedFields + ', ';
-          SkippedFields := SkippedFields + FFields[i].FieldName;
+          if SkippedFields <> '' then SkippedFields := SkippedFields + sLineBreak;
+          SkippedFields := SkippedFields + '  • ' + FFields[i].FieldName +
+                           '  (' + FFields[i].FieldType + ')';
         end;
       end;
     end;
+
     if SkippedFields <> '' then
-      MessageDlg('External tables do not support these field types.' + sLineBreak +
-                 'They have been deselected automatically:' + sLineBreak +
-                 SkippedFields, mtWarning, [mbOK], 0);
+    begin
+      if MessageDlg(
+           'External tables do not support these field types.' + sLineBreak +
+           sLineBreak +
+           'The following fields have been deselected:' + sLineBreak +
+           sLineBreak +
+           SkippedFields + sLineBreak +
+           sLineBreak +
+           'Start the copy operation anyway?',
+           mtWarning, [mbYes, mbNo], 0) <> mrYes then
+      begin
+        StatusBar1.SimpleText := 'Copy cancelled by user.';
+        Exit;
+      end;
+    end;
   end;
 
   // From/To
@@ -1211,17 +1271,27 @@ begin
     Application.ProcessMessages;
 
     CopyEngineLocal := TCopyTableDataLocal.Create(
-          FSourceDBIndex, FDestDBIndex,
-          MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
-          Fields,
-          StrToIntDef(edtBatchSize.Text, 500000),
-          FromRow, ToRow
-        );
-
+      FSourceDBIndex, FDestDBIndex,
+      MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
+      Fields,
+      StrToIntDef(edtBatchSize.Text, 500000),
+      FromRow, ToRow
+    );
     try
       CopyEngineLocal.Execute;
+      Stats := CopyEngineLocal.Statistics;
     finally
       CopyEngineLocal.Free;
+    end;
+
+    Stats.DestIsExternal := chkboxExternalTable.Checked;
+
+    ReportForm := TfrmCopyReport.Create(nil);
+    try
+      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.ShowModal;
+    finally
+      ReportForm.Free;
     end;
   end
 
@@ -1241,11 +1311,21 @@ begin
       FromRow, ToRow,
       IBDBSource, IBTransSource, IBDBDest, IBTransDest
     );
-
     try
       CopyEngineCrossExecuteBlock.Execute;
+      Stats := CopyEngineCrossExecuteBlock.Statistics;
     finally
       CopyEngineCrossExecuteBlock.Free;
+    end;
+
+    Stats.DestIsExternal := chkboxExternalTable.Checked;
+
+    ReportForm := TfrmCopyReport.Create(nil);
+    try
+      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.ShowModal;
+    finally
+      ReportForm.Free;
     end;
   end
 
@@ -1271,6 +1351,17 @@ begin
     finally
       CopyEngineCrossRowByRow.Free;
     end;
+
+    Stats.DestIsExternal := chkboxExternalTable.Checked;
+
+    ReportForm := TfrmCopyReport.Create(nil);
+    try
+      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.ShowModal;
+    finally
+      ReportForm.Free;
+    end;
+
   end;
 
   StatusBar1.SimpleText := 'Copy completed: ' + Trim(comboxSourceTables.Text) + ' → ' + DestTable;
@@ -1412,11 +1503,34 @@ begin
 end;
 
 procedure TfrmCloneTable.FormShow(Sender: TObject);
+var
+  i: Integer;
 begin
   frmThemeSelector.btnApplyClick(Self);
 
-  // Jetzt Guard AUS
+  // Guard AUS – ab jetzt dürfen die Change-Handler feuern
   FUpdatingCombos := False;
+
+  // Vorbelegung anwenden, falls ein Tabellen-Node übergeben wurde
+  ApplyInitialSelection;
+
+  // Kaskade explizit auslösen
+  if comboxSourceServer.Items.Count > 0 then
+    comboxSourceServerChange(nil);
+
+  // Wenn eine konkrete Tabelle vorgegeben ist → auswählen
+  if FInitialTableName <> '' then
+  begin
+    i := comboxSourceTables.Items.IndexOf(FInitialTableName);
+    if i >= 0 then
+    begin
+      comboxSourceTables.ItemIndex := i;
+      comboxSourceTablesChange(nil);   // löst LoadFields + edtDestTable-Update aus
+    end;
+  end;
+
+  if comboxDestServer.Items.Count > 0 then
+    comboxDestServerChange(nil);
 end;
 
 procedure TfrmCloneTable.rbAllRowsChange(Sender: TObject);

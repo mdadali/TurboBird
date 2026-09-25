@@ -599,28 +599,8 @@ begin
 end;
 
 procedure TServerSession.ParseFBVersion;
-var
-  S: string;
-  DotPos: Integer;
-  MajorStr, MinorStr: string;
 begin
-  FFBVersionMajor := 0;
-  FFBVersionMinor := 0;
-
-  S := FFBVersionString;
-  if Pos('Firebird', S) > 0 then
-    S := Trim(Copy(S, Pos('Firebird', S) + Length('Firebird'), MaxInt));
-
-  DotPos := Pos('.', S);
-  if DotPos > 0 then
-  begin
-    MajorStr := Copy(S, 1, DotPos-1);
-    MinorStr := Copy(S, DotPos+1, MaxInt);
-    FFBVersionMajor := StrToIntDef(MajorStr, 0);
-    FFBVersionMinor := StrToIntDef(MinorStr, 0);
-  end
-  else
-    FFBVersionMajor := StrToIntDef(S, 0);
+  ParseFBVersionString(FFBVersionString, FFBVersionMajor, FFBVersionMinor);
 end;
 
 end.
