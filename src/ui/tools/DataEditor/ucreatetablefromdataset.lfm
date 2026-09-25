@@ -46,7 +46,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Top = 51
       Width = 88
       TabOrder = 2
-      Text = '1000000'
+      Text = '25600'
     end
     object Label3: TLabel
       Left = 432
