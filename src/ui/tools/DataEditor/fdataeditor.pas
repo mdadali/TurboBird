@@ -737,7 +737,14 @@ begin
     FLoadElapsedLabel.Caption := 'Elapsed: 00:00:00';
     FLoadElapsedLabel.Font.Style := [fsBold];
 
+    // === Status-Text VOR dem Blockieren setzen ===
+    FLoadStatusLabel.Caption := 'Reading file, please wait...';
+    FLoadElapsedLabel.Caption := 'This may take a while for large files.';
+
     WaitForm.Show;
+    WaitForm.BringToFront;
+    Application.ProcessMessages;
+    Sleep(100);
     Application.ProcessMessages;
 
     // === Timer starten (für animierte Punkte + Elapsed) ===
