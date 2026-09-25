@@ -408,10 +408,10 @@ object frmCloneTable: TfrmCloneTable
       Left = 22
       Height = 44
       Top = 56
-      Width = 826
+      Width = 858
       Caption = 'Copy Method'
       ClientHeight = 24
-      ClientWidth = 824
+      ClientWidth = 856
       TabOrder = 6
       object rbExecuteBlock: TRadioButton
         Left = 16
@@ -423,22 +423,22 @@ object frmCloneTable: TfrmCloneTable
         TabOrder = 0
       end
       object rbRowByRow: TRadioButton
-        Left = 360
+        Left = 344
         Height = 21
         Hint = 'All fields copied individually, supports all data types'
         Top = 0
-        Width = 217
-        Caption = 'Row by Row (All Columns - Slow)'
+        Width = 231
+        Caption = 'Row by Row (Ignore Arraxs - Slow)'
         Checked = True
         TabOrder = 1
         TabStop = True
       end
       object rbInsertSelect: TRadioButton
-        Left = 600
+        Left = 584
         Height = 21
         Top = 0
-        Width = 205
-        Caption = 'Insert Select (same database)'
+        Width = 259
+        Caption = 'Insert Select (same database - Fastest)'
         TabOrder = 2
       end
     end

@@ -21,7 +21,7 @@ uses
   uthemeselector,
 
   uCopyStatistics,
-  frmCopyReport
+  uReport
   ;
 
 
@@ -1144,7 +1144,7 @@ var
   IsProblemField: Boolean;
   TmpMethodName: string;
 
-  ReportForm: TfrmCopyReport;
+  ReportForm: TfrmReport;
   Stats: TCopyStatistics;
   FormulasText: string;
 begin
@@ -1372,7 +1372,7 @@ begin
       Stats.CreateTableSQL := '';
 
     // --- Report anzeigen ---
-    ReportForm := TfrmCopyReport.Create(nil);
+    ReportForm := TfrmReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
       ReportForm.ShowModal;
@@ -1427,7 +1427,7 @@ begin
       Stats.CreateTableSQL := '';
 
     // --- Report anzeigen ---
-    ReportForm := TfrmCopyReport.Create(nil);
+    ReportForm := TfrmReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
       ReportForm.ShowModal;
@@ -1483,7 +1483,7 @@ begin
       Stats.CreateTableSQL := '';
 
     // --- Report anzeigen ---
-    ReportForm := TfrmCopyReport.Create(nil);
+    ReportForm := TfrmReport.Create(nil);
     try
       ReportForm.SetReportText(FormatCopyReport(Stats));
       ReportForm.ShowModal;

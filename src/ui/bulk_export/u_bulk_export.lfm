@@ -1,7 +1,7 @@
 object frmBulkExport: TfrmBulkExport
-  Left = 524
+  Left = 527
   Height = 692
-  Top = 93
+  Top = 116
   Width = 1067
   Caption = 'Bulk Export'
   ClientHeight = 692
@@ -746,7 +746,6 @@ object frmBulkExport: TfrmBulkExport
       ClientHeight = 112
       ClientWidth = 384
       TabOrder = 5
-      Visible = False
       object cbFormulaPreset: TComboBox
         Left = 16
         Height = 35
