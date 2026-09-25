@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 445
+  Left = 692
   Height = 575
-  Top = 83
+  Top = 216
   Width = 847
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 575
@@ -105,11 +105,11 @@ object frmDataEditor: TfrmDataEditor
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 491
+      ClientHeight = 494
       ClientWidth = 837
       object RxDBGrid1: TRxDBGrid
         Left = 0
-        Height = 491
+        Height = 494
         Top = 0
         Width = 837
         ColumnDefValues.BlobText = '(blob)'
@@ -188,12 +188,12 @@ object frmDataEditor: TfrmDataEditor
     end
     object tsDetail: TTabSheet
       Caption = 'Detail View'
-      ClientHeight = 491
+      ClientHeight = 494
       ClientWidth = 837
       TabVisible = False
       object ScrollBox1: TScrollBox
         Left = 0
-        Height = 491
+        Height = 494
         Top = 0
         Width = 837
         HorzScrollBar.Page = 1
@@ -204,67 +204,67 @@ object frmDataEditor: TfrmDataEditor
     end
     object tsCSVSettings: TTabSheet
       Caption = 'CSV Settings'
-      ClientHeight = 491
+      ClientHeight = 494
       ClientWidth = 837
       object Label1: TLabel
         Left = 56
-        Height = 20
+        Height = 19
         Top = 40
-        Width = 136
+        Width = 125
         Caption = 'Default Field Length'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 56
-        Height = 20
+        Height = 19
         Top = 88
-        Width = 62
+        Width = 58
         Caption = 'Delimiter'
         ParentColor = False
       end
       object Label5: TLabel
         Left = 56
-        Height = 20
+        Height = 19
         Top = 184
-        Width = 77
+        Width = 71
         Caption = 'Quote Char'
         ParentColor = False
       end
       object Label6: TLabel
         Left = 56
-        Height = 20
+        Height = 19
         Top = 136
-        Width = 80
+        Width = 71
         Caption = 'Line Ending'
         ParentColor = False
       end
       object chkBoxIgnoreOuterWhiteSpace: TCheckBox
         Left = 400
-        Height = 24
+        Height = 21
         Top = 88
-        Width = 195
+        Width = 180
         Caption = 'Ignore outer Whiteppace'
         TabOrder = 0
       end
       object chkBoxFirstLineAsFieldName: TCheckBox
         Left = 400
-        Height = 24
+        Height = 21
         Top = 40
-        Width = 180
+        Width = 163
         Caption = 'First Line as Fieldname'
         TabOrder = 1
       end
       object chkBoxQuoteOuterWhiteSpace: TCheckBox
         Left = 400
-        Height = 24
+        Height = 21
         Top = 134
-        Width = 189
+        Width = 175
         Caption = 'Quote outer Whitespace'
         TabOrder = 2
       end
       object edtDefaultFieldLength: TEdit
         Left = 272
-        Height = 37
+        Height = 31
         Top = 40
         Width = 48
         MaxLength = 1024
@@ -274,7 +274,7 @@ object frmDataEditor: TfrmDataEditor
       end
       object edtDelimiter: TEdit
         Left = 272
-        Height = 37
+        Height = 31
         Top = 88
         Width = 24
         MaxLength = 1
@@ -283,7 +283,7 @@ object frmDataEditor: TfrmDataEditor
       end
       object edtLineEnding: TEdit
         Left = 272
-        Height = 37
+        Height = 31
         Top = 136
         Width = 40
         TabOrder = 5
@@ -291,7 +291,7 @@ object frmDataEditor: TfrmDataEditor
       end
       object edtQuoteChar: TEdit
         Left = 272
-        Height = 37
+        Height = 31
         Top = 184
         Width = 24
         TabOrder = 6
@@ -300,11 +300,11 @@ object frmDataEditor: TfrmDataEditor
     end
     object tsSQL: TTabSheet
       Caption = 'SQL'
-      ClientHeight = 491
+      ClientHeight = 494
       ClientWidth = 837
       inline SynEdit1: TSynEdit
         Left = 0
-        Height = 441
+        Height = 444
         Top = 0
         Width = 837
         Align = alClient
@@ -802,7 +802,7 @@ object frmDataEditor: TfrmDataEditor
       object Panel2: TPanel
         Left = 0
         Height = 50
-        Top = 441
+        Top = 444
         Width = 837
         Align = alBottom
         TabOrder = 1
@@ -819,6 +819,7 @@ object frmDataEditor: TfrmDataEditor
     Top = 264
   end
   object CSVDataset1: TCSVDataset
+    PacketRecords = 10000
     FieldDefs = <>
     AutoCalcFields = False
     AfterDelete = CSVDataset1AfterDelete

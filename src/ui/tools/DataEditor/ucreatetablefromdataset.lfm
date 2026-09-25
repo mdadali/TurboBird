@@ -1,7 +1,7 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 243
+  Left = 516
   Height = 540
-  Top = 142
+  Top = 156
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
@@ -14,18 +14,18 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   object grboxCopyOptions1: TGroupBox
     Left = 0
     Height = 140
-    Top = 328
+    Top = 329
     Width = 1016
     Align = alBottom
     Caption = 'Copy Options'
-    ClientHeight = 119
+    ClientHeight = 120
     ClientWidth = 1014
     TabOrder = 0
     object rbAllRows: TRadioButton
       Left = 16
-      Height = 24
+      Height = 21
       Top = 56
-      Width = 82
+      Width = 74
       Caption = 'All Rows'
       Checked = True
       OnChange = rbAllRowsChange
@@ -34,15 +34,15 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object rbRange: TRadioButton
       Left = 120
-      Height = 24
+      Height = 21
       Top = 56
-      Width = 69
+      Width = 63
       Caption = 'Range'
       TabOrder = 1
     end
-    object edtBatchSize: TEdit
-      Left = 512
-      Height = 37
+    object edtCommitInterval: TEdit
+      Left = 544
+      Height = 31
       Top = 51
       Width = 88
       TabOrder = 2
@@ -50,15 +50,15 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object Label3: TLabel
       Left = 432
-      Height = 20
+      Height = 19
       Top = 56
-      Width = 69
-      Caption = 'Batch Size'
+      Width = 100
+      Caption = 'Commit Interval'
       ParentColor = False
     end
     object edtFrom: TEdit
       Left = 208
-      Height = 37
+      Height = 31
       Top = 51
       Width = 88
       Enabled = False
@@ -77,7 +77,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object edtTo: TEdit
       Left = 320
-      Height = 37
+      Height = 31
       Top = 51
       Width = 96
       Enabled = False
@@ -86,19 +86,19 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object chkboxCopyData: TCheckBox
       Left = 16
-      Height = 24
+      Height = 21
       Top = 8
-      Width = 93
+      Width = 87
       Caption = 'Copy Data'
       Checked = True
       State = cbChecked
       TabOrder = 5
     end
     object lblHint: TLabel
-      Left = 640
-      Height = 20
-      Top = 16
-      Width = 45
+      Left = 728
+      Height = 19
+      Top = 8
+      Width = 40
       Caption = 'lblHint'
       ParentColor = False
     end
@@ -106,7 +106,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   object pnlBottom: TPanel
     Left = 0
     Height = 50
-    Top = 468
+    Top = 469
     Width = 1016
     Align = alBottom
     ClientHeight = 50
@@ -131,7 +131,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       TabOrder = 1
     end
     object btnRun: TButton
-      Left = 663
+      Left = 664
       Height = 33
       Top = 8
       Width = 75
@@ -147,12 +147,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     Width = 1016
     Align = alTop
     Caption = 'Fields'
-    ClientHeight = 211
+    ClientHeight = 212
     ClientWidth = 1014
     TabOrder = 2
     object sgFields: TStringGrid
       Left = 0
-      Height = 211
+      Height = 212
       Top = 0
       Width = 681
       Align = alClient
@@ -164,11 +164,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object pnlFields: TPanel
       Left = 681
-      Height = 211
+      Height = 212
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 211
+      ClientHeight = 212
       ClientWidth = 333
       TabOrder = 1
       object chkLstFields: TCheckListBox
@@ -212,23 +212,23 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     TabOrder = 3
     object Label1: TLabel
       Left = 24
-      Height = 20
+      Height = 19
       Top = 8
-      Width = 50
+      Width = 48
       Caption = 'Servers'
       ParentColor = False
     end
     object Label2: TLabel
       Left = 328
-      Height = 20
+      Height = 19
       Top = 8
-      Width = 29
+      Width = 28
       Caption = 'DB''s'
       ParentColor = False
     end
     object cmbBoxServers: TComboBox
       Left = 24
-      Height = 37
+      Height = 31
       Top = 32
       Width = 248
       ItemHeight = 0
@@ -238,7 +238,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object cmbBoxDBs: TComboBox
       Left = 328
-      Height = 37
+      Height = 31
       Top = 32
       Width = 196
       ItemHeight = 0
@@ -247,15 +247,15 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object Label4: TLabel
       Left = 573
-      Height = 20
+      Height = 19
       Top = 8
-      Width = 80
+      Width = 72
       Caption = 'Table Name'
       ParentColor = False
     end
     object edtDestTableName: TEdit
       Left = 573
-      Height = 37
+      Height = 31
       Top = 32
       Width = 411
       TabOrder = 2
@@ -263,8 +263,8 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 22
-    Top = 518
+    Height = 21
+    Top = 519
     Width = 1016
     Panels = <>
   end
