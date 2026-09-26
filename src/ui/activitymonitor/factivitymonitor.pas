@@ -138,7 +138,7 @@ begin
     trExec.Commit;
 
   if IBDatabase.Connected then
-    IBDatabase.Connected := false;
+    //IBDatabase.Connected := false;
 end;
 
 { ============================================= }
