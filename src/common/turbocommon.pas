@@ -531,6 +531,7 @@ var
 
     //BulkExport
     DefaultBatchSize: integer;
+    BulkExportDefaultPreset: string;
 
     //CSV Editor
     CSVDefaultFieldLength: integer;
@@ -3843,6 +3844,8 @@ begin
 
   //BulkExport
   DefaultBatchSize := fIniFile.ReadInteger('BulkExport','DefaultBatchSize', 500000);
+  BulkExportDefaultPreset    := fIniFile.ReadString('BulkExport','DefaultPreset', 'csv_export');
+
 
   // CSV Editor
   CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
@@ -3958,7 +3961,7 @@ begin
 
   //BulkExport
   fIniFile.WriteInteger('BulkExport', 'DefaultBatchSize', DefaultBatchSize);
-
+  fIniFile.ReadString('BulkExport','DefaultPreset', BulkExportDefaultPreset);
 
     // CSV Editor
     fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
