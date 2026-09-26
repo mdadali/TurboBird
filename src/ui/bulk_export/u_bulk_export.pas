@@ -8,6 +8,8 @@ uses
   Classes, SysUtils, Forms, Controls,
   Math, DateUtils, Dialogs,
   Graphics, StdCtrls, ExtCtrls,
+  //StreamIO,
+  //Iostream,
   SynEdit, Grids, CheckLst, ComCtrls, DB,  BufStream,
   IBDatabase, IBQuery, IBSQL, IBXScript,
 
@@ -16,14 +18,14 @@ uses
   uthemeselector,
   uFormulaPresets,
   fmetaquerys,
-  uReport,
-  uSystemInfo;
 
-
+  uSystemInfo,
+  uReport;
 
 type
 
   { TfrmBulkExport }
+
   TfrmBulkExport = class(TForm)
     btnAddToQueue: TButton;
     btnClose: TButton;
@@ -123,6 +125,7 @@ implementation
 {$R *.lfm}
 
 { TfrmBulkExport }
+
 // ------------------------------------------------------------------
 // Source-Auswahl – nur FÜLLEN, keine Kaskade
 // ------------------------------------------------------------------
@@ -669,6 +672,279 @@ begin
   FCancelled := True;
 end;
 
+{procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
+const
+  LINE_BUFFER_SIZE = 10000;
+var
+  TotalRows, BatchSize, Exported, StartRow: Integer;
+  FromRow, ToRow: Integer;
+  ProgressForm: TForm;
+  ProgressLabel, LblElapsed, LblPhase: TLabel;
+  ProgressBar: TProgressBar;
+  BtnCancel: TButton;
+  StartTime, EndTime: TDateTime;
+  DB: TIBDatabase;
+  Trans: TIBTransaction;
+  Q: TIBSQL;
+  Line: RawByteString;
+  LineEnd: RawByteString;
+  SQL: string;
+  BaseSQL: string;
+  FileStream: TBufferedFileStream;
+  LineBuffer: TStringList;
+  BufferCount: Integer;
+
+  procedure FlushBuffer;
+  var
+    j: Integer;
+    BufLine: RawByteString;
+  begin
+    for j := 0 to LineBuffer.Count - 1 do
+    begin
+      BufLine := LineBuffer[j];
+      FileStream.Write(BufLine[1], Length(BufLine));
+      FileStream.Write(LineEnd[1], Length(LineEnd));
+    end;
+    LineBuffer.Clear;
+    BufferCount := 0;
+  end;
+
+  procedure UpdateProgress;
+  begin
+    ProgressBar.Position := Exported;
+    ProgressLabel.Caption := Format('Exported %s of %s rows',
+      [FormatFloat('#,##0', Exported), FormatFloat('#,##0', TotalRows)]);
+    LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime) +
+      '   |   ' + FormatFloat('#,##0',
+        Round(Exported / Max(0.001, (Now - StartTime) * 86400))) + ' rows/sec';
+    Application.ProcessMessages;
+  end;
+
+begin
+  BatchSize := GetBatchSize;
+  FromRow := GetFromRow;
+  ToRow := GetToRow;
+
+  // Eigene DB-Verbindung
+  DB := TIBDatabase.Create(nil);
+  Trans := TIBTransaction.Create(nil);
+  DB.DefaultTransaction := Trans;
+  Trans.DefaultDatabase := DB;
+  AssignIBDatabase(RegisteredDatabases[FSourceDBIndex].IBDatabase, DB);
+  with RegisteredDatabases[FSourceDBIndex] do
+  begin
+    DB.Params.Values['user_name'] := RegRec.UserName;
+    if RegRec.Password <> '' then
+      DB.Params.Values['password'] := RegRec.Password
+    else
+      DB.Params.Values['password'] := GetDBSessionPassword(RegRec.ServerName, RegRec.DatabaseName);
+  end;
+  DB.LoginPrompt := False;
+  DB.Connected := True;
+  Trans.StartTransaction;
+
+  Q := TIBSQL.Create(nil);
+  Q.Database := DB;
+  Q.Transaction := Trans;
+
+  BaseSQL := Copy(ASQL, Pos('SELECT ', UpperCase(ASQL)) + 7, MaxInt);
+  LineEnd := sLineBreak;
+
+  LineBuffer := TStringList.Create;
+  LineBuffer.Capacity := LINE_BUFFER_SIZE;
+  BufferCount := 0;
+
+  ProgressForm := TForm.Create(nil);
+  try
+    // === Progress-Formular aufbauen ===
+    ProgressForm.Width := 520;
+    ProgressForm.Height := 220;
+    ProgressForm.Position := poScreenCenter;
+    ProgressForm.BorderStyle := bsDialog;
+    ProgressForm.Caption := 'Bulk Export';
+
+    // Phase-Label (Counting / Preparing / Exporting / Finalizing)
+    LblPhase := TLabel.Create(ProgressForm);
+    LblPhase.Parent := ProgressForm;
+    LblPhase.Left := 16;
+    LblPhase.Top := 16;
+    LblPhase.Caption := 'Counting rows...';
+    LblPhase.Font.Style := [fsBold];
+    LblPhase.Width := 480;
+
+    // Zeilen-Label
+    ProgressLabel := TLabel.Create(ProgressForm);
+    ProgressLabel.Parent := ProgressForm;
+    ProgressLabel.Left := 16;
+    ProgressLabel.Top := 42;
+    ProgressLabel.Caption := 'Please wait...';
+    ProgressLabel.Width := 480;
+
+    // Progressbar
+    ProgressBar := TProgressBar.Create(ProgressForm);
+    ProgressBar.Parent := ProgressForm;
+    ProgressBar.Left := 16;
+    ProgressBar.Top := 70;
+    ProgressBar.Width := 480;
+    ProgressBar.Height := 20;
+    ProgressBar.Min := 0;
+    ProgressBar.Max := 100;
+    ProgressBar.Position := 0;
+    ProgressBar.Style := pbstMarquee;   // ← animiert, solange TotalRows unbekannt
+
+    // Elapsed
+    LblElapsed := TLabel.Create(ProgressForm);
+    LblElapsed.Parent := ProgressForm;
+    LblElapsed.Left := 16;
+    LblElapsed.Top := 100;
+    LblElapsed.Caption := 'Elapsed: 00:00:00';
+    LblElapsed.Width := 480;
+
+    // Cancel
+    BtnCancel := TButton.Create(ProgressForm);
+    BtnCancel.Parent := ProgressForm;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left := 200;
+    BtnCancel.Top := 140;
+    BtnCancel.Width := 100;
+    BtnCancel.OnClick := @CancelClick;
+
+    // === SOFORT SICHTBAR ===
+    ProgressForm.Show;
+    ProgressForm.BringToFront;
+    Application.ProcessMessages;
+    Sleep(50);
+    Application.ProcessMessages;
+
+    FCancelled := False;
+    StartTime := Now;
+    Exported := 0;
+    StartRow := FromRow;
+
+    // ============================================================
+    // Phase 1: Zeilen zählen
+    // ============================================================
+    LblPhase.Caption := 'Counting rows...';
+    Application.ProcessMessages;
+
+    TotalRows := 0;
+    try
+      Q.SQL.Text := 'SELECT COUNT(*) FROM ' + Trim(comboxSourceTables.Text);
+      Q.ExecQuery;
+      if not Q.EOF then
+        TotalRows := Q.Fields[0].AsInteger;
+      Q.Close;
+    except
+      TotalRows := 0;
+    end;
+
+    if (FromRow > 1) or (ToRow < TotalRows) then
+    begin
+      if ToRow > TotalRows then ToRow := TotalRows;
+      TotalRows := ToRow - FromRow + 1;
+    end;
+
+    // Jetzt kennen wir die Zeilenzahl → Progressbar umstellen
+    ProgressBar.Style := pbstNormal;
+    ProgressBar.Max := TotalRows;
+    ProgressBar.Position := 0;
+
+    // ============================================================
+    // Phase 2: Datei öffnen
+    // ============================================================
+    LblPhase.Caption := 'Opening output file...';
+    Application.ProcessMessages;
+
+    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, 1048576);
+
+    // ============================================================
+    // Phase 3: Export
+    // ============================================================
+    LblPhase.Caption := 'Exporting data...';
+    LblElapsed.Caption := 'Elapsed: 00:00:00';
+    Application.ProcessMessages;
+
+    try
+      repeat
+        SQL := 'SELECT FIRST ' + IntToStr(BatchSize) +
+               ' SKIP ' + IntToStr(StartRow - 1) + ' ' + BaseSQL;
+        Q.Close;
+        Q.SQL.Text := SQL;
+        Q.ExecQuery;
+
+        if Q.EOF then Break;
+
+        while not Q.EOF do
+        begin
+          if FCancelled then Break;
+
+          Line := Q.Fields[0].AsString;
+          LineBuffer.Add(Line);
+          Inc(BufferCount);
+          Inc(Exported);
+
+          if BufferCount >= LINE_BUFFER_SIZE then
+          begin
+            FlushBuffer;
+            UpdateProgress;
+          end;
+
+          Q.Next;
+        end;
+
+        StartRow := StartRow + BatchSize;
+
+      until (Exported >= TotalRows) or FCancelled;
+
+      // Rest schreiben
+      if BufferCount > 0 then
+        FlushBuffer;
+
+    finally
+      FileStream.Flush;
+      FileStream.Free;
+    end;
+
+    // ============================================================
+    // Phase 4: Finalisieren
+    // ============================================================
+    LblPhase.Caption := 'Finalizing...';
+    UpdateProgress;
+
+    EndTime := Now;
+  finally
+    LineBuffer.Free;
+    Q.Free;
+    Trans.Rollback;
+    DB.Connected := False;
+    DB.Free;
+    Trans.Free;
+    ProgressForm.Free;
+  end;
+
+  // Statistik
+  if FCancelled then
+    ShowMessage(Format('Export cancelled!' + sLineBreak +
+                       'Rows: %s' + sLineBreak +
+                       'Time: %s' + sLineBreak +
+                       'Speed: %s rows/sec',
+                       [FormatFloat('#,##0', Exported),
+                        FormatDateTime('hh:nn:ss', EndTime - StartTime),
+                        FormatFloat('#,##0', Round(Exported / Max(0.001, (EndTime - StartTime) * 86400)))]))
+  else
+    ShowMessage(Format('Export completed!' + sLineBreak +
+                       'Rows: %s' + sLineBreak +
+                       'Time: %s' + sLineBreak +
+                       'Speed: %s rows/sec' + sLineBreak +
+                       'Batch size: %s' + sLineBreak +
+                       'Formula used: %s',
+                       [FormatFloat('#,##0', Exported),
+                        FormatDateTime('hh:nn:ss', EndTime - StartTime),
+                        FormatFloat('#,##0', Round(Exported / Max(0.001, (EndTime - StartTime) * 86400))),
+                        FormatFloat('#,##0', BatchSize),
+                        BoolToStr(chkUseFormula.Checked, 'Yes', 'No')]));
+end; }
+
 procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
 const
   LINE_BUFFER_SIZE = 10000;
@@ -992,6 +1268,5 @@ begin
     ProgressForm.Free;
   end;
 end;
-
 
 end.
