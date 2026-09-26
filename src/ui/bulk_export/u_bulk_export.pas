@@ -8,8 +8,6 @@ uses
   Classes, SysUtils, Forms, Controls,
   Math, DateUtils, Dialogs,
   Graphics, StdCtrls, ExtCtrls,
-  //StreamIO,
-  //Iostream,
   SynEdit, Grids, CheckLst, ComCtrls, DB,  BufStream,
   IBDatabase, IBQuery, IBSQL, IBXScript,
 
@@ -24,27 +22,6 @@ uses
 
 
 type
-
-  { TExportStatistics }
-  TExportStatistics = record
-    SourceServer: string;
-    SourceDatabase: string;
-    SourceTable: string;
-    SourceServerVersion: string;
-    ClientLibVersion: string;
-
-    ExportFileName: string;
-    ExportFileSize: Int64;
-
-    FormulaUsed: Boolean;
-    FormulasApplied: string;
-
-    RowsExported: Int64;
-    BatchSize: Integer;
-    ElapsedSeconds: Double;
-
-    SystemInfo: TSystemInfo;
-  end;
 
   { TfrmBulkExport }
   TfrmBulkExport = class(TForm)
@@ -133,7 +110,6 @@ type
     function  GetFromRow: Integer;
     function  GetToRow: Integer;
     procedure CancelClick(Sender: TObject);
-    function  FormatExportReport(const Stats: TExportStatistics): string;
     procedure DoBulkExport(const ASQL: string);
   public
     procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
@@ -693,331 +669,6 @@ begin
   FCancelled := True;
 end;
 
-{procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
-const
-  LINE_BUFFER_SIZE = 10000;
-var
-  TotalRows, BatchSize, Exported, StartRow: Integer;
-  FromRow, ToRow: Integer;
-  ProgressForm: TForm;
-  ProgressLabel, LblElapsed, LblPhase: TLabel;
-  ProgressBar: TProgressBar;
-  BtnCancel: TButton;
-  StartTime, EndTime: TDateTime;
-  DB: TIBDatabase;
-  Trans: TIBTransaction;
-  Q: TIBSQL;
-  Line: RawByteString;
-  LineEnd: RawByteString;
-  SQL: string;
-  BaseSQL: string;
-  FileStream: TBufferedFileStream;
-  LineBuffer: TStringList;
-  BufferCount: Integer;
-  FileSize: Int64;
-  Stats: TExportStatistics;
-  ReportForm: TfrmReport;
-  i: Integer;
-
-  procedure FlushBuffer;
-  var
-    j: Integer;
-    BufLine: RawByteString;
-  begin
-    for j := 0 to LineBuffer.Count - 1 do
-    begin
-      BufLine := LineBuffer[j];
-      FileStream.Write(BufLine[1], Length(BufLine));
-      FileStream.Write(LineEnd[1], Length(LineEnd));
-    end;
-    LineBuffer.Clear;
-    BufferCount := 0;
-  end;
-
-  procedure UpdateProgress;
-  begin
-    ProgressBar.Position := Exported;
-    ProgressLabel.Caption := Format('Exported %s of %s rows',
-      [FormatFloat('#,##0', Exported), FormatFloat('#,##0', TotalRows)]);
-    LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime) +
-      '   |   ' + FormatFloat('#,##0',
-        Round(Exported / Max(0.001, (Now - StartTime) * 86400))) + ' rows/sec';
-    Application.ProcessMessages;
-  end;
-
-begin
-  BatchSize := GetBatchSize;
-  FromRow := GetFromRow;
-  ToRow := GetToRow;
-
-  // ============================================================
-  // Statistik-Record vorbereiten
-  // ============================================================
-  FillChar(Stats, SizeOf(Stats), 0);
-  Stats.SourceServer   := comboxSourceServer.Text;
-  Stats.SourceDatabase := comboxSourceDB.Text;
-  Stats.SourceTable    := comboxSourceTables.Text;
-  Stats.ExportFileName := edtExportFileName.Text;
-  Stats.BatchSize      := BatchSize;
-  Stats.FormulaUsed    := chkUseFormula.Checked;
-
-  if (FSourceDBIndex >= 0) and (FSourceDBIndex < Length(RegisteredDatabases)) then
-  begin
-    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
-
-    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
-       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
-      Stats.ClientLibVersion := 'Firebird ' +
-        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
-  end;
-
-  // Systeminfo (Hardware + Export-Pfad)
-  Stats.SystemInfo := GetSystemInfo(edtExportFileName.Text);
-
-  // Formeln sammeln
-  Stats.FormulasApplied := '';
-  if chkUseFormula.Checked then
-  begin
-    for i := 0 to High(FFields) do
-      if (Trim(sgFields.Cells[2, i + 1]) <> '') then
-        Stats.FormulasApplied := Stats.FormulasApplied +
-          '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[2, i + 1] + sLineBreak;
-  end;
-
-  // ============================================================
-  // Eigene Datenbankverbindung
-  // ============================================================
-  DB := TIBDatabase.Create(nil);
-  Trans := TIBTransaction.Create(nil);
-  DB.DefaultTransaction := Trans;
-  Trans.DefaultDatabase := DB;
-  AssignIBDatabase(RegisteredDatabases[FSourceDBIndex].IBDatabase, DB);
-  with RegisteredDatabases[FSourceDBIndex] do
-  begin
-    DB.Params.Values['user_name'] := RegRec.UserName;
-    if RegRec.Password <> '' then
-      DB.Params.Values['password'] := RegRec.Password
-    else
-      DB.Params.Values['password'] := GetDBSessionPassword(RegRec.ServerName, RegRec.DatabaseName);
-  end;
-  DB.LoginPrompt := False;
-  DB.Connected := True;
-  Trans.StartTransaction;
-
-  Q := TIBSQL.Create(nil);
-  Q.Database := DB;
-  Q.Transaction := Trans;
-
-  // BaseSQL einmal vorberechnen
-  BaseSQL := Copy(ASQL, Pos('SELECT ', UpperCase(ASQL)) + 7, MaxInt);
-
-  // LineEnding einmal cachen
-  LineEnd := sLineBreak;
-
-  // Zeilen-Puffer vorbereiten
-  LineBuffer := TStringList.Create;
-  LineBuffer.Capacity := LINE_BUFFER_SIZE;
-  BufferCount := 0;
-
-  // ============================================================
-  // Fortschrittsdialog
-  // ============================================================
-  ProgressForm := TForm.Create(nil);
-  try
-    ProgressForm.Width := 520;
-    ProgressForm.Height := 220;
-    ProgressForm.Position := poScreenCenter;
-    ProgressForm.BorderStyle := bsDialog;
-    ProgressForm.Caption := 'Bulk Export';
-
-    LblPhase := TLabel.Create(ProgressForm);
-    LblPhase.Parent := ProgressForm;
-    LblPhase.Left := 16;
-    LblPhase.Top := 16;
-    LblPhase.Caption := 'Counting rows...';
-    LblPhase.Font.Style := [fsBold];
-    LblPhase.Width := 480;
-
-    ProgressLabel := TLabel.Create(ProgressForm);
-    ProgressLabel.Parent := ProgressForm;
-    ProgressLabel.Left := 16;
-    ProgressLabel.Top := 42;
-    ProgressLabel.Caption := 'Please wait...';
-    ProgressLabel.Width := 480;
-
-    ProgressBar := TProgressBar.Create(ProgressForm);
-    ProgressBar.Parent := ProgressForm;
-    ProgressBar.Left := 16;
-    ProgressBar.Top := 70;
-    ProgressBar.Width := 480;
-    ProgressBar.Height := 20;
-    ProgressBar.Min := 0;
-    ProgressBar.Max := 100;
-    ProgressBar.Position := 0;
-    ProgressBar.Style := pbstMarquee;
-
-    LblElapsed := TLabel.Create(ProgressForm);
-    LblElapsed.Parent := ProgressForm;
-    LblElapsed.Left := 16;
-    LblElapsed.Top := 100;
-    LblElapsed.Caption := 'Elapsed: 00:00:00';
-    LblElapsed.Width := 480;
-
-    BtnCancel := TButton.Create(ProgressForm);
-    BtnCancel.Parent := ProgressForm;
-    BtnCancel.Caption := 'Cancel';
-    BtnCancel.Left := 200;
-    BtnCancel.Top := 140;
-    BtnCancel.Width := 100;
-    BtnCancel.OnClick := @CancelClick;
-
-    // === SOFORT SICHTBAR ===
-    ProgressForm.Show;
-    ProgressForm.BringToFront;
-    Application.ProcessMessages;
-    Sleep(100);
-    Application.ProcessMessages;
-
-    FCancelled := False;
-    StartTime := Now;
-    Exported := 0;
-    StartRow := FromRow;
-
-    // ============================================================
-    // Phase 1: Zeilen zählen
-    // ============================================================
-    LblPhase.Caption := 'Counting rows...';
-    Application.ProcessMessages;
-
-    TotalRows := 0;
-    try
-      Q.SQL.Text := 'SELECT COUNT(*) FROM ' + Trim(comboxSourceTables.Text);
-      Q.ExecQuery;
-      if not Q.EOF then
-        TotalRows := Q.Fields[0].AsInteger;
-      Q.Close;
-    except
-      TotalRows := 0;
-    end;
-
-    if (FromRow > 1) or (ToRow < TotalRows) then
-    begin
-      if ToRow > TotalRows then ToRow := TotalRows;
-      TotalRows := ToRow - FromRow + 1;
-    end;
-
-    ProgressBar.Style := pbstNormal;
-    ProgressBar.Max := TotalRows;
-    ProgressBar.Position := 0;
-
-    // ============================================================
-    // Phase 2: Datei öffnen
-    // ============================================================
-    LblPhase.Caption := 'Opening output file...';
-    Application.ProcessMessages;
-
-    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, 1048576);
-
-    // ============================================================
-    // Phase 3: Export
-    // ============================================================
-    LblPhase.Caption := 'Exporting data...';
-    LblElapsed.Caption := 'Elapsed: 00:00:00';
-    Application.ProcessMessages;
-
-    try
-      repeat
-        SQL := 'SELECT FIRST ' + IntToStr(BatchSize) +
-               ' SKIP ' + IntToStr(StartRow - 1) + ' ' + BaseSQL;
-        Q.Close;
-        Q.SQL.Text := SQL;
-        Q.ExecQuery;
-
-        if Q.EOF then Break;
-
-        while not Q.EOF do
-        begin
-          if FCancelled then Break;
-
-          Line := Q.Fields[0].AsString;
-          LineBuffer.Add(Line);
-          Inc(BufferCount);
-          Inc(Exported);
-
-          if BufferCount >= LINE_BUFFER_SIZE then
-          begin
-            FlushBuffer;
-            UpdateProgress;
-          end;
-
-          Q.Next;
-        end;
-
-        StartRow := StartRow + BatchSize;
-
-      until (Exported >= TotalRows) or FCancelled;
-
-      if BufferCount > 0 then
-        FlushBuffer;
-
-    finally
-      FileStream.Flush;
-      FileStream.Free;
-    end;
-
-    // ============================================================
-    // Phase 4: Finalisieren
-    // ============================================================
-    LblPhase.Caption := 'Finalizing...';
-    UpdateProgress;
-
-    EndTime := Now;
-
-    // ============================================================
-    // Statistik finalisieren (VOR dem Freigeben)
-    // ============================================================
-    Stats.RowsExported   := Exported;
-    Stats.ElapsedSeconds := (EndTime - StartTime) * SecsPerDay;
-
-    FileSize := 0;
-    if FileExists(edtExportFileName.Text) then
-    begin
-      try
-        with TFileStream.Create(edtExportFileName.Text, fmOpenRead or fmShareDenyNone) do
-        try
-          FileSize := Size;
-        finally
-          Free;
-        end;
-      except
-        FileSize := 0;
-      end;
-    end;
-    Stats.ExportFileSize := FileSize;
-
-    // ============================================================
-    // Report anzeigen
-    // ============================================================
-    ReportForm := TfrmReport.Create(nil);
-    try
-      ReportForm.SetReportText(FormatExportReport(Stats));
-      ReportForm.ShowModal;
-    finally
-      ReportForm.Free;
-    end;
-
-  finally
-    // Freigaben
-    LineBuffer.Free;
-    Q.Free;
-    Trans.Rollback;
-    DB.Connected := False;
-    DB.Free;
-    Trans.Free;
-    ProgressForm.Free;
-  end;
-end;}
-
 procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
 const
   LINE_BUFFER_SIZE = 10000;
@@ -1040,7 +691,7 @@ var
   LineBuffer: TStringList;
   BufferCount: Integer;
   FileSize: Int64;
-  Stats: TExportStatistics;
+  Stats: TTransferStatistic;
   ReportForm: TfrmReport;
   i: Integer;
 
@@ -1079,12 +730,15 @@ begin
   // Statistik-Record vorbereiten
   // ============================================================
   FillChar(Stats, SizeOf(Stats), 0);
-  Stats.SourceServer   := comboxSourceServer.Text;
-  Stats.SourceDatabase := comboxSourceDB.Text;
-  Stats.SourceTable    := comboxSourceTables.Text;
-  Stats.ExportFileName := edtExportFileName.Text;
-  Stats.BatchSize      := BatchSize;
-  Stats.FormulaUsed    := chkUseFormula.Checked;
+  Stats.Kind                 := tkExport;
+  Stats.SourceKind           := 'Firebird Table';
+  Stats.SourceServer         := comboxSourceServer.Text;
+  Stats.SourceDatabase       := comboxSourceDB.Text;
+  Stats.SourceTable          := comboxSourceTables.Text;
+  Stats.DestKind             := 'File';
+  Stats.DestFileName         := edtExportFileName.Text;
+  Stats.BatchSize            := BatchSize;
+  Stats.FormulaUsed          := chkUseFormula.Checked;
 
   if (FSourceDBIndex >= 0) and (FSourceDBIndex < Length(RegisteredDatabases)) then
   begin
@@ -1096,7 +750,7 @@ begin
         RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
   end;
 
-  // Systeminfo (Hardware + Export-Pfad)
+  // Systeminfo
   Stats.SystemInfo := GetSystemInfo(edtExportFileName.Text);
 
   // Formeln sammeln
@@ -1133,13 +787,9 @@ begin
   Q.Database := DB;
   Q.Transaction := Trans;
 
-  // BaseSQL einmal vorberechnen
   BaseSQL := Copy(ASQL, Pos('SELECT ', UpperCase(ASQL)) + 7, MaxInt);
-
-  // LineEnding einmal cachen
   LineEnd := sLineBreak;
 
-  // Zeilen-Puffer vorbereiten
   LineBuffer := TStringList.Create;
   LineBuffer.Capacity := LINE_BUFFER_SIZE;
   BufferCount := 0;
@@ -1196,7 +846,6 @@ begin
     BtnCancel.Width := 100;
     BtnCancel.OnClick := @CancelClick;
 
-    // === SOFORT SICHTBAR ===
     ProgressForm.Show;
     ProgressForm.BringToFront;
     Application.ProcessMessages;
@@ -1206,10 +855,9 @@ begin
     FCancelled := False;
     Exported := 0;
     StartRow := FromRow;
-    StartTime := Now;   // Dummy – wird nach COUNT neu gesetzt
 
     // ============================================================
-    // Phase 1: Zeilen zählen (NICHT in der Zeitmessung!)
+    // Phase 1: Zeilen zählen
     // ============================================================
     LblPhase.Caption := 'Counting rows...';
     Application.ProcessMessages;
@@ -1303,8 +951,8 @@ begin
     // ============================================================
     // Statistik finalisieren
     // ============================================================
-    Stats.RowsExported   := Exported;
-    Stats.ElapsedSeconds := (EndTime - StartTime) * SecsPerDay;
+    Stats.RowsProcessed   := Exported;
+    Stats.ElapsedSeconds  := (EndTime - StartTime) * SecsPerDay;
 
     // Dateigröße ermitteln
     FileSize := 0;
@@ -1321,21 +969,20 @@ begin
         FileSize := 0;
       end;
     end;
-    Stats.ExportFileSize := FileSize;
+    Stats.DestFileSize := FileSize;
 
     // ============================================================
     // Report anzeigen
     // ============================================================
     ReportForm := TfrmReport.Create(nil);
     try
-      ReportForm.SetReportText(FormatExportReport(Stats));
+      ReportForm.SetReportText(FormatTransferReport(Stats));
       ReportForm.ShowModal;
     finally
       ReportForm.Free;
     end;
 
   finally
-    // Freigaben
     LineBuffer.Free;
     Q.Free;
     Trans.Rollback;
@@ -1346,96 +993,5 @@ begin
   end;
 end;
 
-// ---------------------------------------------------------------------------
-// Export-Report formatieren
-// ---------------------------------------------------------------------------
-function TfrmBulkExport.FormatExportReport(const Stats: TExportStatistics): string;
-var
-  SL: TStringList;
-  RowsPerSec: Double;
-begin
-  SL := TStringList.Create;
-  try
-    SL.Add('═══════════════════════════════════════════════════');
-    SL.Add('                  EXPORT REPORT');
-    SL.Add('═══════════════════════════════════════════════════');
-    SL.Add('');
-    SL.Add('Source:');
-    SL.Add('  Server:    ' + Stats.SourceServer);
-    SL.Add('  Database:  ' + Stats.SourceDatabase);
-    SL.Add('  Table:     ' + Stats.SourceTable);
-    if Stats.SourceServerVersion <> '' then
-      SL.Add('  Version:   ' + Stats.SourceServerVersion);
-    SL.Add('');
-
-    SL.Add('Destination:');
-    SL.Add('  File:      ' + ExtractFileName(Stats.ExportFileName));
-    SL.Add('  Path:      ' + ExtractFilePath(Stats.ExportFileName));
-
-
-    if Stats.ExportFileSize > 0 then
-    begin
-      if Stats.ExportFileSize >= 1024 * 1024 then
-        SL.Add('  Size:      ' + FormatFloat('#,##0.00',
-          Stats.ExportFileSize / (1024 * 1024)) + ' MB')
-      else
-        SL.Add('  Size:      ' + FormatFloat('#,##0',
-          Stats.ExportFileSize / 1024) + ' KB');
-    end;
-    SL.Add('');
-
-    SL.Add('Options:');
-    SL.Add('  Batch Size:   ' + FormatFloat('#,##0', Stats.BatchSize));
-    SL.Add('  Formula Used: ' + BoolToStr(Stats.FormulaUsed, 'Yes', 'No'));
-    SL.Add('');
-
-
-    if Stats.FormulasApplied <> '' then
-    begin
-      SL.Add('Formulas Applied:');
-      SL.Add(Stats.FormulasApplied);
-      SL.Add('');
-    end;
-
-    SL.Add('Result:');
-    SL.Add('  Rows Exported: ' + FormatFloat('#,##0', Stats.RowsExported));
-    SL.Add('  Time:          ' + FormatDateTime('hh:nn:ss',
-      Stats.ElapsedSeconds / SecsPerDay));
-
-    if Stats.ElapsedSeconds > 0 then
-      RowsPerSec := Stats.RowsExported / Stats.ElapsedSeconds
-    else
-      RowsPerSec := 0;
-
-    SL.Add('  Speed:         ' + FormatFloat('#,##0', Round(RowsPerSec)) +
-      ' rows/sec');
-    SL.Add('');
-
-    // === Environment ===
-    SL.Add('Environment:');
-    if Stats.ClientLibVersion <> '' then
-      SL.Add('  Client Lib: ' + Stats.ClientLibVersion);
-    SL.Add('  OS:        ' + Stats.SystemInfo.OSName);
-    SL.Add('  CPU:       ' + Stats.SystemInfo.CPUModel);
-    SL.Add('  Cores:     ' + IntToStr(Stats.SystemInfo.CPUCores));
-    SL.Add('  RAM:       ' + FormatFloat('#,##0', Stats.SystemInfo.RAMTotalMB) + ' MB');
-
-    if Stats.SystemInfo.DiskPath <> '' then
-    begin
-      SL.Add('  Disk (' + ExtractFileName(Stats.SystemInfo.DiskPath) + '):');
-      SL.Add('    Free:    ' + FormatFloat('#,##0', Stats.SystemInfo.DiskFreeMB) + ' MB');
-      SL.Add('    Total:   ' + FormatFloat('#,##0', Stats.SystemInfo.DiskTotalMB) + ' MB');
-      if Stats.SystemInfo.DiskType <> '' then
-        SL.Add('    Type:    ' + Stats.SystemInfo.DiskType);
-    end;
-
-    SL.Add('');
-    SL.Add('═══════════════════════════════════════════════════');
-
-    Result := SL.Text;
-  finally
-    SL.Free;
-  end;
-end;
 
 end.
