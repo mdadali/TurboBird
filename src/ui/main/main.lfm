@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 448
+  Left = 944
   Height = 649
-  Top = 264
+  Top = 542
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 620
@@ -7919,16 +7919,6 @@ object fmMain: TfmMain
       Tag = 1
       Caption = 'Bulk Export'
       OnClick = lmBulkExportClick
-    end
-    object lmExportTableToDataEditorRO: TMenuItem
-      Tag = 1
-      Caption = 'View in Data Editor'
-      OnClick = lmExportTableToDataEditorROClick
-    end
-    object lmExportTableToDataEditorRW: TMenuItem
-      Tag = -10
-      Caption = 'Edit in Data Editor'
-      OnClick = lmExportTableToDataEditorRWClick
     end
     object lmCloneToExternalTable: TMenuItem
       Tag = -10
