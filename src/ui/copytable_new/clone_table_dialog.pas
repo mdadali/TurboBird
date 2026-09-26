@@ -20,7 +20,6 @@ uses
   fmetaquerys,
   uthemeselector,
 
-  uCopyStatistics,
   uReport,
   uSystemInfo
   ;
@@ -1146,7 +1145,7 @@ var
   TmpMethodName: string;
 
   ReportForm: TfrmReport;
-  Stats: TCopyStatistics;
+  Stats: TTransferStatistic;
   FormulasText: string;
 begin
   if chkboxExternalTable.Checked and (Trim(edtExternalFile.Text) = '') then
@@ -1350,13 +1349,14 @@ begin
       CopyEngineLocal.Free;
     end;
 
-    Stats.DestIsExternal := chkboxExternalTable.Checked;
+    if chkboxExternalTable.Checked then
+      Stats.DestKind := 'External Table'
+    else
+      Stats.DestKind := 'Firebird Table';
+
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
-    // --- Server-Versionen und Client-Lib ---
-    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
-    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
-
+    // --- Client-Lib-Version (Server-Versionen kommen schon aus der Engine) ---
     if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
        Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
       Stats.ClientLibVersion := 'Firebird ' +
@@ -1385,7 +1385,7 @@ begin
     // --- Report anzeigen ---
     ReportForm := TfrmReport.Create(nil);
     try
-      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.SetReportText(FormatTransferReport(Stats));
       ReportForm.ShowModal;
     finally
       ReportForm.Free;
@@ -1415,17 +1415,19 @@ begin
       CopyEngineCrossExecuteBlock.Free;
     end;
 
-    Stats.DestIsExternal := chkboxExternalTable.Checked;
+    if chkboxExternalTable.Checked then
+      Stats.DestKind := 'External Table'
+    else
+      Stats.DestKind := 'Firebird Table';
+
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
-    // --- Server-Versionen und Client-Lib ---
-    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
-    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
-
+    // --- Client-Lib-Version (Server-Versionen kommen schon aus der Engine) ---
     if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
        Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
       Stats.ClientLibVersion := 'Firebird ' +
         RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
+
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';
@@ -1450,7 +1452,7 @@ begin
     // --- Report anzeigen ---
     ReportForm := TfrmReport.Create(nil);
     try
-      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.SetReportText(FormatTransferReport(Stats));
       ReportForm.ShowModal;
     finally
       ReportForm.Free;
@@ -1481,13 +1483,14 @@ begin
       CopyEngineCrossRowByRow.Free;
     end;
 
-    Stats.DestIsExternal := chkboxExternalTable.Checked;
+    if chkboxExternalTable.Checked then
+      Stats.DestKind := 'External Table'
+    else
+      Stats.DestKind := 'Firebird Table';
+
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
-    // --- Server-Versionen und Client-Lib ---
-    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
-    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
-
+    // --- Client-Lib-Version (Server-Versionen kommen schon aus der Engine) ---
     if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
        Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
       Stats.ClientLibVersion := 'Firebird ' +
@@ -1516,7 +1519,7 @@ begin
     // --- Report anzeigen ---
     ReportForm := TfrmReport.Create(nil);
     try
-      ReportForm.SetReportText(FormatCopyReport(Stats));
+      ReportForm.SetReportText(FormatTransferReport(Stats));
       ReportForm.ShowModal;
     finally
       ReportForm.Free;

@@ -41,7 +41,8 @@ uses
   SysTables,
   EnterPass,
   fsimpleobjextractor,
-  cUnIntelliSenseCache;
+  cUnIntelliSenseCache,
+  uSystemInfo;
 
 {$I version.inc}
 {$I turbocommon.inc}
@@ -331,6 +332,67 @@ type
   TForeignKeyInfoArray = array of TForeignKeyInfo;
 
 
+
+type
+  // ==========================================================================
+  // Transfer-Statistik (für CloneTable, BulkExport, DataEditor)
+  // ==========================================================================
+
+  TCopyMethod = (cmLocal, cmCrossExecuteBlock, cmCrossRowByRow);
+
+  TTransferKind = (
+    tkCopy,           // CloneTable: Tabelle → Tabelle
+    tkExport,         // BulkExport: Tabelle → Datei
+    tkLoadFile,       // DataEditor: Datei → Dataset
+    tkLoadTable,      // DataEditor: Tabelle → Dataset
+    tkCreateTable     // DataEditor: Dataset → Tabelle
+  );
+
+  TTransferStatistic = record
+    Kind: TTransferKind;
+
+    // === SOURCE ===
+    SourceKind: string;              // 'File', 'Firebird Table', 'External Table'
+    SourceServer: string;
+    SourceDatabase: string;
+    SourceTable: string;
+    SourceServerVersion: string;
+    SourceFileFormat: string;        // CSV, JSON, XLSX
+    SourceFileName: string;
+    SourceFileSize: Int64;
+
+    // === DESTINATION ===
+    DestKind: string;
+    DestServer: string;
+    DestDatabase: string;
+    DestTable: string;
+    DestServerVersion: string;
+    DestFileName: string;            // Vollständiger Pfad
+    DestFileSize: Int64;
+
+    // === OPTIONS ===
+    Method: TCopyMethod;
+    BatchSize: Integer;
+    FromRow: Integer;
+    ToRow: Integer;
+    UseRowRange: Boolean;
+    FormulaUsed: Boolean;
+    FormulasApplied: string;
+    CreateTableSQL: string;
+    CSVOptions: string;              // Mehrzeilige CSV-Parameter-Beschreibung
+    OptionsExtra: string;            // Zusätzliche Optionen (z.B. 'Read-Only')
+
+    // === RESULT ===
+    RowsProcessed: Int64;
+    FieldsCount: Integer;
+    ElapsedSeconds: Double;
+
+    // === ENVIRONMENT ===
+    ClientLibVersion: string;
+    SystemInfo: TSystemInfo;
+  end;
+
+
   //search
   TDBField = (
    dbfTitle,
@@ -496,6 +558,16 @@ var
     SlowQueryThreshold: Integer;  // in Millisekunden
 
     //end-Ini.File////////////////////////////////////////////////////////////////
+
+
+// ==========================================================================
+// Transfer-Statistik (für CloneTable, BulkExport, DataEditor)
+// ==========================================================================
+function CopyMethodToStr(M: TCopyMethod): string;
+function CopyStatsRowsPerSec(const Stats: TTransferStatistic): Double;
+function FormatNumberEN(const AValue: Int64): string;
+function FormatTransferReport(const Stats: TTransferStatistic): string;
+
 
 //transactions
 function GetTransactionParamsAsString(ATrans: TIBTransaction): string;
@@ -740,6 +812,285 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses Reg;
+
+{ ==========================================================================
+  Transfer-Statistik: Hilfsfunktionen und Formatierung
+  ========================================================================== }
+
+function CopyMethodToStr(M: TCopyMethod): string;
+begin
+  case M of
+    cmLocal:             Result := 'Same Database (INSERT...SELECT)';
+    cmCrossExecuteBlock: Result := 'Cross-Database (Execute Block)';
+    cmCrossRowByRow:     Result := 'Cross-Database (Row-by-Row)';
+  else
+    Result := 'Unknown';
+  end;
+end;
+
+function CopyStatsRowsPerSec(const Stats: TTransferStatistic): Double;
+begin
+  if Stats.ElapsedSeconds > 0 then
+    Result := Stats.RowsProcessed / Stats.ElapsedSeconds
+  else
+    Result := 0;
+end;
+
+function FormatNumberEN(const AValue: Int64): string;
+var
+  S: string;
+  i, Len: Integer;
+begin
+  S := IntToStr(AValue);
+  Len := Length(S);
+  Result := '';
+
+  for i := 1 to Len do
+  begin
+    Result := Result + S[i];
+    if ((Len - i) mod 3 = 0) and (i < Len) then
+      Result := Result + ',';
+  end;
+end;
+
+// ---------------------------------------------------------------------------
+// Report-Titel je nach Art
+// ---------------------------------------------------------------------------
+function TransferKindToTitle(K: TTransferKind): string;
+begin
+  case K of
+    tkCopy:        Result := 'COPY REPORT';
+    tkExport:      Result := 'EXPORT REPORT';
+    tkLoadFile:    Result := 'LOAD REPORT';
+    tkLoadTable:   Result := 'LOAD REPORT';
+    tkCreateTable: Result := 'CREATE TABLE REPORT';
+  else
+    Result := 'REPORT';
+  end;
+end;
+
+// ---------------------------------------------------------------------------
+// Quelldatei-Größe formatieren
+// ---------------------------------------------------------------------------
+function FormatFileSize(ASize: Int64): string;
+begin
+  if ASize <= 0 then
+    Result := ''
+  else if ASize >= 1024 * 1024 * 1024 then
+    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024 * 1024)) + ' GB'
+  else if ASize >= 1024 * 1024 then
+    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024)) + ' MB'
+  else if ASize >= 1024 then
+    Result := FormatFloat('#,##0', ASize / 1024) + ' KB'
+  else
+    Result := FormatFloat('#,##0', ASize) + ' bytes';
+end;
+
+// ---------------------------------------------------------------------------
+// Environment-Sektion (gemeinsam für alle Report-Typen)
+// ---------------------------------------------------------------------------
+procedure AddEnvironmentSection(SL: TStringList; const Stats: TTransferStatistic);
+begin
+  SL.Add('Environment:');
+  if Stats.ClientLibVersion <> '' then
+    SL.Add('  Client Lib: ' + Stats.ClientLibVersion);
+  SL.Add('  OS:        ' + Stats.SystemInfo.OSName);
+  SL.Add('  CPU:       ' + Stats.SystemInfo.CPUModel);
+  SL.Add('  Cores:     ' + IntToStr(Stats.SystemInfo.CPUCores));
+  SL.Add('  RAM:       ' + FormatFloat('#,##0', Stats.SystemInfo.RAMTotalMB) + ' MB');
+
+  if Stats.SystemInfo.DiskPath <> '' then
+  begin
+    SL.Add('  Disk (' + ExtractFileName(Stats.SystemInfo.DiskPath) + '):');
+    SL.Add('    Free:    ' + FormatFloat('#,##0', Stats.SystemInfo.DiskFreeMB) + ' MB');
+    SL.Add('    Total:   ' + FormatFloat('#,##0', Stats.SystemInfo.DiskTotalMB) + ' MB');
+    if Stats.SystemInfo.DiskType <> '' then
+      SL.Add('    Type:    ' + Stats.SystemInfo.DiskType);
+  end;
+end;
+
+
+// ---------------------------------------------------------------------------
+// Hauptfunktion: Transfer-Report formatieren
+// ---------------------------------------------------------------------------
+function FormatTransferReport(const Stats: TTransferStatistic): string;
+var
+  SL: TStringList;
+  RowsPerSec: Double;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Add('═══════════════════════════════════════════════════');
+    SL.Add('              ' + TransferKindToTitle(Stats.Kind));
+    SL.Add('═══════════════════════════════════════════════════');
+    SL.Add('');
+
+    // ======================================================================
+    // COPY-METHOD (nur bei tkCopy)
+    // ======================================================================
+    if Stats.Kind = tkCopy then
+    begin
+      SL.Add('Copy Method:');
+      SL.Add('  ' + CopyMethodToStr(Stats.Method));
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // SOURCE (nur wenn vorhanden)
+    // ======================================================================
+    if (Stats.SourceFileName <> '') or
+       (Stats.SourceServer <> '') or
+       (Stats.SourceDatabase <> '') or
+       (Stats.SourceTable <> '') then
+    begin
+      SL.Add('Source:');
+
+      // Datei-basierte Quelle
+      if Stats.SourceFileName <> '' then
+      begin
+        SL.Add('  File:      ' + ExtractFileName(Stats.SourceFileName));
+        SL.Add('  Path:      ' + ExtractFilePath(Stats.SourceFileName));
+      end;
+
+      // Server-basierte Quelle
+      if Stats.SourceServer <> '' then
+        SL.Add('  Server:    ' + Stats.SourceServer);
+      if Stats.SourceDatabase <> '' then
+        SL.Add('  Database:  ' + Stats.SourceDatabase);
+      if Stats.SourceTable <> '' then
+        SL.Add('  Table:     ' + Stats.SourceTable);
+      if Stats.SourceKind <> '' then
+        SL.Add('  Type:      ' + Stats.SourceKind);
+      if Stats.SourceServerVersion <> '' then
+        SL.Add('  Version:   ' + Stats.SourceServerVersion);
+      if Stats.SourceFileFormat <> '' then
+        SL.Add('  Format:    ' + Stats.SourceFileFormat);
+      if Stats.SourceFileSize > 0 then
+        SL.Add('  Size:      ' + FormatFileSize(Stats.SourceFileSize));
+
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // DESTINATION (nur wenn vorhanden)
+    // ======================================================================
+    if (Stats.DestServer <> '') or
+       (Stats.DestDatabase <> '') or
+       (Stats.DestTable <> '') or
+       (Stats.DestFileName <> '') then
+    begin
+      SL.Add('Destination:');
+
+      // Server-basiertes Ziel
+      if Stats.DestServer <> '' then
+        SL.Add('  Server:    ' + Stats.DestServer);
+      if Stats.DestDatabase <> '' then
+        SL.Add('  Database:  ' + Stats.DestDatabase);
+      if Stats.DestTable <> '' then
+        SL.Add('  Table:     ' + Stats.DestTable);
+      if Stats.DestKind <> '' then
+        SL.Add('  Type:      ' + Stats.DestKind);
+      if Stats.DestServerVersion <> '' then
+        SL.Add('  Version:   ' + Stats.DestServerVersion);
+
+      // Datei-Ziel
+      if Stats.DestFileName <> '' then
+      begin
+        SL.Add('  File:      ' + ExtractFileName(Stats.DestFileName));
+        SL.Add('  Path:      ' + ExtractFilePath(Stats.DestFileName));
+      end;
+      if Stats.DestFileSize > 0 then
+        SL.Add('  Size:      ' + FormatFileSize(Stats.DestFileSize));
+
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // OPTIONS
+    // ======================================================================
+    if (Stats.BatchSize > 0) or
+       Stats.UseRowRange or
+       (Stats.OptionsExtra <> '') or
+       (Stats.CSVOptions <> '') or
+       (Stats.Kind in [tkCopy, tkExport, tkCreateTable]) then
+    begin
+      SL.Add('Options:');
+
+      if Stats.OptionsExtra <> '' then
+        SL.Add('  Mode:          ' + Stats.OptionsExtra);
+      if Stats.BatchSize > 0 then
+        SL.Add('  Batch Size:    ' + FormatNumberEN(Stats.BatchSize));
+      if Stats.UseRowRange then
+        SL.Add(Format('  Row Range:     %s .. %s',
+          [FormatNumberEN(Stats.FromRow), FormatNumberEN(Stats.ToRow)]));
+
+      if Stats.Kind in [tkCopy, tkExport, tkCreateTable] then
+      begin
+        if Stats.FormulaUsed then
+          SL.Add('  Formula Used:  Yes')
+        else
+          SL.Add('  Formula Used:  No');
+      end;
+
+      if Stats.CSVOptions <> '' then
+      begin
+        SL.Add('');
+        SL.Add('  CSV Options:');
+        SL.Add(Stats.CSVOptions);
+      end;
+
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // FORMULAS APPLIED
+    // ======================================================================
+    if Stats.FormulasApplied <> '' then
+    begin
+      SL.Add('Formulas Applied:');
+      SL.Add(Stats.FormulasApplied);
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // RESULT
+    // ======================================================================
+    SL.Add('Result:');
+    SL.Add('  Rows:          ' + FormatNumberEN(Stats.RowsProcessed));
+    if Stats.FieldsCount > 0 then
+      SL.Add('  Fields:        ' + IntToStr(Stats.FieldsCount));
+    SL.Add('  Time:          ' + FormatDateTime('hh:nn:ss.zzz',
+      Stats.ElapsedSeconds / SecsPerDay));
+
+    RowsPerSec := CopyStatsRowsPerSec(Stats);
+    SL.Add('  Speed:         ' + FormatFloat('#,##0', Round(RowsPerSec)) + ' rows/sec');
+    SL.Add('');
+
+    // ======================================================================
+    // TABLE STRUCTURE
+    // ======================================================================
+    if Stats.CreateTableSQL <> '' then
+    begin
+      SL.Add('Table Structure:');
+      SL.Add(Stats.CreateTableSQL);
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // ENVIRONMENT
+    // ======================================================================
+    AddEnvironmentSection(SL, Stats);
+
+    SL.Add('');
+    SL.Add('═══════════════════════════════════════════════════');
+
+    Result := SL.Text;
+  finally
+    SL.Free;
+  end;
+end;
+
+
 
 //Transactions
 function GetTransactionParamsAsString(ATrans: TIBTransaction): string;

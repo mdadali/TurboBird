@@ -8,8 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls, StdCtrls, ComCtrls, ExtCtrls, Dialogs,
   Graphics,
   IBDatabase, IBQuery, DateUtils,
-  turbocommon,
-  uCopyStatistics;
+  turbocommon;
 
 type
 
@@ -87,7 +86,7 @@ type
     FDestDB        : TIBDatabase;
     FDestTrans     : TIBTransaction;
 
-    FStatistics: TCopyStatistics;
+    FStatistics: TTransferStatistic;
 
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
@@ -113,7 +112,7 @@ type
 
     property TotalRows : Integer read FTotalRows;
     property CopiedRows : Integer read FCopiedRows;
-    property Statistics: TCopyStatistics read FStatistics;
+    property Statistics: TTransferStatistic read FStatistics;
   end;
 
 implementation
@@ -612,16 +611,22 @@ begin
   // ------------------------------------------------------------------
   // Statistik-Record füllen
   // ------------------------------------------------------------------
+  // ------------------------------------------------------------------
+  // Statistik-Record füllen
+  // ------------------------------------------------------------------
+  FStatistics.Kind            := tkCopy;
   FStatistics.Method          := cmLocal;
+  FStatistics.SourceKind      := 'Firebird Table';
   FStatistics.SourceServer    := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
   FStatistics.SourceDatabase  := RegisteredDatabases[FSourceDBIndex].RegRec.Title;
   FStatistics.SourceTable     := FSourceTable;
-  FStatistics.SourceIsExternal := False;
+  FStatistics.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
+  FStatistics.DestKind        := 'Firebird Table';
   FStatistics.DestServer      := RegisteredDatabases[FDestDBIndex].RegRec.ServerName;
   FStatistics.DestDatabase    := RegisteredDatabases[FDestDBIndex].RegRec.Title;
   FStatistics.DestTable       := FDestTable;
-  FStatistics.DestIsExternal  := False;
-  FStatistics.RowsCopied      := FCopiedRows;
+  FStatistics.DestServerVersion := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
+  FStatistics.RowsProcessed   := FCopiedRows;
   FStatistics.BatchSize       := FBatchSize;
   FStatistics.FromRow         := FFromRow;
   FStatistics.ToRow           := FToRow;

@@ -9,8 +9,7 @@ uses
   Graphics,
   IBDatabase, IBQuery, ibxscript, DateUtils,
   DB,
-  turbocommon,
-  uCopyStatistics;
+  turbocommon;
 
 
 type
@@ -89,7 +88,7 @@ type
     FDestDB        : TIBDatabase;
     FDestTrans     : TIBTransaction;
 
-    FStatistics: TCopyStatistics;
+    FStatistics: TTransferStatistic;
 
     function  GetSourceDB : TIBDatabase;
     function  GetSourceTrans : TIBTransaction;
@@ -115,7 +114,7 @@ type
 
     property TotalRows : Integer read FTotalRows;
     property CopiedRows : Integer read FCopiedRows;
-    property Statistics: TCopyStatistics read FStatistics;
+    property Statistics: TTransferStatistic read FStatistics;
   end;
 
 implementation
@@ -714,22 +713,24 @@ begin
   else
     RowsPerSec := 0;
 
+  FStatistics.Kind            := tkCopy;
   FStatistics.Method          := cmCrossRowByRow;
+  FStatistics.SourceKind      := 'Firebird Table';
   FStatistics.SourceServer    := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
   FStatistics.SourceDatabase  := RegisteredDatabases[FSourceDBIndex].RegRec.Title;
   FStatistics.SourceTable     := FSourceTable;
-  FStatistics.SourceIsExternal := False;
+  FStatistics.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
+  FStatistics.DestKind        := 'Firebird Table';
   FStatistics.DestServer      := RegisteredDatabases[FDestDBIndex].RegRec.ServerName;
   FStatistics.DestDatabase    := RegisteredDatabases[FDestDBIndex].RegRec.Title;
   FStatistics.DestTable       := FDestTable;
-  FStatistics.DestIsExternal  := False;
-  FStatistics.RowsCopied      := FCopiedRows;
+  FStatistics.DestServerVersion := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
+  FStatistics.RowsProcessed   := FCopiedRows;
   FStatistics.BatchSize       := FBatchSize;
   FStatistics.FromRow         := FFromRow;
   FStatistics.ToRow           := FToRow;
   FStatistics.UseRowRange     := (FFromRow > 1) or (FToRow > 0);
   FStatistics.ElapsedSeconds  := (EndTime - FStartTime) * SecsPerDay;
-
   if FCancelled then
     StatusStr := 'cancelled'
   else
