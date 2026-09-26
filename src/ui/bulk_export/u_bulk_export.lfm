@@ -1,10 +1,10 @@
 object frmBulkExport: TfrmBulkExport
-  Left = 527
-  Height = 692
-  Top = 116
+  Left = 500
+  Height = 802
+  Top = 136
   Width = 1067
   Caption = 'Bulk Export'
-  ClientHeight = 692
+  ClientHeight = 802
   ClientWidth = 1067
   OnClose = FormClose
   OnCreate = FormCreate
@@ -595,12 +595,12 @@ object frmBulkExport: TfrmBulkExport
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 280
+    Height = 296
     Top = 208
     Width = 1067
-    Align = alClient
+    Align = alTop
     Caption = 'Fields'
-    ClientHeight = 260
+    ClientHeight = 276
     ClientWidth = 1065
     TabOrder = 1
     object btnOpenExternalFile: TButton
@@ -613,7 +613,7 @@ object frmBulkExport: TfrmBulkExport
     end
     object sgFields: TStringGrid
       Left = 0
-      Height = 260
+      Height = 276
       Top = 0
       Width = 732
       Align = alClient
@@ -626,11 +626,11 @@ object frmBulkExport: TfrmBulkExport
     end
     object pnlFields: TPanel
       Left = 732
-      Height = 260
+      Height = 276
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 260
+      ClientHeight = 276
       ClientWidth = 333
       TabOrder = 2
       object chkLstFields: TCheckListBox
@@ -665,12 +665,12 @@ object frmBulkExport: TfrmBulkExport
   end
   object grboxExportOptions: TGroupBox
     Left = 0
-    Height = 152
-    Top = 488
+    Height = 246
+    Top = 504
     Width = 1067
-    Align = alBottom
+    Align = alClient
     Caption = 'Export Options'
-    ClientHeight = 132
+    ClientHeight = 226
     ClientWidth = 1065
     TabOrder = 2
     object rbAllRows: TRadioButton
@@ -693,17 +693,17 @@ object frmBulkExport: TfrmBulkExport
       TabOrder = 1
     end
     object edtBatchSize: TEdit
-      Left = 503
+      Left = 306
       Height = 31
-      Top = 56
+      Top = 104
       Width = 88
       TabOrder = 2
       Text = '1000000'
     end
     object Label3: TLabel
-      Left = 418
+      Left = 194
       Height = 19
-      Top = 64
+      Top = 112
       Width = 62
       Caption = 'Batch Size'
       ParentColor = False
@@ -738,12 +738,12 @@ object frmBulkExport: TfrmBulkExport
     end
     object grBoxFormulaPresets: TGroupBox
       Left = 679
-      Height = 132
+      Height = 226
       Top = 0
       Width = 386
       Align = alRight
       Caption = 'Formula Presets'
-      ClientHeight = 112
+      ClientHeight = 206
       ClientWidth = 384
       TabOrder = 5
       object cbFormulaPreset: TComboBox
@@ -769,7 +769,7 @@ object frmBulkExport: TfrmBulkExport
     object chkUseFormula: TCheckBox
       Left = 16
       Height = 21
-      Top = 104
+      Top = 184
       Width = 102
       Caption = 'Use Formula'
       OnChange = chkUseFormulaChange
@@ -799,11 +799,27 @@ object frmBulkExport: TfrmBulkExport
       OnClick = btnExportFileNameClick
       TabOrder = 8
     end
+    object edtLineBuffer: TEdit
+      Left = 504
+      Height = 31
+      Top = 104
+      Width = 104
+      TabOrder = 9
+      Text = '50000'
+    end
+    object Label5: TLabel
+      Left = 424
+      Height = 19
+      Top = 112
+      Width = 66
+      Caption = 'LineBuffer'
+      ParentColor = False
+    end
   end
   object Panel1: TPanel
     Left = 0
     Height = 52
-    Top = 640
+    Top = 750
     Width = 1067
     Align = alBottom
     ClientHeight = 52

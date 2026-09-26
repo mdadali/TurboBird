@@ -1,7 +1,7 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 553
+  Left = 572
   Height = 540
-  Top = 156
+  Top = 128
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
@@ -41,17 +41,17 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       TabOrder = 1
     end
     object edtCommitInterval: TEdit
-      Left = 544
+      Left = 792
       Height = 31
-      Top = 51
+      Top = 48
       Width = 88
       TabOrder = 2
       Text = '25600'
     end
     object Label3: TLabel
-      Left = 432
+      Left = 672
       Height = 19
-      Top = 56
+      Top = 51
       Width = 100
       Caption = 'Commit Interval'
       ParentColor = False
@@ -95,9 +95,9 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       TabOrder = 5
     end
     object lblHint: TLabel
-      Left = 728
+      Left = 641
       Height = 19
-      Top = 8
+      Top = -8
       Width = 40
       Caption = 'lblHint'
       ParentColor = False
@@ -109,6 +109,22 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Width = 52
       Caption = 'lblStatus'
       ParentColor = False
+    end
+    object Label5: TLabel
+      Left = 445
+      Height = 19
+      Top = 51
+      Width = 66
+      Caption = 'LineBuffer'
+      ParentColor = False
+    end
+    object edtLineBuffer: TEdit
+      Left = 520
+      Height = 31
+      Top = 48
+      Width = 104
+      TabOrder = 6
+      Text = '50000'
     end
   end
   object pnlBottom: TPanel

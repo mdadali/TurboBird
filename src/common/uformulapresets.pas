@@ -5,7 +5,9 @@ unit uFormulaPresets;
 interface
 
 uses
-  Classes, SysUtils, IniFiles, Forms;
+  Classes, SysUtils, IniFiles, Forms,
+  FileUtil,
+  turbocommon;
 
 type
   TFieldInfoArray = array of record
@@ -18,8 +20,11 @@ type
 
   { TFormulaPreset }
 
+  { TFormulaPreset }
+
   TFormulaPreset = class
   private
+    FFileName: string;              // ← NEU
     FName: string;
     FDescription: string;
     FSeparator: string;
@@ -35,6 +40,7 @@ type
 
     function GetFormulaForFieldType(const AFieldType: string): string;
 
+    property FileName: string read FFileName;      // ← NEU (read-only)
     property Name: string read FName write FName;
     property Description: string read FDescription write FDescription;
     property Separator: string read FSeparator write FSeparator;
@@ -60,6 +66,7 @@ type
     function GetPresetByIndex(AIndex: Integer): TFormulaPreset;
     function PresetCount: Integer;
     function PresetName(AIndex: Integer): string;
+    function GetDefaultPresetIndex: Integer;
   end;
 
 var
@@ -67,8 +74,7 @@ var
 
 implementation
 
-uses
-  FileUtil;
+
 
 { TFormulaPreset }
 
@@ -79,6 +85,7 @@ begin
   FSeparator := ',';
   FQuoteChar := '"';
   FIncludeHeader := True;
+  FFileName := '';                    // ← NEU
 end;
 
 destructor TFormulaPreset.Destroy;
@@ -90,18 +97,17 @@ end;
 function TFormulaPreset.LoadFromFile(const AFileName: string): Boolean;
 var
   Ini: TIniFile;
-  i: Integer;
-  KeyName: string;
 begin
   Result := False;
   if not FileExists(AFileName) then Exit;
 
   Ini := TIniFile.Create(AFileName);
   try
-    FName := Ini.ReadString('Preset', 'Name', '');
+    FFileName    := ExtractFileName(AFileName);
+    FName        := Ini.ReadString('Preset', 'Name', '');
     FDescription := Ini.ReadString('Preset', 'Description', '');
-    FSeparator := Ini.ReadString('Preset', 'Separator', ',');
-    FQuoteChar := Ini.ReadString('Preset', 'QuoteChar', '"');
+    FSeparator   := Ini.ReadString('Preset', 'Separator', ',');
+    FQuoteChar   := Ini.ReadString('Preset', 'QuoteChar', '"');
     FIncludeHeader := Ini.ReadBool('Preset', 'IncludeHeader', True);
 
     FFormulas.Clear;
@@ -340,6 +346,41 @@ begin
     Result := FPresets[AIndex]
   else
     Result := '';
+end;
+
+// ---------------------------------------------------------------------------
+// Default-Preset bestimmen
+//   1. BulkExportDefaultPreset (globale Variable) → passendes Preset suchen
+//   2. Fallback: erstes geladenes Preset
+//   3. Kein Preset vorhanden → -1
+// ---------------------------------------------------------------------------
+function TFormulaPresetManager.GetDefaultPresetIndex: Integer;
+var
+  i: Integer;
+  DefaultName, PresetFileBase: string;
+  P: TFormulaPreset;
+begin
+  Result := -1;
+
+  DefaultName := Trim(BulkExportDefaultPreset);
+  if DefaultName <> '' then
+  begin
+    // Falls der User ".ini" mitschreibt, wegdenken
+    if LowerCase(ExtractFileExt(DefaultName)) = '.ini' then
+      DefaultName := ChangeFileExt(DefaultName, '');
+
+    for i := 0 to FPresets.Count - 1 do
+    begin
+      P := TFormulaPreset(FPresets.Objects[i]);
+      PresetFileBase := ChangeFileExt(P.FileName, '');
+      if SameText(PresetFileBase, DefaultName) then
+        Exit(i);
+    end;
+  end;
+
+  // Fallback: erstes Preset
+  if FPresets.Count > 0 then
+    Result := 0;
 end;
 
 initialization
