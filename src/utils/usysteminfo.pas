@@ -15,6 +15,7 @@ type
     DiskFreeMB: Int64;
     DiskTotalMB: Int64;
     DiskPath: string;
+    DiskType: string;
     OSName: string;
   end;
 
@@ -23,18 +24,18 @@ function FormatSystemInfo(const AInfo: TSystemInfo): string;
 
 implementation
 
+{$IFDEF WINDOWS}
+uses
+  Windows, Registry;
+{$ENDIF}
+
 {$IFDEF LINUX}
 uses
   BaseUnix;
 {$ENDIF}
 
-{$IFDEF WINDOWS}
-uses
-  Windows;
-{$ENDIF}
-
 // ---------------------------------------------------------------------------
-// CPU-Modell auslesen
+// CPU-Modell
 // ---------------------------------------------------------------------------
 function GetCPUModel: string;
 {$IFDEF LINUX}
@@ -109,7 +110,48 @@ end;
 {$ENDIF}
 
 // ---------------------------------------------------------------------------
-// RAM-Gesamt auslesen
+// CPU-Kerne (logisch)
+// ---------------------------------------------------------------------------
+function GetCPUCores: Integer;
+{$IFDEF LINUX}
+var
+  SL: TStringList;
+  i, Count: Integer;
+begin
+  Result := System.CpuCount;   // Fallback
+  if not FileExists('/proc/cpuinfo') then Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile('/proc/cpuinfo');
+    Count := 0;
+    for i := 0 to SL.Count - 1 do
+      if (Pos('processor', SL[i]) = 1) and
+         (Length(SL[i]) > 9) and
+         (SL[i][10] in [#9, ' ', ':']) then
+        Inc(Count);
+    if Count > 0 then
+      Result := Count;
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+begin
+  Result := System.CpuCount;
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+begin
+  Result := System.CpuCount;
+end;
+{$ENDIF}
+
+// ---------------------------------------------------------------------------
+// RAM-Gesamt
 // ---------------------------------------------------------------------------
 function GetRAMTotalMB: Int64;
 {$IFDEF LINUX}
@@ -133,7 +175,7 @@ begin
         ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
         ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
         if TryStrToInt64(ValStr, MemKB) then
-          Result := MemKB div 1024;   // KB → MB
+          Result := MemKB div 1024;
         Break;
       end;
     end;
@@ -229,6 +271,60 @@ end;
 {$ENDIF}
 
 // ---------------------------------------------------------------------------
+// Festplatten-Typ (SSD/HDD)
+// ---------------------------------------------------------------------------
+function GetDiskType(const APath: string): string;
+{$IFDEF LINUX}
+var
+  DeviceName, SysPath, Rotational: string;
+  SL: TStringList;
+begin
+  Result := '';
+  if APath = '' then Exit;
+
+  // Bekannte Block-Devices durchsuchen
+  if FileExists('/sys/block/nvme0n1/queue/rotational') then
+    DeviceName := 'nvme0n1'
+  else if FileExists('/sys/block/sda/queue/rotational') then
+    DeviceName := 'sda'
+  else if FileExists('/sys/block/vda/queue/rotational') then
+    DeviceName := 'vda'
+  else
+    Exit;
+
+  SysPath := '/sys/block/' + DeviceName + '/queue/rotational';
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile(SysPath);
+    Rotational := Trim(SL.Text);
+    if Rotational = '0' then
+    begin
+      if Pos('nvme', DeviceName) = 1 then
+        Result := 'NVMe SSD'
+      else
+        Result := 'SSD';
+    end
+    else if Rotational = '1' then
+      Result := 'HDD (rotational)';
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+begin
+  Result := 'Unknown (Windows)';
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+begin
+  Result := 'Unknown (macOS)';
+end;
+{$ENDIF}
+
+// ---------------------------------------------------------------------------
 // Hauptfunktion
 // ---------------------------------------------------------------------------
 function GetSystemInfo(const APath: string): TSystemInfo;
@@ -236,24 +332,25 @@ var
   PathToCheck: string;
 begin
   Result.CPUModel := GetCPUModel;
-  Result.CPUCores := System.CpuCount;   // ← Einfach und plattformübergreifend
+  Result.CPUCores := GetCPUCores;
   Result.RAMTotalMB := GetRAMTotalMB;
   Result.OSName := GetOSName;
 
-  // Festplatte
   Result.DiskPath := APath;
   Result.DiskFreeMB := 0;
   Result.DiskTotalMB := 0;
+  Result.DiskType := '';
 
   if APath <> '' then
   begin
-    PathToCheck := IncludeTrailingPathDelimiter(ExtractFileDir(APath));
+    PathToCheck := ExtractFileDir(APath);
     if PathToCheck = '' then
       PathToCheck := ExtractFilePath(APath);
 
     try
       Result.DiskFreeMB := DiskFree(AddDisk(PathToCheck)) div (1024 * 1024);
       Result.DiskTotalMB := DiskSize(AddDisk(PathToCheck)) div (1024 * 1024);
+      Result.DiskType := GetDiskType(PathToCheck);
     except
       // Ignorieren – manche Pfade lassen sich nicht auflösen
     end;
@@ -269,7 +366,7 @@ var
 begin
   SL := TStringList.Create;
   try
-    SL.Add('System:');
+    SL.Add('Environment:');
     SL.Add('  OS:        ' + AInfo.OSName);
     SL.Add('  CPU:       ' + AInfo.CPUModel);
     SL.Add('  Cores:     ' + IntToStr(AInfo.CPUCores));
@@ -280,6 +377,8 @@ begin
       SL.Add('  Disk (' + ExtractFileName(AInfo.DiskPath) + '):');
       SL.Add('    Free:    ' + FormatFloat('#,##0', AInfo.DiskFreeMB) + ' MB');
       SL.Add('    Total:   ' + FormatFloat('#,##0', AInfo.DiskTotalMB) + ' MB');
+      if AInfo.DiskType <> '' then
+        SL.Add('    Type:    ' + AInfo.DiskType);
     end;
 
     Result := SL.Text;

@@ -1,7 +1,7 @@
 object frmEditTableDataNew: TfrmEditTableDataNew
-  Left = 54
+  Left = 473
   Height = 507
-  Top = 261
+  Top = 154
   Width = 1109
   Caption = 'Edit Tabledata'
   ClientHeight = 507
@@ -51,15 +51,15 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     TabOrder = 2
     object tsMainTableGrid: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 473
+      ClientHeight = 476
       ClientWidth = 754
       object pnlMainTable: TPanel
         Left = 0
-        Height = 473
+        Height = 476
         Top = 0
         Width = 754
         Align = alClient
-        ClientHeight = 473
+        ClientHeight = 476
         ClientWidth = 754
         TabOrder = 0
         object pnlMainTableCaption: TPanel
@@ -73,7 +73,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         end
         object DBNavigator1: TDBNavigator
           Left = 1
-          Height = 26
+          Height = 48
           Top = 138
           Width = 752
           Align = alTop
@@ -84,7 +84,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           ChildSizing.ShrinkVertical = crsScaleChilds
           ChildSizing.Layout = cclLeftToRightThenTopToBottom
           ChildSizing.ControlsPerLine = 100
-          ClientHeight = 26
+          ClientHeight = 48
           ClientWidth = 752
           DataSource = dsMain
           Options = []
@@ -98,29 +98,29 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           Width = 752
           Align = alTop
           Caption = 'Tablefilter'
-          ClientHeight = 84
+          ClientHeight = 85
           ClientWidth = 750
           TabOrder = 2
           object chkBoxUseFilter: TCheckBox
             Left = 8
-            Height = 24
+            Height = 21
             Top = 8
-            Width = 89
+            Width = 83
             Caption = 'Use Filter'
             OnChange = chkBoxUseFilterChange
             TabOrder = 0
           end
           object Label2: TLabel
             Left = 176
-            Height = 20
+            Height = 19
             Top = 12
-            Width = 63
+            Width = 59
             Caption = 'Filterfield'
             ParentColor = False
           end
           object cboxFilterField: TComboBox
             Left = 264
-            Height = 36
+            Height = 35
             Top = 8
             Width = 344
             ItemHeight = 0
@@ -129,7 +129,7 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           end
           object edtFilterValue: TEdit
             Left = 264
-            Height = 37
+            Height = 31
             Top = 43
             Width = 344
             OnChange = edtFilterValueChange
@@ -137,17 +137,17 @@ object frmEditTableDataNew: TfrmEditTableDataNew
           end
           object Label1: TLabel
             Left = 176
-            Height = 20
+            Height = 19
             Top = 48
-            Width = 70
+            Width = 65
             Caption = 'Filtervalue'
             ParentColor = False
           end
           object chkBoxCasesensitive: TCheckBox
             Left = 8
-            Height = 24
+            Height = 21
             Top = 48
-            Width = 122
+            Width = 111
             Caption = 'Case Sensitive'
             OnChange = chkBoxCasesensitiveChange
             TabOrder = 3
@@ -155,8 +155,8 @@ object frmEditTableDataNew: TfrmEditTableDataNew
         end
         object DBGridMain: TRxDBGrid
           Left = 1
-          Height = 308
-          Top = 164
+          Height = 289
+          Top = 186
           Width = 752
           ColumnDefValues.BlobText = '(blob)'
           TitleButtons = False
@@ -234,36 +234,56 @@ object frmEditTableDataNew: TfrmEditTableDataNew
     end
     object tsFormView: TTabSheet
       Caption = 'Form View'
-      ClientHeight = 473
+      ClientHeight = 476
       ClientWidth = 754
-      object dbnavMainTableFormView: TDBNavigator
-        Left = 0
-        Height = 25
-        Top = 0
-        Width = 754
-        Align = alTop
-        BevelOuter = bvNone
-        ChildSizing.EnlargeHorizontal = crsScaleChilds
-        ChildSizing.EnlargeVertical = crsScaleChilds
-        ChildSizing.ShrinkHorizontal = crsScaleChilds
-        ChildSizing.ShrinkVertical = crsScaleChilds
-        ChildSizing.Layout = cclLeftToRightThenTopToBottom
-        ChildSizing.ControlsPerLine = 100
-        ClientHeight = 25
-        ClientWidth = 754
-        DataSource = dsMain
-        Options = []
-        TabOrder = 0
-      end
       object pnlRecord: TScrollBox
         Left = 0
-        Height = 448
-        Top = 25
+        Height = 426
+        Top = 50
         Width = 754
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
+        TabOrder = 0
+      end
+      object pnlMainTableFormView: TPanel
+        Left = 0
+        Height = 50
+        Top = 0
+        Width = 754
+        Align = alTop
+        ClientHeight = 50
+        ClientWidth = 754
         TabOrder = 1
+        object dbnavMainTableFormView: TDBNavigator
+          Left = 1
+          Height = 48
+          Top = 1
+          Width = 677
+          Align = alClient
+          BevelOuter = bvNone
+          ChildSizing.EnlargeHorizontal = crsScaleChilds
+          ChildSizing.EnlargeVertical = crsScaleChilds
+          ChildSizing.ShrinkHorizontal = crsScaleChilds
+          ChildSizing.ShrinkVertical = crsScaleChilds
+          ChildSizing.Layout = cclLeftToRightThenTopToBottom
+          ChildSizing.ControlsPerLine = 100
+          ClientHeight = 48
+          ClientWidth = 677
+          DataSource = dsMain
+          Options = []
+          TabOrder = 0
+        end
+        object btnCommitRetaining: TButton
+          Left = 678
+          Height = 48
+          Top = 1
+          Width = 75
+          Align = alRight
+          Caption = 'Commit'
+          OnClick = btnCommitRetainingClick
+          TabOrder = 1
+        end
       end
     end
   end

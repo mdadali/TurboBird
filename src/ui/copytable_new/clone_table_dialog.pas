@@ -1353,6 +1353,15 @@ begin
     Stats.DestIsExternal := chkboxExternalTable.Checked;
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
 
+    // --- Server-Versionen und Client-Lib ---
+    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
+    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
+
+    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
+      Stats.ClientLibVersion := 'Firebird ' +
+        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
+
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';
     if chkUseFormula.Checked then
@@ -1408,6 +1417,15 @@ begin
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
+
+    // --- Server-Versionen und Client-Lib ---
+    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
+    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
+
+    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
+      Stats.ClientLibVersion := 'Firebird ' +
+        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';
@@ -1465,6 +1483,15 @@ begin
 
     Stats.DestIsExternal := chkboxExternalTable.Checked;
     Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
+
+    // --- Server-Versionen und Client-Lib ---
+    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
+    Stats.DestServerVersion   := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString;
+
+    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
+      Stats.ClientLibVersion := 'Firebird ' +
+        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
 
     // --- Formeln sammeln ---
     Stats.FormulasApplied := '';

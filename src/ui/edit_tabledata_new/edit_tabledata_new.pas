@@ -20,6 +20,7 @@ type
   { TfrmEditTableDataNew }
 
   TfrmEditTableDataNew = class(TForm)
+    btnCommitRetaining: TButton;
     cboxFilterField: TComboBox;
     chkBoxCasesensitive: TCheckBox;
     chkBoxUseFilter: TCheckBox;
@@ -45,6 +46,7 @@ type
     pnlFKTablesCaption: TPanel;
     pnlMainTable: TPanel;
     pnlMainTableCaption: TPanel;
+    pnlMainTableFormView: TPanel;
     pnlRecord: TScrollBox;
     DBGridMain: TRxDBGrid;
     Separator1: TMenuItem;
@@ -54,6 +56,7 @@ type
     transMain: TIBTransaction;
     pnlDetailTables: TPanel;
     Splitter1: TSplitter;
+    procedure btnCommitRetainingClick(Sender: TObject);
     procedure chkBoxCasesensitiveChange(Sender: TObject);
     procedure chkBoxUseFilterChange(Sender: TObject);
     procedure dsMainStateChange(Sender: TObject);
@@ -482,6 +485,9 @@ end;
 procedure TfrmEditTableDataNew.FormClose(Sender: TObject;
   var CloseAction: TCloseAction);
 begin
+  if transMain.InTransaction then
+    transMain.Commit;
+    ;
   if Assigned(FDefaultCache) then
     FreeAndNil(FDefaultCache);
 
@@ -523,6 +529,12 @@ begin
   SetTableFilter;
   IBTableMain.Filtered := True;
   IBTableMain.Open;
+end;
+
+procedure TfrmEditTableDataNew.btnCommitRetainingClick(Sender: TObject);
+begin
+  if transMain.InTransaction then
+    transMain.CommitRetaining;
 end;
 
 procedure TfrmEditTableDataNew.edtFilterValueChange(Sender: TObject);
