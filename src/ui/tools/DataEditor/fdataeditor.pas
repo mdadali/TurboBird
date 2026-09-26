@@ -25,7 +25,10 @@ uses
 
   fdataexportersintrf,
 
-  fpsTypes
+  fpsTypes,
+
+  uReport,
+  uSystemInfo
   ;
 
 type
@@ -119,10 +122,6 @@ type
     procedure lmStdExportFormatsClick(Sender: TObject);
   private
     FFileName: string;
-    FOwnDB: TIBDatabase;
-    FOwnTrans: TIBTransaction;
-    FOwnDataset: TDataSet;
-    FIsReadOnly: Boolean;
 
     FLoadTimer: TTimer;
     FLoadStartTime: TDateTime;
@@ -131,7 +130,6 @@ type
     FLoadDotCount: Integer;
     procedure LoadTimerTick(Sender: TObject);
 
-    procedure CleanupOwnComponents;
     procedure LoadFile(const FileName: string);
     procedure SaveFile(const FileName: string);
     procedure SetCSVSettingsFromForm;
@@ -139,8 +137,6 @@ type
     procedure ReadIni;
     procedure WriteIni;
   public
-    procedure LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
-    procedure LoadFromDataSet(ADataSet: TDataSet; const ATitle: string);  // Bleibt für Dateien
   end;
 
 //var
@@ -234,179 +230,6 @@ begin
 
   // CSV im Hauptthread laden
   Synchronize(@LoadCSVInDataset);
-end;
-
-
-
-{ TfrmDataEditor }
-procedure TfrmDataEditor.LoadFromTable(ADBIndex: Integer; const ATableName: string; AReadOnly: Boolean);
-var
-  Rec: TRegisteredDatabase;
-  Password: string;
-  WaitForm: TForm;
-  WaitLabel: TLabel;
-  StartTime, EndTime: TDateTime;
-  RowCount: Integer;
-begin
-  Screen.Cursor := crSQLWait;
-  Application.ProcessMessages;
-
-  CleanupOwnComponents;
-  if DataSource1.DataSet.Active then
-    DataSource1.DataSet.Close;
-
-  FFileName := '';
-  FIsReadOnly := AReadOnly;
-
-  Rec := RegisteredDatabases[ADBIndex].RegRec;
-
-  // Eigene DB-Verbindung
-  FOwnDB := TIBDatabase.Create(nil);
-  FOwnTrans := TIBTransaction.Create(nil);
-  FOwnDB.DefaultTransaction := FOwnTrans;
-  FOwnTrans.DefaultDatabase := FOwnDB;
-  FOwnTrans.Params.Assign(RegisteredDatabases[ADBIndex].IBTransaction.Params);
-  AssignIBDatabase(RegisteredDatabases[ADBIndex].IBDatabase, FOwnDB);
-
-  // User direkt setzen
-  FOwnDB.Params.Values['user_name'] := Rec.UserName;
-
-  // Passwort aus Cache oder gespeichertem Passwort holen
-  Password := Rec.Password;
-  if Password = '' then
-    Password := GetDBSessionPassword(Rec.ServerName, Rec.DatabaseName);
-  FOwnDB.Params.Values['password'] := Password;
-
-  FOwnDB.LoginPrompt := False;
-  FOwnDB.Connected := True;
-  FOwnTrans.StartTransaction;
-
-  // Dataset erstellen
-  if AReadOnly then
-  begin
-    FOwnDataset := TIBQuery.Create(nil);
-    TIBQuery(FOwnDataset).Database := FOwnDB;
-    TIBQuery(FOwnDataset).Transaction := FOwnTrans;
-    TIBQuery(FOwnDataset).SQL.Text := 'SELECT * FROM ' + MakeObjectNameQuoted(ATableName);
-  end
-  else
-  begin
-    FOwnDataset := TIBTable.Create(nil);
-    TIBTable(FOwnDataset).Database := FOwnDB;
-    TIBTable(FOwnDataset).Transaction := FOwnTrans;
-    TIBTable(FOwnDataset).TableName := ATableName;
-  end;
-
-  // ============================================================
-  //  Einfaches modales Wartefenster (kein ProgressBar)
-  // ============================================================
-  WaitForm := TForm.Create(nil);
-  try
-    WaitForm.Width := 320;
-    WaitForm.Height := 100;
-    WaitForm.Position := poScreenCenter;
-    WaitForm.BorderStyle := bsDialog;
-    WaitForm.Caption := 'Please wait';
-
-    WaitLabel := TLabel.Create(WaitForm);
-    WaitLabel.Parent := WaitForm;
-    WaitLabel.Align := alClient;
-    WaitLabel.Alignment := taCenter;
-    WaitLabel.Layout := tlCenter;
-    WaitLabel.Caption := 'Loading data, please wait...';
-    WaitLabel.Font.Size := 11;
-
-    WaitForm.Show;
-    Application.ProcessMessages;
-
-    StartTime := Now;
-
-    FOwnDataset.Open;
-    // Genaue Zeilenzählung
-    FOwnDataset.Last;
-    FOwnDataset.First;
-    EndTime := Now;
-
-  finally
-    WaitForm.Free;
-  end;
-
-  RowCount := FOwnDataset.RecordCount;
-
-  DataSource1.DataSet := FOwnDataset;
-  RxDBGrid1.DataSource := DataSource1;
-  DBNavigator1.DataSource := DataSource1;
-  RxDBGrid1.OptimizeColumnsWidthAll;
-
-  if AReadOnly then
-    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RO])'
-  else
-    Caption := 'Turbobird - Data Editor (' + ATableName + ' [RW])';
-
-  btnExportAs.Enabled := True;
-  btnCreateSQL.Enabled := True;
-
-  Screen.Cursor := crDefault;
-  Application.ProcessMessages;
-
-  // ============================================================
-  //  Statistik anzeigen
-  // ============================================================
-  MessageDlg(
-    Format('Table "%s" loaded successfully!', [ATableName]) + sLineBreak + sLineBreak +
-    'Start time : ' + FormatDateTime('hh:nn:ss.zzz', StartTime) + sLineBreak +
-    'End time   : ' + FormatDateTime('hh:nn:ss.zzz', EndTime) + sLineBreak +
-    'Duration   : ' + FormatDateTime('hh:nn:ss', EndTime - StartTime) + sLineBreak +
-    'Records    : ' + IntToStr(RowCount),
-    mtInformation, [mbOK], 0
-  );
-end;
-
-procedure TfrmDataEditor.CleanupOwnComponents;
-begin
-  if Assigned(FOwnDataset) then
-  begin
-    if FOwnDataset.Active then
-      FOwnDataset.Close;
-    FreeAndNil(FOwnDataset);
-  end;
-  if Assigned(FOwnTrans) then
-  begin
-    if FOwnTrans.InTransaction then
-      FOwnTrans.Rollback;
-    FreeAndNil(FOwnTrans);
-  end;
-  if Assigned(FOwnDB) then
-  begin
-    if FOwnDB.Connected then
-      FOwnDB.Connected := False;
-    FreeAndNil(FOwnDB);
-  end;
-end;
-
-procedure TfrmDataEditor.LoadFromDataSet(ADataSet: TDataSet; const ATitle: string);
-begin
-  Screen.Cursor := crSQLWait;
-  Application.ProcessMessages;
-
-  CleanupOwnComponents;
-  if DataSource1.DataSet.Active then
-    DataSource1.DataSet.Close;
-
-  DataSource1.DataSet := ADataSet;
-  ADataSet.Open;
-
-  RxDBGrid1.DataSource := DataSource1;
-  DBNavigator1.DataSource := DataSource1;
-  RxDBGrid1.OptimizeColumnsWidthAll;
-
-  Caption := 'Turbobird - Data Editor (' + ATitle + ')';
-  btnExportAs.Enabled := True;
-  btnCreateSQL.Enabled := True;
-  FFileName := '';
-
-  Screen.Cursor := crDefault;
-  Application.ProcessMessages;
 end;
 
 procedure  TfrmDataEditor.ReadIni;
@@ -616,9 +439,10 @@ var
   CSVThread: TCSVLoadThread;
   StartTime, EndTime: TDateTime;
   DiffSeconds, FileSizeMB: Double;
-  Hours, Minutes, Seconds: Integer;
   FileSize: Int64;
   RowCount: Integer;
+  Stats: TTransferStatistic;
+  ReportForm: TfrmReport;
 begin
   if not OpenDialog1.Execute then Exit;
 
@@ -660,7 +484,7 @@ begin
   try
     WaitForm.Caption := 'Loading...';
     WaitForm.Width := 520;
-    WaitForm.Height := 270;
+    WaitForm.Height := 260;
     WaitForm.Position := poScreenCenter;
     WaitForm.BorderStyle := bsDialog;
     WaitForm.FormStyle := fsStayOnTop;
@@ -706,10 +530,10 @@ begin
     LblRows.Parent := PnlInfo;
     LblRows.Left := 16;
     LblRows.Top := 52;
-    LblRows.Caption := 'Rows:     counting...';
+    LblRows.Caption := 'Rows:     reading...';
     LblRows.Width := 480;
 
-    // === Status + animierte Punkte ===
+    // === Status + Marquee ===
     PnlStatus := TPanel.Create(WaitForm);
     PnlStatus.Parent := WaitForm;
     PnlStatus.Align := alTop;
@@ -720,9 +544,10 @@ begin
     FLoadStatusLabel.Parent := PnlStatus;
     FLoadStatusLabel.Left := 16;
     FLoadStatusLabel.Top := 12;
-    FLoadStatusLabel.Caption := 'Loading';
+    FLoadStatusLabel.Caption := 'Reading file, please wait...';
     FLoadStatusLabel.Font.Size := 10;
     FLoadStatusLabel.Font.Style := [fsBold];
+    FLoadStatusLabel.Width := 480;
 
     // === Elapsed ===
     PnlBottom := TPanel.Create(WaitForm);
@@ -734,44 +559,25 @@ begin
     FLoadElapsedLabel.Parent := PnlBottom;
     FLoadElapsedLabel.Left := 16;
     FLoadElapsedLabel.Top := 12;
-    FLoadElapsedLabel.Caption := 'Elapsed: 00:00:00';
-    FLoadElapsedLabel.Font.Style := [fsBold];
-
-    // === Status-Text VOR dem Blockieren setzen ===
-    FLoadStatusLabel.Caption := 'Reading file, please wait...';
     FLoadElapsedLabel.Caption := 'This may take a while for large files.';
+    FLoadElapsedLabel.Width := 480;
 
+    // === SOFORT SICHTBAR ===
     WaitForm.Show;
     WaitForm.BringToFront;
     Application.ProcessMessages;
     Sleep(100);
     Application.ProcessMessages;
 
-    // === Timer starten (für animierte Punkte + Elapsed) ===
-    FLoadDotCount := 0;
-    FLoadTimer := TTimer.Create(WaitForm);
-    FLoadTimer.Interval := 300;
-    FLoadTimer.OnTimer := @LoadTimerTick;
-    FLoadTimer.Enabled := True;
-
     // ============================================================
     // Thread starten
     // ============================================================
     CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
 
-    // Auf Thread-Ende warten
     while not CSVThread.Finished do
     begin
       Application.ProcessMessages;
       Sleep(20);
-    end;
-
-    // === Timer stoppen ===
-    if Assigned(FLoadTimer) then
-    begin
-      FLoadTimer.Enabled := False;
-      FLoadTimer.Free;
-      FLoadTimer := nil;
     end;
 
     // === Datasets reaktivieren ===
@@ -782,53 +588,64 @@ begin
     EndTime := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
-    // Status im Formular aktualisieren
+    // Status aktualisieren
     LblRows.Caption := 'Rows:     ' + FormatFloat('#,##0', RowCount);
     FLoadStatusLabel.Caption := 'Finished.';
     FLoadElapsedLabel.Caption := 'Elapsed: ' +
       FormatDateTime('hh:nn:ss', EndTime - StartTime);
     Application.ProcessMessages;
 
-    // Kurze Pause, damit der User das Ergebnis sieht
     Sleep(400);
 
   finally
-    if Assigned(FLoadTimer) then
-    begin
-      FLoadTimer.Enabled := False;
-      FLoadTimer.Free;
-      FLoadTimer := nil;
-    end;
     WaitForm.Free;
   end;
 
   // ============================================================
-  // End-Statistik
+  // End-Statistik als Report
   // ============================================================
   DiffSeconds := (EndTime - StartTime) * 86400.0;
-  Hours := Trunc(DiffSeconds / 3600);
-  Minutes := Trunc((DiffSeconds - Hours * 3600) / 60);
-  Seconds := Trunc(DiffSeconds) mod 60;
 
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
   btnCreateSQL.Enabled := True;
   btnExportAs.Enabled := True;
 
-  // Statistik-Dialog mit Speed
-  MessageDlg(
-    'File loaded successfully!' + sLineBreak +
-    sLineBreak +
-    'File:      ' + ExtractFileName(FFileName) + sLineBreak +
-    'Size:      ' + Format('%.2f MB', [FileSizeMB]) + sLineBreak +
-    'Rows:      ' + FormatFloat('#,##0', RowCount) + sLineBreak +
-    sLineBreak +
-    'Start Time: ' + TimeToStr(StartTime) + sLineBreak +
-    'End Time:   ' + TimeToStr(EndTime) + sLineBreak +
-    'Elapsed:    ' + Format('%.2d:%.2d:%.2d', [Hours, Minutes, Seconds]) + sLineBreak +
-    sLineBreak +
-    'Speed:      ' + FormatFloat('#,##0', Round(RowCount / Max(0.001, DiffSeconds))) +
-                    ' rows/sec',
-    mtInformation, [mbOK], 0);
+  // --- Statistik-Record füllen ---
+  FillChar(Stats, SizeOf(Stats), 0);
+  Stats.Kind             := tkLoadFile;
+  Stats.SourceKind       := 'File';
+  Stats.SourceFileName   := FFileName;
+  Stats.SourceFileSize   := FileSize;
+  Stats.SourceFileFormat := UpperCase(ExtractFileExt(FFileName));
+  // Punkt am Anfang entfernen: '.CSV' → 'CSV'
+  if (Stats.SourceFileFormat <> '') and (Stats.SourceFileFormat[1] = '.') then
+    Delete(Stats.SourceFileFormat, 1, 1);
+  Stats.OptionsExtra     := 'Read-Only';
+  Stats.RowsProcessed    := RowCount;
+  Stats.FieldsCount      := DataSource1.DataSet.FieldCount;
+  Stats.ElapsedSeconds   := DiffSeconds;
+  Stats.SystemInfo       := GetSystemInfo(FFileName);
+
+  // --- CSV-Optionen (nur bei CSV-Dateien) ---
+  if UpperCase(Stats.SourceFileFormat) = 'CSV' then
+    Stats.CSVOptions :=
+      '    Delimiter: ' + QuotedStr(edtDelimiter.Text) + sLineBreak +
+      '    Quote Char: ' + QuotedStr(edtQuoteChar.Text) + sLineBreak +
+      '    First Line As Field Names: ' +
+        BoolToStr(chkBoxFirstLineAsFieldName.Checked, 'Yes', 'No') + sLineBreak +
+      '    Ignore Outer Whitespace: ' +
+        BoolToStr(chkBoxIgnoreOuterWhiteSpace.Checked, 'Yes', 'No') + sLineBreak +
+      '    Quote Outer Whitespace: ' +
+        BoolToStr(chkBoxQuoteOuterWhiteSpace.Checked, 'Yes', 'No');
+
+  // --- Report anzeigen ---
+  ReportForm := TfrmReport.Create(nil);
+  try
+    ReportForm.SetReportText(FormatTransferReport(Stats));
+    ReportForm.ShowModal;
+  finally
+    ReportForm.Free;
+  end;
 end;
 
 procedure TfrmDataEditor.btnCreateSQLClick(Sender: TObject);
@@ -904,36 +721,17 @@ end;
 procedure TfrmDataEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
 begin
   if Button = nbRefresh then
-  begin
     if FFileName <> '' then
       LoadFile(FFileName)
-    else
-    begin
-      FOwnDataset.Close;
-      FOwnDataset.Open;
-      RxDBGrid1.OptimizeColumnsWidthAll;
-    end;
-    Abort;
-  end;
 
-  if Button = nbPost then
-  begin
+  else if Button = nbPost then
     if FFileName <> '' then
       SaveFile(FFileName)
-    else
-    begin
-      if FOwnDataset.State in [dsEdit, dsInsert] then
-        FOwnDataset.Post;
-      if FOwnTrans.InTransaction then
-        FOwnTrans.CommitRetaining;
-    end;
-  end;
 end;
 
 procedure TfrmDataEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   WriteIni;
-  CleanupOwnComponents;
   CloseAction := caFree;
 end;
 
