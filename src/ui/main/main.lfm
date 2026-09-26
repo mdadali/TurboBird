@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 178
+  Left = 432
   Height = 649
-  Top = 224
+  Top = 116
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 620
@@ -5707,9 +5707,22 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
+      ClientHeight = 526
+      ClientWidth = 1096
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
+      object PixieHtmlView1: TPixieHtmlView
+        Left = 0
+        Height = 526
+        Top = 0
+        Width = 1096
+        TabOrder = 0
+        TabStop = True
+        Zoom = 1
+        Align = alClient
+        Color = clWhite
+      end
     end
   end
   object Button1: TButton

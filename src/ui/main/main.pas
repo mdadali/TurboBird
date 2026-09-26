@@ -82,7 +82,7 @@ uses
 
   uthemeselector,
   fsimpleobjextractor,
-  cUnIntelliSenseCache,
+  cUnIntelliSenseCache, Pixie.HtmlView,
 
   //MWA Tools
   fScriptEngine,
@@ -151,6 +151,7 @@ type
     lmExportTableToDataEditorRO: TMenuItem;
     lmExportTableToDataEditorRW: TMenuItem;
     lmBulkExport: TMenuItem;
+    PixieHtmlView1: TPixieHtmlView;
     Separator12: TMenuItem;
     mnSQLMonitor: TMenuItem;
     mnSQLParser: TMenuItem;
@@ -667,7 +668,11 @@ begin
 end;
 
 procedure TfmMain.FormCreate(Sender: TObject);
+var IndexFile: string;
 begin
+  IndexFile := ExtractFilePath(Application.ExeName) + PathDelim + 'data'  + PathDelim +  'help' + PathDelim + Language + PathDelim + 'index.html';
+  PixieHtmlView1.LoadFromFile(IndexFile);
+
   turbocommon.MainTreeView := tvMain;
 
   DefaultTransactionFile :=
