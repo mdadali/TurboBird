@@ -35,15 +35,14 @@ type
     btnExportFileName: TButton;
     cbFormulaPreset: TComboBox;
     chkLstFields: TCheckListBox;
-    chkUseFormula: TCheckBox;
     comboxSourceDB: TComboBox;
     comboxSourceServer: TComboBox;
     comboxSourceTables: TComboBox;
     edtExportFileName: TEdit;
     edtBatchSize: TEdit;
     edtFrom: TEdit;
-    edtLineBuffer: TEdit;
     edtTo: TEdit;
+    edtLineBuffer: TEdit;
     grboxExportOptions: TGroupBox;
     grBoxFields: TGroupBox;
     grBoxFormulaPresets: TGroupBox;
@@ -51,7 +50,6 @@ type
     grBoxGeneratedQuery: TGroupBox;
     Label1: TLabel;
     Label3: TLabel;
-    Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
     Label8: TLabel;
@@ -73,7 +71,6 @@ type
     procedure btnDeselectAllClick(Sender: TObject);
     procedure btnRefreshPresetsClick(Sender: TObject);
     procedure cbFormulaPresetChange(Sender: TObject);
-    procedure chkUseFormulaChange(Sender: TObject);
     procedure comboxSourceServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
     procedure comboxSourceTablesChange(Sender: TObject);
@@ -117,8 +114,9 @@ type
     procedure CancelClick(Sender: TObject);
     function  BuildExportSQL: string;
     function  BuildHeaderLine: string;
+    function  NeedsQuoting(const AFieldType: string): Boolean;
+    function  WrapWithQuotes(const AFieldExpr, AQuoteChar: string): string;
     procedure DoBulkExport(const ASQL: string);
-    function  GetLineBufferSize: Integer;
   public
     procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
   end;
@@ -127,15 +125,10 @@ implementation
 
 {$R *.lfm}
 
-function TfrmBulkExport.GetLineBufferSize: Integer;
-begin
-  Result := StrToIntDef(edtLineBuffer.Text, 10000);
-  if Result < 1 then Result := 10000;
-end;
+// ============================================================================
+// HILFSFUNKTIONEN
+// ============================================================================
 
-// ============================================================================
-// HILFSFUNKTION
-// ============================================================================
 function ExpandSep(const S: string): string;
 begin
   Result := S;
@@ -243,8 +236,8 @@ begin
   FLastPresetIndex := -1;
 
   edtBatchSize.Text := IntToStr(DefaultBatchSize);
+  edtLineBuffer.Text := '70000000';   // 70 MB Default (≈ 1 Mio Zeilen)
 
-  // Presets sofort laden – Combobox ohne "None"
   LoadFormulaPresets;
 end;
 
@@ -371,28 +364,11 @@ begin
   end;
 end;
 
-procedure TfrmBulkExport.chkUseFormulaChange(Sender: TObject);
-begin
-  if sgFields.Columns.Count < 3 then Exit;
-  if chkUseFormula.Checked then
-    sgFields.Columns[2].Color := clWindow
-  else
-    sgFields.Columns[2].Color := clBtnFace;
-
-  btnPreviewSQLClick(nil);
-end;
-
 procedure TfrmBulkExport.sgFieldsDblClick(Sender: TObject);
 var
   NewFormula: string;
   Row: Integer;
 begin
-  if not chkUseFormula.Checked then
-  begin
-    ShowMessage('Enable "Use Formula" to enter formulas.');
-    Exit;
-  end;
-
   Row := sgFields.Row;
   if (Row < 1) or (Row >= sgFields.RowCount) then Exit;
 
@@ -556,7 +532,6 @@ begin
     Iso.Free;
   end;
 
-  // Formeln aus aktuellem Preset anwenden
   if cbFormulaPreset.ItemIndex >= 0 then
   begin
     ApplyPresetToGrid;
@@ -613,6 +588,44 @@ begin
 end;
 
 // ============================================================================
+// QUOTE-WRAP
+// ============================================================================
+
+function TfrmBulkExport.NeedsQuoting(const AFieldType: string): Boolean;
+var
+  CT: string;
+begin
+  CT := UpperCase(AFieldType);
+
+  // Zahlen und Bool werden NICHT gequotet
+  if Pos('SMALLINT', CT) > 0 then Exit(False);
+  if Pos('BIGINT',   CT) > 0 then Exit(False);
+  if Pos('INTEGER',  CT) > 0 then Exit(False);
+  if Pos('FLOAT',    CT) > 0 then Exit(False);
+  if Pos('DOUBLE',   CT) > 0 then Exit(False);
+  if Pos('NUMERIC',  CT) > 0 then Exit(False);
+  if Pos('DECIMAL',  CT) > 0 then Exit(False);
+  if Pos('BOOLEAN',  CT) > 0 then Exit(False);
+
+  // Alles andere wird gequotet
+  Result := True;
+end;
+
+function TfrmBulkExport.WrapWithQuotes(
+  const AFieldExpr, AQuoteChar: string): string;
+var
+  QC, QC2: string;
+begin
+  if AQuoteChar = '' then
+    Exit(AFieldExpr);
+
+  QC  := QuotedStr(AQuoteChar);              // '"'
+  QC2 := QuotedStr(AQuoteChar + AQuoteChar); // '""'
+
+  Result := QC + ' || REPLACE(' + AFieldExpr + ', ' + QC + ', ' + QC2 + ') || ' + QC;
+end;
+
+// ============================================================================
 // SQL-BAU
 // ============================================================================
 
@@ -621,7 +634,6 @@ var
   i: Integer;
   Preset: TFormulaPreset;
   FieldExpr, Formula, Separator, LineExpr: string;
-  UseFormula: Boolean;
 begin
   Result := '';
 
@@ -633,7 +645,6 @@ begin
   end;
 
   Separator := ExpandSep(Preset.Separator);
-  UseFormula := chkUseFormula.Checked;
 
   LineExpr := '';
   for i := 0 to High(FFields) do
@@ -641,26 +652,28 @@ begin
     if not chkLstFields.Checked[i] then Continue;
     if i + 1 >= sgFields.RowCount then Break;
 
-    if UseFormula then
-    begin
-      Formula := Trim(sgFields.Cells[2, i + 1]);
-      if Formula = '' then
-        Formula := '$1';
-      Formula := StringReplace(Formula, '$1', FFields[i].FieldName, [rfReplaceAll]);
-      FieldExpr := '(' + Formula + ')';
-    end
-    else
-    begin
-      // Roh: CAST für concat-Kompatibilität
-      if Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0 then
-        FieldExpr := 'CAST(SUBSTRING(' + FFields[i].FieldName +
-                     ' FROM 1 FOR 32765) AS VARCHAR(32765))'
-      else
-        FieldExpr := 'CAST(' + FFields[i].FieldName + ' AS VARCHAR(32765))';
-    end;
+    // Formel aus Grid (oder $1)
+    Formula := Trim(sgFields.Cells[2, i + 1]);
+    if Formula = '' then
+      Formula := '$1';
 
+    // $1 durch Feldname ersetzen
+    Formula := StringReplace(Formula, '$1', FFields[i].FieldName, [rfReplaceAll]);
+    FieldExpr := '(' + Formula + ')';
+
+    // Quote-Wrap wenn Preset.DataQuoted + Feldtyp braucht es
+    if Preset.DataQuoted and (Preset.QuoteChar <> '') and
+       NeedsQuoting(FFields[i].FieldType) then
+      FieldExpr := WrapWithQuotes(FieldExpr, Preset.QuoteChar);
+
+    // Separator davor (außer beim ersten)
     if LineExpr <> '' then
-      LineExpr := LineExpr + ' || ' + QuotedStr(Separator) + ' || ';
+    begin
+      if Separator <> '' then
+        LineExpr := LineExpr + ' || ' + QuotedStr(Separator) + ' || '
+      else
+        LineExpr := LineExpr + ' || ';
+    end;
     LineExpr := LineExpr + FieldExpr;
   end;
 
@@ -693,7 +706,7 @@ begin
   begin
     if not chkLstFields.Checked[i] then Continue;
     if Line <> '' then Line := Line + Sep;
-    if QC <> '' then
+    if Preset.HeaderQuoted and (QC <> '') then
       Line := Line + QC + FFields[i].FieldName + QC
     else
       Line := Line + FFields[i].FieldName;
@@ -745,7 +758,7 @@ procedure TfrmBulkExport.btnExportFileNameClick(Sender: TObject);
 begin
   with TSaveDialog.Create(nil) do
   try
-    Filter := 'CSV files (*.csv)|*.csv|All files (*.*)|*.*';
+    Filter := 'CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*';
     if Execute then
       edtExportFileName.Text := FileName;
   finally
@@ -774,7 +787,7 @@ begin
 end;
 
 // ============================================================================
-// BULK EXPORT ENGINE — Ein Cursor, ein ProgressBar
+// BULK EXPORT ENGINE
 // ============================================================================
 
 procedure TfrmBulkExport.DoBulkExport(const ASQL: string);
@@ -793,55 +806,17 @@ var
   Q: TIBSQL;
   Line: RawByteString;
   LineEnd: RawByteString;
+  LenLine, LenEnd: Integer;
   SQL, BaseSQL, CountSQL: string;
   FileStream: TBufferedFileStream;
-  LineBuffer: TStringList;
-  BufferCount: Integer;
-  LineBufferSize: Integer;
+  BufferBytes: Int64;
+  BytesSinceGui: Int64;
   FileSize: Int64;
   Stats: TTransferStatistic;
   ReportForm: TfrmReport;
   i, CheckedCount: Integer;
   HeaderLine: string;
 
-  // ---------------------------------------------------------------------------
-  // FlushBuffer: alles in einen MemoryStream, dann EIN Write
-  // ---------------------------------------------------------------------------
-  procedure FlushBuffer;
-  var
-    j: Integer;
-    Buf: TMemoryStream;
-    BufLine: RawByteString;
-  begin
-    if LineBuffer.Count = 0 then Exit;
-
-    Buf := TMemoryStream.Create;
-    try
-      for j := 0 to LineBuffer.Count - 1 do
-      begin
-        BufLine := LineBuffer[j];
-        if BufLine <> '' then
-          Buf.Write(BufLine[1], Length(BufLine));
-        if LineEnd <> '' then
-          Buf.Write(LineEnd[1], Length(LineEnd));
-      end;
-
-      if Buf.Size > 0 then
-      begin
-        Buf.Position := 0;
-        FileStream.CopyFrom(Buf, Buf.Size);
-      end;
-    finally
-      Buf.Free;
-    end;
-
-    LineBuffer.Clear;
-    BufferCount := 0;
-  end;
-
-  // ---------------------------------------------------------------------------
-  // Progress-Update
-  // ---------------------------------------------------------------------------
   procedure UpdateProgress;
   var
     ElapsedSec: Double;
@@ -873,7 +848,13 @@ begin
   UseRange := rbRange.Checked;
   FromRow := GetFromRow;
   ToRow := GetToRow;
-  LineBufferSize := GetLineBufferSize;
+
+  // --- Buffer-Größe in Bytes (aus edtLineBuffer) ---
+  BufferBytes := StrToIntDef(edtLineBuffer.Text, 70000000);
+  if BufferBytes < 65536 then
+    BufferBytes := 65536;
+  if BufferBytes > 268435456 then
+    BufferBytes := 268435456;
 
   // ------------------------------------------------------------------
   // Statistik vorbereiten
@@ -887,7 +868,7 @@ begin
   Stats.DestKind         := 'File';
   Stats.DestFileName     := edtExportFileName.Text;
   Stats.BatchSize        := GetBatchSize;
-  Stats.FormulaUsed      := chkUseFormula.Checked;
+  Stats.FormulaUsed      := True;    // immer, per Modell A
   Stats.FromRow          := FromRow;
   Stats.ToRow            := ToRow;
   Stats.UseRowRange      := UseRange;
@@ -903,24 +884,19 @@ begin
 
   Stats.SystemInfo := GetSystemInfo(edtExportFileName.Text);
 
-  // Felder zählen
   CheckedCount := 0;
   for i := 0 to High(FFields) do
     if chkLstFields.Checked[i] then Inc(CheckedCount);
   Stats.FieldsCount := CheckedCount;
 
-  // Formeln sammeln
   Stats.FormulasApplied := '';
-  if chkUseFormula.Checked then
+  for i := 0 to High(FFields) do
   begin
-    for i := 0 to High(FFields) do
-    begin
-      if i + 1 >= sgFields.RowCount then Break;
-      if not chkLstFields.Checked[i] then Continue;
-      if Trim(sgFields.Cells[2, i + 1]) <> '' then
-        Stats.FormulasApplied := Stats.FormulasApplied +
-          '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[2, i + 1] + sLineBreak;
-    end;
+    if i + 1 >= sgFields.RowCount then Break;
+    if not chkLstFields.Checked[i] then Continue;
+    if Trim(sgFields.Cells[2, i + 1]) <> '' then
+      Stats.FormulasApplied := Stats.FormulasApplied +
+        '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[2, i + 1] + sLineBreak;
   end;
 
   // ------------------------------------------------------------------
@@ -948,7 +924,7 @@ begin
   Q.Transaction := Trans;
 
   // ------------------------------------------------------------------
-  // BaseSQL: nur "SELECT " am Anfang entfernen
+  // BaseSQL: "SELECT " am Anfang entfernen
   // ------------------------------------------------------------------
   BaseSQL := Trim(ASQL);
   if UpperCase(Copy(BaseSQL, 1, 7)) = 'SELECT ' then
@@ -956,10 +932,6 @@ begin
 
   LineEnd := sLineBreak;
   HeaderLine := BuildHeaderLine;
-
-  LineBuffer := TStringList.Create;
-  LineBuffer.Capacity := LineBufferSize;
-  BufferCount := 0;
 
   // ------------------------------------------------------------------
   // Progress-Formular
@@ -1021,6 +993,7 @@ begin
 
     FCancelled := False;
     Exported := 0;
+    BytesSinceGui := 0;
 
     // ============================================================
     // Phase 1: Zeilen zählen
@@ -1040,7 +1013,6 @@ begin
       TotalRows := 0;
     end;
 
-    // Erwartete Zeilen (Range berücksichtigen)
     if UseRange then
     begin
       if ToRow > TotalRows then ToRow := TotalRows;
@@ -1067,13 +1039,13 @@ begin
     LblPhase.Caption := 'Opening output file...';
     Application.ProcessMessages;
 
-    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, 1048576);
+    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, BufferBytes);
 
     if HeaderLine <> '' then
       FileStream.Write(HeaderLine[1], Length(HeaderLine));
 
     // ============================================================
-    // Phase 3: Export — EIN Cursor mit SKIP/FIRST nur einmal
+    // Phase 3: Export
     // ============================================================
     StartTime := Now;
     LblPhase.Caption := 'Exporting data...';
@@ -1097,21 +1069,25 @@ begin
         if FCancelled then Break;
 
         Line := Q.Fields[0].AsString;
-        LineBuffer.Add(Line);
-        Inc(BufferCount);
-        Inc(Exported);
+        LenLine := Length(Line);
+        LenEnd := Length(LineEnd);
 
-        if BufferCount >= LineBufferSize then
+        if LenLine > 0 then
+          FileStream.Write(Line[1], LenLine);
+        if LenEnd > 0 then
+          FileStream.Write(LineEnd[1], LenEnd);
+
+        Inc(Exported);
+        Inc(BytesSinceGui, LenLine + LenEnd);
+
+        if BytesSinceGui >= BufferBytes then
         begin
-          FlushBuffer;
+          BytesSinceGui := 0;
           UpdateProgress;
         end;
 
         Q.Next;
       end;
-
-      if BufferCount > 0 then
-        FlushBuffer;
 
     finally
       FileStream.Flush;
@@ -1125,9 +1101,6 @@ begin
     UpdateProgress;
     EndTime := Now;
 
-    // ============================================================
-    // Statistik finalisieren
-    // ============================================================
     Stats.RowsProcessed  := Exported;
     Stats.ElapsedSeconds := (EndTime - StartTime) * SecsPerDay;
 
@@ -1163,7 +1136,6 @@ begin
     end;
 
   finally
-    LineBuffer.Free;
     Q.Free;
     if Trans.InTransaction then Trans.Rollback;
     DB.Connected := False;

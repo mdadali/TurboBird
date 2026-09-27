@@ -5,9 +5,7 @@ unit uFormulaPresets;
 interface
 
 uses
-  Classes, SysUtils, IniFiles, Forms,
-  FileUtil,
-  turbocommon;
+  Classes, SysUtils, IniFiles, Forms;
 
 type
   TFieldInfoArray = array of record
@@ -20,16 +18,16 @@ type
 
   { TFormulaPreset }
 
-  { TFormulaPreset }
-
   TFormulaPreset = class
   private
-    FFileName: string;              // ← NEU
+    FFileName: string;
     FName: string;
     FDescription: string;
     FSeparator: string;
     FQuoteChar: string;
     FIncludeHeader: Boolean;
+    FHeaderQuoted: Boolean;
+    FDataQuoted: Boolean;
     FFormulas: TStringList;
   public
     constructor Create;
@@ -40,12 +38,14 @@ type
 
     function GetFormulaForFieldType(const AFieldType: string): string;
 
-    property FileName: string read FFileName;      // ← NEU (read-only)
+    property FileName: string read FFileName;
     property Name: string read FName write FName;
     property Description: string read FDescription write FDescription;
     property Separator: string read FSeparator write FSeparator;
     property QuoteChar: string read FQuoteChar write FQuoteChar;
     property IncludeHeader: Boolean read FIncludeHeader write FIncludeHeader;
+    property HeaderQuoted: Boolean read FHeaderQuoted write FHeaderQuoted;
+    property DataQuoted: Boolean read FDataQuoted write FDataQuoted;
   end;
 
   { TFormulaPresetManager }
@@ -64,9 +64,9 @@ type
     procedure Reload;
     function GetPreset(const AName: string): TFormulaPreset;
     function GetPresetByIndex(AIndex: Integer): TFormulaPreset;
+    function GetDefaultPresetIndex: Integer;
     function PresetCount: Integer;
     function PresetName(AIndex: Integer): string;
-    function GetDefaultPresetIndex: Integer;
   end;
 
 var
@@ -74,7 +74,9 @@ var
 
 implementation
 
-
+uses
+  FileUtil,
+  turbocommon;   // für BulkExportDefaultPreset
 
 { TFormulaPreset }
 
@@ -85,7 +87,9 @@ begin
   FSeparator := ',';
   FQuoteChar := '"';
   FIncludeHeader := True;
-  FFileName := '';                    // ← NEU
+  FHeaderQuoted := True;
+  FDataQuoted := True;
+  FFileName := '';
 end;
 
 destructor TFormulaPreset.Destroy;
@@ -109,6 +113,8 @@ begin
     FSeparator   := Ini.ReadString('Preset', 'Separator', ',');
     FQuoteChar   := Ini.ReadString('Preset', 'QuoteChar', '"');
     FIncludeHeader := Ini.ReadBool('Preset', 'IncludeHeader', True);
+    FHeaderQuoted  := Ini.ReadBool('Preset', 'HeaderQuoted', True);
+    FDataQuoted    := Ini.ReadBool('Preset', 'DataQuoted', True);
 
     FFormulas.Clear;
     Ini.ReadSectionValues('Formulas', FFormulas);
@@ -134,6 +140,8 @@ begin
       Ini.WriteString('Preset', 'Separator', FSeparator);
       Ini.WriteString('Preset', 'QuoteChar', FQuoteChar);
       Ini.WriteBool('Preset', 'IncludeHeader', FIncludeHeader);
+      Ini.WriteBool('Preset', 'HeaderQuoted', FHeaderQuoted);
+      Ini.WriteBool('Preset', 'DataQuoted', FDataQuoted);
 
       for i := 0 to FFormulas.Count - 1 do
       begin
@@ -153,38 +161,33 @@ end;
 function TFormulaPreset.GetFormulaForFieldType(const AFieldType: string): string;
 var
   CleanType: string;
-  i: Integer;
-  KeyName: string;
 begin
-  Result := '$1';  // Default: 1:1 Copy
+  Result := '$1';
 
   CleanType := UpperCase(Trim(AFieldType));
 
-  // Numerische Typen
-  if Pos('SMALLINT', CleanType) > 0 then Result := FFormulas.Values['INTEGER']
-  else if Pos('INTEGER', CleanType) > 0 then Result := FFormulas.Values['INTEGER']
-  else if Pos('BIGINT', CleanType) > 0 then Result := FFormulas.Values['INTEGER']
-  else if Pos('FLOAT', CleanType) > 0 then Result := FFormulas.Values['FLOAT']
-  else if Pos('DOUBLE', CleanType) > 0 then Result := FFormulas.Values['FLOAT']
-  else if Pos('NUMERIC', CleanType) > 0 then Result := FFormulas.Values['FLOAT']
-  else if Pos('DECIMAL', CleanType) > 0 then Result := FFormulas.Values['FLOAT']
+  // BLOB zuerst (enthält manchmal CHAR)
+  if Pos('BLOB', CleanType) > 0 then
+    Result := FFormulas.Values['BLOB']
 
-  // String-Typen
-  else if Pos('CHAR', CleanType) > 0 then Result := FFormulas.Values['STRING']
-  else if Pos('VARCHAR', CleanType) > 0 then Result := FFormulas.Values['STRING']
+  else if Pos('SMALLINT', CleanType) > 0 then Result := FFormulas.Values['INTEGER']
+  else if Pos('BIGINT',   CleanType) > 0 then Result := FFormulas.Values['INTEGER']
+  else if Pos('INTEGER',  CleanType) > 0 then Result := FFormulas.Values['INTEGER']
+  else if Pos('FLOAT',    CleanType) > 0 then Result := FFormulas.Values['FLOAT']
+  else if Pos('DOUBLE',   CleanType) > 0 then Result := FFormulas.Values['FLOAT']
+  else if Pos('NUMERIC',  CleanType) > 0 then Result := FFormulas.Values['FLOAT']
+  else if Pos('DECIMAL',  CleanType) > 0 then Result := FFormulas.Values['FLOAT']
 
-  // Datum/Zeit
-  else if Pos('DATE', CleanType) > 0 then Result := FFormulas.Values['DATE']
-  else if Pos('TIME', CleanType) > 0 then Result := FFormulas.Values['TIMESTAMP']
   else if Pos('TIMESTAMP', CleanType) > 0 then Result := FFormulas.Values['TIMESTAMP']
+  else if Pos('DATE',      CleanType) > 0 then Result := FFormulas.Values['DATE']
+  else if Pos('TIME',      CleanType) > 0 then Result := FFormulas.Values['TIMESTAMP']
 
-  // Boolean
-  else if Pos('BOOLEAN', CleanType) > 0 then Result := FFormulas.Values['BOOLEAN']
+  else if Pos('CSTRING', CleanType) > 0 then Result := FFormulas.Values['STRING']
+  else if Pos('VARCHAR', CleanType) > 0 then Result := FFormulas.Values['STRING']
+  else if Pos('CHAR',    CleanType) > 0 then Result := FFormulas.Values['STRING']
 
-  // BLOB
-  else if Pos('BLOB', CleanType) > 0 then Result := FFormulas.Values['BLOB'];
+  else if Pos('BOOLEAN', CleanType) > 0 then Result := FFormulas.Values['BOOLEAN'];
 
-  // Fallback: wenn kein spezifischer Eintrag → $1
   if Result = '' then
     Result := '$1';
 end;
@@ -225,60 +228,198 @@ procedure TFormulaPresetManager.CreateDefaultPresets;
 var
   Preset: TFormulaPreset;
 begin
-  // CSV Export
-  if not FileExists(FPresetDir + 'csv_export.ini') then
+  // ---------- 1. CSV Quoted (Header + Daten) ----------
+  if not FileExists(FPresetDir + 'csv_quoted.ini') then
   begin
     Preset := TFormulaPreset.Create;
     try
-      Preset.Name := 'CSV Export';
-      Preset.Description := 'Export all fields as quoted CSV values (numbers unquoted)';
-      Preset.Separator := ',';
-      Preset.QuoteChar := '"';
-      Preset.FFormulas.Values['STRING'] := '''''''' + ' || $1 || ' + '''''''';
-      Preset.FFormulas.Values['INTEGER'] := '$1';
-      Preset.FFormulas.Values['FLOAT'] := '$1';
-      Preset.FFormulas.Values['DATE'] := '''''''' + ' || CAST($1 AS VARCHAR(10)) || ' + '''''''';
-      Preset.FFormulas.Values['TIMESTAMP'] := '''''''' + ' || CAST($1 AS VARCHAR(19)) || ' + '''''''';
-      Preset.FFormulas.Values['BOOLEAN'] := '$1';
-      Preset.FFormulas.Values['BLOB'] := '''''''' + ' || CAST(SUBSTRING($1 FROM 1 FOR 32765) AS VARCHAR(32765)) || ' + '''''''';
-      Preset.SaveToFile(FPresetDir + 'csv_export.ini');
+      Preset.Name          := 'CSV Quoted';
+      Preset.Description   := 'CSV mit Quotes auf Strings/Datum, Zahlen roh';
+      Preset.Separator     := ',';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := True;
+      Preset.DataQuoted    := True;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'csv_quoted.ini');
     finally
       Preset.Free;
     end;
   end;
 
-  // Fixed Format
+  // ---------- 2. CSV Unquoted (Header + Daten roh) ----------
+  if not FileExists(FPresetDir + 'csv_unquoted.ini') then
+  begin
+    Preset := TFormulaPreset.Create;
+    try
+      Preset.Name          := 'CSV Unquoted';
+      Preset.Description   := 'CSV ohne Quotes, alles roh';
+      Preset.Separator     := ',';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := False;
+      Preset.DataQuoted    := False;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'csv_unquoted.ini');
+    finally
+      Preset.Free;
+    end;
+  end;
+
+  // ---------- 3. CSV Header Quoted (Data Unquoted) ----------
+  if not FileExists(FPresetDir + 'csv_header_quoted.ini') then
+  begin
+    Preset := TFormulaPreset.Create;
+    try
+      Preset.Name          := 'CSV Header Quoted';
+      Preset.Description   := 'Header mit Quotes, Daten roh';
+      Preset.Separator     := ',';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := True;
+      Preset.DataQuoted    := False;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'csv_header_quoted.ini');
+    finally
+      Preset.Free;
+    end;
+  end;
+
+  // ---------- 4. CSV Data Quoted (Header Unquoted) ----------
+  if not FileExists(FPresetDir + 'csv_data_quoted.ini') then
+  begin
+    Preset := TFormulaPreset.Create;
+    try
+      Preset.Name          := 'CSV Data Quoted';
+      Preset.Description   := 'Header roh, Daten mit Quotes';
+      Preset.Separator     := ',';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := False;
+      Preset.DataQuoted    := True;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'csv_data_quoted.ini');
+    finally
+      Preset.Free;
+    end;
+  end;
+
+  // ---------- 5. TSV Quoted ----------
+  if not FileExists(FPresetDir + 'tsv_quoted.ini') then
+  begin
+    Preset := TFormulaPreset.Create;
+    try
+      Preset.Name          := 'TSV Quoted';
+      Preset.Description   := 'Tab-separiert mit Quotes';
+      Preset.Separator     := '\t';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := True;
+      Preset.DataQuoted    := True;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'tsv_quoted.ini');
+    finally
+      Preset.Free;
+    end;
+  end;
+
+  // ---------- 6. Pipe Quoted ----------
+  if not FileExists(FPresetDir + 'pipe_quoted.ini') then
+  begin
+    Preset := TFormulaPreset.Create;
+    try
+      Preset.Name          := 'Pipe Quoted';
+      Preset.Description   := 'Pipe-separiert mit Quotes';
+      Preset.Separator     := '|';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := True;
+      Preset.DataQuoted    := True;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
+      Preset.FFormulas.Values['BLOB']      := 'SUBSTRING($1 FROM 1 FOR 32765)';
+      Preset.SaveToFile(FPresetDir + 'pipe_quoted.ini');
+    finally
+      Preset.Free;
+    end;
+  end;
+
+  // ---------- 7. Fixed Format ----------
   if not FileExists(FPresetDir + 'fixed_format.ini') then
   begin
     Preset := TFormulaPreset.Create;
     try
-      Preset.Name := 'Fixed Format';
-      Preset.Description := 'Export all fields as fixed-width columns';
-      Preset.FFormulas.Values['STRING'] := 'CAST($1 AS CHAR(50))';
-      Preset.FFormulas.Values['INTEGER'] := 'CAST($1 AS CHAR(10))';
-      Preset.FFormulas.Values['FLOAT'] := 'CAST($1 AS CHAR(20))';
-      Preset.FFormulas.Values['DATE'] := 'CAST($1 AS CHAR(10))';
+      Preset.Name          := 'Fixed Format';
+      Preset.Description   := 'Fixed-Width-Format, kein Separator';
+      Preset.Separator     := '';
+      Preset.QuoteChar     := '';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := False;
+      Preset.DataQuoted    := False;
+      Preset.FFormulas.Values['STRING']    := 'CAST($1 AS CHAR(50))';
+      Preset.FFormulas.Values['INTEGER']   := 'CAST($1 AS CHAR(10))';
+      Preset.FFormulas.Values['FLOAT']     := 'CAST($1 AS CHAR(20))';
+      Preset.FFormulas.Values['DATE']      := 'CAST($1 AS CHAR(10))';
       Preset.FFormulas.Values['TIMESTAMP'] := 'CAST($1 AS CHAR(19))';
-      Preset.FFormulas.Values['BOOLEAN'] := 'CAST($1 AS CHAR(5))';
+      Preset.FFormulas.Values['BOOLEAN']   := 'CAST($1 AS CHAR(5))';
       Preset.SaveToFile(FPresetDir + 'fixed_format.ini');
     finally
       Preset.Free;
     end;
   end;
 
-  // JSON Export
+  // ---------- 8. JSON Export ----------
   if not FileExists(FPresetDir + 'json_export.ini') then
   begin
     Preset := TFormulaPreset.Create;
     try
-      Preset.Name := 'JSON Export';
-      Preset.Description := 'Export all fields as JSON values';
-      Preset.FFormulas.Values['STRING'] := '''"'' || $1 || ''"''';
-      Preset.FFormulas.Values['INTEGER'] := '$1';
-      Preset.FFormulas.Values['FLOAT'] := '$1';
-      Preset.FFormulas.Values['BOOLEAN'] := '$1';
-      Preset.FFormulas.Values['DATE'] := '''"'' || CAST($1 AS VARCHAR(10)) || ''"''';
-      Preset.FFormulas.Values['TIMESTAMP'] := '''"'' || CAST($1 AS VARCHAR(19)) || ''"''';
+      Preset.Name          := 'JSON Export';
+      Preset.Description   := 'JSON-Werte, Strings/Datum in Doppelquotes';
+      Preset.Separator     := ',';
+      Preset.QuoteChar     := '"';
+      Preset.IncludeHeader := True;
+      Preset.HeaderQuoted  := True;
+      Preset.DataQuoted    := True;
+      Preset.FFormulas.Values['STRING']    := '$1';
+      Preset.FFormulas.Values['INTEGER']   := '$1';
+      Preset.FFormulas.Values['FLOAT']     := '$1';
+      Preset.FFormulas.Values['DATE']      := '$1';
+      Preset.FFormulas.Values['TIMESTAMP'] := '$1';
+      Preset.FFormulas.Values['BOOLEAN']   := '$1';
       Preset.SaveToFile(FPresetDir + 'json_export.ini');
     finally
       Preset.Free;
@@ -288,7 +429,7 @@ end;
 
 procedure TFormulaPresetManager.LoadAllPresets;
 var
-  i: integer;
+  i: Integer;
   SR: TSearchRec;
   Preset: TFormulaPreset;
   FullPath: string;
@@ -335,25 +476,6 @@ begin
     Result := nil;
 end;
 
-function TFormulaPresetManager.PresetCount: Integer;
-begin
-  Result := FPresets.Count;
-end;
-
-function TFormulaPresetManager.PresetName(AIndex: Integer): string;
-begin
-  if (AIndex >= 0) and (AIndex < FPresets.Count) then
-    Result := FPresets[AIndex]
-  else
-    Result := '';
-end;
-
-// ---------------------------------------------------------------------------
-// Default-Preset bestimmen
-//   1. BulkExportDefaultPreset (globale Variable) → passendes Preset suchen
-//   2. Fallback: erstes geladenes Preset
-//   3. Kein Preset vorhanden → -1
-// ---------------------------------------------------------------------------
 function TFormulaPresetManager.GetDefaultPresetIndex: Integer;
 var
   i: Integer;
@@ -365,7 +487,6 @@ begin
   DefaultName := Trim(BulkExportDefaultPreset);
   if DefaultName <> '' then
   begin
-    // Falls der User ".ini" mitschreibt, wegdenken
     if LowerCase(ExtractFileExt(DefaultName)) = '.ini' then
       DefaultName := ChangeFileExt(DefaultName, '');
 
@@ -378,9 +499,21 @@ begin
     end;
   end;
 
-  // Fallback: erstes Preset
   if FPresets.Count > 0 then
     Result := 0;
+end;
+
+function TFormulaPresetManager.PresetCount: Integer;
+begin
+  Result := FPresets.Count;
+end;
+
+function TFormulaPresetManager.PresetName(AIndex: Integer): string;
+begin
+  if (AIndex >= 0) and (AIndex < FPresets.Count) then
+    Result := FPresets[AIndex]
+  else
+    Result := '';
 end;
 
 initialization
