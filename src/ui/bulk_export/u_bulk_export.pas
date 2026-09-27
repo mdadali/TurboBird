@@ -378,6 +378,8 @@ begin
     sgFields.Columns[2].Color := clWindow
   else
     sgFields.Columns[2].Color := clBtnFace;
+
+  btnPreviewSQLClick(nil);
 end;
 
 procedure TfrmBulkExport.sgFieldsDblClick(Sender: TObject);
@@ -1170,7 +1172,5 @@ begin
     ProgressForm.Free;
   end;
 end;
-
-end.
 
 end.
