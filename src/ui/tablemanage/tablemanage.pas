@@ -15,7 +15,6 @@ uses
   fbcommon,
   turbocommon,
 
-  fmetaquerys,
   fsimpleobjextractor,
 
   uthemeselector,
@@ -56,11 +55,7 @@ type
     edDrop: TBitBtn;
     edIndexName: TEdit;
     GroupBox2: TGroupBox;
-    CurrentIBDatabase: TIBDatabase;
-    CurrentIBTransaction: TIBTransaction;
     ImageList2: TImageList;
-    SQLQuery1: TIBQuery;
-    SQLQuery2: TIBQuery;
     ImageList1: TImageList;
     Label1: TLabel;
     Label2: TLabel;
@@ -104,7 +99,6 @@ type
     procedure edDropClick(Sender: TObject);
     procedure bbEditPermissionClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
@@ -151,7 +145,7 @@ implementation
 
 { TfmTableManage }
 
-uses NewEditField, Main, QueryWindow, SysTables, newForeignKey, PermissionManage;
+uses SysTables, NewEditField, Main, QueryWindow, newForeignKey, PermissionManage;
 
 
 procedure TfmTableManage.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -178,23 +172,8 @@ begin
   if Assigned(FExtractor) then
     FreeAndNil(FExtractor);
 
-  if SQLQuery1.Active then
-    SQLQuery1.Close;
-  if SQLQuery2.Active then
-    SQLQuery2.Close;
-  if CurrentIBTransaction.InTransaction then
-    CurrentIBTransaction.Commit;
-  if CurrentIBDatabase.Connected then
-    CurrentIBDatabase.Connected := false;
-
   CloseAction := caFree;
   TTabSheet(Parent).Free;
-end;
-
-procedure TfmTableManage.FormCreate(Sender: TObject);
-begin
-  CurrentIBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
-  CurrentIBDatabase.LoginPrompt := true;
 end;
 
 procedure TfmTableManage.FormKeyDown(Sender: TObject; var Key: Word;
@@ -249,9 +228,24 @@ var
   FieldOrder, FieldSize, FieldPrecision, FieldScale: Integer;
   AllowNull: Boolean;
 begin
+  // ============================================================
+  // Arrays können derzeit nicht editiert werden
+  // ============================================================
+  if (sgFields.Row >= 1) and (sgFields.Row < sgFields.RowCount) then
+  begin
+    if Pos('[', sgFields.Cells[2, sgFields.Row]) > 0 then
+    begin
+      MessageDlg(
+        'Array fields cannot be edited at this time.' + sLineBreak +
+        sLineBreak +
+        'A dedicated array editor is planned for a future release.',
+        mtInformation, [mbOK], 0);
+      Exit;
+    end;
+  end;
+
   fmNewEditField:= TfmNewEditField.Create(nil);
-  {todo: getting info from gui elements that got it from a function that got it
-   from a query is awful. Rework to use e.g. the function}
+
   with sgFields, fmNewEditField do
   begin
     FieldName:= Trim(Cells[1, Row]);
@@ -271,10 +265,12 @@ begin
     DefaultValue := Trim(Cells[9, Row]);
     Description  := Trim(Cells[10, Row]);
     FieldOrder:= Row;
+
     fmNewEditField.Init(FDBIndex, FTableName, foEdit,
       FieldName, FieldType, Characterset, Collation,
       DefaultValue, Description,
-      FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull, bbRefreshFields);
+      FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull,
+      bbRefreshFields, FExtractor);
 
     Caption:= 'Edit field: ' + OldFieldName;
 
@@ -289,16 +285,15 @@ var
 begin
   if sgTriggers.RowCount > 1 then
   begin
-    List:= TStringList.Create;
+    List := TStringList.Create;
     try
-      ATriggerName:= sgTriggers.Cells[0, sgTriggers.Row];
-      dmSysTables.ScriptTrigger(FDBIndex, ATriggerName, List);
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit Trigger ', List.Text, bbRefreshTriggers.OnClick);
+      ATriggerName := sgTriggers.Cells[0, sgTriggers.Row];
+      FExtractor.GetTriggerScript(ATriggerName, List);
+      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit Trigger', List.Text, bbRefreshTriggers.OnClick);
     finally
       List.Free;
     end;
   end;
-
 end;
 
 // ============================================================
@@ -306,64 +301,103 @@ end;
 // ============================================================
 procedure TfmTableManage.FillForeignKeys;
 var
-  Items: TStringList;
-  i: Integer;
-  Line, FKName, FKDef: string;
-  ColonPos: Integer;
+  FKs: TFBForeignKeyDefArray;
+  i, Row: Integer;
 begin
   sgForeignKeys.RowCount := 1;
 
-  Items := TStringList.Create;
-  try
-    FExtractor.Extract(otForeignKeys, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
+  FKs := FExtractor.GetTableForeignKeys(FTableName);
 
-    for i := 0 to Items.Count - 1 do
-    begin
-      Line := Items[i];
-      // Format: "FK_NAME: Feld → RefConstraint"
-      // oder:    "FK_NAME: Feld1, Feld2 → RefConstraint"
+  for i := 0 to High(FKs) do
+  begin
+    sgForeignKeys.RowCount := sgForeignKeys.RowCount + 1;
+    Row := sgForeignKeys.RowCount - 1;
 
-      sgForeignKeys.RowCount := i + 2;
-      sgForeignKeys.Cells[0, i + 1] := Line;  // Komplette DDL-Zeile
-    end;
-
-  finally
-    Items.Free;
+    sgForeignKeys.Cells[0, Row] := FKs[i].ConstraintName;   // Constraint Name
+    sgForeignKeys.Cells[1, Row] := FKs[i].KeyName;          // Key Name
+    sgForeignKeys.Cells[2, Row] := FKs[i].OnFields;         // On Fields
+    sgForeignKeys.Cells[3, Row] := FKs[i].RefTable;         // Foreign Table
+    sgForeignKeys.Cells[4, Row] := FKs[i].RefFields;        // Foreign Key (= RefFields)
+    sgForeignKeys.Cells[5, Row] := FKs[i].UpdateRule;       // Update Rule
+    sgForeignKeys.Cells[6, Row] := FKs[i].DeleteRule;       // Delete Rule
   end;
 
   if sgForeignKeys.RowCount > 1 then
     sgForeignKeys.Row := 1;
 end;
 
-// ============================================================
-// bbNewForeignKeyClick angepasst:
-// ============================================================
 procedure TfmTableManage.bbNewForeignKeyClick(Sender: TObject);
 var
-  Count: Integer;
   FieldsList: TStringList;
-  Iso: TIsolatedQuery;
+  TableList: TStringList;
+  RawFields: TFBFieldRawArray;
+  i: Integer;
+  ServerVersionMajor: Word;
 begin
+  // ============================================================
+  // Versions-Check: FK-Anlage auf FB 1.5 nicht möglich
+  // (Server verlangt exklusiven Zugriff — TurboBird hält aber
+  //  mehrere Verbindungen offen: Main-Tree, Extractor, Form)
+  // ============================================================
+  ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
+
+  if ServerVersionMajor < 2 then
+  begin
+    ShowMessage(
+      'Foreign Key creation is not supported on Firebird 1.5.' + sLineBreak +
+      sLineBreak +
+      'Firebird 1.5 requires exclusive database access when adding ' +
+      'a new Foreign Key. TurboBird has active connections to this ' +
+      'database, so the server will reject the operation.' + sLineBreak +
+      sLineBreak +
+      'Workaround:' + sLineBreak +
+      '  Use isql or another tool with a single connection to create' + sLineBreak +
+      '  the Foreign Key, then refresh this tab.' + sLineBreak +
+      sLineBreak +
+      'See "Known Limitations" in the documentation for details.'
+    );
+    Exit;
+  end;
+
+  // ============================================================
+  // 1. Felder der aktuellen Tabelle (On-Fields)
+  // ============================================================
   FieldsList := TStringList.Create;
   try
-    Iso := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName, FieldsList);
+    RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+    for i := 0 to High(RawFields) do
+      FieldsList.Add(RawFields[i].FieldName);
+
     fmNewForeignKey.clxOnFields.Clear;
     fmNewForeignKey.clxOnFields.Items.AddStrings(FieldsList);
   finally
     FieldsList.Free;
-    Iso.Free;
   end;
-  fmNewForeignKey.edNewName.Text := 'FK_' + FTableName + '_' + IntToStr(sgForeignKeys.RowCount);
 
-  // Foreign tables
-  fmNewForeignKey.cbTables.Items.CommaText := dmSysTables.GetDBObjectNames(FDBIndex, otTables, Count);
+  fmNewForeignKey.edNewName.Text := 'FK_' + FTableName + '_' +
+    IntToStr(sgForeignKeys.RowCount);
+
+  // ============================================================
+  // 2. Fremdtabellen-Liste (Ziel-Tabellen für FK)
+  // ============================================================
+  TableList := TStringList.Create;
+  try
+    FExtractor.ExtractObjectNames(FDBIndex, otTables, false, TStrings(TableList), '');
+
+    fmNewForeignKey.cbTables.Items.Clear;
+    fmNewForeignKey.cbTables.Items.AddStrings(TableList);
+  finally
+    TableList.Free;
+  end;
+
   fmNewForeignKey.DatabaseIndex := FDBIndex;
   fmNewForeignKey.laTable.Caption := FTableName;
   fmNewForeignKey.Caption := 'New Foreign Key for: ' + FTableName;
 
   if fmNewForeignKey.ShowModal = mrOK then
   begin
-    fmNewForeignKey.QWindow.OnCommit := @bbRefreshForeignKeysClick;
+    if  Assigned(fmNewForeignKey.QWindow) then
+      fmNewForeignKey.QWindow.OnCommit := @bbRefreshForeignKeysClick;
   end;
 end;
 
@@ -371,39 +405,47 @@ procedure TfmTableManage.bbDropForeignKeyClick(Sender: TObject);
 var
   QWindow: TfmQueryWindow;
   FKName: string;
-  Line: string;
-  ColonPos: Integer;
 begin
-  if sgForeignKeys.Row > 0 then
-  begin
-    Line := sgForeignKeys.Cells[0, sgForeignKeys.Row];
-    // Extrahiere FK-Namen aus "FK_NAME: Feld → RefConstraint"
-    ColonPos := Pos(':', Line);
-    if ColonPos > 0 then
-      FKName := Trim(Copy(Line, 1, ColonPos - 1))
-    else
-      FKName := Line;
+  if sgForeignKeys.Row <= 0 then
+    Exit;
 
-    if MessageDlg('Are you sure you want to drop ' + FKName + '?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Foreign Key: ' + FKName);
-      QWindow.meQuery.Lines.Text := 'ALTER TABLE ' + FTableName + ' DROP CONSTRAINT ' + FKName;
-      fmMain.Show;
-      QWindow.OnCommit := @bbRefreshForeignKeysClick;
-    end;
+  FKName := sgForeignKeys.Cells[0, sgForeignKeys.Row];
+  if FKName = '' then
+    Exit;
+
+  if MessageDlg('Are you sure you want to drop ' + FKName + '?',
+    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  begin
+    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Foreign Key: ' + FKName);
+    QWindow.meQuery.Lines.Text :=
+      'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+      ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(FKName);
+    fmMain.Show;
+    QWindow.OnCommit := @bbRefreshForeignKeysClick;
   end;
 end;
 
 procedure TfmTableManage.bbDropIndicesClick(Sender: TObject);
+var
+  Line, IndexName: string;
+  ColonPos: Integer;
 begin
   with sgIndices do
   begin
-    if (RowCount > 1) and
-      (MessageDlg('Are you sure you want to drop index: ' + Cells[0, Row], mtConfirmation,
-        [mbYes, mbNo], 0) = mrYes) then
+    if RowCount <= 1 then Exit;
+
+    Line := Cells[0, Row];
+    ColonPos := Pos(':', Line);
+    if ColonPos > 0 then
+      IndexName := Trim(Copy(Line, 1, ColonPos - 1))
+    else
+      IndexName := Trim(Line);
+
+    if MessageDlg('Are you sure you want to drop index: ' + IndexName, mtConfirmation,
+      [mbYes, mbNo], 0) = mrYes then
     begin
       fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop Index on table: ' + FTableName,
-        'DROP INDEX ' + Cells[0, Row], @bbRefreshIndicesClick);
+        'DROP INDEX ' + IndexName, @bbRefreshIndicesClick);
     end;
   end;
 end;
@@ -459,59 +501,50 @@ end;
 procedure TfmTableManage.bbAddUserClick(Sender: TObject);
 var
   fmPermissions: TfmPermissionManage;
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
   dbIndex: Integer;
   ATab: TTabSheet;
   Title, FullHint, DBAlias: string;
-  UserRole: string;
 begin
-  SelNode := fmMain.tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  dbIndex := FDBIndex;  // Tabellenkontext kommt aus Form
+  if not Assigned(FNodeInfos) then
+    Exit;
+
+  dbIndex := FDBIndex;
 
   Title := 'Add User Permission: ' + FTableName;
 
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmPermissionManage) then
-    fmPermissions := TfmPermissionManage(NodeInfos^.EditorForm)
-  else
-  begin
-    fmPermissions := TfmPermissionManage.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    fmPermissions.Parent := ATab;
-    fmPermissions.Align := alClient;
-    fmPermissions.BorderStyle := bsNone;
+  // Permission-Form als Tab in TableManage anlegen
+  fmPermissions := TfmPermissionManage.Create(Application);
+  ATab := TTabSheet.Create(Self);
+  ATab.Parent := PageControl1;
+  ATab.ImageIndex := TPNodeInfos(FNodeInfos)^.ImageIndex;
+  fmPermissions.Parent := ATab;
+  fmPermissions.Align := alClient;
+  fmPermissions.BorderStyle := bsNone;
 
-    NodeInfos^.EditorForm := fmPermissions;
-  end;
-
-  // Tab vorbereiten
-  ATab := fmPermissions.Parent as TTabSheet;
   PageControl1.ActivePage := ATab;
   ATab.Tag := dbIndex;
 
-  // Tab-Titel
   ATab.Caption := Title;
   fmPermissions.Caption := Title;
 
-  // Detaillierte Infos als Hint
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table Permissions' + sLineBreak +
-    'Table: ' + FTableName + sLineBreak +
-    'Action: Add User';
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-  UserRole := sgPermissions.Cells[0, sgPermissions.Row];
-  // Form initialisieren (UserType = 1 für User)
-  fmPermissions.Init(NodeInfos, dbIndex, FTableName, UserRole, 1, @bbRefreshPermissionsClick);
+  // Hint
+  if Assigned(FNodeInfos^.OwnerNode) then
+  begin
+    DBAlias := GetAncestorNodeText(FNodeInfos^.OwnerNode, 1);
+    FullHint :=
+      'Server:   ' + GetAncestorNodeText(FNodeInfos^.OwnerNode, 0) + sLineBreak +
+      'DBAlias:  ' + DBAlias + sLineBreak +
+      'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
+      'Object type: Table Permissions' + sLineBreak +
+      'Table: ' + FTableName + sLineBreak +
+      'Action: Add User';
+    ATab.Hint := FullHint;
+    ATab.ShowHint := True;
+  end;
+
+  // Init mit FNodeInfos + FExtractor (UserType = 1 für User)
+  fmPermissions.Init(FNodeInfos, dbIndex, FTableName, '', 1,
+    FExtractor, @bbRefreshPermissionsClick);
   fmPermissions.Show;
 end;
 
@@ -524,7 +557,7 @@ begin
   begin
     Init(FDBIndex, FTableName, foNew,
       '', '', '', '', '', '',
-      0, 0, 0, 0, True, bbRefreshFields);
+      0, 0, 0, 0, True, bbRefreshFields, FExtractor);
     Caption:= 'Add new field to Table: ' + FTableName;
     Show;
   end;
@@ -537,73 +570,43 @@ end;
 
 procedure TfmTableManage.FillReferences;
 var
-  SQL: string;
+  Refs: TForeignKeyInfoArray;
+  i, Row: Integer;
 begin
   sgReferences.RowCount := 1;
 
-  SQLQuery1.Close;
-  SQLQuery1.SQL.Text :=
-    'select '+
-    'trim(rc.rdb$constraint_name) as ConstName, '+
-    'trim(rfc.rdb$const_name_uq) as KeyName, '+
-    'trim(rc2.rdb$relation_name) as CurrentTableName, '+
-    'trim(flds_pk.rdb$field_name) as CurrentFieldName, '+
-    'trim(rc.rdb$relation_name) as OtherTableName, '+
-    'trim(flds_fk.rdb$field_name) as OtherFieldName, '+
-    'trim(rfc.rdb$update_rule) as UpdateRule, '+
-    'trim(rfc.rdb$delete_rule) as DeleteRule '+
-    'from rdb$relation_constraints AS rc '+
-    'inner join rdb$ref_constraints as rfc on (rc.rdb$constraint_name = rfc.rdb$constraint_name) '+
-    'inner join rdb$index_segments as flds_fk on (flds_fk.rdb$index_name = rc.rdb$index_name) ' +
-    'inner join rdb$relation_constraints as rc2 on (rc2.rdb$constraint_name = rfc.rdb$const_name_uq) ' +
-    'inner join rdb$index_segments as flds_pk on ' +
-    '((flds_pk.rdb$index_name = rc2.rdb$index_name) and (flds_fk.rdb$field_position = flds_pk.rdb$field_position)) ' +
-    'where rc.rdb$constraint_type = ''FOREIGN KEY'' '+
-    'and rc2.rdb$relation_name = ''' + UpperCase(FTableName) + ''' '+
-    'order by rc.rdb$constraint_name, flds_fk.rdb$field_position ';
+  Refs := FExtractor.GetTableReferences(MakeCaseSensitiveAuto(FTableName));
 
-  ConnectDBPrepared(SQLQuery1.Database, SQLQuery1.Transaction, FDBIndex, SQLQuery1.Database.DefaultTransaction.Params);
-
-  SQLQuery1.Open;
-
-  with SQLQuery1 do
-  while not EOF do
+  for i := 0 to High(Refs) do
   begin
     sgReferences.RowCount := sgReferences.RowCount + 1;
-    sgReferences.Cells[0, sgReferences.RowCount - 1] := FieldByName('ConstName').AsString;
-    sgReferences.Cells[1, sgReferences.RowCount - 1] := FieldByName('OtherTableName').AsString;
-    sgReferences.Cells[2, sgReferences.RowCount - 1] := FieldByName('OtherFieldName').AsString;
-    sgReferences.Cells[3, sgReferences.RowCount - 1] := FieldByName('KeyName').AsString;
-    Next;
-  end;
+    Row := sgReferences.RowCount - 1;
 
-  SQLQuery1.Close;
+    sgReferences.Cells[0, Row] := MakeCaseSensitiveAuto(Refs[i].ConstraintName);    // FK-Name
+    sgReferences.Cells[1, Row] := MakeCaseSensitiveAuto(Refs[i].ForeignTable);      // referenzierende Tabelle
+    sgReferences.Cells[2, Row] := MakeCaseSensitiveAuto(Refs[i].ForeignFields);     // Feld(er) dort
+    sgReferences.Cells[3, Row] := MakeCaseSensitiveAuto(Refs[i].MasterFields);      // Feld(er) bei uns
+  end;
 
   if sgReferences.RowCount > 1 then
     sgReferences.Row := 1;
 end;
-
-{procedure TfmTableManage.cbIndexTypeChange(Sender: TObject);
-begin
-  case cbIndexType.ItemIndex of
-    0: edIndexName.Text:= 'PK_' + FTableName + '_1';
-    1: edIndexName.Text:= 'IX_' + FTableName + '_' + IntToStr(sgIndices.RowCount);
-  end;
-end;}
 
 procedure TfmTableManage.cbIndexTypeChange(Sender: TObject);
 begin
   edIndexName.Text := 'IX_' + FTableName + '_' + IntToStr(sgIndices.RowCount);
 end;
 
-
 procedure TfmTableManage.edDropClick(Sender: TObject);
+var TmpFieldName: string;
 begin
   if MessageDlg('Are you sure you want to delete the field: ' + sgFields.Cells[1, sgFields.Row] +
     ' with its data', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
   begin
-    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop field', 'ALTER TABLE ' + FTableName + ' DROP ' +
-      sgFields.Cells[1, sgFields.Row], @bbRefreshFieldsClick);
+    TmpFieldName := MakeCaseSensitiveAuto(sgFields.Cells[1, sgFields.Row]);
+
+    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop field', 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) + ' DROP ' +
+         TmpFieldName  , @bbRefreshFieldsClick);
   end;
 end;
 
@@ -611,16 +614,18 @@ procedure TfmTableManage.bbEditPermissionClick(Sender: TObject);
 var
   fmPermissions: TfmPermissionManage;
   UserType, dbIndex: Integer;
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
   ATab: TTabSheet;
   Title, FullHint, DBAlias, UserOrRole: string;
+  DBNode: TTreeNode;
 begin
   if sgPermissions.Row <= 0 then
   begin
     ShowMessage('There is no selected user/role');
     Exit;
   end;
+
+  if not Assigned(FNodeInfos) then
+    Exit;
 
   // User/Role unterscheiden
   if sgPermissions.Cells[1, sgPermissions.Row] = 'User' then
@@ -629,59 +634,47 @@ begin
     UserType := 2;
   UserOrRole := sgPermissions.Cells[0, sgPermissions.Row];
 
-  // Aktuellen Node ermitteln
-  SelNode := fmMain.tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  dbIndex := FDBIndex;  // kommt aus TfmTableManage, nicht vom Node
+  dbIndex := FDBIndex;
 
   Title := 'Permissions:' + FTableName + ':' + UserOrRole;
 
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.EditorForm) and (NodeInfos^.EditorForm is TfmPermissionManage) then
-    fmPermissions := TfmPermissionManage(NodeInfos^.EditorForm)
-  else
-  begin
-    fmPermissions := TfmPermissionManage.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    fmPermissions.Parent := ATab;
-    fmPermissions.Align := alClient;
-    fmPermissions.BorderStyle := bsNone;
+  // Permission-Form als Tab in TableManage anlegen (nicht im Tree-Node speichern!)
+  fmPermissions := TfmPermissionManage.Create(Application);
+  ATab := TTabSheet.Create(Self);
+  ATab.Parent := PageControl1;
+  ATab.ImageIndex := TPNodeInfos(FNodeInfos)^.ImageIndex;
+  fmPermissions.Parent := ATab;
+  fmPermissions.Align := alClient;
+  fmPermissions.BorderStyle := bsNone;
 
-    NodeInfos^.EditorForm := fmPermissions;
-  end;
-
-  // Tab vorbereiten
-  ATab := fmPermissions.Parent as TTabSheet;
   PageControl1.ActivePage := ATab;
   ATab.Tag := dbIndex;
 
-  // Tab-Titel
   ATab.Caption := Title;
   fmPermissions.Caption := Title;
 
-  // Detaillierte Infos als Hint
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table Permissions' + sLineBreak +
-    'Table: ' + FTableName + sLineBreak +
-    'Granted to: ' + UserOrRole + sLineBreak;
+  // Hint
+  if Assigned(FNodeInfos^.OwnerNode) then
+  begin
+    DBAlias := GetAncestorNodeText(FNodeInfos^.OwnerNode, 1);
+    FullHint :=
+      'Server:   ' + GetAncestorNodeText(FNodeInfos^.OwnerNode, 0) + sLineBreak +
+      'DBAlias:  ' + DBAlias + sLineBreak +
+      'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
+      'Object type: Table Permissions' + sLineBreak +
+      'Table: ' + FTableName + sLineBreak +
+      'Granted to: ' + UserOrRole + sLineBreak;
+    if UserType = 1 then
+      FullHint := FullHint + 'Type: User'
+    else
+      FullHint := FullHint + 'Type: Role';
+    ATab.Hint := FullHint;
+    ATab.ShowHint := True;
+  end;
 
-  if UserType = 1 then
-    FullHint := FullHint + 'Type: User'
-  else
-    FullHint := FullHint + 'Type: Role';
-
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Form initialisieren
-  fmPermissions.Init(NodeInfos, dbIndex, FTableName, UserOrRole, UserType, @bbRefreshPermissionsClick);
+  // Init mit FNodeInfos (nicht SelNode!) und FExtractor
+  fmPermissions.Init(FNodeInfos, dbIndex, FTableName, UserOrRole, UserType,
+    FExtractor, @bbRefreshPermissionsClick);
   fmPermissions.Show;
 end;
 
@@ -697,30 +690,6 @@ begin
   FExtractor := TSimpleObjExtractor.Create(dbIndex);
 
   try
-    if SQLQuery1.Active then
-      SQLQuery1.Close;
-    if SQLQuery2.Active then
-      SQLQuery2.Close;
-    if CurrentIBTransaction.InTransaction then
-      CurrentIBTransaction.Commit;
-    if CurrentIBDatabase.Connected then
-      CurrentIBDatabase.Connected := false;
-
-    if AreSameDB(CurrentIBDatabase, RegisteredDatabases[dbIndex].IBDatabase) then
-      exit;
-
-    AssignIBDatabase(RegisteredDatabases[dbIndex].IBDatabase, CurrentIBDatabase);
-    CurrentIBDatabase.DefaultTransaction := CurrentIBTransaction;
-
-    // WICHTIG: OnLogin-Handler setzen, sonst kommt IBX-eigener Dialog!
-    CurrentIBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
-    CurrentIBDatabase.LoginPrompt := True;
-
-    SQLQuery1.DataBase := CurrentIBDatabase;
-    SQLQuery1.Transaction := CurrentIBTransaction;
-    SQLQuery2.DataBase := CurrentIBDatabase;
-    SQLQuery2.Transaction := CurrentIBTransaction;
-
     if not Assigned(fmPrimaryKey) then
     begin
       fmPrimaryKey := TfmPrimaryKey.Create(Self);
@@ -859,84 +828,39 @@ begin
   FillPermissions;
 end;
 
-{procedure TfmTableManage.FillIndices;
-var
-  Items: TStringList;
-  i: Integer;
-  Line, IndexName, IndexDef: string;
-  ColonPos: Integer;
-begin
-  sgIndices.RowCount := 1;
-
-  Items := TStringList.Create;
-  try
-    // Gleiche Methode wie der Baum!
-    FSimpleObjExtractor.Extract(otIndexes, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
-
-    for i := 0 to Items.Count - 1 do
-    begin
-      Line := Items[i];
-      // Line format: "IDX_NAME: UNIQUE ON (Feld1, Feld2)"
-      ColonPos := Pos(':', Line);
-      if ColonPos > 0 then
-      begin
-        IndexName := Trim(Copy(Line, 1, ColonPos - 1));
-        IndexDef  := Trim(Copy(Line, ColonPos + 2, MaxInt));
-      end
-      else
-      begin
-        IndexName := Line;
-        IndexDef  := '';
-      end;
-
-      sgIndices.RowCount := sgIndices.RowCount + 1;
-      sgIndices.Cells[0, i + 1] := IndexName;
-      sgIndices.Cells[1, i + 1] := IndexDef;  // komplette Definition
-    end;
-
-  finally
-    Items.Free;
-  end;
-end;}
-
 procedure TfmTableManage.FillIndices;
 var
   Items: TStringList;
   i: Integer;
+  RawFields: TFBFieldRawArray;
 begin
   sgIndices.RowCount := 1;
 
   Items := TStringList.Create;
   try
-    FExtractor.Extract(otIndexes, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
+    FExtractor.Extract(otIndexes, FTableName, [],
+      AlwaysQuoteIdentifiers, TStrings(Items));
 
     for i := 0 to Items.Count - 1 do
     begin
       sgIndices.RowCount := i + 2;
       sgIndices.Cells[0, i + 1] := Items[i];  // "IDX_NAME: UNIQUE ON (Feld1, Feld2)"
     end;
-
   finally
     Items.Free;
   end;
 
-  // Felder für "Create Index" laden
-  if Assigned(RegisteredDatabases[FDBIndex].IBTransaction) then
-    if RegisteredDatabases[FDBIndex].IBTransaction.InTransaction then
-      RegisteredDatabases[FDBIndex].IBTransaction.CommitRetaining;
-
+  // Felder für "Create Index" laden — ohne BLOBs
   edIndexName.Text := 'IX_' + FTableName + '_' + IntToStr(sgIndices.RowCount);
 
   clbFields.Clear;
-  // Felder über SimpleObjExtractor oder bestehende Methode laden
-  with GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName).Query do
+  RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+  for i := 0 to High(RawFields) do
   begin
-    while not EOF do
-    begin
-      if (FieldByName('field_type_int').AsInteger <> BlobType) then
-        clbFields.Items.Add(FieldByName('Field_Name').AsString);
-      Next;
-    end;
+    // BLOB-Felder können nicht in Index aufgenommen werden.
+    // 261 = RDB$FIELD_TYPE für BLOB (alle Versionen FB 1.5–6)
+    if RawFields[i].FieldType <> 261 then
+      clbFields.Items.Add(RawFields[i].FieldName);
   end;
 
   if sgIndices.RowCount > 1 then
@@ -944,220 +868,335 @@ begin
 end;
 
 procedure TfmTableManage.FillTriggers;
+var
+  Triggers: TFBTriggerRawArray;
+  i, Row: Integer;
 begin
-  SQLQuery1.Close;
-  SQLQuery1.SQL.Text:= Format('SELECT RDB$Trigger_Name, RDB$Trigger_Inactive FROM RDB$TRIGGERS WHERE RDB$SYSTEM_FLAG=0 ' +
-    'and RDB$Relation_Name = ''%s'' ',[FTableName]);
+  sgTriggers.RowCount := 1;
 
-  ConnectDBPrepared(SQLQuery1.Database, SQLQuery1.Transaction, FDBIndex, SQLQuery1.Database.DefaultTransaction.Params);
+  Triggers := FExtractor.GetTableTriggersRaw(FTableName);
 
-  SQLQuery1.Open;
-  sgTriggers.RowCount:= 1;
-  with sgTriggers, SQLQuery1 do
-  while not EOF do
+  for i := 0 to High(Triggers) do
   begin
-    RowCount:= RowCount + 1;
-    Cells[0, RowCount - 1]:= Fields[0].AsString;
-    if Fields[1].AsString = '1' then
-      Cells[1, RowCount - 1]:= '0'
+    sgTriggers.RowCount := sgTriggers.RowCount + 1;
+    Row := sgTriggers.RowCount - 1;
+
+    sgTriggers.Cells[0, Row] := Triggers[i].TriggerName;
+    if Triggers[i].IsActive then
+      sgTriggers.Cells[1, Row] := '1'
     else
-      Cells[1, RowCount - 1]:= '1';
-    Next;
+      sgTriggers.Cells[1, Row] := '0';
   end;
-  SQLQuery1.Close;
+
+  if sgTriggers.RowCount > 1 then
+    sgTriggers.Row := 1;
 end;
 
 procedure TfmTableManage.FillPermissions;
 var
-  UsersList: TStringList;
-  i: Integer;
-  UserName: string;
-  ObjType: Integer;
-  Permissions: string;
+  Perms: TFBPermissionArray;
+  i, Row: Integer;
+  Priv: string;
 begin
-  {todo: analyse transaction behaviour. Why do we have an explicit commit here? Also,
-  get rid of the implicit rollbacks and use a separate read only transaction for extracting
-  DDL and other read only info}
-  if CurrentIBTransaction.InTransaction then
-    CurrentIBTransaction.Commit;
-  UsersList:= TStringList.Create;
-  try
-    UsersList.CommaText:= dmSysTables.GetDBUsers(FDBIndex, FTableName);
-    sgPermissions.RowCount:= UsersList.Count + 1;
-    for i:= 0 to UsersList.Count - 1 do
-    begin
-      UserName:= UsersList[i];
-      if Pos('<R>', UserName) = 1 then
-        begin
-          sgPermissions.Cells[1, i + 1]:= 'Role';
-          Delete(UserName, 1, 3);
-        end
-      else
-        sgPermissions.Cells[1, i + 1]:= 'User';
+  sgPermissions.RowCount := 1;
 
-      sgPermissions.Cells[0, i + 1]:= UserName;
+  Perms := FExtractor.GetObjectPermissions(FTableName);
 
-      // Permissions
-      Permissions:= dmSysTables.GetObjectUserPermission(FDBIndex, FTableName, UserName, ObjType);
+  for i := 0 to High(Perms) do
+  begin
+    sgPermissions.RowCount := sgPermissions.RowCount + 1;
+    Row := sgPermissions.RowCount - 1;
 
-      if Pos('S', Permissions) > 0 then
-        sgPermissions.Cells[2, i + 1]:= '1'
-      else
-        sgPermissions.Cells[2, i + 1]:= '0';
+    Priv := Perms[i].Privileges;
 
-      if Pos('I', Permissions) > 0 then
-        sgPermissions.Cells[3, i + 1]:= '1'
-      else
-        sgPermissions.Cells[3, i + 1]:= '0';
+    if Perms[i].IsRole then
+      sgPermissions.Cells[1, Row] := 'Role'
+    else
+      sgPermissions.Cells[1, Row] := 'User';
 
-      if Pos('U', Permissions) > 0 then
-        sgPermissions.Cells[4, i + 1]:= '1'
-      else
-        sgPermissions.Cells[4, i + 1]:= '0';
+    sgPermissions.Cells[0, Row] := Perms[i].UserName;
 
-      if Pos('D', Permissions) > 0 then
-        sgPermissions.Cells[5, i + 1]:= '1'
-      else
-        sgPermissions.Cells[5, i + 1]:= '0';
-
-      if Pos('R', Permissions) > 0 then
-        sgPermissions.Cells[6, i + 1]:= '1'
-      else
-        sgPermissions.Cells[6, i + 1]:= '0';
-
-      if Pos('SG', Permissions) > 0 then
-        sgPermissions.Cells[7, i + 1]:= '1'
-      else
-        sgPermissions.Cells[7, i + 1]:= '0';
-
-      if Pos('IG', Permissions) > 0 then
-        sgPermissions.Cells[8, i + 1]:= '1'
-      else
-        sgPermissions.Cells[8, i + 1]:= '0';
-
-      if Pos('UG', Permissions) > 0 then
-        sgPermissions.Cells[9, i + 1]:= '1'
-      else
-        sgPermissions.Cells[9, i + 1]:= '0';
-
-      if Pos('DG', Permissions) > 0 then
-        sgPermissions.Cells[10, i + 1]:= '1'
-      else
-        sgPermissions.Cells[10, i + 1]:= '0';
-
-      if Pos('RG', Permissions) > 0 then
-        sgPermissions.Cells[11, i + 1]:= '1'
-      else
-        sgPermissions.Cells[11, i + 1]:= '0';
-    end;
-  finally
-    UsersList.Free;
+    if PermissionHas(Priv, 'S')  then sgPermissions.Cells[2,  Row] := '1' else sgPermissions.Cells[2,  Row] := '0';
+    if PermissionHas(Priv, 'I')  then sgPermissions.Cells[3,  Row] := '1' else sgPermissions.Cells[3,  Row] := '0';
+    if PermissionHas(Priv, 'U')  then sgPermissions.Cells[4,  Row] := '1' else sgPermissions.Cells[4,  Row] := '0';
+    if PermissionHas(Priv, 'D')  then sgPermissions.Cells[5,  Row] := '1' else sgPermissions.Cells[5,  Row] := '0';
+    if PermissionHas(Priv, 'R')  then sgPermissions.Cells[6,  Row] := '1' else sgPermissions.Cells[6,  Row] := '0';
+    if PermissionHas(Priv, 'SG') then sgPermissions.Cells[7,  Row] := '1' else sgPermissions.Cells[7,  Row] := '0';
+    if PermissionHas(Priv, 'IG') then sgPermissions.Cells[8,  Row] := '1' else sgPermissions.Cells[8,  Row] := '0';
+    if PermissionHas(Priv, 'UG') then sgPermissions.Cells[9,  Row] := '1' else sgPermissions.Cells[9,  Row] := '0';
+    if PermissionHas(Priv, 'DG') then sgPermissions.Cells[10, Row] := '1' else sgPermissions.Cells[10, Row] := '0';
+    if PermissionHas(Priv, 'RG') then sgPermissions.Cells[11, Row] := '1' else sgPermissions.Cells[11, Row] := '0';
   end;
+
+  if sgPermissions.RowCount > 1 then
+    sgPermissions.Row := 1;
 end;
 
-procedure TfmTableManage.FillFields;
+{procedure TfmTableManage.FillFields;
 var
-  FieldSize: integer;
-  FieldType: ansistring;
-  CleanTypeName: string;
+  RawFields: TFBFieldRawArray;
   i: Integer;
+  FieldType: string;
+  CleanTypeName: string;
   PKFieldsList: TStringList;
   DefaultValue: string;
   PKIndexName: string;
-  TmpConstraintName: ansistring;
+  TmpConstraintName: AnsiString;
   TmpInt: integer;
   IsUUID: boolean;
-  Iso: TIsolatedQuery;
+  Row: Integer;
 begin
   try
-    sgFields.RowCount:= 1;
-    Iso := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
-    with sgFields, Iso.Query do
-    while not EOF do
+    sgFields.RowCount := 1;
+
+    RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+
+    for i := 0 to High(RawFields) do
     begin
-      RowCount:= RowCount + 1;
+      sgFields.RowCount := sgFields.RowCount + 1;
+      Row := sgFields.RowCount - 1;
 
-      // Field Name
-      Cells[1, RowCount - 1]:= Trim(FieldByName('Field_Name').AsString);
+      // ---------- Field Name ----------
+      sgFields.Cells[1, Row] := RawFields[i].FieldName;
 
-      // Field Type
-      GetFieldType(Iso.Query, FieldType, FieldSize);
-      Cells[2, RowCount - 1]:= FieldType;
+      // ---------- Field Type ----------
+      // Domain-basiert → nur der Domain-Name (wie bisher)
+      // Base Type     → der aufgelöste Firebird-Typ
+      if (RawFields[i].FieldSource <> '') and
+         (not IsFieldDomainSystemGenerated(RawFields[i].FieldSource)) then
+        FieldType := RawFields[i].FieldSource
+      else
+        FieldType := GetFBTypeName(
+          RawFields[i].FieldType,
+          RawFields[i].FieldSubType,
+          RawFields[i].FieldLength,
+          RawFields[i].FieldPrecision,
+          RawFields[i].FieldScale,
+          RawFields[i].CharacterSetName,
+          RawFields[i].CharacterLength
+        );
+
+      sgFields.Cells[2, Row] := FieldType;
 
       CleanTypeName := GetNameFromSizedTypeName(FieldType);
 
-      IsUUID := (CleanTypeName = 'CHAR') and  (FieldByName('Field_Length').AsInteger = 16)
-        and (Trim(UpperCase(FieldByName('Field_Charset').AsString)) = 'OCTETS');
+      // UUID-Erkennung (CHAR(16) OCTETS)
+      IsUUID := (CleanTypeName = 'CHAR') and (RawFields[i].FieldLength = 16)
+        and (Trim(UpperCase(RawFields[i].CharacterSetName)) = 'OCTETS');
 
-      If isUUID then
+      if IsUUID then
       begin
         FieldType := 'UUID';
-        Cells[7, RowCount - 1] := '';  //collation   ignore...
+        sgFields.Cells[7, Row] := '';
       end;
 
-        // Computed fields (Calculated)
-      if Iso.Query.FieldByName('computed_source').AsString <> '' then
-        Cells[2, RowCount - 1]:= Iso.Query.FieldByName('computed_source').AsString;
+      // Computed Field → Expression anzeigen statt Typ
+      if RawFields[i].ComputedSource <> '' then
+        sgFields.Cells[2, Row] := RawFields[i].ComputedSource;
 
-      // Field Size
-      if Iso.Query.FieldByName('field_type_int').AsInteger in [CharType,CStringType,VarCharType] then
-        Cells[3, RowCount - 1]:= Iso.Query.FieldByName('CharacterLength').AsString
-      else // why show byte size for numerical fields like integer fields?
-        Cells[3, RowCount - 1]:= Iso.Query.FieldByName('Field_Length').AsString;
+      // ---------- Field Size ----------
+      if RawFields[i].FieldType in [CharType, CStringType, VarCharType] then
+      begin
+        if RawFields[i].CharacterLength > 0 then
+          sgFields.Cells[3, Row] := IntToStr(RawFields[i].CharacterLength)
+        else
+          sgFields.Cells[3, Row] := IntToStr(RawFields[i].FieldLength);
+      end
+      else
+        sgFields.Cells[3, Row] := IntToStr(RawFields[i].FieldLength);
 
+      // ---------- Precision / Scale ----------
       if (CleanTypeName = 'DECIMAL') or (CleanTypeName = 'NUMERIC') then
       begin
-        Cells[4, RowCount - 1]:= Iso.Query.FieldByName('field_precision').AsString;
-        TmpInt := Abs(Iso.Query.FieldByName('field_scale').AsInteger);
-        Cells[5, RowCount - 1]:= IntToStr(TmpInt);
+        sgFields.Cells[4, Row] := IntToStr(RawFields[i].FieldPrecision);
+        TmpInt := Abs(RawFields[i].FieldScale);
+        sgFields.Cells[5, Row] := IntToStr(TmpInt);
       end;
 
-      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR') or (CleanTypeName = 'UUID'))  then
-      begin
-        Cells[6, RowCount - 1]:= Iso.Query.FieldByName('field_charset').AsString;
-      end;
+      // ---------- Charset ----------
+      if (CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR') or (CleanTypeName = 'UUID') then
+        sgFields.Cells[6, Row] := RawFields[i].CharacterSetName;
 
+      // ---------- Collation ----------
       if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR')) and (not IsUUID) then
-        Cells[7, RowCount - 1]:= Iso.Query.FieldByName('field_collation').AsString;
+        sgFields.Cells[7, Row] := RawFields[i].CollationName;
 
-      // Null/Not null
-      if Iso.Query.FieldByName('field_not_null_constraint').AsString = '1' then
-        Cells[8, RowCount - 1]:= '0'
+      // ---------- Nullable flag ----------
+      // Grid-Konvention: '0' = NOT NULL, '1' = NULL erlaubt
+      if RawFields[i].NotNull then
+        sgFields.Cells[8, Row] := '0'
       else
-        Cells[8, RowCount - 1]:= '1';
+        sgFields.Cells[8, Row] := '1';
 
-      // Default Value
-      DefaultValue := Iso.Query.FieldByName('Field_Default_Source').AsString;
-      Cells[9, RowCount - 1] := ExtractDefaultValue(DefaultValue);
+      // ---------- Default Value ----------
+      DefaultValue := ExtractDefaultValue(RawFields[i].DefaultSource);
+      sgFields.Cells[9, Row] := DefaultValue;
 
-      Cells[10, RowCount - 1]:= Iso.Query.FieldByName('Field_Description').AsString;
-      Next;
+      // ---------- Description ----------
+      sgFields.Cells[10, Row] := RawFields[i].Description;
     end;
-    Iso.Free;
-    // Primary Keys
-    PKFieldsList:= TStringList.Create;
+
+    // ---------- Primary-Key Marker ----------
+    PKFieldsList := TStringList.Create;
     try
-      PKIndexName := GetPrimaryKeyIndexNameIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName, TmpConstraintName);
+      PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, TmpConstraintName);
       ConstraintName := TmpConstraintName;
 
       if PKIndexName <> '' then
-        fmMain.GetConstraintFields(FTableName, PKIndexName, PKFieldsList);
+        FExtractor.GetConstraintFields(PKIndexName, PKFieldsList);
 
       with sgFields do
-      for i:= 1 to RowCount - 1 do
-        if PKFieldsList.IndexOf(Cells[1, i]) <> -1 then
-          Cells[0, i]:= '1'
-        else
-          Cells[0, i]:= '0';
+        for i := 1 to RowCount - 1 do
+          if PKFieldsList.IndexOf(Cells[1, i]) <> -1 then
+            Cells[0, i] := '1'
+          else
+            Cells[0, i] := '0';
     finally
       PKFieldsList.Free;
     end;
+
+  except
+    on E: Exception do
+      MessageDlg('Error while reading table fields: ' + e.Message, mtError, [mbOk], 0);
+  end;
+end;}
+
+procedure TfmTableManage.FillFields;
+var
+  RawFields: TFBFieldRawArray;
+  i: Integer;
+  FieldType: string;
+  CleanTypeName: string;
+  PKFieldsList: TStringList;
+  DefaultValue: string;
+  PKIndexName: string;
+  TmpConstraintName: AnsiString;
+  TmpInt: integer;
+  IsUUID: boolean;
+  Row: Integer;
+  ArraySuffix: string;
+begin
+  try
+    sgFields.RowCount := 1;
+
+    RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+
+    for i := 0 to High(RawFields) do
+    begin
+      sgFields.RowCount := sgFields.RowCount + 1;
+      Row := sgFields.RowCount - 1;
+
+      // ---------- Field Name ----------
+      sgFields.Cells[1, Row] := RawFields[i].FieldName;
+
+      // ---------- Array-Suffix vorbereiten ----------
+      ArraySuffix := ArrayDimsToSuffix(RawFields[i].ArrayDims);
+
+      // ---------- Field Type ----------
+      // Domain-basiert → Domain-Name
+      // Base Type     → aufgelöster Firebird-Typ
+      if (RawFields[i].FieldSource <> '') and
+         (not IsFieldDomainSystemGenerated(RawFields[i].FieldSource)) then
+        FieldType := RawFields[i].FieldSource
+      else
+        FieldType := GetFBTypeName(
+          RawFields[i].FieldType,
+          RawFields[i].FieldSubType,
+          RawFields[i].FieldLength,
+          RawFields[i].FieldPrecision,
+          RawFields[i].FieldScale,
+          RawFields[i].CharacterSetName,
+          RawFields[i].CharacterLength
+        );
+
+      // Array-Suffix anhängen
+      if ArraySuffix <> '' then
+        FieldType := FieldType + ArraySuffix;
+
+      sgFields.Cells[2, Row] := FieldType;
+
+      CleanTypeName := GetNameFromSizedTypeName(FieldType);
+
+      // UUID-Erkennung (CHAR(16) OCTETS)
+      IsUUID := (CleanTypeName = 'CHAR') and (RawFields[i].FieldLength = 16)
+        and (Trim(UpperCase(RawFields[i].CharacterSetName)) = 'OCTETS');
+
+      if IsUUID then
+      begin
+        FieldType := 'UUID';
+        sgFields.Cells[7, Row] := '';
+      end;
+
+      // Computed Field → Expression anzeigen statt Typ
+      if RawFields[i].ComputedSource <> '' then
+        sgFields.Cells[2, Row] := RawFields[i].ComputedSource;
+
+      // ---------- Field Size ----------
+      if RawFields[i].FieldType in [CharType, CStringType, VarCharType] then
+      begin
+        if RawFields[i].CharacterLength > 0 then
+          sgFields.Cells[3, Row] := IntToStr(RawFields[i].CharacterLength)
+        else
+          sgFields.Cells[3, Row] := IntToStr(RawFields[i].FieldLength);
+      end
+      else
+        sgFields.Cells[3, Row] := IntToStr(RawFields[i].FieldLength);
+
+      // ---------- Precision / Scale ----------
+      if (CleanTypeName = 'DECIMAL') or (CleanTypeName = 'NUMERIC') then
+      begin
+        sgFields.Cells[4, Row] := IntToStr(RawFields[i].FieldPrecision);
+        TmpInt := Abs(RawFields[i].FieldScale);
+        sgFields.Cells[5, Row] := IntToStr(TmpInt);
+      end;
+
+      // ---------- Charset ----------
+      if (CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR') or (CleanTypeName = 'UUID') then
+        sgFields.Cells[6, Row] := RawFields[i].CharacterSetName;
+
+      // ---------- Collation ----------
+      if ((CleanTypeName = 'CHAR') or (CleanTypeName = 'VARCHAR')) and (not IsUUID) then
+        sgFields.Cells[7, Row] := RawFields[i].CollationName;
+
+      // ---------- Nullable flag ----------
+      // Grid-Konvention: '0' = NOT NULL, '1' = NULL erlaubt
+      if RawFields[i].NotNull then
+        sgFields.Cells[8, Row] := '0'
+      else
+        sgFields.Cells[8, Row] := '1';
+
+      // ---------- Default Value ----------
+      DefaultValue := ExtractDefaultValue(RawFields[i].DefaultSource);
+      sgFields.Cells[9, Row] := DefaultValue;
+
+      // ---------- Description ----------
+      sgFields.Cells[10, Row] := RawFields[i].Description;
+    end;
+
+    // ---------- Primary-Key Marker ----------
+    PKFieldsList := TStringList.Create;
+    try
+      PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, TmpConstraintName);
+      ConstraintName := TmpConstraintName;
+
+      if PKIndexName <> '' then
+        FExtractor.GetConstraintFields(PKIndexName, PKFieldsList);
+
+      with sgFields do
+        for i := 1 to RowCount - 1 do
+          if PKFieldsList.IndexOf(Cells[1, i]) <> -1 then
+            Cells[0, i] := '1'
+          else
+            Cells[0, i] := '0';
+    finally
+      PKFieldsList.Free;
+    end;
+
   except
     on E: Exception do
       MessageDlg('Error while reading table fields: ' + e.Message, mtError, [mbOk], 0);
   end;
 end;
-
 
 
 initialization

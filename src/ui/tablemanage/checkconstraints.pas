@@ -12,7 +12,6 @@ uses
   fbcommon,
 
   fsimpleobjextractor,
-  fmetaquerys,
 
   uthemeselector;
 
@@ -62,7 +61,8 @@ type
     procedure UpdateButtonStates;
 
   public
-    procedure Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
+    procedure Init(ADBIndex: Integer; const ATableName: string;
+                   ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
     procedure FillCheckConstraints;
 
   end;
@@ -113,7 +113,6 @@ begin
     bbDrop.Enabled := False;
     bbPost.Enabled := HasContent;
 
-    // Name nur bei New änderbar, nicht bei Edit
     edConstraintName.Enabled := (FEditingConstraintName = '');
     meCheckExpression.Enabled := True;
 
@@ -138,8 +137,6 @@ end;
 
 procedure TfmCheckConstraints.LoadConstraintDetail(const ConstraintName: string);
 var
-  SQL: string;
-  Qry: TIsolatedQuery;
   RawSource: string;
 begin
   ClearEditFields;
@@ -149,35 +146,21 @@ begin
 
   edConstraintName.Text := ConstraintName;
 
-  SQL :=
-    'SELECT TRIM(trg.RDB$TRIGGER_SOURCE) AS CHECK_SOURCE ' +
-    'FROM RDB$RELATION_CONSTRAINTS rc ' +
-    'JOIN RDB$CHECK_CONSTRAINTS cc ON rc.RDB$CONSTRAINT_NAME = cc.RDB$CONSTRAINT_NAME ' +
-    'JOIN RDB$TRIGGERS trg ON cc.RDB$TRIGGER_NAME = trg.RDB$TRIGGER_NAME ' +
-    'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(FTableName) + ' ' +
-    'AND rc.RDB$CONSTRAINT_NAME = ' + QuotedStr(ConstraintName) + ' ' +
-    'AND rc.RDB$CONSTRAINT_TYPE = ''CHECK'' ' +
-    'ORDER BY trg.RDB$TRIGGER_NAME';
+  // Ausdruck über den Extractor holen — funktioniert auf FB 1.5 bis 6
+  RawSource := FExtractor.GetCheckConstraintSource(FTableName, ConstraintName);
 
-  Qry := TIsolatedQuery.Create(RegisteredDatabases[FDBIndex].IBDatabase, SQL);
-  try
-    if not Qry.Query.EOF then
-    begin
-      RawSource := Trim(Qry.Query.FieldByName('CHECK_SOURCE').AsString);
+  if RawSource = '' then
+    Exit;
 
-      // "CHECK (...)" → "(...)" entfernen
-      if Pos('CHECK', UpperCase(RawSource)) = 1 then
-      begin
-        RawSource := Trim(Copy(RawSource, Length('CHECK') + 1, MaxInt));
-        if (Length(RawSource) >= 2) and (RawSource[1] = '(') and (RawSource[Length(RawSource)] = ')') then
-          RawSource := Trim(Copy(RawSource, 2, Length(RawSource) - 2));
-      end;
-
-      meCheckExpression.Text := RawSource;
-    end;
-  finally
-    Qry.Free;
+  // "CHECK (...)" → "(...)" entfernen, falls vorhanden
+  if Pos('CHECK', UpperCase(RawSource)) = 1 then
+  begin
+    RawSource := Trim(Copy(RawSource, Length('CHECK') + 1, MaxInt));
+    if (Length(RawSource) >= 2) and (RawSource[1] = '(') and (RawSource[Length(RawSource)] = ')') then
+      RawSource := Trim(Copy(RawSource, 2, Length(RawSource) - 2));
   end;
+
+  meCheckExpression.Text := RawSource;
 end;
 
 procedure TfmCheckConstraints.FillCheckConstraints;
@@ -189,14 +172,14 @@ begin
 
   Items := TStringList.Create;
   try
-    FExtractor.Extract(otCheckConstraints, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
+    FExtractor.Extract(otCheckConstraints, FTableName, [],
+      AlwaysQuoteIdentifiers, TStrings(Items));
 
     for i := 0 to Items.Count - 1 do
     begin
       sgCheckConstraints.RowCount := i + 2;
       sgCheckConstraints.Cells[0, i + 1] := Items[i];
     end;
-
   finally
     Items.Free;
   end;
@@ -208,9 +191,7 @@ begin
     sgCheckConstraintsSelection(nil, 0, 1);
   end
   else
-  begin
     ClearEditFields;
-  end;
 
   // Immer in den Normalmodus zurücksetzen
   FEditMode := False;
@@ -247,7 +228,7 @@ begin
   edConstraintName.Text := 'CHK_' + FTableName + '_' + IntToStr(sgCheckConstraints.RowCount);
   meCheckExpression.Text := '-- Enter check condition, e.g. FIELD_NAME > 0';
   FEditMode := True;
-  FEditingConstraintName := '';   // New = kein existierender Name
+  FEditingConstraintName := '';
   UpdateButtonStates;
   edConstraintName.SetFocus;
 end;
@@ -276,7 +257,9 @@ begin
   if IsNew then
     QWindow := fmMain.ShowQueryWindow(FDBIndex, 'New Check Constraint: ' + ConstraintName)
   else
-    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Check Constraint: ' + ConstraintName);  QWindow.meQuery.Lines.Clear;
+    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Check Constraint: ' + ConstraintName);
+
+  QWindow.meQuery.Lines.Clear;
 
   QWindow.meQuery.Lines.Add('SET TERM ^;');
   QWindow.meQuery.Lines.Add('');
@@ -304,7 +287,6 @@ begin
   QWindow.OnCommit := @bbRefreshClick;
   QWindow.Show;
 
-  // Zurücksetzen
   FEditMode := False;
   FEditingConstraintName := '';
   ClearEditFields;
@@ -329,7 +311,7 @@ begin
 
   FEditMode := True;
   UpdateButtonStates;
-  edConstraintName.Enabled := False;   // Name nicht änderbar
+  edConstraintName.Enabled := False;
   meCheckExpression.SetFocus;
 end;
 

@@ -26,32 +26,32 @@ object fmDBInfo: TfmDBInfo
     TabOrder = 0
     object tsInfos: TTabSheet
       Caption = 'Infos'
-      ClientHeight = 507
+      ClientHeight = 510
       ClientWidth = 810
       object Panel1: TPanel
         Left = 0
-        Height = 502
+        Height = 505
         Top = 5
         Width = 810
         Align = alClient
-        ClientHeight = 502
+        ClientHeight = 505
         ClientWidth = 810
         TabOrder = 0
         object GroupBox1: TGroupBox
           Left = 1
-          Height = 500
+          Height = 503
           Top = 1
           Width = 808
           Align = alClient
           Caption = 'Database informations'
-          ClientHeight = 479
+          ClientHeight = 483
           ClientWidth = 806
           TabOrder = 0
           object Label1: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 72
-            Width = 63
+            Width = 58
             Caption = 'Database'
             ParentColor = False
           end
@@ -70,9 +70,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label2: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 102
-            Width = 83
+            Width = 77
             Caption = 'ODS Version'
             ParentColor = False
           end
@@ -91,9 +91,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label3: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 133
-            Width = 53
+            Width = 49
             Caption = 'CharSet'
             ParentColor = False
           end
@@ -112,9 +112,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label4: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 165
-            Width = 92
+            Width = 85
             Caption = 'Creation Date'
             ParentColor = False
           end
@@ -133,9 +133,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label8: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 232
-            Width = 77
+            Width = 73
             Caption = 'Server time'
             ParentColor = False
           end
@@ -154,10 +154,10 @@ object fmDBInfo: TfmDBInfo
           end
           object Label9: TLabel
             Left = 17
-            Height = 20
+            Height = 19
             Hint = ' Firebird version string'
             Top = 8
-            Width = 97
+            Width = 92
             Caption = 'Server Version'
             ParentColor = False
           end
@@ -177,10 +177,10 @@ object fmDBInfo: TfmDBInfo
           end
           object Label12: TLabel
             Left = 17
-            Height = 20
+            Height = 19
             Hint = 'Database site name'
             Top = 39
-            Width = 69
+            Width = 63
             Caption = 'Site Name'
             ParentColor = False
           end
@@ -200,9 +200,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label15: TLabel
             Left = 264
-            Height = 20
+            Height = 19
             Top = 129
-            Width = 72
+            Width = 66
             Caption = 'SQLDialect'
             ParentColor = False
           end
@@ -221,99 +221,99 @@ object fmDBInfo: TfmDBInfo
           end
           object Label16: TLabel
             Left = 17
-            Height = 20
+            Height = 19
             Hint = 'Database Version (level) number'
             Top = 270
-            Width = 70
+            Width = 65
             Caption = 'Base Level'
             ParentColor = False
           end
           object Label17: TLabel
             Left = 17
-            Height = 20
+            Height = 19
             Hint = 'Database Implementation Number'
             Top = 304
-            Width = 146
+            Width = 137
             Caption = 'DBImplementationNo'
             ParentColor = False
           end
           object Label18: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Hint = 'Database implementation version no'
             Top = 197
-            Width = 50
+            Width = 47
             Caption = 'Version'
             ParentColor = False
           end
           object Label19: TLabel
             Left = 471
-            Height = 20
+            Height = 19
             Hint = 'Amount of server memory (in bytes) currently in use'
             Top = 110
-            Width = 111
+            Width = 104
             Caption = 'Current Memory'
             ParentColor = False
           end
           object Label20: TLabel
             Left = 473
-            Height = 20
+            Height = 19
             Hint = 'Number specifying the mode in which database writes are'#10'performed (0 for asynchronous, 1 for synchronous)'
             Top = 182
-            Width = 92
+            Width = 85
             Caption = 'Forced Writes'
             ParentColor = False
           end
           object Label21: TLabel
             Left = 471
-            Height = 20
+            Height = 19
             Hint = 'Maximum amount of memory (in bytes) used at one time since'#10'the first process attached to the database'
             Top = 146
-            Width = 87
+            Width = 82
             Caption = 'Max Memory'
             ParentColor = False
           end
           object Label22: TLabel
             Left = 473
-            Height = 20
+            Height = 19
             Hint = 'Number of memory buffers currently allocated'
             Top = 220
-            Width = 86
+            Width = 79
             Caption = 'Num Buffers'
             ParentColor = False
           end
           object Label23: TLabel
             Left = 471
-            Height = 20
+            Height = 19
             Hint = 'Number of transactions that are committed between “sweeps” to'#10'remove database record versions that are no longer needed'
             Top = 258
-            Width = 100
+            Width = 93
             Caption = 'Sweep Interval'
             ParentColor = False
           end
           object chkBoxEncrypted: TCheckBox
             Left = 471
-            Height = 24
+            Height = 21
             Top = 8
-            Width = 94
+            Width = 87
             Caption = 'Encrypted'
             Enabled = False
             TabOrder = 8
           end
           object Label24: TLabel
             Left = 473
-            Height = 20
+            Height = 19
             Top = 39
-            Width = 136
+            Width = 125
             Caption = 'EncryptionKeyName'
             ParentColor = False
           end
           object Label25: TLabel
             Left = 473
-            Height = 20
+            Height = 19
             Hint = 'Number of active transactions.'
             Top = 300
-            Width = 118
+            Width = 107
             Caption = 'TransactionCount'
             ParentColor = False
           end
@@ -358,9 +358,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label38: TLabel
             Left = 16
-            Height = 20
+            Height = 19
             Top = 338
-            Width = 154
+            Width = 143
             Caption = 'Connected UserNames'
             ParentColor = False
           end
@@ -482,9 +482,9 @@ object fmDBInfo: TfmDBInfo
           end
           object Label6: TLabel
             Left = 471
-            Height = 20
+            Height = 19
             Top = 72
-            Width = 94
+            Width = 85
             Caption = 'Database Size'
             ParentColor = False
           end
@@ -502,7 +502,7 @@ object fmDBInfo: TfmDBInfo
     end
     object tsPages: TTabSheet
       Caption = 'Pages'
-      ClientHeight = 507
+      ClientHeight = 510
       ClientWidth = 810
       OnShow = tsPagesShow
       object Panel2: TPanel
@@ -516,9 +516,9 @@ object fmDBInfo: TfmDBInfo
         TabOrder = 0
         object Label5: TLabel
           Left = 24
-          Height = 20
+          Height = 19
           Top = 22
-          Width = 64
+          Width = 58
           Caption = 'Page Size'
           ParentColor = False
         end
@@ -537,9 +537,9 @@ object fmDBInfo: TfmDBInfo
         end
         object Label10: TLabel
           Left = 416
-          Height = 20
+          Height = 19
           Top = 22
-          Width = 78
+          Width = 72
           Caption = 'Used Pages'
           ParentColor = False
         end
@@ -558,9 +558,9 @@ object fmDBInfo: TfmDBInfo
         end
         object Label11: TLabel
           Left = 24
-          Height = 20
+          Height = 19
           Top = 64
-          Width = 73
+          Width = 68
           Caption = 'Free Pages'
           ParentColor = False
         end
@@ -579,10 +579,10 @@ object fmDBInfo: TfmDBInfo
         end
         object Label13: TLabel
           Left = 223
-          Height = 20
+          Height = 19
           Hint = 'Number of database pages allocated'
           Top = 22
-          Width = 66
+          Width = 60
           Caption = 'Allocation'
           ParentColor = False
         end
@@ -602,37 +602,37 @@ object fmDBInfo: TfmDBInfo
         end
         object Label26: TLabel
           Left = 223
-          Height = 20
+          Height = 19
           Hint = 'Number of reads from the memory buffer cache'
           Top = 64
-          Width = 51
+          Width = 48
           Caption = 'Fetches'
           ParentColor = False
         end
         object Label27: TLabel
           Left = 416
-          Height = 20
+          Height = 19
           Hint = 'Number of writes to the memory buffer cache'
           Top = 64
-          Width = 41
+          Width = 38
           Caption = 'Marks'
           ParentColor = False
         end
         object Label28: TLabel
           Left = 24
-          Height = 20
+          Height = 19
           Hint = 'Number of page reads'
           Top = 104
-          Width = 41
+          Width = 37
           Caption = 'Reads'
           ParentColor = False
         end
         object Label29: TLabel
           Left = 223
-          Height = 20
+          Height = 19
           Hint = 'Number of page writes'
           Top = 104
-          Width = 43
+          Width = 40
           Caption = 'Writes'
           ParentColor = False
         end
@@ -736,9 +736,9 @@ object fmDBInfo: TfmDBInfo
         end
         object Label14: TLabel
           Left = 416
-          Height = 20
+          Height = 19
           Top = 10
-          Width = 127
+          Width = 117
           Caption = 'Current PageIndex'
           ParentColor = False
         end
@@ -767,7 +767,7 @@ object fmDBInfo: TfmDBInfo
       object ATBinHex1: TATBinHex
         Cursor = crIBeam
         Left = 0
-        Height = 313
+        Height = 316
         Top = 194
         Width = 810
         Align = alClient
@@ -932,12 +932,17 @@ object fmDBInfo: TfmDBInfo
     Active = False
     DefaultDatabase = IBDB
     DefaultAction = TARollback
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
     Left = 664
     Top = 436
   end
   object IBDBInfo: TIBDatabaseInfo
     Database = IBDB
-    Left = 608
-    Top = 304
+    Left = 528
+    Top = 64
   end
 end

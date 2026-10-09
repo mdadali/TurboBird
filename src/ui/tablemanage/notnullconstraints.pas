@@ -8,11 +8,12 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Buttons,
   Grids, CheckLst,
 
+  IBSQL,
+
   turbocommon,
   fbcommon,
 
   fsimpleobjextractor,
-  fmetaquerys,
 
   uthemeselector;
 
@@ -43,9 +44,12 @@ type
     FOrigNotNullFields: TStringList;  // Ursprüngliche NOT NULL Felder
 
     procedure LoadFields;
+    function HasNullValues(const AFieldName: string): Boolean;
+
 
   public
-    procedure Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
+    procedure Init(ADBIndex: Integer; const ATableName: string;
+                   ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
     procedure FillNotNullConstraints;
 
   end;
@@ -76,31 +80,24 @@ end;
 
 procedure TfmNotNullConstraints.LoadFields;
 var
-  FieldsQuery: TIsolatedQuery;
-  FieldName: string;
-  IsNotNull: Boolean;
+  RawFields: TFBFieldRawArray;
   i: Integer;
+  FieldName: string;
 begin
   chkLstBoxFields.Clear;
   FOrigNotNullFields.Clear;
 
-  FieldsQuery := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
-  try
-    while not FieldsQuery.Query.EOF do
-    begin
-      FieldName := Trim(FieldsQuery.Query.FieldByName('field_name').AsString);
-      IsNotNull := (FieldsQuery.Query.FieldByName('field_not_null_constraint').AsString = '1');
+  RawFields := FExtractor.GetTableFieldsRaw(FTableName);
 
-      chkLstBoxFields.Items.Add(FieldName);
-      chkLstBoxFields.Checked[chkLstBoxFields.Count - 1] := IsNotNull;
+  for i := 0 to High(RawFields) do
+  begin
+    FieldName := RawFields[i].FieldName;
 
-      if IsNotNull then
-        FOrigNotNullFields.Add(FieldName);
+    chkLstBoxFields.Items.Add(FieldName);
+    chkLstBoxFields.Checked[chkLstBoxFields.Count - 1] := RawFields[i].NotNull;
 
-      FieldsQuery.Query.Next;
-    end;
-  finally
-    FieldsQuery.Free;
+    if RawFields[i].NotNull then
+      FOrigNotNullFields.Add(FieldName);
   end;
 
   // Button-Status
@@ -116,14 +113,14 @@ begin
 
   Items := TStringList.Create;
   try
-    FExtractor.Extract(otNotNullConstraints, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
+    FExtractor.Extract(otNotNullConstraints, FTableName, [],
+      AlwaysQuoteIdentifiers, TStrings(Items));
 
     for i := 0 to Items.Count - 1 do
     begin
       sgNotNullConstraints.RowCount := i + 2;
       sgNotNullConstraints.Cells[0, i + 1] := Items[i];
     end;
-
   finally
     Items.Free;
   end;
@@ -157,6 +154,36 @@ begin
   bbApply.Enabled := HasChanges;
 end;
 
+// ============================================================
+// Vorprüfung: enthält eine Spalte NULL-Werte?
+// Auf FB 1.5 / 2.x prüft Firebird beim Setzen von NOT NULL nicht
+// automatisch — das machen wir hier selbst, sonst inkonsistente DB.
+// ============================================================
+function TfmNotNullConstraints.HasNullValues(const AFieldName: string): Boolean;
+var
+  Qry: TIBSQL;
+begin
+  Result := False;
+
+  Qry := TIBSQL.Create(nil);
+  try
+    Qry.Database := FExtractor.FIBDatabase;
+    Qry.Transaction := FExtractor.FIBTransaction;
+    if not Qry.Transaction.InTransaction then
+      Qry.Transaction.StartTransaction;
+
+    Qry.SQL.Text :=
+      'SELECT COUNT(*) FROM ' + MakeCaseSensitiveAuto(FTableName) + ' ' +
+      'WHERE ' + MakeCaseSensitiveAuto(AFieldName) + ' IS NULL';
+    Qry.ExecQuery;
+
+    if not Qry.EOF then
+      Result := Qry.Fields[0].AsInteger > 0;
+  finally
+    Qry.Free;
+  end;
+end;
+
 procedure TfmNotNullConstraints.bbApplyClick(Sender: TObject);
 var
   QWindow: TfmQueryWindow;
@@ -165,26 +192,81 @@ var
   FieldName: string;
   CurrentlyNotNull: Boolean;
   WasNotNull: Boolean;
+  ServerVersionMajor: Word;
+  NullCheckFailed: string;
 begin
+  ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
+
+  NullCheckFailed := '';
+
+  // ============================================================
+  // 1. Vorprüfung — nur für Felder, die NOT NULL werden sollen
+  // ============================================================
+  for i := 0 to chkLstBoxFields.Count - 1 do
+  begin
+    FieldName := chkLstBoxFields.Items[i];
+    CurrentlyNotNull := chkLstBoxFields.Checked[i];
+    WasNotNull := (FOrigNotNullFields.IndexOf(FieldName) >= 0);
+
+    // Wird gerade NOT NULL gesetzt UND war es vorher nicht
+    if CurrentlyNotNull and (not WasNotNull) then
+    begin
+      if HasNullValues(FieldName) then
+      begin
+        if NullCheckFailed <> '' then
+          NullCheckFailed := NullCheckFailed + sLineBreak;
+        NullCheckFailed := NullCheckFailed + '  - ' + FieldName;
+      end;
+    end;
+  end;
+
+  if NullCheckFailed <> '' then
+  begin
+    MessageDlg(
+      'The following fields contain NULL values and cannot be set to NOT NULL:' +
+      sLineBreak + sLineBreak +
+      NullCheckFailed + sLineBreak + sLineBreak +
+      'Please fill these NULL values first.',
+      mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // ============================================================
+  // 2. SQL generieren — Versions-Weiche
+  // ============================================================
   SQL := TStringList.Create;
   try
     for i := 0 to chkLstBoxFields.Count - 1 do
     begin
-      FieldName := MakeCaseSensitiveAuto(chkLstBoxFields.Items[i]);
+      FieldName := chkLstBoxFields.Items[i];
       CurrentlyNotNull := chkLstBoxFields.Checked[i];
-      WasNotNull := (FOrigNotNullFields.IndexOf(chkLstBoxFields.Items[i]) >= 0);
+      WasNotNull := (FOrigNotNullFields.IndexOf(FieldName) >= 0);
 
-      if CurrentlyNotNull and not WasNotNull then
+      if CurrentlyNotNull and (not WasNotNull) then
       begin
         // SET NOT NULL
-        SQL.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-          ' ALTER COLUMN ' + FieldName + ' SET NOT NULL ^;');
+        if ServerVersionMajor >= 3 then
+          SQL.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+            ' ALTER COLUMN ' + MakeCaseSensitiveAuto(FieldName) + ' SET NOT NULL ^;')
+        else
+          // FB 1.5 / 2.x — Workaround via Systemtabelle
+          SQL.Add('UPDATE RDB$RELATION_FIELDS ' +
+            'SET RDB$NULL_FLAG = 1 ' +
+            'WHERE RDB$RELATION_NAME = ' + QuotedStr(FTableName) + ' ' +
+            '  AND RDB$FIELD_NAME = ' + QuotedStr(FieldName) + ' ^;');
       end
-      else if not CurrentlyNotNull and WasNotNull then
+      else if (not CurrentlyNotNull) and WasNotNull then
       begin
         // DROP NOT NULL
-        SQL.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-          ' ALTER COLUMN ' + FieldName + ' DROP NOT NULL ^;');
+        if ServerVersionMajor >= 3 then
+          SQL.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+            ' ALTER COLUMN ' + MakeCaseSensitiveAuto(FieldName) + ' DROP NOT NULL ^;')
+        else
+          // FB 1.5 / 2.x — Workaround via Systemtabelle
+          SQL.Add('UPDATE RDB$RELATION_FIELDS ' +
+            'SET RDB$NULL_FLAG = NULL ' +
+            'WHERE RDB$RELATION_NAME = ' + QuotedStr(FTableName) + ' ' +
+            '  AND RDB$FIELD_NAME = ' + QuotedStr(FieldName) + ' ^;');
       end;
     end;
 
@@ -204,6 +286,9 @@ begin
 
     QWindow.OnCommit := @bbRefreshClick;
     QWindow.Show;
+
+    // Metadaten haben sich geändert → TreeView neu laden
+    turbocommon.MetaDataChanged := True;
 
   finally
     SQL.Free;

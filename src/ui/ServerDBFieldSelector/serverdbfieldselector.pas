@@ -10,10 +10,8 @@ uses
   IBCustomDataSet, Variants, DB,
 
   turbocommon,
-
-  fmetaquerys;  // Für GetFieldsIsolated
-
-
+  fbcommon,
+  fsimpleobjextractor;
 
 type
   TSelectorFieldInfo = record
@@ -75,6 +73,9 @@ type
 
     FShowSource: Boolean;
 
+    FExtractor: TSimpleObjExtractor;
+    FExtractorDBIndex: Integer;
+
     function GetSelectedFieldsList: TStringList;
 
     procedure SetShowSource(AValue: Boolean);
@@ -107,6 +108,8 @@ type
     procedure SetFieldList(AFieldList: TStringList; AFieldInfos: array of TSelectorFieldInfo);
     procedure SetShowFieldSelection(AVisible: Boolean);
     procedure ClearAll;
+    procedure EnsureExtractor(ADBIndex: Integer);
+
 
     // ===== DIALOG FUNCTIONS =====
     function ShowDialog(out ASourceServer, ASourceDB, ASourceTable: string;
@@ -168,7 +171,9 @@ begin
   FSourceDBIndex := -1;
   FDestDBIndex := -1;
 
-  // Standardwerte setzen
+  FExtractor := nil;             // ← NEU
+  FExtractorDBIndex := -1;       // ← NEU
+
   chkCreateTable.Checked := True;
   chkboxExternalTable.Checked := False;
   UpdateExternalFileState;
@@ -176,6 +181,10 @@ end;
 
 destructor TfrmServerDBFieldSelector.Destroy;
 begin
+  // NEU:
+  if Assigned(FExtractor) then
+    FreeAndNil(FExtractor);
+
   FFieldList.Free;
   FSelectedFields.Free;
   inherited;
@@ -206,6 +215,22 @@ begin
   chkLstFields.Clear;
   FFieldList.Clear;
   FSelectedFields.Clear;
+end;
+
+// ============================================================
+// Stellt sicher, dass ein Extractor für die angegebene DB existiert.
+// Erzeugt neu, wenn noch keiner da ist oder die DB gewechselt wurde.
+// ============================================================
+procedure TfrmServerDBFieldSelector.EnsureExtractor(ADBIndex: Integer);
+begin
+  if Assigned(FExtractor) and (FExtractorDBIndex = ADBIndex) then
+    Exit;
+
+  if Assigned(FExtractor) then
+    FreeAndNil(FExtractor);
+
+  FExtractor := TSimpleObjExtractor.Create(ADBIndex);
+  FExtractorDBIndex := ADBIndex;
 end;
 
 procedure TfrmServerDBFieldSelector.SetFieldList(AFieldList: TStringList; AFieldInfos: array of TSelectorFieldInfo);
@@ -298,24 +323,40 @@ begin
 end;
 
 function TfrmServerDBFieldSelector.FillSourceTableCombo: Boolean;
+var
+  TableList: TStringList;
+  i: Integer;
 begin
   Result := False;
   comboxSourceTables.Items.Clear;
   comboxSourceTables.Items.Add(''); // Leerer Eintrag
 
+  if FSourceDBIndex < 0 then
+    Exit;
+
   try
-    // Verbindung muss bereits konfiguriert sein
-    if FSourceDBIndex >= 0 then
+    EnsureExtractor(FSourceDBIndex);
+    if not Assigned(FExtractor) then
+      Exit;
+
+    TableList := TStringList.Create;
+    try
+      FExtractor.ExtractObjectNames(FSourceDBIndex, otTables, false,
+        TStrings(TableList), '');
+
+      for i := 0 to TableList.Count - 1 do
+        comboxSourceTables.Items.Add(TableList[i]);
+    finally
+      TableList.Free;
+    end;
+
+    if comboxSourceTables.Items.Count > 0 then
     begin
-      // Tabellen aus der Datenbank holen
-      RegisteredDatabases[FSourceDBIndex].IBDatabase.GetTableNames(comboxSourceTables.Items);
-      if comboxSourceTables.Items.Count > 0 then
-      begin
-        comboxSourceTables.ItemIndex := 0;
-        Result := True;
-      end;
+      comboxSourceTables.ItemIndex := 0;
+      Result := True;
     end;
   except
+    // still — wie vorher
   end;
 end;
 
@@ -425,15 +466,10 @@ begin
   end;
 end;
 
-// ============================================================================
-// FIELDS (wie in CloneTable)
-// ============================================================================
-
 procedure TfrmServerDBFieldSelector.LoadFields;
 var
-  Iso: TIsolatedQuery;
+  RawFields: TFBFieldRawArray;
   i: Integer;
-  FieldName: string;
 begin
   if FSourceDBIndex < 0 then Exit;
 
@@ -441,20 +477,17 @@ begin
   FFieldList.Clear;
   FSelectedFields.Clear;
 
-  Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase,
-                           Trim(comboxSourceTables.Text));
-  try
-    while not Iso.Query.EOF do
-    begin
-      FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
-      FFieldList.Add(FieldName);
-      Iso.Query.Next;
-    end;
-  finally
-    Iso.Free;
-  end;
+  if Trim(comboxSourceTables.Text) = '' then
+    Exit;
 
-  // Felder in die CheckListBox laden
+  EnsureExtractor(FSourceDBIndex);
+  if not Assigned(FExtractor) then
+    Exit;
+
+  RawFields := FExtractor.GetTableFieldsRaw(Trim(comboxSourceTables.Text));
+  for i := 0 to High(RawFields) do
+    FFieldList.Add(RawFields[i].FieldName);
+
   for i := 0 to FFieldList.Count - 1 do
   begin
     chkLstFields.Items.Add(FFieldList[i]);

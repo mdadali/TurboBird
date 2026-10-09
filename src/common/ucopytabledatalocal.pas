@@ -1,3 +1,11 @@
+{ ============================================================================
+  Local Copy Engine — Same-Database (INSERT ... SELECT)
+
+  Quoting-Regel in dieser Unit:
+
+    * Tabellen und Felder → MakeCaseSensitiveAuto()
+      (case-sensitive Namen erhalten Anführungszeichen)
+  ============================================================================ }
 unit uCopyTableDataLocal;
 
 {$mode objfpc}{$H+}
@@ -176,6 +184,7 @@ var
   DestFields, SourceFields : string;
   i : Integer;
   FormulaExpr : string;
+  QFieldName : string;
 begin
   DestFields := '';
   SourceFields := '';
@@ -185,22 +194,25 @@ begin
     if not FFieldTransforms[i].CopyField then
       Continue;
 
-    // Zielfeld
+    // Zielfeld — mit Auto-Quoting (case-sensitive Felder)
+    QFieldName := MakeCaseSensitiveAuto(FFieldTransforms[i].DestField);
+
     if DestFields <> '' then
       DestFields := DestFields + ', ';
-    DestFields := DestFields + FFieldTransforms[i].DestField;
+    DestFields := DestFields + QFieldName;
 
-    // Quellfeld (mit oder ohne Formel)
+    // Quellfeld — ebenfalls mit Auto-Quoting
     if SourceFields <> '' then
       SourceFields := SourceFields + ', ';
 
     if FFieldTransforms[i].Formula = '' then
-      SourceFields := SourceFields + FFieldTransforms[i].SourceField
+      SourceFields := SourceFields + MakeCaseSensitiveAuto(FFieldTransforms[i].SourceField)
     else
     begin
-      // $1 durch den Quell-Spaltennamen ersetzen
+      // $1 durch den gequoteten Quell-Spaltennamen ersetzen
       FormulaExpr := StringReplace(FFieldTransforms[i].Formula, '$1',
-                                   FFieldTransforms[i].SourceField, [rfReplaceAll]);
+                                   MakeCaseSensitiveAuto(FFieldTransforms[i].SourceField),
+                                   [rfReplaceAll]);
       SourceFields := SourceFields + FormulaExpr;
     end;
   end;
@@ -506,7 +518,7 @@ begin
       CountQuery.Database := GetSourceDB;
       CountQuery.Transaction := GetSourceTrans;
       CountQuery.AllowAutoActivateTransaction := True;
-      CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + FSourceTable;
+      CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + MakeCaseSensitiveAuto(FSourceTable);
       CountQuery.Open;
       TotalInSource := CountQuery.Fields[0].AsInteger;
       CountQuery.Close;

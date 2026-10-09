@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 499
+  Left = 478
   Height = 748
-  Top = 259
+  Top = 180
   Width = 1232
   Caption = 'fmQueryWindow'
   ClientHeight = 742
@@ -72561,8 +72561,8 @@ object fmQueryWindow: TfmQueryWindow
     )
     AfterTransactionEnd = FQueryTransAfterTransactionEnd
     OnStartTransaction = FQueryTransStartTransaction
-    Left = 320
-    Top = 216
+    Left = 688
+    Top = 584
   end
   object SynAutoComplete1: TSynAutoComplete
     AutoCompleteList.Strings = (
@@ -72593,8 +72593,8 @@ object fmQueryWindow: TfmQueryWindow
     ShowSetupForm = True
     Options = []
     OpenAfterExport = True
-    Left = 96
-    Top = 337
+    Left = 216
+    Top = 528
   end
   object RxDBGridExportPDF1: TRxDBGridExportPDF
     Caption = 'Export to PDF file'
@@ -72624,8 +72624,8 @@ object fmQueryWindow: TfmQueryWindow
     ShowPerformanceStats = True
     StopOnFirstError = False
     OnSelectSQL = FIBXScriptSelectSQL
-    Left = 120
-    Top = 240
+    Left = 592
+    Top = 584
   end
   object FScriptTrans: TIBTransaction
     TransactionName = '{4E112E83-89DD-4F89-9653-7D32044E4F00}'
@@ -72638,7 +72638,7 @@ object fmQueryWindow: TfmQueryWindow
     )
     AfterTransactionEnd = FScriptTransAfterTransactionEnd
     OnStartTransaction = FScriptTransStartTransaction
-    Left = 216
-    Top = 240
+    Left = 832
+    Top = 584
   end
 end

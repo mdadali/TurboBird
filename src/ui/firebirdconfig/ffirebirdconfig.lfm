@@ -948,6 +948,11 @@ object fmFirebirdConfig: TfmFirebirdConfig
   object SQLTransaction1: TIBTransaction
     TransactionName = '{02E1CD19-C191-4F30-8706-5A55F9534C02}'
     Active = False
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
     Left = 764
     Top = 221
   end

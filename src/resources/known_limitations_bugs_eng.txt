@@ -1,5 +1,70 @@
 Known Limitations / Bugs
------------------------
+------------------------------
+[Array Fields Cannot Be Edited]
+  Array fields cannot currently be edited in TableManage.
+  A hint appears on double-click or when clicking "Edit".
+
+  Affected:
+    - TableManage → Fields → "Edit" on an array field
+    - TableManage → Fields → Double-click on an array field
+
+  Background:
+    Firebird does not allow changing array dimensions via
+    ALTER COLUMN. To modify an array field, it would have to be
+    dropped and recreated completely — with all consequences for
+    dependent objects (triggers, views, foreign keys).
+
+  A dedicated array editor is planned for a future release.
+
+  Display (read-only) works:
+    - TreeView → Fields
+    - Extract → Extract Table Fields
+    - Extract → Extract Table MetaData
+    - TableManage → Fields (column "Field Type")
+
+
+[CSV Export with Case-Sensitive Tables]
+- The CSV export (Bulk Export) currently does not support
+  case-sensitive table names. Tables with mixed case
+  (created with double quotes) cannot be exported correctly.
+
+
+
+[NUMERIC Precision > 16 on FB 4+]
+NUMERIC with precision up to 38. However,
+IBX 2.7.x has a bug in the BCD conversion for values with
+precision > 16. TurboBird works around this by automatically
+reducing precision to 16 — values may be truncated.
+
+Bug report submitted to Tony Whyman on <date>.
+
+
+
+[Foreign Key Creation on Firebird 1.5]
+- On Firebird 1.5, a new Foreign Key cannot be created through TurboBird.
+  The server requires exclusive database access for this DDL operation,
+  but TurboBird keeps active connections to the database open. The server
+  rejects the operation with "object <TABLE> is in use".
+
+  Affected:
+    - TableManage → Foreign Keys → "New Foreign Key"
+
+  Workaround:
+    Create the Foreign Key with isql or another tool that opens only a
+    single connection to the database. Then refresh the Foreign Keys tab
+    in TurboBird.
+
+    Example (Linux):
+      isql -user SYSDBA -password <pwd> /path/to/db.fdb
+      SQL> ALTER TABLE EMPLOYEE ADD CONSTRAINT FK_EMPLOYEE_DEPT
+           FOREIGN KEY (DEPT_NO) REFERENCES DEPARTMENT (DEPT_NO);
+      SQL> COMMIT;
+      SQL> QUIT;
+
+  Note:
+    Firebird 2.0 and newer are not affected — there, FK creation
+    works as expected.
+
 [Tablelock]
 - When a table is opened and the corresponding tab is closed afterwards, 
   the table lock remains active until the database connection is fully closed 

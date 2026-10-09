@@ -10,7 +10,7 @@ uses
   IBDatabase, IBQuery, DateUtils,
 
   turbocommon,
-  uCopyTableDataCrossRowByRow;
+  ucopytabledatarowbyrow;
 
 
 type
@@ -235,9 +235,11 @@ procedure TCopyThreadCrossExecuteBlock.BuildInsertExecuteBlockSQL(BatchRows: Int
 var
   DestFields, SelectFields, IntoVars, ValuesVars, VarType: string;
   i: Integer;
+  QFieldName: string;
 begin
   SQL := 'EXECUTE BLOCK' + sLineBreak + 'AS' + sLineBreak;
 
+  // DECLARE-Variablen — Namen unquoted (PSQL-Variablen sind case-insensitiv)
   for i := 0 to High(FFieldTransforms) do
   begin
     if not FFieldTransforms[i].CopyField then Continue;
@@ -251,6 +253,7 @@ begin
 
   SQL := SQL + 'BEGIN' + sLineBreak;
 
+  // SELECT-Felder — mit Auto-Quoting für case-sensitive Felder
   SelectFields := '';
   for i := 0 to High(FFieldTransforms) do
   begin
@@ -259,15 +262,20 @@ begin
     if Pos('BLOB', UpperCase(FFieldTransforms[i].DestFieldType)) > 0 then Continue;
 
     if SelectFields <> '' then SelectFields := SelectFields + ', ';
+
+    QFieldName := MakeCaseSensitiveAuto(FFieldTransforms[i].SourceField);
+
     if FFieldTransforms[i].Formula <> '' then
     begin
       VarType := StringReplace(FFieldTransforms[i].Formula, '''', '''''', [rfReplaceAll]);
-      SelectFields := SelectFields + '(' + StringReplace(VarType, '$1', FFieldTransforms[i].SourceField, [rfReplaceAll]) + ')';
+      SelectFields := SelectFields + '(' +
+        StringReplace(VarType, '$1', QFieldName, [rfReplaceAll]) + ')';
     end
     else
-      SelectFields := SelectFields + FFieldTransforms[i].SourceField;
+      SelectFields := SelectFields + QFieldName;
   end;
 
+  // INSERT-Zielfelder — mit Auto-Quoting
   DestFields := '';
   for i := 0 to High(FFieldTransforms) do
   begin
@@ -275,9 +283,10 @@ begin
     if Pos('[', FFieldTransforms[i].DestFieldType) > 0 then Continue;
     if Pos('BLOB', UpperCase(FFieldTransforms[i].DestFieldType)) > 0 then Continue;
     if DestFields <> '' then DestFields := DestFields + ', ';
-    DestFields := DestFields + FFieldTransforms[i].DestField;
+    DestFields := DestFields + MakeCaseSensitiveAuto(FFieldTransforms[i].DestField);
   end;
 
+  // INTO-Variablen — unquoted (PSQL)
   IntoVars := '';
   for i := 0 to High(FFieldTransforms) do
   begin
@@ -288,6 +297,7 @@ begin
     IntoVars := IntoVars + ':v_' + FFieldTransforms[i].DestField;
   end;
 
+  // VALUES-Variablen — unquoted
   ValuesVars := '';
   for i := 0 to High(FFieldTransforms) do
   begin
@@ -298,17 +308,18 @@ begin
     ValuesVars := ValuesVars + ':v_' + FFieldTransforms[i].DestField;
   end;
 
+  // Tabellen-Namen quoten
   SQL := SQL +
     '  FOR EXECUTE STATEMENT' + sLineBreak +
     '    ''SELECT FIRST ' + IntToStr(BatchRows) +
     ' SKIP ' + IntToStr(FFromRow - 1) + ' ' + SelectFields +
-    ' FROM ' + FSourceTable + '''' + sLineBreak +
+    ' FROM ' + MakeCaseSensitiveAuto(FSourceTable) + '''' + sLineBreak +
     '    ON EXTERNAL DATA SOURCE ''' + FSourceConnStr + '''' + sLineBreak +
     '    AS USER ''' + FSourceUser + ''' PASSWORD ''' + FSourcePwd + '''' + sLineBreak +
     '    INTO ' + IntoVars + sLineBreak +
     '  DO' + sLineBreak +
     '  BEGIN' + sLineBreak +
-    '    INSERT INTO ' + FDestTable + ' (' + DestFields + ')' + sLineBreak +
+    '    INSERT INTO ' + MakeCaseSensitiveAuto(FDestTable) + ' (' + DestFields + ')' + sLineBreak +
     '    VALUES (' + ValuesVars + ');' + sLineBreak +
     '  END' + sLineBreak +
     'END';
@@ -324,12 +335,15 @@ begin
   begin
     if not FProblemFieldTransforms[i].CopyField then Continue;
     if SetFields <> '' then SetFields := SetFields + ', ';
-    SetFields := SetFields + FProblemFieldTransforms[i].DestField + ' = :v_' + FProblemFieldTransforms[i].DestField;
+    // LHS = Feldname (quoten), RHS = PSQL-Variable (unquoted)
+    SetFields := SetFields +
+      MakeCaseSensitiveAuto(FProblemFieldTransforms[i].DestField) +
+      ' = :v_' + FProblemFieldTransforms[i].DestField;
   end;
 
-  SQL := 'UPDATE ' + FDestTable + ' SET ' + SetFields +
+  SQL := 'UPDATE ' + MakeCaseSensitiveAuto(FDestTable) + ' SET ' + SetFields +
          ' WHERE RDB$DB_KEY IN ' +
-         '(SELECT RDB$DB_KEY FROM ' + FDestTable + ' ' +
+         '(SELECT RDB$DB_KEY FROM ' + MakeCaseSensitiveAuto(FDestTable) + ' ' +
          'ROWS ' + IntToStr(FFirstRow) + ' TO ' + IntToStr(FLastRow) + ')';
 end;
 
@@ -720,7 +734,7 @@ begin
       CountQuery.Database := GetSourceDB;
       CountQuery.Transaction := GetSourceTrans;
       CountQuery.AllowAutoActivateTransaction := True;
-      CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + FSourceTable;
+            CountQuery.SQL.Text := 'SELECT COUNT(*) FROM ' + MakeCaseSensitiveAuto(FSourceTable);
       CountQuery.Open;
       TotalInSource := CountQuery.Fields[0].AsInteger;
       CountQuery.Close;
@@ -850,3 +864,4 @@ begin
 end;
 
 end.
+

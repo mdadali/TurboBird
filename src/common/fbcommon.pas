@@ -15,6 +15,43 @@ uses
 
 
 type
+
+  TArrayDim = record
+    LowerBound: Integer;
+    UpperBound: Integer;
+  end;
+  TArrayDims = array of TArrayDim;
+
+
+  { Rohdaten eines Feldes aus den Systemtabellen.
+    Wird von TSimpleObjExtractor.GetTableFieldsRaw geliefert.
+    Enthält alle Meta-Informationen, die für die Anzeige,
+    für Clones, Exporte etc. nötig sind. }
+  TFBFieldRaw = record
+    FieldName: string;
+    FieldType: Integer;
+    FieldSubType: Integer;
+    FieldLength: Integer;
+    CharacterLength: Integer;
+    FieldPrecision: Integer;
+    FieldScale: Integer;
+    NotNull: Boolean;
+    DefaultSource: string;
+    Description: string;
+    ComputedSource: string;
+    CharacterSetID: Integer;
+    CollationID: Integer;
+    CharacterSetName: string;
+    CollationName: string;
+    FieldSource: string;
+    FieldPosition: Integer;
+    ArrayUpperBound: Integer;    // bleibt: erste Dimension (Kompatibilität)
+    ArrayDims: TArrayDims;       // NEU: alle Dimensionen
+  end;
+
+  TFBFieldRawArray = array of TFBFieldRaw;
+
+
   TObjectType = (
     // --- Allgemein / Keine Zuordnung ---
     otNone,
@@ -146,6 +183,71 @@ type
   end;
 
 
+  TForeignKeyInfo = record
+    ConstraintName: string;
+    ForeignTable: string;
+    ForeignFields: string;   // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
+    MasterTable: string;
+    MasterFields: string;    // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
+  end;
+  TForeignKeyInfoArray = array of TForeignKeyInfo;
+
+
+  // ============================================================
+  // FOREIGN KEY Definition — aus Sicht der Tabelle, die den FK hat.
+  // Für den Foreign-Keys-Tab in TableManage.
+  //
+  // Nicht verwechseln mit TForeignKeyInfo (das ist aus Sicht der
+  // referenzierten Tabelle — für den References-Tab).
+  // ============================================================
+  TFBForeignKeyDef = record
+    ConstraintName: string;
+    KeyName: string;
+    OnFields: string;         // ';'-getrennt (Composite-FKs)
+    RefTable: string;
+    RefFields: string;        // ';'-getrennt (Composite-FKs)
+    UpdateRule: string;
+    DeleteRule: string;
+  end;
+  TFBForeignKeyDefArray = array of TFBForeignKeyDef;
+
+
+  TFBTriggerRaw = record
+    TriggerName: string;
+    IsActive: Boolean;
+  end;
+  TFBTriggerRawArray = array of TFBTriggerRaw;
+
+
+
+
+  TFBTriggerInfo = record
+    TriggerName: string;
+    RelationName: string;
+    TriggerSource: string;
+    TriggerType: Int64;
+    TriggerSequence: Integer;
+    IsActive: Boolean;
+    EngineName: string;      // FB 3+ — leer auf älteren
+    EntryPoint: string;      // FB 3+ — leer auf älteren
+  end;
+
+type
+  TFBPermissionInfo = record
+    UserName: string;
+    IsRole: Boolean;
+    Privileges: string;   // 'S,I,U,D,R,SG,IG,UG,DG,RG' (Komma-getrennt)
+  end;
+  TFBPermissionArray = array of TFBPermissionInfo;
+
+
+  TFBUserGrantInfo = record
+    ObjectName: string;
+    WithGrant: Boolean;
+  end;
+  TFBUserGrantArray = array of TFBUserGrantInfo;
+
+
 const
 
   //NumObjects = 13; //number of different objects in dbObjects array below
@@ -162,7 +264,30 @@ const
     'PrimaryKeys', 'ForeignKeys', 'UniqueConstraints',
     'CheckConstraints', 'NotNullConstraints');
 
-procedure ParseFBVersionString(const AVersionString: string;
+
+
+  { ==========================================================================
+    Datentyp-Prüfung und -Auflösung für Server-Version-Kompatibilität
+    ========================================================================== }
+
+  procedure GetDataTypesByFBVersion(AVersion: Word; AList: TStringList);
+  function ExtractBaseType(const AFieldType: string): string;
+  function GetEffectiveBaseType(const AFieldType: string;
+                                ADatabase: TIBDatabase;
+                                ATransaction: TIBTransaction): string;
+  function IsTypeSupported(const AFieldType: string;
+                           const ASupportedTypes: TStringList): Boolean;
+
+
+  function GetMaxNumericPrecision(AVersion: Word): Integer;
+  function ExtractPrecision(const AFieldType: string): Integer;
+  function IsFieldTypeSupported(const AFieldType: string;
+                                AVersion: Word;
+                                ADatabase: TIBDatabase;
+                                ATransaction: TIBTransaction): Boolean;
+
+
+  procedure ParseFBVersionString(const AVersionString: string;
                                out AMajor, AMinor: Word);
 
 function ConnectFirebirdService(
@@ -202,17 +327,458 @@ var
     ClientLibraryName: string;
     Port: string;
 
-    //FBVersionString: string;
-    //FBVersionMajor: Integer = 0;
-    //FBVersionMinor: Integer = 0;
-    //FBVersionNumber: single = 0.0;
-
-
 implementation
 
 uses turbocommon;
 
+function GetMaxNumericPrecision(AVersion: Word): Integer;
+begin
+  case AVersion of
+    10:      Result := 9;
+    15, 20,
+    25, 30:  Result := 18;
+    40, 50,
+    60:      Result := 38;
+  else
+    Result := 0;
+  end;
+end;
 
+function ExtractPrecision(const AFieldType: string): Integer;
+var
+  S: string;
+  P, StartP: Integer;
+begin
+  Result := 0;
+  S := UpperCase(Trim(AFieldType));
+
+  P := Pos('(', S);
+  if P = 0 then Exit;
+
+  StartP := P + 1;
+  P := StartP;
+  while (P <= Length(S)) and (S[P] in ['0'..'9']) do
+    Inc(P);
+
+  if P > StartP then
+    Result := StrToIntDef(Copy(S, StartP, P - StartP), 0);
+end;
+
+function IsFieldTypeSupported(const AFieldType: string;
+                              AVersion: Word;
+                              ADatabase: TIBDatabase;
+                              ATransaction: TIBTransaction): Boolean;
+var
+  SupportedTypes: TStringList;
+  WorkType, BaseType: string;
+  Precision, MaxPrecision: Integer;
+begin
+  Result := False;
+
+  if Trim(AFieldType) = '' then Exit;
+
+  // WorkType = aufgelöster Domain-Typ ODER Original-Feldtyp
+  // (WICHTIG: Original behält die Precision wie NUMERIC(38,10))
+  if IsDomain(AFieldType) then
+  begin
+    // Domain auflösen
+    WorkType := DomainToDataType(AFieldType, ADatabase, ATransaction);
+    if WorkType = '' then Exit;
+  end
+  else
+  begin
+    // Kein Domain → Original behalten (NICHT extrahieren!)
+    WorkType := AFieldType;
+  end;
+
+  SupportedTypes := TStringList.Create;
+  try
+    GetDataTypesByFBVersion(AVersion, SupportedTypes);
+    if SupportedTypes.Count = 0 then Exit;
+
+    // Basistyp extrahieren (strippt nur die Klammer)
+    BaseType := ExtractBaseType(WorkType);
+    if BaseType = '' then Exit;
+
+    // Basistyp in der Liste?
+    if SupportedTypes.IndexOf(BaseType) < 0 then
+      Exit;
+
+    // Precision-Check für NUMERIC/DECIMAL
+    if (BaseType = 'NUMERIC') or (BaseType = 'DECIMAL') then
+    begin
+      Precision := ExtractPrecision(WorkType);   // ← WorkType hat die Precision!
+      MaxPrecision := GetMaxNumericPrecision(AVersion);
+
+      if (MaxPrecision > 0) and (Precision > MaxPrecision) then
+        Exit;
+    end;
+
+    Result := True;
+  finally
+    SupportedTypes.Free;
+  end;
+end;
+
+
+{ ==========================================================================
+  GetDataTypesByFBVersion
+
+  Füllt die übergebene TStringList mit den von der angegebenen
+  Firebird-Version unterstützten Datentypen.
+
+  WICHTIG: Die Liste wird VORHER geleert (AList.Clear).
+           Der Aufrufer ist für Erstellung UND Freigabe der
+           TStringList verantwortlich.
+
+  AVersion-Kodierung (Major * 10 + Minor):
+    10 = Firebird 1.0
+    15 = Firebird 1.5
+    20 = Firebird 2.0
+    25 = Firebird 2.5
+    30 = Firebird 3.0
+    40 = Firebird 4.0
+    50 = Firebird 5.0
+    60 = Firebird 6.0
+
+  Unbekannte Versionen liefern eine LEERE Liste.
+  ========================================================================== }
+procedure GetDataTypesByFBVersion(AVersion: Word; AList: TStringList);
+begin
+  if AList = nil then Exit;
+
+  AList.Clear;
+
+  case AVersion of
+    10: { FB 1.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIMESTAMP');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    15: { FB 1.5 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIMESTAMP');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    20: { FB 2.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIMESTAMP');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    25: { FB 2.5 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIMESTAMP');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    30: { FB 3.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIMESTAMP');
+        AList.Add('BOOLEAN');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    40: { FB 4.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('INT128');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('DECFLOAT(16)');
+        AList.Add('DECFLOAT(34)');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIME WITH TIME ZONE');
+        AList.Add('TIMESTAMP');
+        AList.Add('TIMESTAMP WITH TIME ZONE');
+        AList.Add('BOOLEAN');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    50: { FB 5.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('INT128');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('DECFLOAT(16)');
+        AList.Add('DECFLOAT(34)');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIME WITH TIME ZONE');
+        AList.Add('TIMESTAMP');
+        AList.Add('TIMESTAMP WITH TIME ZONE');
+        AList.Add('BOOLEAN');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+
+    60: { FB 6.0 }
+      begin
+        AList.Add('SMALLINT');
+        AList.Add('INTEGER');
+        AList.Add('BIGINT');
+        AList.Add('INT128');
+        AList.Add('FLOAT');
+        AList.Add('DOUBLE PRECISION');
+        AList.Add('NUMERIC');
+        AList.Add('DECIMAL');
+        AList.Add('DECFLOAT(16)');
+        AList.Add('DECFLOAT(34)');
+        AList.Add('CHAR');
+        AList.Add('VARCHAR');
+        AList.Add('DATE');
+        AList.Add('TIME');
+        AList.Add('TIME WITH TIME ZONE');
+        AList.Add('TIMESTAMP');
+        AList.Add('TIMESTAMP WITH TIME ZONE');
+        AList.Add('BOOLEAN');
+        AList.Add('BLOB SUB_TYPE TEXT');
+        AList.Add('BLOB SUB_TYPE BINARY');
+      end;
+  else
+    { Unbekannte Version → LEERE Liste }
+    ;
+  end;
+end;
+
+{ ==========================================================================
+  ExtractBaseType
+
+  Reduziert einen Firebird-Feldtyp auf seinen Basistyp.
+
+  Beispiele:
+    'VARCHAR(50)'                  → 'VARCHAR'
+    'NUMERIC(15,4)'                → 'NUMERIC'
+    'CHAR(10) CHARACTER SET NONE'  → 'CHAR'
+    'INTEGER[10]'                  → 'INTEGER'
+    'VARCHAR(20) [5]'              → 'VARCHAR'
+    'BLOB SUB_TYPE TEXT'           → 'BLOB SUB_TYPE TEXT'
+    'BLOB SUB_TYPE BINARY'         → 'BLOB SUB_TYPE BINARY'
+    'BLOB'                         → 'BLOB SUB_TYPE BINARY'
+    'DECFLOAT(16)'                 → 'DECFLOAT(16)'
+    'TIMESTAMP WITH TIME ZONE'     → 'TIMESTAMP WITH TIME ZONE'
+    'JOBCODE'                      → 'JOBCODE'  (Domain-Name)
+  ========================================================================== }
+function ExtractBaseType(const AFieldType: string): string;
+var
+  S: string;
+  P: Integer;
+begin
+  Result := '';
+  S := UpperCase(Trim(AFieldType));
+
+  if S = '' then Exit;
+
+  // 1. Arrays abstreifen: INTEGER[10] → INTEGER
+  P := Pos('[', S);
+  if P > 0 then
+    S := Trim(Copy(S, 1, P - 1));
+
+  // 2. BLOB SUB_TYPE behandeln
+  if Pos('BLOB', S) > 0 then
+  begin
+    if (Pos('TEXT', S) > 0) or (Pos('SUBTYPE 1', S) > 0) then
+      Result := 'BLOB SUB_TYPE TEXT'
+    else
+      Result := 'BLOB SUB_TYPE BINARY';
+    Exit;
+  end;
+
+  // 3. DECFLOAT mit Precision: DECFLOAT(16) → DECFLOAT(16)
+  if Pos('DECFLOAT(', S) > 0 then
+  begin
+    P := Pos(')', S);
+    if P > 0 then
+    begin
+      Result := Copy(S, 1, P);
+      Exit;
+    end;
+  end;
+
+  // 4. CHARACTER SET Suffix abstreifen
+  P := Pos(' CHARACTER SET', S);
+  if P > 0 then
+    S := Trim(Copy(S, 1, P - 1));
+
+  // 5. Klammer-Parameter abstreifen: VARCHAR(50) → VARCHAR
+  P := Pos('(', S);
+  if P > 0 then
+    S := Trim(Copy(S, 1, P - 1));
+
+  Result := S;
+end;
+
+{ ==========================================================================
+  GetEffectiveBaseType
+
+  Liefert den effektiven Basistyp eines Feldes.
+
+  Wenn AFieldType ein Domain-Name ist, wird die Domain über die
+  Systemtabellen aufgelöst und ihr Basistyp zurückgegeben.
+
+  Beispiele:
+    AFieldType = 'INTEGER'    → 'INTEGER'   (kein Domain)
+    AFieldType = 'VARCHAR(50)'→ 'VARCHAR'   (kein Domain)
+    AFieldType = 'JOBCODE'    → 'CHAR'      (Domain aufgelöst)
+    AFieldType = 'SALARY'     → 'NUMERIC'   (Domain aufgelöst)
+    AFieldType = 'MYSECRET'   → ''          (Domain nicht auflösbar)
+
+  Rückgabe:
+    Der Basistyp (in Großbuchstaben)
+    Leerer String, wenn der Typ nicht ermittelt werden konnte
+  ========================================================================== }
+function GetEffectiveBaseType(const AFieldType: string;
+                              ADatabase: TIBDatabase;
+                              ATransaction: TIBTransaction): string;
+var
+  ResolvedType: string;
+begin
+  Result := '';
+
+  if Trim(AFieldType) = '' then Exit;
+
+  // Fall 1: Kein Domain-Name → direkt als Basistyp behandeln
+  if not IsDomain(AFieldType) then
+  begin
+    Result := ExtractBaseType(AFieldType);
+    Exit;
+  end;
+
+  // Fall 2: Domain-Name → auflösen
+  ResolvedType := DomainToDataType(AFieldType, ADatabase, ATransaction);
+
+  if ResolvedType = '' then
+  begin
+    // Domain konnte nicht aufgelöst werden → unbekannt
+    Result := '';
+    Exit;
+  end;
+
+  // Domain aufgelöst → Basistyp extrahieren
+  Result := ExtractBaseType(ResolvedType);
+end;
+
+{ ==========================================================================
+  IsTypeSupported
+
+  Prüft, ob ein Feld-Basistyp von der angegebenen Server-Version
+  unterstützt wird.
+
+  AFieldType ist bereits der effektive Basistyp (z.B. von
+  GetEffectiveBaseType) — KEIN Domain-Name.
+
+  ASupportedTypes stammt typischerweise aus GetDataTypesByFBVersion.
+
+  Rückgabe:
+    True  → Typ ist unterstützt
+    False → Typ ist NICHT unterstützt
+
+  Beispiele:
+    AFieldType = 'VARCHAR', ASupportedTypes = FB 3.0-Liste
+      → True
+
+    AFieldType = 'BOOLEAN', ASupportedTypes = FB 2.5-Liste
+      → False
+
+    AFieldType = 'DECFLOAT(16)', ASupportedTypes = FB 3.0-Liste
+      → False
+
+    AFieldType = 'BLOB SUB_TYPE TEXT', ASupportedTypes = FB 2.5-Liste
+      → True
+  ========================================================================== }
+function IsTypeSupported(const AFieldType: string;
+                         const ASupportedTypes: TStringList): Boolean;
+var
+  BaseType: string;
+begin
+  Result := True;  // Default: OK
+
+  if AFieldType = '' then Exit;
+  if ASupportedTypes = nil then Exit;
+  if ASupportedTypes.Count = 0 then Exit;
+
+  BaseType := ExtractBaseType(AFieldType);
+  if BaseType = '' then Exit;
+
+  // Exakter Match in der Liste
+  Result := ASupportedTypes.IndexOf(BaseType) >= 0;
+end;
 
 procedure ParseFBVersionString(const AVersionString: string;
                                out AMajor, AMinor: Word);

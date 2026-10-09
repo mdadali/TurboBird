@@ -1,5 +1,72 @@
 Bekannte Einschränkungen / Bugs
 ------------------------------
+[Array-Felder können nicht bearbeitet werden]
+- Array-Felder können in TableManage derzeit nicht editiert werden.
+  Beim Doppelklick oder Klick auf "Edit" erscheint ein Hinweis.
+
+  Betroffen:
+    - TableManage → Fields → "Edit" auf einem Array-Feld
+    - TableManage → Fields → Doppelklick auf ein Array-Feld
+
+  Hintergrund:
+    Firebird erlaubt keine Änderung der Array-Dimensionen per
+    ALTER COLUMN. Ein Array-Feld müsste für eine Änderung komplett
+    gedroppt und neu angelegt werden — mit allen Folgen für
+    abhängige Objekte (Trigger, Views, Foreign Keys).
+
+  Ein spezieller Array-Editor ist für eine spätere Version geplant.
+
+  Anzeige (read-only) funktioniert:
+    - TreeView → Fields
+    - Extract → Extract Table Fields
+    - Extract → Extract Table MetaData
+    - TableManage → Fields (Spalte "Field Type")
+
+
+
+
+[CSV-Export mit case-sensitiven Tabellen]
+- Der CSV-Export (Bulk Export) unterstützt derzeit keine
+  case-sensitiven Tabellennamen. Tabellen mit gemischter
+  Groß-/Kleinschreibung (in doppelten Anführungszeichen erstellt)
+  können nicht korrekt exportiert werden.
+
+
+
+[NUMERIC Precision > 16]
+NUMERIC bis Precision 38. IBX 2.7.x
+hat jedoch einen Bug in der BCD-Konvertierung für Werte > 16.
+TurboBird umgeht das durch automatische Precision-Reduktion
+auf 16 — Werte können abgeschnitten werden.
+
+Bug-Report an Tony Whyman eingereicht am <Datum>.
+
+
+[Foreign Key Creation auf Firebird 1.5]
+- Auf Firebird 1.5 kann kein neuer Foreign Key über TurboBird angelegt werden.
+  Der Server verlangt für diese DDL-Operation exklusiven Datenbank-Zugriff,
+  TurboBird hält jedoch aktive Verbindungen zur Datenbank offen. Der Server
+  lehnt die Operation mit "object <TABLE> is in use" ab.
+
+  Betroffen:
+    - TableManage → Foreign Keys → "New Foreign Key"
+
+  Workaround:
+    Foreign Key mit isql oder einem anderen Tool anlegen, das nur eine
+    einzige Verbindung zur Datenbank öffnet. Danach den Foreign-Keys-Tab
+    in TurboBird aktualisieren.
+
+    Beispiel (Linux):
+      isql -user SYSDBA -password <pwd> /pfad/zur/db.fdb
+      SQL> ALTER TABLE EMPLOYEE ADD CONSTRAINT FK_EMPLOYEE_DEPT
+           FOREIGN KEY (DEPT_NO) REFERENCES DEPARTMENT (DEPT_NO);
+      SQL> COMMIT;
+      SQL> QUIT;
+
+  Hinweis:
+    Firebird 2.0 und neuer sind nicht betroffen — dort funktioniert
+    die FK-Anlage wie erwartet.
+
 
 [Tablelock]
 - Wenn eine Tabelle geöffnet und der entsprechende Tab anschließend geschlossen wird, 
@@ -17,8 +84,6 @@ Bekannte Einschränkungen / Bugs
   Dadurch werden bei der schrittweisen Skriptausführung falsche Zeilen im Editor farbig markiert. 
   Ursache ist, dass eingebundene Include-Dateien die internen Zeilenoffsets des Debuggers verändern.
 
-[Edit Table Data]
-- Case-sensitive Tabellennamen werden derzeit nicht unterstützt.
 
 [Embedded Connections]
 - Der Usermanager ist ausgeblendet.

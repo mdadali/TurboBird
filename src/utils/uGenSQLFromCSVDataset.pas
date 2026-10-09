@@ -5,19 +5,23 @@ unit uGenSQLFromCSVDataset;
 interface
 
 uses
-  Classes, SysUtils, DB, csvdataset;
+  Classes, SysUtils, DB, csvdataset,
+  fbcommon
+  ;
 
 type
-  TFBFieldInfo = record
-    FieldName: string;
-    FieldType: string;
-    Detected: Boolean;
-    MaxLength: Integer;
+  { Feld-Info für CSV-Dataset-Felder (NICHT Firebird-Metadaten!).
+    Enthält den fertigen Firebird-Typ-String für die SQL-Generierung. }
+  TCSVDataSetField = record
+    FieldName: string;       // Feldname (aus CSV-Header oder ColumnN)
+    FieldType: string;       // Firebird-Typ als String, z.B. 'VARCHAR(50)'
+    Detected: Boolean;       // True = Typ automatisch erkannt, False = Fallback
+    MaxLength: Integer;      // Erkannte max. Länge (für String-Typen)
   end;
 
-  TFBFieldInfoArray = array of TFBFieldInfo;
+  TCSVDataSetFieldArray = array of TCSVDataSetField;
 
-  TGenSQLFromCSVDataset = class
+TGenSQLFromCSVDataset = class
   private
     const
       ANALYZE_ROWS = 100;   // Erste N Zeilen analysieren (schnell)
@@ -26,7 +30,7 @@ type
     FTableName: string;
     FDefaultFieldLength: Integer;
     FSQL: string;
-    FFields: TFBFieldInfoArray;
+    FFields: TCSVDataSetFieldArray;
 
     procedure AnalyzeFields;
     procedure GenerateSQL;
@@ -38,7 +42,7 @@ type
     constructor Create(ADataSet: TDataSet; const ATableName: string;
       ADefaultFieldLength: Integer);
     property SQL: string read FSQL;
-    property Fields: TFBFieldInfoArray read FFields;
+    property Fields: TCSVDataSetFieldArray read FFields;
   end;
 
 implementation
