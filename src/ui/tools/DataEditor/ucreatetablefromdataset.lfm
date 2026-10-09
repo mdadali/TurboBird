@@ -264,6 +264,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       Top = 32
       Width = 196
       ItemHeight = 0
+      OnChange = cmbBoxDBsChange
       TabOrder = 1
       Text = 'cmbBoxDBs'
     end
@@ -289,12 +290,5 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     Top = 519
     Width = 1016
     Panels = <>
-  end
-  object ProgressBar1: TProgressBar
-    Left = 792
-    Height = 20
-    Top = 519
-    Width = 228
-    TabOrder = 5
   end
 end

@@ -15,6 +15,8 @@ uses
   interfaces, LCLPlatformDef,
   DB,  RegExpr,  FileUtil,
 
+  fbcommon,
+
   floginservicemanager,
 
   fpstdexports,
@@ -34,7 +36,6 @@ uses
 
   Variants,
 
-  fbcommon,
   fSetFBClient,
   fServerSession,
 
@@ -201,10 +202,6 @@ type
   tvotForm
   );
 
-
-
-type
-
   TFieldTransform = record
     SourceField   : string;      // Quell-Spaltenname
     DestField     : string;      // Ziel-Spaltenname
@@ -212,9 +209,7 @@ type
     CopyField     : Boolean;     // True = kopieren/transformieren, False = überspringen
     DestFieldType : string;      // Firebird-Datentyp für DECLARE (z.B. 'INTEGER', 'VARCHAR(100)')
   end;
-
   TFieldTransformArray = array of TFieldTransform;
-
 
   TServerRecord = packed record
     ServerName: string[127];
@@ -318,31 +313,19 @@ type
       ServerVersionMinor: word;
       ServerVersionString: string;
       Visible: boolean;
+      OwnerNode: TTreeNode;
     end;
 
-type
-  TForeignKeyInfo = record
-    ConstraintName: string;
-    ForeignTable: string;
-    ForeignFields: string;   // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
-    MasterTable: string;
-    MasterFields: string;    // z.B. 'JOB_CODE;JOB_GRADE;JOB_COUNTRY'
-  end;
 
-  TForeignKeyInfoArray = array of TForeignKeyInfo;
-
-
-
-type
   // ==========================================================================
-  // Transfer-Statistik (für CloneTable, BulkExport, DataEditor)
+  // Transfer-Statistik (für CloneTable, CSVExport, DataEditor)
   // ==========================================================================
 
-  TCopyMethod = (cmLocal, cmCrossExecuteBlock, cmCrossRowByRow);
+  TCopyMethod = (cmLocal, cmLocalRowByRow, cmCrossExecuteBlock, cmCrossRowByRow, cmFBIntf);
 
   TTransferKind = (
     tkCopy,           // CloneTable: Tabelle → Tabelle
-    tkExport,         // BulkExport: Tabelle → Datei
+    tkExport,         // CSVExport: Tabelle → Datei
     tkLoadFile,       // DataEditor: Datei → Dataset
     tkLoadTable,      // DataEditor: Tabelle → Dataset
     tkCreateTable     // DataEditor: Dataset → Tabelle
@@ -529,9 +512,9 @@ var
     DefTxFileName: string[255];          // optionaler Label / Alias
 
 
-    //BulkExport
+    //CSVExport
     DefaultBatchSize: integer;
-    BulkExportDefaultPreset: string;
+    CSVExportDefaultPreset: string;
 
     //CSV Editor
     CSVDefaultFieldLength: integer;
@@ -558,11 +541,43 @@ var
     TraceFlags: string;
     SlowQueryThreshold: Integer;  // in Millisekunden
 
-    //end-Ini.File////////////////////////////////////////////////////////////////
+//end-Ini.File////////////////////////////////////////////////////////////////
 
+procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
+function  GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
+function FindDBIndexByDatabaseInstance(ADatabase: TIBDatabase): Integer;
+
+function RunStartupCheck: string;
+
+// Transaktions-Sicherheit
+procedure EnsureTransactionParams(ATrans: TIBTransaction;
+                                  const ADefaultFile: string = '');
+function  IsTransactionParamsValid(ATrans: TIBTransaction;
+                                   out Reason: string): Boolean;
+function  IsTransactionParamsValid(ATrans: TIBTransaction): Boolean; overload;
+
+// ============================================================
+// Prüft, ob ein Privileg-Code in einem Privilegien-String enthalten ist.
+// APrivileges Format: 'S,I,U,SG' (Komma-getrennt).
+// APriv: 'S', 'I', 'U', 'D', 'R', 'SG', 'IG', 'UG', 'DG', 'RG'.
+//
+// Semantik: Pos(APriv, APrivileges) > 0 — d.h. 'S' matcht auch 'SG',
+// weil WITH GRANT OPTION die Basis-Berechtigung implizit enthält.
+// Das entspricht der bisherigen Logik in TableManage.FillPermissions.
+// ============================================================
+function PermissionHas(const APrivileges, APriv: string): Boolean;
+
+
+// ============================================================
+// Entfernt einen optionalen TABLE.-Präfix aus einem Node-Text.
+// Wird von globalen Trigger-Listen verwendet (Format: TABLE.TRIGGER),
+// damit der Edit/View-Code nur den reinen Trigger-Namen weiterreicht.
+// Trigger-Namen sind DB-weit eindeutig — deshalb reicht der Suffix.
+// ============================================================
+function StripTablePrefix(const AName: string): string;
 
 // ==========================================================================
-// Transfer-Statistik (für CloneTable, BulkExport, DataEditor)
+// Transfer-Statistik (für CloneTable, CSVExport, DataEditor)
 // ==========================================================================
 function CopyMethodToStr(M: TCopyMethod): string;
 function CopyStatsRowsPerSec(const Stats: TTransferStatistic): Double;
@@ -633,9 +648,11 @@ var    SessionPasswordCache: TStringList;
   procedure SetServerSessionPassword(const AServerName, APassword: string);
   procedure ClearServerSessionPassword(const AServerName: string);
   function  GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
+  function  GetDBSessionPasswordByIndex(ADBIndex: Integer): string;
   procedure SetDBSessionPassword(const AServerName, ADatabaseName, APassword: string);
   procedure ClearDBSessionPassword(const AServerName, ADatabaseName: string);
   procedure ClearAllSessionPasswords;
+  procedure CachePasswordAfterConnect(ADBIndex: Integer; ADatabase: TIBDatabase);
 
 //Forms
 function GetFormsBasePath: string;
@@ -661,6 +678,7 @@ function  MakeCaseSensitiveAuto(const AObjectName: string): string;
 
 procedure MakeObjectNameListQuoted(var AObjectList: TStringList);
 function  StripQuotes(const S: string): string;
+function StripIdentifierQuotes(const AName: string): string;
 
 function NeedsCommit(Q: TIBQuery): Boolean;
 
@@ -795,6 +813,7 @@ function FontStylesToStr(AStyles: TFontStyles): string;
 
 //Arrays
 function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
+function ArrayDimsToSuffix(const ADims: TArrayDims): string;
 
 
 //ExternalTable
@@ -812,20 +831,366 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 
 implementation
 
-uses Reg;
+uses  Reg;
+
+// ============================================================================
+// Markiert eine TIBDatabase-Instanz mit ihrem RegisteredDatabases-Index.
+//
+// Wird vom Tag-Feld der Komponente gespeichert (Offset +1, damit 0 = "unset"
+// bleibt — das ist der TComponent-Default).
+//
+// Zweck: Form-lokale TIBDatabase-Instanzen (FIBConnection in QueryWindow,
+// IBDBSource/IBDBDest in CloneTable, etc.) eindeutig ihrem registrierten
+// Eintrag in RegisteredDatabases[] zuordnen — auch wenn dieselbe DB unter
+// mehreren Titeln registriert ist.
+// ============================================================================
+procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
+begin
+  if Assigned(AInstance) then
+    AInstance.Tag := ADBIndex + 1;
+end;
+
+function GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
+begin
+  Result := -1;
+  if Assigned(AInstance) and (AInstance.Tag > 0) then
+    Result := AInstance.Tag - 1;
+end;
+
+// ============================================================================
+// Findet den DB-Index einer TIBDatabase-Instanz — 100% eindeutig.
+//
+// Reihenfolge:
+//   1. Tag-Feld der Instanz (form-lokale Verbindungen)
+//   2. Pointer-Match gegen RegisteredDatabases[] (geteilte Instanz)
+//
+// Kein String-Fallback mehr nötig — beide Pfade sind eindeutig.
+// ============================================================================
+function FindDBIndexByDatabaseInstance(ADatabase: TIBDatabase): Integer;
+var
+  i: Integer;
+begin
+  Result := -1;
+  if not Assigned(ADatabase) then
+    Exit;
+
+  // 1. Tag (form-lokal)
+  Result := GetDBInstanceIndex(ADatabase);
+  if Result >= 0 then
+    Exit;
+
+  // 2. Pointer (geteilte Instanz)
+  for i := 0 to High(RegisteredDatabases) do
+    if RegisteredDatabases[i].IBDatabase = ADatabase then
+      Exit(i);
+end;
+
+// ============================================================================
+// Ensures that a transaction has non-empty Params.
+//
+// If ADefaultFile is provided and exists → loads params from there.
+// Otherwise → falls back to a hardcoded default (read_committed etc.).
+//
+// If Params already has content, this function does nothing.
+// ============================================================================
+procedure EnsureTransactionParams(ATrans: TIBTransaction;
+                                  const ADefaultFile: string);
+var
+  UseFile: string;
+begin
+  if not Assigned(ATrans) then
+    Exit;
+
+  // Nur eingreifen wenn Params leer sind
+  if ATrans.Params.Count > 0 then
+    Exit;
+
+  UseFile := ADefaultFile;
+
+  if FileExists(UseFile) then
+    ATrans.Params.LoadFromFile(UseFile)
+  else
+  begin
+    // Harter Fallback — funktioniert immer
+    ATrans.Params.Clear;
+    ATrans.Params.Add('read_committed');
+    ATrans.Params.Add('rec_version');
+    ATrans.Params.Add('nowait');
+  end;
+end;
+
+// ============================================================================
+// Validates a transaction's Params.
+//
+// Konservativ: erkennt offensichtlich kaputte Inhalte (leer, unbekannte
+// Parameter, Steuerzeichen) — nicht exotische aber gültige IBX-Flags.
+//
+// Bekannte gültige Keys (Firebird TPB):
+//   read_committed, read_consistency, rec_version, no_rec_version,
+//   nowait, wait, read_only, write
+// ============================================================================
+function IsTransactionParamsValid(ATrans: TIBTransaction;
+                                  out Reason: string): Boolean;
+const
+  ValidKeys: array[0..8] of string = (
+    'read_committed',
+    'read_consistency',
+    'rec_version',
+    'no_rec_version',
+    'nowait',
+    'wait',
+    'read_only',
+    'write',
+    'autocommit'
+  );
+var
+  i, j: Integer;
+  Line, LineLC: string;
+  IsValid: Boolean;
+  HasValidKey: Boolean;
+begin
+  Result := True;
+  Reason := '';
+
+  if not Assigned(ATrans) then
+  begin
+    Reason := 'Transaction is nil';
+    Exit(False);
+  end;
+
+  if ATrans.Params.Count = 0 then
+  begin
+    Reason := 'Params are empty';
+    Exit(False);
+  end;
+
+  HasValidKey := False;
+
+  for i := 0 to ATrans.Params.Count - 1 do
+  begin
+    Line := Trim(ATrans.Params[i]);
+
+    // Leere Zeilen ignorieren (können durch Text-Assign entstehen)
+    if Line = '' then
+      Continue;
+
+    LineLC := LowerCase(Line);
+
+    // Steuerzeichen-Check (Müll aus Speicher-Drift)
+    for j := 1 to Length(Line) do
+      if Ord(Line[j]) < 32 then
+      begin
+        Reason := 'Invalid control character in param: "' + Line + '"';
+        Exit(False);
+      end;
+
+    // Bekannter Key?
+    IsValid := False;
+    for j := Low(ValidKeys) to High(ValidKeys) do
+      if Pos(ValidKeys[j], LineLC) = 1 then
+      begin
+        IsValid := True;
+        HasValidKey := True;
+        Break;
+      end;
+
+    // Unbekannter Parameter → nicht unbedingt Fehler,
+    // aber wenn NICHTS bekannt ist, ist es wahrscheinlich Müll.
+    // Wir zählen gültige Keys und entscheiden am Ende.
+  end;
+
+  if not HasValidKey then
+  begin
+    Reason := 'No recognized transaction parameter found (all params unknown)';
+    Exit(False);
+  end;
+end;
+
+function IsTransactionParamsValid(ATrans: TIBTransaction): Boolean;
+var
+  Dummy: string;
+begin
+  Result := IsTransactionParamsValid(ATrans, Dummy);
+end;
+
+function RunStartupCheck: string;
+var
+  Msg: TStringList;
+  RegFile: string;
+  FileLen: Int64;
+  ConfigDir: string;
+  i: Integer;
+  Bad: Integer;
+  HasLayoutDrift: Boolean;
+  LayoutDriftReport: string;
+  DbsRegExists: Boolean;
+  SrvRegExists: Boolean;
+  TxFile: string;
+
+  procedure Add(const S: string);
+  begin
+    Msg.Add('• ' + S);
+  end;
+
+  function GetFileSizeBytes(const AFileName: string): Int64;
+  var
+    FS: TFileStream;
+  begin
+    FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+    try
+      Result := FS.Size;
+    finally
+      FS.Free;
+    end;
+  end;
+
+begin
+  Msg := TStringList.Create;
+  HasLayoutDrift := False;
+  LayoutDriftReport := '';
+  try
+    ConfigDir := GetConfigurationDirectory;
+
+    // 1) databases.reg — check record layout
+    RegFile := ConfigDir + DatabasesRegFile;
+    DbsRegExists := FileExists(RegFile);
+    if DbsRegExists then
+    begin
+      FileLen := GetFileSizeBytes(RegFile);
+
+      if (FileLen mod SizeOf(TRegisteredDatabase)) <> 0 then
+      begin
+        HasLayoutDrift := True;
+        LayoutDriftReport := LayoutDriftReport +
+          '  - databases.reg: ' +
+          IntToStr(FileLen mod SizeOf(TRegisteredDatabase)) +
+          ' bytes leftover' + sLineBreak;
+      end;
+    end;
+    // Missing databases.reg alone is NOT an error
+    // (fresh install / user hasn't registered any DB yet)
+
+    // 2) servers.reg — check record layout
+    RegFile := ConfigDir + ServersRegFile;
+    SrvRegExists := FileExists(RegFile);
+    if SrvRegExists then
+    begin
+      FileLen := GetFileSizeBytes(RegFile);
+
+      if (FileLen mod SizeOf(TServerRecord)) <> 0 then
+      begin
+        HasLayoutDrift := True;
+        LayoutDriftReport := LayoutDriftReport +
+          '  - servers.reg: ' +
+          IntToStr(FileLen mod SizeOf(TServerRecord)) +
+          ' bytes leftover' + sLineBreak;
+      end;
+    end;
+
+    // 2b) Inconsistency: servers.reg missing but databases.reg exists
+    if (not SrvRegExists) and DbsRegExists then
+      Add('servers.reg is missing while databases.reg exists — ' +
+          'registry files are inconsistent. Please re-register your servers.');
+
+    // 3) Report layout drift with recovery instructions
+    if HasLayoutDrift then
+    begin
+      Add('Registry file layout mismatch detected:');
+      Msg.Add(LayoutDriftReport);
+      Add('This usually happens after a TurboBird upgrade that changed');
+      Add('the internal record structure of the registry files.');
+      Add('');
+      Add('To fix this, close TurboBird and delete the following files:');
+      Add('    ' + ConfigDir + DatabasesRegFile);
+      Add('    ' + ConfigDir + ServersRegFile);
+      Add('');
+      Add('Then restart TurboBird and register your servers and databases again.');
+      Add('(Your actual Firebird database files are NOT affected.)');
+    end;
+
+    // 4) Default transaction file present?
+    TxFile := IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))
+              + 'data' + PathDelim
+              + 'transaction_presets' + PathDelim
+              + DefTxFileName;
+
+    if (DefTxFileName = '') or not FileExists(TxFile) then
+      Add('Default transaction file is missing: ' + TxFile);
+
+    // 5) Per registered DB: TxConfig + Params
+    Bad := 0;
+    for i := 0 to High(RegisteredDatabases) do
+    begin
+      if Trim(RegisteredDatabases[i].RegRec.TxConfig) = '' then
+        Inc(Bad);
+
+      if Assigned(RegisteredDatabases[i].IBTransaction) and
+         (RegisteredDatabases[i].IBTransaction.Params.Count = 0) then
+        Inc(Bad);
+    end;
+
+    if Bad > 0 then
+      Add(IntToStr(Bad) + ' database(s) with empty transaction configuration');
+
+    // Result
+    if Msg.Count = 0 then
+      Result := ''
+    else
+      Result := 'Startup check found problems:' + sLineBreak +
+                sLineBreak + Msg.Text;
+  finally
+    Msg.Free;
+  end;
+end;
+
+// ============================================================
+// Prüft, ob ein Privileg-Code in einem Privilegien-String enthalten ist.
+// APrivileges Format: 'S,I,U,SG' (Komma-getrennt).
+// APriv: 'S', 'I', 'U', 'D', 'R', 'SG', 'IG', 'UG', 'DG', 'RG'.
+//
+// Semantik: Pos(APriv, APrivileges) > 0 — d.h. 'S' matcht auch 'SG',
+// weil WITH GRANT OPTION die Basis-Berechtigung implizit enthält.
+// Das entspricht der bisherigen Logik in TableManage.FillPermissions.
+// ============================================================
+function PermissionHas(const APrivileges, APriv: string): Boolean;
+begin
+  if APriv = '' then
+    Exit(False);
+  Result := Pos(APriv, APrivileges) > 0;
+end;
+
+// ============================================================
+// Entfernt einen optionalen TABLE.-Präfix aus einem Node-Text.
+// Wird von globalen Trigger-Listen verwendet (Format: TABLE.TRIGGER),
+// damit der Edit/View-Code nur den reinen Trigger-Namen weiterreicht.
+// Trigger-Namen sind DB-weit eindeutig — deshalb reicht der Suffix.
+// ============================================================
+function StripTablePrefix(const AName: string): string;
+var
+  P: Integer;
+  S: string;
+begin
+  S := Trim(AName);
+  P := Pos('.', S);
+  if P > 0 then
+    Result := Trim(Copy(S, P + 1, MaxInt))
+  else
+    Result := S;
+end;
 
 { ==========================================================================
   Transfer-Statistik: Hilfsfunktionen und Formatierung
   ========================================================================== }
-
 function CopyMethodToStr(M: TCopyMethod): string;
 begin
   case M of
-    cmLocal:             Result := 'Same Database (INSERT...SELECT)';
-    cmCrossExecuteBlock: Result := 'Cross-Database (Execute Block)';
-    cmCrossRowByRow:     Result := 'Cross-Database (Row-by-Row)';
-  else
-    Result := 'Unknown';
+    cmLocal:              Result := 'INSERT...SELECT (Same Database only)';
+    cmCrossExecuteBlock:  Result := 'EXECUTE BLOCK';
+    cmLocalRowByRow:      Result := 'Row-by-Row (IBX)';
+    cmCrossRowByRow:      Result := 'Row-by-Row (IBX)';
+    cmFBIntf:             Result := 'Firebird API (FBIntf)';
+    else
+      Result := 'Unknown';
   end;
 end;
 
@@ -1019,8 +1384,15 @@ begin
 
       if Stats.OptionsExtra <> '' then
         SL.Add('  Mode:          ' + Stats.OptionsExtra);
+
       if Stats.BatchSize > 0 then
-        SL.Add('  Batch Size:    ' + FormatNumberEN(Stats.BatchSize));
+      begin
+        if Stats.Method = cmFBIntf then
+          SL.Add('  Batch Memory:  ' + FormatNumberEN(Stats.BatchSize) + ' MB')
+        else
+          SL.Add('  Batch Size:    ' + FormatNumberEN(Stats.BatchSize));
+      end;
+
       if Stats.UseRowRange then
         SL.Add(Format('  Row Range:     %s .. %s',
           [FormatNumberEN(Stats.FromRow), FormatNumberEN(Stats.ToRow)]));
@@ -2266,10 +2638,18 @@ begin
     end;
 
     // 8. Transaktionsparameter zuweisen (falls übergeben), dann starten
+    // 8. Transaktionsparameter zuweisen (falls übergeben), dann starten
     if Assigned(ATransaction) then
     begin
-      if Assigned(ATxParams) then
-        ATransaction.Params.Assign(ATxParams);
+      if Assigned(ATxParams) and (ATxParams.Count > 0) then
+        ATransaction.Params.Assign(ATxParams)
+      else if ATransaction.Params.Count = 0 then
+        ATransaction.Params.LoadFromFile(
+          IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))
+          + 'data' + PathDelim
+          + 'transaction_presets' + PathDelim
+          + DefTxFileName
+        );
 
       if not ATransaction.InTransaction then
         ATransaction.StartTransaction;
@@ -2374,6 +2754,17 @@ begin
   end;
 end;
 
+function GetDBSessionPasswordByIndex(ADBIndex: Integer): string;
+begin
+  Result := '';
+  if (ADBIndex < 0) or (ADBIndex > High(RegisteredDatabases)) then
+    Exit;
+
+  Result := GetDBSessionPassword(
+    RegisteredDatabases[ADBIndex].RegRec.ServerName,
+    RegisteredDatabases[ADBIndex].RegRec.DatabaseName);
+end;
+
 procedure SetDBSessionPassword(const AServerName, ADatabaseName, APassword: string);
 var
   idx: Integer;
@@ -2406,6 +2797,40 @@ procedure ClearAllSessionPasswords;
 begin
   if Assigned(SessionPasswordCache) then
     SessionPasswordCache.Clear;
+end;
+
+// ============================================================================
+// Nach erfolgreichem Connect: Passwort in den Session-Cache,
+// wenn der User es nicht dauerhaft speichern wollte.
+//
+// Analog zu tvMainExpanding in main.pas — die zentrale Stelle, damit alle
+// Formen (CloneTable, CSVExport, QueryWindow, ...) dasselbe Verhalten haben:
+// Passwort einmal eingeben, danach für die ganze Session im Cache.
+// ============================================================================
+procedure CachePasswordAfterConnect(ADBIndex: Integer; ADatabase: TIBDatabase);
+var
+  Pwd: string;
+begin
+  if (ADBIndex < 0) or (ADBIndex > High(RegisteredDatabases)) then Exit;
+  if not Assigned(ADatabase) then Exit;
+  if not ADatabase.Connected then Exit;
+
+  Pwd := ADatabase.Params.Values['password'];
+  if Pwd = '' then Exit;
+
+  // Wenn User "Save password" wollte → das ist schon persistent.
+  // Nur cachen, was NICHT auf Platte geschrieben wurde.
+  if RegisteredDatabases[ADBIndex].RegRec.SavePassword then Exit;
+
+  // In den Session-Cache
+  SetDBSessionPassword(
+    RegisteredDatabases[ADBIndex].RegRec.ServerName,
+    RegisteredDatabases[ADBIndex].RegRec.DatabaseName,
+    Pwd);
+
+  // RegRec in-memory auch aktualisieren, damit OnDatabaseLogin
+  // beim nächsten Aufruf schon beim zweiten Check (DB-Cache) trifft.
+  RegisteredDatabases[ADBIndex].RegRec.Password := Pwd;
 end;
 //////////////////////////////////////////////////
 
@@ -2632,8 +3057,11 @@ begin
 end;
 
 function IsObjectNameCaseSensitive(AObjectName: string): boolean;
+var
+  S: string;
 begin
-  result := (AObjectName <> AnsiUpperCase(AObjectName));
+  S := Trim(AObjectName);
+  Result := (S <> AnsiUpperCase(S));
 end;
 
 function IsObjectNameQuoted(const AStr: string): Boolean;
@@ -3392,6 +3820,7 @@ begin
   Target.DatabaseName   := Source.DatabaseName;
   Target.FirebirdLibraryPathName := Source.FirebirdLibraryPathName;
   Target.Params.Assign(Source.Params);
+
   Target.LoginPrompt    := True;
   Target.OnLogin        := @dmSysTables.OnDatabaseLogin;
   Target.SQLDialect     := Source.SQLDialect;
@@ -3401,6 +3830,7 @@ begin
   Target.IdleTimer      := Source.IdleTimer;
   Target.AllowStreamedConnected := Source.AllowStreamedConnected;
 end;
+
 function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
 begin
   Result := False;
@@ -3842,9 +4272,9 @@ begin
   DefTxFileName := fIniFile.ReadString('TransactionDefaults','TxFileName','read_committed.txt');
 
 
-  //BulkExport
-  DefaultBatchSize := fIniFile.ReadInteger('BulkExport','DefaultBatchSize', 500000);
-  BulkExportDefaultPreset    := fIniFile.ReadString('BulkExport','DefaultPreset', 'csv_export');
+  //CSVExport
+  DefaultBatchSize := fIniFile.ReadInteger('CSVExport','DefaultBatchSize', 500000);
+  CSVExportDefaultPreset    := fIniFile.ReadString('CSVExport','DefaultPreset', 'csv_quoted');
 
 
   // CSV Editor
@@ -3959,9 +4389,9 @@ begin
   //Transaction-Default config
   fIniFile.WriteString('TransactionDefaults', 'TxFileName', DefTxFileName);
 
-  //BulkExport
-  fIniFile.WriteInteger('BulkExport', 'DefaultBatchSize', DefaultBatchSize);
-  fIniFile.ReadString('BulkExport','DefaultPreset', BulkExportDefaultPreset);
+  //CSVExport
+  fIniFile.WriteInteger('CSVExport', 'DefaultBatchSize', DefaultBatchSize);
+  fIniFile.ReadString('CSVkExport','DefaultPreset', CSVExportDefaultPreset);
 
     // CSV Editor
     fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
@@ -4369,6 +4799,25 @@ end;
 function StripQuotes(const S: string): string;
 begin
   if (Length(S) >= 2) and (S[1] = '''') and (S[Length(S)] = '''') then
+    Result := Copy(S, 2, Length(S) - 2)
+  else
+    Result := S;
+end;
+
+// ============================================================
+// Entfernt doppelte Anführungszeichen (Identifier-Quotes).
+// Wird für RDB$-Lookups verwendet — RDB$ speichert Identifier
+// ohne Quotes.
+//
+// WICHTIG: Nicht zu verwechseln mit StripQuotes — das entfernt
+// einfache Anführungszeichen (SQL-String-Literale).
+// ============================================================
+function StripIdentifierQuotes(const AName: string): string;
+var
+  S: string;
+begin
+  S := Trim(AName);
+  if (Length(S) >= 2) and (S[1] = '"') and (S[Length(S)] = '"') then
     Result := Copy(S, 2, Length(S) - 2)
   else
     Result := S;
@@ -5257,19 +5706,23 @@ begin
     14 : Result := 'CHAR';
     16 : Result := 'BIGINT';
     23 : Result := 'BOOLEAN';
+    24 : Result := 'DECFLOAT(16)';
+    25 : Result := 'DECFLOAT(34)';
+    26 : Result := 'INT128';                    // Fallback, wird unten korrigiert
     27 : Result := 'DOUBLE PRECISION';
+    28 : Result := 'TIME WITH TIME ZONE';
+    29 : Result := 'TIMESTAMP WITH TIME ZONE';
     35 : Result := 'TIMESTAMP';
     37 : Result := 'VARCHAR';
     40 : Result := 'CSTRING';
     45 : Result := 'BLOB_ID';
-    261: Result := 'BLOB';
-
-    // Firebird 4.0 / 5.0 neue Typen
-    24: Result := 'DECFLOAT(16)';
-    25: Result := 'DECFLOAT(34)';
-    26: Result := 'INT128';
-    28: Result := 'TIME WITH TIME ZONE';
-    29: Result := 'TIMESTAMP WITH TIME ZONE';
+    261:
+      begin
+        if SubType = 1 then
+          Result := 'BLOB SUB_TYPE TEXT'
+        else
+          Result := 'BLOB SUB_TYPE BINARY';
+      end;
 
   else
     Result := 'UNKNOWN_TYPE. CODE = ' + IntToStr(Index);
@@ -5284,30 +5737,44 @@ begin
       Result := Result + '(' + IntToStr(FieldLength) + ')';
   end;
 
-  // Numerische Typen mit SubType (NUMERIC/DECIMAL)
-  if Index in [7, 8, 16] then
+  // Numerische Typen mit SubType (NUMERIC/DECIMAL) — inkl. INT128 (26)
+  if Index in [7, 8, 16, 26] then
   begin
-    if SubType = 0 then
+    // Sonderfall INT128 mit Scale ≠ 0 → NUMERIC(38,x)
+    if Index = 26 then
     begin
-      case Index of
-        7: Result := 'SMALLINT';
-        8: Result := 'INTEGER';
-        16: Result := 'BIGINT';
+      if (Scale <> 0) and (Scale <> -1) then
+      begin
+        if Precision <= 0 then
+          Precision := 38;
+        Result := 'NUMERIC(' + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
       end;
+      // sonst: bleibt 'INT128' (Fallback vom case)
     end
     else
     begin
-      if SubType = 1 then
-        Result := 'NUMERIC('
-      else if SubType = 2 then
-        Result := 'DECIMAL('
+      if SubType <= 0 then
+      begin
+        case Index of
+          7: Result := 'SMALLINT';
+          8: Result := 'INTEGER';
+          16: Result := 'BIGINT';
+        end;
+      end
       else
-        Result := 'UNKNOWN_NUMERIC(';
+      begin
+        if SubType = 1 then
+          Result := 'NUMERIC('
+        else if SubType = 2 then
+          Result := 'DECIMAL('
+        else
+          Result := 'UNKNOWN_NUMERIC(';
 
-      if Precision < 0 then
-        Precision := 2;
+        if Precision < 0 then
+          Precision := 2;
 
-      Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
+        Result := Result + IntToStr(Precision) + ',' + IntToStr(Abs(Scale)) + ')';
+      end;
     end;
   end;
 
@@ -5647,7 +6114,7 @@ begin
   Result := Text = Filter;
 end;
 
-
+//Arrays
 function GetArrayFieldInfo(DB: TIBDatabase; Field: TIBArrayField): string;
 var
   MetaQuery, DimQuery: TIBQuery;
@@ -5728,6 +6195,25 @@ begin
   end;
 end;
 
+function ArrayDimsToSuffix(const ADims: TArrayDims): string;
+var
+  j: Integer;
+  S: string;
+begin
+  S := '';
+  for j := 0 to High(ADims) do
+  begin
+    if S <> '' then
+      S := S + ', ';
+    S := S + IntToStr(ADims[j].LowerBound) + ':' + IntToStr(ADims[j].UpperBound);
+  end;
+  if S <> '' then
+    Result := ' [' + S + ']'
+  else
+    Result := '';
+end;
+
+
 //ExternalTable
 function GetTableFieldsForExternalTable(ADBIndex: Integer;
   const ATableName: string): TDataSet;
@@ -5778,32 +6264,87 @@ begin
       Inc(Result);
 end;
 
-function IsDomain(const ATypeName: string): Boolean;
-const
-  StandardTypes: array[0..22] of string = (
-    'SMALLINT', 'INTEGER', 'BIGINT', 'INT128',
-    'FLOAT', 'DOUBLE', 'DOUBLE PRECISION', 'DECFLOAT',
-    'DECIMAL', 'NUMERIC',
-    'CHAR', 'VARCHAR', 'CSTRING',
-    'DATE', 'TIME', 'TIMESTAMP',
-    'BLOB', 'BOOLEAN', 'UUID', 'QUAD', 'D_FLOAT',
-    'TIME WITH TIME ZONE', 'TIMESTAMP WITH TIME ZONE'
-  );
-var
-  CleanType: string;
-  i: Integer;
-begin
-  CleanType := UpperCase(Trim(ATypeName));
+{ ==========================================================================
+  IsDomain
 
-  if Pos('(', CleanType) > 0 then
-    CleanType := Copy(CleanType, 1, Pos('(', CleanType) - 1);
+  Prüft, ob ein Feldtyp-String ein Domain-Name ist (True) oder ein
+  bekannter Firebird-Basistyp (False).
 
-  for i := Low(StandardTypes) to High(StandardTypes) do
-    if CleanType = StandardTypes[i] then
+  Standard-Typen (auch alte InterBase-Typen) werden erkannt.
+  Alles andere wird als Domain-Name interpretiert.
+
+  Behandelt werden auch:
+    - BLOB-Varianten (SUB_TYPE TEXT, SUB_TYPE BINARY, SUB_TYPE 0, SUB_TYPE 1)
+    - Suffixe wie CHARACTER SET, SEGMENT SIZE
+    - Klammer-Parameter (z.B. VARCHAR(50))
+
+  Beispiele:
+    'INTEGER'                                          → False (Basistyp)
+    'VARCHAR'                                          → False (Basistyp)
+    'VARCHAR(50)'                                      → False (Basistyp)
+    'CHAR(10) CHARACTER SET NONE'                      → False (Basistyp)
+    'BLOB'                                             → False (Basistyp)
+    'BLOB SUB_TYPE TEXT'                               → False (Basistyp)
+    'BLOB SUB_TYPE BINARY'                             → False (Basistyp)
+    'BLOB SUB_TYPE 0'                                  → False (Basistyp)
+    'BLOB SUB_TYPE TEXT SEGMENT SIZE 80'               → False (Basistyp)
+    'BLOB SUB_TYPE TEXT SEGMENT SIZE 80 CHARACTER SET NONE' → False (Basistyp)
+    'BLOB_ID'                                          → False (Spezial-Typ)
+    'JOBCODE'                                          → True  (Domain)
+    'SALARY'                                           → True  (Domain)
+  ========================================================================== }
+  function IsDomain(const ATypeName: string): Boolean;
+  const
+    StandardTypes: array[0..23] of string = (
+      'SMALLINT', 'INTEGER', 'BIGINT', 'INT128',
+      'FLOAT', 'DOUBLE', 'DOUBLE PRECISION', 'DECFLOAT',
+      'DECIMAL', 'NUMERIC',
+      'CHAR', 'VARCHAR', 'CSTRING',
+      'DATE', 'TIME', 'TIMESTAMP',
+      'BLOB', 'BLOB_ID',
+      'BOOLEAN', 'UUID', 'QUAD', 'D_FLOAT',
+      'TIME WITH TIME ZONE', 'TIMESTAMP WITH TIME ZONE'
+    );
+  var
+    CleanType: string;
+    i, P: Integer;
+  begin
+    CleanType := UpperCase(Trim(ATypeName));
+
+    // 1. CHARACTER SET Suffix abstreifen
+    P := Pos(' CHARACTER SET ', CleanType);
+    if P > 0 then
+      CleanType := Trim(Copy(CleanType, 1, P - 1));
+
+    // 2. SEGMENT SIZE Suffix abstreifen (BLOB)
+    P := Pos(' SEGMENT SIZE ', CleanType);
+    if P > 0 then
+      CleanType := Trim(Copy(CleanType, 1, P - 1));
+
+    // 3. Array-Klammern abstreifen: INTEGER [10] → INTEGER
+    P := Pos('[', CleanType);
+    if P > 0 then
+      CleanType := Trim(Copy(CleanType, 1, P - 1));
+
+    // 4. Klammer-Parameter abstreifen: VARCHAR(50) → VARCHAR
+    P := Pos('(', CleanType);
+    if P > 0 then
+      CleanType := Trim(Copy(CleanType, 1, P - 1));
+
+    // 5. BLOB-Varianten alle als Standardtyp
+    if (CleanType = 'BLOB SUB_TYPE TEXT') or
+       (CleanType = 'BLOB SUB_TYPE BINARY') or
+       (CleanType = 'BLOB SUB_TYPE 0') or
+       (CleanType = 'BLOB SUB_TYPE 1') then
       Exit(False);
 
-  Result := True;
-end;
+    // 6. Standard-Typen prüfen
+    for i := Low(StandardTypes) to High(StandardTypes) do
+      if CleanType = StandardTypes[i] then
+        Exit(False);
+
+    Result := True;
+  end;
 
 function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATransaction: TIBTransaction): string;
 var

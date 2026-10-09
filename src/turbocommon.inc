@@ -24,6 +24,7 @@ const
   Arch = '64';
   {$ENDIF}
 
+
 const
 
   CompileDate = {$I %DATE%};  // z. B. '2025/07/25'

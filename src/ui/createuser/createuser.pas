@@ -6,9 +6,10 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, ExtCtrls,
+  StdCtrls, ComCtrls, Buttons, ExtCtrls,
   fbcommon,
   turbocommon,
+  fsimpleobjextractor,
   uthemeselector;
 
 type
@@ -27,13 +28,14 @@ type
     Label2: TLabel;
     Label3: TLabel;
     procedure cxGrantRoleChange(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormShow(Sender: TObject);
   private
-    { private declarations }
+    FExtractor: TSimpleObjExtractor;
+    FOwnsExtractor: Boolean;
   public
     procedure Init(dbIndex: Integer);
-    { public declarations }
-  end; 
+  end;
 
 var
   fmCreateUser: TfmCreateUser;
@@ -42,11 +44,19 @@ implementation
 
 { TfmCreateUser }
 
-uses SysTables;
-
 procedure TfmCreateUser.cxGrantRoleChange(Sender: TObject);
 begin
-  cbRoles.Visible:= cxGrantRole.Checked;
+  cbRoles.Visible := cxGrantRole.Checked;
+end;
+
+procedure TfmCreateUser.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  // Extractor nur freigeben, wenn wir ihn selbst erzeugt haben
+  if FOwnsExtractor and Assigned(FExtractor) then
+    FreeAndNil(FExtractor);
+
+  CloseAction := caFree;
 end;
 
 procedure TfmCreateUser.FormShow(Sender: TObject);
@@ -56,17 +66,46 @@ end;
 
 procedure TfmCreateUser.Init(dbIndex: Integer);
 var
-  Count: Integer;
+  RolesList: TStringList;
+  DBNode: TTreeNode;
 begin
-  cbRoles.Items.CommaText:= dmSysTables.GetDBObjectNames(dbIndex, otRoles, Count);
-  if count > 0 then
+  // ============================================================
+  // Extractor vom DB-Node holen (Level 1)
+  // ============================================================
+  FExtractor := nil;
+  FOwnsExtractor := False;
+
+  DBNode := turbocommon.FindNodeByDBIndex(Word(dbIndex));
+  if Assigned(DBNode) and Assigned(DBNode.Data) then
+    FExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
+
+  if not Assigned(FExtractor) then
+  begin
+    FExtractor := TSimpleObjExtractor.Create(dbIndex);
+    FOwnsExtractor := True;
+  end;
+
+  // ============================================================
+  // Rollen laden
+  // ============================================================
+  cbRoles.Items.Clear;
+
+  RolesList := TStringList.Create;
+  try
+    FExtractor.ExtractObjectNames(dbIndex, otRoles, false,
+      TStrings(RolesList), '');
+    cbRoles.Items.AddStrings(RolesList);
+  finally
+    RolesList.Free;
+  end;
+
+  if cbRoles.Items.Count > 0 then
     cbRoles.ItemIndex := 0
   else
-    cxGrantRole.Visible := false;
+    cxGrantRole.Visible := False;
 end;
 
 initialization
   {$I createuser.lrs}
 
 end.
-

@@ -12,7 +12,6 @@ uses
   fbcommon,
 
   fsimpleobjextractor,
-  fmetaquerys,
 
   uthemeselector;
 
@@ -54,7 +53,8 @@ type
     procedure LoadConstraintFields(const ConstraintName: string);
 
   public
-    procedure Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
+    procedure Init(ADBIndex: Integer; const ATableName: string;
+                   ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
     procedure FillUniqueConstraints;
 
   end;
@@ -83,28 +83,20 @@ end;
 
 procedure TfmUniqueConstraints.LoadFields;
 var
-  FieldsQuery: TIsolatedQuery;
+  RawFields: TFBFieldRawArray;
+  i: Integer;
 begin
   chkLstBoxFields.Clear;
 
-  FieldsQuery := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
-  try
-    while not FieldsQuery.Query.EOF do
-    begin
-      chkLstBoxFields.Items.Add(Trim(FieldsQuery.Query.FieldByName('field_name').AsString));
-      FieldsQuery.Query.Next;
-    end;
-  finally
-    FieldsQuery.Free;
-  end;
+  RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+  for i := 0 to High(RawFields) do
+    chkLstBoxFields.Items.Add(RawFields[i].FieldName);
 end;
 
 procedure TfmUniqueConstraints.LoadConstraintFields(const ConstraintName: string);
 var
-  ConstraintFields: TStringList;
+  FieldsList: TStringList;
   i, j: Integer;
-  SQL: string;
-  Qry: TIsolatedQuery;
 begin
   // Alle Checkboxen deaktivieren
   for i := 0 to chkLstBoxFields.Count - 1 do
@@ -120,30 +112,24 @@ begin
   edConstraintName.Text := ConstraintName;
 
   // Felder des Constraints ermitteln
-  SQL :=
-    'SELECT TRIM(isg.RDB$FIELD_NAME) AS FIELD_NAME ' +
-    'FROM RDB$RELATION_CONSTRAINTS rc ' +
-    'JOIN RDB$INDEX_SEGMENTS isg ON rc.RDB$INDEX_NAME = isg.RDB$INDEX_NAME ' +
-    'WHERE rc.RDB$RELATION_NAME = ' + QuotedStr(MakeCaseSensitiveAuto(FTableName)) + ' ' +
-    'AND rc.RDB$CONSTRAINT_NAME = ' + QuotedStr(ConstraintName) + ' ' +
-    'ORDER BY isg.RDB$FIELD_POSITION';
-
-  Qry := TIsolatedQuery.Create(RegisteredDatabases[FDBIndex].IBDatabase, SQL);
+  FieldsList := TStringList.Create;
   try
-    while not Qry.Query.EOF do
+    FExtractor.GetConstraintFieldsByName(FTableName, ConstraintName, FieldsList);
+
+    // Checkboxen anhaken
+    for i := 0 to chkLstBoxFields.Count - 1 do
     begin
-      for i := 0 to chkLstBoxFields.Count - 1 do
+      for j := 0 to FieldsList.Count - 1 do
       begin
-        if SameText(chkLstBoxFields.Items[i], Trim(Qry.Query.FieldByName('FIELD_NAME').AsString)) then
+        if SameText(chkLstBoxFields.Items[i], FieldsList[j]) then
         begin
           chkLstBoxFields.Checked[i] := True;
           Break;
         end;
       end;
-      Qry.Query.Next;
     end;
   finally
-    Qry.Free;
+    FieldsList.Free;
   end;
 end;
 
@@ -156,7 +142,8 @@ begin
 
   Items := TStringList.Create;
   try
-    FExtractor.Extract(otUniqueConstraints, FTableName, [], AlwaysQuoteIdentifiers, TStrings(Items));
+    FExtractor.Extract(otUniqueConstraints, FTableName, [],
+      AlwaysQuoteIdentifiers, TStrings(Items));
 
     for i := 0 to Items.Count - 1 do
     begin

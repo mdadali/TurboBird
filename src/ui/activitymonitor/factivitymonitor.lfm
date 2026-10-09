@@ -392,17 +392,24 @@ object frmActivityMonitor: TfrmActivityMonitor
     Active = False
     DefaultDatabase = IBDatabase
     Params.Strings = (
-      'read committed'
+      'read_committed'
+      'rec_version'
+      'nowait'
     )
-    Left = 888
-    Top = 144
+    Left = 720
+    Top = 280
   end
   object trExec: TIBTransaction
     TransactionName = '{F3C0108B-2094-419C-BC56-94FE4F3A40FA}'
     Active = False
     DefaultDatabase = IBDatabase
-    Left = 888
-    Top = 64
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
+    Left = 560
+    Top = 288
   end
   object qryAttachments: TIBQuery
     AllowAutoActivateTransaction = True

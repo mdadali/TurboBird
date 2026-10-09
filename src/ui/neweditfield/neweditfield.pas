@@ -7,8 +7,12 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Spin, Buttons,
+
+  IBSQL,
+
   turbocommon,
   fbcommon,
+  fsimpleobjextractor,
   uthemeselector;
 
 type
@@ -53,12 +57,14 @@ type
     FDBIndex: Integer;
     FTableName: string;
     FFormMode: TFormMode;
+    FExtractor: TSimpleObjExtractor;
     FRefreshButton: TBitBtn;
     function NeedsFieldAlter: Boolean;
     function HasFieldTypeChanged: Boolean;
     function HasCharsetChanged: Boolean;
     function HasCollationChanged: Boolean;
     function RequiresFieldRecreation: Boolean;
+    function FieldHasNullValues(const AFieldName: string): Boolean;
   public
     OldFieldName: string;
     OldFieldType: string;
@@ -71,14 +77,10 @@ type
     OldCharacterSet: string;
     OldCollation: string;
     OldDescription: string;
-    procedure Init(dbIndex: Integer; TableName: string;
-      FormMode: TFormMode;
-      FieldName, FieldType,
-      CharacterSet, Collation,
-      DefaultValue, Description: string;
-      Size, Precision, Scale, Order: Integer;
-      AllowNull: Boolean;
-      RefreshButton: TBitBtn);
+
+    procedure Init(dbIndex: Integer; TableName: string; FormMode: TFormMode; FieldName, FieldType, CharacterSet, Collation,
+                   DefaultValue, Description: string; Size, Precision, Scale, Order: Integer;
+                   AllowNull: Boolean;RefreshButton: TBitBtn; AExtractor: TSimpleObjExtractor);
     procedure EnableDisableControls;
     { public declarations }
   end; 
@@ -90,7 +92,7 @@ implementation
 
 { TfmNewEditField }
 
-uses Main, SysTables;
+uses Main;
 
 function TfmNewEditField.NeedsFieldAlter: Boolean;
 begin
@@ -145,6 +147,37 @@ begin
   Result := ((HasCharsetChanged or HasCollationChanged) and not (cbType.Text = 'UUID'));
 end;
 
+// ============================================================
+// Prüft, ob ein Feld NULL-Werte enthält.
+// Wird bei NOT NULL-Setzung auf FB 1.5/2.x benötigt, weil der
+// Server dort keine automatische Prüfung durchführt.
+// ============================================================
+function TfmNewEditField.FieldHasNullValues(const AFieldName: string): Boolean;
+var
+  Qry: TIBSQL;
+begin
+  Result := False;
+  if not Assigned(FExtractor) then
+    Exit;
+
+  Qry := TIBSQL.Create(FExtractor.FIBDatabase);
+  try
+    Qry.Transaction := FExtractor.FIBTransaction;
+    if not Qry.Transaction.InTransaction then
+      Qry.Transaction.StartTransaction;
+
+    Qry.SQL.Text :=
+      'SELECT COUNT(*) FROM ' + MakeCaseSensitiveAuto(FTableName) + ' ' +
+      'WHERE ' + MakeCaseSensitiveAuto(AFieldName) + ' IS NULL';
+    Qry.ExecQuery;
+
+    if not Qry.EOF then
+      Result := Qry.Fields[0].AsInteger > 0;
+  finally
+    Qry.Free;
+  end;
+end;
+
 procedure TfmNewEditField.bbAddClick(Sender: TObject);
 var
   Line, NewCharset, NewCollation, FieldDef, TempFieldName, BaseType: string;
@@ -152,31 +185,41 @@ var
   TmpFloat: Double;
   TmpInt: Int64;
   TableName, FieldName: string;
+  ServerVersionMajor: Word;
 begin
-  TableName := Trim(FTableName);
-  TableName := MakeCaseSensitiveAuto(TableName);
+  if not Assigned(FExtractor) then
+  begin
+    MessageDlg('Extractor not initialized.', mtError, [mbOK], 0);
+    Exit;
+  end;
 
-  FieldName := Trim(edFieldName.Text);
-  FieldName := MakeCaseSensitiveAuto(FieldName);
+  ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
+
+  TableName := MakeCaseSensitiveAuto(Trim(FTableName));
+  FieldName := MakeCaseSensitiveAuto(Trim(edFieldName.Text));
 
   if FRefreshButton = nil then
     Clk := nil
   else
     Clk := FRefreshButton.OnClick;
 
-  NewCharset := cbCharset.Text;
+  NewCharset   := cbCharset.Text;
   NewCollation := cbCollation.Text;
 
-  if fFormMode = foNew then  // Neues Feld
+  // ============================================================
+  // NEW FIELD
+  // ============================================================
+  if fFormMode = foNew then
   begin
     BaseType := cbType.Text;
     bbGenUUID.Visible := cbType.Text = 'UUID';
 
-    // UUID-Spezialbehandlung
+    // --- Typ-Definition bauen ---
     if BaseType = 'UUID' then
     begin
       FieldDef := 'CHAR(16) CHARACTER SET OCTETS';
-    end else
+    end
+    else
     begin
       FieldDef := BaseType;
 
@@ -184,7 +227,8 @@ begin
         FieldDef := FieldDef + '(' + IntToStr(seSize.Value) + ')';
 
       if (FieldDef = 'DECIMAL') or (FieldDef = 'NUMERIC') then
-        FieldDef := FieldDef + '(' + IntToStr(sePrecision.Value) + ',' + IntToStr(seScale.Value) + ')';
+        FieldDef := FieldDef + '(' + IntToStr(sePrecision.Value) + ',' +
+                    IntToStr(seScale.Value) + ')';
 
       if NewCharset <> '' then
         FieldDef := FieldDef + ' CHARACTER SET ' + NewCharset;
@@ -193,7 +237,7 @@ begin
         FieldDef := FieldDef + ' COLLATE ' + NewCollation;
     end;
 
-    // Default value
+    // --- Default-Wert ---
     if Trim(edDefault.Text) <> '' then
     begin
       try
@@ -207,7 +251,9 @@ begin
                 (BaseType = 'REAL') then
         begin
           TmpFloat := StrToFloat(edDefault.Text);
-          FieldDef := FieldDef + ' DEFAULT ' + StringReplace(FloatToStrF(TmpFloat, ffGeneral, 15, 0), ',', '.', [rfReplaceAll]);
+          FieldDef := FieldDef + ' DEFAULT ' +
+            StringReplace(FloatToStrF(TmpFloat, ffGeneral, 15, 0),
+                          ',', '.', [rfReplaceAll]);
         end
         else if (BaseType = 'CHAR') or (BaseType = 'VARCHAR') or (BaseType = 'CSTRING') then
         begin
@@ -215,131 +261,213 @@ begin
         end
         else
         begin
-          // Default fallback for other types
           FieldDef := FieldDef + ' DEFAULT ' + edDefault.Text;
         end;
       except
         on E: Exception do
-        begin
-          raise Exception.Create('Invalid default value for field type "' + BaseType + '": ' + E.Message);
-        end;
+          raise Exception.Create('Invalid default value for field type "' +
+            BaseType + '": ' + E.Message);
       end;
     end;
 
-    // NOT NULL
+    // --- NOT NULL ---
     if not cxAllowNull.Checked then
       FieldDef := FieldDef + ' NOT NULL';
 
-    Line := 'ALTER TABLE ' + TableName + ' ADD ' +  FieldName + ' ' + FieldDef + ';';
+    Line := 'ALTER TABLE ' + TableName + ' ADD ' + FieldName + ' ' + FieldDef + ';';
 
-    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Add new field to Table: ' + FTableName, Line, Clk);
-  end
-  else  // Existierendes Feld bearbeiten
-  begin
-    bbGenUUID.Visible := cbType.Text = 'UUID';
-    Line := '';
-    BaseType := cbType.Text;
+    fmMain.ShowCompleteQueryWindow(FDBIndex,
+      'Add new field to Table: ' + FTableName, Line, Clk);
 
-    if not NeedsFieldAlter then
-      Exit; // Nichts zu tun
-
-    Line := '';
-
-    if Trim(edFieldName.Text) <> OldFieldName then
-      Line := Line + 'ALTER TABLE ' + FTableName + ' ALTER ' + OldFieldName + ' TO ' + edFieldName.Text + ';' + LineEnding;
-
-    if HasFieldTypeChanged then
-    begin
-      if BaseType = 'UUID' then
-      begin
-        // UUID-Feld, Typ fest: CHAR(16) OCTETS → nicht ändern
-      end else
-      begin
-        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' TYPE ' + cbType.Text;
-
-        if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') then
-          Line := Line + '(' + IntToStr(sePrecision.Value) + ',' + IntToStr(seScale.Value) + ')'
-        else if (cbType.Text = 'CHAR') or (cbType.Text = 'CSTRING') or (cbType.Text = 'VARCHAR') then
-          Line := Line + '(' + IntToStr(seSize.Value) + ')';
-
-        if (NewCharset <> '') and (NewCharset = OldCharacterSet) then
-          Line := Line + ' CHARACTER SET ' + NewCharset;
-
-        Line := Line + ';' + LineEnding;
-      end;
-    end;
-
-    // Charset or Collation changed?
-    if ((NewCharset <> OldCharacterSet) or (NewCollation <> OldCollation)) and (BaseType <> 'UUID') then
-    begin
-      TempFieldName := edFieldName.Text + '_NEW';
-
-      FieldDef := cbType.Text;
-      if (FieldDef = 'CHAR') or (FieldDef = 'CSTRING') or (FieldDef = 'VARCHAR') then
-        FieldDef := FieldDef + '(' + IntToStr(seSize.Value) + ')';
-
-      if NewCharset <> '' then
-        FieldDef := FieldDef + ' CHARACTER SET ' + NewCharset;
-
-      if NewCollation <> '' then
-        FieldDef := FieldDef + ' COLLATE ' + NewCollation;
-
-      Line := Line + '-- Charset or Collation change requires field recreation:' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + TableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
-      Line := Line + 'UPDATE ' + TableName + ' SET ' + TempFieldName + ' = ' + edFieldName.Text + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + TableName + ' DROP ' + FieldName + ';' + LineEnding;
-      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + TempFieldName + ' TO ' + FieldName + ';' + LineEnding;
-    end;
-
-    // Fieldposition
-    if seOrder.Value <> OldOrder then
-      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
-              ' POSITION ' + IntToStr(seOrder.Value) + ';' + LineEnding;
-
-    // NOT NULL
-    if cxAllowNull.Checked <> OldAllowNull then
-    begin
-      if cxAllowNull.Checked then
-        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' DROP NOT NULL;' + LineEnding
-      else
-        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' SET NOT NULL;' + LineEnding;
-    end;
-
-    // Default
-    if edDefault.Text <> OldDefault then
-    begin
-      if Trim(edDefault.Text) <> '' then
-      begin
-        try
-          if (cbType.Text = 'INTEGER') or (cbType.Text = 'SMALLINT') or (cbType.Text = 'BIGINT') then
-            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
-                    ' SET DEFAULT ' + IntToStr(StrToInt(edDefault.Text)) + ';' + LineEnding
-          else if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') or
-                  (cbType.Text = 'FLOAT') or (cbType.Text = 'DOUBLE PRECISION') or
-                  (cbType.Text = 'REAL') then
-            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
-                    ' SET DEFAULT ' + StringReplace(FloatToStrF(StrToFloat(edDefault.Text), ffGeneral, 15, 0), ',', '.', [rfReplaceAll]) + ';' + LineEnding
-          else
-            Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
-                    ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding;
-        except
-          on E: Exception do
-            raise Exception.Create('Invalid default value: ' + E.Message);
-        end;
-      end
-      else
-        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName + ' DROP DEFAULT;' + LineEnding;
-    end;
-
-    // Beschreibung
-    if memoDescription.Text <> OldDescription then
-    Line := Line + 'COMMENT ON COLUMN ' + TableName + '.' + FieldName +
-              ' IS ' +  LineEnding + FormatMultilineSQLText(memoDescription.Text) + ';' + LineEnding;
-
-    if Line <> '' then
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit field: ' + OldFieldName, Line, Clk);
-
+    Close;
+    Exit;
   end;
+
+  // ============================================================
+  // EDIT EXISTING FIELD
+  // ============================================================
+  bbGenUUID.Visible := cbType.Text = 'UUID';
+  BaseType := cbType.Text;
+
+  if not NeedsFieldAlter then
+  begin
+    Close;
+    Exit;
+  end;
+
+  // ============================================================
+  // NULL-Vorprüfung vor SET NOT NULL auf FB < 3
+  // Auf FB 1.5/2.x prüft der Server nicht — wir müssen das selbst
+  // tun, sonst inkonsistente DB (Restore-Fehler bei gbak).
+  // ============================================================
+  if (not cxAllowNull.Checked) and OldAllowNull and (ServerVersionMajor < 3) then
+  begin
+    if FieldHasNullValues(OldFieldName) then
+    begin
+      MessageDlg(
+        'Field "' + OldFieldName + '" contains NULL values.' + sLineBreak +
+        sLineBreak +
+        'On Firebird ' + IntToStr(ServerVersionMajor) + '.x, setting NOT NULL ' +
+        'would succeed silently but leave the database inconsistent. ' +
+        'Please fill the NULL values first.',
+        mtError, [mbOK], 0);
+      Exit;
+    end;
+  end;
+
+  Line := '';
+
+  // --- 1. Rename ---
+  if Trim(edFieldName.Text) <> OldFieldName then
+    Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + OldFieldName +
+            ' TO ' + FieldName + ';' + LineEnding;
+
+  // --- 2. Type change ---
+  if HasFieldTypeChanged then
+  begin
+    if BaseType = 'UUID' then
+    begin
+      // UUID-Typ ist fix — nichts zu ändern
+    end
+    else
+    begin
+      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+              ' TYPE ' + cbType.Text;
+
+      if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') then
+        Line := Line + '(' + IntToStr(sePrecision.Value) + ',' +
+                IntToStr(seScale.Value) + ')'
+      else if (cbType.Text = 'CHAR') or (cbType.Text = 'CSTRING') or
+              (cbType.Text = 'VARCHAR') then
+        Line := Line + '(' + IntToStr(seSize.Value) + ')';
+
+      if (NewCharset <> '') and (NewCharset = OldCharacterSet) then
+        Line := Line + ' CHARACTER SET ' + NewCharset;
+
+      Line := Line + ';' + LineEnding;
+    end;
+  end;
+
+  // --- 3. Charset / Collation-Änderung → Recreation ---
+  if ((NewCharset <> OldCharacterSet) or (NewCollation <> OldCollation)) and
+     (BaseType <> 'UUID') then
+  begin
+    TempFieldName := edFieldName.Text + '_NEW';
+
+    FieldDef := cbType.Text;
+    if (FieldDef = 'CHAR') or (FieldDef = 'CSTRING') or (FieldDef = 'VARCHAR') then
+      FieldDef := FieldDef + '(' + IntToStr(seSize.Value) + ')';
+
+    if NewCharset <> '' then
+      FieldDef := FieldDef + ' CHARACTER SET ' + NewCharset;
+
+    if NewCollation <> '' then
+      FieldDef := FieldDef + ' COLLATE ' + NewCollation;
+
+    Line := Line + '-- Charset or Collation change requires field recreation:' + LineEnding;
+    Line := Line + 'ALTER TABLE ' + TableName + ' ADD ' + TempFieldName + ' ' + FieldDef + ';' + LineEnding;
+    Line := Line + 'UPDATE ' + TableName + ' SET ' + TempFieldName + ' = ' + FieldName + ';' + LineEnding;
+    Line := Line + 'ALTER TABLE ' + TableName + ' DROP ' + FieldName + ';' + LineEnding;
+    Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + TempFieldName +
+            ' TO ' + FieldName + ';' + LineEnding;
+  end;
+
+  // --- 4. Position ---
+  if seOrder.Value <> OldOrder then
+    Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+            ' POSITION ' + IntToStr(seOrder.Value) + ';' + LineEnding;
+
+  // ============================================================
+  // 5. NOT NULL — Versions-Weiche
+  // ============================================================
+  if cxAllowNull.Checked <> OldAllowNull then
+  begin
+    if ServerVersionMajor >= 3 then
+    begin
+      // FB 3.0+ — sauberes DDL
+      if cxAllowNull.Checked then
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+                ' DROP NOT NULL;' + LineEnding
+      else
+        Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+                ' SET NOT NULL;' + LineEnding;
+    end
+    else
+    begin
+      // FB 1.5 / 2.x — Workaround über Systemtabelle
+      // RDB$ speichert Namen unquoted — StripQuotes für den Lookup.
+      if cxAllowNull.Checked then
+        Line := Line + 'UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = NULL' + LineEnding +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(StripQuotes(FTableName)) + LineEnding +
+                '  AND RDB$FIELD_NAME = ' + QuotedStr(StripQuotes(edFieldName.Text)) + ';' + LineEnding
+      else
+        Line := Line + 'UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = 1' + LineEnding +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(StripQuotes(FTableName)) + LineEnding +
+                '  AND RDB$FIELD_NAME = ' + QuotedStr(StripQuotes(edFieldName.Text)) + ';' + LineEnding;
+    end;
+  end;
+
+  // --- 6. Default ---
+  if edDefault.Text <> OldDefault then
+  begin
+    if Trim(edDefault.Text) <> '' then
+    begin
+      try
+        if (cbType.Text = 'INTEGER') or (cbType.Text = 'SMALLINT') or
+           (cbType.Text = 'BIGINT') then
+          Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+                  ' SET DEFAULT ' + IntToStr(StrToInt(edDefault.Text)) + ';' + LineEnding
+        else if (cbType.Text = 'NUMERIC') or (cbType.Text = 'DECIMAL') or
+                (cbType.Text = 'FLOAT') or (cbType.Text = 'DOUBLE PRECISION') or
+                (cbType.Text = 'REAL') then
+          Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+                  ' SET DEFAULT ' +
+                  StringReplace(FloatToStrF(StrToFloat(edDefault.Text), ffGeneral, 15, 0),
+                                ',', '.', [rfReplaceAll]) + ';' + LineEnding
+        else
+          Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+                  ' SET DEFAULT ' + QuotedStr(edDefault.Text) + ';' + LineEnding;
+      except
+        on E: Exception do
+          raise Exception.Create('Invalid default value: ' + E.Message);
+      end;
+    end
+    else
+      Line := Line + 'ALTER TABLE ' + TableName + ' ALTER ' + FieldName +
+              ' DROP DEFAULT;' + LineEnding;
+  end;
+
+  // --- 7. Description ---
+  // COMMENT ON COLUMN gibt es erst ab FB 2.0.
+  // Auf FB 1.5 direkt RDB$DESCRIPTION updaten.
+  if memoDescription.Text <> OldDescription then
+  begin
+    if ServerVersionMajor >= 2 then
+    begin
+      // FB 2.0+ — sauberes DDL
+      Line := Line + 'COMMENT ON COLUMN ' + TableName + '.' + FieldName +
+              ' IS ' + LineEnding + FormatMultilineSQLText(memoDescription.Text) + ';' + LineEnding;
+    end
+    else
+    begin
+      // FB 1.5 — Workaround über Systemtabelle
+      // RDB$ speichert Namen unquoted — StripQuotes für den Lookup.
+      if Trim(memoDescription.Text) <> '' then
+        Line := Line + 'UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = ' +
+                FormatMultilineSQLText(memoDescription.Text) + LineEnding +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(StripQuotes(FTableName)) + LineEnding +
+                '  AND RDB$FIELD_NAME = ' + QuotedStr(StripQuotes(edFieldName.Text)) + ';' + LineEnding
+      else
+        // Beschreibung entfernen
+        Line := Line + 'UPDATE RDB$RELATION_FIELDS SET RDB$DESCRIPTION = NULL' + LineEnding +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(StripQuotes(FTableName)) + LineEnding +
+                '  AND RDB$FIELD_NAME = ' + QuotedStr(StripQuotes(edFieldName.Text)) + ';' + LineEnding;
+    end;
+  end;
+
+  if Line <> '' then
+    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit field: ' + OldFieldName, Line, Clk);
+
   Close;
 end;
 
@@ -380,13 +508,15 @@ end;
 
 procedure TfmNewEditField.cbTypeChange(Sender: TObject);
 begin
-  seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
+  if Assigned(FExtractor) then
+    seSize.Value := FExtractor.GetFieldTypeSize(cbType.Text);
   EnableDisableControls;
 end;
 
 procedure TfmNewEditField.cbTypeEditingDone(Sender: TObject);
 begin
-  seSize.Value:= dmSysTables.GetDefaultTypeSize(FDBIndex, cbType.Text);
+  if Assigned(FExtractor) then
+    seSize.Value := FExtractor.GetFieldTypeSize(cbType.Text);
 end;
 
 procedure TfmNewEditField.FormClose(Sender: TObject;
@@ -473,6 +603,7 @@ begin
   cbCollation.Enabled := ((cbCharSet.Enabled) and  (not IsUUID));
 end;
 
+
 procedure TfmNewEditField.Init(dbIndex: Integer; TableName: string;
   FormMode: TFormMode;
   FieldName, FieldType,
@@ -480,20 +611,40 @@ procedure TfmNewEditField.Init(dbIndex: Integer; TableName: string;
   DefaultValue, Description: string;
   Size, Precision, Scale, Order: integer;
   AllowNull: Boolean;
-  RefreshButton: TBitBtn);
+  RefreshButton: TBitBtn;
+  AExtractor: TSimpleObjExtractor);
+
+var
+ DomainsList: TStringList;
+i: Integer;
 begin
   fFormMode:= FormMode;
   seScale.MaxValue := Abs(Scale);
   cbType.Clear;
 
-  // Load basic datatypes for fields into combobox....
-  dmSysTables.GetAllTypes(cbType.Items, dbIndex);
+  FExtractor := AExtractor;
+  FDBIndex := dbIndex;
+  FTableName := TableName;
 
-  // ... add domain types for fields
-  dmSysTables.GetDomainTypes(dbIndex, cbType.Items);
+  // Typen laden — jetzt über den Extractor
+  if Assigned(FExtractor) then
+  begin
+    FExtractor.GetAllFieldTypes(cbType.Items);
 
-  FDBIndex:= dbIndex;
-  FTableName:= TableName;
+    // var-Parameter brauchen echte Variable, keine Property
+    DomainsList := TStringList.Create;
+    try
+      FExtractor.ExtractObjectNames(dbIndex, otDomains, false,
+        TStrings(DomainsList), '');
+
+      // Domains in die ComboBox übernehmen (mit Duplikat-Schutz)
+      for i := 0 to DomainsList.Count - 1 do
+        if cbType.Items.IndexOf(DomainsList[i]) < 0 then
+          cbType.Items.Add(DomainsList[i]);
+    finally
+      DomainsList.Free;
+    end;
+  end;
 
   FRefreshButton:= RefreshButton;
 
@@ -511,12 +662,12 @@ begin
   OldCharacterSet:= Trim(CharacterSet);
   cbCharset.ItemIndex := cbCharset.items.IndexOf(OldCharacterSet);
 
-  cbCharsetEditingDone(nil); //fill collation combobox
+  cbCharsetEditingDone(nil); // collation combobox füllen
   OldCollation:= Trim(Collation);
   if OldCharacterSet <> 'OCTETS' then
     cbCollation.ItemIndex := cbCollation.items.IndexOf(OldCollation)
   else
-   cbCollation.ItemIndex := -1;
+    cbCollation.ItemIndex := -1;
   OldDescription:= Description;
   memoDescription.Text := OldDescription;
   edFieldName.Text:= OldFieldName;
@@ -534,23 +685,24 @@ begin
     cbType.Enabled := false;
     if cbType.Text = 'UUID' then
       cbCharSet.Enabled := false;
-  end else
-  begin
-   cbType.Enabled := true;
-  end;
+  end
+  else
+    cbType.Enabled := true;
 
   if FormMode = foEdit then
   begin
-    bbAdd.Caption:= 'Update';
-    Caption:= 'Edit field: ' + FieldName + ' on : ' + TableName;
+    bbAdd.Caption := 'Update';
+    Caption := 'Edit field: ' + FieldName + ' on : ' + TableName;
   end
   else
   begin
-    bbAdd.Caption:= 'Add';
-    Caption:= 'Add new field in : ' + TableName;
+    bbAdd.Caption := 'Add';
+    Caption := 'Add new field in : ' + TableName;
   end;
+
   EnableDisableControls;
 end;
+
 
 initialization
   {$I neweditfield.lrs}

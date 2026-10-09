@@ -1,7 +1,7 @@
 object fmPrimaryKey: TfmPrimaryKey
-  Left = 405
+  Left = 846
   Height = 401
-  Top = 197
+  Top = 372
   Width = 903
   Caption = 'fmPrimaryKey'
   ClientHeight = 401

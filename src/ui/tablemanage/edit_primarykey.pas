@@ -12,7 +12,6 @@ uses
   fbcommon,
 
   fsimpleobjextractor,
-  fmetaquerys,
 
   uthemeselector;
 
@@ -43,11 +42,12 @@ type
     FNodeInfos: TPNodeInfos;
     FExtractor: TSimpleObjExtractor;
 
-    procedure LoadFields;                          // Felder in CheckListBox laden
-    procedure CheckPKFields;                       // PK-Felder anhaken
+    procedure LoadFields;        // Felder in CheckListBox laden
+    procedure CheckPKFields;     // PK-Felder anhaken
 
   public
-    procedure Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
+    procedure Init(ADBIndex: Integer; const ATableName: string;
+                   ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
     procedure FillPrimaryKey;
 
   end;
@@ -61,7 +61,8 @@ uses Main, QueryWindow;
 
 { TfmPrimaryKey }
 
-procedure TfmPrimaryKey.Init(ADBIndex: Integer; const ATableName: string; ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
+procedure TfmPrimaryKey.Init(ADBIndex: Integer; const ATableName: string;
+  ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
 begin
   FDBIndex := ADBIndex;
   FTableName := ATableName;
@@ -76,20 +77,14 @@ end;
 
 procedure TfmPrimaryKey.LoadFields;
 var
-  FieldsQuery: TIsolatedQuery;
+  RawFields: TFBFieldRawArray;
+  i: Integer;
 begin
   chkLstBoxFields.Clear;
 
-  FieldsQuery := GetFieldsIsolated(RegisteredDatabases[FDBIndex].IBDatabase, FTableName);
-  try
-    while not FieldsQuery.Query.EOF do
-    begin
-      chkLstBoxFields.Items.Add(Trim(FieldsQuery.Query.FieldByName('field_name').AsString));
-      FieldsQuery.Query.Next;
-    end;
-  finally
-    FieldsQuery.Free;
-  end;
+  RawFields := FExtractor.GetTableFieldsRaw(FTableName);
+  for i := 0 to High(RawFields) do
+    chkLstBoxFields.Items.Add(RawFields[i].FieldName);
 end;
 
 procedure TfmPrimaryKey.CheckPKFields;
@@ -105,13 +100,11 @@ begin
   // Aktuelle PK-Felder ermitteln
   FieldsList := TStringList.Create;
   try
-    PKIndexName := GetPrimaryKeyIndexNameIsolated(
-      RegisteredDatabases[FDBIndex].IBDatabase, FTableName, PKConstraintName);
+    PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
 
     if PKIndexName <> '' then
     begin
-      GetConstraintFieldsIsolated(
-        RegisteredDatabases[FDBIndex].IBDatabase, FTableName, PKIndexName, FieldsList);
+      FExtractor.GetConstraintFields(PKIndexName, FieldsList);
 
       // PK-Felder anhaken
       for i := 0 to chkLstBoxFields.Count - 1 do
@@ -190,8 +183,7 @@ begin
   end;
 
   // Constraint-Namen ermitteln
-  PKIndexName := GetPrimaryKeyIndexNameIsolated(
-    RegisteredDatabases[FDBIndex].IBDatabase, FTableName, PKConstraintName);
+  PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
 
   QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Primary Key: ' + FTableName);
   QWindow.meQuery.Lines.Clear;
@@ -201,12 +193,14 @@ begin
   if PKConstraintName <> '' then
   begin
     QWindow.meQuery.Lines.Add('-- Drop existing Primary Key');
-    QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) + ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
+    QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+      ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
     QWindow.meQuery.Lines.Add('');
   end;
 
   QWindow.meQuery.Lines.Add('-- Create new Primary Key');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) + ' ADD PRIMARY KEY (' + CheckedFields + ') ^;');
+  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' ADD PRIMARY KEY (' + CheckedFields + ') ^;');
   QWindow.meQuery.Lines.Add('');
   QWindow.meQuery.Lines.Add('SET TERM ;^');
 
@@ -225,14 +219,14 @@ begin
     if MessageDlg('Are you sure you want to drop the Primary Key from ' + FTableName + '?',
       mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
-      PKIndexName := GetPrimaryKeyIndexNameIsolated(
-        RegisteredDatabases[FDBIndex].IBDatabase, FTableName, PKConstraintName);
+      PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
 
       QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Primary Key: ' + FTableName);
       QWindow.meQuery.Lines.Clear;
       QWindow.meQuery.Lines.Add('SET TERM ^;');
       QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) + ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
+      QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+        ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
       QWindow.meQuery.Lines.Add('');
       QWindow.meQuery.Lines.Add('SET TERM ;^');
       QWindow.OnCommit := @bbRefreshClick;
@@ -270,11 +264,10 @@ begin
   end;
 
   // Prüfen ob bereits ein PK existiert
-  PKIndexName := GetPrimaryKeyIndexNameIsolated(
-    RegisteredDatabases[FDBIndex].IBDatabase, FTableName, PKConstraintName);
+  PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
   HasPK := (PKConstraintName <> '');
 
-  // Edit: aktiv wenn Felder gecheckt UND (PK existiert ODER neu)
+  // Edit: aktiv wenn Felder gecheckt
   bbEdit.Enabled := HasChecked;
 
   // Drop: aktiv wenn PK existiert

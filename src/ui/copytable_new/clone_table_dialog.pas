@@ -7,17 +7,22 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Grids, CheckLst, Menus, IB, IBQuery, IBDatabase, IBDatabaseInfo,
-  IBExtract, ibxscript,
+  IBExtract, ibxscript,  IBSQL,
 
   SysTables,
   turbocommon,
+  fbcommon,
+
+  fsimpleobjextractor,
 
   uCopyTableDataLocal,
   uCopyTableDataCrossExecuteBlock,
-  uCopyTableDataCrossRowByRow,
-  uFormulaPresets,
+  ucopytabledatarowbyrow,
+  uCopyTableDataFBIntf,
 
-  fmetaquerys,
+  uFormulaPresets,
+  uProblemFieldsDialog,
+
   uthemeselector,
 
   uReport,
@@ -38,40 +43,49 @@ type
   { TfrmCloneTable }
 
   TfrmCloneTable = class(TForm)
-    btnCancel: TButton;
+    btnAddToQueue: TButton;
+    btnCancelGlobal: TButton;
     btnDeselectAll: TButton;
     btnExecute: TButton;
+    btnExternalFile: TButton;
+    btnGenTestFormulas: TButton;
     btnNewDB: TButton;
     btnOpenExternalFile: TButton;
     btnPreviewSQL: TButton;
-    btnAddToQueue: TButton;
     btnRefreshPresets: TButton;
-    btnExternalFile: TButton;
-    btnGenTestFormulas: TButton;
     btnSelectAll: TButton;
+    cbFormulaPreset: TComboBox;
+    chkFBIntfForceRow: TCheckBox;
+    chkboxExternalTable: TCheckBox;
     chkCopyData: TCheckBox;
+    chkCreateTable: TCheckBox;
     chkLstFields: TCheckListBox;
     chkUseFormula: TCheckBox;
-    chkboxExternalTable: TCheckBox;
-    chkCreateTable: TCheckBox;
-    cbFormulaPreset: TComboBox;
     comboxDestDB: TComboBox;
-    comboxSourceDB: TComboBox;
     comboxDestServer: TComboBox;
+    comboxSourceDB: TComboBox;
     comboxSourceServer: TComboBox;
     comboxSourceTables: TComboBox;
     Destination: TGroupBox;
-    edtExternalFile: TEdit;
+    edtFBIntfRowByRowCommit: TEdit;
+    edtFBIntfMemory: TEdit;
+    edtlRowByRowBatchSize: TEdit;
+    edtExecBlockBatch: TEdit;
+    edtLocalBatchSize: TEdit;
     edtDestTable: TEdit;
-    edtBatchSize: TEdit;
+    edtExternalFile: TEdit;
     edtFrom: TEdit;
     edtTo: TEdit;
-    grboxCopyOptions: TGroupBox;
-    grBoxFormulaFields: TGroupBox;
-    grBoxSource: TGroupBox;
-    grBoxFormulaPresets: TGroupBox;
     grBoxCopyMethod: TGroupBox;
+    grboxCopyOptions: TGroupBox;
     grboxFields: TGroupBox;
+    grBoxFormulaFields: TGroupBox;
+    grBoxFormulaPresets: TGroupBox;
+    grBoxSource: TGroupBox;
+    gbLocalEngine: TGroupBox;
+    gbExecBlockEngine: TGroupBox;
+    gbRowByRowEngine: TGroupBox;
+    gbFBIntfEngine: TGroupBox;
     IBDBDest: TIBDatabase;
     IBDBSource: TIBDatabase;
     IBQueryDest: TIBQuery;
@@ -79,8 +93,17 @@ type
     IBTransDest: TIBTransaction;
     IBTransSource: TIBTransaction;
     IBXScript1: TIBXScript;
+    lbFBIntfRowByRowCommit: TLabel;
+    lblFBIntfStrategy: TLabel;
+    lblFBIntfMemoryRange: TLabel;
+    lblFBIntfMemory: TLabel;
+    lblRowByRowBatchSize: TLabel;
+    lblRowByRowInfo: TLabel;
+    lblExecBlockInfo: TLabel;
+    lblExecBlockBatch: TLabel;
+    lblLocalBatchInfo: TLabel;
+    lblLocalBatchSize: TLabel;
     Label2: TLabel;
-    Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -88,20 +111,23 @@ type
     Label8: TLabel;
     lbSourceTable: TLabel;
     OpenDialog1: TOpenDialog;
+    PageControlMain: TPageControl;
     Panel1: TPanel;
-    pnlSelector: TPanel;
     pnlFieldsSelectButtons: TPanel;
-    pnlTop: TPanel;
+    pnlSelector: TPanel;
     PopupMenu1: TPopupMenu;
-    rbInsertSelect: TRadioButton;
-    rbRowByRow: TRadioButton;
-    rbExecuteBlock: TRadioButton;
     rbAllRows: TRadioButton;
+    rbExecuteBlock: TRadioButton;
+    rbFBIntf: TRadioButton;
+    rbInsertSelect: TRadioButton;
     rbRange: TRadioButton;
+    rbRowByRow: TRadioButton;
     sgFields: TStringGrid;
     StatusBar1: TStatusBar;
+    tsSelection: TTabSheet;
+    tsEngineSettings: TTabSheet;
     procedure btnAddToQueueClick(Sender: TObject);
-    procedure btnCancelClick(Sender: TObject);
+    procedure btnCancelGlobalClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
     procedure btnExternalFileClick(Sender: TObject);
     procedure btnGenTestFormulasClick(Sender: TObject);
@@ -111,18 +137,22 @@ type
     procedure btnPreviewSQLClick(Sender: TObject);
     procedure cbFormulaPresetChange(Sender: TObject);
     procedure chkboxExternalTableChange(Sender: TObject);
-    procedure chkCreateTableChange(Sender: TObject);
+    procedure chkLstFieldsClickCheck(Sender: TObject);
     procedure chkUseFormulaChange(Sender: TObject);
     procedure comboxDestDBChange(Sender: TObject);
     procedure comboxDestServerChange(Sender: TObject);
     procedure comboxSourceDBChange(Sender: TObject);
     procedure comboxSourceServerChange(Sender: TObject);
     procedure comboxSourceTablesChange(Sender: TObject);
+    procedure edtExecBlockBatchExit(Sender: TObject);
+    procedure edtLocalBatchSizeExit(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFieldsDblClick(Sender: TObject);
+
+    procedure rbCopyMethodChange(Sender: TObject);
   private
     FNodeInfos: TPNodeInfos;
     FSourceDBIndex: Integer;
@@ -132,6 +162,24 @@ type
 
     FInitialTableName: string;
     FInitialDBIndex: Integer;
+
+    FExtractor: TSimpleObjExtractor;
+    FExtractorDBIndex: Integer;
+
+    function GetLocalBatchSize: Integer;
+    function GetExecBlockBatchSize: Integer;
+    function GetFBIntfRowByRowCommit: Integer;
+    function GetRowByRowCommitInterval: Integer;
+    function GetFBIntfMemoryMB: Integer;
+
+
+    procedure UpdateEngineStatus;
+    procedure EnsureExtractor(ADBIndex: Integer);
+
+    procedure ApplyFieldStates;
+
+    function  CheckFieldCompatibility(AForCopy: Boolean = True): Boolean;
+    function  ShowProblemDialog(const AMessage: string): Integer;
 
     procedure ApplyInitialSelection;
     function  FillSourceServerCombo: boolean;
@@ -157,6 +205,16 @@ type
 
     function TableExists(DB: TIBDatabase; TableName: string): Boolean;
     function CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
+
+    function GetMissingDestFields(DB: TIBDatabase;
+      const ATableName: string): TStringList;
+    procedure DeselectFields(AMissingFields: TStringList);
+    function ShowStructureDriftDialog(const ATableName: string;
+      AMissingFields: TStringList; AAllowDrop: Boolean): Integer;
+    function DropDestTable(DB: TIBDatabase; Trans: TIBTransaction;
+      const ATableName: string): Boolean;
+
+    procedure HighlightActiveEngineGroup;
   public
     procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
     procedure LoadFormulaPresets;
@@ -171,6 +229,664 @@ implementation
 {$R *.lfm}
 
 { TfrmCloneTable }
+
+function TfrmCloneTable.GetFBIntfRowByRowCommit: Integer;
+begin
+  Result := StrToIntDef(Trim(edtFBIntfRowByRowCommit.Text), 2000000);
+end;
+
+function TfrmCloneTable.GetRowByRowCommitInterval: Integer;
+begin
+  Result := StrToIntDef(Trim(edtlRowByRowBatchSize.Text), 2000000);
+end;
+
+function TfrmCloneTable.GetExecBlockBatchSize: Integer;
+begin
+  Result := StrToIntDef(Trim(edtExecBlockBatch.Text), 10000);
+end;
+
+function TfrmCloneTable.GetLocalBatchSize: Integer;
+begin
+  Result := StrToIntDef(Trim(edtLocalBatchSize.Text), 500000);
+end;
+
+function TfrmCloneTable.GetFBIntfMemoryMB: Integer;
+begin
+  Result := StrToIntDef(Trim(edtFBIntfMemory.Text), 256);
+  if Result < 16  then Result := 16;    // FBIntf-Minimum
+  if Result > 256 then Result := 256;   // FBIntf-Cap (MWA Guide 1.12)
+end;
+
+procedure TfrmCloneTable.UpdateEngineStatus;
+begin
+  if rbInsertSelect.Checked then
+    StatusBar1.SimpleText := Format('INSERT...SELECT — Batch Size: %s rows',
+      [FormatFloat('#,##0', GetLocalBatchSize)])
+
+  else if rbExecuteBlock.Checked then
+    StatusBar1.SimpleText := Format('EXECUTE BLOCK — Batch Size: %s rows',
+      [FormatFloat('#,##0', GetExecBlockBatchSize)])
+
+  else if rbRowByRow.Checked then
+    StatusBar1.SimpleText := Format('Row-by-Row (IBX) — Commit every %s rows',
+      [FormatFloat('#,##0', GetRowByRowCommitInterval)])
+
+  else if rbFBIntf.Checked then
+    StatusBar1.SimpleText := Format('Firebird API (FBIntf) — Batch Memory: %s MB',
+      [FormatFloat('#,##0', GetFBIntfMemoryMB)]);
+end;
+
+procedure TfrmCloneTable.rbCopyMethodChange(Sender: TObject);
+begin
+  HighlightActiveEngineGroup;
+end;
+
+procedure TfrmCloneTable.HighlightActiveEngineGroup;
+const
+  ACTIVE_COLOR   = clSkyBlue;   // oder clBtnFace für neutral
+  INACTIVE_COLOR = clBtnFace;
+begin
+  // Alle GroupBoxen zurück auf Neutral
+  gbLocalEngine.Color   := INACTIVE_COLOR;
+  gbExecBlockEngine.Color := INACTIVE_COLOR;
+  gbRowByRowEngine.Color  := INACTIVE_COLOR;
+  gbFBIntfEngine.Color    := INACTIVE_COLOR;
+
+  // Aktive GroupBox hervorheben
+  if rbInsertSelect.Checked then
+    gbLocalEngine.Color := ACTIVE_COLOR
+  else if rbExecuteBlock.Checked then
+    gbExecBlockEngine.Color := ACTIVE_COLOR
+  else if rbRowByRow.Checked then
+    gbRowByRowEngine.Color := ACTIVE_COLOR
+  else if rbFBIntf.Checked then
+    gbFBIntfEngine.Color := ACTIVE_COLOR;
+end;
+
+// ============================================================
+// Ermittelt Felder, die in der Zieltabelle fehlen.
+// Nur Felder, die tatsächlich eingefügt werden (checked, nicht computed).
+// ============================================================
+function TfrmCloneTable.GetMissingDestFields(DB: TIBDatabase;
+  const ATableName: string): TStringList;
+var
+  Q: TIBQuery;
+  i: Integer;
+  FieldName: string;
+begin
+  Result := TStringList.Create;
+
+  // 1. Alle zu kopierenden Felder sammeln
+  for i := 0 to High(FFields) do
+  begin
+    if i >= chkLstFields.Count then Break;
+    if not chkLstFields.Checked[i] then Continue;
+    if FFields[i].IsComputed then Continue;
+    Result.Add(FFields[i].FieldName);
+  end;
+
+  // 2. Mit tatsächlichen Spalten der Zieltabelle abgleichen
+  Q := TIBQuery.Create(nil);
+  try
+    Q.Database := DB;
+    Q.Transaction := DB.DefaultTransaction;
+    Q.AllowAutoActivateTransaction := True;
+    Q.SQL.Text :=
+      'SELECT RDB$FIELD_NAME FROM RDB$RELATION_FIELDS ' +
+      'WHERE RDB$RELATION_NAME = :T';
+    Q.ParamByName('T').AsString := StripIdentifierQuotes(ATableName);
+    Q.Open;
+
+    while not Q.EOF do
+    begin
+      FieldName := Trim(Q.FieldByName('RDB$FIELD_NAME').AsString);
+      i := Result.IndexOf(FieldName);
+      if i >= 0 then
+        Result.Delete(i);
+      Q.Next;
+    end;
+    Q.Close;
+  finally
+    Q.Free;
+  end;
+end;
+
+// ============================================================
+// Wählt fehlende Felder im Hauptformular ab.
+// ApplyFieldStates muss danach vom Aufrufer kommen.
+// ============================================================
+procedure TfrmCloneTable.DeselectFields(AMissingFields: TStringList);
+var
+  i: Integer;
+begin
+  for i := 0 to chkLstFields.Count - 1 do
+    if AMissingFields.IndexOf(chkLstFields.Items[i]) >= 0 then
+      chkLstFields.Checked[i] := False;
+end;
+
+// ============================================================
+// Dialog mit 4 Optionen: Drop / Deselect / Continue / Cancel
+// mrYes    = Drop & Recreate
+// mrNo     = Deselect Missing
+// mrIgnore = Continue Anyway
+// mrCancel = Cancel
+// ============================================================
+function TfrmCloneTable.ShowStructureDriftDialog(
+  const ATableName: string;
+  AMissingFields: TStringList;
+  AAllowDrop: Boolean): Integer;
+var
+  Dlg: TForm;
+  Memo: TMemo;
+  BtnDrop, BtnDeselect, BtnContinue, btnCancel: TButton;
+  i: Integer;
+begin
+  Dlg := TForm.Create(nil);
+  try
+    Dlg.Caption := 'Destination Table Structure Warning';
+    Dlg.Width := 620;
+    Dlg.Height := 420;
+    Dlg.Position := poScreenCenter;
+    Dlg.BorderStyle := bsDialog;
+
+    Memo := TMemo.Create(Dlg);
+    Memo.Parent := Dlg;
+    Memo.Left := 16;
+    Memo.Top := 16;
+    Memo.Width := 572;
+    Memo.Height := 280;
+    Memo.ReadOnly := True;
+    Memo.ScrollBars := ssVertical;
+    Memo.Lines.Add('The destination table "' + ATableName + '" already exists,');
+    Memo.Lines.Add('but the following columns are missing in the destination:');
+    Memo.Lines.Add('');
+    for i := 0 to AMissingFields.Count - 1 do
+      Memo.Lines.Add('  • ' + AMissingFields[i]);
+    Memo.Lines.Add('');
+    Memo.Lines.Add('The copy would fail when trying to insert them.');
+    Memo.Lines.Add('');
+    Memo.Lines.Add('What do you want to do?');
+
+    // Zeile 1 — Drop & Deselect
+    BtnDrop := TButton.Create(Dlg);
+    BtnDrop.Parent := Dlg;
+    BtnDrop.Caption := 'Drop && Recreate';
+    BtnDrop.Left := 16;
+    BtnDrop.Top := 310;
+    BtnDrop.Width := 280;
+    BtnDrop.ModalResult := mrYes;
+    BtnDrop.Enabled := AAllowDrop;
+    if not AAllowDrop then
+      BtnDrop.Hint := 'Enable "Create Destination Table" to use this option';
+
+    BtnDeselect := TButton.Create(Dlg);
+    BtnDeselect.Parent := Dlg;
+    BtnDeselect.Caption := 'Deselect Missing';
+    BtnDeselect.Left := 308;
+    BtnDeselect.Top := 310;
+    BtnDeselect.Width := 280;
+    BtnDeselect.ModalResult := mrNo;
+
+    // Zeile 2 — Continue & Cancel
+    BtnContinue := TButton.Create(Dlg);
+    BtnContinue.Parent := Dlg;
+    BtnContinue.Caption := 'Continue Anyway';
+    BtnContinue.Left := 16;
+    BtnContinue.Top := 350;
+    BtnContinue.Width := 280;
+    BtnContinue.ModalResult := mrIgnore;
+
+    btnCancelGlobal := TButton.Create(Dlg);
+    btnCancelGlobal.Parent := Dlg;
+    btnCancelGlobal.Caption := 'Cancel';
+    btnCancelGlobal.Left := 308;
+    btnCancelGlobal.Top := 350;
+    btnCancelGlobal.Width := 280;
+    btnCancelGlobal.ModalResult := mrCancel;
+
+    Result := Dlg.ShowModal;
+  finally
+    Dlg.Free;
+  end;
+end;
+
+{// ============================================================
+// DROP TABLE — für „Drop & Recreate"
+// ============================================================
+function TfrmCloneTable.DropDestTable(DB: TIBDatabase;
+  Trans: TIBTransaction; const ATableName: string): Boolean;
+var
+  Q: TIBSQL;
+begin
+  Result := False;
+  Q := TIBSQL.Create(DB);
+  try
+    Q.Transaction := Trans;
+    if not Trans.InTransaction then
+      Trans.StartTransaction;
+    Q.SQL.Text := 'DROP TABLE ' +
+      MakeCaseSensitiveAuto(StripIdentifierQuotes(ATableName));
+    Q.Open;
+    Trans.Commit;
+    Result := True;
+  except
+    on E: Exception do
+    begin
+      if Trans.InTransaction then
+        Trans.Rollback;
+      MessageDlg('Could not drop table:' + sLineBreak + E.Message,
+        mtError, [mbOK], 0);
+    end;
+  end;
+  Q.Free;
+end;}
+
+// ============================================================
+// DROP TABLE — für „Drop & Recreate"
+//
+// Wichtig:
+//   * DDL-Statements brauchen ExecQuery (nicht Open!)
+//   * Nach dem Drop wird verifiziert, dass die Tabelle wirklich weg ist
+//   * IBX kann DDL nur auf einer aktiven Transaktion ausführen
+// ============================================================
+function TfrmCloneTable.DropDestTable(DB: TIBDatabase;
+  Trans: TIBTransaction; const ATableName: string): Boolean;
+var
+  Q: TIBSQL;
+  CleanName: string;
+begin
+  Result := False;
+
+  if (DB = nil) or (Trans = nil) then
+  begin
+    MessageDlg('DropDestTable: DB or Transaction is nil.',
+      mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  CleanName := StripIdentifierQuotes(ATableName);
+  if Trim(CleanName) = '' then
+  begin
+    MessageDlg('DropDestTable: Table name is empty.',
+      mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  Q := TIBSQL.Create(nil);
+  try
+    Q.Database := DB;
+    Q.Transaction := Trans;
+
+    // Transaktion sicherstellen
+    if not Trans.InTransaction then
+      Trans.StartTransaction;
+
+    Q.SQL.Text := 'DROP TABLE ' + MakeCaseSensitiveAuto(CleanName);
+
+    // ============================================================
+    // WICHTIG: ExecQuery (nicht Open!) — Open ist für SELECT
+    // und führt DDL-Statements NICHT aus.
+    // ============================================================
+    Q.ExecQuery;
+
+    Trans.Commit;
+
+    // ============================================================
+    // Verifikation: Ist die Tabelle wirklich weg?
+    // ============================================================
+    if TableExists(DB, ATableName) then
+    begin
+      MessageDlg(
+        'Drop was reported as successful, but the table still exists:' +
+        sLineBreak + sLineBreak +
+        '  ' + ATableName + sLineBreak + sLineBreak +
+        'The copy will be aborted to avoid data corruption.',
+        mtError, [mbOK], 0);
+      Exit;   // Result bleibt False
+    end;
+
+    Result := True;
+
+  except
+    on E: Exception do
+    begin
+      if Trans.InTransaction then
+        Trans.Rollback;
+
+      MessageDlg(
+        'Could not drop table "' + ATableName + '":' +
+        sLineBreak + sLineBreak +
+        E.Message,
+        mtError, [mbOK], 0);
+    end;
+  end;
+
+  Q.Free;
+end;
+
+// ============================================================
+// Synchronisiert FFields[i].Checked und sgFields.Cells[0, i+1]
+// mit chkLstFields.Checked[] — eine Richtung, eine Quelle der Wahrheit.
+// ============================================================
+procedure TfrmCloneTable.ApplyFieldStates;
+var
+  i: Integer;
+begin
+  for i := 0 to High(FFields) do
+  begin
+    if i >= chkLstFields.Count then Break;
+
+    FFields[i].Checked := chkLstFields.Checked[i];
+
+    if FFields[i].Checked then
+      sgFields.Cells[0, i + 1] := '1'
+    else
+      sgFields.Cells[0, i + 1] := '0';
+  end;
+end;
+
+procedure TfrmCloneTable.EnsureExtractor(ADBIndex: Integer);
+begin
+  if Assigned(FExtractor) and (FExtractorDBIndex = ADBIndex) then
+    Exit;
+
+  if Assigned(FExtractor) then
+    FreeAndNil(FExtractor);
+
+  FExtractor := TSimpleObjExtractor.Create(ADBIndex);
+  FExtractorDBIndex := ADBIndex;
+end;
+
+// ============================================================================
+// FIELD COMPATIBILITY
+// ============================================================================
+
+function TfrmCloneTable.ShowProblemDialog(const AMessage: string): Integer;
+var
+  Dlg: TForm;
+  Btn: TButton;
+  i: Integer;
+  YesBtn, NoBtn, CancelBtn: TButton;
+begin
+  Result := mrCancel;
+
+  Dlg := CreateMessageDialog(AMessage, mtWarning, [mbYes, mbNo, mbCancel]);
+  try
+    Dlg.Caption := 'CloneTable — Problem Fields';
+    Dlg.Width := Dlg.Width + 200;
+
+    YesBtn := nil;
+    NoBtn := nil;
+    CancelBtn := nil;
+
+    for i := 0 to Dlg.ComponentCount - 1 do
+    begin
+      if Dlg.Components[i] is TButton then
+      begin
+        Btn := TButton(Dlg.Components[i]);
+        if SameText(Btn.Name, 'Yes') then YesBtn := Btn
+        else if SameText(Btn.Name, 'No') then NoBtn := Btn
+        else if SameText(Btn.Name, 'Cancel') then CancelBtn := Btn;
+      end;
+    end;
+
+    if Assigned(YesBtn) then
+    begin
+      YesBtn.Caption := 'Deselect && Continue';
+      YesBtn.Width := 160;
+    end;
+    if Assigned(NoBtn) then
+    begin
+      NoBtn.Caption := 'Continue Anyway';
+      NoBtn.Width := 160;
+    end;
+    if Assigned(CancelBtn) then
+    begin
+      CancelBtn.Caption := 'Cancel';
+      CancelBtn.Width := 100;
+    end;
+
+    Result := Dlg.ShowModal;
+  finally
+    Dlg.Free;
+  end;
+end;
+
+function TfrmCloneTable.CheckFieldCompatibility(AForCopy: Boolean = True): Boolean;
+var
+  AMajor, AMinor: Word;
+  AVersion: Word;
+  SupportedTypes: TStringList;
+  ProblemFields: TProblemFieldArray;
+  KeptNames: TStringList;
+  Dlg: TfrmProblemDialog;
+  i, j: Integer;
+  NeedsMethodCheck: Boolean;
+  S, PrecisionStr: string;
+  P1, P2, Precision: Integer;
+  IsFB4Only: Boolean;
+  IsPrecisionHigh: Boolean;
+  Category: TProblemCategory;
+  HasProblem: Boolean;
+  HasAnyProblem: Boolean;
+begin
+  Result := False;
+
+  SetLength(ProblemFields, 0);
+  SupportedTypes := TStringList.Create;
+  try
+    ParseFBVersionString(
+      RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionString,
+      AMajor, AMinor);
+    AVersion := AMajor * 10 + AMinor;
+
+    GetDataTypesByFBVersion(AVersion, SupportedTypes);
+
+    NeedsMethodCheck := AForCopy and
+                        (chkboxExternalTable.Checked or
+                         rbExecuteBlock.Checked or
+                         rbRowByRow.Checked);
+
+    HasAnyProblem := False;
+
+    for i := 0 to High(FFields) do
+    begin
+      if not chkLstFields.Checked[i] then Continue;
+
+      HasProblem := False;
+      Category := pcNotSupported;
+      S := UpperCase(FFields[i].FieldType);
+
+      // ============================================================
+      // Sektion 1: Not supported (Array, BLOB bei bestimmten Methoden,
+      //            Computed bei Execute Block / External)
+      // ============================================================
+      // ============================================================
+      // Sektion 1: Not supported (Array, BLOB bei bestimmten Methoden,
+      //            Computed bei Execute Block / External)
+      // ============================================================
+      if NeedsMethodCheck then
+      begin
+        if Pos('[', FFields[i].FieldType) > 0 then
+        begin
+          HasProblem := True;
+          Category := pcNotSupported;
+        end
+        else if (chkboxExternalTable.Checked or rbExecuteBlock.Checked) and
+                (FFields[i].IsComputed or (Pos('BLOB', S) > 0)) then
+        begin
+          HasProblem := True;
+          Category := pcNotSupported;
+        end;
+      end;
+
+      // ============================================================
+      // Sektion 2: May overflow (nur bei Execute Block Cross-DB)
+      // ============================================================
+      if (not HasProblem) and
+         ((FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked) then
+      begin
+        IsFB4Only := False;
+        IsPrecisionHigh := False;
+
+        if (Pos('INT128', S) > 0) or (Pos('DECFLOAT', S) > 0) or
+           (Pos('WITH TIME ZONE', S) > 0) then
+        begin
+          if AMajor < 4 then
+            IsFB4Only := True;
+          // AMajor >= 4: kein Problem
+        end;
+
+        if (Pos('NUMERIC', S) > 0) or (Pos('DECIMAL', S) > 0) then
+        begin
+          P1 := Pos('(', S);
+          if P1 > 0 then
+          begin
+            P2 := Pos(',', S);
+            if P2 > P1 then
+              PrecisionStr := Trim(Copy(S, P1 + 1, P2 - P1 - 1))
+            else
+            begin
+              P2 := Pos(')', S);
+              if P2 > P1 then
+                PrecisionStr := Trim(Copy(S, P1 + 1, P2 - P1 - 1))
+              else
+                PrecisionStr := '';
+            end;
+
+            if TryStrToInt(PrecisionStr, Precision) then
+            begin
+              if (AMajor < 4) and (Precision > 18) then
+                IsFB4Only := True;
+            end;
+          end;
+        end;
+
+        if IsFB4Only then
+        begin
+          HasProblem := True;
+          Category := pcNotSupported;
+        end
+        else if IsPrecisionHigh then
+        begin
+          HasProblem := True;
+          Category := pcMayOverflow;
+        end;
+      end;
+
+      // ============================================================
+      // Sektion 3: IBX conversion (nur bei Row-by-Row)
+      // ============================================================
+      if (not HasProblem) and rbRowByRow.Checked then
+      begin
+        IsPrecisionHigh := False;
+
+        if (Pos('INT128', S) > 0) or (Pos('DECFLOAT', S) > 0) then
+          IsPrecisionHigh := True;
+
+        if (Pos('NUMERIC', S) > 0) or (Pos('DECIMAL', S) > 0) then
+        begin
+          P1 := Pos('(', S);
+          if P1 > 0 then
+          begin
+            P2 := Pos(',', S);
+            if P2 > P1 then
+              PrecisionStr := Trim(Copy(S, P1 + 1, P2 - P1 - 1))
+            else
+            begin
+              P2 := Pos(')', S);
+              if P2 > P1 then
+                PrecisionStr := Trim(Copy(S, P1 + 1, P2 - P1 - 1))
+              else
+                PrecisionStr := '';
+            end;
+
+            if TryStrToInt(PrecisionStr, Precision) then
+              if Precision > 16 then
+                IsPrecisionHigh := True;
+          end;
+        end;
+
+        if IsPrecisionHigh then
+        begin
+          HasProblem := True;
+          Category := pcIBXConversion;
+        end;
+      end;
+
+      // ============================================================
+      // Sektion 4: Version-Check (immer)
+      // ============================================================
+      if (not HasProblem) and (SupportedTypes.Count > 0) then
+      begin
+        if not IsFieldTypeSupported(FFields[i].FieldType, AVersion,
+                                    IBDBSource, IBTransSource) then
+        begin
+          HasProblem := True;
+          Category := pcNotSupported;
+        end;
+      end;
+
+      if HasProblem then
+      begin
+        HasAnyProblem := True;
+        SetLength(ProblemFields, Length(ProblemFields) + 1);
+        ProblemFields[High(ProblemFields)].FieldName := FFields[i].FieldName;
+        ProblemFields[High(ProblemFields)].FieldType := FFields[i].FieldType;
+        ProblemFields[High(ProblemFields)].Category := Category;
+      end;
+    end;
+
+    // ============================================================
+    // Keine Probleme → weiter
+    // ============================================================
+    if not HasAnyProblem then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+    // ============================================================
+    // Dialog öffnen
+    // ============================================================
+    Dlg := TfrmProblemDialog.CreateNew(nil);
+    try
+      Dlg.Init(ProblemFields);
+
+      if Dlg.ShowModal = mrOK then
+      begin
+        KeptNames := Dlg.GetKeptFieldNames;
+        try
+          for i := 0 to High(ProblemFields) do
+          begin
+            if KeptNames.IndexOf(ProblemFields[i].FieldName) < 0 then
+            begin
+              for j := 0 to chkLstFields.Count - 1 do
+                if SameText(chkLstFields.Items[j], ProblemFields[i].FieldName) then
+                begin
+                  chkLstFields.Checked[j] := False;
+                  Break;
+                end;
+            end;
+          end;
+        finally
+          KeptNames.Free;
+        end;
+
+        ApplyFieldStates;
+        Result := True;
+      end
+      else
+        Result := False;
+    finally
+      Dlg.Free;
+    end;
+
+  finally
+    SupportedTypes.Free;
+  end;
+end;
+
 procedure TfrmCloneTable.ApplyInitialSelection;
 var
   i: Integer;
@@ -204,59 +920,64 @@ end;
 procedure TfrmCloneTable.UpdateCopyMethodAvailability;
 var
   SameServer, SameDB: Boolean;
+  ServerVersionMajor, ServerVersionMinor: Word;
+  SupportsExecuteBlock: Boolean;
 begin
+  if FDestDBIndex < 0 then Exit;
+
+  // FBIntf: immer verfügbar (Same-DB und Cross-DB)
+    rbFBIntf.Enabled := True;
+
   SameServer := SameText(Trim(comboxSourceServer.Text), Trim(comboxDestServer.Text));
-  SameDB := SameServer and SameText(Trim(comboxSourceDB.Text), Trim(comboxDestDB.Text));
+  SameDB     := SameServer and SameText(Trim(comboxSourceDB.Text), Trim(comboxDestDB.Text));
 
-  // GroupBox ist IMMER enabled
-  grBoxCopyMethod.Enabled := True;
+  ServerVersionMajor := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionMajor;
+  ServerVersionMinor := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionMinor;
 
-  // Insert Select: nur bei SameDB möglich
+  // Execute Block mit ON EXTERNAL DATA SOURCE erst ab FB 2.1
+  SupportsExecuteBlock := (ServerVersionMajor > 2) or
+                          ((ServerVersionMajor = 2) and (ServerVersionMinor >= 1));
+
+  // ============================================================
+  // Enabled-Zustände pro Methode
+  // ============================================================
   rbInsertSelect.Enabled := SameDB;
 
-  // Execute Block: nur bei Cross-DB sinnvoll
-  rbExecuteBlock.Enabled := not SameDB;
+  if SameDB then
+    rbExecuteBlock.Enabled := True
+  else
+    rbExecuteBlock.Enabled := SupportsExecuteBlock;
 
-  // Row-by-Row: immer möglich
   rbRowByRow.Enabled := True;
 
-  // Sicherstellen, dass eine gültige Option ausgewählt ist
+  // ============================================================
+  // Vorauswahl — immer die beste verfügbare Methode
+  // ============================================================
   if SameDB then
   begin
-    // Insert Select ist der Default
-    if not rbInsertSelect.Checked and not rbRowByRow.Checked then
-      rbInsertSelect.Checked := True;
+    // Same-DB → Insert-Select ist immer die beste Wahl
+    rbInsertSelect.Checked := True;
 
-    // Falls eine ungültige Option ausgewählt war → korrigieren
-    if rbExecuteBlock.Checked then
-    begin
-      rbExecuteBlock.Checked := False;
-      rbInsertSelect.Checked := True;
-    end;
-
-    StatusBar1.SimpleText := 'Same database: Insert Select (default) or Row-by-Row.';
+    StatusBar1.SimpleText := 'Same database: Insert Select (fastest) or Row-by-Row.';
   end
   else
   begin
-    // Cross-DB: Default = Execute Block
-    if not rbExecuteBlock.Checked and not rbRowByRow.Checked then
-      rbExecuteBlock.Checked := True;
-
-    // Falls Insert Select ausgewählt war → korrigieren
-    if rbInsertSelect.Checked then
+    // Cross-DB → Execute Block (wenn verfügbar), sonst Row-by-Row
+    if SupportsExecuteBlock then
     begin
-      rbInsertSelect.Checked := False;
       rbExecuteBlock.Checked := True;
+      StatusBar1.SimpleText := 'Cross-database: Execute Block (default) or Row-by-Row.';
+    end
+    else
+    begin
+      rbRowByRow.Checked := True;
+      StatusBar1.SimpleText := 'Cross-database: Row-by-Row only (Execute Block requires FB 2.1+).';
     end;
-
-    StatusBar1.SimpleText := 'Cross-database: Execute Block (default) or Row-by-Row.';
   end;
 end;
 
 procedure TfrmCloneTable.FormCreate(Sender: TObject);
 begin
-  edtBatchSize.Text := IntToStr(DefaultBatchSize);
-
   // StringGrid initialisieren
   sgFields.RowCount := 1;
   sgFields.ColCount := 4;
@@ -299,67 +1020,6 @@ begin
     FInitialDBIndex := ANodeInfos^.dbIndex;
 end;
 
-// ============================================================================
-// SOURCE
-// ============================================================================
-
-{procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
-begin
-  if FUpdatingCombos then Exit;
-  FUpdatingCombos := True;
-  try
-    FillSourceDBCombo;
-  finally
-    FUpdatingCombos := False;
-  end;
-  UpdateCopyMethodAvailability;
-end;}
-
-{procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
-begin
-  if FUpdatingCombos then Exit;
-  FUpdatingCombos := True;
-  try
-    comboxSourceTables.Items.Clear;
-    if ConfigureSourceConnection then
-    begin
-      FillSourceTableCombo;
-      edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
-      LoadFields;
-    end
-    else
-      grBoxCopyMethod.Enabled := False;
-  finally
-    FUpdatingCombos := False;
-  end;
-  UpdateCopyMethodAvailability;
-end;}
-
-procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
-begin
-  if FUpdatingCombos then Exit;
-  FUpdatingCombos := True;
-  try
-    FillSourceDBCombo;
-
-    // Nach dem Füllen explizit die Kaskade auslösen,
-    // damit auch bei nur einer DB der Login-/Lade-Flow läuft.
-    if comboxSourceDB.Items.Count > 0 then
-    begin
-      comboxSourceDB.ItemIndex := 0;
-      // Handler explizit aufrufen, weil OnChange durch den Guard blockiert wird
-    end;
-  finally
-    FUpdatingCombos := False;
-  end;
-
-  // Jetzt Guard ist aus → explizit auslösen
-  if comboxSourceDB.Items.Count > 0 then
-    comboxSourceDBChange(nil);
-
-  UpdateCopyMethodAvailability;
-end;
-
 procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
 var
   i: Integer;
@@ -391,14 +1051,30 @@ begin
       edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
       LoadFields;
     end
-    else
-    begin
-      grBoxCopyMethod.Enabled := False;
-      StatusBar1.SimpleText := 'Source database not connected.';
-    end;
+    else StatusBar1.SimpleText := 'Source database not connected.';
+
   finally
     FUpdatingCombos := False;
   end;
+  UpdateCopyMethodAvailability;
+end;
+
+procedure TfrmCloneTable.comboxSourceServerChange(Sender: TObject);
+begin
+  if FUpdatingCombos then Exit;
+  FUpdatingCombos := True;
+  try
+    FillSourceDBCombo;
+    // KEIN erzwungenes ItemIndex := 0 mehr — FillSourceDBCombo
+    // setzt selbst einen Default, wenn keine valide Auswahl existiert.
+  finally
+    FUpdatingCombos := False;
+  end;
+
+  // Kaskade explizit auslösen
+  if comboxSourceDB.Items.Count > 0 then
+    comboxSourceDBChange(nil);
+
   UpdateCopyMethodAvailability;
 end;
 
@@ -411,8 +1087,36 @@ begin
   LoadFields;
 end;
 
+procedure TfrmCloneTable.edtExecBlockBatchExit(Sender: TObject);
+var
+  V: Integer;
+begin
+  V := StrToIntDef(Trim(edtExecBlockBatch.Text), 10000);
+
+  edtExecBlockBatch.Text := IntToStr(V);
+
+  if rbExecuteBlock.Checked then
+    UpdateEngineStatus;
+end;
+
+procedure TfrmCloneTable.edtLocalBatchSizeExit(Sender: TObject);
+var
+  V: Integer;
+begin
+  V := StrToIntDef(Trim(edtLocalBatchSize.Text), 500000);
+
+  edtLocalBatchSize.Text := IntToStr(V);
+
+  // StatusBar aktualisieren, falls Local aktiv ist
+  if rbInsertSelect.Checked then
+    UpdateEngineStatus;
+end;
+
 procedure TfrmCloneTable.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  if Assigned(FExtractor) then
+    FreeAndNil(FExtractor);
+
   if Assigned(IBQuerySource) and IBQuerySource.Active then
     IBQuerySource.Close;
   if Assigned(IBQueryDest) and IBQueryDest.Active then
@@ -460,9 +1164,14 @@ end;
 
 function TfrmCloneTable.FillSourceDBCombo: boolean;
 var
-  i: Integer;
+  i, PreserveIdx: Integer;
+  PreserveTitle: string;
 begin
   Result := False;
+
+  // Aktuelle Auswahl merken (falls vorhanden)
+  PreserveTitle := Trim(comboxSourceDB.Text);
+
   comboxSourceDB.Items.Clear;
 
   for i := 0 to High(RegisteredDatabases) do
@@ -471,14 +1180,21 @@ begin
 
   if comboxSourceDB.Items.Count > 0 then
   begin
-    comboxSourceDB.ItemIndex := 0;
+    // Versuche die vorherige Auswahl zu erhalten
+    PreserveIdx := comboxSourceDB.Items.IndexOf(PreserveTitle);
+    if PreserveIdx >= 0 then
+      comboxSourceDB.ItemIndex := PreserveIdx
+    else
+      comboxSourceDB.ItemIndex := 0;
+
     Result := True;
     if ConfigureSourceConnection then
     begin
       FillSourceTableCombo;
       LoadFields;
     end;
-  end else
+  end
+  else
   begin
     chkLstFields.Items.Clear;
     sgFields.RowCount := 0;
@@ -486,7 +1202,8 @@ begin
   end;
 end;
 
-function TfrmCloneTable.FillSourceTableCombo: boolean;
+//IBX version
+{function TfrmCloneTable.FillSourceTableCombo: boolean;
 begin
   Result := False;
   comboxSourceTables.Items.Clear;
@@ -505,6 +1222,48 @@ begin
       sgFields.RowCount := 0;
     end;
   except
+  end;
+end;}
+
+function TfrmCloneTable.FillSourceTableCombo: boolean;
+var
+  Extractor: TSimpleObjExtractor;
+  TableList: TStringList;
+  i: Integer;
+begin
+  Result := False;
+  comboxSourceTables.Items.Clear;
+
+  if FSourceDBIndex < 0 then
+    Exit;
+
+  try
+    Extractor := TSimpleObjExtractor.Create(FSourceDBIndex);
+    TableList := TStringList.Create;
+    try
+      Extractor.ExtractTableNames(TableList, False, False);
+      for i := 0 to TableList.Count - 1 do
+        comboxSourceTables.Items.Add(TableList[i]);
+    finally
+      TableList.Free;
+      Extractor.Free;
+    end;
+
+    if comboxSourceTables.Items.Count > 0 then
+    begin
+      comboxSourceTables.ItemIndex := 0;
+      Result := True;
+    end
+    else
+    begin
+      chkLstFields.Items.Clear;
+      sgFields.RowCount := 0;
+    end;
+  except
+    on E: Exception do
+    begin
+      StatusBar1.SimpleText := 'Could not load table names: ' + E.Message;
+    end;
   end;
 end;
 
@@ -539,6 +1298,7 @@ begin
 
     // --- Einstellungen von der geteilten DB in die Form-Component kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBSource);
+    SetDBInstanceIndex(IBDBSource, FSourceDBIndex);
 
     // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
     if Trim(IBDBSource.Params.Values['user_name']) = '' then
@@ -551,8 +1311,8 @@ begin
       if Pwd = '' then
         Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
 
-      if Pwd = '' then
-        Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
+      //if Pwd = '' then
+        //Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
 
       if (Pwd = '') and DBRec.RegRec.IsEmbedded then
         Pwd := 'embedded_local';
@@ -561,20 +1321,27 @@ begin
         IBDBSource.Params.Values['password'] := Pwd;
     end;
 
-    // --- Transaktion: Params kopieren, DefaultDatabase auf Form-DB setzen ---
-    if DBRec.IBTransaction.Params.Count > 0 then
-      IBTransSource.Params.Assign(DBRec.IBTransaction.Params)
-    else
-    begin
-      IBTransSource.Params.Clear;
-      IBTransSource.Params.Add('read_committed');
-      IBTransSource.Params.Add('rec_version');
-      IBTransSource.Params.Add('nowait');
-    end;
+    // --- Transaktion: Params kopieren + validieren ---
+    IBTransSource.Params.Clear;
+    IBTransSource.Params.Assign(DBRec.IBTransaction.Params);
+
+    // Defaults greifen, wenn die kopierten Params leer oder Müll sind
+    EnsureTransactionParams(IBTransSource, DefTxFileName);
+
+    if not IsTransactionParamsValid(IBTransSource) then
+      // Falls Assign Müll geliefert hat → hart auf Default
+      EnsureTransactionParams(IBTransSource, '');
+
+    // DefaultDatabase explizit setzen (Pflicht für StartTransaction!)
+    IBTransSource.DefaultDatabase := IBDBSource;
+
 
     // --- Jetzt verbinden (Form-eigene Verbindung!) ---
     if not IBDBSource.Connected then
       IBDBSource.Connected := True;
+
+    CachePasswordAfterConnect(FSourceDBIndex, IBDBSource);
+
     if not IBTransSource.InTransaction then
       IBTransSource.StartTransaction;
 
@@ -619,6 +1386,7 @@ begin
 
     // --- Einstellungen kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBDest);
+    SetDBInstanceIndex(IBDBDest, FDestDBIndex);
 
     // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
     if Trim(IBDBDest.Params.Values['user_name']) = '' then
@@ -631,8 +1399,8 @@ begin
       if Pwd = '' then
         Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
 
-      if Pwd = '' then
-        Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
+      //if Pwd = '' then
+        //Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
 
       if (Pwd = '') and DBRec.RegRec.IsEmbedded then
         Pwd := 'embedded_local';
@@ -641,15 +1409,16 @@ begin
         IBDBDest.Params.Values['password'] := Pwd;
     end;
 
-    if DBRec.IBTransaction.Params.Count > 0 then
-      IBTransDest.Params.Assign(DBRec.IBTransaction.Params)
-    else
-    begin
-      IBTransDest.Params.Clear;
-      IBTransDest.Params.Add('read_committed');
-      IBTransDest.Params.Add('rec_version');
-      IBTransDest.Params.Add('nowait');
-    end;
+    // --- Transaktion: Params kopieren + validieren ---
+    IBTransDest.Params.Clear;
+    IBTransDest.Params.Assign(DBRec.IBTransaction.Params);
+
+    EnsureTransactionParams(IBTransDest, DefTxFileName);
+
+    if not IsTransactionParamsValid(IBTransDest) then
+      EnsureTransactionParams(IBTransDest, '');
+
+    // DefaultDatabase VOR StartTransaction setzen!
     IBTransDest.DefaultDatabase := IBDBDest;
 
     // --- Query an die Form-eigenen Komponenten binden ---
@@ -659,6 +1428,9 @@ begin
     // --- Verbinden ---
     if not IBDBDest.Connected then
       IBDBDest.Connected := True;
+
+    CachePasswordAfterConnect(FDestDBIndex, IBDBDest);
+
     if not IBTransDest.InTransaction then
       IBTransDest.StartTransaction;
 
@@ -724,10 +1496,8 @@ begin
       ConnectToDBAs(FDestDBIndex);
 
     if not ConfigureDestConnection then
-    begin
-      grBoxCopyMethod.Enabled := False;
       StatusBar1.SimpleText := 'Destination database not connected.';
-    end;
+
   finally
     FUpdatingCombos := False;
   end;
@@ -784,54 +1554,60 @@ end;
 // ============================================================================
 procedure TfrmCloneTable.LoadFields;
 var
-  Iso: TIsolatedQuery;
-  i: Integer;
-  FieldName, FieldType, ComputedSource: string;
-  FSize: Integer;
+  RawFields: TFBFieldRawArray;
+  i, idx: Integer;
+  FieldType: string;
 begin
-  // === Absicherung: ungültige Ausgangslage verhindern ===
   if FSourceDBIndex < 0 then Exit;
   if Trim(comboxSourceTables.Text) = '' then Exit;
-  if not Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) then Exit;
 
   SetLength(FFields, 0);
   chkLstFields.Clear;
   sgFields.RowCount := 1;
 
   try
-    Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase,
-                             Trim(comboxSourceTables.Text));
-    try
-      while not Iso.Query.EOF do
-      begin
-        FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
-        GetFieldType(Iso.Query, FieldType, FSize);
-        ComputedSource := Trim(Iso.Query.FieldByName('computed_source').AsString);
+    EnsureExtractor(FSourceDBIndex);
+    if not Assigned(FExtractor) then Exit;
 
-        i := Length(FFields);
-        SetLength(FFields, i + 1);
-        FFields[i].FieldName := FieldName;
-        FFields[i].FieldType := FieldType;
-        FFields[i].IsComputed := (ComputedSource <> '');
-        FFields[i].Checked := True;
-        FFields[i].Formula := '';
+    RawFields := FExtractor.GetTableFieldsRaw(Trim(comboxSourceTables.Text));
 
-        chkLstFields.Items.Add(FieldName);
-        chkLstFields.Checked[i] := True;
+    for i := 0 to High(RawFields) do
+    begin
+      // Basis-Typ (nicht Domain-Name) — für Clone-Zwecke robust
+      FieldType := GetFBTypeName(
+        RawFields[i].FieldType,
+        RawFields[i].FieldSubType,
+        RawFields[i].FieldLength,
+        RawFields[i].FieldPrecision,
+        RawFields[i].FieldScale,
+        RawFields[i].CharacterSetName,
+        RawFields[i].CharacterLength
+      );
 
-        sgFields.RowCount := i + 2;
-        sgFields.Cells[0, i + 1] := '1';
-        sgFields.Cells[1, i + 1] := FieldName;
-        sgFields.Cells[2, i + 1] := FieldType;
-        sgFields.Cells[3, i + 1] := '';
+      // Array-Dimension anhängen — CheckFieldCompatibility erkennt
+      // Arrays am '['-Zeichen
+      if RawFields[i].ArrayUpperBound <> 0 then
+        FieldType := FieldType + ' [' + IntToStr(RawFields[i].ArrayUpperBound) + ']';
 
-        if FFields[i].IsComputed then
-          sgFields.Cells[3, i + 1] := '(computed)';
+      idx := Length(FFields);
+      SetLength(FFields, idx + 1);
+      FFields[idx].FieldName := RawFields[i].FieldName;
+      FFields[idx].FieldType := FieldType;
+      FFields[idx].IsComputed := (Trim(RawFields[i].ComputedSource) <> '');
+      FFields[idx].Checked := True;
+      FFields[idx].Formula := '';
 
-        Iso.Query.Next;
-      end;
-    finally
-      Iso.Free;
+      chkLstFields.Items.Add(RawFields[i].FieldName);
+      chkLstFields.Checked[idx] := True;
+
+      sgFields.RowCount := idx + 2;
+      sgFields.Cells[0, idx + 1] := '1';
+      sgFields.Cells[1, idx + 1] := RawFields[i].FieldName;
+      sgFields.Cells[2, idx + 1] := FieldType;
+      sgFields.Cells[3, idx + 1] := '';
+
+      if FFields[idx].IsComputed then
+        sgFields.Cells[3, idx + 1] := '(computed)';
     end;
   except
     on E: Exception do
@@ -842,8 +1618,8 @@ begin
       sgFields.RowCount := 1;
     end;
   end;
-
-  //btnGenTestFormulasClick(nil);
+  // Initialer Button-Zustand (wenn min. 1 Feld vorhanden → Execute aktiv)
+  btnExecute.Enabled := (chkLstFields.Count > 0);
 end;
 
 procedure TfrmCloneTable.btnSelectAllClick(Sender: TObject);
@@ -851,10 +1627,10 @@ var
   i: Integer;
 begin
   for i := 0 to chkLstFields.Count - 1 do
-  begin
     chkLstFields.Checked[i] := True;
-    sgFields.Cells[0, i + 1] := '1';
-  end;
+
+  ApplyFieldStates;
+  btnExecute.Enabled := (chkLstFields.Count > 0);
 end;
 
 procedure TfrmCloneTable.btnDeselectAllClick(Sender: TObject);
@@ -862,10 +1638,10 @@ var
   i: Integer;
 begin
   for i := 0 to chkLstFields.Count - 1 do
-  begin
     chkLstFields.Checked[i] := False;
-    sgFields.Cells[0, i + 1] := '0';
-  end;
+
+  ApplyFieldStates;
+  btnExecute.Enabled := False;
 end;
 
 procedure TfrmCloneTable.sgFieldsDblClick(Sender: TObject);
@@ -945,62 +1721,95 @@ end;
 function TfrmCloneTable.GenerateCreateTableSQL: string;
 var
   SL: TStringList;
-  i: Integer;
-  Iso: TIsolatedQuery;
-  FieldName, FieldType, DefaultSource, NullFlag, ComputedSource: string;
+  i, j: Integer;
+  RawFields: TFBFieldRawArray;
+  FieldName, FieldType, DefaultSource, ComputedSource: string;
   Line: string;
-  FSize: Integer;
 begin
   SL := TStringList.Create;
   try
-    SL.Add('CREATE TABLE ' + edtDestTable.Text + ' (');
+    SL.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Trim(edtDestTable.Text)) + ' (');
 
-    Iso := GetFieldsIsolated(RegisteredDatabases[FSourceDBIndex].IBDatabase, Trim(comboxSourceTables.Text));
-    try
-      i := 0;
-      while not Iso.Query.EOF do
+    EnsureExtractor(FSourceDBIndex);
+    if not Assigned(FExtractor) then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+    RawFields := FExtractor.GetTableFieldsRaw(Trim(comboxSourceTables.Text));
+
+    for i := 0 to High(RawFields) do
+    begin
+      if i >= chkLstFields.Count then Break;
+      if not chkLstFields.Checked[i] then Continue;
+
+      FieldName := MakeCaseSensitiveAuto(RawFields[i].FieldName);
+      ComputedSource := Trim(RawFields[i].ComputedSource);
+
+      if ComputedSource <> '' then
       begin
-        FieldName := Trim(Iso.Query.FieldByName('field_name').AsString);
+        Line := '  ' + FieldName + ' COMPUTED BY (' + ComputedSource + '),';
+      end
+      else
+      begin
+        FieldType := GetFBTypeName(
+          RawFields[i].FieldType,
+          RawFields[i].FieldSubType,
+          RawFields[i].FieldLength,
+          RawFields[i].FieldPrecision,
+          RawFields[i].FieldScale,
+          RawFields[i].CharacterSetName,
+          RawFields[i].CharacterLength
+        );
 
-        if chkLstFields.Checked[i] then
+        // Nach GetFBTypeName — Versions-Fix für BLOB-Subtype
+        if (RawFields[i].FieldType = 261) and          // BLOB
+           (RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionMajor < 2) then
         begin
-          GetFieldType(Iso.Query, FieldType, FSize);
-          DefaultSource := Trim(Iso.Query.FieldByName('field_default_source').AsString);
-          NullFlag := Iso.Query.FieldByName('field_not_null_constraint').AsString;
-          ComputedSource := Trim(Iso.Query.FieldByName('computed_source').AsString);
-
-          if ComputedSource <> '' then
-          begin
-            // COMPUTED BY: Immer anlegen bei normalen Tabellen
-            Line := '  ' + FieldName + ' COMPUTED BY (' + ComputedSource + '),';
-          end
-          else
-          begin
-            Line := '  ' + FieldName + ' ' + FieldType;
-
-            if DefaultSource <> '' then
-            begin
-              // Firebird liefert DefaultSource MIT dem Wort "DEFAULT" davor.
-              // Nur ein "DEFAULT" anhängen, wenn noch nicht vorhanden.
-              if UpperCase(Copy(DefaultSource, 1, 7)) = 'DEFAULT' then
-                Line := Line + ' ' + DefaultSource
-              else
-                Line := Line + ' DEFAULT ' + DefaultSource;
-            end;
-
-            if NullFlag = '1' then
-              Line := Line + ' NOT NULL';
-            Line := Line + ',';
-          end;
-
-          SL.Add(Line);
+          // Firebird 1.5 kennt den Alias 'BINARY' nicht → numerischer Subtyp
+          FieldType := StringReplace(FieldType, ' SUB_TYPE BINARY',
+                                     ' SUB_TYPE 0', [rfReplaceAll, rfIgnoreCase]);
+          FieldType := StringReplace(FieldType, ' SUB_TYPE TEXT',
+                                     ' SUB_TYPE 1', [rfReplaceAll, rfIgnoreCase]);
         end;
 
-        Iso.Query.Next;
-        Inc(i);
+        if Length(RawFields[i].ArrayDims) > 0 then
+        begin
+          FieldType := FieldType + ' [';
+          for j := 0 to High(RawFields[i].ArrayDims) do
+          begin
+            if j > 0 then FieldType := FieldType + ', ';
+            with RawFields[i].ArrayDims[j] do
+            begin
+              if LowerBound = 1 then
+                FieldType := FieldType + IntToStr(UpperBound)
+              else
+                FieldType := FieldType + IntToStr(LowerBound) + ':' +
+                             IntToStr(UpperBound);
+            end;
+          end;
+          FieldType := FieldType + ']';
+        end;
+
+        Line := '  ' + FieldName + ' ' + FieldType;
+
+        DefaultSource := Trim(RawFields[i].DefaultSource);
+        if DefaultSource <> '' then
+        begin
+          if UpperCase(Copy(DefaultSource, 1, 7)) = 'DEFAULT' then
+            Line := Line + ' ' + DefaultSource
+          else
+            Line := Line + ' DEFAULT ' + DefaultSource;
+        end;
+
+        if RawFields[i].NotNull then
+          Line := Line + ' NOT NULL';
+
+        Line := Line + ',';
       end;
-    finally
-      Iso.Free;
+
+      SL.Add(Line);
     end;
 
     // Letztes Komma entfernen
@@ -1008,7 +1817,7 @@ begin
     begin
       i := SL.Count - 1;
       Line := SL[i];
-      if Line[Length(Line)] = ',' then
+      if (Length(Line) > 0) and (Line[Length(Line)] = ',') then
         SL[i] := Copy(Line, 1, Length(Line) - 1);
     end;
 
@@ -1023,6 +1832,7 @@ function TfrmCloneTable.GenerateInsertSQL: string;
 var
   SourceFields, DestFields: string;
   i: Integer;
+  QFieldName: string;
 begin
   SourceFields := '';
   DestFields := '';
@@ -1031,17 +1841,20 @@ begin
   begin
     if chkLstFields.Checked[i] and (not FFields[i].IsComputed) then
     begin
+      QFieldName := MakeCaseSensitiveAuto(FFields[i].FieldName);
+
       if SourceFields <> '' then SourceFields := SourceFields + ', ';
-      SourceFields := SourceFields + FFields[i].FieldName;
+      SourceFields := SourceFields + QFieldName;
 
       if DestFields <> '' then DestFields := DestFields + ', ';
-      DestFields := DestFields + FFields[i].FieldName;
+      DestFields := DestFields + QFieldName;
     end;
   end;
 
-  Result := 'INSERT INTO ' + edtDestTable.Text + ' (' + DestFields + ')' + sLineBreak +
+  Result := 'INSERT INTO ' + MakeCaseSensitiveAuto(Trim(edtDestTable.Text)) +
+            ' (' + DestFields + ')' + sLineBreak +
             'SELECT ' + SourceFields + sLineBreak +
-            'FROM ' + Trim(comboxSourceTables.Text) + ';';
+            'FROM ' + MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)) + ';';
 end;
 
 function TfrmCloneTable.GenerateCreateExternalTableSQL: string;
@@ -1053,20 +1866,20 @@ var
 begin
   SL := TStringList.Create;
   try
-    SL.Add('CREATE TABLE ' + edtDestTable.Text + ' EXTERNAL FILE ''' +
-           edtExternalFile.Text + ''' (');
+    SL.Add('CREATE TABLE ' + MakeCaseSensitiveAuto(Trim(edtDestTable.Text)) +
+           ' EXTERNAL FILE ''' + edtExternalFile.Text + ''' (');
 
     for i := 0 to chkLstFields.Count - 1 do
     begin
       if not chkLstFields.Checked[i] then Continue;
 
-      FieldName := chkLstFields.Items[i];
-      FieldType := FFields[i].FieldType;   // Firebird-Typ, z. B. 'VARCHAR(50)'
+      FieldName := MakeCaseSensitiveAuto(chkLstFields.Items[i]);
+      FieldType := FFields[i].FieldType;
 
       // Keine BLOBs, Arrays oder Computed Fields in externen Tabellen!
       if FFields[i].IsComputed then Continue;
       if Pos('BLOB', UpperCase(FieldType)) > 0 then Continue;
-      if Pos('[', FieldType) > 0 then Continue;  // Arrays
+      if Pos('[', FieldType) > 0 then Continue;
 
       SL.Add('  ' + FieldName + ' ' + FieldType + ',');
     end;
@@ -1132,21 +1945,22 @@ end;
 procedure TfrmCloneTable.btnExecuteClick(Sender: TObject);
 var
   Fields: TFieldTransformArray;
+
   CopyEngineLocal: TCopyTableDataLocal;
   CopyEngineCrossExecuteBlock: TCopyTableDataCrossExecuteBlock;
-  CopyEngineCrossRowByRow: TCopyTableDataCrossRowByRow;
+  CopyEngineRowByRow: TCopyTableDataRowByRow;
+  CopyEngineFBIntf: TCopyTableDataFBIntf;
+
   DestTable: string;
-  SkippedFields: string;
   FromRow, ToRow: Integer;
   i: integer;
-
-  NeedsProblemCheck: Boolean;
+  TableCreated: Boolean;
   IsProblemField: Boolean;
-  TmpMethodName: string;
-
   ReportForm: TfrmReport;
   Stats: TTransferStatistic;
   FormulasText: string;
+  MissingFields: TStringList;
+  Answer: Integer;
 begin
   if chkboxExternalTable.Checked and (Trim(edtExternalFile.Text) = '') then
   begin
@@ -1163,6 +1977,19 @@ begin
   if FDestDBIndex < 0 then
   begin
     MessageDlg('Please select a valid destination database.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  // Sicherheits-Check: mindestens ein Feld muss ausgewählt sein
+  i := 0;
+  while (i < chkLstFields.Count) and (not chkLstFields.Checked[i]) do
+    Inc(i);
+
+  if i >= chkLstFields.Count then
+  begin
+    MessageDlg('No fields selected.' + sLineBreak +
+               'Please select at least one field to copy.',
+               mtWarning, [mbOK], 0);
     Exit;
   end;
 
@@ -1206,6 +2033,66 @@ begin
     Exit;
   end;
 
+  // ============================================================
+  // Feld-Kompatibilität prüfen
+  //  - Version-Check: immer
+  //  - Method-Check: nur wenn Copy Data aktiv
+  // ============================================================
+  if not CheckFieldCompatibility(chkCopyData.Checked) then
+  begin
+    StatusBar1.SimpleText := 'Copy cancelled by user.';
+    Exit;
+  end;
+
+  // ============================================================
+  // Structure-Drift-Check — nur wenn Daten kopiert werden
+  // ============================================================
+  if chkCopyData.Checked and TableExists(IBDBDest, DestTable) then
+  begin
+    MissingFields := GetMissingDestFields(IBDBDest, DestTable);
+    try
+      if MissingFields.Count > 0 then
+      begin
+        Answer := ShowStructureDriftDialog(DestTable, MissingFields,
+                                           chkCreateTable.Checked);
+
+        case Answer of
+          mrYes:
+            // Drop & Recreate
+            begin
+              if DropDestTable(IBDBDest, IBTransDest, DestTable) then
+                chkCreateTable.Checked := True   // sicherstellen dass neu angelegt wird
+              else
+              begin
+                StatusBar1.SimpleText := 'Drop failed — aborting copy.';
+                Exit;
+              end;
+            end;
+
+          mrNo:
+            // Deselect Missing
+            begin
+              DeselectFields(MissingFields);
+              ApplyFieldStates;
+              StatusBar1.SimpleText := IntToStr(MissingFields.Count) +
+                ' field(s) deselected.';
+            end;
+
+          mrIgnore:
+            ; // Continue Anyway — nichts tun
+
+          mrCancel:
+            begin
+              StatusBar1.SimpleText := 'Copy cancelled by user.';
+              Exit;
+            end;
+        end;
+      end;
+    finally
+      MissingFields.Free;
+    end;
+  end;
+
   // CREATE TABLE falls gewünscht
   if chkCreateTable.Checked then
   begin
@@ -1215,9 +2102,17 @@ begin
       Application.ProcessMessages;
 
       if chkboxExternalTable.Checked then
-        CreateExternalDestTable(IBDBDest, IBTransDest, DestTable)
+        TableCreated := CreateExternalDestTable(IBDBDest, IBTransDest, DestTable)
       else
-        CreateDestTable(IBDBDest, IBTransDest, DestTable);
+        TableCreated := CreateDestTable(IBDBDest, IBTransDest, DestTable);
+
+      if not TableCreated then
+      begin
+        // Fehler ist bereits in CreateDestTable/CreateExternalDestTable
+        // gemeldet worden (MessageDlg).
+        StatusBar1.SimpleText := 'Table creation failed: ' + DestTable;
+        Exit;   // ← Abbruch — KEIN Copy, KEIN Success-Dialog
+      end;
     end;
   end;
 
@@ -1244,80 +2139,6 @@ begin
     ToRow := 0;
   end;
 
-  // ============================================================
-  // Problemfelder prüfen – abhängig von der Engine
-  //   External / Execute Block: BLOB, Array, Computed
-  //   Row-by-Row:               nur Array
-  // ============================================================
-  NeedsProblemCheck := chkboxExternalTable.Checked or
-                       ((FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked) or
-                       rbRowByRow.Checked;
-
-  if NeedsProblemCheck then
-  begin
-    SkippedFields := '';
-    for i := 0 to chkLstFields.Count - 1 do
-    begin
-      if chkLstFields.Checked[i] then
-      begin
-        IsProblemField := False;
-
-        // Arrays sind immer problematisch (außer bei Insert Select)
-        if Pos('[', FFields[i].FieldType) > 0 then
-          IsProblemField := True;
-
-        // BLOB und Computed nur bei External/Execute Block
-        if chkboxExternalTable.Checked or
-           ((FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked) then
-        begin
-          if FFields[i].IsComputed or
-             (Pos('BLOB', UpperCase(FFields[i].FieldType)) > 0) then
-            IsProblemField := True;
-        end;
-
-        if IsProblemField then
-        begin
-          chkLstFields.Checked[i] := False;
-          sgFields.Cells[0, i + 1] := '0';
-          if SkippedFields <> '' then SkippedFields := SkippedFields + sLineBreak;
-          SkippedFields := SkippedFields + '  • ' + FFields[i].FieldName +
-                           '  (' + FFields[i].FieldType + ')';
-        end;
-      end;
-    end;
-
-    if SkippedFields <> '' then
-    begin
-      // Methode ermitteln für die Meldung
-      if chkboxExternalTable.Checked then
-        TmpMethodName := 'External Table'
-      else if (FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked then
-        TmpMethodName := 'Execute Block'
-      else if rbRowByRow.Checked then
-        TmpMethodName := 'Row-by-Row'
-      else
-        TmpMethodName := 'The selected method';
-
-      if MessageDlg(
-           TmpMethodName + ' cannot copy the following field types:' + sLineBreak +
-           sLineBreak +
-           SkippedFields + sLineBreak +
-           sLineBreak +
-           'These fields have been deselected.' + sLineBreak +
-           sLineBreak +
-           'Hint:' + sLineBreak +
-           '  • Arrays       → use Insert Select (same DB) or gbak' + sLineBreak +
-           '  • BLOB/Computed → use Insert Select or Row-by-Row' + sLineBreak +
-           sLineBreak +
-           'Start the copy operation anyway?',
-           mtWarning, [mbYes, mbNo], 0) <> mrYes then
-      begin
-        StatusBar1.SimpleText := 'Copy cancelled by user.';
-        Exit;
-      end;
-    end;
-  end;
-
   // Felder aus Grid holen
   Fields := GetFieldTransforms;
 
@@ -1339,7 +2160,7 @@ begin
       FSourceDBIndex, FDestDBIndex,
       MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
-      StrToIntDef(edtBatchSize.Text, 500000),
+      StrToIntDef(edtLocalBatchSize.Text, 500000),
       FromRow, ToRow
     );
     try
@@ -1395,7 +2216,7 @@ begin
   // ============================================================
   // CROSS-DB: Execute Block (keine Arrays, BLOBs, Computed)
   // ============================================================
-  else if (FSourceDBIndex <> FDestDBIndex) and rbExecuteBlock.Checked then
+  else if rbExecuteBlock.Checked then
   begin
     StatusBar1.SimpleText := 'Copying across databases (Execute Block)...';
     Application.ProcessMessages;
@@ -1404,7 +2225,7 @@ begin
       FSourceDBIndex, FDestDBIndex,
       MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
-      StrToIntDef(edtBatchSize.Text, 10000),
+      StrToIntDef(edtExecBlockBatch.Text, 20000),
       FromRow, ToRow,
       IBDBSource, IBTransSource, IBDBDest, IBTransDest
     );
@@ -1460,27 +2281,80 @@ begin
   end
 
   // ============================================================
-  // CROSS-DB: Row-by-Row (keine Arrays)
+  // FBIntf (Cross-DB mit Arrays und BLOBs)
+  // ============================================================
+  else if rbFBIntf.Checked then
+  begin
+    StatusBar1.SimpleText := 'Copying via FBIntf (arrays + BLOBs supported)...';
+    Application.ProcessMessages;
+
+    CopyEngineFBIntf := TCopyTableDataFBIntf.Create(
+      FSourceDBIndex, FDestDBIndex,
+      Trim(comboxSourceTables.Text), Trim(edtDestTable.Text),
+      Fields,
+      StrToIntDef(edtFBIntfMemory.Text, 256),
+      FromRow, ToRow,
+      chkFBIntfForceRow.Checked, GetFBIntfRowByRowCommit
+    );
+    try
+      CopyEngineFBIntf.Execute;
+      Stats := CopyEngineFBIntf.Statistics;
+    finally
+      CopyEngineFBIntf.Free;
+    end;
+
+    if chkboxExternalTable.Checked then
+      Stats.DestKind := 'External Table'
+    else
+      Stats.DestKind := 'Firebird Table';
+
+    Stats.SystemInfo := GetSystemInfo(GetDBFileNameFromConnectionString(
+      RegisteredDatabases[FDestDBIndex].RegRec.DatabaseName));
+
+    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
+       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
+      Stats.ClientLibVersion := 'Firebird ' +
+        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
+
+    // --- CREATE TABLE ---
+    if chkCreateTable.Checked then
+      Stats.CreateTableSQL := GenerateCreateTableSQL
+    else
+      Stats.CreateTableSQL := '';
+
+    // --- Report ---
+    ReportForm := TfrmReport.Create(nil);
+    try
+      ReportForm.SetReportText(FormatTransferReport(Stats));
+      ReportForm.ShowModal;
+    finally
+      ReportForm.Free;
+    end;
+  end
+
+  // ============================================================
+  // CROSS-DB: Row-by-Row (Fallback, keine Arrays)
   // ============================================================
   else
   begin
     StatusBar1.SimpleText := 'Copying across databases (Row-by-Row)...';
+
     Application.ProcessMessages;
 
-    CopyEngineCrossRowByRow := TCopyTableDataCrossRowByRow.Create(
+    CopyEngineRowByRow := TCopyTableDataRowByRow.Create(
       FSourceDBIndex, FDestDBIndex,
       MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text)), DestTable,
       Fields,
-      StrToIntDef(edtBatchSize.Text, 10000),
+      StrToIntDef(edtlRowByRowBatchSize.Text, 10000),
       FromRow, ToRow,
       IBDBSource, IBTransSource, IBDBDest, IBTransDest
     );
 
     try
-      CopyEngineCrossRowByRow.Execute;
-      Stats := CopyEngineCrossRowByRow.Statistics;
+      CopyEngineRowByRow.Execute;
+      Stats := CopyEngineRowByRow.Statistics;
     finally
-      CopyEngineCrossRowByRow.Free;
+      CopyEngineRowByRow.Free;
     end;
 
     if chkboxExternalTable.Checked then
@@ -1605,7 +2479,7 @@ begin
   MessageDlg('Queue feature coming soon!', mtInformation, [mbOK], 0);
 end;
 
-procedure TfrmCloneTable.btnCancelClick(Sender: TObject);
+procedure TfrmCloneTable.btnCancelGlobalClick(Sender: TObject);
 begin
   Close;
 end;
@@ -1626,15 +2500,103 @@ begin
     Q.AllowAutoActivateTransaction := True;
     Q.SQL.Text :=
       'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
-      'WHERE UPPER(RDB$RELATION_NAME) = :T AND RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0';
-    Q.ParamByName('T').AsString := UpperCase(TableName);
+      'WHERE RDB$RELATION_NAME = :T AND RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0';
+    Q.ParamByName('T').AsString := StripIdentifierQuotes(TableName);
     Q.Open;
-    Result := not Q.EOF;
+    Result := (Q.RecordCount > 0);
     Q.Close;
   finally
     Q.Free;
   end;
 end;
+
+{// ============================================================
+// TABLE EXISTS — prüft, ob eine Tabelle (kein View) in der DB existiert.
+//
+// Wichtig:
+//   * Arbeitet mit einer eigenen, frischen Transaktion
+//     → immer aktueller Snapshot, unabhängig vom Zustand der
+//       aufrufenden Transaktion (z. B. direkt nach einem DROP)
+//   * read_committed + rec_version + nowait → keine Blockaden
+//   * not Q.EOF statt RecordCount (IBX-RecordCount ist unzuverlässig)
+//   * Erkennt nur echte Tabellen, keine Views, keine System-Tabellen
+// ============================================================
+function TfrmCloneTable.TableExists(DB: TIBDatabase; TableName: string): Boolean;
+var
+  Q: TIBQuery;
+  T: TIBTransaction;
+  CleanName: string;
+begin
+  Result := False;
+
+  if DB = nil then
+    Exit;
+
+  CleanName := StripIdentifierQuotes(TableName);
+  if Trim(CleanName) = '' then
+    Exit;
+
+  Q := nil;
+  T := nil;
+  try
+    // ---- Eigene, frische Transaktion ----
+    T := TIBTransaction.Create(nil);
+    try
+      T.DefaultDatabase := DB;
+      T.Params.Clear;
+      T.Params.Add('read_committed');
+      T.Params.Add('rec_version');
+      T.Params.Add('nowait');
+      T.StartTransaction;
+
+      // ---- Query ----
+      Q := TIBQuery.Create(nil);
+      try
+        Q.Database := DB;
+        Q.Transaction := T;
+        Q.SQL.Text :=
+          'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+          'WHERE RDB$RELATION_NAME = :T ' +
+          '  AND RDB$VIEW_BLR IS NULL ' +
+          '  AND RDB$SYSTEM_FLAG = 0';
+        Q.ParamByName('T').AsString := CleanName;
+        Q.Open;
+
+        Q.First;
+        Result := not Q.EOF;
+
+        Q.Close;
+      finally
+        Q.Free;
+        Q := nil;
+      end;
+
+      if T.InTransaction then
+        T.Commit;
+
+    finally
+      T.Free;
+      T := nil;
+    end;
+
+  except
+    // Bei Fehler: Result bleibt False.
+    // Stilles Schlucken ist hier OK, weil TableExists eine reine
+    // Ja/Nein-Frage beantwortet — kein Grund, den User zu behelligen.
+    if Assigned(Q) then
+    begin
+      try Q.Close; except end;
+      FreeAndNil(Q);
+    end;
+    if Assigned(T) then
+    begin
+      try
+        if T.InTransaction then T.Rollback;
+      except end;
+      FreeAndNil(T);
+    end;
+  end;
+end;}
 
 function TfrmCloneTable.CreateDestTable(DestDB: TIBDatabase; DestTrans: TIBTransaction; TableName: string): Boolean;
 var
@@ -1758,9 +2720,27 @@ begin
   btnExternalFile.Enabled := chkboxExternalTable.Checked;
 end;
 
-procedure TfrmCloneTable.chkCreateTableChange(Sender: TObject);
+// ============================================================
+// Sofort-Sync bei jedem Klick im Hauptformular.
+// Aktualisiert FFields/sgFields und deaktiviert btnExecute,
+// wenn kein Feld mehr ausgewählt ist.
+// ============================================================
+procedure TfrmCloneTable.chkLstFieldsClickCheck(Sender: TObject);
+var
+  i: Integer;
+  AnyChecked: Boolean;
 begin
+  ApplyFieldStates;
 
+  AnyChecked := False;
+  for i := 0 to chkLstFields.Count - 1 do
+    if chkLstFields.Checked[i] then
+    begin
+      AnyChecked := True;
+      Break;
+    end;
+
+  btnExecute.Enabled := AnyChecked;
 end;
 
 procedure TfrmCloneTable.chkUseFormulaChange(Sender: TObject);

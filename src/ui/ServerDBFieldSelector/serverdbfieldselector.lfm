@@ -1,7 +1,7 @@
 object frmServerDBFieldSelector: TfrmServerDBFieldSelector
-  Left = 390
+  Left = 442
   Height = 316
-  Top = 226
+  Top = 157
   Width = 1250
   Caption = 'frmServerDBFieldSelector'
   ClientHeight = 316

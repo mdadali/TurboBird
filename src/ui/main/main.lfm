@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 944
-  Height = 649
-  Top = 542
+  Left = 532
+  Height = 668
+  Top = 221
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 620
+  ClientHeight = 639
   ClientWidth = 1486
   Color = clForm
   DragMode = dmAutomatic
@@ -5582,7 +5582,7 @@ object fmMain: TfmMain
   WindowState = wsMaximized
   object Splitter1: TSplitter
     Left = 360
-    Height = 565
+    Height = 584
     Top = 34
     Width = 14
     Beveled = True
@@ -5590,7 +5590,7 @@ object fmMain: TfmMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 21
-    Top = 599
+    Top = 618
     Width = 1486
     Panels = <    
       item
@@ -5681,7 +5681,7 @@ object fmMain: TfmMain
   end
   object PageControl1: TPageControl
     Left = 377
-    Height = 558
+    Height = 577
     Top = 37
     Width = 1106
     ActivePage = tsMain
@@ -5707,27 +5707,33 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 526
+      ClientHeight = 545
       ClientWidth = 1096
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
-      object PixieHtmlView1: TPixieHtmlView
+      object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 526
+        Height = 545
         Top = 0
         Width = 1096
-        TabOrder = 0
-        TabStop = True
-        Zoom = 1
+        BorderStyle = htFocused
+        HistoryMaxCount = 0
+        NoSelect = False
+        PrintMarginBottom = 2
+        PrintMarginLeft = 2
+        PrintMarginRight = 2
+        PrintMarginTop = 2
+        PrintScale = 1
+        OnHotSpotClick = HtmlViewer1HotSpotClick
         Align = alClient
-        Color = clWhite
+        TabOrder = 0
       end
     end
   end
   object Button1: TButton
     Left = 0
-    Height = 565
+    Height = 584
     Top = 34
     Width = 27
     Align = alLeft
@@ -5737,17 +5743,17 @@ object fmMain: TfmMain
   end
   object pnlLeft: TPanel
     Left = 27
-    Height = 565
+    Height = 584
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 565
+    ClientHeight = 584
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 5
     object tvMain: TTreeView
       Left = 1
-      Height = 500
+      Height = 519
       Top = 64
       Width = 331
       Align = alClient
@@ -7102,7 +7108,7 @@ object fmMain: TfmMain
     Tag = 501
     Images = ImageList1
     OnPopup = pmDatabasePopup
-    Left = 153
+    Left = 152
     Top = 480
     object lmNewForm: TMenuItem
       Tag = 501
@@ -7915,20 +7921,20 @@ object fmMain: TfmMain
       Caption = 'Clone Table...'
       OnClick = lmCloneTableClick
     end
-    object lmBulkExport: TMenuItem
+    object lmCSVBulkExporter: TMenuItem
       Tag = 1
-      Caption = 'Bulk Export'
-      OnClick = lmBulkExportClick
+      Caption = 'CSV Bulk Export...'
+      OnClick = lmCSVBulkExporterClick
     end
     object lmCloneToExternalTable: TMenuItem
       Tag = -10
-      Caption = 'Clone to external Table'
+      Caption = 'Clone to external Table...'
       Visible = False
       OnClick = lmCloneToExternalTableClick
     end
     object lmCopyTable: TMenuItem
       Tag = -10
-      Caption = 'Copy Table'
+      Caption = 'Copy Table...'
       Bitmap.Data = {
         36040000424D3604000000000000360000002800000010000000100000000100
         2000000000000004000064000000640000000000000000000000000000000000
@@ -7970,7 +7976,7 @@ object fmMain: TfmMain
     end
     object lmImportTable: TMenuItem
       Tag = -10
-      Caption = 'Import to Table'
+      Caption = 'Import to Table...'
       ImageIndex = 75
       Visible = False
       OnClick = lmImportTableClick
@@ -8422,11 +8428,6 @@ object fmMain: TfmMain
       Tag = 111
       Caption = 'Copy User Permission To'
       OnClick = lmCopyUserPermissionClick
-    end
-    object lmEditField: TMenuItem
-      Tag = 112
-      Caption = 'Edit Field'
-      OnClick = lmEditFieldClick
     end
     object lmNewUDF: TMenuItem
       Tag = 16
@@ -9347,6 +9348,11 @@ object fmMain: TfmMain
     TransactionName = '{E7A93331-169C-407D-B805-831FABAB8845}'
     Active = False
     DefaultDatabase = CurrentIBConnection
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
     Left = 104
     Top = 184
   end

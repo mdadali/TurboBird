@@ -38,6 +38,11 @@ object dmSysTables: TdmSysTables
   object stTrans: TIBTransaction
     TransactionName = '{6BAA211A-EF6A-40FE-AA49-76CA671ED2E9}'
     Active = False
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
     Left = 304
     Top = 32
   end

@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 462
+  Left = 489
   Height = 537
-  Top = 216
+  Top = 281
   Width = 1184
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -9,7 +9,6 @@ object fmTableManage: TfmTableManage
   ClientWidth = 1184
   KeyPreview = True
   OnClose = FormClose
-  OnCreate = FormCreate
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   Position = poScreenCenter
@@ -646,7 +645,7 @@ object fmTableManage: TfmTableManage
         TabOrder = 2
       end
       object bbDropForeignKey: TBitBtn
-        Left = 184
+        Left = 192
         Height = 40
         Top = 452
         Width = 75
@@ -781,7 +780,7 @@ object fmTableManage: TfmTableManage
         TabOrder = 1
       end
       object bbNewTrigger: TBitBtn
-        Left = 6
+        Left = 8
         Height = 40
         Top = 449
         Width = 126
@@ -868,7 +867,7 @@ object fmTableManage: TfmTableManage
         TabOrder = 2
       end
       object bbEditTrigger: TBitBtn
-        Left = 150
+        Left = 152
         Height = 40
         Top = 449
         Width = 75
@@ -975,7 +974,7 @@ object fmTableManage: TfmTableManage
       OnShow = tsPermissionsShow
       object sgPermissions: TStringGrid
         Left = 5
-        Height = 433
+        Height = 436
         Top = 5
         Width = 1154
         Align = alTop
@@ -1426,64 +1425,6 @@ object fmTableManage: TfmTableManage
       A769A329FB883AEA39B252FE876A65A455EBBAECB32A69FBF3B59947ADDAC0ED
       3F69310BB669DA901A4AFF6334A1AFDFEB7FD4BF7D97F00F4342ACEC
     }
-  end
-  object SQLQuery1: TIBQuery
-    AllowAutoActivateTransaction = True
-    Database = CurrentIBDatabase
-    Transaction = CurrentIBTransaction
-    BufferChunks = 1000
-    BufferChunksInFirstBlock = 50
-    CachedUpdates = False
-    CaseSensitiveParameterNames = False
-    EnableStatistics = False
-    GenerateParamNames = False
-    GeneratorField.ApplyOnEvent = gaeOnNewRecord
-    MasterDetailDelay = 0
-    Params = <>
-    SQLFiltered = False
-    DataSetCloseAction = dcDiscardChanges
-    TZTextOption = tzOffset
-    DefaultTZDate = 43831
-    Left = 101
-    Top = 198
-  end
-  object SQLQuery2: TIBQuery
-    AllowAutoActivateTransaction = True
-    Database = CurrentIBDatabase
-    Transaction = CurrentIBTransaction
-    BufferChunks = 1000
-    BufferChunksInFirstBlock = 50
-    CachedUpdates = False
-    CaseSensitiveParameterNames = False
-    EnableStatistics = False
-    GenerateParamNames = False
-    GeneratorField.ApplyOnEvent = gaeOnNewRecord
-    MasterDetailDelay = 0
-    Params = <>
-    SQLFiltered = False
-    DataSetCloseAction = dcDiscardChanges
-    TZTextOption = tzOffset
-    DefaultTZDate = 43831
-    Left = 209
-    Top = 198
-  end
-  object CurrentIBDatabase: TIBDatabase
-    Connected = False
-    CreateIfNotExists = False
-    AllowStreamedConnected = False
-    DefaultTransaction = CurrentIBTransaction
-    IdleTimer = 0
-    TraceFlags = []
-    UseDefaultSystemCodePage = False
-    Left = 344
-    Top = 264
-  end
-  object CurrentIBTransaction: TIBTransaction
-    TransactionName = '{B04763F6-F1D7-4FC1-96BF-E2F6315F94FB}'
-    Active = False
-    DefaultDatabase = CurrentIBDatabase
-    Left = 529
-    Top = 264
   end
   object ImageList2: TImageList
     Left = 428

@@ -1,4 +1,12 @@
-unit uCopyTableDataCrossRowByRow;
+{ ============================================================================
+  Row-by-Row Copy Engine — Cross-Database
+
+  Quoting-Regel in dieser Unit:
+
+    * Tabellen und Felder   → MakeCaseSensitiveAuto()
+    * Param-Namen (:name)   → NICHT quoten (Firebird-Params case-insensitiv)
+  ============================================================================ }
+unit ucopytabledatarowbyrow;
 
 {$mode objfpc}{$H+}
 
@@ -37,7 +45,6 @@ type
     FLblElapsed    : TLabel;
     FBtnCancel     : TButton;
 
-    procedure BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
   protected
     procedure UpdateProgressGUI;
     procedure Execute; override;
@@ -64,9 +71,9 @@ type
     property ErrorMessage : string read FErrorMessage;
   end;
 
-  { TCopyTableDataCrossRowByRow }
+  { TCopyTableDataRowByRow }
 
-  TCopyTableDataCrossRowByRow = class
+  TCopyTableDataRowByRow = class
   private
     FSourceDBIndex : Integer;
     FDestDBIndex   : Integer;
@@ -138,8 +145,11 @@ begin
   FSourceTrans := ASourceTrans;
   FDestDB := ADestDB;
   FDestTrans := ADestTrans;
-  FSourceTable := ASourceTable;
-  FDestTable := ADestTable;
+
+  // Identifier mit Auto-Quoting vorbereiten
+  FSourceTable := MakeCaseSensitiveAuto(ASourceTable);
+  FDestTable   := MakeCaseSensitiveAuto(ADestTable);
+
   FBatchSize := ABatchSize;
   FTotalRows := ATotalRows;
   FFromRow := AFromRow;
@@ -171,54 +181,6 @@ begin
   FProgressBar   := AProgressBar;
   FLblElapsed    := ALblElapsed;
   FBtnCancel     := ABtnCancel;
-end;
-
-procedure TCopyThreadRowByRow.BuildBatchInsert(SourceQuery: TIBQuery; BatchRows: Integer; out SQL: string);
-var
-  DestFields, RowValues: string;
-  i: Integer;
-  FieldValue: string;
-begin
-  DestFields := '';
-  for i := 0 to High(FFieldTransforms) do
-  begin
-    if FFieldTransforms[i].CopyField then
-    begin
-      if DestFields <> '' then
-        DestFields := DestFields + ', ';
-      DestFields := DestFields + FFieldTransforms[i].DestField;
-    end;
-  end;
-
-  // NUR EINE Zeile!
-  RowValues := '';
-  for i := 0 to High(FFieldTransforms) do
-  begin
-    if not FFieldTransforms[i].CopyField then
-      Continue;
-
-    if RowValues <> '' then
-      RowValues := RowValues + ', ';
-
-    if SourceQuery.FieldByName(FFieldTransforms[i].SourceField).IsNull then
-      RowValues := RowValues + 'NULL'
-    else
-    begin
-      if FFieldTransforms[i].Formula <> '' then
-      begin
-        // Formel: $1 durch Feldnamen ersetzen, nicht durch Wert!
-        RowValues := RowValues + StringReplace(FFieldTransforms[i].Formula, '$1',
-                                               FFieldTransforms[i].SourceField, [rfReplaceAll]);
-      end
-      else
-      begin
-        FieldValue := SourceQuery.FieldByName(FFieldTransforms[i].SourceField).AsString;
-        RowValues := RowValues + QuotedStr(FieldValue);
-      end;
-    end;
-  end;
-
-  SQL := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + RowValues + ')';
 end;
 
 procedure TCopyThreadRowByRow.UpdateProgressGUI;
@@ -254,9 +216,8 @@ var
   SourceQuery, DestQuery: TIBQuery;
   BatchCount, BatchIndex: Integer;
   FromRow, ToRow, BatchRows: Integer;
-  i: Integer;
+  i, f: Integer;
   DestFields, SelectFields, ParamNames: string;
-  FieldValue: string;
   OldDecimalSep: Char;
   RowsInBatch: Integer;
 begin
@@ -264,7 +225,9 @@ begin
   DefaultFormatSettings.DecimalSeparator := '.';
   try
     try
+      // ============================================================
       // Zielfelder + Parameter-Namen einmalig sammeln
+      // ============================================================
       DestFields := '';
       ParamNames := '';
       for i := 0 to High(FFieldTransforms) do
@@ -276,12 +239,16 @@ begin
             DestFields := DestFields + ', ';
             ParamNames := ParamNames + ', ';
           end;
-          DestFields := DestFields + FFieldTransforms[i].DestField;
+          // Spalten-Name quoten — Param-Name NICHT (Firebird-Params
+          // sind case-insensitive, Quoting würde brechen)
+          DestFields := DestFields + MakeCaseSensitiveAuto(FFieldTransforms[i].DestField);
           ParamNames := ParamNames + ':' + FFieldTransforms[i].DestField;
         end;
       end;
 
+      // ============================================================
       // SELECT-Felder mit Formeln
+      // ============================================================
       SelectFields := '';
       for i := 0 to High(FFieldTransforms) do
       begin
@@ -289,12 +256,13 @@ begin
           Continue;
         if SelectFields <> '' then
           SelectFields := SelectFields + ', ';
+
         if FFieldTransforms[i].Formula <> '' then
           SelectFields := SelectFields + '(' +
             StringReplace(FFieldTransforms[i].Formula, '$1',
-                          FFieldTransforms[i].SourceField, [rfReplaceAll]) + ')'
+                          MakeCaseSensitiveAuto(FFieldTransforms[i].SourceField), [rfReplaceAll]) + ')'
         else
-          SelectFields := SelectFields + FFieldTransforms[i].SourceField;
+          SelectFields := SelectFields + MakeCaseSensitiveAuto(FFieldTransforms[i].SourceField);
       end;
 
       SourceQuery := TIBQuery.Create(nil);
@@ -308,9 +276,11 @@ begin
         DestQuery.AllowAutoActivateTransaction := true;
         DestQuery.Transaction := FDestTrans;
 
-        // INSERT EINMAL vorbereiten!
-        DestQuery.SQL.Text := 'INSERT INTO ' + FDestTable + ' (' + DestFields + ') VALUES (' + ParamNames + ')';
-        DestQuery.Prepare;
+        // ============================================================
+        // INSERT EINMAL vorbereiten
+        // ============================================================
+        DestQuery.SQL.Text := 'INSERT INTO ' + FDestTable +
+                              ' (' + DestFields + ') VALUES (' + ParamNames + ')';
 
         BatchCount := (FTotalRows + FBatchSize - 1) div FBatchSize;
         FStartTime := Now;
@@ -325,7 +295,9 @@ begin
             ToRow := FFromRow + FTotalRows - 1;
           BatchRows := ToRow - FromRow + 1;
 
+          // ============================================================
           // SELECT auf Quell-DB
+          // ============================================================
           SourceQuery.Close;
           SourceQuery.SQL.Text :=
             'SELECT FIRST ' + IntToStr(BatchRows) +
@@ -342,24 +314,51 @@ begin
           begin
             if Cancelled then Break;
 
+            // ============================================================
             // Params aus SourceQuery-Feldern setzen
+            // ============================================================
+            f := 0;
             for i := 0 to High(FFieldTransforms) do
             begin
-              if not FFieldTransforms[i].CopyField then Continue;
+              if not FFieldTransforms[i].CopyField then
+                Continue;
 
-              if SourceQuery.Fields[i].IsNull then
+              if SourceQuery.Fields[f].IsNull then
                 DestQuery.ParamByName(FFieldTransforms[i].DestField).Clear
               else
               begin
-                FieldValue := SourceQuery.Fields[i].AsString;
-                if SourceQuery.Fields[i].DataType in [ftSmallint, ftInteger, ftLargeint,
-                                                       ftFloat, ftCurrency, ftBCD, ftFMTBcd] then
-                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsFloat := StrToFloat(FieldValue)
-                else if SourceQuery.Fields[i].DataType = ftBoolean then
-                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsBoolean := (FieldValue = 'True')
+                // Standard-Typen → native Konvertierung
+                case SourceQuery.Fields[f].DataType of
+                  ftSmallint, ftWord:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsSmallInt :=
+                      SourceQuery.Fields[f].AsInteger;
+
+                  ftInteger, ftAutoInc:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsInteger :=
+                      SourceQuery.Fields[f].AsInteger;
+
+                  ftLargeint:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsLargeInt :=
+                      SourceQuery.Fields[f].AsLargeInt;
+
+                  ftFloat, ftCurrency:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsFloat :=
+                      SourceQuery.Fields[f].AsFloat;
+
+                  ftDateTime, ftTimeStamp, ftDate, ftTime:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsDateTime :=
+                      SourceQuery.Fields[f].AsDateTime;
+
+                  ftBoolean:
+                    DestQuery.ParamByName(FFieldTransforms[i].DestField).AsBoolean :=
+                      SourceQuery.Fields[f].AsBoolean;
                 else
-                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsString := FieldValue;
+                  DestQuery.ParamByName(FFieldTransforms[i].DestField).AsString :=
+                    SourceQuery.Fields[f].AsString;
+                end;
               end;
+
+              Inc(f);
             end;
 
             DestQuery.ExecSQL;
@@ -368,7 +367,9 @@ begin
             Inc(RowsInBatch);
             SourceQuery.Next;
 
+            // ============================================================
             // Batch-Commit
+            // ============================================================
             if (RowsInBatch >= FBatchSize) then
             begin
               FDestTrans.CommitRetaining;
@@ -379,7 +380,9 @@ begin
 
           SourceQuery.Close;
 
+          // ============================================================
           // Rest committen
+          // ============================================================
           if RowsInBatch > 0 then
           begin
             FDestTrans.CommitRetaining;
@@ -387,6 +390,9 @@ begin
           end;
         end;
 
+        // ============================================================
+        // Finaler Commit
+        // ============================================================
         if FDestTrans.InTransaction then
           FDestTrans.Commit;
 
@@ -414,9 +420,9 @@ begin
 end;
 
 
-{ TCopyTableDataCrossRowByRow }
+{ TCopyTableDataRowByRow }
 
-constructor TCopyTableDataCrossRowByRow.Create(
+constructor TCopyTableDataRowByRow.Create(
   ASourceDBIndex, ADestDBIndex : Integer;
   const ASourceTable, ADestTable : string;
   const AFieldTransforms : TFieldTransformArray;
@@ -434,8 +440,11 @@ begin
 
   FSourceDBIndex := ASourceDBIndex;
   FDestDBIndex   := ADestDBIndex;
-  FSourceTable   := ASourceTable;
-  FDestTable     := ADestTable;
+
+  // Identifier mit Auto-Quoting vorbereiten
+  FSourceTable   := MakeCaseSensitiveAuto(ASourceTable);
+  FDestTable     := MakeCaseSensitiveAuto(ADestTable);
+
   FBatchSize     := ABatchSize;
   FFromRow       := AFromRow;
   FToRow         := AToRow;
@@ -455,7 +464,7 @@ begin
     FFieldTransforms[i] := AFieldTransforms[i];
 end;
 
-destructor TCopyTableDataCrossRowByRow.Destroy;
+destructor TCopyTableDataRowByRow.Destroy;
 begin
   if Assigned(FThread) then
   begin
@@ -466,7 +475,7 @@ begin
   inherited Destroy;
 end;
 
-function TCopyTableDataCrossRowByRow.GetSourceDB : TIBDatabase;
+function TCopyTableDataRowByRow.GetSourceDB : TIBDatabase;
 begin
   if Assigned(FSourceDB) then
     Result := FSourceDB
@@ -474,7 +483,7 @@ begin
     Result := RegisteredDatabases[FSourceDBIndex].IBDatabase;
 end;
 
-function TCopyTableDataCrossRowByRow.GetSourceTrans : TIBTransaction;
+function TCopyTableDataRowByRow.GetSourceTrans : TIBTransaction;
 begin
   if Assigned(FSourceTrans) then
     Result := FSourceTrans
@@ -482,7 +491,7 @@ begin
     Result := RegisteredDatabases[FSourceDBIndex].IBTransaction;
 end;
 
-function TCopyTableDataCrossRowByRow.GetDestDB : TIBDatabase;
+function TCopyTableDataRowByRow.GetDestDB : TIBDatabase;
 begin
   if Assigned(FDestDB) then
     Result := FDestDB
@@ -490,7 +499,7 @@ begin
     Result := RegisteredDatabases[FDestDBIndex].IBDatabase;
 end;
 
-function TCopyTableDataCrossRowByRow.GetDestTrans : TIBTransaction;
+function TCopyTableDataRowByRow.GetDestTrans : TIBTransaction;
 begin
   if Assigned(FDestTrans) then
     Result := FDestTrans
@@ -498,7 +507,7 @@ begin
     Result := RegisteredDatabases[FDestDBIndex].IBTransaction;
 end;
 
-procedure TCopyTableDataCrossRowByRow.CancelButtonClick(Sender: TObject);
+procedure TCopyTableDataRowByRow.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
   if Assigned(FThread) then
@@ -511,7 +520,7 @@ begin
   end;
 end;
 
-function TCopyTableDataCrossRowByRow.Execute : Boolean;
+function TCopyTableDataRowByRow.Execute : Boolean;
 var
   CountQuery : TIBQuery;
   TotalInSource : Integer;
@@ -524,7 +533,6 @@ var
   EndTime : TDateTime;
   RowsPerSec : Double;
   StatusStr : string;
-  Msg : string;
   ErrorMsg : string;
 begin
   Result := False;
@@ -714,8 +722,16 @@ begin
     RowsPerSec := 0;
 
   FStatistics.Kind            := tkCopy;
-  FStatistics.Method          := cmCrossRowByRow;
+
+  // Same-DB vs. Cross-DB unterscheiden
+  // CloneTable nutzt diese Unit auch für Same-DB Row-by-Row
+  if FSourceDBIndex = FDestDBIndex then
+    FStatistics.Method := cmLocalRowByRow
+  else
+    FStatistics.Method := cmCrossRowByRow;
+
   FStatistics.SourceKind      := 'Firebird Table';
+
   FStatistics.SourceServer    := RegisteredDatabases[FSourceDBIndex].RegRec.ServerName;
   FStatistics.SourceDatabase  := RegisteredDatabases[FSourceDBIndex].RegRec.Title;
   FStatistics.SourceTable     := FSourceTable;

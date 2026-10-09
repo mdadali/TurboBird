@@ -51,36 +51,65 @@ function GetFieldsIsolated(const SourceDB: TIBDatabase; const ATableName: string
 var
   SQL: string;
   TableNameForSQL: string;
+  DBIndex: Integer;
+  IsFB15: Boolean;
 begin
   TableNameForSQL := ATableName;
-    // Hochkommas entfernen, falls vorhanden
   if (TableNameForSQL[1] = '"') and (TableNameForSQL[Length(TableNameForSQL)] = '"') then
     TableNameForSQL := Copy(TableNameForSQL, 2, Length(TableNameForSQL)-2);
 
-  // QueryTemplate aus deinem bestehenden Code, nur parametrisiert
-  SQL :=
-    'SELECT r.RDB$FIELD_NAME AS field_name, ' +
-    ' r.RDB$DESCRIPTION AS field_description, ' +
-    ' r.RDB$DEFAULT_SOURCE AS field_default_source, ' +
-    ' r.RDB$NULL_FLAG AS field_not_null_constraint, ' +
-    ' f.RDB$FIELD_LENGTH AS field_length, ' +
-    ' f.RDB$CHARACTER_LENGTH AS characterlength, ' +
-    ' f.RDB$FIELD_PRECISION AS field_precision, ' +
-    ' f.RDB$FIELD_SCALE AS field_scale, ' +
-    ' f.RDB$FIELD_TYPE as field_type_int, ' +
-    ' f.RDB$FIELD_SUB_TYPE AS field_sub_type, ' +
-    ' coll.RDB$COLLATION_NAME AS field_collation, ' +
-    ' cset.RDB$CHARACTER_SET_NAME AS field_charset, ' +
-    ' f.RDB$computed_source AS computed_source, ' +
-    ' dim.RDB$UPPER_BOUND AS array_upper_bound, ' +
-    ' r.RDB$FIELD_SOURCE AS field_source ' +
-    ' FROM RDB$RELATION_FIELDS r ' +
-    ' LEFT JOIN RDB$FIELDS f ON r.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
-    ' LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID and f.rdb$character_set_id=coll.rdb$character_set_id ' +
-    ' LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
-    ' LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
-    ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(TableNameForSQL) +
-    ' ORDER BY r.RDB$FIELD_POSITION';
+  // FB-1.5-Weiche: Server-Bug schneidet CHAR(31) auf 10 Zeichen ab
+  DBIndex := GetDBIndexByDatabase(SourceDB);
+  IsFB15 := (DBIndex >= 0) and (RegisteredDatabases[DBIndex].RegRec.ServerVersionMajor < 2);
+
+  if IsFB15 then
+    SQL :=
+      'SELECT CAST(r.RDB$FIELD_NAME AS VARCHAR(255)) AS field_name, ' +
+      ' r.RDB$DESCRIPTION AS field_description, ' +
+      ' r.RDB$DEFAULT_SOURCE AS field_default_source, ' +
+      ' r.RDB$NULL_FLAG AS field_not_null_constraint, ' +
+      ' f.RDB$FIELD_LENGTH AS field_length, ' +
+      ' f.RDB$CHARACTER_LENGTH AS characterlength, ' +
+      ' f.RDB$FIELD_PRECISION AS field_precision, ' +
+      ' f.RDB$FIELD_SCALE AS field_scale, ' +
+      ' f.RDB$FIELD_TYPE as field_type_int, ' +
+      ' f.RDB$FIELD_SUB_TYPE AS field_sub_type, ' +
+      ' CAST(coll.RDB$COLLATION_NAME AS VARCHAR(255)) AS field_collation, ' +
+      ' CAST(cset.RDB$CHARACTER_SET_NAME AS VARCHAR(255)) AS field_charset, ' +
+      ' f.RDB$computed_source AS computed_source, ' +
+      ' dim.RDB$UPPER_BOUND AS array_upper_bound, ' +
+      ' CAST(r.RDB$FIELD_SOURCE AS VARCHAR(255)) AS field_source ' +
+      ' FROM RDB$RELATION_FIELDS r ' +
+      ' LEFT JOIN RDB$FIELDS f ON r.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
+      ' LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID and f.rdb$character_set_id=coll.rdb$character_set_id ' +
+      ' LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
+      ' LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
+      ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(TableNameForSQL) +
+      ' ORDER BY r.RDB$FIELD_POSITION'
+  else
+    SQL :=
+      'SELECT r.RDB$FIELD_NAME AS field_name, ' +
+      ' r.RDB$DESCRIPTION AS field_description, ' +
+      ' r.RDB$DEFAULT_SOURCE AS field_default_source, ' +
+      ' r.RDB$NULL_FLAG AS field_not_null_constraint, ' +
+      ' f.RDB$FIELD_LENGTH AS field_length, ' +
+      ' f.RDB$CHARACTER_LENGTH AS characterlength, ' +
+      ' f.RDB$FIELD_PRECISION AS field_precision, ' +
+      ' f.RDB$FIELD_SCALE AS field_scale, ' +
+      ' f.RDB$FIELD_TYPE as field_type_int, ' +
+      ' f.RDB$FIELD_SUB_TYPE AS field_sub_type, ' +
+      ' coll.RDB$COLLATION_NAME AS field_collation, ' +
+      ' cset.RDB$CHARACTER_SET_NAME AS field_charset, ' +
+      ' f.RDB$computed_source AS computed_source, ' +
+      ' dim.RDB$UPPER_BOUND AS array_upper_bound, ' +
+      ' r.RDB$FIELD_SOURCE AS field_source ' +
+      ' FROM RDB$RELATION_FIELDS r ' +
+      ' LEFT JOIN RDB$FIELDS f ON r.RDB$FIELD_SOURCE = f.RDB$FIELD_NAME ' +
+      ' LEFT JOIN RDB$COLLATIONS coll ON f.RDB$COLLATION_ID = coll.RDB$COLLATION_ID and f.rdb$character_set_id=coll.rdb$character_set_id ' +
+      ' LEFT JOIN RDB$CHARACTER_SETS cset ON f.RDB$CHARACTER_SET_ID = cset.RDB$CHARACTER_SET_ID ' +
+      ' LEFT JOIN RDB$FIELD_DIMENSIONS dim ON f.RDB$FIELD_NAME = dim.RDB$FIELD_NAME ' +
+      ' WHERE r.RDB$RELATION_NAME = ' + QuotedStr(TableNameForSQL) +
+      ' ORDER BY r.RDB$FIELD_POSITION';
 
   Result := TIsolatedQuery.Create(SourceDB, SQL, AStrList);
 end;

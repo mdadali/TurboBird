@@ -1081,6 +1081,7 @@ begin
 
   // Eigene Datenbank‑Kopie für dieses Fenster
   AssignIBDatabase(RegisteredDatabases[dbIndex].IBDatabase, FIBConnection);
+  SetDBInstanceIndex(FIBConnection, dbIndex);
   FQueryTrans.DefaultDatabase := FIBConnection;
   FIBConnection.DefaultTransaction := FQueryTrans;
 
@@ -1117,6 +1118,7 @@ begin
     FIBConnection.OnLogin := @dmSysTables.OnDatabaseLogin;
     FIBConnection.LoginPrompt := True;
     FIBConnection.Connected := True;
+    CachePasswordAfterConnect(dbIndex, FIBConnection);
   end;
 
   // Tabellennamen für Syntax‑Highlighting laden
@@ -2698,23 +2700,20 @@ procedure TfmQueryWindow.rgScreenModesClick(Sender: TObject);
 begin
   case rgScreenModes.ItemIndex of
   0:begin
-      //fmMain.tvMain.Visible  := true;
-      //fmMain.ToolBar1.Visible := true;
       meQuery.Align := alTop;
       meQuery.Visible := true;
+      Splitter1.Visible := true;
       pnlOutputPanel.Visible := true;
     end;
   1:begin
-      //fmMain.tvMain.Visible  := true;
-      //fmMain.ToolBar1.Visible := false;
+      pnlOutputPanel.Visible := false;
       pnlOutputPanel.Visible := false;
       meQuery.Align := alClient;
       meQuery.Visible := true;
     end;
   2:begin
-      //fmMain.tvMain.Visible  := true;
-      //fmMain.ToolBar1.Visible := false;
       meQuery.Visible := false;
+      Splitter1.Visible := false;
       meQuery.Align := alTop;
       pnlOutputPanel.Visible := true;
     end;

@@ -11,6 +11,8 @@ uses
   IBQuery, IBTable,
 
   turbocommon,
+  fbcommon,
+
   uthemeselector,
   foreign_key_table,
   fdataexportersintrf;

@@ -1,12 +1,11 @@
 object fmPermissionManage: TfmPermissionManage
   Left = 590
-  Height = 359
+  Height = 363
   Top = 92
-  Width = 532
+  Width = 538
   Caption = 'Permission Management'
-  ClientHeight = 359
-  ClientWidth = 532
-  DesignTimePPI = 95
+  ClientHeight = 363
+  ClientWidth = 538
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -15,96 +14,96 @@ object fmPermissionManage: TfmPermissionManage
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 0
-    Height = 335
+    Height = 339
     Top = 24
-    Width = 532
+    Width = 538
     ActivePage = tsTables
     Align = alClient
     TabIndex = 0
     TabOrder = 0
     object tsTables: TTabSheet
       Caption = 'Tables'
-      ClientHeight = 301
+      ClientHeight = 308
       ClientWidth = 528
       object Label1: TLabel
         Left = 14
-        Height = 20
+        Height = 19
         Top = 11
-        Width = 65
+        Width = 62
         Caption = 'User/Role'
         ParentColor = False
       end
       object Label2: TLabel
         Left = 14
-        Height = 20
-        Top = 94
-        Width = 36
+        Height = 19
+        Top = 95
+        Width = 32
         Caption = 'Table'
         ParentColor = False
       end
       object cbTables: TComboBox
         Left = 14
-        Height = 32
-        Top = 111
-        Width = 234
+        Height = 35
+        Top = 112
+        Width = 236
         ItemHeight = 0
         OnChange = cbTablesChange
         Style = csDropDownList
         TabOrder = 0
       end
       object Label3: TLabel
-        Left = 307
-        Height = 20
+        Left = 310
+        Height = 19
         Top = 10
-        Width = 81
+        Width = 74
         Caption = 'Permissions'
         ParentColor = False
       end
       object cxSelect: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 85
-        Width = 64
+        Left = 317
+        Height = 21
+        Top = 86
+        Width = 61
         Caption = 'Select'
         TabOrder = 1
       end
       object cxInsert: TCheckBox
-        Left = 315
-        Height = 22
-        Top = 137
-        Width = 64
+        Left = 318
+        Height = 21
+        Top = 138
+        Width = 62
         Caption = 'Insert'
         TabOrder = 2
       end
       object cxUpdate: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 181
-        Width = 73
+        Left = 317
+        Height = 21
+        Top = 183
+        Width = 70
         Caption = 'Update'
         TabOrder = 3
       end
       object cxDelete: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 234
-        Width = 67
+        Left = 317
+        Height = 21
+        Top = 236
+        Width = 66
         Caption = 'Delete'
         TabOrder = 4
       end
       object cxReferences: TCheckBox
-        Left = 315
-        Height = 22
-        Top = 284
-        Width = 98
+        Left = 318
+        Height = 21
+        Top = 287
+        Width = 94
         Caption = 'References'
         TabOrder = 5
       end
       object bbApplyTable: TBitBtn
         Left = 6
         Height = 35
-        Top = 263
-        Width = 74
+        Top = 270
+        Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
         Kind = bkOK
@@ -113,59 +112,59 @@ object fmPermissionManage: TfmPermissionManage
       end
       object cbUsers: TComboBox
         Left = 14
-        Height = 32
+        Height = 35
         Top = 32
-        Width = 234
+        Width = 236
         ItemHeight = 0
         OnChange = cbTablesChange
         Style = csDropDownList
         TabOrder = 7
       end
       object cxSelectGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 102
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 103
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 8
       end
       object cxInsertGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 154
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 156
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 9
       end
       object cxUpdateGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 201
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 203
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 10
       end
       object cxDeleteGrant: TCheckBox
-        Left = 338
-        Height = 22
-        Top = 251
-        Width = 96
+        Left = 342
+        Height = 21
+        Top = 254
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 11
       end
       object cxReferencesGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 306
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 309
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 12
       end
       object cxAll: TCheckBox
-        Left = 315
+        Left = 318
         Height = 24
         Top = 34
-        Width = 65
+        Width = 66
         AutoSize = False
         Caption = 'All'
         Font.Style = [fsBold]
@@ -173,10 +172,10 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 13
       end
       object cxAllGrant: TCheckBox
-        Left = 341
+        Left = 345
         Height = 24
-        Top = 54
-        Width = 109
+        Top = 55
+        Width = 110
         AutoSize = False
         Caption = 'With Grant'
         Font.Style = [fsBold]
@@ -186,21 +185,21 @@ object fmPermissionManage: TfmPermissionManage
     end
     object tsViews: TTabSheet
       Caption = 'Views'
-      ClientHeight = 301
+      ClientHeight = 308
       ClientWidth = 528
       object Label8: TLabel
         Left = 14
-        Height = 20
+        Height = 19
         Top = 11
-        Width = 65
+        Width = 62
         Caption = 'User/Role'
         ParentColor = False
       end
       object cbViewsUsers: TComboBox
         Left = 18
-        Height = 32
+        Height = 35
         Top = 34
-        Width = 218
+        Width = 220
         ItemHeight = 0
         OnChange = cbViewsUsersChange
         Style = csDropDownList
@@ -208,17 +207,17 @@ object fmPermissionManage: TfmPermissionManage
       end
       object Label9: TLabel
         Left = 14
-        Height = 20
-        Top = 94
-        Width = 31
+        Height = 19
+        Top = 95
+        Width = 28
         Caption = 'View'
         ParentColor = False
       end
       object cbViews: TComboBox
         Left = 18
-        Height = 32
-        Top = 123
-        Width = 218
+        Height = 35
+        Top = 124
+        Width = 220
         ItemHeight = 0
         OnChange = cbViewsChange
         Style = csDropDownList
@@ -227,8 +226,8 @@ object fmPermissionManage: TfmPermissionManage
       object bbApplyView: TBitBtn
         Left = 6
         Height = 33
-        Top = 263
-        Width = 74
+        Top = 270
+        Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
         Kind = bkOK
@@ -236,16 +235,16 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 2
       end
       object Label10: TLabel
-        Left = 307
-        Height = 20
+        Left = 310
+        Height = 19
         Top = 10
-        Width = 81
+        Width = 74
         Caption = 'Permissions'
         ParentColor = False
       end
       object cxViewAll: TCheckBox
-        Left = 315
-        Height = 22
+        Left = 318
+        Height = 21
         Top = 34
         Width = 41
         Caption = 'All'
@@ -254,9 +253,9 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 3
       end
       object cxViewAllGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 48
+        Left = 345
+        Height = 21
+        Top = 49
         Width = 98
         Caption = 'With Grant'
         Font.Style = [fsBold]
@@ -264,123 +263,123 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 4
       end
       object cxViewSelect: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 85
-        Width = 64
+        Left = 317
+        Height = 21
+        Top = 86
+        Width = 61
         Caption = 'Select'
         TabOrder = 5
       end
       object cxViewSelectGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 101
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 102
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 6
       end
       object cxViewInsert: TCheckBox
-        Left = 315
-        Height = 22
-        Top = 137
-        Width = 64
+        Left = 318
+        Height = 21
+        Top = 138
+        Width = 62
         Caption = 'Insert'
         TabOrder = 7
       end
       object cxViewInsertGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 152
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 154
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 8
       end
       object cxViewUpdate: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 181
-        Width = 73
+        Left = 317
+        Height = 21
+        Top = 183
+        Width = 70
         Caption = 'Update'
         TabOrder = 9
       end
       object cxViewUpdateGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 200
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 202
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 10
       end
       object cxViewDelete: TCheckBox
-        Left = 314
-        Height = 22
-        Top = 234
-        Width = 67
+        Left = 317
+        Height = 21
+        Top = 236
+        Width = 66
         Caption = 'Delete'
         TabOrder = 11
       end
       object cxViewDeleteGrant: TCheckBox
-        Left = 338
-        Height = 22
-        Top = 250
-        Width = 96
+        Left = 342
+        Height = 21
+        Top = 253
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 12
       end
       object cxViewReferences: TCheckBox
-        Left = 315
-        Height = 22
-        Top = 284
-        Width = 98
+        Left = 318
+        Height = 21
+        Top = 287
+        Width = 94
         Caption = 'References'
         TabOrder = 13
       end
       object cxViewReferencesGrant: TCheckBox
-        Left = 341
-        Height = 22
-        Top = 304
-        Width = 96
+        Left = 345
+        Height = 21
+        Top = 307
+        Width = 90
         Caption = 'With Grant'
         TabOrder = 14
       end
     end
     object tsProcedures: TTabSheet
       Caption = 'Procedures'
-      ClientHeight = 301
+      ClientHeight = 308
       ClientWidth = 528
       object Label4: TLabel
         Left = 12
-        Height = 20
+        Height = 19
         Top = 10
-        Width = 65
+        Width = 62
         Caption = 'User/Role'
         ParentColor = False
       end
       object cbProcUsers: TComboBox
         Left = 16
-        Height = 32
+        Height = 35
         Top = 34
-        Width = 194
+        Width = 196
         ItemHeight = 0
         OnChange = cbProcUsersChange
         Style = csDropDownList
         TabOrder = 0
       end
       object Label5: TLabel
-        Left = 228
-        Height = 20
+        Left = 230
+        Height = 19
         Top = 11
-        Width = 81
+        Width = 74
         Caption = 'Permissions'
         ParentColor = False
       end
       object clbProcedures: TCheckListBox
-        Left = 243
-        Height = 221
+        Left = 246
+        Height = 228
         Top = 39
-        Width = 209
+        Width = 211
         Anchors = [akTop, akLeft, akBottom]
-        ItemHeight = 20
+        ItemHeight = 0
         OnClick = clbProceduresClick
         OnKeyUp = clbProceduresKeyUp
         TabOrder = 1
@@ -389,8 +388,8 @@ object fmPermissionManage: TfmPermissionManage
       object bbApplyProc: TBitBtn
         Left = 6
         Height = 33
-        Top = 260
-        Width = 74
+        Top = 264
+        Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
         Kind = bkOK
@@ -398,10 +397,10 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 2
       end
       object cxProcGrant: TCheckBox
-        Left = 243
-        Height = 22
-        Top = 265
-        Width = 96
+        Left = 246
+        Height = 21
+        Top = 273
+        Width = 90
         Anchors = [akLeft, akBottom]
         Caption = 'With Grant'
         OnChange = cxProcGrantChange
@@ -410,39 +409,39 @@ object fmPermissionManage: TfmPermissionManage
     end
     object tsRoles: TTabSheet
       Caption = 'Roles'
-      ClientHeight = 301
+      ClientHeight = 308
       ClientWidth = 528
       object Label6: TLabel
         Left = 12
-        Height = 20
+        Height = 19
         Top = 10
-        Width = 31
+        Width = 30
         Caption = 'User'
         ParentColor = False
       end
       object cbRolesUser: TComboBox
         Left = 18
-        Height = 32
+        Height = 35
         Top = 32
-        Width = 186
+        Width = 188
         ItemHeight = 0
         OnChange = cbRolesUserChange
         Style = csDropDownList
         TabOrder = 0
       end
       object Label7: TLabel
-        Left = 228
-        Height = 20
+        Left = 230
+        Height = 19
         Top = 11
-        Width = 81
+        Width = 74
         Caption = 'Permissions'
         ParentColor = False
       end
       object bbApplyRoles: TBitBtn
         Left = 12
         Height = 35
-        Top = 262
-        Width = 74
+        Top = 269
+        Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
         Kind = bkOK
@@ -450,32 +449,32 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 1
       end
       object clbRoles: TCheckListBox
-        Left = 243
-        Height = 221
+        Left = 246
+        Height = 228
         Top = 39
-        Width = 209
+        Width = 211
         Anchors = [akTop, akLeft, akBottom]
-        ItemHeight = 20
+        ItemHeight = 0
         OnClick = clbRolesClick
         OnKeyUp = clbRolesKeyUp
         TabOrder = 2
         TopIndex = -1
       end
       object BitBtn1: TBitBtn
-        Left = 101
+        Left = 102
         Height = 35
-        Top = 262
-        Width = 74
+        Top = 269
+        Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Refresh'
         OnClick = BitBtn1Click
         TabOrder = 3
       end
       object cxRoleGrant: TCheckBox
-        Left = 243
-        Height = 22
-        Top = 270
-        Width = 103
+        Left = 246
+        Height = 21
+        Top = 278
+        Width = 95
         Anchors = [akLeft, akBottom]
         Caption = 'With Admin'
         OnChange = cxRoleGrantChange
@@ -487,13 +486,13 @@ object fmPermissionManage: TfmPermissionManage
     Left = 0
     Height = 24
     Top = 0
-    Width = 532
+    Width = 538
     Align = alTop
     ClientHeight = 24
-    ClientWidth = 532
+    ClientWidth = 538
     TabOrder = 1
     object bbClose: TSpeedButton
-      Left = 504
+      Left = 510
       Height = 22
       Top = 1
       Width = 27
