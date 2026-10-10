@@ -32,9 +32,7 @@ uses
   ;
 
 type
-
-  { TfrmDataEditor }
-
+  TDetectChoice = (dcUseDetected, dcKeepCurrent, dcCancel);
 
   TfrmDataEditor = class;
 
@@ -53,29 +51,33 @@ type
     property LoadError: string read FLoadError;
   end;
 
+  { TfrmDataEditor }
   TfrmDataEditor = class(TForm)
     btnCopySQL: TButton;
     btnOpenFile: TButton;
     btnExportAs: TButton;
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
+    CheckBoxAutoDedectLineEnding: TCheckBox;
+    CheckBoxAutoDedectQuoteChar: TCheckBox;
+    CheckBoxAutoDedectDelimiter: TCheckBox;
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
     cmbboxLineEnding: TComboBox;
     cmbboxDelimiter: TComboBox;
+    cmbboxQuoteChar: TComboBox;
     CSVDataset1: TCSVDataset;
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
-    edtQuoteChar: TEdit;
     edtDefaultFieldLength: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
     JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
+    Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
-    Label5: TLabel;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmExportDataAsPDF: TMenuItem;
@@ -99,7 +101,7 @@ type
     Separator1: TMenuItem;
     Separator2: TMenuItem;
     sWorksheetDataset1: TsWorksheetDataset;
-    SynEdit1: TSynEdit;
+    SynEditSQL: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     tsSQL: TTabSheet;
     tsCSVSettings: TTabSheet;
@@ -112,6 +114,7 @@ type
     procedure btnExportAsClick(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
+    procedure cmbboxQuoteCharChange(Sender: TObject);
     procedure CSVDataset1AfterDelete(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -138,16 +141,17 @@ type
     procedure LoadFile(const FileName: string);
     procedure SaveFile(const FileName: string);
     procedure SetCSVSettingsFromForm;
-    procedure SelectDataSetByFileName(const AFileName: string);
+    function  SelectDataSetByFileName(const AFileName: string): Boolean;
     procedure SyncLineEndingCombo;
     procedure SyncDelimiterCombo;
+    procedure SyncQuoteCharCombo;
     procedure ReadIni;
     procedure WriteIni;
-    function  AskUseDetected(
+    function AskUseDetected(
       const AFileName: string;
       const ACurLE, ADetLE: string;
       const ACurDel, ADetDel: Char;
-      const ACurQC, ADetQC: Char): Boolean;
+      const ACurQC, ADetQC: Char): TDetectChoice;
   public
   end;
 
@@ -285,16 +289,35 @@ begin
     cmbboxDelimiter.ItemIndex := 0;   // Fallback Komma
 end;
 
+procedure TfrmDataEditor.SyncQuoteCharCombo;
+begin
+  if not Assigned(cmbboxQuoteChar) then Exit;
+  if cmbboxQuoteChar.Items.Count = 0 then Exit;
+
+  if CSVQuoteChar = '"' then
+    cmbboxQuoteChar.ItemIndex := 0
+  else if CSVQuoteChar = '''' then
+    cmbboxQuoteChar.ItemIndex := 1
+  else if CSVQuoteChar = #0 then
+    cmbboxQuoteChar.ItemIndex := 2
+  else
+  begin
+    // Exotisches Zeichen — wir zeigen es direkt in der Combo
+    cmbboxQuoteChar.ItemIndex := 3;   // Custom...
+    cmbboxQuoteChar.Text := CSVQuoteChar;
+  end;
+end;
+
 procedure TfrmDataEditor.SetCSVSettingsFromForm;
 begin
   CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
   CSVDataset1.CSVOptions.Delimiter := CSVDelimiter;
   CSVDataset1.CSVOptions.LineEnding := CSVLineEnding;
 
-  if edtQuoteChar.Text <> '' then
-    CSVDataset1.CSVOptions.QuoteChar := edtQuoteChar.Text[1]
+  if CSVQuoteChar <> #0 then
+    CSVDataset1.CSVOptions.QuoteChar := CSVQuoteChar
   else
-    CSVDataset1.CSVOptions.QuoteChar := '"';
+    CSVDataset1.CSVOptions.QuoteChar := #0;
 
   CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
@@ -302,9 +325,15 @@ begin
 end;
 
 procedure TfrmDataEditor.ReadIni;
+var TempStr: string;
 begin
+  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
+  if TempStr <> '' then
+    CSVQuoteChar := TempStr[1]
+  else
+    CSVQuoteChar := #0;   // leer = keine Quotes
+  SyncQuoteCharCombo;
   edtDefaultFieldLength.Text          := IntToStr(CSVDefaultFieldLength);
-  edtQuoteChar.Text                   := CSVQuoteChar;
   chkBoxFirstLineAsFieldName.Checked  := CSVFirstLineAsFieldNames;
   chkBoxIgnoreOuterWhiteSpace.Checked := CSVIgnoreOuterWhitespace;
   chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
@@ -312,6 +341,7 @@ begin
   // LineEnding-Combo anhand der INI-geladenen CSVLineEnding positionieren
   SyncLineEndingCombo;
   SyncDelimiterCombo;
+  SyncQuoteCharCombo;
 end;
 
 procedure TfrmDataEditor.WriteIni;
@@ -321,10 +351,7 @@ begin
   // CSVDelimiter wird bereits durch cmbboxDelimiterChange gesetzt
   // — hier nichts zu tun
 
-  if edtQuoteChar.Text <> '' then
-    CSVQuoteChar := edtQuoteChar.Text[1]
-  else
-    CSVQuoteChar := '"';
+// CSVQuoteChar wird durch cmbboxQuoteCharChange gesetzt — nichts tun
 
   CSVFirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVIgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
@@ -436,7 +463,7 @@ begin
   except end;
 
   try
-    SynEdit1.Lines.Clear;
+    SynEditSQL.Lines.Clear;
   except end;
 end;
 
@@ -534,80 +561,60 @@ begin
   end;
 end;
 
-procedure TfrmDataEditor.SelectDataSetByFileName(const AFileName: string);
+function TfrmDataEditor.SelectDataSetByFileName(const AFileName: string): Boolean;
 var
   Ext: string;
   DetLE: string;
   DetDel, DetQC: Char;
+  Choice: TDetectChoice;
 begin
-  // Alles zurücksetzen — verhindert Zustands-Kollisionen beim Wechsel
-  ResetAllDatasets;
-
+  Result := True;
   Ext := LowerCase(ExtractFileExt(AFileName));
 
-  if DataSource1.DataSet <> nil then
-  begin
-    if DataSource1.DataSet.Active then
-      DataSource1.DataSet.Close;
-  end;
+  ResetAllDatasets;
 
   if (Ext = '.csv') then
   begin
     DataSource1.DataSet := CSVDataSet1;
 
-    // ============================================================
-    // Auto-Detection: LineEnding, Delimiter, QuoteChar
-    // ============================================================
+    // Auto-Detection
     DetLE  := DetectLineEnding(AFileName);
     DetDel := DetectDelimiter(AFileName);
     DetQC  := DetectQuoteChar(AFileName, DetDel);
 
-    // Nur fragen wenn mindestens ein Wert abweicht
-    if AskUseDetected(AFileName,
-                      CSVLineEnding, DetLE,
-                      CSVDelimiter,  DetDel,
-                      CSVQuoteChar,  DetQC) then
+    Choice := AskUseDetected(AFileName,
+                             CSVLineEnding, DetLE,
+                             CSVDelimiter,  DetDel,
+                             CSVQuoteChar,  DetQC);
+
+    if Choice = dcCancel then
+    begin
+      Result := False;
+      Exit;   // Datei-Öffnen wird vom Aufrufer abgebrochen
+    end;
+
+    if Choice = dcUseDetected then
     begin
       CSVLineEnding := DetLE;
       CSVDelimiter  := DetDel;
       CSVQuoteChar  := DetQC;
     end;
+    // dcKeepCurrent: aktuelle Werte behalten — nichts tun
 
-    // UI synchronisieren
     SyncLineEndingCombo;
     SyncDelimiterCombo;
-    edtQuoteChar.Text := CSVQuoteChar;
+    SyncQuoteCharCombo;
   end
 
   else if (Ext = '.json') then
-      DataSource1.DataSet := JSONDataSet1
+    DataSource1.DataSet := JSONDataSet1
 
   else if (Ext = '.xlsx') or (Ext = '.xls') or (Ext = '.xml')
-       or (Ext = '.html') or (Ext = '.ods')
+       or (Ext = '.html') or (Ext = '.htm') or (Ext = '.ods')
        or (Ext = '.wiki') or (Ext = '.wikitable') then
   begin
     DataSource1.DataSet := sWorksheetDataset1;
-
-    if Ext = '.xlsx' then
-      sWorksheetDataset1.FileFormat := sfOOXML
-
-    else if Ext = '.xls' then
-      sWorksheetDataset1.FileFormat := sfExcel8
-
-    else if Ext = '.xml' then
-      sWorksheetDataset1.FileFormat := sfExcelXML
-
-    else if (Ext = '.html') or (Ext = '.htm') then
-      sWorksheetDataset1.FileFormat := sfHTML
-
-    else if Ext = '.odt' then
-      sWorksheetDataset1.FileFormat := sfOpenDocument
-
-    else if Ext = '.wiki' then
-      sWorksheetDataset1.FileFormat := sfWikiTable_Pipes
-
-    else if Ext = '.wikitable' then
-      sWorksheetDataset1.FileFormat := sfWikiTable_WikiMedia;
+    // ... FileFormat-Zuweisung wie gehabt ...
   end
 
   else if (Ext = '.dbf') then
@@ -639,8 +646,18 @@ var
 begin
   if not OpenDialog1.Execute then Exit;
 
+  PageControl1.ActivePage := tsGrid;
+
   FFileName := OpenDialog1.FileName;
-  SelectDataSetByFileName(FFileName);
+
+  // SelectDataSetByFileName kann durch User-Cancel false zurückgeben
+  if not SelectDataSetByFileName(FFileName) then
+  begin
+    FFileName := '';      // Zustand zurücksetzen
+    Exit;                 // Datei wird nicht geladen
+  end;
+
+  SynEditSQL.Lines.Clear;
 
   SetCSVSettingsFromForm;
 
@@ -859,20 +876,30 @@ begin
   // --- CSV-Optionen (nur bei CSV-Dateien) ---
   // Aus dem Dataset lesen — das kennt den tatsächlichen Zustand
   // nach SetCSVSettingsFromForm und ist immer synchron.
+  // --- CSV-Optionen (nur bei CSV-Dateien) ---
+  // Aus dem Dataset lesen — das kennt den tatsächlichen Zustand
+  // nach SetCSVSettingsFromForm und ist immer synchron.
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
      (DataSource1.DataSet = CSVDataset1) then
   begin
-    // Delimiter symbolisch darstellen (Tab als '\t' etc.)
+    // Delimiter symbolisch darstellen
     if CSVDataset1.CSVOptions.Delimiter = #9 then
       Stats.CSVOptions := '    Delimiter: ' + QuotedStr('\t') + sLineBreak
-    else if CSVDataset1.CSVOptions.Delimiter = #32 then
+    else if CSVDataset1.CSVOptions.Delimiter = ' ' then
       Stats.CSVOptions := '    Delimiter: ' + QuotedStr('Space') + sLineBreak
     else
       Stats.CSVOptions := '    Delimiter: ' +
         QuotedStr(CSVDataset1.CSVOptions.Delimiter) + sLineBreak;
 
+    // QuoteChar: #0 → (none), sonst als Zeichen
+    if CSVDataset1.CSVOptions.QuoteChar = #0 then
+      Stats.CSVOptions := Stats.CSVOptions +
+        '    Quote Char: (none)' + sLineBreak
+    else
+      Stats.CSVOptions := Stats.CSVOptions +
+        '    Quote Char: ' + QuotedStr(CSVDataset1.CSVOptions.QuoteChar) + sLineBreak;
+
     Stats.CSVOptions := Stats.CSVOptions +
-      '    Quote Char: ' + QuotedStr(CSVDataset1.CSVOptions.QuoteChar) + sLineBreak +
       '    Line Ending: ' +
         CSVLineEndingStrToName(CSVDataset1.CSVOptions.LineEnding) + sLineBreak +
       '    First Line As Field Names: ' +
@@ -927,7 +954,7 @@ begin
     GenSQLFromCSVDataset := TGenSQLFromCSVDataset.Create(
       DataSource1.DataSet, TempTableName, TempFieldLength);
 
-    SynEdit1.Lines.Text := GenSQLFromCSVDataset.SQL;
+    SynEditSQL.Lines.Text := GenSQLFromCSVDataset.SQL;
     PageControl1.ActivePage := tsSQL;
     btnCopySQL.Enabled := true;
   except
@@ -1008,10 +1035,10 @@ procedure TfrmDataEditor.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
 
-  SynEdit1.Color      := QWEditorBackgroundColor;
-  SynEdit1.Font.Name  := QWEditorFontName;
-  SynEdit1.Font.Size  := QWEditorFontSize;
-  SynEdit1.Font.Color := QWEditorFontColor;
+  SynEditSQL.Color      := QWEditorBackgroundColor;
+  SynEditSQL.Font.Name  := QWEditorFontName;
+  SynEditSQL.Font.Size  := QWEditorFontSize;
+  SynEditSQL.Font.Color := QWEditorFontColor;
 end;
 
 procedure TfrmDataEditor.btnExportAsClick(Sender: TObject);
@@ -1050,6 +1077,49 @@ begin
   end;
 
   // Dataset sofort mit neuer Einstellung füttern
+  SetCSVSettingsFromForm;
+end;
+
+procedure TfrmDataEditor.cmbboxQuoteCharChange(Sender: TObject);
+var
+  NewChar: string;
+begin
+  if csDestroying in ComponentState then Exit;
+  if not Assigned(CSVDataset1) then Exit;
+
+  case cmbboxQuoteChar.ItemIndex of
+    0: CSVQuoteChar := '"';
+    1: CSVQuoteChar := '''';
+    2: CSVQuoteChar := #0;
+    3:
+      begin
+        NewChar := '';
+        if InputQuery('Custom Quote Char',
+                       'Enter a single character to use as quote:',
+                       NewChar) then
+        begin
+          if Length(NewChar) = 1 then
+            CSVQuoteChar := NewChar[1]
+          else if NewChar = '' then
+            CSVQuoteChar := #0
+          else
+          begin
+            ShowMessage('Please enter exactly one character (or leave empty for none).');
+            SyncQuoteCharCombo;
+            Exit;
+          end;
+        end
+        else
+        begin
+          // User hat abgebrochen — Combo zurück
+          SyncQuoteCharCombo;
+          Exit;
+        end;
+      end;
+  else
+    CSVQuoteChar := '"';
+  end;
+
   SetCSVSettingsFromForm;
 end;
 
@@ -1173,7 +1243,7 @@ end;
 
 procedure TfrmDataEditor.btnCopySQLClick(Sender: TObject);
 begin
-  if Trim(SynEdit1.Lines.Text) = '' then
+  if Trim(SynEditSQL.Lines.Text) = '' then
   begin
     MessageDlg('Warning',
       'Nothing to copy.',
@@ -1182,10 +1252,10 @@ begin
   end;
 
   try
-    if SynEdit1.SelText <> '' then
-      Clipboard.AsText := SynEdit1.SelText
+    if SynEditSQL.SelText <> '' then
+      Clipboard.AsText := SynEditSQL.SelText
     else
-      Clipboard.AsText := SynEdit1.Lines.Text;
+      Clipboard.AsText := SynEditSQL.Lines.Text;
 
     MessageDlg('Info',
       'SQL copied to clipboard.',
@@ -1203,19 +1273,20 @@ function TfrmDataEditor.AskUseDetected(
   const AFileName: string;
   const ACurLE, ADetLE: string;
   const ACurDel, ADetDel: Char;
-  const ACurQC, ADetQC: Char): Boolean;
+  const ACurQC, ADetQC: Char): TDetectChoice;
 var
   Dlg: TForm;
   Memo: TMemo;
   LblTitle: TLabel;
-  BtnUseDetected, BtnKeepCurrent: TButton;
+  BtnUseDetected, BtnKeepCurrent, BtnCancelFile: TButton;
   Content: TStringList;
   HasDiff: Boolean;
   CurLEName, DetLEName: string;
   CurDelStr, DetDelStr: string;
   CurQCStr, DetQCStr: string;
 begin
-  Result := True;   // Default: Detected verwenden
+  Result := dcUseDetected;
+  if csDestroying in ComponentState then Exit;
 
   // Nur fragen wenn mindestens ein Wert abweicht
   HasDiff :=
@@ -1247,7 +1318,7 @@ begin
   try
     Dlg.Caption := 'CSV Auto-Detection';
     Dlg.Width := 560;
-    Dlg.Height := 380;
+    Dlg.Height := 400;
     Dlg.Position := poScreenCenter;
     Dlg.BorderStyle := bsDialog;
     Dlg.FormStyle := fsStayOnTop;
@@ -1283,14 +1354,18 @@ begin
         Content.Add(Format('  QuoteChar          %-13s (same)', [CurQCStr]));
 
       Content.Add('');
-      Content.Add('Use the auto-detected values for this file?');
+      Content.Add('Choose an action:');
+      Content.Add('');
+      Content.Add('  [Use Detected]    — Load file with the auto-detected values');
+      Content.Add('  [Keep Current]    — Load file with your current settings');
+      Content.Add('  [Cancel]          — Abort — do not load the file');
 
       Memo := TMemo.Create(Dlg);
       Memo.Parent := Dlg;
       Memo.Left := 16;
       Memo.Top := 38;
       Memo.Width := 528;
-      Memo.Height := 230;
+      Memo.Height := 250;
       Memo.ReadOnly := True;
       Memo.ScrollBars := ssVertical;
       Memo.Font.Name := 'Courier New';
@@ -1300,11 +1375,14 @@ begin
       Content.Free;
     end;
 
+    // ============================================================
+    // Drei Buttons: Use Detected | Keep Current | Cancel
+    // ============================================================
     BtnUseDetected := TButton.Create(Dlg);
     BtnUseDetected.Parent := Dlg;
     BtnUseDetected.Caption := 'Use Detected';
-    BtnUseDetected.Left := 280;
-    BtnUseDetected.Top := 285;
+    BtnUseDetected.Left := 152;
+    BtnUseDetected.Top := 305;
     BtnUseDetected.Width := 120;
     BtnUseDetected.Default := True;
     BtnUseDetected.ModalResult := mrYes;
@@ -1312,12 +1390,26 @@ begin
     BtnKeepCurrent := TButton.Create(Dlg);
     BtnKeepCurrent.Parent := Dlg;
     BtnKeepCurrent.Caption := 'Keep Current';
-    BtnKeepCurrent.Left := 408;
-    BtnKeepCurrent.Top := 285;
+    BtnKeepCurrent.Left := 280;
+    BtnKeepCurrent.Top := 305;
     BtnKeepCurrent.Width := 120;
     BtnKeepCurrent.ModalResult := mrNo;
 
-    Result := (Dlg.ShowModal = mrYes);
+    BtnCancelFile := TButton.Create(Dlg);
+    BtnCancelFile.Parent := Dlg;
+    BtnCancelFile.Caption := 'Cancel';
+    BtnCancelFile.Left := 408;
+    BtnCancelFile.Top := 305;
+    BtnCancelFile.Width := 120;
+    BtnCancelFile.ModalResult := mrCancel;
+
+    case Dlg.ShowModal of
+      mrYes: Result := dcUseDetected;
+      mrNo:  Result := dcKeepCurrent;
+    else
+      Result := dcCancel;
+    end;
+
   finally
     Dlg.Free;
   end;

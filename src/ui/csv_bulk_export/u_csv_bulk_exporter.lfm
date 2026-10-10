@@ -1,7 +1,7 @@
 object frmCSVBulkExporter: TfrmCSVBulkExporter
-  Left = 659
+  Left = 1041
   Height = 831
-  Top = 116
+  Top = 302
   Width = 1166
   Caption = 'CSV Bulk Exporter'
   ClientHeight = 831
@@ -757,6 +757,18 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Caption = 'Refresh Presets'
         OnClick = btnRefreshPresetsClick
         TabOrder = 1
+      end
+      object btnEditCurrentPreset: TButton
+        Left = 256
+        Height = 35
+        Hint = 'Edit Current Preset'
+        Top = 56
+        Width = 120
+        Caption = 'Edit Preset'
+        OnClick = btnEditCurrentPresetClick
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 2
       end
     end
     object Label1: TLabel
