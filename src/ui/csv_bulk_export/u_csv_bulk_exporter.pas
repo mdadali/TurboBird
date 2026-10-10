@@ -44,6 +44,7 @@ type
     btnRefreshPresets: TButton;
     btnExportFileName: TButton;
     btnSelectAll: TButton;
+    btnEditCurrentPreset: TButton;
     cbFormulaPreset: TComboBox;
     chkLstFields: TCheckListBox;
     comboxSourceDB: TComboBox;
@@ -80,6 +81,7 @@ type
 
     procedure btnAddToQueueClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
+    procedure btnEditCurrentPresetClick(Sender: TObject);
     procedure btnExportFileNameClick(Sender: TObject);
     procedure btnPreviewSQLClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
@@ -144,6 +146,7 @@ type
     procedure DoBulkExport(const ASQL: string);
     function  CheckAndResolveProblemFields: Boolean;
     function  IsBlobBinaryType(const AFieldType: string): Boolean;
+    function EditCurrentPreset: Boolean;
   public
     procedure Init(ANodeInfos: TPNodeInfos; const ATableName: string);
   end;
@@ -1290,7 +1293,9 @@ var
   ReportForm: TfrmReport;
   i, CheckedCount: Integer;
   HeaderLine: string;
-  Preset: TFormulaPreset;      // ← NEU
+  Preset: TFormulaPreset;
+  PresetPath: string;
+  PresetSL: TStringList;
 
   procedure UpdateProgress;
   var
@@ -1361,9 +1366,12 @@ begin
     RowsPerUpdate := 10000;
 
   // ============================================================
-  // Statistik — Basis-Teil
+  // Statistik — Basis
+  // WICHTIG: FillChar MUSS vor allen Feldzuweisungen stehen,
+  //          sonst werden sie wieder auf 0 gesetzt.
   // ============================================================
   FillChar(Stats, SizeOf(Stats), 0);
+
   Stats.Kind             := tkExport;
   Stats.SourceKind       := 'Firebird Table';
   Stats.SourceServer     := comboxSourceServer.Text;
@@ -1374,6 +1382,32 @@ begin
   Stats.BatchSize        := GetBatchSize;
   Stats.FormulaUsed      := True;
 
+  // ============================================================
+  // Preset-Info — NACH FillChar!
+  // ============================================================
+  Stats.PresetName := Preset.Name;
+  Stats.PresetFileName := Preset.FileName;
+
+  PresetPath := FormulaPresetManager.PresetDir + Preset.FileName;
+  if FileExists(PresetPath) then
+  begin
+    PresetSL := TStringList.Create;
+    try
+      PresetSL.LoadFromFile(PresetPath);
+      Stats.PresetFileContent := PresetSL.Text;
+    finally
+      PresetSL.Free;
+    end;
+  end;
+
+  if Trim(Preset.Description) <> '' then
+    Stats.OptionsExtra := 'Preset: ' + Preset.Name + ' — ' + Preset.Description
+  else
+    Stats.OptionsExtra := 'Preset: ' + Preset.Name;
+
+  // ============================================================
+  // Source-Server-Version + Client-Lib
+  // ============================================================
   if (FSourceDBIndex >= 0) and (FSourceDBIndex < Length(RegisteredDatabases)) then
   begin
     Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
@@ -1385,6 +1419,9 @@ begin
 
   Stats.SystemInfo := GetSystemInfo(edtExportFileName.Text);
 
+  // ============================================================
+  // Feld-Zähler + angewendete Formeln
+  // ============================================================
   CheckedCount := 0;
   for i := 0 to High(FFields) do
     if chkLstFields.Checked[i] then Inc(CheckedCount);
@@ -1427,6 +1464,9 @@ begin
 
   HeaderLine := BuildHeaderLine;
 
+  // ============================================================
+  // Progress-Fenster
+  // ============================================================
   ProgressForm := TForm.Create(nil);
   try
     ProgressForm.Width := 520;
@@ -1645,8 +1685,9 @@ begin
     Stats.DestFileSize := FileSize;
 
     if FCancelled then
-      Stats.OptionsExtra := Format('CANCELLED after %s rows',
-        [FormatFloat('#,##0', Exported)]);
+      Stats.OptionsExtra := Stats.OptionsExtra + sLineBreak +
+        Format('  CANCELLED after %s rows',
+          [FormatFloat('#,##0', Exported)]);
 
     ReportForm := TfrmReport.Create(nil);
     try
@@ -1661,6 +1702,160 @@ begin
     Q.Free;
     if Trans.InTransaction then Trans.Rollback;
     Trans.Free;
+  end;
+end;
+
+procedure TfrmCSVBulkExporter.btnEditCurrentPresetClick(Sender: TObject);
+var
+  CurrentName: string;
+  Idx: Integer;
+begin
+  CurrentName := cbFormulaPreset.Text;
+
+  if not EditCurrentPreset then
+    Exit;   // User hat abgebrochen oder Speichern fehlgeschlagen
+
+  // Presets neu laden
+  FormulaPresetManager.Reload;
+  LoadFormulaPresets;
+
+  // Selbes Preset wieder auswählen
+  if CurrentName <> '' then
+  begin
+    Idx := cbFormulaPreset.Items.IndexOf(CurrentName);
+    if Idx >= 0 then
+      cbFormulaPreset.ItemIndex := Idx;
+  end;
+
+  // Grid + Preview aktualisieren
+  if cbFormulaPreset.ItemIndex >= 0 then
+  begin
+    ApplyPresetToGrid;
+    ApplySkipTypes;
+    FLastPresetIndex := cbFormulaPreset.ItemIndex;
+    ValidateAndEnableRun;
+
+    if (Length(FFields) > 0) and (chkLstFields.Count > 0) then
+      btnPreviewSQLClick(nil);
+  end;
+end;
+
+function TfrmCSVBulkExporter.EditCurrentPreset: Boolean;
+var
+  Preset: TFormulaPreset;
+  PresetPath: string;
+  Dlg: TForm;
+  Memo: TMemo;
+  LblInfo: TLabel;
+  BtnSave, BtnCancel: TButton;
+  SL: TStringList;
+begin
+  Result := False;
+
+  Preset := GetActivePreset;
+  if Preset = nil then
+  begin
+    ShowMessage('No preset selected.');
+    Exit;
+  end;
+
+  PresetPath := FormulaPresetManager.PresetDir + Preset.FileName;
+
+  if not FileExists(PresetPath) then
+  begin
+    ShowMessage('Preset file not found:' + sLineBreak + PresetPath);
+    Exit;
+  end;
+
+  Dlg := TForm.Create(nil);
+  try
+    Dlg.Caption := 'Edit Preset: ' + Preset.Name;
+    Dlg.Width := 720;
+    Dlg.Height := 600;
+    Dlg.Position := poScreenCenter;
+    Dlg.BorderStyle := bsSizeable;
+    Dlg.FormStyle := fsStayOnTop;
+
+    // ============================================================
+    // Info-Label mit Pfad
+    // ============================================================
+    LblInfo := TLabel.Create(Dlg);
+    LblInfo.Parent := Dlg;
+    LblInfo.Left := 12;
+    LblInfo.Top := 8;
+    LblInfo.Width := Dlg.ClientWidth - 24;
+    LblInfo.Anchors := [akLeft, akTop, akRight];
+    LblInfo.Caption := 'File: ' + PresetPath;
+    LblInfo.Font.Style := [fsBold];
+
+    // ============================================================
+    // Memo mit Preset-Inhalt
+    // ============================================================
+    Memo := TMemo.Create(Dlg);
+    Memo.Parent := Dlg;
+    Memo.Left := 12;
+    Memo.Top := 32;
+    Memo.Width := Dlg.ClientWidth - 24;
+    Memo.Height := Dlg.ClientHeight - 100;
+    Memo.Anchors := [akLeft, akTop, akRight, akBottom];
+    Memo.ScrollBars := ssBoth;
+    Memo.Font.Name := 'Courier New';
+    Memo.Font.Size := 10;
+    Memo.WordWrap := False;
+
+    SL := TStringList.Create;
+    try
+      SL.LoadFromFile(PresetPath);
+      Memo.Lines.Assign(SL);
+    finally
+      SL.Free;
+    end;
+
+    // ============================================================
+    // Buttons — Save + Cancel
+    // ============================================================
+    BtnSave := TButton.Create(Dlg);
+    BtnSave.Parent := Dlg;
+    BtnSave.Caption := 'Save';
+    BtnSave.Width := 100;
+    BtnSave.Anchors := [akRight, akBottom];
+    BtnSave.Left := Dlg.ClientWidth - 224;
+    BtnSave.Top := Dlg.ClientHeight - 52;
+    BtnSave.ModalResult := mrOk;
+    BtnSave.Default := True;
+
+    BtnCancel := TButton.Create(Dlg);
+    BtnCancel.Parent := Dlg;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Width := 100;
+    BtnCancel.Anchors := [akRight, akBottom];
+    BtnCancel.Left := Dlg.ClientWidth - 112;
+    BtnCancel.Top := Dlg.ClientHeight - 52;
+    BtnCancel.ModalResult := mrCancel;
+    BtnCancel.Cancel := True;
+
+    // ============================================================
+    // Anzeigen + Speichern
+    // ============================================================
+    if Dlg.ShowModal = mrOk then
+    begin
+      try
+        SL := TStringList.Create;
+        try
+          SL.Assign(Memo.Lines);
+          SL.SaveToFile(PresetPath);
+        finally
+          SL.Free;
+        end;
+        Result := True;
+      except
+        on E: Exception do
+          ShowMessage('Failed to save preset:' + sLineBreak + sLineBreak + E.Message);
+      end;
+    end;
+
+  finally
+    Dlg.Free;
   end;
 end;
 

@@ -101,6 +101,7 @@ type
     function GetDefaultPresetIndex: Integer;
     function PresetCount: Integer;
     function PresetName(AIndex: Integer): string;
+    property PresetDir: string read GetPresetDir;
   end;
 
 var
@@ -361,6 +362,25 @@ begin
     SetLength(Result, 1);
     Result[0] := Issue;
     Exit;
+  end;
+
+  // ===========================================================
+  // ERROR: QuoteChar = Single Quote
+  // ===========================================================
+  if APreset.QuoteChar = '''' then
+  begin
+    Issue.Severity := isError;
+    Issue.Message :=
+      'QuoteChar = single quote is not supported in SQL export' + sLineBreak +
+      sLineBreak +
+      'Problem:' + sLineBreak +
+      '  The SQL generator cannot safely escape a single quote as' + sLineBreak +
+      '  the CSV quote character.' + sLineBreak +
+      sLineBreak +
+      'Solution:' + sLineBreak +
+      '  Use " (double quote) or leave the field empty (unquoted mode).';
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Issue;
   end;
 
   // ===========================================================

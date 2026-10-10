@@ -365,6 +365,10 @@ type
     CSVOptions: string;              // Mehrzeilige CSV-Parameter-Beschreibung
     OptionsExtra: string;            // Zusätzliche Optionen (z.B. 'Read-Only')
 
+    PresetName: string;
+    PresetFileName: string;
+    PresetFileContent: string;
+
     // === RESULT ===
     RowsProcessed: Int64;
     FieldsCount: Integer;
@@ -1071,8 +1075,9 @@ begin
       Break;
   end;
 
-  // Doppelquote gewinnt bei Gleichstand (Standard-CSV)
-  if (SingleAtBoundary > 0) and (SingleAtBoundary > DoubleAtBoundary) then
+  if (DoubleAtBoundary = 0) and (SingleAtBoundary = 0) then
+    Result := #0                     // keine Quotes erkannt
+  else if SingleAtBoundary > DoubleAtBoundary then
     Result := ''''
   else
     Result := '"';
@@ -1628,7 +1633,7 @@ begin
       SL.Add('Options:');
 
       if Stats.OptionsExtra <> '' then
-        SL.Add('  Mode:          ' + Stats.OptionsExtra);
+        SL.Add('  ' + Stats.OptionsExtra);
 
       if Stats.BatchSize > 0 then
       begin
@@ -1657,6 +1662,24 @@ begin
         SL.Add(Stats.CSVOptions);
       end;
 
+      SL.Add('');
+    end;
+
+    // ======================================================================
+    // PRESET DEFINITION
+    // ======================================================================
+    if Stats.PresetFileContent <> '' then
+    begin
+      SL.Add('Preset Definition:');
+      if Stats.PresetName <> '' then
+        SL.Add('  Name:  ' + Stats.PresetName);
+      if Stats.PresetFileName <> '' then
+        SL.Add('  File:  ' + Stats.PresetFileName);
+
+      SL.Add('');
+      SL.Add('----- BEGIN PRESET FILE ---------------------------------');
+      SL.Add(Stats.PresetFileContent);
+      SL.Add('----- END PRESET FILE -----------------------------------');
       SL.Add('');
     end;
 
