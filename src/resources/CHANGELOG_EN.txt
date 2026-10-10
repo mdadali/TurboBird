@@ -4,6 +4,123 @@ What's New for TurboBird
 * : fixed
 - : removed
 
+
+TurboBird v1.2.1.1288
+
+Build date & time: 10.10.2026, 15:00
+
++ CloneTable: Two new copy methods
+  - Firebird API Row-by-Row:
+    Copies all data types reliably — including
+    arrays (n dimensions, recursive) and BLOBs
+    (both TEXT and BINARY).
+  - Firebird Batch API:
+    High-performance batch processing for purely scalar fields.
+    (Arrays and BLOBs are not supported.)
+    Available from Firebird 4.0.
+  - The method is selected automatically based on
+    field types and server version. For BLOBs, arrays or
+    Firebird < 4.0, it automatically switches to Row-by-Row.
+  - New option: Row-by-Row can be forced manually.
+  - Problem field detection: Depending on the selected
+    copy method, unsupported field types (BLOBs, arrays, etc.)
+    are automatically detected and marked in the field selection.
+    The user can specifically deselect these fields before
+    the copy process is started.
+
++ CSV Bulk Export (New)
+  - Exports Firebird tables as CSV files
+  - Server-side formatting for maximum speed
+  - Batch processing with configurable size
+  - Buffered stream for optimal write speed
+  - Progress display with timing and statistics
+  - Preset-based configuration with 9 included
+    preset files:
+    CSV Quoted, CSV Unquoted (numeric only), CSV German,
+    CSV Header Quoted, CSV Data Quoted, TSV Quoted,
+    Pipe Quoted, Fixed Format, JSON Export
+  - Configurable per preset:
+    - Separator, decimal point, quote character
+    - Line ending (CRLF, LF, CR or System)
+    - Header on/off, header quoted or raw
+    - Data quoted or raw
+    - Problem fields selectively skipped (arrays, BLOBs)
+    - Boolean representation configurable (TRUE/FALSE)
+    - Formulas per data type (e.g. BLOB truncation via SUBSTRING)
+  - Preset Editor: The current preset can be edited directly
+    from within the exporter and saved.
+    After saving, the presets are automatically reloaded
+    and the preview is updated.
+  - Preset Validator warns about critical configurations:
+    - ERROR if single quote is used as QuoteChar (SQL conflict)
+    - ERROR if Separator = QuoteChar
+    - ERROR if Separator = DecimalPoint
+    - WARNING for unquoted + free text (data loss risk)
+    - WARNING if Separator appears in formulas
+    - WARNING for unbalanced quotes in formulas
+    - WARNING for formulas without $1 placeholder
+  - Export report contains:
+    - Preset name and description in the Options section
+    - Full preset file content with
+      BEGIN/END markers and file name as reference
+    - Client library version, server version
+    - Environment info (OS, CPU, RAM, disk)
+
+! Dialog "Bulk Export" replaced by "CSV Bulk Export"
+
+! Case-sensitive identifiers are handled correctly
+  throughout (mixedCase, CAMEL):
+  - MakeCaseSensitiveAuto() instead of unconditional quoting
+  - Affects CSV Bulk Export, CloneTable and DataEditor
+  - Formulas with $1 placeholder quote field names correctly
+  - Table names are quoted only when necessary
+
+! DataEditor: Extensively revised for CSV roundtrip
+  - Auto-detection when opening CSV files:
+    - Line ending (CRLF/LF/CR) by majority rule
+    - Delimiter (comma, semicolon, tab, pipe)
+    - Quote character (double quote, single quote, none)
+  - Auto-detect can be enabled individually per field via
+    checkboxes in the CSV tab (LineEnding, Delimiter, QuoteChar).
+    Only enabled fields are detected when opening.
+    Settings are stored persistently in the INI.
+  - Dialog "CSV Auto-Detection" with three actions:
+    - Use Detected — apply detected values
+      (only for fields with auto-detect checkbox enabled)
+    - Keep Current — keep current settings
+    - Cancel — do not load the file
+  - Disabled fields are marked as "(auto-off)" in the dialog.
+  - New ComboBoxes for LineEnding, Delimiter and QuoteChar:
+    - LineEnding: CRLF, LF, CR, System
+    - Delimiter: comma, semicolon, tab, pipe, space
+    - QuoteChar: ", ', (none), Custom...
+    - "Custom..." opens an input dialog for
+      arbitrary quote characters
+    - Cancel in the custom dialog restores the previous value
+  - LOAD report reads values directly from the dataset instead
+    of from the form — always shows the actual
+    state including line ending symbol and (none) for QuoteChar.
+
+! Report fixes:
+  - LOAD report shows CSV options from the dataset
+  - EXPORT report shows preset name + description
+  - Preset definition as full INI content with
+    BEGIN/END markers
+  - CANCELLED message is appended to OptionsExtra
+    instead of overwriting it
+
+! INI configuration:
+  - New section [CSVExport] for the CSV Bulk Exporter
+  - New keys in [CSVEditor]:
+    CSVLineEnding, AutoDetectLineEnding, AutoDetectDelimiter,
+    AutoDetectQuoteChar
+
+* Multiple bugs fixed.
+
+
+
+------------------------------------------------------------------------------------------------------
+
 TurboBird v1.2.1.1286
 Build-Date & -Time: 05.09.2026, 12:30
 

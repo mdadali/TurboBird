@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 489
+  Left = 557
   Height = 679
-  Top = 175
+  Top = 183
   Width = 1056
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 679
@@ -99,9 +99,9 @@ object frmDataEditor: TfrmDataEditor
     Height = 629
     Top = 50
     Width = 1056
-    ActivePage = tsCSVSettings
+    ActivePage = tsGrid
     Align = alClient
-    TabIndex = 2
+    TabIndex = 0
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
