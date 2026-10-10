@@ -5,6 +5,50 @@ Neuigkeiten für TurboBird
 -: entfernt
 
 
+TurboBird v1.2.1.1288
+
+Build-Datum & -Zeit: 05.09.2026, 12:30
+
++ CloneTable: Zwei neue Kopiermethoden
+  - Firebird API Row-by-Row:
+    Kopiert alle Datentypen zuverlässig — einschließlich
+    Arrays (n Dimensionen, rekursiv) und BLOBs
+    (sowohl TEXT als auch BINARY).
+  - Firebird Batch API:
+    Hochperformante Batch-Verarbeitung für rein skalare Felder.
+    (Arrays und BLOBs werden nicht unterstützt.)
+    Verfügbar ab Firebird 4.0.
+  - Die Auswahl der Methode erfolgt automatisch je nach
+    Feldtypen und Serverversion. Bei BLOBs, Arrays oder
+    Firebird < 4.0 wird automatisch auf Row-by-Row umgeschaltet.
+  - Neue Option: Row-by-Row kann manuell erzwungen werden.
+  - Problemfelder-Erkennung: Je nach gewählter Kopiermethode
+    werden nicht unterstützte Feldtypen (BLOBs, Arrays, etc.)
+    automatisch erkannt und in der Feldauswahl markiert.
+    Der Anwender kann diese Felder gezielt abwählen, bevor
+    der Kopiervorgang gestartet wird.
+
+! Maske "Bulk Export" durch "CSV Bulk Export" ersetzt
+  - Schneller CSV-Export direkt aus Firebird-Tabellen
+  - Serverseitige Formatierung für maximale Geschwindigkeit
+  - Batch-Verarbeitung mit konfigurierbarer Größe
+  - Gepufferter Stream für optimale Schreibgeschwindigkeit
+  - Fortschrittsanzeige mit Zeitmessung und Statistik
+  - Flexible Konfiguration über Preset-Dateien:
+    - Separator, Dezimaltrennzeichen, Quote-Zeichen
+    - Header ein-/ausschalten, Header gequotet oder roh
+    - Daten gequotet oder roh
+    - Problemfelder gezielt überspringen (z.B. Arrays, BLOBs)
+    - Eigene Darstellung für Boolean-Werte (TRUE/FALSE)
+    - Formeln pro Datentyp (z.B. BLOB-Kürzung via SUBSTRING)
+  - 9 vorgefertigte Preset-Dateien werden mitgeliefert
+    (z.B. CSV Data Quoted, CSV Data Plain, TSV, ...)
+
+* Mehrere Bugs behoben.
+
+
+---------------------------------------------------------------------------------------
+
 TurboBird v1.2.1.1286
 
 Build-Datum & -Zeit: 05.09.2026, 12:30

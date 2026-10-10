@@ -4,7 +4,7 @@ set -e
 
 PROJECT_NAME="TurboBird"
 BUILD_MODE="i386-darwin64-carbon-debug"
-FULL_VERSION="1.2.1.1284"
+FULL_VERSION="1.2.1.1288"
 
 STRIP=OFF
 COMPRESS=ON

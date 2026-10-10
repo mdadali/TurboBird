@@ -525,7 +525,6 @@ var
     CSVIgnoreOuterWhitespace,
     CSVQuoteOuterWhitespace: boolean;
 
-
     //UpdateChecker
     AutoSearchOnProgramStart: boolean;
     UnzipAfterDownload: boolean;
@@ -542,6 +541,13 @@ var
     SlowQueryThreshold: Integer;  // in Millisekunden
 
 //end-Ini.File////////////////////////////////////////////////////////////////
+
+//CSV
+function CSVLineEndingNameToStr(const AName: string): string;
+function CSVLineEndingStrToName(const AValue: string): string;
+function DetectLineEnding(const AFileName: string): string;
+function DetectDelimiter(const AFileName: string): Char;
+function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
 function  GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
@@ -832,6 +838,245 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses  Reg;
+
+//CSV
+// ============================================================
+// CSV Auto-Detection — LineEnding, Delimiter & QuoteChar
+//
+// DetectLineEnding:
+//   Liest die ersten 8 KB und ermittelt das vorherrschende
+//   Zeilenende (CRLF, LF oder CR) per Mehrheitsprinzip.
+//   Fallback: LF
+//
+// DetectDelimiter:
+//   Liest die ersten 8 KB und findet das häufigste Trennzeichen
+//   außerhalb von Quotes in der ersten Zeile.
+//   Kandidaten: ','  ';'  #9 (Tab)  '|'
+//   Fallback: ','
+//
+// DetectQuoteChar:
+//   Sucht nach einem Quote-Zeichen das an einer Feldgrenze
+//   (nach Delimiter, nach Zeilenumbruch oder am Dateianfang)
+//   auftritt. Damit werden Apostrophe im Text (it's) nicht mit
+//   Single-Quote-Feldern verwechselt.
+//   Fallback: '"'
+function CSVLineEndingNameToStr(const AName: string): string;
+begin
+  if SameText(Trim(AName), 'CRLF') then Result := #13#10
+  else if SameText(Trim(AName), 'LF') then Result := #10
+  else if SameText(Trim(AName), 'CR') then Result := #13
+  else if SameText(Trim(AName), 'LINEENDING') then Result := LineEnding
+  else if SameText(Trim(AName), 'SYSTEM') then Result := LineEnding
+  else Result := #10;  // portabler Default
+end;
+
+function CSVLineEndingStrToName(const AValue: string): string;
+begin
+  if AValue = #13#10 then Result := 'CRLF'
+  else if AValue = #10 then Result := 'LF'
+  else if AValue = #13 then Result := 'CR'
+  else Result := 'LF';
+end;
+
+function DetectLineEnding(const AFileName: string): string;
+var
+  FS: TFileStream;
+  Buf: array[0..8191] of Byte;
+  BytesRead, i: Integer;
+  CRCount, LFCount, CRLFCount: Integer;
+begin
+  Result := #10;   // Default LF — portabel
+
+  if not FileExists(AFileName) then
+    Exit;
+
+  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    BytesRead := FS.Read(Buf, SizeOf(Buf));
+  finally
+    FS.Free;
+  end;
+
+  if BytesRead < 2 then
+    Exit;
+
+  CRCount   := 0;
+  LFCount   := 0;
+  CRLFCount := 0;
+  i := 0;
+
+  while i < BytesRead do
+  begin
+    if Buf[i] = 13 then
+    begin
+      if (i + 1 < BytesRead) and (Buf[i + 1] = 10) then
+      begin
+        Inc(CRLFCount);
+        Inc(i, 2);
+        Continue;
+      end
+      else
+        Inc(CRCount);
+    end
+    else if Buf[i] = 10 then
+      Inc(LFCount);
+    Inc(i);
+  end;
+
+  // Mehrheit entscheidet
+  if (CRLFCount >= CRCount) and (CRLFCount >= LFCount) and (CRLFCount > 0) then
+    Result := #13#10
+  else if (LFCount >= CRCount) and (LFCount > 0) then
+    Result := #10
+  else if CRCount > 0 then
+    Result := #13;
+end;
+
+function DetectDelimiter(const AFileName: string): Char;
+var
+  FS: TFileStream;
+  Buf: array[0..8191] of Byte;
+  BytesRead, i: Integer;
+  S: string;
+  CommaCount, SemicolonCount, TabCount, PipeCount: Integer;
+  InDoubleQuote, InSingleQuote: Boolean;
+begin
+  Result := ',';
+
+  if not FileExists(AFileName) then
+    Exit;
+
+  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    BytesRead := FS.Read(Buf, SizeOf(Buf));
+  finally
+    FS.Free;
+  end;
+
+  if BytesRead <= 0 then
+    Exit;
+
+  SetLength(S, BytesRead);
+  Move(Buf[0], S[1], BytesRead);
+
+  CommaCount     := 0;
+  SemicolonCount := 0;
+  TabCount       := 0;
+  PipeCount      := 0;
+  InDoubleQuote  := False;
+  InSingleQuote  := False;
+
+  for i := 1 to Length(S) do
+  begin
+    // Nur erste Zeile analysieren
+    if S[i] = #10 then Break;
+    if S[i] = #13 then Continue;
+
+    // Quote-Zustand tracken
+    if S[i] = '"' then
+    begin
+      InDoubleQuote := not InDoubleQuote;
+      Continue;
+    end;
+
+    if (S[i] = '''') and (not InDoubleQuote) then
+    begin
+      InSingleQuote := not InSingleQuote;
+      Continue;
+    end;
+
+    if InDoubleQuote or InSingleQuote then
+      Continue;
+
+    case S[i] of
+      ',': Inc(CommaCount);
+      ';': Inc(SemicolonCount);
+      #9:  Inc(TabCount);
+      '|': Inc(PipeCount);
+    end;
+  end;
+
+  // Häufigster gewinnt — mindestens 1 Vorkommen
+  if (SemicolonCount >= 1) and
+     (SemicolonCount > CommaCount) and
+     (SemicolonCount > TabCount) and
+     (SemicolonCount > PipeCount) then
+    Result := ';'
+
+  else if (TabCount >= 1) and
+          (TabCount > CommaCount) and
+          (TabCount > SemicolonCount) and
+          (TabCount > PipeCount) then
+    Result := #9
+
+  else if (PipeCount >= 1) and
+          (PipeCount > CommaCount) and
+          (PipeCount > SemicolonCount) and
+          (PipeCount > TabCount) then
+    Result := '|'
+
+  else
+    Result := ',';
+end;
+
+function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
+var
+  FS: TFileStream;
+  Buf: array[0..8191] of Byte;
+  BytesRead, i: Integer;
+  S: string;
+  C, Prev: Char;
+  DoubleAtBoundary, SingleAtBoundary: Integer;
+begin
+  Result := '"';
+
+  if not FileExists(AFileName) then
+    Exit;
+
+  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    BytesRead := FS.Read(Buf, SizeOf(Buf));
+  finally
+    FS.Free;
+  end;
+
+  if BytesRead <= 0 then
+    Exit;
+
+  SetLength(S, BytesRead);
+  Move(Buf[0], S[1], BytesRead);
+
+  DoubleAtBoundary := 0;
+  SingleAtBoundary := 0;
+  Prev := #0;
+
+  for i := 1 to Length(S) do
+  begin
+    C := S[i];
+
+    // Quote an einer Feldgrenze?
+    // (nach Delimiter, nach Zeilenumbruch oder am Dateianfang)
+    if (Prev = ADelimiter) or (Prev = #10) or (Prev = #13) or (i = 1) then
+    begin
+      if C = '"' then
+        Inc(DoubleAtBoundary)
+      else if C = '''' then
+        Inc(SingleAtBoundary);
+    end;
+
+    Prev := C;
+
+    // Nur erste Zeile reicht für die Erkennung
+    if (i > 1) and (C = #10) then
+      Break;
+  end;
+
+  // Doppelquote gewinnt bei Gleichstand (Standard-CSV)
+  if (SingleAtBoundary > 0) and (SingleAtBoundary > DoubleAtBoundary) then
+    Result := ''''
+  else
+    Result := '"';
+end;
 
 // ============================================================================
 // Markiert eine TIBDatabase-Instanz mit ihrem RegisteredDatabases-Index.
@@ -2198,6 +2443,16 @@ begin
   DestRec.LastOpened := Now;
   DestRec.ConnectOnApplicationStart := False;
 
+  // ============================================================
+  // SICHERHEIT: Passwort NICHT übernehmen!
+  // Der Benutzer muss sich bewusst neu anmelden und entscheiden,
+  // ob das Passwort gespeichert werden soll.
+  // ============================================================
+  DestRec.Password     := '';
+  DestRec.SavePassword := False;
+  DestRec.UserName     := SourceRec.UserName;  // User darf übernommen werden
+  DestRec.Role         := SourceRec.Role;      // Role darf übernommen werden
+
   // Server‑Einstellungen übernehmen
   DestRec.IsEmbedded            := ServerRec.IsEmbedded;
   DestRec.FireBirdClientLibPath := ServerRec.ClientLibraryPath;
@@ -2410,22 +2665,71 @@ var
   Metadata: TStringList;
   Script: TIBXScript;
   DBWasConnected: boolean;
+  ServerRecord: TServerRecord;
+  DBFilePath: string;
+  DBExistedBefore: Boolean;
 begin
   Result := False;
+  DBExistedBefore := False;
 
-  // 1) Leere DB erstellen
+  // ============================================================
+  // 1) Prüfen, ob die Ziel-DB bereits existiert
+  //    (Embedded: Datei vorhanden; Remote: nicht prüfbar → false)
+  // ============================================================
+  ServerRecord := GetServerRecordFromFileByName(
+    RegisteredDatabases[ADestDBIndex].RegRec.ServerName);
+
+  if ServerRecord.IsEmbedded then
+  begin
+    DBFilePath := GetDBFileNameFromConnectionString(
+      RegisteredDatabases[ADestDBIndex].IBDatabase.DatabaseName);
+
+    if FileExists(DBFilePath) then
+      DBExistedBefore := True;
+  end;
+
+  // ============================================================
+  // 2) Leere DB erstellen (bei bereits existierender Datei
+  //    passiert nichts mehr — siehe Anpassung in
+  //    CreateEmptyDatabase)
+  // ============================================================
   if not CreateEmptyDatabase(
        RegisteredDatabases[ADestDBIndex].RegRec.ServerName,
        RegisteredDatabases[ADestDBIndex].RegRec.Title) then
     Exit;
 
-  // 2) Metadaten extrahieren
+  // ============================================================
+  // 3) Login für die neue/alte DB durchführen
+  //    (Dialog falls nötig, danach ist die Verbindung aktiv)
+  // ============================================================
+  if not ConnectToDBAs(ADestDBIndex, True) then
+  begin
+    MessageDlg(
+      'Could not connect to the destination database.' + sLineBreak +
+      sLineBreak +
+      'The database exists, but metadata could not be copied.' + sLineBreak +
+      'You can connect to it manually later.',
+      mtWarning, [mbOK], 0);
+    Exit;
+  end;
+
+  // ============================================================
+  // 4) Wenn DB bereits existierte → keine Metadaten kopieren
+  // ============================================================
+  if DBExistedBefore then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  // ============================================================
+  // 5) Metadaten extrahieren und ausführen
+  // ============================================================
   Metadata := TStringList.Create;
   Extractor := TSimpleObjExtractor.Create(ASourceDBIndex);
   try
     Extractor.Extract(otDatabase, '', [], AlwaysQuoteIdentifiers, TStrings(Metadata));
 
-    // 3) Metadaten auf Ziel-DB ausführen
     Script := TIBXScript.Create(nil);
     try
       Script.Database := RegisteredDatabases[ADestDBIndex].IBDatabase;
@@ -4281,32 +4585,28 @@ begin
   CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
 
   TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
-  CSVDelimiter := TempStr[1];
-
-  {TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','CRLF');
-
-  case UpperCase(TempStr) of
-    'CRLF': CSVLineEnding := #13#10;
-    'LF':   CSVLineEnding := #10;
-    'CR':   CSVLineEnding := #13;
+  if TempStr <> '' then
+    CSVDelimiter := TempStr[1]
   else
-    CSVLineEnding := LineEnding;  // Fallback
-  end;}
+    CSVDelimiter := ',';
 
   TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
-  CSVQuoteChar := TempStr[1];
+  if TempStr <> '' then
+    CSVQuoteChar := TempStr[1]
+  else
+    CSVQuoteChar := '"';
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','LF');
+  CSVLineEnding := CSVLineEndingNameToStr(TempStr);
 
   CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
   CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
   CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
 
-
   //UpdateChecker
   AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
   UnzipAfterDownload := fIniFile.ReadBool('UpdateChecker','UnzipAfterDownload', True);
   RunNewVersionAfterUnzip:= fIniFile.ReadBool('UpdateChecker','RunNewVersionAfterUnzip', false);
-
-
   DeleteOldVersions := fIniFile.ReadBool('UpdateChecker','DeleteOldVersions', false);
 
 
@@ -4393,25 +4693,24 @@ begin
   fIniFile.WriteInteger('CSVExport', 'DefaultBatchSize', DefaultBatchSize);
   fIniFile.ReadString('CSVkExport','DefaultPreset', CSVExportDefaultPreset);
 
-    // CSV Editor
-    fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
-
-    fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
-
-    {// LineEnding zurück in Text umwandeln
-    case CSVLineEnding of
-      #13#10: TempStr := 'CRLF';
-      #10:    TempStr := 'LF';
-      #13:    TempStr := 'CR';
-    else
-      TempStr := 'CRLF';
-    end;
-    fIniFile.WriteString('CSVEditor','CSVLineEnding',TempStr);}
-
-    fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
-    fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
-    fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
-    fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
+  // CSV Editor
+  if CSVLineEnding = #13#10 then
+    TempStr := 'CRLF'
+  else if CSVLineEnding = #10 then
+    TempStr := 'LF'
+  else if CSVLineEnding = #13 then
+    TempStr := 'CR'
+  else if CSVLineEnding = LineEnding then
+    TempStr := 'SYSTEM'
+  else
+    TempStr := 'LF';
+  fIniFile.WriteString('CSVEditor','CSVLineEnding', TempStr);
+  fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
+  fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
+  fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
+  fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
+  fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
+  fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
 
 
     //UpdateChecker

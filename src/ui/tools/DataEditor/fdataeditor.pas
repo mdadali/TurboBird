@@ -43,12 +43,14 @@ type
   private
     FFileName: string;
     FOwner: TfrmDataEditor;
+    FLoadError: string;
     procedure CloseDataset;
     procedure LoadCSVInDataset;
   protected
     procedure Execute; override;
   public
     constructor Create(AOwner: TfrmDataEditor; const AFileName: string);
+    property LoadError: string read FLoadError;
   end;
 
   TfrmDataEditor = class(TForm)
@@ -60,20 +62,20 @@ type
     chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
+    cmbboxLineEnding: TComboBox;
+    cmbboxDelimiter: TComboBox;
     CSVDataset1: TCSVDataset;
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
     edtQuoteChar: TEdit;
-    edtLineEnding: TEdit;
-    edtDelimiter: TEdit;
     edtDefaultFieldLength: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
     JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
-    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
     Label5: TLabel;
-    Label6: TLabel;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmExportDataAsPDF: TMenuItem;
@@ -108,6 +110,8 @@ type
     procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
+    procedure cmbboxDelimiterChange(Sender: TObject);
+    procedure cmbboxLineEndingChange(Sender: TObject);
     procedure CSVDataset1AfterDelete(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -130,12 +134,20 @@ type
     FLoadDotCount: Integer;
     procedure LoadTimerTick(Sender: TObject);
 
+    procedure ResetAllDatasets;
     procedure LoadFile(const FileName: string);
     procedure SaveFile(const FileName: string);
     procedure SetCSVSettingsFromForm;
     procedure SelectDataSetByFileName(const AFileName: string);
+    procedure SyncLineEndingCombo;
+    procedure SyncDelimiterCombo;
     procedure ReadIni;
     procedure WriteIni;
+    function  AskUseDetected(
+      const AFileName: string;
+      const ACurLE, ADetLE: string;
+      const ACurDel, ADetDel: Char;
+      const ACurQC, ADetQC: Char): Boolean;
   public
   end;
 
@@ -173,15 +185,18 @@ end;
 
 constructor TCSVLoadThread.Create(AOwner: TfrmDataEditor; const AFileName: string);
 begin
-  inherited Create(True); // suspended
-  FreeOnTerminate := True;
+  inherited Create(True);
+  FreeOnTerminate := False;   // ← geändert: wir lesen LoadError nach Finish
   FOwner := AOwner;
   FFileName := AFileName;
+  FLoadError := '';
   Start;
 end;
 
 procedure TCSVLoadThread.CloseDataset;
 begin
+  if not Assigned(FOwner.DataSource1.DataSet) then Exit;
+
   if FOwner.DataSource1.DataSet.Active then
     FOwner.DataSource1.DataSet.Close;
   FOwner.DataSource1.DataSet.Fields.Clear;
@@ -189,38 +204,46 @@ end;
 
 procedure TCSVLoadThread.LoadCSVInDataset;
 begin
-  if FOwner.DataSource1.DataSet = FOwner.CSVDataset1 then
-    FOwner.CSVDataset1.LoadFromCSVFile(FFileName)
+  try
+    if FOwner.DataSource1.DataSet = FOwner.CSVDataset1 then
+      FOwner.CSVDataset1.LoadFromCSVFile(FFileName)
 
-  else if FOwner.DataSource1.DataSet = FOwner.JSONDataset1 then
-    FOwner.JSONDataset1.LoadFromFile(FFileName)
+    else if FOwner.DataSource1.DataSet = FOwner.JSONDataset1 then
+      FOwner.JSONDataset1.LoadFromFile(FFileName)
 
-  else if FOwner.DataSource1.DataSet = FOwner.sWorksheetDataset1 then
-  begin
-    FOwner.sWorksheetDataset1.FileName := FFileName;
-    //FOwner.sWorksheetDataset1.Open;
-  end
+    else if FOwner.DataSource1.DataSet = FOwner.sWorksheetDataset1 then
+    begin
+      FOwner.sWorksheetDataset1.FileName := FFileName;
+    end
 
-  else if FOwner.DataSource1.DataSet = FOwner.Dbf1 then
-  begin
-    FOwner.Dbf1.FilePathFull := FFileName;
-    //FOwner.Dbf1.Open;
-  end
+    else if FOwner.DataSource1.DataSet = FOwner.Dbf1 then
+    begin
+      FOwner.Dbf1.FilePathFull := FFileName;
+    end
 
-  else if FOwner.DataSource1.DataSet = FOwner.SdfDataSet1 then
-  begin
-    FOwner.SdfDataSet1.FileName := FFileName;
-    //FOwner.SdfDataSet1.Open;
-  end
+    else if FOwner.DataSource1.DataSet = FOwner.SdfDataSet1 then
+    begin
+      FOwner.SdfDataSet1.FileName := FFileName;
+    end
 
-  else if FOwner.DataSource1.DataSet = FOwner.FixedFormatDataSet1 then
-  begin
-    FOwner.FixedFormatDataSet1.FileName := FFileName;
-    //FOwner.FixedFormatDataSet1.Open;
+    else if FOwner.DataSource1.DataSet = FOwner.FixedFormatDataSet1 then
+    begin
+      FOwner.FixedFormatDataSet1.FileName := FFileName;
+    end;
+
+    FOwner.DataSource1.DataSet.Open;
+    FOwner.RxDBGrid1.OptimizeColumnsWidthAll;
+
+  except
+    on E: Exception do
+    begin
+      // Fehler merken — wird in btnOpenFileClick angezeigt
+      FLoadError := E.Message;
+
+      // Kompletten Zustand plattmachen — nächster Ladeversuch startet sauber
+      FOwner.ResetAllDatasets;
+    end;
   end;
-
-  FOwner.DataSource1.DataSet.Open;
-  FOwner.RxDBGrid1.OptimizeColumnsWidthAll;
 end;
 
 procedure TCSVLoadThread.Execute;
@@ -232,50 +255,189 @@ begin
   Synchronize(@LoadCSVInDataset);
 end;
 
-procedure  TfrmDataEditor.ReadIni;
+procedure TfrmDataEditor.SyncLineEndingCombo;
 begin
-  edtDefaultFieldLength.Text          := IntTostr(CSVDefaultFieldLength);
-  edtDelimiter.Text                   := CSVDelimiter;
-  //edtLineEnding.Text                := CSVLineEnding;
-  edtQuoteChar.Text                   := CSVQuoteChar;
-  chkBoxFirstLineAsFieldName.Checked  := CSVFirstLineAsFieldNames;
-  chkBoxIgnoreOuterWhiteSpace.Checked := CSVIgnoreOuterWhitespace;
-  chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
+  if CSVLineEnding = #13#10 then
+    cmbboxLineEnding.ItemIndex := 0
+  else if CSVLineEnding = #10 then
+    cmbboxLineEnding.ItemIndex := 1
+  else if CSVLineEnding = #13 then
+    cmbboxLineEnding.ItemIndex := 2
+  else if CSVLineEnding = LineEnding then
+    cmbboxLineEnding.ItemIndex := 3
+  else
+    cmbboxLineEnding.ItemIndex := 1;   // Fallback LF
+end;
+
+procedure TfrmDataEditor.SyncDelimiterCombo;
+begin
+  if CSVDelimiter = ',' then
+    cmbboxDelimiter.ItemIndex := 0
+  else if CSVDelimiter = ';' then
+    cmbboxDelimiter.ItemIndex := 1
+  else if CSVDelimiter = #9 then
+    cmbboxDelimiter.ItemIndex := 2
+  else if CSVDelimiter = '|' then
+    cmbboxDelimiter.ItemIndex := 3
+  else if CSVDelimiter = ' ' then
+    cmbboxDelimiter.ItemIndex := 4
+  else
+    cmbboxDelimiter.ItemIndex := 0;   // Fallback Komma
 end;
 
 procedure TfrmDataEditor.SetCSVSettingsFromForm;
 begin
   CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
-
-  if edtDelimiter.Text <> '' then
-    CSVDataset1.CSVOptions.Delimiter  := edtDelimiter.Text[1]
-  else
-   CSVDataset1.CSVOptions.Delimiter := ' ';
-
-  if edtLineEnding.Text <> '' then
-    CSVDataset1.CSVOptions.LineEnding := edtLineEnding.Text[1]
-  else
-    CSVDataset1.CSVOptions.LineEnding := ' ';
+  CSVDataset1.CSVOptions.Delimiter := CSVDelimiter;
+  CSVDataset1.CSVOptions.LineEnding := CSVLineEnding;
 
   if edtQuoteChar.Text <> '' then
-    CSVDataset1.CSVOptions.QuoteChar  := edtQuoteChar.Text[1]
+    CSVDataset1.CSVOptions.QuoteChar := edtQuoteChar.Text[1]
   else
-    CSVDataset1.CSVOptions.QuoteChar:= '"';
+    CSVDataset1.CSVOptions.QuoteChar := '"';
 
   CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
   CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
 end;
 
+procedure TfrmDataEditor.ReadIni;
+begin
+  edtDefaultFieldLength.Text          := IntToStr(CSVDefaultFieldLength);
+  edtQuoteChar.Text                   := CSVQuoteChar;
+  chkBoxFirstLineAsFieldName.Checked  := CSVFirstLineAsFieldNames;
+  chkBoxIgnoreOuterWhiteSpace.Checked := CSVIgnoreOuterWhitespace;
+  chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
+
+  // LineEnding-Combo anhand der INI-geladenen CSVLineEnding positionieren
+  SyncLineEndingCombo;
+  SyncDelimiterCombo;
+end;
+
 procedure TfrmDataEditor.WriteIni;
 begin
   CSVDefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
-  CSVDelimiter := edtDelimiter.Text[1];
-  //CSVLineEnding := edtLineEnding.Text[1];
-  CSVQuoteChar := edtQuoteChar.Text[1];
+
+  // CSVDelimiter wird bereits durch cmbboxDelimiterChange gesetzt
+  // — hier nichts zu tun
+
+  if edtQuoteChar.Text <> '' then
+    CSVQuoteChar := edtQuoteChar.Text[1]
+  else
+    CSVQuoteChar := '"';
+
   CSVFirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVIgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
-  CSVQuoteOuterWhitespace := chkBoxQuoteOuterWhiteSpace.Checked;
+  CSVQuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
+end;
+
+procedure TfrmDataEditor.ResetAllDatasets;
+begin
+  RxDBGrid1.DataSource := nil;
+  DBNavigator1.DataSource := nil;
+  DataSource1.DataSet := nil;
+
+  // ---- CSVDataset1 ----
+  if Assigned(CSVDataset1) then
+  begin
+    try
+      if CSVDataset1.Active then
+      begin
+        CSVDataset1.Close;
+      end;
+    except
+      // Zustand kaputt — nichts tun, Fields.Clear kommt eh
+    end;
+    try
+      CSVDataset1.Fields.Clear;
+    except end;
+    try
+      CSVDataset1.FieldDefs.Clear;
+    except end;
+  end;
+
+  // ---- JSONDataset1 ----
+  if Assigned(JSONDataset1) then
+  begin
+    try
+      if JSONDataset1.Active then
+        JSONDataset1.Close;
+    except end;
+    try
+      JSONDataset1.Fields.Clear;
+    except end;
+    try
+      JSONDataset1.FieldDefs.Clear;
+    except end;
+  end;
+
+  // ---- sWorksheetDataset1 ----
+  if Assigned(sWorksheetDataset1) then
+  begin
+    try
+      if sWorksheetDataset1.Active then
+        sWorksheetDataset1.Close;
+    except end;
+    try
+      sWorksheetDataset1.Fields.Clear;
+    except end;
+    try
+      sWorksheetDataset1.FieldDefs.Clear;
+    except end;
+  end;
+
+  // ---- Dbf1 ----
+  if Assigned(Dbf1) then
+  begin
+    try
+      if Dbf1.Active then
+        Dbf1.Close;
+    except end;
+    try
+      Dbf1.Fields.Clear;
+    except end;
+    try
+      Dbf1.FieldDefs.Clear;
+    except end;
+  end;
+
+  // ---- SdfDataSet1 ----
+  if Assigned(SdfDataSet1) then
+  begin
+    try
+      if SdfDataSet1.Active then
+        SdfDataSet1.Close;
+    except end;
+    try
+      SdfDataSet1.Fields.Clear;
+    except end;
+    try
+      SdfDataSet1.FieldDefs.Clear;
+    except end;
+  end;
+
+  // ---- FixedFormatDataSet1 ----
+  if Assigned(FixedFormatDataSet1) then
+  begin
+    try
+      if FixedFormatDataSet1.Active then
+        FixedFormatDataSet1.Close;
+    except end;
+    try
+      FixedFormatDataSet1.Fields.Clear;
+    except end;
+    try
+      FixedFormatDataSet1.FieldDefs.Clear;
+    except end;
+  end;
+
+  try
+    RxDBGrid1.Columns.Clear;
+  except end;
+
+  try
+    SynEdit1.Lines.Clear;
+  except end;
 end;
 
 procedure TfrmDataEditor.LoadFile(const FileName: string);
@@ -375,7 +537,12 @@ end;
 procedure TfrmDataEditor.SelectDataSetByFileName(const AFileName: string);
 var
   Ext: string;
+  DetLE: string;
+  DetDel, DetQC: Char;
 begin
+  // Alles zurücksetzen — verhindert Zustands-Kollisionen beim Wechsel
+  ResetAllDatasets;
+
   Ext := LowerCase(ExtractFileExt(AFileName));
 
   if DataSource1.DataSet <> nil then
@@ -385,7 +552,32 @@ begin
   end;
 
   if (Ext = '.csv') then
-    DataSource1.DataSet := CSVDataSet1
+  begin
+    DataSource1.DataSet := CSVDataSet1;
+
+    // ============================================================
+    // Auto-Detection: LineEnding, Delimiter, QuoteChar
+    // ============================================================
+    DetLE  := DetectLineEnding(AFileName);
+    DetDel := DetectDelimiter(AFileName);
+    DetQC  := DetectQuoteChar(AFileName, DetDel);
+
+    // Nur fragen wenn mindestens ein Wert abweicht
+    if AskUseDetected(AFileName,
+                      CSVLineEnding, DetLE,
+                      CSVDelimiter,  DetDel,
+                      CSVQuoteChar,  DetQC) then
+    begin
+      CSVLineEnding := DetLE;
+      CSVDelimiter  := DetDel;
+      CSVQuoteChar  := DetQC;
+    end;
+
+    // UI synchronisieren
+    SyncLineEndingCombo;
+    SyncDelimiterCombo;
+    edtQuoteChar.Text := CSVQuoteChar;
+  end
 
   else if (Ext = '.json') then
       DataSource1.DataSet := JSONDataSet1
@@ -443,18 +635,12 @@ var
   RowCount: Integer;
   Stats: TTransferStatistic;
   ReportForm: TfrmReport;
+  LoadErr: string;
 begin
   if not OpenDialog1.Execute then Exit;
 
   FFileName := OpenDialog1.FileName;
   SelectDataSetByFileName(FFileName);
-
-  SynEdit1.Lines.Clear;
-  if DataSource1.DataSet.Active then
-  begin
-    DataSource1.DataSet.Close;
-    DataSource1.DataSet.Fields.Clear;
-  end;
 
   SetCSVSettingsFromForm;
 
@@ -580,10 +766,54 @@ begin
       Sleep(20);
     end;
 
+    // ============================================================
+    // Fehler prüfen — BEVOR wir die Grids reaktivieren
+    // ============================================================
+    LoadErr := CSVThread.LoadError;
+    CSVThread.Free;
+    CSVThread := nil;
+
+    if LoadErr <> '' then
+    begin
+      LblRows.Caption := 'Rows:     — load failed —';
+      FLoadStatusLabel.Caption := 'Error.';
+      FLoadElapsedLabel.Caption := 'Elapsed: ' +
+        FormatDateTime('hh:nn:ss', Now - StartTime);
+      Application.ProcessMessages;
+
+      MessageDlg(
+        'Could not load file:' + sLineBreak + sLineBreak +
+        'File: ' + ExtractFileName(FFileName) + sLineBreak +
+        'Ext:  ' + LowerCase(ExtractFileExt(FFileName)) + sLineBreak +
+        sLineBreak +
+        'Error:' + sLineBreak + LoadErr,
+        mtError, [mbOK], 0);
+
+      Caption := 'Turbobird - Data Editor';
+      btnCreateSQL.Enabled := False;
+      btnExportAs.Enabled := False;
+
+      Exit;
+    end;
+
     // === Datasets reaktivieren ===
+    DataSource1.DataSet := DataSource1.DataSet;   // Kick: Rebind erzwingen
+
     DBNavigator1.DataSource := DataSource1;
     RxDBGrid1.DataSource := DataSource1;
     RxDBGrid1.OptimizeColumnsWidthAll;
+
+    // Grid explizit neu aufbauen
+    RxDBGrid1.Columns.Clear;                    // ← jetzt HIER, nach Reattach
+    if DataSource1.DataSet.Active and
+       (not DataSource1.DataSet.IsEmpty) then
+    begin
+      DataSource1.DataSet.First;
+      RxDBGrid1.OptimizeColumnsWidthAll;
+    end;
+
+    RxDBGrid1.Refresh;                          // Neu zeichnen
+    RxDBGrid1.Invalidate;                       // Redraw erzwingen
 
     EndTime := Now;
     RowCount := DataSource1.DataSet.RecordCount;
@@ -627,16 +857,31 @@ begin
   Stats.SystemInfo       := GetSystemInfo(FFileName);
 
   // --- CSV-Optionen (nur bei CSV-Dateien) ---
-  if UpperCase(Stats.SourceFileFormat) = 'CSV' then
-    Stats.CSVOptions :=
-      '    Delimiter: ' + QuotedStr(edtDelimiter.Text) + sLineBreak +
-      '    Quote Char: ' + QuotedStr(edtQuoteChar.Text) + sLineBreak +
+  // Aus dem Dataset lesen — das kennt den tatsächlichen Zustand
+  // nach SetCSVSettingsFromForm und ist immer synchron.
+  if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
+     (DataSource1.DataSet = CSVDataset1) then
+  begin
+    // Delimiter symbolisch darstellen (Tab als '\t' etc.)
+    if CSVDataset1.CSVOptions.Delimiter = #9 then
+      Stats.CSVOptions := '    Delimiter: ' + QuotedStr('\t') + sLineBreak
+    else if CSVDataset1.CSVOptions.Delimiter = #32 then
+      Stats.CSVOptions := '    Delimiter: ' + QuotedStr('Space') + sLineBreak
+    else
+      Stats.CSVOptions := '    Delimiter: ' +
+        QuotedStr(CSVDataset1.CSVOptions.Delimiter) + sLineBreak;
+
+    Stats.CSVOptions := Stats.CSVOptions +
+      '    Quote Char: ' + QuotedStr(CSVDataset1.CSVOptions.QuoteChar) + sLineBreak +
+      '    Line Ending: ' +
+        CSVLineEndingStrToName(CSVDataset1.CSVOptions.LineEnding) + sLineBreak +
       '    First Line As Field Names: ' +
-        BoolToStr(chkBoxFirstLineAsFieldName.Checked, 'Yes', 'No') + sLineBreak +
+        BoolToStr(CSVDataset1.CSVOptions.FirstLineAsFieldNames, 'Yes', 'No') + sLineBreak +
       '    Ignore Outer Whitespace: ' +
-        BoolToStr(chkBoxIgnoreOuterWhiteSpace.Checked, 'Yes', 'No') + sLineBreak +
+        BoolToStr(CSVDataset1.CSVOptions.IgnoreOuterWhitespace, 'Yes', 'No') + sLineBreak +
       '    Quote Outer Whitespace: ' +
-        BoolToStr(chkBoxQuoteOuterWhiteSpace.Checked, 'Yes', 'No');
+        BoolToStr(CSVDataset1.CSVOptions.QuoteOuterWhitespace, 'Yes', 'No');
+  end;
 
   // --- Report anzeigen ---
   ReportForm := TfrmReport.Create(nil);
@@ -776,6 +1021,36 @@ begin
   // Popup-Menü unter dem Button anzeigen
   P := btnExportAs.ClientToScreen(Point(0, btnExportAs.Height));
   pmGrid.PopUp(P.X, P.Y);
+end;
+
+procedure TfrmDataEditor.cmbboxDelimiterChange(Sender: TObject);
+begin
+  case cmbboxDelimiter.ItemIndex of
+    0: CSVDelimiter := ',';     // Komma
+    1: CSVDelimiter := ';';     // Semikolon
+    2: CSVDelimiter := #9;      // Tab
+    3: CSVDelimiter := '|';     // Pipe
+    4: CSVDelimiter := ' ';     // Space
+  else
+    CSVDelimiter := ',';        // Fallback
+  end;
+
+  SetCSVSettingsFromForm;
+end;
+
+procedure TfrmDataEditor.cmbboxLineEndingChange(Sender: TObject);
+begin
+  case cmbboxLineEnding.ItemIndex of
+    0: CSVLineEnding := #13#10;         // CRLF
+    1: CSVLineEnding := #10;            // LF
+    2: CSVLineEnding := #13;            // CR
+    3: CSVLineEnding := LineEnding;     // plattformabhängig (System.LineEnding)
+  else
+    CSVLineEnding := #10;               // Fallback
+  end;
+
+  // Dataset sofort mit neuer Einstellung füttern
+  SetCSVSettingsFromForm;
 end;
 
 procedure TfrmDataEditor.lmStdExportFormatsClick(Sender: TObject);
@@ -921,6 +1196,130 @@ begin
       MessageDlg('Error',
         'Failed to copy to clipboard:'#13#10 + E.Message,
         mtError, [mbOK], 0);
+  end;
+end;
+
+function TfrmDataEditor.AskUseDetected(
+  const AFileName: string;
+  const ACurLE, ADetLE: string;
+  const ACurDel, ADetDel: Char;
+  const ACurQC, ADetQC: Char): Boolean;
+var
+  Dlg: TForm;
+  Memo: TMemo;
+  LblTitle: TLabel;
+  BtnUseDetected, BtnKeepCurrent: TButton;
+  Content: TStringList;
+  HasDiff: Boolean;
+  CurLEName, DetLEName: string;
+  CurDelStr, DetDelStr: string;
+  CurQCStr, DetQCStr: string;
+begin
+  Result := True;   // Default: Detected verwenden
+
+  // Nur fragen wenn mindestens ein Wert abweicht
+  HasDiff :=
+    (ACurLE <> ADetLE) or
+    (ACurDel <> ADetDel) or
+    (ACurQC <> ADetQC);
+
+  if not HasDiff then Exit;
+
+  // Symbolische Namen fürs UI
+  CurLEName := CSVLineEndingStrToName(ACurLE);
+  DetLEName := CSVLineEndingStrToName(ADetLE);
+
+  if ACurDel = #9 then CurDelStr := '\t'
+  else if ACurDel = ' ' then CurDelStr := 'Space'
+  else CurDelStr := QuotedStr(ACurDel);
+
+  if ADetDel = #9 then DetDelStr := '\t'
+  else if ADetDel = ' ' then DetDelStr := 'Space'
+  else DetDelStr := QuotedStr(ADetDel);
+
+  if ACurQC = #0 then CurQCStr := '(none)'
+  else CurQCStr := QuotedStr(ACurQC);
+
+  if ADetQC = #0 then DetQCStr := '(none)'
+  else DetQCStr := QuotedStr(ADetQC);
+
+  Dlg := TForm.Create(nil);
+  try
+    Dlg.Caption := 'CSV Auto-Detection';
+    Dlg.Width := 560;
+    Dlg.Height := 380;
+    Dlg.Position := poScreenCenter;
+    Dlg.BorderStyle := bsDialog;
+    Dlg.FormStyle := fsStayOnTop;
+
+    LblTitle := TLabel.Create(Dlg);
+    LblTitle.Parent := Dlg;
+    LblTitle.Left := 16;
+    LblTitle.Top := 12;
+    LblTitle.Width := 528;
+    LblTitle.Caption := 'Auto-detection found different values than your current settings:';
+    LblTitle.Font.Style := [fsBold];
+
+    Content := TStringList.Create;
+    try
+      Content.Add('File: ' + ExtractFileName(AFileName));
+      Content.Add('');
+      Content.Add('                     Current       Detected');
+      Content.Add('  ──────────────     ─────────     ─────────');
+
+      if ACurLE <> ADetLE then
+        Content.Add(Format('  LineEnding         %-13s %s', [CurLEName, DetLEName]))
+      else
+        Content.Add(Format('  LineEnding         %-13s (same)', [CurLEName]));
+
+      if ACurDel <> ADetDel then
+        Content.Add(Format('  Delimiter          %-13s %s', [CurDelStr, DetDelStr]))
+      else
+        Content.Add(Format('  Delimiter          %-13s (same)', [CurDelStr]));
+
+      if ACurQC <> ADetQC then
+        Content.Add(Format('  QuoteChar          %-13s %s', [CurQCStr, DetQCStr]))
+      else
+        Content.Add(Format('  QuoteChar          %-13s (same)', [CurQCStr]));
+
+      Content.Add('');
+      Content.Add('Use the auto-detected values for this file?');
+
+      Memo := TMemo.Create(Dlg);
+      Memo.Parent := Dlg;
+      Memo.Left := 16;
+      Memo.Top := 38;
+      Memo.Width := 528;
+      Memo.Height := 230;
+      Memo.ReadOnly := True;
+      Memo.ScrollBars := ssVertical;
+      Memo.Font.Name := 'Courier New';
+      Memo.Font.Size := 10;
+      Memo.Lines.Assign(Content);
+    finally
+      Content.Free;
+    end;
+
+    BtnUseDetected := TButton.Create(Dlg);
+    BtnUseDetected.Parent := Dlg;
+    BtnUseDetected.Caption := 'Use Detected';
+    BtnUseDetected.Left := 280;
+    BtnUseDetected.Top := 285;
+    BtnUseDetected.Width := 120;
+    BtnUseDetected.Default := True;
+    BtnUseDetected.ModalResult := mrYes;
+
+    BtnKeepCurrent := TButton.Create(Dlg);
+    BtnKeepCurrent.Parent := Dlg;
+    BtnKeepCurrent.Caption := 'Keep Current';
+    BtnKeepCurrent.Left := 408;
+    BtnKeepCurrent.Top := 285;
+    BtnKeepCurrent.Width := 120;
+    BtnKeepCurrent.ModalResult := mrNo;
+
+    Result := (Dlg.ShowModal = mrYes);
+  finally
+    Dlg.Free;
   end;
 end;
 

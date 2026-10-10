@@ -46,6 +46,7 @@ type
     FBooleanTrue: string;
     FBooleanFalse: string;
     FFormulas: TStringList;
+    FLineEnding: string;
   public
     constructor Create;
     destructor Destroy; override;
@@ -63,6 +64,7 @@ type
     property Separator: string read FSeparator write FSeparator;
     property DecimalPoint: string read FDecimalPoint write FDecimalPoint;
     property QuoteChar: string read FQuoteChar write FQuoteChar;
+    property LineEnding: string read FLineEnding write FLineEnding;
     property IncludeHeader: Boolean read FIncludeHeader write FIncludeHeader;
     property HeaderQuoted: Boolean read FHeaderQuoted write FHeaderQuoted;
     property DataQuoted: Boolean read FDataQuoted write FDataQuoted;
@@ -137,6 +139,7 @@ end;
 function TFormulaPreset.LoadFromFile(const AFileName: string): Boolean;
 var
   Ini: TIniFile;
+  LineEndingName: string;
 begin
   Result := False;
   if not FileExists(AFileName) then Exit;
@@ -156,6 +159,18 @@ begin
     FBooleanTrue   := Ini.ReadString('Preset', 'BooleanTrue', 'TRUE');
     FBooleanFalse  := Ini.ReadString('Preset', 'BooleanFalse', 'FALSE');
 
+    // LineEnding — symbolischer Name → echtes Control-Zeichen
+    LineEndingName := Ini.ReadString('Preset', 'LineEnding', 'LF');
+    case UpperCase(Trim(LineEndingName)) of
+      'CRLF':     FLineEnding := #13#10;
+      'LF':       FLineEnding := #10;
+      'CR':       FLineEnding := #13;
+      'SYSTEM':   FLineEnding := LineEnding;
+      'LINEENDING': FLineEnding := LineEnding;
+    else
+      FLineEnding := #10;   // portabler Fallback
+    end;
+
     FFormulas.Clear;
     Ini.ReadSectionValues('Formulas', FFormulas);
 
@@ -170,6 +185,7 @@ var
   Ini: TIniFile;
   i: Integer;
   KeyName: string;
+  LineEndingName: string;
 begin
   Result := False;
   try
@@ -180,6 +196,21 @@ begin
       Ini.WriteString('Preset', 'Separator', FSeparator);
       Ini.WriteString('Preset', 'DecimalPoint', FDecimalPoint);
       Ini.WriteString('Preset', 'QuoteChar', FQuoteChar);
+
+      // LineEnding als symbolischer Name — CRLF / LF / CR / SYSTEM
+      if FLineEnding = #13#10 then
+        LineEndingName := 'CRLF'
+      else if FLineEnding = #10 then
+        LineEndingName := 'LF'
+      else if FLineEnding = #13 then
+        LineEndingName := 'CR'
+      else if FLineEnding = LineEnding then
+        LineEndingName := 'SYSTEM'
+      else
+        LineEndingName := 'LF';   // Fallback
+
+      Ini.WriteString('Preset', 'LineEnding', LineEndingName);
+
       Ini.WriteBool('Preset', 'IncludeHeader', FIncludeHeader);
       Ini.WriteBool('Preset', 'HeaderQuoted', FHeaderQuoted);
       Ini.WriteBool('Preset', 'DataQuoted', FDataQuoted);
@@ -493,6 +524,72 @@ begin
     SetLength(Result, Length(Result) + 1);
     Result[High(Result)] := Issue;
   end;
+
+  // ===========================================================
+  // INFO: LineEnding
+  // ===========================================================
+  if APreset.LineEnding = #13 then
+  begin
+    Issue.Severity := isWarning;
+    Issue.Message :=
+      'LineEnding is CR (classic Mac OS, pre-2001)' + sLineBreak +
+      sLineBreak +
+      'Problem:' + sLineBreak +
+      '  Almost no modern tool understands CR as a line ending.' + sLineBreak +
+      '  Notepad on Windows shows everything as one line.' + sLineBreak +
+      sLineBreak +
+      'Solution:' + sLineBreak +
+      '  Use LF (recommended, portable) or CRLF (Windows-only).';
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Issue;
+  end
+  else if APreset.LineEnding = '' then
+  begin
+    Issue.Severity := isWarning;
+    Issue.Message :=
+      'LineEnding is empty' + sLineBreak +
+      sLineBreak +
+      'Problem:' + sLineBreak +
+      '  No line ending between records — the file becomes one long line.' + sLineBreak +
+      sLineBreak +
+      'Solution:' + sLineBreak +
+      '  Set LineEnding to LF in the preset (INI: LineEnding=LF).';
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Issue;
+  end;
+
+  // ===========================================================
+  // WARNING: Unquoted + Separator = Data-Loss-Risiko
+  // ===========================================================
+  if (not APreset.DataQuoted) and (Trim(APreset.QuoteChar) = '') then
+  begin
+    Issue.Severity := isWarning;
+    Issue.Message :=
+      'Unquoted mode is unsafe for text data' + sLineBreak +
+      sLineBreak +
+      'Problem:' + sLineBreak +
+      '  Fields are not wrapped in quotes. Any field value that' + sLineBreak +
+      '  contains the Separator character (' +
+        QuotedStr(APreset.Separator) + ') or a line break' + sLineBreak +
+      '  will be split into multiple columns — the CSV becomes unparseable.' + sLineBreak +
+      sLineBreak +
+      'Example of broken output:' + sLineBreak +
+      '  "Müller' + APreset.Separator + ' Hans"  →  2 columns instead of 1' + sLineBreak +
+      sLineBreak +
+      'Recommendation:' + sLineBreak +
+      '  Only use unquoted mode for tables that are guaranteed to contain' + sLineBreak +
+      '  no Separator characters and no line breaks in any text field' + sLineBreak +
+      '  (e.g. pure numeric data, IDs, codes).' + sLineBreak +
+      sLineBreak +
+      '  For general-purpose export, enable quoting:' + sLineBreak +
+      '    DataQuoted=1' + sLineBreak +
+      '    QuoteChar="' + sLineBreak +
+      sLineBreak +
+      '  Or use a different Preset (CSV Quoted, CSV German, TSV Quoted, ...).';
+    SetLength(Result, Length(Result) + 1);
+    Result[High(Result)] := Issue;
+  end;
+
 end;
 
 class function TPresetValidator.HasErrors(const AIssues: TPresetIssues): Boolean;
@@ -574,6 +671,7 @@ begin
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;   // LF
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
@@ -591,16 +689,18 @@ begin
     end;
   end;
 
-  // ---------- 2. CSV Unquoted ----------
+  // ---------- 2. CSV Unquoted (numeric only) ----------
   if not FileExists(FPresetDir + 'csv_unquoted.ini') then
   begin
     Preset := TFormulaPreset.Create;
     try
-      Preset.Name          := 'CSV Unquoted';
-      Preset.Description   := 'CSV ohne Quotes, alles roh';
+      Preset.Name          := 'CSV Unquoted (numeric only)';
+      Preset.Description   := 'WARNING: no quoting — only safe for numeric/ID data. ' +
+                              'Text with Separator or line breaks will break the file.';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := False;
       Preset.DataQuoted    := False;
@@ -628,6 +728,7 @@ begin
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := False;
@@ -655,6 +756,7 @@ begin
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := False;
       Preset.DataQuoted    := True;
@@ -682,6 +784,7 @@ begin
       Preset.Separator     := ';';
       Preset.DecimalPoint  := ',';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
@@ -709,6 +812,7 @@ begin
       Preset.Separator     := '\t';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
@@ -736,6 +840,7 @@ begin
       Preset.Separator     := '|';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
@@ -763,6 +868,7 @@ begin
       Preset.Separator     := '';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := False;
       Preset.HeaderQuoted  := False;
       Preset.DataQuoted    := False;
@@ -789,6 +895,7 @@ begin
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
