@@ -1,7 +1,7 @@
 object frmCSVBulkExporter: TfrmCSVBulkExporter
-  Left = 1385
+  Left = 659
   Height = 831
-  Top = 200
+  Top = 116
   Width = 1166
   Caption = 'CSV Bulk Exporter'
   ClientHeight = 831
@@ -871,5 +871,12 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       OnClick = btnAddToQueueClick
       TabOrder = 3
     end
+  end
+  object SynSQLSyn1: TSynSQLSyn
+    DefaultFilter = 'SQL Files (*.sql)|*.sql'
+    Enabled = False
+    SQLDialect = sqlFirebird40
+    Left = 852
+    Top = 428
   end
 end

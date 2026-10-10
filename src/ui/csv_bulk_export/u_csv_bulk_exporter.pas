@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, Forms, Controls,
   Math, DateUtils, Dialogs,
   Graphics, StdCtrls, ExtCtrls,
-  SynEdit, Grids, CheckLst, ComCtrls, DB, BufStream,
+  SynEdit, SynHighlighterSQL, Grids, CheckLst, ComCtrls, DB, BufStream,
   IBDatabase, IBQuery, IBSQL, IBXScript, IBDataOutput,
 
   SysTables,
@@ -76,6 +76,7 @@ type
     rbRange: TRadioButton;
     sgFields: TStringGrid;
     syneditGenerateQuery: TSynEdit;
+    SynSQLSyn1: TSynSQLSyn;
 
     procedure btnAddToQueueClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
@@ -505,12 +506,12 @@ end;
 // ============================================================================
 // VALIDATOR
 // ============================================================================
-
 procedure TfrmCSVBulkExporter.ValidateAndEnableRun;
 var
   Preset: TFormulaPreset;
   Issues: TPresetIssues;
-  HasErr: Boolean;
+  HasErr, HasWarn: Boolean;
+  i: Integer;
 begin
   Preset := GetActivePreset;
   if Preset = nil then
@@ -521,8 +522,18 @@ begin
   end;
 
   Issues := TPresetValidator.Validate(Preset);
-  HasErr := TPresetValidator.HasErrors(Issues);
 
+  HasErr := False;
+  HasWarn := False;
+  for i := 0 to High(Issues) do
+  begin
+    if Issues[i].Severity = isError then HasErr := True
+    else if Issues[i].Severity = isWarning then HasWarn := True;
+  end;
+
+  // ============================================================
+  // Fehler → Preset blockieren
+  // ============================================================
   if HasErr then
   begin
     MessageDlg('Preset has errors:' + sLineBreak + sLineBreak +
@@ -530,13 +541,25 @@ begin
                mtError, [mbOK], 0);
     btnPreviewSQL.Enabled := False;
     btnExecute.Enabled := False;
-  end
-  else
-  begin
-    btnPreviewSQL.Enabled := True;
-    if syneditGenerateQuery.Text = '' then
-      btnExecute.Enabled := False;
+    Exit;
   end;
+
+  // ============================================================
+  // Warnungen → anzeigen, aber weitermachen
+  // ============================================================
+  if HasWarn then
+  begin
+    MessageDlg('Preset has warnings:' + sLineBreak + sLineBreak +
+               TPresetValidator.BuildMessage(Issues),
+               mtWarning, [mbOK], 0);
+  end;
+
+  // ============================================================
+  // Freigeben
+  // ============================================================
+  btnPreviewSQL.Enabled := True;
+  if syneditGenerateQuery.Text = '' then
+    btnExecute.Enabled := False;
 end;
 
 // ============================================================================
@@ -698,13 +721,13 @@ end;
 // ============================================================================
 // FELDER LADEN
 // ============================================================================
-
 procedure TfrmCSVBulkExporter.LoadFields;
 var
   RawFields: TFBFieldRawArray;
   Extractor: TSimpleObjExtractor;
   i: Integer;
-  TypeStr: string;
+  TypeStr, ArraySuffix: string;
+  IsComputed: Boolean;
 begin
   if FSourceDBIndex < 0 then Exit;
   if Trim(comboxSourceTables.Text) = '' then Exit;
@@ -737,6 +760,8 @@ begin
     // Name aus Raw
     FFields[i].FieldName := RawFields[i].FieldName;
 
+    IsComputed := Trim(RawFields[i].ComputedSource) <> '';
+
     // Typ-String bauen
     TypeStr := GetFBTypeName(
       RawFields[i].FieldType,
@@ -747,6 +772,15 @@ begin
       RawFields[i].CharacterSetName,
       RawFields[i].CharacterLength
     );
+
+    // Array-Suffix anhängen — wichtig für IsProblemField-Erkennung
+    ArraySuffix := ArrayDimsToSuffix(RawFields[i].ArrayDims);
+    if ArraySuffix <> '' then
+      TypeStr := TypeStr + ArraySuffix;
+
+    if IsComputed then
+      TypeStr := TypeStr + ' (computed)';
+
     FFields[i].FieldType := TypeStr;
 
     // CSV-eigene Felder initialisieren
@@ -760,7 +794,11 @@ begin
     sgFields.RowCount := i + 2;
     sgFields.Cells[0, i + 1] := FFields[i].FieldName;
     sgFields.Cells[1, i + 1] := FFields[i].FieldType;
-    sgFields.Cells[2, i + 1] := '';
+
+    if IsComputed then
+      sgFields.Cells[2, i + 1] := '(computed)'
+    else
+      sgFields.Cells[2, i + 1] := '';
   end;
 
   if cbFormulaPreset.ItemIndex >= 0 then
@@ -771,6 +809,7 @@ begin
     ValidateAndEnableRun;
   end;
 end;
+
 
 procedure TfrmCSVBulkExporter.btnSelectAllClick(Sender: TObject);
 var
@@ -999,6 +1038,7 @@ var
   i: Integer;
   Preset: TFormulaPreset;
   FieldExpr, Formula, Separator: string;
+  QuotedFieldName: string;
   IsBool, IsNum, IsStr, IsBinaryBlob: Boolean;
   LineExpr: string;
 begin
@@ -1020,19 +1060,23 @@ begin
     if not chkLstFields.Checked[i] then Continue;
     if i + 1 >= sgFields.RowCount then Break;
 
+    // Case-sensitive Identifier: quoten wenn nicht komplett UPPERCASE
+    QuotedFieldName := MakeCaseSensitiveAuto(FFields[i].FieldName);
+
     // Formel aus Grid (oder $1)
     Formula := Trim(sgFields.Cells[2, i + 1]);
     if Formula = '' then
       Formula := '$1';
 
-    Formula := StringReplace(Formula, '$1', FFields[i].FieldName, [rfReplaceAll]);
+    // $1 durch den gequoteten Feldnamen ersetzen
+    Formula := StringReplace(Formula, '$1', QuotedFieldName, [rfReplaceAll]);
     FieldExpr := '(' + Formula + ')';
 
     IsBool := IsBooleanType(FFields[i].FieldType);
     IsNum  := not IsBool and not NeedsQuoting(FFields[i].FieldType);
     IsStr  := not IsBool and not IsNum;
 
-    // NEU: Binary BLOB erkennen
+    // Binary BLOB erkennen
     IsBinaryBlob := IsBlobBinaryType(FFields[i].FieldType);
 
     // Boolean: CASE WHEN ...
@@ -1077,11 +1121,11 @@ begin
     Exit;
   end;
 
-  // SELECT mehrzeilig
+  // SELECT mehrzeilig — Tabellenname mit Auto-Quoting (case-sensitive)
   Result := 'SELECT' + sLineBreak +
             LineExpr + sLineBreak +
             '  AS csv_line' + sLineBreak +
-            'FROM ' + MakeObjectNameQuoted(comboxSourceTables.Text);
+            'FROM ' + MakeCaseSensitiveAuto(Trim(comboxSourceTables.Text));
 end;
 
 function TfrmCSVBulkExporter.IsBlobBinaryType(const AFieldType: string): Boolean;
@@ -1090,20 +1134,29 @@ var
 begin
   CT := UpperCase(AFieldType);
 
-  // BLOB SUB_TYPE BINARY erkennen
-  // Typische Schreibweisen:
-  //   "BLOB SUB_TYPE 0"
-  //   "BLOB SUB_TYPE BINARY"
-  //   "BLOB"  (Default ist BINARY in Firebird)
-  Result := (Pos('BLOB', CT) > 0) and
-            ((Pos('BINARY', CT) > 0) or (Pos('SUBTYPE 0', CT) > 0));
+  // Kein BLOB → sofort raus
+  if Pos('BLOB', CT) = 0 then
+    Exit(False);
+
+  // Explizit BINARY oder SUBTYPE 0 → binär
+  if (Pos('BINARY', CT) > 0) or (Pos('SUBTYPE 0', CT) > 0) or
+     (Pos('SUB_TYPE 0', CT) > 0) then
+    Exit(True);
+
+  // Explizit TEXT oder SUBTYPE 1 → text
+  if (Pos('TEXT', CT) > 0) or (Pos('SUBTYPE 1', CT) > 0) or
+     (Pos('SUB_TYPE 1', CT) > 0) then
+    Exit(False);
+
+  // Reines "BLOB" ohne Subtyp → Firebird-Default ist BINARY
+  Result := True;
 end;
 
 function TfrmCSVBulkExporter.BuildHeaderLine: string;
 var
   i: Integer;
   Preset: TFormulaPreset;
-  Sep, QC, Line: string;
+  Sep, QC, Line, LE: string;
 begin
   Result := '';
   Preset := GetActivePreset;
@@ -1111,7 +1164,12 @@ begin
   if not Preset.IncludeHeader then Exit;
 
   Sep := ExpandSep(Preset.Separator);
-  QC := Preset.QuoteChar;
+  QC  := Preset.QuoteChar;
+
+  // LineEnding aus Preset, Fallback auf globale DataEditor-Einstellung
+  LE := Preset.LineEnding;
+  if LE = '' then
+    LE := CSVLineEnding;
 
   Line := '';
   for i := 0 to High(FFields) do
@@ -1126,7 +1184,7 @@ begin
   end;
 
   if Line <> '' then
-    Result := Line + sLineBreak;
+    Result := Line + LE;
 end;
 
 // ============================================================================
@@ -1205,391 +1263,6 @@ end;
 // ============================================================================
 // BULK EXPORT ENGINE
 // ============================================================================
-
-{procedure TfrmCSVBulkExporter.DoBulkExport(const ASQL: string);
-var
-  TotalRows, ExpectedRows: Int64;
-  Exported: Int64;
-  FromRow, ToRow: Integer;
-  UseRange: Boolean;
-  ProgressForm: TForm;
-  ProgressLabel, LblElapsed, LblPhase: TLabel;
-  ProgressBar: TProgressBar;
-  BtnCancel: TButton;
-  StartTime, EndTime: TDateTime;
-  DB: TIBDatabase;
-  Trans: TIBTransaction;
-  Q: TIBSQL;
-  Line: RawByteString;
-  LineEnd: RawByteString;
-  LenLine, LenEnd: Integer;
-  SQL, BaseSQL, CountSQL: string;
-  FileStream: TBufferedFileStream;
-  BufferBytes: Int64;
-  RowsPerUpdate: Integer;
-  RowsSinceUpdate: Int64;
-  FileSize: Int64;
-  Stats: TTransferStatistic;
-  ReportForm: TfrmReport;
-  i, CheckedCount: Integer;
-  HeaderLine: string;
-
-  procedure UpdateProgress;
-  var
-    ElapsedSec: Double;
-    RowsPerSec: Double;
-  begin
-    if ExpectedRows > 0 then
-      ProgressBar.Position := Exported;
-
-    ElapsedSec := (Now - StartTime) * 86400;
-    if ElapsedSec > 0 then
-      RowsPerSec := Exported / ElapsedSec
-    else
-      RowsPerSec := 0;
-
-    if ExpectedRows > 0 then
-      ProgressLabel.Caption := Format('Exported %s of %s rows',
-        [FormatFloat('#,##0', Exported), FormatFloat('#,##0', ExpectedRows)])
-    else
-      ProgressLabel.Caption := Format('Exported %s rows',
-        [FormatFloat('#,##0', Exported)]);
-
-    LblElapsed.Caption := 'Elapsed: ' + FormatDateTime('hh:nn:ss', Now - StartTime) +
-      '   |   ' + FormatFloat('#,##0', Round(RowsPerSec)) + ' rows/sec';
-
-    Application.ProcessMessages;
-  end;
-
-begin
-  UseRange := rbRange.Checked;
-  FromRow := GetFromRow;
-  ToRow := GetToRow;
-
-  // ------------------------------------------------------------------
-  // Buffer-Größe (hart kodiert wie in der schnellen Version)
-  // ------------------------------------------------------------------
-  BufferBytes := StrToIntDef(edtByteBuffer.Text, (1024 * 1024 * 64)); //64 MB
-  if BufferBytes < 64 * 1024 then BufferBytes := 64 * 1024;
-  if BufferBytes > 64 * 1024 * 1024 then BufferBytes := 64 * 1024 * 1024;
-
-  // ------------------------------------------------------------------
-  // Zeilen pro GUI-Update (aus edtLineBuffer)
-  // ------------------------------------------------------------------
-  RowsPerUpdate := StrToIntDef(edtLineBuffer.Text, 10000);
-  if RowsPerUpdate < 1 then
-    RowsPerUpdate := 10000;
-
-  // ------------------------------------------------------------------
-  // Statistik
-  // ------------------------------------------------------------------
-  FillChar(Stats, SizeOf(Stats), 0);
-  Stats.Kind             := tkExport;
-  Stats.SourceKind       := 'Firebird Table';
-  Stats.SourceServer     := comboxSourceServer.Text;
-  Stats.SourceDatabase   := comboxSourceDB.Text;
-  Stats.SourceTable      := comboxSourceTables.Text;
-  Stats.DestKind         := 'File';
-  Stats.DestFileName     := edtExportFileName.Text;
-  Stats.BatchSize        := GetBatchSize;
-  Stats.FormulaUsed      := True;
-  Stats.FromRow          := FromRow;
-  Stats.ToRow            := ToRow;
-  Stats.UseRowRange      := UseRange;
-
-  if (FSourceDBIndex >= 0) and (FSourceDBIndex < Length(RegisteredDatabases)) then
-  begin
-    Stats.SourceServerVersion := RegisteredDatabases[FSourceDBIndex].RegRec.ServerVersionString;
-    if Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase) and
-       Assigned(RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI) then
-      Stats.ClientLibVersion := 'Firebird ' +
-        RegisteredDatabases[FSourceDBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
-  end;
-
-  Stats.SystemInfo := GetSystemInfo(edtExportFileName.Text);
-
-  CheckedCount := 0;
-  for i := 0 to High(FFields) do
-    if chkLstFields.Checked[i] then Inc(CheckedCount);
-  Stats.FieldsCount := CheckedCount;
-
-  Stats.FormulasApplied := '';
-  for i := 0 to High(FFields) do
-  begin
-    if i + 1 >= sgFields.RowCount then Break;
-    if not chkLstFields.Checked[i] then Continue;
-    if Trim(sgFields.Cells[2, i + 1]) <> '' then
-      Stats.FormulasApplied := Stats.FormulasApplied +
-        '  • ' + FFields[i].FieldName + ' = ' + sgFields.Cells[2, i + 1] + sLineBreak;
-  end;
-
-  // ------------------------------------------------------------------
-  // Eigene DB-Verbindung
-  // ------------------------------------------------------------------
-  DB := TIBDatabase.Create(nil);
-  Trans := TIBTransaction.Create(nil);
-  DB.DefaultTransaction := Trans;
-  Trans.DefaultDatabase := DB;
-  AssignIBDatabase(RegisteredDatabases[FSourceDBIndex].IBDatabase, DB);
-  SetDBInstanceIndex(DB, FSourceDBIndex);
-
-  DB.Params.Values['user_name'] := RegisteredDatabases[FSourceDBIndex].RegRec.UserName;
-
-  if RegisteredDatabases[FSourceDBIndex].RegRec.Password <> '' then
-    DB.Params.Values['password'] := RegisteredDatabases[FSourceDBIndex].RegRec.Password
-  else
-    DB.Params.Values['password'] := GetDBSessionPassword(
-      RegisteredDatabases[FSourceDBIndex].RegRec.ServerName,
-      RegisteredDatabases[FSourceDBIndex].RegRec.DatabaseName);
-
-  DB.LoginPrompt := true;
-  DB.OnLogin := @dmSysTables.OnDatabaseLogin;
-  DB.Connected := True;
-  CachePasswordAfterConnect(FSourceDBIndex, DB);
-  Trans.StartTransaction;
-
-  Q := TIBSQL.Create(nil);
-  Q.Database := DB;
-  Q.Transaction := Trans;
-
-  BaseSQL := Trim(ASQL);
-  if (Length(BaseSQL) >= 6) and (UpperCase(Copy(BaseSQL, 1, 6)) = 'SELECT') then
-    BaseSQL := Trim(Copy(BaseSQL, 7, MaxInt));
-
-  LineEnd := sLineBreak;
-  HeaderLine := BuildHeaderLine;
-
-  ProgressForm := TForm.Create(nil);
-  try
-    ProgressForm.Width := 520;
-    ProgressForm.Height := 220;
-    ProgressForm.Position := poScreenCenter;
-    ProgressForm.BorderStyle := bsDialog;
-    ProgressForm.Caption := 'CSV Bulk Exporter';
-
-    LblPhase := TLabel.Create(ProgressForm);
-    LblPhase.Parent := ProgressForm;
-    LblPhase.Left := 16;
-    LblPhase.Top := 16;
-    LblPhase.Caption := 'Counting rows...';
-    LblPhase.Font.Style := [fsBold];
-    LblPhase.Width := 480;
-
-    ProgressLabel := TLabel.Create(ProgressForm);
-    ProgressLabel.Parent := ProgressForm;
-    ProgressLabel.Left := 16;
-    ProgressLabel.Top := 42;
-    ProgressLabel.Caption := 'Please wait...';
-    ProgressLabel.Width := 480;
-
-    ProgressBar := TProgressBar.Create(ProgressForm);
-    ProgressBar.Parent := ProgressForm;
-    ProgressBar.Left := 16;
-    ProgressBar.Top := 70;
-    ProgressBar.Width := 480;
-    ProgressBar.Height := 20;
-    ProgressBar.Min := 0;
-    ProgressBar.Max := 100;
-    ProgressBar.Position := 0;
-    ProgressBar.Style := pbstMarquee;
-
-    LblElapsed := TLabel.Create(ProgressForm);
-    LblElapsed.Parent := ProgressForm;
-    LblElapsed.Left := 16;
-    LblElapsed.Top := 100;
-    LblElapsed.Caption := 'Elapsed: 00:00:00';
-    LblElapsed.Width := 480;
-
-    BtnCancel := TButton.Create(ProgressForm);
-    BtnCancel.Parent := ProgressForm;
-    BtnCancel.Caption := 'Cancel';
-    BtnCancel.Left := 200;
-    BtnCancel.Top := 140;
-    BtnCancel.Width := 100;
-    BtnCancel.OnClick := @CancelClick;
-
-    ProgressForm.Show;
-    ProgressForm.BringToFront;
-    Application.ProcessMessages;
-    Sleep(50);
-    Application.ProcessMessages;
-
-    FCancelled := False;
-    Exported := 0;
-    RowsSinceUpdate := 0;
-
-    // ============================================================
-    // Phase 1: Zeilen zählen
-    // ============================================================
-    LblPhase.Caption := 'Counting rows...';
-    Application.ProcessMessages;
-
-    TotalRows := 0;
-    try
-      CountSQL := 'SELECT COUNT(*) FROM (SELECT ' + BaseSQL + ') AS cnt_qry';
-      Q.SQL.Text := CountSQL;
-      Q.ExecQuery;
-      if not Q.EOF then
-        TotalRows := Q.Fields[0].AsInt64;
-      Q.Close;
-    except
-      TotalRows := 0;
-    end;
-
-    if UseRange then
-    begin
-      if ToRow > TotalRows then ToRow := TotalRows;
-      if FromRow > TotalRows then FromRow := TotalRows;
-      ExpectedRows := ToRow - FromRow + 1;
-      if ExpectedRows < 0 then ExpectedRows := 0;
-    end
-    else
-    begin
-      ToRow := TotalRows;
-      ExpectedRows := TotalRows;
-    end;
-
-    if ExpectedRows > 0 then
-    begin
-      ProgressBar.Style := pbstNormal;
-      ProgressBar.Max := ExpectedRows;
-      ProgressBar.Position := 0;
-    end;
-
-    // ============================================================
-    // Phase 2: Datei öffnen + Header
-    // ============================================================
-    LblPhase.Caption := 'Opening output file...';
-    Application.ProcessMessages;
-
-    FileStream := TBufferedFileStream.Create(edtExportFileName.Text, fmCreate, BufferBytes);
-
-    if HeaderLine <> '' then
-      FileStream.Write(HeaderLine[1], Length(HeaderLine));
-
-    // ============================================================
-    // Phase 3: Export
-    // ============================================================
-    StartTime := Now;
-    LblPhase.Caption := 'Exporting data...';
-    Application.ProcessMessages;
-
-    if UseRange and (FromRow > 1) then
-      SQL := 'SELECT SKIP ' + IntToStr(FromRow - 1) +
-             ' FIRST ' + IntToStr(ExpectedRows) + ' ' + BaseSQL
-    else if UseRange then
-      SQL := 'SELECT FIRST ' + IntToStr(ExpectedRows) + ' ' + BaseSQL
-    else
-      SQL := 'SELECT ' + BaseSQL;
-
-    try
-      try
-        Q.Close;
-        Q.SQL.Text := SQL;
-        Q.ExecQuery;
-
-        while not Q.EOF do
-        begin
-          if FCancelled then Break;
-
-          Line := Q.Fields[0].AsString;
-          LenLine := Length(Line);
-          LenEnd := Length(LineEnd);
-
-          if LenLine > 0 then
-          begin
-            try
-              FileStream.Write(Line[1], LenLine);
-            except
-              on E: Exception do
-              begin
-                // Sauber abbrechen, nicht crashen
-                raise Exception.Create('Write failed: ' + E.Message);
-              end;
-            end;
-          end;
-
-          Inc(Exported);
-          Inc(RowsSinceUpdate);
-
-          if RowsSinceUpdate >= RowsPerUpdate then
-          begin
-            RowsSinceUpdate := 0;
-            UpdateProgress;
-          end;
-
-          Q.Next;
-        end;
-      except
-        on E: Exception do
-        begin
-          FileStream.Flush;
-          FileStream.Free;
-          FileStream := nil;
-          if FileExists(edtExportFileName.Text) then
-            DeleteFile(edtExportFileName.Text);
-          MessageDlg('Export failed:' + sLineBreak + sLineBreak + E.Message,
-                     mtError, [mbOK], 0);
-          Exit;
-        end;
-      end;
-
-    finally
-      if Assigned(FileStream) then
-      begin
-        FileStream.Flush;
-        FileStream.Free;
-      end;
-    end;
-
-    // ============================================================
-    // Phase 4: Finalisieren
-    // ============================================================
-    LblPhase.Caption := 'Finalizing...';
-    UpdateProgress;
-    EndTime := Now;
-
-    Stats.RowsProcessed  := Exported;
-    Stats.ElapsedSeconds := (EndTime - StartTime) * SecsPerDay;
-
-    FileSize := 0;
-    if FileExists(edtExportFileName.Text) then
-    begin
-      try
-        with TFileStream.Create(edtExportFileName.Text, fmOpenRead or fmShareDenyNone) do
-        try
-          FileSize := Size;
-        finally
-          Free;
-        end;
-      except
-        FileSize := 0;
-      end;
-    end;
-    Stats.DestFileSize := FileSize;
-
-    if FCancelled then
-      Stats.OptionsExtra := Format('CANCELLED after %s rows',
-        [FormatFloat('#,##0', Exported)]);
-
-    ReportForm := TfrmReport.Create(nil);
-    try
-      ReportForm.SetReportText(FormatTransferReport(Stats));
-      ReportForm.ShowModal;
-    finally
-      ReportForm.Free;
-    end;
-
-  finally
-    Q.Free;
-    if Trans.InTransaction then Trans.Rollback;
-    DB.Connected := False;
-    DB.Free;
-    Trans.Free;
-    ProgressForm.Free;
-  end;
-end;  }
-
 procedure TfrmCSVBulkExporter.DoBulkExport(const ASQL: string);
 var
   TotalRows, ExpectedRows: Int64;
@@ -1617,6 +1290,7 @@ var
   ReportForm: TfrmReport;
   i, CheckedCount: Integer;
   HeaderLine: string;
+  Preset: TFormulaPreset;      // ← NEU
 
   procedure UpdateProgress;
   var
@@ -1647,11 +1321,10 @@ var
 
 begin
   // ============================================================
-  // Guard: FDB muss verbunden sein (wird von LoadTableList aufgebaut)
+  // Guard: FDB muss verbunden sein
   // ============================================================
   if not Assigned(FDB) or not FDB.Connected then
   begin
-    // Fallback: über ConnectToDBAs verbinden (falls Combo-Change nicht lief)
     if (FSourceDBIndex < 0) or (not ConnectToDBAs(FSourceDBIndex)) then
     begin
       ShowMessage('Source database not connected.');
@@ -1665,27 +1338,31 @@ begin
     end;
   end;
 
+  // ============================================================
+  // Preset holen — LineEnding wird von hier gezogen
+  // ============================================================
+  Preset := GetActivePreset;
+  if Preset = nil then
+  begin
+    ShowMessage('No formula preset selected.');
+    Exit;
+  end;
+
   UseRange := rbRange.Checked;
   FromRow := GetFromRow;
   ToRow := GetToRow;
 
-  // ------------------------------------------------------------------
-  // Buffer-Größe
-  // ------------------------------------------------------------------
   BufferBytes := StrToIntDef(edtByteBuffer.Text, 1024 * 1024 * 64);
   if BufferBytes < 64 * 1024 then BufferBytes := 64 * 1024;
   if BufferBytes > 64 * 1024 * 1024 then BufferBytes := 64 * 1024 * 1024;
 
-  // ------------------------------------------------------------------
-  // Zeilen pro GUI-Update
-  // ------------------------------------------------------------------
   RowsPerUpdate := StrToIntDef(edtLineBuffer.Text, 10000);
   if RowsPerUpdate < 1 then
     RowsPerUpdate := 10000;
 
-  // ------------------------------------------------------------------
-  // Statistik
-  // ------------------------------------------------------------------
+  // ============================================================
+  // Statistik — Basis-Teil
+  // ============================================================
   FillChar(Stats, SizeOf(Stats), 0);
   Stats.Kind             := tkExport;
   Stats.SourceKind       := 'Firebird Table';
@@ -1696,9 +1373,6 @@ begin
   Stats.DestFileName     := edtExportFileName.Text;
   Stats.BatchSize        := GetBatchSize;
   Stats.FormulaUsed      := True;
-  Stats.FromRow          := FromRow;
-  Stats.ToRow            := ToRow;
-  Stats.UseRowRange      := UseRange;
 
   if (FSourceDBIndex >= 0) and (FSourceDBIndex < Length(RegisteredDatabases)) then
   begin
@@ -1727,8 +1401,7 @@ begin
   end;
 
   // ============================================================
-  // Verbindung wiederverwenden (kein neuer Connect!)
-  // Neue Transaktion für sauberen Isolation-Snapshot
+  // Verbindung wiederverwenden
   // ============================================================
   DB := FDB;
   Trans := TIBTransaction.Create(nil);
@@ -1745,7 +1418,13 @@ begin
   if (Length(BaseSQL) >= 6) and (UpperCase(Copy(BaseSQL, 1, 6)) = 'SELECT') then
     BaseSQL := Trim(Copy(BaseSQL, 7, MaxInt));
 
-  LineEnd := sLineBreak;
+  // ============================================================
+  // LineEnding aus Preset (Fallback: globale Einstellung)
+  // ============================================================
+  LineEnd := Preset.LineEnding;
+  if LineEnd = '' then
+    LineEnd := CSVLineEnding;
+
   HeaderLine := BuildHeaderLine;
 
   ProgressForm := TForm.Create(nil);
@@ -1838,6 +1517,10 @@ begin
       ExpectedRows := TotalRows;
     end;
 
+    Stats.FromRow     := FromRow;
+    Stats.ToRow       := ToRow;
+    Stats.UseRowRange := UseRange;
+
     if ExpectedRows > 0 then
     begin
       ProgressBar.Style := pbstNormal;
@@ -1885,6 +1568,7 @@ begin
           LenLine := Length(Line);
           LenEnd := Length(LineEnd);
 
+          // Zeileninhalt schreiben
           if LenLine > 0 then
           begin
             try
@@ -1896,6 +1580,10 @@ begin
               end;
             end;
           end;
+
+          // Zeilenumbruch schreiben
+          if LenEnd > 0 then
+            FileStream.Write(LineEnd[1], LenEnd);
 
           Inc(Exported);
           Inc(RowsSinceUpdate);
@@ -1973,9 +1661,7 @@ begin
     Q.Free;
     if Trans.InTransaction then Trans.Rollback;
     Trans.Free;
-    // FDB bleibt verbunden — wird von LoadTableList weiterverwaltet
   end;
 end;
-
 
 end.
