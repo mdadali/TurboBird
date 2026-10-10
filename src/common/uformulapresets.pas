@@ -687,11 +687,11 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'CSV Quoted';
-      Preset.Description   := 'CSV mit Quotes auf Strings/Datum, Zahlen roh';
+      Preset.Description   := 'Standard CSV with quotes around strings/dates, numbers raw';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
-      Preset.LineEnding    := #10;   // LF
+      Preset.LineEnding    := #10;
       Preset.IncludeHeader := True;
       Preset.HeaderQuoted  := True;
       Preset.DataQuoted    := True;
@@ -715,8 +715,8 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'CSV Unquoted (numeric only)';
-      Preset.Description   := 'WARNING: no quoting — only safe for numeric/ID data. ' +
-                              'Text with Separator or line breaks will break the file.';
+      Preset.Description   := 'WARNING: no quoting - only safe for numeric/ID data. ' +
+                              'Text containing the separator or line breaks will break the file.';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '';
@@ -744,7 +744,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'CSV Header Quoted';
-      Preset.Description   := 'Header mit Quotes, Daten roh';
+      Preset.Description   := 'Header fields quoted, data fields raw';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
@@ -772,7 +772,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'CSV Data Quoted';
-      Preset.Description   := 'Header roh, Daten mit Quotes';
+      Preset.Description   := 'Header fields raw, data fields quoted';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
@@ -800,7 +800,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'CSV German';
-      Preset.Description   := 'Deutsches CSV: Semikolon als Trenner, Komma als Dezimal';
+      Preset.Description   := 'German/European CSV: semicolon separator, comma decimal point';
       Preset.Separator     := ';';
       Preset.DecimalPoint  := ',';
       Preset.QuoteChar     := '"';
@@ -828,7 +828,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'TSV Quoted';
-      Preset.Description   := 'Tab-separiert mit Quotes';
+      Preset.Description   := 'Tab-separated values with quoting';
       Preset.Separator     := '\t';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
@@ -856,7 +856,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'Pipe Quoted';
-      Preset.Description   := 'Pipe-separiert mit Quotes';
+      Preset.Description   := 'Pipe-separated values with quoting';
       Preset.Separator     := '|';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';
@@ -884,7 +884,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'Fixed Format';
-      Preset.Description   := 'Fixed-Width-Format, kein Separator, kein Header';
+      Preset.Description   := 'Fixed-width format, no separator, no header';
       Preset.Separator     := '';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '';
@@ -911,7 +911,7 @@ begin
     Preset := TFormulaPreset.Create;
     try
       Preset.Name          := 'JSON Export';
-      Preset.Description   := 'JSON-Werte, Strings/Datum in Doppelquotes';
+      Preset.Description   := 'JSON-oriented values, strings/dates wrapped in double quotes';
       Preset.Separator     := ',';
       Preset.DecimalPoint  := '.';
       Preset.QuoteChar     := '"';

@@ -529,6 +529,11 @@ var
     CSVIgnoreOuterWhitespace,
     CSVQuoteOuterWhitespace: boolean;
 
+    // Auto-Detect-Schalter (pro Feld einzeln)
+    AutoDetectLineEnding: Boolean;
+    AutoDetectDelimiter:  Boolean;
+    AutoDetectQuoteChar:  Boolean;
+
     //UpdateChecker
     AutoSearchOnProgramStart: boolean;
     UnzipAfterDownload: boolean;
@@ -4626,6 +4631,11 @@ begin
   CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
   CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
 
+  // Auto-Detect-Schalter — Default: alle an
+  AutoDetectLineEnding := fIniFile.ReadBool('CSVEditor','AutoDetectLineEnding', True);
+  AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
+  AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
+
   //UpdateChecker
   AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
   UnzipAfterDownload := fIniFile.ReadBool('UpdateChecker','UnzipAfterDownload', True);
@@ -4734,6 +4744,10 @@ begin
   fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
   fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
   fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
+  // Auto-Detect-Schalter
+  fIniFile.WriteBool('CSVEditor','AutoDetectLineEnding', AutoDetectLineEnding);
+  fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
+  fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
 
 
     //UpdateChecker

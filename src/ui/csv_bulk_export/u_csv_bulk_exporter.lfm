@@ -1,7 +1,7 @@
 object frmCSVBulkExporter: TfrmCSVBulkExporter
-  Left = 1041
+  Left = 349
   Height = 831
-  Top = 302
+  Top = 214
   Width = 1166
   Caption = 'CSV Bulk Exporter'
   ClientHeight = 831

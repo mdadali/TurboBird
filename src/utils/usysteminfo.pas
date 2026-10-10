@@ -27,6 +27,40 @@ implementation
 {$IFDEF WINDOWS}
 uses
   Windows, Registry;
+
+type
+  // ============================================================
+  // FPC deklariert TMemoryStatusEx / GlobalMemoryStatusEx nicht
+  // in allen Versionen in der Windows-Unit. Daher hier manuell
+  // deklariert — passend zum Windows-API-Layout.
+  // ============================================================
+  TMemoryStatusEx = record
+    dwLength:                DWORD;
+    dwMemoryLoad:            DWORD;
+    ullTotalPhys:            QWord;
+    ullAvailPhys:            QWord;
+    ullTotalPageFile:        QWord;
+    ullAvailPageFile:        QWord;
+    ullTotalVirtual:         QWord;
+    ullAvailVirtual:         QWord;
+    ullAvailExtendedVirtual: QWord;
+  end;
+
+function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL;
+  stdcall; external 'kernel32.dll' name 'GlobalMemoryStatusEx';
+
+// Liefert den Laufwerksindex für DiskFree/DiskSize:
+// 0 = aktuelles Laufwerk, 1 = A:, 2 = B:, 3 = C:, ...
+function PathDriveNumber(const APath: string): Byte;
+var
+  Drive: string;
+begin
+  Drive := ExtractFileDrive(APath);
+  if (Length(Drive) >= 2) and (Drive[2] = ':') then
+    Result := Ord(UpCase(Drive[1])) - Ord('A') + 1
+  else
+    Result := 0;
+end;
 {$ENDIF}
 
 {$IFDEF LINUX}
@@ -330,6 +364,9 @@ end;
 function GetSystemInfo(const APath: string): TSystemInfo;
 var
   PathToCheck: string;
+  {$IFDEF WINDOWS}
+  Drv: Byte;
+  {$ENDIF}
 begin
   Result.CPUModel := GetCPUModel;
   Result.CPUCores := GetCPUCores;
@@ -348,8 +385,16 @@ begin
       PathToCheck := ExtractFilePath(APath);
 
     try
+      {$IFDEF WINDOWS}
+      // DiskFree/DiskSize erwarten auf Windows einen Byte-Index:
+      // 0 = aktuelles Laufwerk, 1 = A:, 2 = B:, 3 = C:, ...
+      Drv := PathDriveNumber(PathToCheck);
+      Result.DiskFreeMB := DiskFree(Drv) div (1024 * 1024);
+      Result.DiskTotalMB := DiskSize(Drv) div (1024 * 1024);
+      {$ELSE}
       Result.DiskFreeMB := DiskFree(AddDisk(PathToCheck)) div (1024 * 1024);
       Result.DiskTotalMB := DiskSize(AddDisk(PathToCheck)) div (1024 * 1024);
+      {$ENDIF}
       Result.DiskType := GetDiskType(PathToCheck);
     except
       // Ignorieren – manche Pfade lassen sich nicht auflösen

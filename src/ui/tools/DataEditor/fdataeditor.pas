@@ -325,20 +325,18 @@ begin
 end;
 
 procedure TfrmDataEditor.ReadIni;
-var TempStr: string;
 begin
-  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
-  if TempStr <> '' then
-    CSVQuoteChar := TempStr[1]
-  else
-    CSVQuoteChar := #0;   // leer = keine Quotes
-  SyncQuoteCharCombo;
   edtDefaultFieldLength.Text          := IntToStr(CSVDefaultFieldLength);
   chkBoxFirstLineAsFieldName.Checked  := CSVFirstLineAsFieldNames;
   chkBoxIgnoreOuterWhiteSpace.Checked := CSVIgnoreOuterWhitespace;
   chkBoxQuoteOuterWhiteSpace.Checked  := CSVQuoteOuterWhitespace;
 
-  // LineEnding-Combo anhand der INI-geladenen CSVLineEnding positionieren
+  // Auto-Detect-Checkboxen
+  CheckBoxAutoDedectLineEnding.Checked := AutoDetectLineEnding;
+  CheckBoxAutoDedectDelimiter.Checked  := AutoDetectDelimiter;
+  CheckBoxAutoDedectQuoteChar.Checked  := AutoDetectQuoteChar;
+
+  // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
   SyncDelimiterCombo;
   SyncQuoteCharCombo;
@@ -348,14 +346,17 @@ procedure TfrmDataEditor.WriteIni;
 begin
   CSVDefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
 
-  // CSVDelimiter wird bereits durch cmbboxDelimiterChange gesetzt
-  // — hier nichts zu tun
-
-// CSVQuoteChar wird durch cmbboxQuoteCharChange gesetzt — nichts tun
+  // CSVDelimiter / CSVQuoteChar / CSVLineEnding werden bereits
+  // durch die Combo-Change-Handler aktuell gehalten — hier nichts tun.
 
   CSVFirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
   CSVIgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
   CSVQuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
+
+  // Auto-Detect-Checkboxen
+  AutoDetectLineEnding := CheckBoxAutoDedectLineEnding.Checked;
+  AutoDetectDelimiter  := CheckBoxAutoDedectDelimiter.Checked;
+  AutoDetectQuoteChar  := CheckBoxAutoDedectQuoteChar.Checked;
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -577,11 +578,28 @@ begin
   begin
     DataSource1.DataSet := CSVDataSet1;
 
-    // Auto-Detection
-    DetLE  := DetectLineEnding(AFileName);
-    DetDel := DetectDelimiter(AFileName);
-    DetQC  := DetectQuoteChar(AFileName, DetDel);
+    // ============================================================
+    // Auto-Detection — nur für aktivierte Checkboxen
+    // ============================================================
+    if CheckBoxAutoDedectLineEnding.Checked then
+      DetLE := DetectLineEnding(AFileName)
+    else
+      DetLE := CSVLineEnding;   // nicht erkannt → gleich Current
 
+    if CheckBoxAutoDedectDelimiter.Checked then
+      DetDel := DetectDelimiter(AFileName)
+    else
+      DetDel := CSVDelimiter;
+
+    if CheckBoxAutoDedectQuoteChar.Checked then
+      // QuoteChar-Detection braucht den Delimiter
+      DetQC := DetectQuoteChar(AFileName, DetDel)
+    else
+      DetQC := CSVQuoteChar;
+
+    // ============================================================
+    // Dialog — nur wenn mindestens ein aktives Feld abweicht
+    // ============================================================
     Choice := AskUseDetected(AFileName,
                              CSVLineEnding, DetLE,
                              CSVDelimiter,  DetDel,
@@ -590,16 +608,20 @@ begin
     if Choice = dcCancel then
     begin
       Result := False;
-      Exit;   // Datei-Öffnen wird vom Aufrufer abgebrochen
+      Exit;
     end;
 
     if Choice = dcUseDetected then
     begin
-      CSVLineEnding := DetLE;
-      CSVDelimiter  := DetDel;
-      CSVQuoteChar  := DetQC;
+      // Nur die Felder übernehmen, deren Checkbox an ist
+      if CheckBoxAutoDedectLineEnding.Checked then
+        CSVLineEnding := DetLE;
+      if CheckBoxAutoDedectDelimiter.Checked then
+        CSVDelimiter := DetDel;
+      if CheckBoxAutoDedectQuoteChar.Checked then
+        CSVQuoteChar := DetQC;
     end;
-    // dcKeepCurrent: aktuelle Werte behalten — nichts tun
+    // dcKeepCurrent: nichts tun
 
     SyncLineEndingCombo;
     SyncDelimiterCombo;
@@ -614,7 +636,21 @@ begin
        or (Ext = '.wiki') or (Ext = '.wikitable') then
   begin
     DataSource1.DataSet := sWorksheetDataset1;
-    // ... FileFormat-Zuweisung wie gehabt ...
+
+    if Ext = '.xlsx' then
+      sWorksheetDataset1.FileFormat := sfOOXML
+    else if Ext = '.xls' then
+      sWorksheetDataset1.FileFormat := sfExcel8
+    else if Ext = '.xml' then
+      sWorksheetDataset1.FileFormat := sfExcelXML
+    else if (Ext = '.html') or (Ext = '.htm') then
+      sWorksheetDataset1.FileFormat := sfHTML
+    else if Ext = '.ods' then
+      sWorksheetDataset1.FileFormat := sfOpenDocument
+    else if Ext = '.wiki' then
+      sWorksheetDataset1.FileFormat := sfWikiTable_Pipes
+    else if Ext = '.wikitable' then
+      sWorksheetDataset1.FileFormat := sfWikiTable_WikiMedia;
   end
 
   else if (Ext = '.dbf') then
@@ -1281,44 +1317,61 @@ var
   BtnUseDetected, BtnKeepCurrent, BtnCancelFile: TButton;
   Content: TStringList;
   HasDiff: Boolean;
+  ShowLE, ShowDel, ShowQC: Boolean;
   CurLEName, DetLEName: string;
   CurDelStr, DetDelStr: string;
   CurQCStr, DetQCStr: string;
+
+  function DelimToStr(C: Char): string;
+  begin
+    if C = #9 then Result := '\t'
+    else if C = ' ' then Result := 'Space'
+    else if C = #0 then Result := '(none)'
+    else Result := QuotedStr(C);
+  end;
+
+  function QCToStr(C: Char): string;
+  begin
+    if C = #0 then Result := '(none)'
+    else Result := QuotedStr(C);
+  end;
+
 begin
   Result := dcUseDetected;
   if csDestroying in ComponentState then Exit;
 
-  // Nur fragen wenn mindestens ein Wert abweicht
+  // ============================================================
+  // Nur Felder mit aktivierter Checkbox werden berücksichtigt
+  // ============================================================
+  ShowLE  := CheckBoxAutoDedectLineEnding.Checked;
+  ShowDel := CheckBoxAutoDedectDelimiter.Checked;
+  ShowQC  := CheckBoxAutoDedectQuoteChar.Checked;
+
+  // Wenn kein Auto-Detect aktiv → sofort raus, kein Dialog
+  if not (ShowLE or ShowDel or ShowQC) then
+    Exit;
+
+  // ============================================================
+  // HasDiff: nur aktive Checkboxen zählen
+  // ============================================================
   HasDiff :=
-    (ACurLE <> ADetLE) or
-    (ACurDel <> ADetDel) or
-    (ACurQC <> ADetQC);
+    (ShowLE  and (ACurLE  <> ADetLE))  or
+    (ShowDel and (ACurDel <> ADetDel)) or
+    (ShowQC  and (ACurQC  <> ADetQC));
 
   if not HasDiff then Exit;
 
+  // ============================================================
   // Symbolische Namen fürs UI
+  // ============================================================
   CurLEName := CSVLineEndingStrToName(ACurLE);
   DetLEName := CSVLineEndingStrToName(ADetLE);
-
-  if ACurDel = #9 then CurDelStr := '\t'
-  else if ACurDel = ' ' then CurDelStr := 'Space'
-  else CurDelStr := QuotedStr(ACurDel);
-
-  if ADetDel = #9 then DetDelStr := '\t'
-  else if ADetDel = ' ' then DetDelStr := 'Space'
-  else DetDelStr := QuotedStr(ADetDel);
-
-  if ACurQC = #0 then CurQCStr := '(none)'
-  else CurQCStr := QuotedStr(ACurQC);
-
-  if ADetQC = #0 then DetQCStr := '(none)'
-  else DetQCStr := QuotedStr(ADetQC);
 
   Dlg := TForm.Create(nil);
   try
     Dlg.Caption := 'CSV Auto-Detection';
-    Dlg.Width := 560;
-    Dlg.Height := 400;
+    Dlg.Width := 600;
+    Dlg.Height := 420;
     Dlg.Position := poScreenCenter;
     Dlg.BorderStyle := bsDialog;
     Dlg.FormStyle := fsStayOnTop;
@@ -1327,7 +1380,7 @@ begin
     LblTitle.Parent := Dlg;
     LblTitle.Left := 16;
     LblTitle.Top := 12;
-    LblTitle.Width := 528;
+    LblTitle.Width := 568;
     LblTitle.Caption := 'Auto-detection found different values than your current settings:';
     LblTitle.Font.Style := [fsBold];
 
@@ -1338,25 +1391,52 @@ begin
       Content.Add('                     Current       Detected');
       Content.Add('  ──────────────     ─────────     ─────────');
 
-      if ACurLE <> ADetLE then
-        Content.Add(Format('  LineEnding         %-13s %s', [CurLEName, DetLEName]))
+      // ----------------------------------------------------------
+      // LineEnding-Zeile
+      // ----------------------------------------------------------
+      if ShowLE then
+      begin
+        if ACurLE <> ADetLE then
+          Content.Add(Format('  LineEnding         %-13s %s', [CurLEName, DetLEName]))
+        else
+          Content.Add(Format('  LineEnding         %-13s (same)', [CurLEName]));
+      end
       else
-        Content.Add(Format('  LineEnding         %-13s (same)', [CurLEName]));
+        Content.Add(Format('  LineEnding         %-13s (auto-off)', [CurLEName]));
 
-      if ACurDel <> ADetDel then
-        Content.Add(Format('  Delimiter          %-13s %s', [CurDelStr, DetDelStr]))
+      // ----------------------------------------------------------
+      // Delimiter-Zeile
+      // ----------------------------------------------------------
+      if ShowDel then
+      begin
+        if ACurDel <> ADetDel then
+          Content.Add(Format('  Delimiter          %-13s %s', [DelimToStr(ACurDel), DelimToStr(ADetDel)]))
+        else
+          Content.Add(Format('  Delimiter          %-13s (same)', [DelimToStr(ACurDel)]));
+      end
       else
-        Content.Add(Format('  Delimiter          %-13s (same)', [CurDelStr]));
+        Content.Add(Format('  Delimiter          %-13s (auto-off)', [DelimToStr(ACurDel)]));
 
-      if ACurQC <> ADetQC then
-        Content.Add(Format('  QuoteChar          %-13s %s', [CurQCStr, DetQCStr]))
+      // ----------------------------------------------------------
+      // QuoteChar-Zeile
+      // ----------------------------------------------------------
+      if ShowQC then
+      begin
+        if ACurQC <> ADetQC then
+          Content.Add(Format('  QuoteChar          %-13s %s', [QCToStr(ACurQC), QCToStr(ADetQC)]))
+        else
+          Content.Add(Format('  QuoteChar          %-13s (same)', [QCToStr(ACurQC)]));
+      end
       else
-        Content.Add(Format('  QuoteChar          %-13s (same)', [CurQCStr]));
+        Content.Add(Format('  QuoteChar          %-13s (auto-off)', [QCToStr(ACurQC)]));
 
+      Content.Add('');
+      Content.Add('Note: (auto-off) = auto-detection disabled for this field');
+      Content.Add('      via the checkbox in the CSV Settings tab.');
       Content.Add('');
       Content.Add('Choose an action:');
       Content.Add('');
-      Content.Add('  [Use Detected]    — Load file with the auto-detected values');
+      Content.Add('  [Use Detected]    — Apply detected values for fields with auto-detect ON');
       Content.Add('  [Keep Current]    — Load file with your current settings');
       Content.Add('  [Cancel]          — Abort — do not load the file');
 
@@ -1364,8 +1444,8 @@ begin
       Memo.Parent := Dlg;
       Memo.Left := 16;
       Memo.Top := 38;
-      Memo.Width := 528;
-      Memo.Height := 250;
+      Memo.Width := 568;
+      Memo.Height := 270;
       Memo.ReadOnly := True;
       Memo.ScrollBars := ssVertical;
       Memo.Font.Name := 'Courier New';
@@ -1376,13 +1456,13 @@ begin
     end;
 
     // ============================================================
-    // Drei Buttons: Use Detected | Keep Current | Cancel
+    // Drei Buttons
     // ============================================================
     BtnUseDetected := TButton.Create(Dlg);
     BtnUseDetected.Parent := Dlg;
     BtnUseDetected.Caption := 'Use Detected';
-    BtnUseDetected.Left := 152;
-    BtnUseDetected.Top := 305;
+    BtnUseDetected.Left := 192;
+    BtnUseDetected.Top := 330;
     BtnUseDetected.Width := 120;
     BtnUseDetected.Default := True;
     BtnUseDetected.ModalResult := mrYes;
@@ -1390,16 +1470,16 @@ begin
     BtnKeepCurrent := TButton.Create(Dlg);
     BtnKeepCurrent.Parent := Dlg;
     BtnKeepCurrent.Caption := 'Keep Current';
-    BtnKeepCurrent.Left := 280;
-    BtnKeepCurrent.Top := 305;
+    BtnKeepCurrent.Left := 320;
+    BtnKeepCurrent.Top := 330;
     BtnKeepCurrent.Width := 120;
     BtnKeepCurrent.ModalResult := mrNo;
 
     BtnCancelFile := TButton.Create(Dlg);
     BtnCancelFile.Parent := Dlg;
     BtnCancelFile.Caption := 'Cancel';
-    BtnCancelFile.Left := 408;
-    BtnCancelFile.Top := 305;
+    BtnCancelFile.Left := 448;
+    BtnCancelFile.Top := 330;
     BtnCancelFile.Width := 120;
     BtnCancelFile.ModalResult := mrCancel;
 
