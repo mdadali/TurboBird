@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1961"/>
+      <BuildNr Value="1963"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -707,102 +707,99 @@
         </Mode0>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="31">
+    <RequiredPackages Count="30">
       <Item1>
         <PackageName Value="FrameViewer09"/>
       </Item1>
       <Item2>
-        <PackageName Value="Pixie.Package.Lazarus"/>
+        <PackageName Value="pascalscript"/>
       </Item2>
       <Item3>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="PascalScriptFCL"/>
       </Item3>
       <Item4>
-        <PackageName Value="PascalScriptFCL"/>
+        <PackageName Value="jvRuntimeDesign"/>
       </Item4>
       <Item5>
-        <PackageName Value="jvRuntimeDesign"/>
+        <PackageName Value="JSONDataSet"/>
       </Item5>
       <Item6>
-        <PackageName Value="JSONDataSet"/>
+        <PackageName Value="DBFLaz"/>
       </Item6>
       <Item7>
-        <PackageName Value="DBFLaz"/>
+        <PackageName Value="SDFLaz"/>
       </Item7>
       <Item8>
-        <PackageName Value="SDFLaz"/>
+        <PackageName Value="laz_fpspreadsheet_dataset"/>
       </Item8>
       <Item9>
-        <PackageName Value="laz_fpspreadsheet_dataset"/>
+        <PackageName Value="ibnongui"/>
       </Item9>
       <Item10>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="encconv_package"/>
       </Item10>
       <Item11>
-        <PackageName Value="encconv_package"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item11>
       <Item12>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item12>
       <Item13>
-        <PackageName Value="rxdbgrid_print"/>
+        <PackageName Value="rxnew"/>
       </Item13>
       <Item14>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="indylaz"/>
       </Item14>
       <Item15>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item15>
       <Item16>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="atbinhex_package"/>
       </Item16>
       <Item17>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="lazreport"/>
       </Item17>
       <Item18>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="lazdbexport"/>
       </Item18>
       <Item19>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item19>
       <Item20>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item20>
       <Item21>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item21>
       <Item22>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="dclibx"/>
       </Item22>
       <Item23>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="iblocaldb"/>
       </Item23>
       <Item24>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="ibcontrols"/>
       </Item24>
       <Item25>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="ibexpress"/>
       </Item25>
       <Item26>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="Abbrevia"/>
       </Item26>
       <Item27>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="MemDSLaz"/>
       </Item27>
       <Item28>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item28>
       <Item29>
-        <PackageName Value="SynEdit"/>
+        <PackageName Value="FCL"/>
         <MinVersion Major="1" Valid="True"/>
       </Item29>
       <Item30>
-        <PackageName Value="FCL"/>
-        <MinVersion Major="1" Valid="True"/>
-      </Item30>
-      <Item31>
         <PackageName Value="LCL"/>
-      </Item31>
+      </Item30>
     </RequiredPackages>
     <Units Count="129">
       <Unit0>

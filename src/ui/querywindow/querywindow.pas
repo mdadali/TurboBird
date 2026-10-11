@@ -18,6 +18,8 @@ uses
   IBDynamicGrid, IBQuery, IBSQL, IBDatabase, IBTable, IB, RxDBGrid, RxDBGridExportPdf,
   RxDBGridPrintGrid, RxDBGridExportSpreadSheet, ibxscript,
 
+  selectsqlresultsunit_ext,  // for IBScripter.OnSelect
+
   SysTables,
   fdataexportersintrf,
   //fblobedit,
@@ -269,7 +271,6 @@ type
       var aSqlQuery: TIBQuery; var meResult: TMemo;
       AdditionalTitle: string = ''): TTabSheet;
 
-    procedure OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
     function ExecuteScript(Script: string): Boolean;
 
     // Create a new Apply button in the specified panel
@@ -1090,7 +1091,6 @@ begin
   FIBXScript.Database := FIBConnection;
   FIBXScript.Transaction := FScriptTrans;
 
-  // 👉 **WICHTIG: Parameter VOR dem Verbinden setzen!**
   if Assigned(RegisteredDatabases[dbIndex].IBTransaction) then
   begin
     FQueryTrans.Params.Assign(RegisteredDatabases[dbIndex].IBTransaction.Params);
@@ -1710,7 +1710,8 @@ begin
   Result := (Pos('COMMIT', UpperSQL) = 1) or (Pos('ROLLBACK', UpperSQL) = 1);
 end;
 
-procedure TfmQueryWindow.OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
+//beim scriptausführung verursacht enlos rekursion!!!
+{procedure TfmQueryWindow.OnFIBXScriptSelectSQL(Sender: TObject; SQLText: string);
 var
   SelNode: TTreeNode;
   QWindow: TfmQueryWindow;
@@ -1723,6 +1724,41 @@ begin
     QWindow.bbRunClick(nil);
     QWindow.Show;
   end;
+end;
+
+//Result wird in externe fenster angezeigt!
+procedure TfmQueryWindow.FIBXScriptSelectSQL(Sender: TObject; SQLText: string);
+var SelectSQLResults: TSelectSQLResultsExt;
+begin
+  SelectSQLResults := TSelectSQLResultsExt.Create(self);
+  SelectSQLResults.SelectQuery.Database := FIBConnection;
+  SelectSQLResults.IBTransaction1.DefaultDatabase := FIBConnection;
+  SelectSQLResults.Show(FIBXScript, SQLText, true);
+  SelectSQLResults.DataSource1.DataSet.First;
+end; }
+
+
+procedure TfmQueryWindow.FIBXScriptSelectSQL(Sender: TObject; SQLText: string);
+var
+  SqlQuery: TIBQuery;
+  SqlTrans: TIBTransaction;
+  meResult: TMemo;
+  ATab: TTabSheet;
+begin
+  SqlTrans := TIBTransaction.Create(Self);
+  SqlTrans.DefaultDatabase := FIBConnection;
+  SqlTrans.Params.Assign(FIBConnection.DefaultTransaction.Params);
+  SqlTrans.StartTransaction;
+
+  SqlQuery := TIBQuery.Create(Self);
+  SqlQuery.Database := FIBConnection;
+  SqlQuery.Transaction := SqlTrans;
+  SqlQuery.SQL.Text := SQLText;
+
+  ATab := CreateResultTab(True, SqlQuery, meResult, 'Script');
+  SqlQuery.Open;
+  ATab.Caption := 'Script Result';
+  ATab.ImageIndex := 0;
 end;
 
 { Display new Save/Apply button for current query result been edited }
@@ -1777,22 +1813,6 @@ begin
   {ShowMessage('Field contents: ' + LineEnding +
     (Sender as TDBGrid).SelectedField.AsString)}
 end;
-
-procedure TfmQueryWindow.FIBXScriptSelectSQL(Sender: TObject; SQLText: string);
-var
-  SelNode: TTreeNode;
-  QWindow: TfmQueryWindow;
-begin
-  SelNode := turbocommon.MainTreeView.Selected;
-  if (SelNode <> nil) and (SelNode.Parent <> nil) then
-  begin
-    QWindow := fmMain.ShowCompleteQueryWindow(TPNodeInfos(SelNode.Data)^.dbIndex, SQLText, SQLText, nil);
-    QWindow.meQuery.Lines.Text:= SQLText;
-    QWindow.bbRunClick(nil);
-    QWindow.Show;
-  end;
-end;
-
 
 { Find text }
 
@@ -3140,9 +3160,18 @@ var
   meResult: TMemo;
   ATab: TTabSheet;
 begin
+  // ── Re-Entrancy-Guard ──────────────────────────────
+ { if FScriptRunning then
+  begin
+    Result := False;
+    Exit;
+  end;
+  FScriptRunning := True; }
   StartTime := Now;
   ATab := nil;
   Result := False;
+  // ----------------------------------------------------
+
 
   try
     ATab := CreateResultTab(False, TempQuery, meResult);
@@ -3160,6 +3189,10 @@ begin
 
       FIBXScript.Database := FIBConnection;
       FIBXScript.Transaction := FScriptTrans;
+
+      if not FIBXScript.Transaction.Active then
+        FIBXScript.Transaction.StartTransaction;
+
       FIBXScript.ExecSQLScript(Script);
 
       if FScriptTrans.InTransaction then
@@ -3215,6 +3248,7 @@ begin
   begin
     if not FScriptTrans.InTransaction then
       FScriptTrans.Params.Assign(FIBConnection.DefaultTransaction.Params);
+
     ExecuteScript(FQuery.Text);
 
     // Buttons aktiv, wenn IRGENDEINE Transaktion offen ist und kein AutoCommit

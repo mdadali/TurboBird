@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 478
+  Left = 496
   Height = 748
-  Top = 180
+  Top = 253
   Width = 1232
   Caption = 'fmQueryWindow'
   ClientHeight = 742
@@ -71764,7 +71764,7 @@ object fmQueryWindow: TfmQueryWindow
     end
   end
   object SynCompletion1: TSynCompletion
-    Position = 0
+    Position = -1
     LinesInWindow = 6
     SelectedColor = clHighlight
     CaseSensitive = True
