@@ -22,7 +22,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1963"/>
+      <BuildNr Value="1967"/>
       <StringTable ProductVersion="0.9"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -38,7 +38,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -90,7 +90,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -138,7 +138,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -184,7 +184,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -238,7 +238,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/PascalScript/Source;components/uib/source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -290,7 +290,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -343,7 +343,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -401,7 +401,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -453,7 +453,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/external_table;ui/tools/RxCSV;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/common;ui/tools/PascalScript_IDE/source/editor;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/dbctrls;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/uib/source;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/systables;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/scriptdb;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/external_table;ui/tools/RxCSV;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/common;ui/tools/PascalScript_IDE/source/editor;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/dbctrls;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/uib/source;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -505,7 +505,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -559,7 +559,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -625,7 +625,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -801,7 +801,7 @@
         <PackageName Value="LCL"/>
       </Item30>
     </RequiredPackages>
-    <Units Count="129">
+    <Units Count="126">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -911,689 +911,670 @@
         <UnitName Value="TableManage"/>
       </Unit24>
       <Unit25>
-        <Filename Value="ui/copytable/copytable.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="fmCopyTable"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="CopyTable"/>
-      </Unit25>
-      <Unit26>
-        <Filename Value="ui/importtable/importtable.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="fmImportTable"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit26>
-      <Unit27>
         <Filename Value="ui/main/main.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmMain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit27>
-      <Unit28>
+      </Unit25>
+      <Unit26>
         <Filename Value="ui/createdb/createdb.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCreateDB"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateDb"/>
-      </Unit28>
-      <Unit29>
+      </Unit26>
+      <Unit27>
         <Filename Value="ui/registerdb/reg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmReg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Reg"/>
-      </Unit29>
-      <Unit30>
+      </Unit27>
+      <Unit28>
         <Filename Value="ui/querywindow/querywindow.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmQueryWindow"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="QueryWindow"/>
-      </Unit30>
-      <Unit31>
+      </Unit28>
+      <Unit29>
         <Filename Value="ui/viewview/viewview.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmViewView"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewView"/>
-      </Unit31>
-      <Unit32>
+      </Unit29>
+      <Unit30>
         <Filename Value="ui/viewtrigger/viewtrigger.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmViewTrigger"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewTrigger"/>
-      </Unit32>
-      <Unit33>
+      </Unit30>
+      <Unit31>
         <Filename Value="ui/viewstoredprocedure/viewsproc.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmViewSProc"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewSProc"/>
-      </Unit33>
-      <Unit34>
+      </Unit31>
+      <Unit32>
         <Filename Value="ui/viewgenerator/viewgen.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmViewGen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewGen"/>
-      </Unit34>
-      <Unit35>
+      </Unit32>
+      <Unit33>
         <Filename Value="ui/newgenerator/newgen.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmNewGen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewGen"/>
-      </Unit35>
-      <Unit36>
+      </Unit33>
+      <Unit34>
         <Filename Value="ui/enterpassword/enterpass.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmEnterPass"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="EnterPass"/>
-      </Unit36>
-      <Unit37>
+      </Unit34>
+      <Unit35>
         <Filename Value="ui/createtrigger/createtrigger.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCreateTrigger"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateTrigger"/>
-      </Unit37>
-      <Unit38>
+      </Unit35>
+      <Unit36>
         <Filename Value="ui/udfinfo/udfinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmUDFInfo"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UDFInfo"/>
-      </Unit38>
-      <Unit39>
+      </Unit36>
+      <Unit37>
         <Filename Value="ui/viewdomain/viewdomain.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmViewDomain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ViewDomain"/>
-      </Unit39>
-      <Unit40>
+      </Unit37>
+      <Unit38>
         <Filename Value="ui/newdomain/newdomain.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmNewDomain"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewDomain"/>
-      </Unit40>
-      <Unit41>
+      </Unit38>
+      <Unit39>
         <Filename Value="common/turbocommon.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit41>
-      <Unit42>
+      </Unit39>
+      <Unit40>
         <Filename Value="libs/topologicalsort.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit42>
-      <Unit43>
+      </Unit40>
+      <Unit41>
         <Filename Value="ui/newconstraint/newforeignkey.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmNewForeignKey"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="newForeignKey"/>
-      </Unit43>
-      <Unit44>
+      </Unit41>
+      <Unit42>
         <Filename Value="ui/neweditfield/neweditfield.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmNewEditField"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NewEditField"/>
-      </Unit44>
-      <Unit45>
+      </Unit42>
+      <Unit43>
         <Filename Value="ui/calender/calen.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCalen"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Calen"/>
-      </Unit45>
-      <Unit46>
+      </Unit43>
+      <Unit44>
         <Filename Value="ui/userpermissions/userpermissions.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmUserPermissions"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UserPermissions"/>
-      </Unit46>
-      <Unit47>
+      </Unit44>
+      <Unit45>
         <Filename Value="ui/permissionmanage/permissionmanage.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmPermissionManage"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="PermissionManage"/>
-      </Unit47>
-      <Unit48>
+      </Unit45>
+      <Unit46>
         <Filename Value="ui/sqlhistory/sqlhistory.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmSQLHistory"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="SQLHistory"/>
-      </Unit48>
-      <Unit49>
+      </Unit46>
+      <Unit47>
         <Filename Value="ui/createuser/createuser.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCreateUser"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CreateUser"/>
-      </Unit49>
-      <Unit50>
+      </Unit47>
+      <Unit48>
         <Filename Value="ui/changepassword/changepass.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmChangePass"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ChangePass"/>
-      </Unit50>
-      <Unit51>
+      </Unit48>
+      <Unit49>
         <Filename Value="ui/dbinfo/dbinfo.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmDBInfo"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="dbInfo"/>
-      </Unit51>
-      <Unit52>
+      </Unit49>
+      <Unit50>
         <Filename Value="ui/comparison/comparison.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmComparison"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Comparison"/>
-      </Unit52>
-      <Unit53>
-        <Filename Value="utils/fileimport.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit53>
-      <Unit54>
+      </Unit50>
+      <Unit51>
         <Filename Value="utils/scriptdb.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="Scriptdb"/>
-      </Unit54>
-      <Unit55>
+      </Unit51>
+      <Unit52>
         <Filename Value="utils/csvdocument.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CsvDocument"/>
-      </Unit55>
-      <Unit56>
+      </Unit52>
+      <Unit53>
         <Filename Value="ui/setfirebirdclient/fsetfbclient.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmSetFBClient"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSetFBClient"/>
-      </Unit56>
-      <Unit57>
+      </Unit53>
+      <Unit54>
         <Filename Value="ui/firebirdconfig/ffirebirdconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmFirebirdConfig"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fFirebirdConfig"/>
-      </Unit57>
-      <Unit58>
+      </Unit54>
+      <Unit55>
         <Filename Value="ui/updatechecker/updatechecker.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmUpdateChecker"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UpdateChecker"/>
-      </Unit58>
-      <Unit59>
+      </Unit55>
+      <Unit56>
         <Filename Value="ui/executer/ftestfunction.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmTestFunction"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fTestFunction"/>
-      </Unit59>
-      <Unit60>
+      </Unit56>
+      <Unit57>
         <Filename Value="datamodules/systables.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="dmSysTables"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
         <UnitName Value="SysTables"/>
-      </Unit60>
-      <Unit61>
+      </Unit57>
+      <Unit58>
         <Filename Value="ui/openquerybuilder/QBEIBX.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit61>
-      <Unit62>
+      </Unit58>
+      <Unit59>
         <Filename Value="ui/openquerybuilder/QBuilder.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="OQBForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit62>
-      <Unit63>
+      </Unit59>
+      <Unit60>
         <Filename Value="ui/openquerybuilder/QBDirFrm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="OQBDirForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit63>
-      <Unit64>
+      </Unit60>
+      <Unit61>
         <Filename Value="ui/openquerybuilder/QBLnkFrm.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="OQBLinkForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit64>
-      <Unit65>
+      </Unit61>
+      <Unit62>
         <Filename Value="common/checkdbintegrity.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CheckDBIntegrity"/>
-      </Unit65>
-      <Unit66>
+      </Unit62>
+      <Unit63>
         <Filename Value="ui/CheckDBIntegrity/fcheckdbintegrity.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCheckDBIntegrity"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fCheckDBIntegrity"/>
-      </Unit66>
-      <Unit67>
+      </Unit63>
+      <Unit64>
         <Filename Value="utils/dbcharsetmigrator.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="DBCharsetMigrator"/>
-      </Unit67>
-      <Unit68>
+      </Unit64>
+      <Unit65>
         <Filename Value="ui/sqlmonitor/fsqlmonitor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmSQLMonitor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit68>
-      <Unit69>
+      </Unit65>
+      <Unit66>
         <Filename Value="utils/data_exporters/fdataexportersintrf.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit69>
-      <Unit70>
+      </Unit66>
+      <Unit67>
         <Filename Value="utils/data_exporters/fmarkdowntableexport.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fMarkDownTableExport"/>
-      </Unit70>
-      <Unit71>
+      </Unit67>
+      <Unit68>
         <Filename Value="utils/data_exporters/fhtmlexport.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit71>
-      <Unit72>
+      </Unit68>
+      <Unit69>
         <Filename Value="utils/data_exporters/fpcstdexporters.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit72>
-      <Unit73>
+      </Unit69>
+      <Unit70>
         <Filename Value="utils/ibarrayhelper.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="IBArrayHelper"/>
-      </Unit73>
-      <Unit74>
+      </Unit70>
+      <Unit71>
         <Filename Value="tests/arraytests/uarrayformtest.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmArrayTest"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uArrayFormTest"/>
-      </Unit74>
-      <Unit75>
+      </Unit71>
+      <Unit72>
         <Filename Value="utils/fServerSession.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit75>
-      <Unit76>
+      </Unit72>
+      <Unit73>
         <Filename Value="utils/fbfeaturechecker.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit76>
-      <Unit77>
+      </Unit73>
+      <Unit74>
         <Filename Value="ui/loginservicemanager/floginservicemanager.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmLoginServiceManager"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit77>
-      <Unit78>
+      </Unit74>
+      <Unit75>
         <Filename Value="ui/serverregistry/fserverregistry.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmServerRegistry"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit78>
-      <Unit79>
+      </Unit75>
+      <Unit76>
         <Filename Value="common/fmetaquerys.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit79>
-      <Unit80>
+      </Unit76>
+      <Unit77>
         <Filename Value="utils/gtk_theme_selector/uthemeselector.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmThemeSelector"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit80>
-      <Unit81>
+      </Unit77>
+      <Unit78>
         <Filename Value="utils/tb_netutils.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit81>
-      <Unit82>
+      </Unit78>
+      <Unit79>
         <Filename Value="ui/DBAdmin/MainFormUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="MainForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit82>
-      <Unit83>
+      </Unit79>
+      <Unit80>
         <Filename Value="ui/DBAdmin/DataModule.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DBDataModule"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-      </Unit83>
-      <Unit84>
+      </Unit80>
+      <Unit81>
         <Filename Value="ui/DBAdmin/dlg/DBLoginDlgUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="DBLoginDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit84>
-      <Unit85>
+      </Unit81>
+      <Unit82>
         <Filename Value="ui/DBAdmin/dlg/BackupDlgUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="BackupDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit85>
-      <Unit86>
+      </Unit82>
+      <Unit83>
         <Filename Value="ui/DBAdmin/dlg/RestoreDlgUnit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="RestoreDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit86>
-      <Unit87>
+      </Unit83>
+      <Unit84>
         <Filename Value="ui/scriptengine/fscriptengine.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmScriptEngine"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fScriptEngine"/>
-      </Unit87>
-      <Unit88>
+      </Unit84>
+      <Unit85>
         <Filename Value="ui/scriptengine/selectsqlresultsunit_ext.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="SelectSQLResultsExt"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit88>
-      <Unit89>
+      </Unit85>
+      <Unit86>
         <Filename Value="utils/data_exporters/fclipboardexport.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fClipboardExport"/>
-      </Unit89>
-      <Unit90>
+      </Unit86>
+      <Unit87>
         <Filename Value="utils/fsimpleobjextractor.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit90>
-      <Unit91>
+      </Unit87>
+      <Unit88>
         <Filename Value="common/cunintellisensecache.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cUnIntelliSenseCache"/>
-      </Unit91>
-      <Unit92>
+      </Unit88>
+      <Unit89>
         <Filename Value="utils/cselectsqlparserext.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="cSelectSQLParserExt"/>
-      </Unit92>
-      <Unit93>
+      </Unit89>
+      <Unit90>
         <Filename Value="datamodules/datamodulesystem.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="dmSystem"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="DataModule"/>
-      </Unit93>
-      <Unit94>
+      </Unit90>
+      <Unit91>
         <Filename Value="ui/servers/fservers.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmServers"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit94>
-      <Unit95>
+      </Unit91>
+      <Unit92>
         <Filename Value="ui/activitymonitor/factivitymonitor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmActivityMonitor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fActivityMonitor"/>
-      </Unit95>
-      <Unit96>
+      </Unit92>
+      <Unit93>
         <Filename Value="ui/edit_tabledata_new/edit_tabledata_new.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmEditTableDataNew"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit96>
-      <Unit97>
+      </Unit93>
+      <Unit94>
         <Filename Value="ui/forign_key_table/foreign_key_table.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmForeignKeyTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit97>
-      <Unit98>
+      </Unit94>
+      <Unit95>
         <Filename Value="ui/ibx_design/ibsqleditor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="IBSQLEditorForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit98>
-      <Unit99>
+      </Unit95>
+      <Unit96>
         <Filename Value="ui/ibx_design/IBTransactionEdit.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="IBTransactionEditForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit99>
-      <Unit100>
+      </Unit96>
+      <Unit97>
         <Filename Value="ui/tools/DataEditor/fdataeditor.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmDataEditor"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit100>
-      <Unit101>
+      </Unit97>
+      <Unit98>
         <Filename Value="utils/uGenSQLFromCSVDataset.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit101>
-      <Unit102>
+      </Unit98>
+      <Unit99>
         <Filename Value="ui/tools/DBReader/DBReader/db_reader.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmDBReader"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit102>
-      <Unit103>
+      </Unit99>
+      <Unit100>
         <Filename Value="ui/tools/DBReader/DBReader/DbGridForm.pas"/>
         <IsPartOfProject Value="True"/>
         <HasResources Value="True"/>
-      </Unit103>
-      <Unit104>
+      </Unit100>
+      <Unit101>
         <Filename Value="ui/tools/PascalScript_IDE/source/designer/u_psstudio.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmPSStudio"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit104>
-      <Unit105>
+      </Unit101>
+      <Unit102>
         <Filename Value="ui/tools/PascalScript_IDE/source/editor/u_consoleide.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmConsoleIDE"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit105>
-      <Unit106>
+      </Unit102>
+      <Unit103>
         <Filename Value="components/PascalScript/Source/ThirdParty/uib/uPSI_uibconst.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit106>
-      <Unit107>
+      </Unit103>
+      <Unit104>
         <Filename Value="components/uib/source/uib.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit107>
-      <Unit108>
+      </Unit104>
+      <Unit105>
         <Filename Value="ui/tablemanage/edit_primarykey.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmPrimaryKey"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit108>
-      <Unit109>
+      </Unit105>
+      <Unit106>
         <Filename Value="ui/tablemanage/uniqueconstraints.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmUniqueConstraints"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="UniqueConstraints"/>
-      </Unit109>
-      <Unit110>
+      </Unit106>
+      <Unit107>
         <Filename Value="ui/tablemanage/checkconstraints.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCheckConstraints"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="CheckConstraints"/>
-      </Unit110>
-      <Unit111>
+      </Unit107>
+      <Unit108>
         <Filename Value="ui/tablemanage/notnullconstraints.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmNotNullConstraints"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="NotNullConstraints"/>
-      </Unit111>
-      <Unit112>
+      </Unit108>
+      <Unit109>
         <Filename Value="components/PascalScript/Source/PascalScript.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit112>
-      <Unit113>
+      </Unit109>
+      <Unit110>
         <Filename Value="common/uexternaltable.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uExternalTable"/>
-      </Unit113>
-      <Unit114>
+      </Unit110>
+      <Unit111>
         <Filename Value="ui/dialogs/clone_table_to_external_table_dialog.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmCloneToExternalTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit114>
-      <Unit115>
+      </Unit111>
+      <Unit112>
         <Filename Value="ui/tools/sqlparser/fsqlparser.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmSQLParser"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="fSQLParser"/>
-      </Unit115>
-      <Unit116>
+      </Unit112>
+      <Unit113>
         <Filename Value="common/ucopytabledatalocal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataLocal"/>
-      </Unit116>
-      <Unit117>
-        <Filename Value="ui/copytable_new/clone_table_dialog.pas"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="ui/clone_table/clone_table_dialog.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmCloneTable"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit117>
-      <Unit118>
+      </Unit114>
+      <Unit115>
         <Filename Value="common/ucopytabledatacrossexecuteblock.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataCrossExecuteBlock"/>
-      </Unit118>
-      <Unit119>
+      </Unit115>
+      <Unit116>
         <Filename Value="common/uformulapresets.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uFormulaPresets"/>
-      </Unit119>
-      <Unit120>
+      </Unit116>
+      <Unit117>
         <Filename Value="common/ucopytabledatarowbyrow.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit120>
-      <Unit121>
+      </Unit117>
+      <Unit118>
         <Filename Value="ui/tools/DataEditor/ucreatetablefromdataset.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmCreateTableFromDataSet"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCreateTableFromDataSet"/>
-      </Unit121>
-      <Unit122>
+      </Unit118>
+      <Unit119>
         <Filename Value="ui/ServerDBFieldSelector/serverdbfieldselector.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmServerDBFieldSelector"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="ServerDBFieldSelector"/>
-      </Unit122>
-      <Unit123>
+      </Unit119>
+      <Unit120>
         <Filename Value="ui/about/about.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="fmAbout"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="About"/>
-      </Unit123>
-      <Unit124>
+      </Unit120>
+      <Unit121>
         <Filename Value="common/ureport.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmReport"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uReport"/>
-      </Unit124>
-      <Unit125>
+      </Unit121>
+      <Unit122>
         <Filename Value="utils/usysteminfo.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uSystemInfo"/>
-      </Unit125>
-      <Unit126>
+      </Unit122>
+      <Unit123>
         <Filename Value="ui/csv_bulk_export/u_csv_bulk_exporter.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="frmCSVBulkExporter"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit126>
-      <Unit127>
+      </Unit123>
+      <Unit124>
         <Filename Value="ui/copytable_new/uproblemfieldsdialog.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uProblemFieldsDialog"/>
-      </Unit127>
-      <Unit128>
+      </Unit124>
+      <Unit125>
         <Filename Value="common/ucopytabledatafbintf.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCopyTableDataFBIntf"/>
-      </Unit128>
+      </Unit125>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1603,7 +1584,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-      <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/copytable;ui/createdb;ui/createtrigger;ui/enterpassword;ui/importtable;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export"/>
+      <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;tests/arraytests;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table"/>
       <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
     </SearchPaths>
     <Parsing>

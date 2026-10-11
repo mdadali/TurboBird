@@ -1,0 +1,76 @@
+========================================================================
+TurboBird - Installation
+========================================================================
+
+------------------------------------------------------------------------
+1. END USERS (Binaries)
+------------------------------------------------------------------------
+
+No installation is required for the binaries.
+TurboBird is portable.
+
+  1. Download the binary ZIP from GitHub
+  2. Extract it to a directory of your choice
+  3. Start TurboBird
+  4. You're ready to go
+
+------------------------------------------------------------------------
+2. DEVELOPERS (Build from Source)
+------------------------------------------------------------------------
+
+Requirements:
+  - Lazarus IDE (recommended: install via fpcupdeluxe)
+  - FPC (Free Pascal Compiler)
+
+Steps:
+
+  1. Download the source code from GitHub
+  2. Extract it to a directory of your choice
+  3. UNINSTALL the standard PascalScript from Lazarus
+     (if present)
+  4. Install PascalScript from "src/components"
+  5. Install all other required components.
+     These can be obtained either via the Online Package Manager
+     or directly from the "src/components" directory.
+
+     Note:
+     Lazarus will automatically report which components are missing
+     as soon as the project is opened.
+
+------------------------------------------------------------------------
+3. IMPORTANT NOTE ABOUT PASCALSCRIPT
+------------------------------------------------------------------------
+
+TurboBird uses its OWN MODIFIED version of PascalScript
+for the PascalScript Studio debugger.
+
+Please do NOT use the standard PascalScript version
+that ships with Lazarus!
+
+Instead, use the version from the TurboBird project:
+
+  src/components/PascalScript/
+
+If the standard version is already installed:
+  -> Uninstall it
+  -> Install the TurboBird version
+
+------------------------------------------------------------------------
+4. RECOMMENDATION
+------------------------------------------------------------------------
+
+For installing Lazarus, fpcupdeluxe is recommended.
+Advantages:
+  - Does NOT install PascalScript by default
+  - More flexible configuration
+  - Avoids conflicts with TurboBird's own
+    PascalScript version from the start
+
+------------------------------------------------------------------------
+5. LICENSE
+------------------------------------------------------------------------
+
+TurboBird is released under the MIT License.
+For more information, see the LICENSE file.
+
+========================================================================
