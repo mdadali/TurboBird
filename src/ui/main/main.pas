@@ -84,9 +84,8 @@ uses
   fsimpleobjextractor,
   cUnIntelliSenseCache,
 
-  Pixie.HtmlView,
+
   LazFileUtils,   // URIToFilename
-  Pixie.Url,      // TPixieUrl, PixieResolveUrl
   URIParser,
 
   //MWA Tools

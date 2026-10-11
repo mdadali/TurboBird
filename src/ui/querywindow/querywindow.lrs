@@ -1,8 +1,8 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmQueryWindow','FORMDATA',[
-  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#222#1#6'Height'#3#236#2
-  +#3'Top'#3#180#0#5'Width'#3#208#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHei'
+  'TPF0'#14'TfmQueryWindow'#13'fmQueryWindow'#4'Left'#3#240#1#6'Height'#3#236#2
+  +#3'Top'#3#253#0#5'Width'#3#208#4#7'Caption'#6#13'fmQueryWindow'#12'ClientHei'
   +'ght'#3#230#2#11'ClientWidth'#3#208#4#5'Color'#7#6'clForm'#9'Icon.Data'#10
   +#127'O"'#0'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0#22#0#0#0#137'PNG'#13#10
   +#26#10#0#0#0#13'IHDR'#0#0#4#0#0#0#4#0#8#6#0#0#0#127#29'+'#131#0'"O,IDATx'#156
@@ -96571,13 +96571,13 @@ LazarusResources.Add('TfmQueryWindow','FORMDATA',[
   +#9'Clipboard'#7'OnClick'#7#24'lmExportToClipboardClick'#0#0#9'TMenuItem'#10
   +'Separator1'#7'Caption'#6#1'-'#0#0#0#9'TMenuItem'#11'lmPrintData'#7'Caption'
   +#6#8'Print...'#7'OnClick'#7#16'lmPrintDataClick'#0#0#0#14'TSynCompletion'#14
-  +'SynCompletion1'#8'Position'#2#0#13'LinesInWindow'#2#6#13'SelectedColor'#7#11
-  +'clHighlight'#13'CaseSensitive'#9#5'Width'#3#6#1#18'AutoUseSingleIdent'#9#8
-  +'ShortCut'#3'.@'#13'EndOfTokenChr'#6#5'()[].'#16'OnCodeCompletion'#7#28'SynC'
-  +'ompletion1CodeCompletion'#13'ExecCommandID'#7#22'ecSynCompletionExecute'#18
-  +'ToggleReplaceWhole'#8#4'Left'#3#224#2#3'Top'#3#144#1#0#0#10'TImageList'#13
-  +'toolbarImages'#6'Height'#2' '#5'Width'#2' '#4'Left'#3'u'#2#3'Top'#2'~'#6'Bi'
-  ,'tmap'#10'U]'#0#0'Lz'#15#0#0#0' '#0#0#0' '#0#0#0'?]'#0#0#0#0#0#0'x'#218#236
+  +'SynCompletion1'#8'Position'#2#255#13'LinesInWindow'#2#6#13'SelectedColor'#7
+  +#11'clHighlight'#13'CaseSensitive'#9#5'Width'#3#6#1#18'AutoUseSingleIdent'#9
+  +#8'ShortCut'#3'.@'#13'EndOfTokenChr'#6#5'()[].'#16'OnCodeCompletion'#7#28'Sy'
+  +'nCompletion1CodeCompletion'#13'ExecCommandID'#7#22'ecSynCompletionExecute'
+  +#18'ToggleReplaceWhole'#8#4'Left'#3#224#2#3'Top'#3#144#1#0#0#10'TImageList'
+  +#13'toolbarImages'#6'Height'#2' '#5'Width'#2' '#4'Left'#3'u'#2#3'Top'#2'~'#6
+  ,'Bitmap'#10'U]'#0#0'Lz'#15#0#0#0' '#0#0#0' '#0#0#0'?]'#0#0#0#0#0#0'x'#218#236
   +#253#5'\'#20#219#255#255#129'/'#8#22#8'vw'#7#138#29'`c'#161'ba'#7'b'''#10'6'
   +#168#136#132#132#132#130'` '#138'"'#221#29#162' ]'#210#221#221#221#185#239
   +#255#251#204#238#226#130#24#247'~'#188#247#251#255#255#127'wx<'#31'g'#230#204
