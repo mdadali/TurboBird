@@ -1566,7 +1566,7 @@
         <ResourceBaseClass Value="Form"/>
       </Unit123>
       <Unit124>
-        <Filename Value="ui/copytable_new/uproblemfieldsdialog.pas"/>
+        <Filename Value="ui/clone_table/uproblemfieldsdialog.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uProblemFieldsDialog"/>
       </Unit124>
