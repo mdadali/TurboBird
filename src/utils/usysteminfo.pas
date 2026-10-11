@@ -1,12 +1,13 @@
 unit uSystemInfo;
 
-//GitTest
-
 {$mode objfpc}{$H+}
 
 interface
 
 uses
+  {$IFDEF DARWIN}
+    Process,
+  {$ENDIF}
   Classes, SysUtils;
 
 type
