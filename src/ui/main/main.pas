@@ -13,7 +13,7 @@ uses
   LCLType, LCLIntf, Classes, SysUtils,
   memds, FileUtil, LResources, Forms, Controls, Graphics, Dialogs, Menus,
   ComCtrls, Reg, QueryWindow, Grids, ExtCtrls, Buttons, StdCtrls, TableManage,
-  dbugintf, turbocommon, importtable, DB,
+  dbugintf, turbocommon, DB,
   IniFiles, Types,   SynEdit,
 
   IBInternals,
@@ -237,7 +237,6 @@ type
     toolbarImages: TImageList;
     MainMenu1: TMainMenu;
     mdsHistory: TMemDataset;
-    lmImportTable: TMenuItem;
     mnFile: TMenuItem;
     lmDisplayView: TMenuItem;
     lmViewTrigger: TMenuItem;
@@ -250,7 +249,6 @@ type
     lmRolePerManagement: TMenuItem;
     lmSetGen: TMenuItem;
     lmDisconnect: TMenuItem;
-    lmCopyTable: TMenuItem;
     lmCopyUserPermission: TMenuItem;
     lmCopyRolePermission: TMenuItem;
     lmGetIncrementGen: TMenuItem;
@@ -339,7 +337,6 @@ type
     procedure lmCompareClick(Sender: TObject);
     procedure lmCopyRolePermissionClick(Sender: TObject);
     procedure lmCopyUserPermissionClick(Sender: TObject);
-    procedure lmCopyTableClick(Sender: TObject);
     procedure lmCreateDBClick(Sender: TObject);
     procedure lmDBAdminClick(Sender: TObject);
     procedure lmDBInfoClick(Sender: TObject);
@@ -376,7 +373,6 @@ type
     procedure lmEditUDRFunctionClick(Sender: TObject);
     procedure lmEditUDRProcedureClick(Sender: TObject);
     procedure lmGetIncrementGenClick(Sender: TObject);
-    procedure lmImportTableClick(Sender: TObject);
     procedure lmNewFormClick(Sender: TObject);
     procedure lmNewUDRFunctionClick(Sender: TObject);
     procedure lmNewUDRProcedureClick(Sender: TObject);
@@ -602,7 +598,7 @@ implementation
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
      EnterPass, CreateTrigger, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
-     PermissionManage, CopyTable, NewEditField, dbInfo, Comparison;
+     PermissionManage, NewEditField, dbInfo, Comparison;
      // About,
 
 
@@ -835,8 +831,6 @@ begin
         (frm as TfmTableManage).Close
       else if frm is TfrmEditTableDataNew then
         (frm as TfrmEditTableDataNew).Close
-      else if frm is TfmImportTable then
-        (frm as TfmImportTable).Close
       else
         frm.Close;                        // Fallback für alle anderen TForm
 
@@ -2175,67 +2169,6 @@ begin
       List.Free;
     end;
   end;
-end;
-
-procedure TfmMain.lmCopyTableClick(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
-  dbIndex: Integer;
-  ATab: TTabSheet;
-  frmCopyTable: TfmCopyTable;
-  TableName, ShortTitle, FullHint, DBAlias: string;
-begin
-  SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Parent = nil) or (SelNode.Parent.Parent = nil) then Exit;
-
-  NodeInfos := TPNodeInfos(SelNode.Parent.Parent.Data);
-  if NodeInfos = nil then Exit;
-  dbIndex := NodeInfos^.dbIndex;
-
-  TableName := GetClearNodeText(SelNode.Text);
-
-  // Prüfen ob ViewForm schon existiert
-  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmCopyTable) then
-    frmCopyTable := TfmCopyTable(NodeInfos^.ViewForm)
-  else
-  begin
-    frmCopyTable := TfmCopyTable.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    frmCopyTable.Parent := ATab;
-    frmCopyTable.Align := alClient;
-    frmCopyTable.BorderStyle := bsNone;
-
-    NodeInfos^.ViewForm := frmCopyTable;
-  end;
-
-  // Tab vorbereiten
-  ATab := frmCopyTable.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Titel
-  ShortTitle := 'Copy Table: ' + TableName;
-  ATab.Caption := ShortTitle;
-  frmCopyTable.Caption := ShortTitle;
-
-  // Hint mit Details
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table Copy' + sLineBreak +
-    'Table: ' + TableName;
-
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Formular initialisieren
-  frmCopyTable.Init(dbIndex, TableName, NodeInfos);
-  frmCopyTable.Show;
 end;
 
 procedure TfmMain.CloneTableAsExternal(const ATableName: string; ADBIndex: Integer);
@@ -3745,66 +3678,6 @@ begin
     ShowCompleteQueryWindow(dbIndex, 'getIncSQL#'  + IntToStr(dbIndex) + ':'  + AGenName,
       'SELECT GEN_ID(' + AGenName + ', 1) FROM RDB$DATABASE;');
   end;
-end;
-
-procedure TfmMain.lmImportTableClick(Sender: TObject);
-var
-  fmImportTable: TfmImportTable;
-  SelNode: TTreeNode;
-  NodeInfos: TPNodeInfos;
-  dbIndex: Integer;
-  ATab: TTabSheet;
-  Title, FullHint, DBAlias: string;
-begin
-  SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Data = nil) then Exit;
-
-  NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
-  dbIndex := NodeInfos^.dbIndex;
-
-  Title := 'Import Table: ' + GetClearNodeText(SelNode.Text);
-
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmImportTable) then
-    fmImportTable := TfmImportTable(NodeInfos^.ViewForm)
-  else
-  begin
-    fmImportTable := TfmImportTable.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-    fmImportTable.Parent := ATab;
-    fmImportTable.Align := alClient;
-    fmImportTable.BorderStyle := bsNone;
-
-    NodeInfos^.ViewForm := fmImportTable;
-  end;
-
-  // Tab vorbereiten
-  ATab := fmImportTable.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Tab-Titel
-  ATab.Caption := Title;
-  fmImportTable.Caption := Title;
-
-  // Detaillierte Infos als Hint
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Object type: Table' + sLineBreak +
-    'Table name: ' + SelNode.Text + sLineBreak +
-    'Action: Import';
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  // Form initialisieren
-  fmImportTable.Init(dbIndex, GetClearNodeText(SelNode.Text), NodeInfos);
-  fmImportTable.Show;
 end;
 
 procedure TfmMain.lmNewUDRFunctionClick(Sender: TObject);
