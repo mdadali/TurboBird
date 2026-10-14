@@ -1,17 +1,18 @@
 object frmScriptEngine: TfrmScriptEngine
-  Left = 707
+  Left = 1108
   Height = 564
-  Top = 337
+  Top = 549
   Width = 1031
   Caption = 'MWA Software IBX-Scripter'
   ClientHeight = 564
   ClientWidth = 1031
   DefaultMonitor = dmPrimary
-  Position = poScreenCenter
-  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 48
@@ -44,8 +45,8 @@ object frmScriptEngine: TfrmScriptEngine
       Width = 138
       Anchors = [akTop, akRight]
       Caption = 'Stop On First Error'
-      TabOrder = 0
       OnChange = chkBoxStopOnErrorChange
+      TabOrder = 0
     end
     object chkBoxEchoInput: TCheckBox
       Left = 880
@@ -54,8 +55,8 @@ object frmScriptEngine: TfrmScriptEngine
       Width = 90
       Anchors = [akTop, akRight]
       Caption = 'Echo Input'
-      TabOrder = 1
       OnChange = chkBoxEchoInputChange
+      TabOrder = 1
     end
   end
   object GroupBox1: TGroupBox
@@ -81,7 +82,7 @@ object frmScriptEngine: TfrmScriptEngine
       ParentColor = False
       ParentFont = False
       TabOrder = 0
-      Gutter.Width = 57
+      Gutter.Width = 0
       Gutter.MouseActions = <>
       RightGutter.Width = 0
       RightGutter.MouseActions = <>
@@ -530,46 +531,6 @@ object frmScriptEngine: TfrmScriptEngine
       LineHighlightColor.Background = clNone
       LineHighlightColor.Foreground = clNone
       inline SynLeftGutterPartList1: TSynGutterPartList
-        object SynGutterMarks1: TSynGutterMarks
-          Width = 24
-          MouseActions = <>
-          MaxExtraMarksColums = 0
-          Options = [sgmoDeDuplicateMarksOnOverflow]
-          MarkupInfo.Background = clBtnFace
-          MarkupInfo.Foreground = clNone
-        end
-        object SynGutterLineNumber1: TSynGutterLineNumber
-          Width = 17
-          MouseActions = <>
-          MarkupInfo.Background = clBtnFace
-          MarkupInfo.Foreground = clNone
-          DigitCount = 2
-          ShowOnlyLineNumbersMultiplesOf = 1
-          ZeroStart = False
-          LeadingZeros = False
-        end
-        object SynGutterChanges1: TSynGutterChanges
-          Width = 4
-          MouseActions = <>
-          ModifiedColor = 59900
-          SavedColor = clGreen
-          MarkupInfo.Background = clNone
-          MarkupInfo.Foreground = clGreen
-          MarkupInfo.FrameColor = 59900
-        end
-        object SynGutterSeparator1: TSynGutterSeparator
-          Width = 2
-          MouseActions = <>
-          MarkupInfo.Background = clWhite
-          MarkupInfo.Foreground = clGray
-        end
-        object SynGutterCodeFolding1: TSynGutterCodeFolding
-          MouseActions = <>
-          MarkupInfo.Background = clNone
-          MarkupInfo.Foreground = clGray
-          MouseActionsExpanded = <>
-          MouseActionsCollapsed = <>
-        end
       end
     end
   end
@@ -615,8 +576,8 @@ object frmScriptEngine: TfrmScriptEngine
       Top = 8
       Width = 75
       Caption = 'Close'
-      TabOrder = 3
       OnClick = btnCloseClick
+      TabOrder = 3
     end
   end
   object GroupBox2: TGroupBox
@@ -676,8 +637,8 @@ object frmScriptEngine: TfrmScriptEngine
     IdleTimer = 0
     TraceFlags = []
     UseDefaultSystemCodePage = False
-    Left = 216
-    Top = 184
+    Left = 240
+    Top = 176
   end
   object IBTransaction1: TIBTransaction
     TransactionName = '{D9ABDD28-0D4A-42F1-B0D8-4F41EDEEFE0E}'

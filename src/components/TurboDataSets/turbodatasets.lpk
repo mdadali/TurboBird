@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="5">
-    <Name Value="JSONDataSet"/>
+    <Name Value="TurboDataSets"/>
     <Type Value="RunAndDesignTime"/>
     <CompilerOptions>
       <Version Value="11"/>
@@ -14,6 +14,11 @@
         <Filename Value="c_json_dataset.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="c_json_dataset"/>
+      </Item>
+      <Item>
+        <Filename Value="ucsvfastdataset.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uCSVFastDataset"/>
       </Item>
     </Files>
     <RequiredPkgs>

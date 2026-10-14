@@ -21,6 +21,7 @@ uses
   uthemeselector,
   uGenSQLFromCSVDataset,
   c_json_dataset,
+  uCSVFastDataset,
   uCreateTableFromDataSet,
 
   fdataexportersintrf,
@@ -29,7 +30,7 @@ uses
 
   uReport,
   uSystemInfo
-  ;
+;
 
 type
   TDetectChoice = (dcUseDetected, dcKeepCurrent, dcCancel);
@@ -58,6 +59,7 @@ type
     btnExportAs: TButton;
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
+    Button1: TButton;
     CheckBoxAutoDedectLineEnding: TCheckBox;
     CheckBoxAutoDedectQuoteChar: TCheckBox;
     CheckBoxAutoDedectDelimiter: TCheckBox;
@@ -67,17 +69,31 @@ type
     cmbboxLineEnding: TComboBox;
     cmbboxDelimiter: TComboBox;
     cmbboxQuoteChar: TComboBox;
-    CSVDataset1: TCSVDataset;
+    CSVFastDataset1: TCSVFastDataset;
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
+    edtMinRowsForRowWidthScan: TEdit;
+    edtRowWidthScanMB: TEdit;
+    edtBlockSize: TEdit;
+    edtBufferSize: TEdit;
     edtDefaultFieldLength: TEdit;
+    edtInitialCellCapacity: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
+    grboxCSVFileRead: TGroupBox;
     JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
+    lblMinRowsForRowWidthScan: TLabel;
+    lblRowWidthScanMB: TLabel;
+    lblActivePerformanceSettings: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    lbBlockSize: TLabel;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
     lmExportDataAsPDF: TMenuItem;
@@ -103,6 +119,7 @@ type
     sWorksheetDataset1: TsWorksheetDataset;
     SynEditSQL: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
+    tsCommonSettings: TTabSheet;
     tsSQL: TTabSheet;
     tsCSVSettings: TTabSheet;
     tsGrid: TTabSheet;
@@ -112,10 +129,11 @@ type
     procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
     procedure cmbboxQuoteCharChange(Sender: TObject);
-    procedure CSVDataset1AfterDelete(DataSet: TDataSet);
+    procedure CSVFastDataset1AfterDelete(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -209,8 +227,18 @@ end;
 procedure TCSVLoadThread.LoadCSVInDataset;
 begin
   try
-    if FOwner.DataSource1.DataSet = FOwner.CSVDataset1 then
-      FOwner.CSVDataset1.LoadFromCSVFile(FFileName)
+
+    // Grid + Navigator komplett abschalten, BEVOR das Dataset geöffnet wird
+    if Assigned(FOwner.DataSource1) then
+    begin
+      if Assigned(FOwner.RxDBGrid1) then
+        FOwner.RxDBGrid1.DataSource := nil;
+      if Assigned(FOwner.DBNavigator1) then
+        FOwner.DBNavigator1.DataSource := nil;
+    end;
+
+    if FOwner.DataSource1.DataSet = FOwner.CSVFastDataset1 then
+      FOwner.CSVFastDataset1.LoadFromCSVFile(FFileName)
 
     else if FOwner.DataSource1.DataSet = FOwner.JSONDataset1 then
       FOwner.JSONDataset1.LoadFromFile(FFileName)
@@ -236,7 +264,10 @@ begin
     end;
 
     FOwner.DataSource1.DataSet.Open;
-    FOwner.RxDBGrid1.OptimizeColumnsWidthAll;
+
+    // JETZT erst wieder verbinden
+    FOwner.RxDBGrid1.DataSource := FOwner.DataSource1;
+    FOwner.DBNavigator1.DataSource := FOwner.DataSource1;
 
   except
     on E: Exception do
@@ -310,18 +341,50 @@ end;
 
 procedure TfrmDataEditor.SetCSVSettingsFromForm;
 begin
-  CSVDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
-  CSVDataset1.CSVOptions.Delimiter := CSVDelimiter;
-  CSVDataset1.CSVOptions.LineEnding := CSVLineEnding;
+  CSVFastDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
+  CSVFastDataset1.CSVOptions.Delimiter := CSVDelimiter;
+  CSVFastDataset1.CSVOptions.LineEnding := CSVLineEnding;
 
   if CSVQuoteChar <> #0 then
-    CSVDataset1.CSVOptions.QuoteChar := CSVQuoteChar
+    CSVFastDataset1.CSVOptions.QuoteChar := CSVQuoteChar
   else
-    CSVDataset1.CSVOptions.QuoteChar := #0;
+    CSVFastDataset1.CSVOptions.QuoteChar := #0;
 
-  CSVDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
-  CSVDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
-  CSVDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
+  CSVFastDataset1.CSVOptions.FirstLineAsFieldNames := chkBoxFirstLineAsFieldName.Checked;
+  CSVFastDataset1.CSVOptions.IgnoreOuterWhitespace := chkBoxIgnoreOuterWhiteSpace.Checked;
+  CSVFastDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
+
+  // ============================================================
+  // CSVFastDataSet Performance-Parameter
+  // ============================================================
+  TCSVFastDataset(CSVFastDataset1).BlockSize :=
+      StrToIntDef(edtBlockSize.Text, 1024);
+  TCSVFastDataset(CSVFastDataset1).BufferSize :=
+      StrToIntDef(edtBufferSize.Text, 2048);
+  TCSVFastDataset(CSVFastDataset1).InitialCellCapacity :=
+      StrToIntDef(edtInitialCellCapacity.Text, 64);
+
+  // ============================================================
+  // Tatsächliche (ggf. geklemmte) Werte zurück in GUI + Globals
+  // ============================================================
+  CSVBlockSizeKB         := TCSVFastDataset(CSVFastDataset1).BlockSize;
+  CSVBufferSizeKB        := TCSVFastDataset(CSVFastDataset1).BufferSize;
+  CSVInitialCellCapacity := TCSVFastDataset(CSVFastDataset1).InitialCellCapacity;
+
+  edtBlockSize.Text           := IntToStr(CSVBlockSizeKB);
+  edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
+  edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
+
+  // ============================================================
+  // Info-Label mit den tatsächlich aktiven Werten
+  // ============================================================
+  lblActivePerformanceSettings.Caption := Format(
+    'Active: Block=%d KB, Buffer=%d KB, Cells=%d, RowScan=%d MB, MinRows=%d',
+    [CSVBlockSizeKB,
+     CSVBufferSizeKB,
+     CSVInitialCellCapacity,
+     CSVRowWidthScanMB,
+     CSVMinRowsForRowWidthScan]);
 end;
 
 procedure TfrmDataEditor.ReadIni;
@@ -336,10 +399,18 @@ begin
   CheckBoxAutoDedectDelimiter.Checked  := AutoDetectDelimiter;
   CheckBoxAutoDedectQuoteChar.Checked  := AutoDetectQuoteChar;
 
+  //CSVFastDataSet Performance-Parameter aus grboxCSVFileRead
+  edtBlockSize.Text           := IntToStr(CSVBlockSizeKB);
+  edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
+  edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
+  edtRowWidthScanMB.Text          := IntToStr(CSVRowWidthScanMB);
+  edtMinRowsForRowWidthScan.Text  := IntToStr(CSVMinRowsForRowWidthScan);
+
   // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
   SyncDelimiterCombo;
   SyncQuoteCharCombo;
+
 end;
 
 procedure TfrmDataEditor.WriteIni;
@@ -357,118 +428,187 @@ begin
   AutoDetectLineEnding := CheckBoxAutoDedectLineEnding.Checked;
   AutoDetectDelimiter  := CheckBoxAutoDedectDelimiter.Checked;
   AutoDetectQuoteChar  := CheckBoxAutoDedectQuoteChar.Checked;
+
+
+  //CSVFastDataSet Performance-Parameter
+  CSVBlockSizeKB         := StrToIntDef(edtBlockSize.Text, 1024);
+  CSVBufferSizeKB        := StrToIntDef(edtBufferSize.Text, 2048);
+  CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
+  CSVRowWidthScanMB         := StrToIntDef(edtRowWidthScanMB.Text, 10);
+  CSVMinRowsForRowWidthScan := StrToIntDef(edtMinRowsForRowWidthScan.Text, 1000);
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
 begin
-  RxDBGrid1.DataSource := nil;
-  DBNavigator1.DataSource := nil;
-  DataSource1.DataSet := nil;
+  // ============================================================
+  // 1. Grid + Navigator zuerst abklemmen — keine Events mehr
+  // ============================================================
+  if Assigned(RxDBGrid1) then
+    RxDBGrid1.DataSource := nil;
+  if Assigned(DBNavigator1) then
+    DBNavigator1.DataSource := nil;
+  if Assigned(DataSource1) then
+    DataSource1.DataSet := nil;
 
-  // ---- CSVDataset1 ----
-  if Assigned(CSVDataset1) then
+  // ============================================================
+  // 2. Alle Datasets schließen und leeren
+  //    Jedes Dataset einzeln, mit eigener Schutzklammer —
+  //    ein kaputtes Dataset darf die anderen nicht blockieren.
+  // ============================================================
+
+  // ---- CSVFastDataset1 ----
+  if Assigned(CSVFastDataset1) then
   begin
+    if CSVFastDataset1.Active then
+      CSVFastDataset1.DisableControls;
     try
-      if CSVDataset1.Active then
-      begin
-        CSVDataset1.Close;
+      try
+        if CSVFastDataset1.Active then
+          CSVFastDataset1.Close;
+      except
+        // Zustand kaputt — Close überspringen, Clear kommt eh
       end;
-    except
-      // Zustand kaputt — nichts tun, Fields.Clear kommt eh
+      try
+        CSVFastDataset1.Fields.Clear;
+      except end;
+      try
+        CSVFastDataset1.FieldDefs.Clear;
+      except end;
+    finally
+      if CSVFastDataset1.Active then
+        CSVFastDataset1.EnableControls;
     end;
-    try
-      CSVDataset1.Fields.Clear;
-    except end;
-    try
-      CSVDataset1.FieldDefs.Clear;
-    except end;
   end;
 
   // ---- JSONDataset1 ----
   if Assigned(JSONDataset1) then
   begin
+    if JSONDataset1.Active then
+      JSONDataset1.DisableControls;
     try
+      try
+        if JSONDataset1.Active then
+          JSONDataset1.Close;
+      except end;
+      try
+        JSONDataset1.Fields.Clear;
+      except end;
+      try
+        JSONDataset1.FieldDefs.Clear;
+      except end;
+    finally
       if JSONDataset1.Active then
-        JSONDataset1.Close;
-    except end;
-    try
-      JSONDataset1.Fields.Clear;
-    except end;
-    try
-      JSONDataset1.FieldDefs.Clear;
-    except end;
+        JSONDataset1.EnableControls;
+    end;
   end;
 
   // ---- sWorksheetDataset1 ----
   if Assigned(sWorksheetDataset1) then
   begin
+    if sWorksheetDataset1.Active then
+      sWorksheetDataset1.DisableControls;
     try
+      try
+        if sWorksheetDataset1.Active then
+          sWorksheetDataset1.Close;
+      except end;
+      try
+        sWorksheetDataset1.Fields.Clear;
+      except end;
+      try
+        sWorksheetDataset1.FieldDefs.Clear;
+      except end;
+    finally
       if sWorksheetDataset1.Active then
-        sWorksheetDataset1.Close;
-    except end;
-    try
-      sWorksheetDataset1.Fields.Clear;
-    except end;
-    try
-      sWorksheetDataset1.FieldDefs.Clear;
-    except end;
+        sWorksheetDataset1.EnableControls;
+    end;
   end;
 
   // ---- Dbf1 ----
   if Assigned(Dbf1) then
   begin
+    if Dbf1.Active then
+      Dbf1.DisableControls;
     try
+      try
+        if Dbf1.Active then
+          Dbf1.Close;
+      except end;
+      try
+        Dbf1.Fields.Clear;
+      except end;
+      try
+        Dbf1.FieldDefs.Clear;
+      except end;
+    finally
       if Dbf1.Active then
-        Dbf1.Close;
-    except end;
-    try
-      Dbf1.Fields.Clear;
-    except end;
-    try
-      Dbf1.FieldDefs.Clear;
-    except end;
+        Dbf1.EnableControls;
+    end;
   end;
 
   // ---- SdfDataSet1 ----
   if Assigned(SdfDataSet1) then
   begin
+    if SdfDataSet1.Active then
+      SdfDataSet1.DisableControls;
     try
+      try
+        if SdfDataSet1.Active then
+          SdfDataSet1.Close;
+      except end;
+      try
+        SdfDataSet1.Fields.Clear;
+      except end;
+      try
+        SdfDataSet1.FieldDefs.Clear;
+      except end;
+    finally
       if SdfDataSet1.Active then
-        SdfDataSet1.Close;
-    except end;
-    try
-      SdfDataSet1.Fields.Clear;
-    except end;
-    try
-      SdfDataSet1.FieldDefs.Clear;
-    except end;
+        SdfDataSet1.EnableControls;
+    end;
   end;
 
   // ---- FixedFormatDataSet1 ----
   if Assigned(FixedFormatDataSet1) then
   begin
+    if FixedFormatDataSet1.Active then
+      FixedFormatDataSet1.DisableControls;
     try
+      try
+        if FixedFormatDataSet1.Active then
+          FixedFormatDataSet1.Close;
+      except end;
+      try
+        FixedFormatDataSet1.Fields.Clear;
+      except end;
+      try
+        FixedFormatDataSet1.FieldDefs.Clear;
+      except end;
+    finally
       if FixedFormatDataSet1.Active then
-        FixedFormatDataSet1.Close;
-    except end;
+        FixedFormatDataSet1.EnableControls;
+    end;
+  end;
+
+  // ============================================================
+  // 3. Grid-Spalten und SQL-Editor leeren
+  // ============================================================
+  if Assigned(RxDBGrid1) then
+  begin
     try
-      FixedFormatDataSet1.Fields.Clear;
-    except end;
-    try
-      FixedFormatDataSet1.FieldDefs.Clear;
+      RxDBGrid1.Columns.Clear;
     except end;
   end;
 
-  try
-    RxDBGrid1.Columns.Clear;
-  except end;
-
-  try
-    SynEditSQL.Lines.Clear;
-  except end;
+  if Assigned(SynEditSQL) then
+  begin
+    try
+      SynEditSQL.Lines.Clear;
+    except end;
+  end;
 end;
 
-procedure TfrmDataEditor.LoadFile(const FileName: string);
+{procedure TfrmDataEditor.LoadFile(const FileName: string);
 begin
   if DataSource1.DataSet.Active then
   begin
@@ -478,8 +618,8 @@ begin
 
   RxDBGrid1.BeginUpdate;
 
-  if DataSource1.DataSet = CSVDataset1 then
-    CSVDataset1.LoadFromCSVFile(FileName)
+  if DataSource1.DataSet = CSVFastDataset1 then
+    CSVFastDataset1.LoadFromCSVFile(FileName)
 
   else if DataSource1.DataSet = JSONDataset1 then
     JSONDataset1.LoadFromFile(FileName)
@@ -509,7 +649,91 @@ begin
     FixedFormatDataSet1.Open;
   end;
 
-  RxDBGrid1.OptimizeColumnsWidthAll;
+  //RxDBGrid1.OptimizeColumnsWidthAll;
+  RxDBGrid1.EndUpdate(True);
+end;}
+
+procedure TfrmDataEditor.LoadFile(const FileName: string);
+var
+  DS: TDataSet;
+begin
+  DS := DataSource1.DataSet;
+  if not Assigned(DS) then Exit;
+
+  // ============================================================
+  // 1. Alten Zustand sauber abräumen — Grid + Navigator abklemmen,
+  //    Dataset-Steuerelemente deaktivieren
+  // ============================================================
+  RxDBGrid1.BeginUpdate;
+  RxDBGrid1.DataSource := nil;
+  DBNavigator1.DataSource := nil;
+
+  DS.DisableControls;
+  try
+    if DS.Active then
+    begin
+      DS.Close;
+      DS.Fields.Clear;
+    end;
+
+    // ============================================================
+    // 2. Datei laden — je nach Dataset-Typ
+    //    Alles innerhalb der DisableControls-Klammer, damit
+    //    kein einziges DataChange-Event ans Grid geht.
+    // ============================================================
+    if DS = CSVFastDataset1 then
+      CSVFastDataset1.LoadFromCSVFile(FileName)
+
+    else if DS = JSONDataset1 then
+      JSONDataset1.LoadFromFile(FileName)
+
+    else if DS = sWorksheetDataset1 then
+    begin
+      sWorksheetDataset1.FileName := FileName;
+      sWorksheetDataset1.SheetName := ChangeFileExt(ExtractFileName(FileName), '');
+      sWorksheetDataset1.Open;
+    end
+
+    else if DS = Dbf1 then
+    begin
+      Dbf1.FilePathFull := FileName;
+      Dbf1.Open;
+    end
+
+    else if DS = SdfDataSet1 then
+    begin
+      SdfDataSet1.FileName := FileName;
+      SdfDataSet1.Open;
+    end
+
+    else if DS = FixedFormatDataSet1 then
+    begin
+      FixedFormatDataSet1.FileName := FileName;
+      FixedFormatDataSet1.Open;
+    end;
+
+    // ============================================================
+    // 3. Cursor auf den Anfang — noch innerhalb der Sperre
+    // ============================================================
+    if DS.Active and (not DS.IsEmpty) then
+      DS.First;
+
+  finally
+    DS.EnableControls;
+  end;
+
+  // ============================================================
+  // 4. Grid + Navigator wieder verbinden
+  //    Erst JETZT, nach dem EnableControls, damit das Grid
+  //    genau EINEN Refresh bekommt statt n.
+  // ============================================================
+  RxDBGrid1.DataSource := DataSource1;
+  DBNavigator1.DataSource := DataSource1;
+
+  // ============================================================
+  // 5. Spaltenbreiten — sample-basiert, nicht über alle Rows
+  // ============================================================
+
   RxDBGrid1.EndUpdate(True);
 end;
 
@@ -538,8 +762,8 @@ begin
   if not DataSource1.DataSet.Active then Exit;
 
   // Für dateibasierte Datasets: direkt speichern
-  if DataSource1.DataSet = CSVDataSet1 then
-    CSVDataSet1.SaveToCSVFile(FileName)
+  if DataSource1.DataSet = CSVFastDataset1 then
+    CSVFastDataset1.SaveToCSVFile(FileName)
   else if DataSource1.DataSet = JSONDataSet1 then
     SaveJSONToFile(JSONDataSet1, FileName)
   else if DataSource1.DataSet = sWorksheetDataset1 then
@@ -576,7 +800,7 @@ begin
 
   if (Ext = '.csv') then
   begin
-    DataSource1.DataSet := CSVDataSet1;
+    DataSource1.DataSet := CSVFastDataset1;
 
     // ============================================================
     // Auto-Detection — nur für aktivierte Checkboxen
@@ -679,7 +903,28 @@ var
   Stats: TTransferStatistic;
   ReportForm: TfrmReport;
   LoadErr: string;
+  MaxLineWidth: Int64;
+  RequiredBufferKB: Int64;
+  ScanStartTime: TDateTime;
+  ScanElapsed: Double;
+  MsgText: string;
+  // Scan-WaitForm
+  ScanForm: TForm;
+  ScanLblInfo, ScanLblRange, ScanLblHint: TLabel;
+  BufferSizeOriginal: Integer;
+  BufferAutoAdjusted: Boolean;
+  RowWidthScanMode: string;
 begin
+  // ============================================================
+  // Initialisierung (verhindert Zufallswerte im Report)
+  // ============================================================
+  MaxLineWidth       := 0;
+  RequiredBufferKB   := 0;
+  ScanElapsed        := 0;
+  BufferAutoAdjusted := False;
+  BufferSizeOriginal := CSVBufferSizeKB;
+  RowWidthScanMode   := 'None';
+
   if not OpenDialog1.Execute then Exit;
 
   PageControl1.ActivePage := tsGrid;
@@ -689,18 +934,154 @@ begin
   // SelectDataSetByFileName kann durch User-Cancel false zurückgeben
   if not SelectDataSetByFileName(FFileName) then
   begin
-    FFileName := '';      // Zustand zurücksetzen
-    Exit;                 // Datei wird nicht geladen
+    FFileName := '';
+    Exit;
   end;
 
   SynEditSQL.Lines.Clear;
 
   SetCSVSettingsFromForm;
 
+  // ============================================================
+  // Row Width Scan — nur bei CSV, wenn Scan aktiviert
+  // ============================================================
+  if (LowerCase(ExtractFileExt(FFileName)) = '.csv') and
+     (CSVRowWidthScanMB <> 0) then
+  begin
+    // Scan-Modus für den Report
+    if CSVRowWidthScanMB < 0 then
+      RowWidthScanMode := 'Whole file'
+    else
+      RowWidthScanMode := Format('%d MB', [CSVRowWidthScanMB]);
+
+    // ============================================================
+    // Scan-WaitForm
+    // ============================================================
+    ScanForm     := nil;
+    ScanLblInfo  := nil;
+    ScanLblRange := nil;
+    ScanLblHint  := nil;
+
+    try
+      ScanForm := TForm.Create(nil);
+      ScanForm.Caption     := 'Row Width Scan';
+      ScanForm.Width       := 440;
+      ScanForm.Height      := 150;
+      ScanForm.Position    := poScreenCenter;
+      ScanForm.BorderStyle := bsDialog;
+      ScanForm.FormStyle   := fsStayOnTop;
+
+      ScanLblInfo := TLabel.Create(ScanForm);
+      ScanLblInfo.Parent    := ScanForm;
+      ScanLblInfo.Left      := 16;
+      ScanLblInfo.Top       := 20;
+      ScanLblInfo.Width     := 400;
+      ScanLblInfo.Caption   := 'Determining maximum row width...';
+      ScanLblInfo.Font.Size := 11;
+      ScanLblInfo.Font.Style := [fsBold];
+
+      ScanLblRange := TLabel.Create(ScanForm);
+      ScanLblRange.Parent  := ScanForm;
+      ScanLblRange.Left    := 16;
+      ScanLblRange.Top     := 55;
+      ScanLblRange.Width   := 400;
+      if CSVRowWidthScanMB < 0 then
+        ScanLblRange.Caption := 'Mode: whole file (may take a while for large files)'
+      else
+        ScanLblRange.Caption := Format('Mode: scanning %d MB', [CSVRowWidthScanMB]);
+
+      ScanLblHint := TLabel.Create(ScanForm);
+      ScanLblHint.Parent    := ScanForm;
+      ScanLblHint.Left      := 16;
+      ScanLblHint.Top       := 85;
+      ScanLblHint.Width     := 400;
+      ScanLblHint.Caption   := 'Please wait...';
+      ScanLblHint.Font.Color := clGray;
+
+      ScanForm.Show;
+      ScanForm.BringToFront;
+      Application.ProcessMessages;
+      Sleep(200);
+      Application.ProcessMessages;
+
+      // ============================================================
+      // Scan durchführen
+      // ============================================================
+      ScanStartTime := Now;
+      MaxLineWidth := EstimateCSVMaxLineWidth(
+        FFileName,
+        CSVRowWidthScanMB,
+        CSVMinRowsForRowWidthScan,
+        CSVQuoteChar);
+      ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
+
+    finally
+      if Assigned(ScanForm) then
+        FreeAndNil(ScanForm);
+    end;
+
+    // ============================================================
+    // Ergebnis auswerten
+    // ============================================================
+    if MaxLineWidth > 0 then
+    begin
+      // BufferSize = 2× Zeilenbreite + 16 KB Reserve
+      RequiredBufferKB := (MaxLineWidth * 2) div 1024 + 16;
+
+      if RequiredBufferKB > CSVBufferSizeKB then
+      begin
+        // --- Anpassung nötig ---
+        MsgText := Format(
+          'Row Width Scan:' + sLineBreak +
+          '  Scan time:                 %.2f s' + sLineBreak +
+          '  Max. row width:            %s Bytes (%.2f KB)' + sLineBreak +
+          sLineBreak +
+          'Current BufferSize:         %d KB' + sLineBreak +
+          'Required BufferSize:        %d KB' + sLineBreak + sLineBreak +
+          '→ BufferSize will be increased to %d KB.',
+          [ScanElapsed,
+           FormatFloat('#,##0', MaxLineWidth),
+           MaxLineWidth / 1024,
+           CSVBufferSizeKB,
+           RequiredBufferKB,
+           RequiredBufferKB]);
+
+        MessageDlg(MsgText, mtInformation, [mbOK], 0);
+
+        BufferSizeOriginal := CSVBufferSizeKB;
+        BufferAutoAdjusted := True;
+
+        CSVBufferSizeKB := RequiredBufferKB;
+        edtBufferSize.Text := IntToStr(RequiredBufferKB);
+      end
+      else
+      begin
+        // --- BufferSize ausreichend ---
+        MsgText := Format(
+          'Row Width Scan:' + sLineBreak +
+          '  Scan time:                 %.2f s' + sLineBreak +
+          '  Max. row width:            %s Bytes (%.2f KB)' + sLineBreak +
+          sLineBreak +
+          'Current BufferSize:         %d KB' + sLineBreak +
+          'Required BufferSize:        %d KB' + sLineBreak + sLineBreak +
+          '→ BufferSize is sufficient. No changes.',
+          [ScanElapsed,
+           FormatFloat('#,##0', MaxLineWidth),
+           MaxLineWidth / 1024,
+           CSVBufferSizeKB,
+           RequiredBufferKB]);
+
+        MessageDlg(MsgText, mtInformation, [mbOK], 0);
+      end;
+    end;
+  end;
+
   DBNavigator1.DataSource := nil;
   RxDBGrid1.DataSource := nil;
 
+  // ============================================================
   // Dateigröße ermitteln
+  // ============================================================
   FileSize := 0;
   if FileExists(FFileName) then
   begin
@@ -721,85 +1102,85 @@ begin
   // ============================================================
   WaitForm := TForm.Create(nil);
   try
-    WaitForm.Caption := 'Loading...';
-    WaitForm.Width := 520;
-    WaitForm.Height := 260;
-    WaitForm.Position := poScreenCenter;
+    WaitForm.Caption     := 'Loading...';
+    WaitForm.Width       := 520;
+    WaitForm.Height      := 260;
+    WaitForm.Position    := poScreenCenter;
     WaitForm.BorderStyle := bsDialog;
-    WaitForm.FormStyle := fsStayOnTop;
+    WaitForm.FormStyle   := fsStayOnTop;
 
     // === Titel ===
     PnlTop := TPanel.Create(WaitForm);
-    PnlTop.Parent := WaitForm;
-    PnlTop.Align := alTop;
-    PnlTop.Height := 45;
+    PnlTop.Parent     := WaitForm;
+    PnlTop.Align      := alTop;
+    PnlTop.Height     := 45;
     PnlTop.BevelOuter := bvNone;
 
     LblTitle := TLabel.Create(WaitForm);
-    LblTitle.Parent := PnlTop;
-    LblTitle.Left := 16;
-    LblTitle.Top := 12;
-    LblTitle.Caption := 'Loading file, please wait...';
+    LblTitle.Parent    := PnlTop;
+    LblTitle.Left      := 16;
+    LblTitle.Top       := 12;
+    LblTitle.Caption   := 'Loading file, please wait...';
     LblTitle.Font.Size := 11;
     LblTitle.Font.Style := [fsBold];
 
     // === Info-Panel ===
     PnlInfo := TPanel.Create(WaitForm);
-    PnlInfo.Parent := WaitForm;
-    PnlInfo.Align := alTop;
-    PnlInfo.Height := 85;
+    PnlInfo.Parent     := WaitForm;
+    PnlInfo.Align      := alTop;
+    PnlInfo.Height     := 85;
     PnlInfo.BevelOuter := bvNone;
 
     LblFile := TLabel.Create(WaitForm);
-    LblFile.Parent := PnlInfo;
-    LblFile.Left := 16;
-    LblFile.Top := 8;
+    LblFile.Parent  := PnlInfo;
+    LblFile.Left    := 16;
+    LblFile.Top     := 8;
     LblFile.Caption := 'File:     ' + ExtractFileName(FFileName);
-    LblFile.Width := 480;
+    LblFile.Width   := 480;
 
     LblSize := TLabel.Create(WaitForm);
-    LblSize.Parent := PnlInfo;
-    LblSize.Left := 16;
-    LblSize.Top := 30;
+    LblSize.Parent  := PnlInfo;
+    LblSize.Left    := 16;
+    LblSize.Top     := 30;
     LblSize.Caption := Format('Size:     %s bytes (%.2f MB)',
       [FormatFloat('#,##0', FileSize), FileSizeMB]);
-    LblSize.Width := 480;
+    LblSize.Width   := 480;
 
     LblRows := TLabel.Create(WaitForm);
-    LblRows.Parent := PnlInfo;
-    LblRows.Left := 16;
-    LblRows.Top := 52;
+    LblRows.Parent  := PnlInfo;
+    LblRows.Left    := 16;
+    LblRows.Top     := 52;
     LblRows.Caption := 'Rows:     reading...';
-    LblRows.Width := 480;
+    LblRows.Width   := 480;
 
-    // === Status + Marquee ===
+    // === Status ===
     PnlStatus := TPanel.Create(WaitForm);
-    PnlStatus.Parent := WaitForm;
-    PnlStatus.Align := alTop;
-    PnlStatus.Height := 45;
+    PnlStatus.Parent     := WaitForm;
+    PnlStatus.Align      := alTop;
+    PnlStatus.Height     := 45;
     PnlStatus.BevelOuter := bvNone;
 
     FLoadStatusLabel := TLabel.Create(WaitForm);
-    FLoadStatusLabel.Parent := PnlStatus;
-    FLoadStatusLabel.Left := 16;
-    FLoadStatusLabel.Top := 12;
-    FLoadStatusLabel.Caption := 'Reading file, please wait...';
+    FLoadStatusLabel.Parent    := PnlStatus;
+    FLoadStatusLabel.Left      := 16;
+    FLoadStatusLabel.Top       := 12;
+    FLoadStatusLabel.Caption   := 'Reading file, please wait...';
     FLoadStatusLabel.Font.Size := 10;
     FLoadStatusLabel.Font.Style := [fsBold];
-    FLoadStatusLabel.Width := 480;
+    FLoadStatusLabel.Width     := 480;
 
     // === Elapsed ===
     PnlBottom := TPanel.Create(WaitForm);
-    PnlBottom.Parent := WaitForm;
-    PnlBottom.Align := alClient;
+    PnlBottom.Parent     := WaitForm;
+    PnlBottom.Align      := alClient;
     PnlBottom.BevelOuter := bvNone;
 
     FLoadElapsedLabel := TLabel.Create(WaitForm);
-    FLoadElapsedLabel.Parent := PnlBottom;
-    FLoadElapsedLabel.Left := 16;
-    FLoadElapsedLabel.Top := 12;
+    FLoadElapsedLabel.Parent  := PnlBottom;
+    FLoadElapsedLabel.Left    := 16;
+    FLoadElapsedLabel.Top     := 12;
     FLoadElapsedLabel.Caption := 'This may take a while for large files.';
-    FLoadElapsedLabel.Width := 480;
+    FLoadElapsedLabel.Width   := 480;
 
     // === SOFORT SICHTBAR ===
     WaitForm.Show;
@@ -828,7 +1209,7 @@ begin
 
     if LoadErr <> '' then
     begin
-      LblRows.Caption := 'Rows:     — load failed —';
+      LblRows.Caption          := 'Rows:     — load failed —';
       FLoadStatusLabel.Caption := 'Error.';
       FLoadElapsedLabel.Caption := 'Elapsed: ' +
         FormatDateTime('hh:nn:ss', Now - StartTime);
@@ -844,35 +1225,29 @@ begin
 
       Caption := 'Turbobird - Data Editor';
       btnCreateSQL.Enabled := False;
-      btnExportAs.Enabled := False;
+      btnExportAs.Enabled  := False;
 
       Exit;
     end;
 
     // === Datasets reaktivieren ===
-    DataSource1.DataSet := DataSource1.DataSet;   // Kick: Rebind erzwingen
+    DataSource1.DataSet := DataSource1.DataSet;
 
     DBNavigator1.DataSource := DataSource1;
-    RxDBGrid1.DataSource := DataSource1;
-    RxDBGrid1.OptimizeColumnsWidthAll;
+    RxDBGrid1.DataSource    := DataSource1;
 
-    // Grid explizit neu aufbauen
-    RxDBGrid1.Columns.Clear;                    // ← jetzt HIER, nach Reattach
+    RxDBGrid1.Columns.Clear;
     if DataSource1.DataSet.Active and
        (not DataSource1.DataSet.IsEmpty) then
     begin
       DataSource1.DataSet.First;
-      RxDBGrid1.OptimizeColumnsWidthAll;
     end;
 
-    RxDBGrid1.Refresh;                          // Neu zeichnen
-    RxDBGrid1.Invalidate;                       // Redraw erzwingen
-
-    EndTime := Now;
+    EndTime  := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
     // Status aktualisieren
-    LblRows.Caption := 'Rows:     ' + FormatFloat('#,##0', RowCount);
+    LblRows.Caption          := 'Rows:     ' + FormatFloat('#,##0', RowCount);
     FLoadStatusLabel.Caption := 'Finished.';
     FLoadElapsedLabel.Caption := 'Elapsed: ' +
       FormatDateTime('hh:nn:ss', EndTime - StartTime);
@@ -891,7 +1266,7 @@ begin
 
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
   btnCreateSQL.Enabled := True;
-  btnExportAs.Enabled := True;
+  btnExportAs.Enabled  := True;
 
   // --- Statistik-Record füllen ---
   FillChar(Stats, SizeOf(Stats), 0);
@@ -900,51 +1275,57 @@ begin
   Stats.SourceFileName   := FFileName;
   Stats.SourceFileSize   := FileSize;
   Stats.SourceFileFormat := UpperCase(ExtractFileExt(FFileName));
-  // Punkt am Anfang entfernen: '.CSV' → 'CSV'
   if (Stats.SourceFileFormat <> '') and (Stats.SourceFileFormat[1] = '.') then
     Delete(Stats.SourceFileFormat, 1, 1);
-  Stats.OptionsExtra     := 'Read-Only';
-  Stats.RowsProcessed    := RowCount;
-  Stats.FieldsCount      := DataSource1.DataSet.FieldCount;
-  Stats.ElapsedSeconds   := DiffSeconds;
-  Stats.SystemInfo       := GetSystemInfo(FFileName);
+  Stats.OptionsExtra   := 'Read-Only';
+  Stats.RowsProcessed  := RowCount;
+  Stats.FieldsCount    := DataSource1.DataSet.FieldCount;
+  Stats.ElapsedSeconds := DiffSeconds;
+  Stats.SystemInfo     := GetSystemInfo(FFileName);
 
   // --- CSV-Optionen (nur bei CSV-Dateien) ---
-  // Aus dem Dataset lesen — das kennt den tatsächlichen Zustand
-  // nach SetCSVSettingsFromForm und ist immer synchron.
-  // --- CSV-Optionen (nur bei CSV-Dateien) ---
-  // Aus dem Dataset lesen — das kennt den tatsächlichen Zustand
-  // nach SetCSVSettingsFromForm und ist immer synchron.
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
-     (DataSource1.DataSet = CSVDataset1) then
+     (DataSource1.DataSet = CSVFastDataset1) then
   begin
     // Delimiter symbolisch darstellen
-    if CSVDataset1.CSVOptions.Delimiter = #9 then
+    if CSVFastDataset1.CSVOptions.Delimiter = #9 then
       Stats.CSVOptions := '    Delimiter: ' + QuotedStr('\t') + sLineBreak
-    else if CSVDataset1.CSVOptions.Delimiter = ' ' then
+    else if CSVFastDataset1.CSVOptions.Delimiter = ' ' then
       Stats.CSVOptions := '    Delimiter: ' + QuotedStr('Space') + sLineBreak
     else
       Stats.CSVOptions := '    Delimiter: ' +
-        QuotedStr(CSVDataset1.CSVOptions.Delimiter) + sLineBreak;
+        QuotedStr(CSVFastDataset1.CSVOptions.Delimiter) + sLineBreak;
 
-    // QuoteChar: #0 → (none), sonst als Zeichen
-    if CSVDataset1.CSVOptions.QuoteChar = #0 then
+    // QuoteChar
+    if CSVFastDataset1.CSVOptions.QuoteChar = #0 then
       Stats.CSVOptions := Stats.CSVOptions +
         '    Quote Char: (none)' + sLineBreak
     else
       Stats.CSVOptions := Stats.CSVOptions +
-        '    Quote Char: ' + QuotedStr(CSVDataset1.CSVOptions.QuoteChar) + sLineBreak;
+        '    Quote Char: ' + QuotedStr(CSVFastDataset1.CSVOptions.QuoteChar) + sLineBreak;
 
     Stats.CSVOptions := Stats.CSVOptions +
       '    Line Ending: ' +
-        CSVLineEndingStrToName(CSVDataset1.CSVOptions.LineEnding) + sLineBreak +
+        CSVLineEndingStrToName(CSVFastDataset1.CSVOptions.LineEnding) + sLineBreak +
       '    First Line As Field Names: ' +
-        BoolToStr(CSVDataset1.CSVOptions.FirstLineAsFieldNames, 'Yes', 'No') + sLineBreak +
+        BoolToStr(CSVFastDataset1.CSVOptions.FirstLineAsFieldNames, 'Yes', 'No') + sLineBreak +
       '    Ignore Outer Whitespace: ' +
-        BoolToStr(CSVDataset1.CSVOptions.IgnoreOuterWhitespace, 'Yes', 'No') + sLineBreak +
+        BoolToStr(CSVFastDataset1.CSVOptions.IgnoreOuterWhitespace, 'Yes', 'No') + sLineBreak +
       '    Quote Outer Whitespace: ' +
-        BoolToStr(CSVDataset1.CSVOptions.QuoteOuterWhitespace, 'Yes', 'No');
+        BoolToStr(CSVFastDataset1.CSVOptions.QuoteOuterWhitespace, 'Yes', 'No');
   end;
+
+  // ============================================================
+  // CSV Buffer Performance
+  // ============================================================
+  Stats.CSVBlockSizeKB         := CSVBlockSizeKB;
+  Stats.CSVBufferSizeKB        := CSVBufferSizeKB;
+  Stats.CSVInitialCellCapacity := CSVInitialCellCapacity;
+  Stats.CSVRowWidthScanMode    := RowWidthScanMode;
+  Stats.CSVRowWidthScanTime    := ScanElapsed;
+  Stats.CSVMaxRowWidth         := MaxLineWidth;
+  Stats.CSVBufferAutoAdjusted  := BufferAutoAdjusted;
+  Stats.CSVBufferOriginalKB    := BufferSizeOriginal;
 
   // --- Report anzeigen ---
   ReportForm := TfrmReport.Create(nil);
@@ -1021,7 +1402,7 @@ begin
   frmCreateTable.ShowModal;
 end;
 
-procedure TfrmDataEditor.CSVDataset1AfterDelete(DataSet: TDataSet);
+procedure TfrmDataEditor.CSVFastDataset1AfterDelete(DataSet: TDataSet);
 begin
   SaveFile(FFileName);
 end;
@@ -1086,6 +1467,11 @@ begin
   pmGrid.PopUp(P.X, P.Y);
 end;
 
+procedure TfrmDataEditor.Button1Click(Sender: TObject);
+begin
+  ShowMessage(IntToStr(CSVFastDataset1.RecordCount));
+end;
+
 procedure TfrmDataEditor.cmbboxDelimiterChange(Sender: TObject);
 begin
   case cmbboxDelimiter.ItemIndex of
@@ -1121,7 +1507,7 @@ var
   NewChar: string;
 begin
   if csDestroying in ComponentState then Exit;
-  if not Assigned(CSVDataset1) then Exit;
+  if not Assigned(CSVFastDataset1) then Exit;
 
   case cmbboxQuoteChar.ItemIndex of
     0: CSVQuoteChar := '"';

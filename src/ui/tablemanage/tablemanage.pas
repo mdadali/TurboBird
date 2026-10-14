@@ -244,6 +244,23 @@ begin
     end;
   end;
 
+  // ============================================================
+  // Computed-Felder können nicht editiert werden
+  // ============================================================
+  if Pos('COMPUTED BY', UpperCase(sgFields.Cells[2, sgFields.Row])) > 0 then
+  begin
+    MessageDlg(
+      'Computed fields cannot be edited at this time.' + sLineBreak +
+      sLineBreak +
+      'Firebird does not allow modifying a computed column via ALTER.' + sLineBreak +
+      'The column would need to be dropped and recreated.' + sLineBreak +
+      sLineBreak +
+      'A dedicated computed-field editor is planned for a future release.',
+      mtInformation, [mbOK], 0);
+    Exit;
+  end;
+
+
   fmNewEditField:= TfmNewEditField.Create(nil);
 
   with sgFields, fmNewEditField do
@@ -1127,9 +1144,9 @@ begin
         sgFields.Cells[7, Row] := '';
       end;
 
-      // Computed Field → Expression anzeigen statt Typ
+      // Computed Field  Ausdruck mit COMPUTED BY-Schlüsselwort anzeigen
       if RawFields[i].ComputedSource <> '' then
-        sgFields.Cells[2, Row] := RawFields[i].ComputedSource;
+        sgFields.Cells[2, Row] := 'COMPUTED BY (' + RawFields[i].ComputedSource + ')';
 
       // ---------- Field Size ----------
       if RawFields[i].FieldType in [CharType, CStringType, VarCharType] then

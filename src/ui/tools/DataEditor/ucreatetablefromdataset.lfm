@@ -1,7 +1,7 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 572
+  Left = 902
   Height = 540
-  Top = 128
+  Top = 144
   Width = 1016
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
@@ -250,23 +250,23 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
     end
     object cmbBoxServers: TComboBox
       Left = 24
-      Height = 31
+      Height = 35
       Top = 32
       Width = 248
       ItemHeight = 0
       OnChange = cmbBoxServersChange
+      Style = csDropDownList
       TabOrder = 0
-      Text = 'cmbBoxServers'
     end
     object cmbBoxDBs: TComboBox
       Left = 328
-      Height = 31
+      Height = 35
       Top = 32
       Width = 196
       ItemHeight = 0
       OnChange = cmbBoxDBsChange
+      Style = csDropDownList
       TabOrder = 1
-      Text = 'cmbBoxDBs'
     end
     object Label4: TLabel
       Left = 573
