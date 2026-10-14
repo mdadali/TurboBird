@@ -1030,7 +1030,6 @@ begin
 
       if RequiredBufferKB > CSVBufferSizeKB then
       begin
-        // --- Anpassung nötig ---
         MsgText := Format(
           'Row Width Scan:' + sLineBreak +
           '  Scan time:                 %.2f s' + sLineBreak +
@@ -1053,6 +1052,11 @@ begin
 
         CSVBufferSizeKB := RequiredBufferKB;
         edtBufferSize.Text := IntToStr(RequiredBufferKB);
+
+        // ============================================================
+        // WICHTIG: Werte ans Dataset durchreichen, BEVOR Load startet
+        // ============================================================
+        SetCSVSettingsFromForm;
       end
       else
       begin
