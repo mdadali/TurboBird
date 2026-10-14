@@ -1,16 +1,16 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 557
+  Left = 800
   Height = 679
-  Top = 183
+  Top = 134
   Width = 1056
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 679
   ClientWidth = 1056
+  Position = poMainFormCenter
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
-  Position = poMainFormCenter
-  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 50
@@ -21,11 +21,11 @@ object frmDataEditor: TfrmDataEditor
     ClientWidth = 1056
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 508
+      Left = 608
       Height = 48
       Top = 1
-      Width = 547
-      Align = alClient
+      Width = 447
+      Align = alRight
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
       ChildSizing.EnlargeVertical = crsScaleChilds
@@ -34,11 +34,11 @@ object frmDataEditor: TfrmDataEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 547
+      ClientWidth = 447
       DataSource = DataSource1
-      OnClick = DBNavigator1Click
       Options = []
       TabOrder = 0
+      OnClick = DBNavigator1Click
     end
     object btnOpenFile: TButton
       Left = 1
@@ -47,8 +47,8 @@ object frmDataEditor: TfrmDataEditor
       Width = 100
       Align = alLeft
       Caption = 'Open'
-      OnClick = btnOpenFileClick
       TabOrder = 1
+      OnClick = btnOpenFileClick
     end
     object btnExportAs: TButton
       Left = 101
@@ -58,8 +58,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Export'
       Enabled = False
-      OnClick = btnExportAsClick
       TabOrder = 2
+      OnClick = btnExportAsClick
     end
     object btnCreateSQL: TButton
       Left = 201
@@ -69,8 +69,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Create SQL'
       Enabled = False
-      OnClick = btnCreateSQLClick
       TabOrder = 3
+      OnClick = btnCreateSQLClick
     end
     object btnCopySQL: TButton
       Left = 301
@@ -80,8 +80,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Copy SQL'
       Enabled = False
-      OnClick = btnCopySQLClick
       TabOrder = 4
+      OnClick = btnCopySQLClick
     end
     object btnCreateTable: TButton
       Left = 401
@@ -90,8 +90,17 @@ object frmDataEditor: TfrmDataEditor
       Width = 107
       Align = alLeft
       Caption = 'Create Table'
-      OnClick = btnCreateTableClick
       TabOrder = 5
+      OnClick = btnCreateTableClick
+    end
+    object Button1: TButton
+      Left = 520
+      Height = 25
+      Top = 16
+      Width = 75
+      Caption = 'Button1'
+      TabOrder = 6
+      OnClick = Button1Click
     end
   end
   object PageControl1: TPageControl
@@ -99,9 +108,9 @@ object frmDataEditor: TfrmDataEditor
     Height = 629
     Top = 50
     Width = 1056
-    ActivePage = tsGrid
+    ActivePage = tsCommonSettings
     Align = alClient
-    TabIndex = 0
+    TabIndex = 4
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -178,7 +187,6 @@ object frmDataEditor: TfrmDataEditor
         Align = alClient
         Color = clWindow
         DrawFullLine = False
-        FocusColor = clRed
         SelectedColor = clHighlight
         DataSource = DataSource1
         Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgHeaderPushedLook]
@@ -200,160 +208,6 @@ object frmDataEditor: TfrmDataEditor
         VertScrollBar.Page = 1
         Align = alClient
         TabOrder = 0
-      end
-    end
-    object tsCSVSettings: TTabSheet
-      Caption = 'CSV Settings'
-      ClientHeight = 598
-      ClientWidth = 1046
-      object Label1: TLabel
-        Left = 56
-        Height = 19
-        Top = 40
-        Width = 125
-        Caption = 'Default Field Length'
-        ParentColor = False
-      end
-      object chkBoxIgnoreOuterWhiteSpace: TCheckBox
-        Left = 584
-        Height = 21
-        Top = 86
-        Width = 180
-        Caption = 'Ignore outer Whiteppace'
-        TabOrder = 0
-      end
-      object chkBoxFirstLineAsFieldName: TCheckBox
-        Left = 584
-        Height = 21
-        Top = 40
-        Width = 163
-        Caption = 'First Line as Fieldname'
-        TabOrder = 1
-      end
-      object chkBoxQuoteOuterWhiteSpace: TCheckBox
-        Left = 584
-        Height = 21
-        Top = 134
-        Width = 175
-        Caption = 'Quote outer Whitespace'
-        TabOrder = 2
-      end
-      object edtDefaultFieldLength: TEdit
-        Left = 272
-        Height = 31
-        Top = 40
-        Width = 80
-        MaxLength = 1024
-        NumbersOnly = True
-        TabOrder = 3
-        Text = '255'
-      end
-      object Label3: TLabel
-        Left = 56
-        Height = 19
-        Top = 184
-        Width = 71
-        Caption = 'Line Ending'
-        ParentColor = False
-      end
-      object cmbboxLineEnding: TComboBox
-        Left = 272
-        Height = 31
-        Top = 184
-        Width = 80
-        ItemHeight = 0
-        ItemIndex = 0
-        Items.Strings = (
-          'CRLF'
-          'LF'
-          'CR'
-          'LineEnding'
-        )
-        OnChange = cmbboxLineEndingChange
-        Style = csDropDownList
-        TabOrder = 4
-        Text = 'CRLF'
-      end
-      object cmbboxDelimiter: TComboBox
-        Left = 272
-        Height = 31
-        Top = 88
-        Width = 80
-        ItemHeight = 0
-        Items.Strings = (
-          ','
-          ';'
-          ' \t'
-          '|'
-          'Space'
-        )
-        OnChange = cmbboxDelimiterChange
-        Style = csDropDownList
-        TabOrder = 5
-      end
-      object Label4: TLabel
-        Left = 56
-        Height = 19
-        Top = 88
-        Width = 58
-        Caption = 'Delimiter'
-        ParentColor = False
-      end
-      object cmbboxQuoteChar: TComboBox
-        Left = 272
-        Height = 31
-        Top = 136
-        Width = 80
-        ItemHeight = 0
-        ItemIndex = 0
-        Items.Strings = (
-          '"'
-          ''''
-          '(none)'
-          'Custom...'
-        )
-        OnChange = cmbboxQuoteCharChange
-        Style = csDropDownList
-        TabOrder = 6
-        Text = '"'
-      end
-      object Label2: TLabel
-        Left = 56
-        Height = 19
-        Top = 136
-        Width = 71
-        Caption = 'Quote Char'
-        ParentColor = False
-      end
-      object CheckBoxAutoDedectDelimiter: TCheckBox
-        Left = 368
-        Height = 21
-        Top = 88
-        Width = 102
-        Caption = 'Auto Dedect'
-        Checked = True
-        State = cbChecked
-        TabOrder = 7
-      end
-      object CheckBoxAutoDedectQuoteChar: TCheckBox
-        Left = 368
-        Height = 21
-        Top = 136
-        Width = 102
-        Caption = 'Auto Dedect'
-        Checked = True
-        State = cbChecked
-        TabOrder = 8
-      end
-      object CheckBoxAutoDedectLineEnding: TCheckBox
-        Left = 368
-        Height = 21
-        Top = 186
-        Width = 102
-        Caption = 'Auto Dedect'
-        Checked = True
-        State = cbChecked
-        TabOrder = 9
       end
     end
     object tsSQL: TTabSheet
@@ -825,6 +679,10 @@ object frmDataEditor: TfrmDataEditor
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
             MouseActions = <>
+            MaxExtraMarksColums = 0
+            Options = [sgmoDeDuplicateMarksOnOverflow]
+            MarkupInfo.Background = clBtnFace
+            MarkupInfo.Foreground = clNone
           end
           object SynGutterLineNumber1: TSynGutterLineNumber
             Width = 17
@@ -841,6 +699,9 @@ object frmDataEditor: TfrmDataEditor
             MouseActions = <>
             ModifiedColor = 59900
             SavedColor = clGreen
+            MarkupInfo.Background = clNone
+            MarkupInfo.Foreground = clGreen
+            MarkupInfo.FrameColor = 59900
           end
           object SynGutterSeparator1: TSynGutterSeparator
             Width = 2
@@ -866,30 +727,279 @@ object frmDataEditor: TfrmDataEditor
         TabOrder = 1
       end
     end
+    object tsCSVSettings: TTabSheet
+      Caption = 'CSV Settings'
+      ClientHeight = 598
+      ClientWidth = 1046
+      object Label1: TLabel
+        Left = 56
+        Height = 19
+        Top = 40
+        Width = 125
+        Caption = 'Default Field Length'
+        ParentColor = False
+      end
+      object chkBoxIgnoreOuterWhiteSpace: TCheckBox
+        Left = 584
+        Height = 21
+        Top = 86
+        Width = 180
+        Caption = 'Ignore outer Whiteppace'
+        TabOrder = 0
+      end
+      object chkBoxFirstLineAsFieldName: TCheckBox
+        Left = 584
+        Height = 21
+        Top = 40
+        Width = 163
+        Caption = 'First Line as Fieldname'
+        TabOrder = 1
+      end
+      object chkBoxQuoteOuterWhiteSpace: TCheckBox
+        Left = 584
+        Height = 21
+        Top = 134
+        Width = 175
+        Caption = 'Quote outer Whitespace'
+        TabOrder = 2
+      end
+      object edtDefaultFieldLength: TEdit
+        Left = 272
+        Height = 31
+        Top = 40
+        Width = 80
+        MaxLength = 1024
+        NumbersOnly = True
+        TabOrder = 3
+        Text = '255'
+      end
+      object Label3: TLabel
+        Left = 56
+        Height = 19
+        Top = 184
+        Width = 71
+        Caption = 'Line Ending'
+        ParentColor = False
+      end
+      object cmbboxLineEnding: TComboBox
+        Left = 272
+        Height = 31
+        Top = 184
+        Width = 80
+        ItemHeight = 0
+        ItemIndex = 0
+        Items.Strings = (
+          'CRLF'
+          'LF'
+          'CR'
+          'LineEnding'
+        )
+        Style = csDropDownList
+        TabOrder = 4
+        Text = 'CRLF'
+        OnChange = cmbboxLineEndingChange
+      end
+      object cmbboxDelimiter: TComboBox
+        Left = 272
+        Height = 31
+        Top = 88
+        Width = 80
+        ItemHeight = 0
+        Items.Strings = (
+          ','
+          ';'
+          ' \t'
+          '|'
+          'Space'
+        )
+        Style = csDropDownList
+        TabOrder = 5
+        OnChange = cmbboxDelimiterChange
+      end
+      object Label4: TLabel
+        Left = 56
+        Height = 19
+        Top = 88
+        Width = 58
+        Caption = 'Delimiter'
+        ParentColor = False
+      end
+      object cmbboxQuoteChar: TComboBox
+        Left = 272
+        Height = 31
+        Top = 136
+        Width = 80
+        ItemHeight = 0
+        ItemIndex = 0
+        Items.Strings = (
+          '"'
+          ''''
+          '(none)'
+          'Custom...'
+        )
+        Style = csDropDownList
+        TabOrder = 6
+        Text = '"'
+        OnChange = cmbboxQuoteCharChange
+      end
+      object Label2: TLabel
+        Left = 56
+        Height = 19
+        Top = 136
+        Width = 71
+        Caption = 'Quote Char'
+        ParentColor = False
+      end
+      object CheckBoxAutoDedectDelimiter: TCheckBox
+        Left = 368
+        Height = 21
+        Top = 88
+        Width = 102
+        Caption = 'Auto Dedect'
+        Checked = True
+        State = cbChecked
+        TabOrder = 7
+      end
+      object CheckBoxAutoDedectQuoteChar: TCheckBox
+        Left = 368
+        Height = 21
+        Top = 136
+        Width = 102
+        Caption = 'Auto Dedect'
+        Checked = True
+        State = cbChecked
+        TabOrder = 8
+      end
+      object CheckBoxAutoDedectLineEnding: TCheckBox
+        Left = 368
+        Height = 21
+        Top = 186
+        Width = 102
+        Caption = 'Auto Dedect'
+        Checked = True
+        State = cbChecked
+        TabOrder = 9
+      end
+    end
+    object tsCommonSettings: TTabSheet
+      Caption = 'Common Settings'
+      ClientHeight = 598
+      ClientWidth = 1046
+      object grboxCSVFileRead: TGroupBox
+        Left = 16
+        Height = 544
+        Top = 16
+        Width = 520
+        Caption = 'CSV - File Read'
+        ClientHeight = 524
+        ClientWidth = 518
+        TabOrder = 0
+        object lbBlockSize: TLabel
+          Left = 32
+          Height = 19
+          Top = 32
+          Width = 88
+          Caption = 'Block Size (KB)'
+        end
+        object edtBlockSize: TEdit
+          Left = 240
+          Height = 31
+          Top = 16
+          Width = 112
+          TabOrder = 0
+          Text = '1024'
+        end
+        object Label5: TLabel
+          Left = 360
+          Height = 19
+          Top = 16
+          Width = 17
+          Caption = 'KB'
+        end
+        object Label6: TLabel
+          Left = 32
+          Height = 19
+          Top = 80
+          Width = 95
+          Caption = 'Buffer Size (KB)'
+        end
+        object edtBufferSize: TEdit
+          Left = 240
+          Height = 31
+          Top = 68
+          Width = 112
+          TabOrder = 1
+          Text = '2048'
+        end
+        object Label7: TLabel
+          Left = 32
+          Height = 19
+          Top = 128
+          Width = 113
+          Caption = 'Initial Cell Capacity'
+        end
+        object edtInitialCellCapacity: TEdit
+          Left = 240
+          Height = 31
+          Top = 120
+          Width = 112
+          TabOrder = 2
+          Text = '128'
+        end
+        object Label8: TLabel
+          Left = 360
+          Height = 19
+          Top = 72
+          Width = 17
+          Caption = 'KB'
+        end
+        object lblActivePerformanceSettings: TLabel
+          Left = 16
+          Height = 19
+          Top = 368
+          Width = 176
+          Caption = 'Active Performance Settings'
+        end
+        object edtRowWidthScanMB: TEdit
+          Left = 240
+          Height = 31
+          Top = 184
+          Width = 112
+          TabOrder = 3
+          Text = '10'
+        end
+        object lblRowWidthScanMB: TLabel
+          Left = 32
+          Height = 19
+          Top = 192
+          Width = 132
+          Caption = 'Row Width Scan (MB):'
+        end
+        object lblMinRowsForRowWidthScan: TLabel
+          Left = 32
+          Height = 19
+          Top = 255
+          Width = 183
+          Caption = 'Min Rows for Row Width Scan:'
+        end
+        object edtMinRowsForRowWidthScan: TEdit
+          Left = 240
+          Height = 31
+          Top = 248
+          Width = 80
+          TabOrder = 4
+          Text = '1000'
+        end
+      end
+    end
   end
   object DataSource1: TDataSource
-    DataSet = CSVDataset1
-    Left = 488
-    Top = 336
+    Left = 840
+    Top = 352
   end
   object OpenDialog1: TOpenDialog
     Left = 688
     Top = 464
-  end
-  object CSVDataset1: TCSVDataset
-    PacketRecords = 10000
-    FieldDefs = <>
-    AutoCalcFields = False
-    AfterDelete = CSVDataset1AfterDelete
-    CSVOptions.FirstLineAsFieldNames = True
-    CSVOptions.DefaultFieldLength = 255
-    CSVOptions.Delimiter = ','
-    CSVOptions.QuoteChar = '"'
-    CSVOptions.LineEnding = #10
-    CSVOptions.IgnoreOuterWhitespace = False
-    CSVOptions.QuoteOuterWhitespace = True
-    Left = 792
-    Top = 568
   end
   object SaveDialog1: TSaveDialog
     Left = 496
@@ -899,11 +1009,11 @@ object frmDataEditor: TfrmDataEditor
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlFirebird40
-    Left = 280
-    Top = 440
+    Left = 568
+    Top = 272
   end
   object pmGrid: TPopupMenu
-    Left = 152
+    Left = 808
     Top = 440
     object Separator2: TMenuItem
       Caption = '-'
@@ -951,8 +1061,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = [rxpoShowTitle, rxpoShowFooter, rxpoShowGridColor, rxpoShowFooterColor, rxpoShowReportTitle]
     ShowProgress = True
-    Left = 80
-    Top = 504
+    Left = 720
+    Top = 264
   end
   object RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet
     RxDBGrid = RxDBGrid1
@@ -960,8 +1070,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = []
     DefaultExt = rdeNone
-    Left = 184
-    Top = 528
+    Left = 664
+    Top = 368
   end
   object RxDBGridExportPDF1: TRxDBGridExportPDF
     Caption = 'Export to PDF file'
@@ -969,8 +1079,8 @@ object frmDataEditor: TfrmDataEditor
     Options = []
     PdfOptions.Options = []
     AuthorPdf = 'TurboBird'
-    Left = 400
-    Top = 384
+    Left = 552
+    Top = 136
   end
   object sWorksheetDataset1: TsWorksheetDataset
     AutoCalcFields = False
@@ -987,29 +1097,40 @@ object frmDataEditor: TfrmDataEditor
     Delimiter = ','
     FirstLineAsSchema = False
     StripTrailingDelimiters = False
-    Left = 736
-    Top = 432
+    Left = 816
+    Top = 304
   end
   object FixedFormatDataSet1: TFixedFormatDataSet
     FileMustExist = True
     ReadOnly = False
     FieldDefs = <>
     AutoCalcFields = False
-    Left = 736
-    Top = 496
+    Left = 824
+    Top = 416
   end
   object Dbf1: TDbf
     IndexDefs = <>
     TableLevel = 4
     FilterOptions = []
-    Left = 720
-    Top = 352
+    Left = 800
+    Top = 200
+  end
+  object CSVFastDataset1: TCSVFastDataset
+    FieldDefs = <>
+    AfterDelete = CSVFastDataset1AfterDelete
+    CSVOptions.FirstLineAsFieldNames = False
+    CSVOptions.DefaultFieldLength = 255
+    CSVOptions.Delimiter = ','
+    CSVOptions.QuoteChar = '"'
+    CSVOptions.LineEnding = #10
+    CSVOptions.IgnoreOuterWhitespace = False
+    CSVOptions.QuoteOuterWhitespace = True
+    Left = 630
+    Top = 197
   end
   object JSONDataSet1: TJSONDataSet
-    PacketRecords = 10000
     FieldDefs = <>
-    AutoCalcFields = False
-    Left = 456
-    Top = 600
+    Left = 656
+    Top = 556
   end
 end

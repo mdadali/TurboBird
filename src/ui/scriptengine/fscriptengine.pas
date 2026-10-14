@@ -31,9 +31,10 @@ unit fScriptEngine;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, SynEdit, SynCompletion, SynHighlighterSQL, Forms,
-  Controls, Graphics, Dialogs, StdCtrls, ComCtrls, ActnList, ExtCtrls,
-  ibxscript, IBDatabase, IB,
+  LCLType, Classes, SysUtils, FileUtil, SynEdit, SynCompletion, SynHighlighterSQL,
+  SynGutter, SynGutterBase, SynGutterChanges, SynGutterCodeFolding,
+  SynGutterLineNumber, SynGutterMarks, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, ComCtrls, ActnList, ExtCtrls, ibxscript, IBDatabase, IB,
 
   turbocommon,
   uthemeselector;
@@ -72,6 +73,7 @@ type
     procedure chkBoxEchoInputChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
     procedure IBDatabase1BeforeConnect(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
@@ -209,6 +211,21 @@ begin
   // TATSynEdit: OptUnprintedVisible := False
   //ed.Options := ed.Options - [eoShowSpecialChars];
 end;
+
+procedure TfrmScriptEngine.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if (ssCtrl in Shift) and ((Key=VK_F4) or (Key=VK_W)) then
+  begin
+    if MessageDlg('Do you want to close this window?', mtConfirmation, [mbNo, mbYes], 0) = mrYes then
+    begin
+      Close;
+      Parent.Free;
+    end;
+  end;
+end;
+
+
 
 procedure TfrmScriptEngine.btnCloseClick(Sender: TObject);
 begin

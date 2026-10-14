@@ -362,7 +362,19 @@ type
     FormulaUsed: Boolean;
     FormulasApplied: string;
     CreateTableSQL: string;
+
     CSVOptions: string;              // Mehrzeilige CSV-Parameter-Beschreibung
+
+    // === CSV BUFFER PERFORMANCE ===
+    CSVBlockSizeKB: Integer;          // Block Size in KB
+    CSVBufferSizeKB: Integer;         // Buffer Size in KB (nach Anpassung)
+    CSVInitialCellCapacity: Integer;  // Initial Cells
+    CSVRowWidthScanMode: string;      // 'Whole file', 'X MB', 'None'
+    CSVRowWidthScanTime: Double;      // Scan-Dauer in Sekunden
+    CSVMaxRowWidth: Int64;            // Ermittelte max. Zeilenbreite in Bytes
+    CSVBufferAutoAdjusted: Boolean;   // Wurde BufferSize automatisch angepasst?
+    CSVBufferOriginalKB: Integer;     // BufferSize vor der Anpassung
+
     OptionsExtra: string;            // Zusätzliche Optionen (z.B. 'Read-Only')
 
     PresetName: string;
@@ -378,6 +390,7 @@ type
     ClientLibVersion: string;
     SystemInfo: TSystemInfo;
   end;
+
 
 
   //search
@@ -424,6 +437,7 @@ const
   TmpDir = 'temp';
 
 var
+   AppName: string;
    WinCloseCanceled: Boolean = False;
 
     MainTreeView: TTreeView;
@@ -529,6 +543,13 @@ var
     CSVIgnoreOuterWhitespace,
     CSVQuoteOuterWhitespace: boolean;
 
+    //CSV FileRead Options
+    CSVBlockSizeKB: Int64 = 1024;
+    CSVBufferSizeKB: Int64 = 2048;
+    CSVInitialCellCapacity: Int64 = 64;
+    CSVRowWidthScanMB: Integer = 10;
+    CSVMinRowsForRowWidthScan: Integer = 1000;
+
     // Auto-Detect-Schalter (pro Feld einzeln)
     AutoDetectLineEnding: Boolean;
     AutoDetectDelimiter:  Boolean;
@@ -551,12 +572,21 @@ var
 
 //end-Ini.File////////////////////////////////////////////////////////////////
 
+//Files
+function CountTextFileLines(const AFileName: string; ABufferSize: Int64 = 0; ALineEnding: Char = #0): Int64;
+
 //CSV
 function CSVLineEndingNameToStr(const AName: string): string;
 function CSVLineEndingStrToName(const AValue: string): string;
 function DetectLineEnding(const AFileName: string): string;
 function DetectDelimiter(const AFileName: string): Char;
 function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
+function EstimateCSVMaxLineWidth(
+  const AFileName: string;
+  AMaxScanMB: Integer = 10;
+  AMinScanRows: Integer = 1000;
+  AQuoteChar: Char = '"'): Int64;
+
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
 function  GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
@@ -848,6 +878,110 @@ implementation
 
 uses  Reg;
 
+//Files
+function CountTextFileLines(const AFileName: string; ABufferSize: Int64; ALineEnding: Char): Int64;
+const
+  DEFAULT_BUFFER_SIZE = 16 * 1024* 1024;   // 16 KB
+var
+  FS: TFileStream;
+  Buf: array of Byte;
+  BytesRead: Integer;
+  I: Integer;
+  TargetByte: Byte;
+  LastByte: Byte;
+  CRCount, LFCount: Int64;
+  DetectedLineEnding: Char;
+  BufSize: Integer;
+begin
+  Result := -1;
+  if not FileExists(AFileName) then Exit;
+
+  // Puffergröße: 0 → Standard, sonst Minimum 4 KB, Maximum 16 MB
+  BufSize := ABufferSize;
+  if BufSize <= 0 then
+    BufSize := DEFAULT_BUFFER_SIZE
+  else
+  begin
+    if BufSize < 4096 then BufSize := 4096;
+    if BufSize > 16 * 1024 * 1024 then BufSize := 16 * 1024 * 1024;
+  end;
+
+  SetLength(Buf, BufSize);
+  Result := 0;
+  LastByte := 0;
+  DetectedLineEnding := ALineEnding;
+
+  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    // ============================================================
+    // Phase 1: LineEnding automatisch erkennen (wenn nicht vorgegeben)
+    // ============================================================
+    if DetectedLineEnding = #0 then
+    begin
+      BytesRead := FS.Read(Buf[0], BufSize);
+      if BytesRead <= 0 then
+      begin
+        // Leere Datei
+        Result := 0;
+        Exit;
+      end;
+
+      CRCount := 0;
+      LFCount := 0;
+      for I := 0 to BytesRead - 1 do
+      begin
+        if Buf[I] = 13 then Inc(CRCount)
+        else if Buf[I] = 10 then Inc(LFCount);
+      end;
+
+      // Entscheidung:
+      // LF vorhanden → LF (deckt LF und CRLF ab)
+      // Nur CR (kein LF) → CR (alte Mac-Format)
+      // Weder noch → Datei hat nur eine Zeile
+      if LFCount > 0 then
+        DetectedLineEnding := #10
+      else if CRCount > 0 then
+        DetectedLineEnding := #13
+      else
+      begin
+        // Keine Zeilenumbrüche → eine Zeile
+        Result := 1;
+        Exit;
+      end;
+
+      // Position zurück auf Anfang
+      FS.Position := 0;
+    end;
+
+    // ============================================================
+    // Phase 2: Zählen mit erkanntem/vorgegebenem LineEnding
+    // ============================================================
+    TargetByte := Byte(DetectedLineEnding);
+
+    repeat
+      BytesRead := FS.Read(Buf[0], BufSize);
+      if BytesRead > 0 then
+      begin
+        I := 0;
+        while I < BytesRead do
+        begin
+          if Buf[I] = TargetByte then
+            Inc(Result);
+          Inc(I);
+        end;
+        LastByte := Buf[BytesRead - 1];
+      end;
+    until BytesRead < BufSize;
+
+    // Letzte Zeile ohne abschließenden Zeilenumbruch mitzählen
+    if (FS.Size > 0) and (LastByte <> TargetByte) then
+      Inc(Result);
+  finally
+    FS.Free;
+    SetLength(Buf, 0);
+  end;
+end;
+
 //CSV
 // ============================================================
 // CSV Auto-Detection — LineEnding, Delimiter & QuoteChar
@@ -1086,6 +1220,117 @@ begin
     Result := ''''
   else
     Result := '"';
+end;
+
+function EstimateCSVMaxLineWidth(
+  const AFileName: string;
+  AMaxScanMB: Integer;
+  AMinScanRows: Integer;
+  AQuoteChar: Char): Int64;
+const
+  BUF_SIZE = 4 * 1024 * 1024;   // 4 MB Block
+var
+  FS: TFileStream;
+  Buf: TBytes;
+  P, BufEnd: PChar;
+  BytesRead: Integer;
+  MaxWidth: Int64;
+  CurrentWidth: Int64;
+  InQuote: Boolean;
+  TotalRead: Int64;
+  RowCount: Int64;
+  MaxBytes: Int64;
+  ScanWholeFile: Boolean;
+  StopScan: Boolean;
+begin
+  Result := -1;
+  if not FileExists(AFileName) then Exit;
+
+  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    // ============================================================
+    // Semantik:
+    //   -1  → ganze Datei
+    //    0  → (sollte nicht aufgerufen werden, aber sicherheitshalber ganze Datei)
+    //   >0  → so viele MB
+    // ============================================================
+    ScanWholeFile := (AMaxScanMB <= 0);
+
+    if ScanWholeFile then
+      MaxBytes := FS.Size
+    else
+    begin
+      MaxBytes := Int64(AMaxScanMB) * 1024 * 1024;
+      if MaxBytes > FS.Size then
+        MaxBytes := FS.Size;
+    end;
+
+    SetLength(Buf, BUF_SIZE);
+
+    MaxWidth := 0;
+    CurrentWidth := 0;
+    InQuote := False;
+    TotalRead := 0;
+    RowCount := 0;
+    StopScan := False;
+
+    while not StopScan do
+    begin
+      BytesRead := FS.Read(Buf[0], BUF_SIZE);
+      if BytesRead <= 0 then Break;   // Datei-Ende
+
+      P := Pointer(Buf);
+      BufEnd := P + BytesRead;
+
+      while P < BufEnd do
+      begin
+        if P^ = AQuoteChar then
+          InQuote := not InQuote
+        else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
+        begin
+          if CurrentWidth > MaxWidth then
+            MaxWidth := CurrentWidth;
+          CurrentWidth := 0;
+          Inc(RowCount);
+
+          // CRLF: LF überspringen
+          if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
+            Inc(P);
+        end
+        else
+          Inc(CurrentWidth);
+
+        Inc(P);
+      end;
+
+      Inc(TotalRead, BytesRead);
+
+      // ============================================================
+      // Stop-Bedingungen
+      // ============================================================
+      if not ScanWholeFile then
+      begin
+        // MB-Limit erreicht UND MinRows erfüllt → Stop
+        if (TotalRead >= MaxBytes) and
+           ((AMinScanRows <= 0) or (RowCount >= AMinScanRows)) then
+          StopScan := True;
+
+        // MinRows erreicht → Stop (unabhängig von MB)
+        if (AMinScanRows > 0) and (RowCount >= AMinScanRows) and
+           (TotalRead >= MaxBytes) then
+          StopScan := True;
+      end;
+      // ScanWholeFile → nur Datei-Ende stoppt (durch BytesRead <= 0)
+    end;
+
+    // Letzte angefangene Zeile noch berücksichtigen
+    if CurrentWidth > MaxWidth then
+      MaxWidth := CurrentWidth;
+
+    Result := MaxWidth;
+  finally
+    FS.Free;
+  end;
 end;
 
 // ============================================================================
@@ -1494,43 +1739,59 @@ end;
 // Quelldatei-Größe formatieren
 // ---------------------------------------------------------------------------
 function FormatFileSize(ASize: Int64): string;
+var
+  FS: TFormatSettings;
 begin
+  // Englischer Format-Stil — unabhängig vom OS-Locale
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
   if ASize <= 0 then
     Result := ''
   else if ASize >= 1024 * 1024 * 1024 then
-    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024 * 1024)) + ' GB'
+    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024 * 1024), FS) + ' GB'
   else if ASize >= 1024 * 1024 then
-    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024)) + ' MB'
+    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024), FS) + ' MB'
   else if ASize >= 1024 then
-    Result := FormatFloat('#,##0', ASize / 1024) + ' KB'
+    Result := FormatFloat('#,##0', ASize / 1024, FS) + ' KB'
   else
-    Result := FormatFloat('#,##0', ASize) + ' bytes';
+    Result := FormatFloat('#,##0', ASize, FS) + ' bytes';
 end;
 
 // ---------------------------------------------------------------------------
 // Environment-Sektion (gemeinsam für alle Report-Typen)
 // ---------------------------------------------------------------------------
 procedure AddEnvironmentSection(SL: TStringList; const Stats: TTransferStatistic);
+var
+  FS: TFormatSettings;
 begin
+  // Englischer Format-Stil — unabhängig vom OS-Locale
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
   SL.Add('Environment:');
   if Stats.ClientLibVersion <> '' then
     SL.Add('  Client Lib: ' + Stats.ClientLibVersion);
   SL.Add('  OS:        ' + Stats.SystemInfo.OSName);
   SL.Add('  CPU:       ' + Stats.SystemInfo.CPUModel);
   SL.Add('  Cores:     ' + IntToStr(Stats.SystemInfo.CPUCores));
-  SL.Add('  RAM:       ' + FormatFloat('#,##0', Stats.SystemInfo.RAMTotalMB) + ' MB');
+  SL.Add('  RAM:       ' + FormatFloat('#,##0', Stats.SystemInfo.RAMTotalMB, FS) + ' MB');
 
   if Stats.SystemInfo.DiskPath <> '' then
   begin
     SL.Add('  Disk (' + ExtractFileName(Stats.SystemInfo.DiskPath) + '):');
-    SL.Add('    Free:    ' + FormatFloat('#,##0', Stats.SystemInfo.DiskFreeMB) + ' MB');
-    SL.Add('    Total:   ' + FormatFloat('#,##0', Stats.SystemInfo.DiskTotalMB) + ' MB');
+    SL.Add('    Free:    ' + FormatFloat('#,##0', Stats.SystemInfo.DiskFreeMB, FS) + ' MB');
+    SL.Add('    Total:   ' + FormatFloat('#,##0', Stats.SystemInfo.DiskTotalMB, FS) + ' MB');
     if Stats.SystemInfo.DiskType <> '' then
       SL.Add('    Type:    ' + Stats.SystemInfo.DiskType);
   end;
 end;
 
-
+// ---------------------------------------------------------------------------
+// Hauptfunktion: Transfer-Report formatieren
+// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Hauptfunktion: Transfer-Report formatieren
 // ---------------------------------------------------------------------------
@@ -1538,7 +1799,13 @@ function FormatTransferReport(const Stats: TTransferStatistic): string;
 var
   SL: TStringList;
   RowsPerSec: Double;
+  FS: TFormatSettings;
 begin
+  // Englischer Format-Stil — unabhängig vom OS-Locale
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
   SL := TStringList.Create;
   try
     SL.Add('═══════════════════════════════════════════════════');
@@ -1557,7 +1824,7 @@ begin
     end;
 
     // ======================================================================
-    // SOURCE (nur wenn vorhanden)
+    // SOURCE
     // ======================================================================
     if (Stats.SourceFileName <> '') or
        (Stats.SourceServer <> '') or
@@ -1566,14 +1833,12 @@ begin
     begin
       SL.Add('Source:');
 
-      // Datei-basierte Quelle
       if Stats.SourceFileName <> '' then
       begin
         SL.Add('  File:      ' + ExtractFileName(Stats.SourceFileName));
         SL.Add('  Path:      ' + ExtractFilePath(Stats.SourceFileName));
       end;
 
-      // Server-basierte Quelle
       if Stats.SourceServer <> '' then
         SL.Add('  Server:    ' + Stats.SourceServer);
       if Stats.SourceDatabase <> '' then
@@ -1593,7 +1858,7 @@ begin
     end;
 
     // ======================================================================
-    // DESTINATION (nur wenn vorhanden)
+    // DESTINATION
     // ======================================================================
     if (Stats.DestServer <> '') or
        (Stats.DestDatabase <> '') or
@@ -1602,7 +1867,6 @@ begin
     begin
       SL.Add('Destination:');
 
-      // Server-basiertes Ziel
       if Stats.DestServer <> '' then
         SL.Add('  Server:    ' + Stats.DestServer);
       if Stats.DestDatabase <> '' then
@@ -1614,7 +1878,6 @@ begin
       if Stats.DestServerVersion <> '' then
         SL.Add('  Version:   ' + Stats.DestServerVersion);
 
-      // Datei-Ziel
       if Stats.DestFileName <> '' then
       begin
         SL.Add('  File:      ' + ExtractFileName(Stats.DestFileName));
@@ -1667,6 +1930,43 @@ begin
         SL.Add(Stats.CSVOptions);
       end;
 
+      // ============================================================
+      // CSV BUFFER PERFORMANCE
+      // ============================================================
+      if (Stats.CSVBlockSizeKB > 0) or
+         (Stats.CSVBufferSizeKB > 0) or
+         (Stats.CSVRowWidthScanMode <> '') then
+      begin
+        SL.Add('');
+        SL.Add('  Buffer Performance:');
+
+        if Stats.CSVBlockSizeKB > 0 then
+          SL.Add('    Block Size:            ' + IntToStr(Stats.CSVBlockSizeKB) + ' KB');
+
+        if Stats.CSVBufferSizeKB > 0 then
+        begin
+          if Stats.CSVBufferAutoAdjusted then
+            SL.Add(Format('    Buffer Size:           %d KB (auto-adjusted from %d KB)',
+              [Stats.CSVBufferSizeKB, Stats.CSVBufferOriginalKB]))
+          else
+            SL.Add('    Buffer Size:           ' + IntToStr(Stats.CSVBufferSizeKB) + ' KB');
+        end;
+
+        if Stats.CSVInitialCellCapacity > 0 then
+          SL.Add('    Initial Cells:         ' + IntToStr(Stats.CSVInitialCellCapacity));
+
+        if Stats.CSVRowWidthScanMode <> '' then
+          SL.Add('    Row Width Scan Mode:   ' + Stats.CSVRowWidthScanMode);
+
+        if Stats.CSVRowWidthScanTime > 0 then
+          SL.Add(Format('    Row Width Scan Time:   %.3f s', [Stats.CSVRowWidthScanTime]));
+
+        if Stats.CSVMaxRowWidth > 0 then
+          SL.Add(Format('    Max Row Width:         %s Bytes (%.2f KB)',
+            [FormatNumberEN(Stats.CSVMaxRowWidth),
+             Stats.CSVMaxRowWidth / 1024]));
+      end;
+
       SL.Add('');
     end;
 
@@ -1709,7 +2009,7 @@ begin
       Stats.ElapsedSeconds / SecsPerDay));
 
     RowsPerSec := CopyStatsRowsPerSec(Stats);
-    SL.Add('  Speed:         ' + FormatFloat('#,##0', Round(RowsPerSec)) + ' rows/sec');
+    SL.Add('  Speed:         ' + FormatFloat('#,##0', Round(RowsPerSec), FS) + ' rows/sec');
     SL.Add('');
 
     // ======================================================================
@@ -1735,8 +2035,6 @@ begin
     SL.Free;
   end;
 end;
-
-
 
 //Transactions
 function GetTransactionParamsAsString(ATrans: TIBTransaction): string;
@@ -4608,10 +4906,8 @@ begin
   DefaultBatchSize := fIniFile.ReadInteger('CSVExport','DefaultBatchSize', 500000);
   CSVExportDefaultPreset    := fIniFile.ReadString('CSVExport','DefaultPreset', 'csv_quoted');
 
-
-  // CSV Editor
+  //CSV Editor
   CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
-
   TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
   if TempStr <> '' then
     CSVDelimiter := TempStr[1]
@@ -4635,6 +4931,18 @@ begin
   AutoDetectLineEnding := fIniFile.ReadBool('CSVEditor','AutoDetectLineEnding', True);
   AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
   AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
+
+  // Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
+  CSVBlockSizeKB           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
+  CSVBufferSizeKB          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
+  CSVInitialCellCapacity   := fIniFile.ReadInteger('CSVEditor','CSVInitialCellCapacity', 64);
+  CSVRowWidthScanMB         := fIniFile.ReadInteger('CSVEditor','CSVRowWidthScanMB', 10);
+  CSVMinRowsForRowWidthScan := fIniFile.ReadInteger('CSVEditor','CSVMinRowsForRowWidthScan', 1000);
+
+  // Sicherheitskorrektur: BufferSize muss >= BlockSize * 2 sein
+  if CSVBufferSizeKB < CSVBlockSizeKB * 2 then
+    CSVBufferSizeKB := CSVBlockSizeKB * 2;
+
 
   //UpdateChecker
   AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
@@ -4748,7 +5056,12 @@ begin
   fIniFile.WriteBool('CSVEditor','AutoDetectLineEnding', AutoDetectLineEnding);
   fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
   fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
-
+  // Performance-Parameter
+  fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeKB);
+  fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeKB);
+  fIniFile.WriteInteger('CSVEditor','CSVInitialCellCapacity', CSVInitialCellCapacity);
+  fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
+  fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
 
     //UpdateChecker
     fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
@@ -6759,8 +7072,34 @@ initialization
   SessionPasswordCache := nil;
   MetaDataChanged := false;
 
-  fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
-  fIniFile     := TIniFile.Create(fIniFileName);
+  //fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
+
+  {$IFDEF LINUX}
+    fIniFileName := Application.ExeName + '.ini';
+  {$ENDIF}
+
+  {$IFDEF WINDOWS}
+    // .exe entfernen, .ini anhängen
+    fIniFileName := ChangeFileExt(Application.ExeName, '.ini');
+  {$ENDIF}
+
+  {$IFDEF DARWIN}
+    // Auf macOS liegt Application.ExeName im .app-Bundle:
+    //   .../TurboBird.app/Contents/MacOS/TurboBird
+    // INI soll neben dem Bundle liegen, also drei Ebenen hoch:
+    //   .../TurboBird.ini
+    fIniFileName := ExtractFilePath(Application.ExeName);           // .../Contents/MacOS/
+    fIniFileName := ExcludeTrailingPathDelimiter(fIniFileName);      // .../Contents/MacOS
+    fIniFileName := ExtractFileDir(fIniFileName);                    // .../Contents
+    fIniFileName := ExtractFileDir(fIniFileName);                    // .../TurboBird.app
+    fIniFileName := ExtractFileDir(fIniFileName);                    // .../ (Ordner mit .app)
+    fIniFileName := IncludeTrailingPathDelimiter(fIniFileName)
+                  + ChangeFileExt(ExtractFileName(Application.ExeName), '.ini');
+    // Ergebnis: .../TurboBird.ini
+  {$ENDIF}
+
+  fIniFile := TIniFile.Create(fIniFileName);
+
 
   ExtractResourcesIfNeeded;
 

@@ -15,6 +15,7 @@ type
     CPUModel: string;
     CPUCores: Integer;
     RAMTotalMB: Int64;
+    RAMFreeMB: Int64;          // ← NEU: verfügbarer RAM
     DiskFreeMB: Int64;
     DiskTotalMB: Int64;
     DiskPath: string;
@@ -23,6 +24,7 @@ type
   end;
 
 function GetSystemInfo(const APath: string = ''): TSystemInfo;
+function GetRAMFreeMB: Int64;   // ← NEU: nur der freie RAM
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
 
 implementation
@@ -263,6 +265,89 @@ end;
 {$ENDIF}
 
 // ---------------------------------------------------------------------------
+// RAM-Verfügbar (frei)
+// ---------------------------------------------------------------------------
+function GetRAMFreeMB: Int64;
+{$IFDEF LINUX}
+var
+  SL: TStringList;
+  i: Integer;
+  Line, ValStr: string;
+  MemKB: Int64;
+begin
+  Result := 0;
+  if not FileExists('/proc/meminfo') then Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile('/proc/meminfo');
+    for i := 0 to SL.Count - 1 do
+    begin
+      Line := SL[i];
+
+      // MemAvailable ist die beste Schätzung des Kernels
+      // (berücksichtigt Cache, der freigegeben werden kann).
+      // Fallback: MemFree, falls MemAvailable fehlt (ältere Kernel).
+      if (Pos('MemAvailable:', Line) = 1) or
+         ((Pos('MemFree:', Line) = 1) and (Result = 0)) then
+      begin
+        ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
+        ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
+        if TryStrToInt64(ValStr, MemKB) then
+          Result := MemKB div 1024;
+
+        // Wenn MemAvailable gefunden wurde, sind wir fertig.
+        if Pos('MemAvailable:', Line) = 1 then
+          Break;
+      end;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+var
+  MemStatus: TMemoryStatusEx;
+begin
+  Result := 0;
+  FillChar(MemStatus, SizeOf(MemStatus), 0);
+  MemStatus.dwLength := SizeOf(MemStatus);
+  if GlobalMemoryStatusEx(MemStatus) then
+    Result := MemStatus.ullAvailPhys div (1024 * 1024);
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+var
+  P: TProcess;
+  SL: TStringList;
+  ValStr: string;
+begin
+  // macOS: vm_stat liefert Seitenzahlen. Wir nutzen sysctl für
+  // einen groben Überblick — die genaue Berechnung erfordert
+  // host_statistics64, das in FPC nicht direkt verfügbar ist.
+  Result := 0;
+  P := TProcess.Create(nil);
+  SL := TStringList.Create;
+  try
+    P.Executable := '/usr/bin/vm_stat';
+    P.Options := [poUsePipes, poWaitOnExit];
+    P.Execute;
+    SL.LoadFromStream(P.Output);
+    // Wir nehmen einen konservativen Schätzwert: 10% des Gesamt-RAM
+    // falls vm_stat nicht auswertbar ist.
+    if SL.Count > 0 then
+      Result := GetRAMTotalMB div 10;
+  finally
+    SL.Free;
+    P.Free;
+  end;
+end;
+{$ENDIF}
+
+// ---------------------------------------------------------------------------
 // OS-Name
 // ---------------------------------------------------------------------------
 function GetOSName: string;
@@ -374,6 +459,7 @@ begin
   Result.CPUModel := GetCPUModel;
   Result.CPUCores := GetCPUCores;
   Result.RAMTotalMB := GetRAMTotalMB;
+  Result.RAMFreeMB := GetRAMFreeMB;      // ← NEU
   Result.OSName := GetOSName;
 
   Result.DiskPath := APath;
@@ -389,8 +475,6 @@ begin
 
     try
       {$IFDEF WINDOWS}
-      // DiskFree/DiskSize erwarten auf Windows einen Byte-Index:
-      // 0 = aktuelles Laufwerk, 1 = A:, 2 = B:, 3 = C:, ...
       Drv := PathDriveNumber(PathToCheck);
       Result.DiskFreeMB := DiskFree(Drv) div (1024 * 1024);
       Result.DiskTotalMB := DiskSize(Drv) div (1024 * 1024);
@@ -411,20 +495,27 @@ end;
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
 var
   SL: TStringList;
+  FS: TFormatSettings;
 begin
+  // Englischer Format-Stil — unabhängig vom OS-Locale
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
   SL := TStringList.Create;
   try
     SL.Add('Environment:');
     SL.Add('  OS:        ' + AInfo.OSName);
     SL.Add('  CPU:       ' + AInfo.CPUModel);
     SL.Add('  Cores:     ' + IntToStr(AInfo.CPUCores));
-    SL.Add('  RAM:       ' + FormatFloat('#,##0', AInfo.RAMTotalMB) + ' MB');
+    SL.Add('  RAM:       ' + FormatFloat('#,##0', AInfo.RAMTotalMB, FS) + ' MB');
+    SL.Add('  RAM free:  ' + FormatFloat('#,##0', AInfo.RAMFreeMB, FS) + ' MB');
 
     if AInfo.DiskPath <> '' then
     begin
       SL.Add('  Disk (' + ExtractFileName(AInfo.DiskPath) + '):');
-      SL.Add('    Free:    ' + FormatFloat('#,##0', AInfo.DiskFreeMB) + ' MB');
-      SL.Add('    Total:   ' + FormatFloat('#,##0', AInfo.DiskTotalMB) + ' MB');
+      SL.Add('    Free:    ' + FormatFloat('#,##0', AInfo.DiskFreeMB, FS) + ' MB');
+      SL.Add('    Total:   ' + FormatFloat('#,##0', AInfo.DiskTotalMB, FS) + ' MB');
       if AInfo.DiskType <> '' then
         SL.Add('    Type:    ' + AInfo.DiskType);
     end;

@@ -79,16 +79,16 @@ type
     procedure FillDBCombo;
     function  GetTargetDBIndex: Integer;
     function  GetTargetTable: string;
-    function  GetCommitInterval: Integer;
-    function  GetFromRow: integer;
-    function  GetToRow: Integer;
+    function  GetCommitInterval: Int64;
+    function  GetFromRow: Int64;
+    function  GetToRow: Int64;
 
     procedure RunFBInsertBatched(ADBIndex: Integer; const ATableName: string);
     procedure AssignParamFromField(Param: TParam; SourceField: TField);
     procedure CancelButtonClick(Sender: TObject);
     function  TableExists(ADB: TIBDatabase; const ATableName: string): Boolean;
     procedure ParseFieldType(const AType: string; out BaseType: string; out Size: Integer);
-    function  GridRowToFieldType(Row: Integer): string;
+    function  GridRowToFieldType(Row: Int64): string;
     procedure SyncFieldsFromGrid;
     procedure SetupGridColumns;
     procedure UpdateTypePickList;
@@ -340,7 +340,7 @@ begin
     BaseType := Trim(AType);
 end;
 
-function TfrmCreateTableFromDataSet.GridRowToFieldType(Row: Integer): string;
+function TfrmCreateTableFromDataSet.GridRowToFieldType(Row: Int64): string;
 var
   BaseType: string;
   Size: Integer;
@@ -373,6 +373,10 @@ begin
   List := GetServerListFromTreeView;
   try
     cmbBoxServers.Items.Assign(List);
+    if cmbBoxServers.Items.Count = 0 then
+      cmbBoxDBs.Text:= '<No database available>'
+    //else
+      //FillDBCombo;
   finally
     List.Free;
   end;
@@ -386,13 +390,20 @@ begin
   for i := 0 to High(RegisteredDatabases) do
     if SameText(RegisteredDatabases[i].RegRec.ServerName, cmbBoxServers.Text) then
       cmbBoxDBs.Items.Add(RegisteredDatabases[i].RegRec.Title);
-  if cmbBoxDBs.Items.Count > 0 then
-    cmbBoxDBs.ItemIndex := 0;
+
+  //if cmbBoxDBs.Items.Count > 0 then
+    //cmbBoxDBs.ItemIndex := 0
+
+  if cmbBoxDBs.Items.Count = 0 then
+    cmbBoxDBs.Items.Add('<No database available>');
+
+  cmbBoxDBs.ItemIndex := 0;
 end;
 
 procedure TfrmCreateTableFromDataSet.cmbBoxServersChange(Sender: TObject);
 begin
-  if cmbBoxServers.ItemIndex < 0 then Exit;
+  if cmbBoxServers.Items.Count = 0 then
+    Exit;
 
   FillDBCombo;
   UpdateTypePickList;
@@ -522,12 +533,12 @@ begin
   Result := Trim(edtDestTableName.Text);
 end;
 
-function TfrmCreateTableFromDataSet.GetCommitInterval: Integer;
+function TfrmCreateTableFromDataSet.GetCommitInterval: Int64;
 begin
   Result := StrToIntDef(edtCommitInterval.Text, 1000000);
 end;
 
-function TfrmCreateTableFromDataSet.GetFromRow: Integer;
+function TfrmCreateTableFromDataSet.GetFromRow: Int64;
 begin
   if rbRange.Checked then
     Result := StrToIntDef(edtFrom.Text, 1)
@@ -535,7 +546,7 @@ begin
     Result := 1;
 end;
 
-function TfrmCreateTableFromDataSet.GetToRow: Integer;
+function TfrmCreateTableFromDataSet.GetToRow: Int64;
 begin
   if rbRange.Checked then
     Result := StrToIntDef(edtTo.Text, FDataSet.RecordCount)
@@ -695,15 +706,15 @@ var
   CheckedFields: array of Integer;
   FieldsPerRow: Integer;
 
-  FromRow, ToRow, TotalRows: Integer;
+  FromRow, ToRow, TotalRows: Int64;
   TotalCommits: Integer;
   CommitsDone: Integer;
 
   i, f: Integer;
-  CurrentRow: Integer;
+  CurrentRow: Int64;
 
-  BatchSize: Integer;
-  RowsSinceCommit: Integer;
+  BatchSize: Int64;
+  RowsSinceCommit: Int64;
 
   SourceField: TField;
   Param: TParam;
