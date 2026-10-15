@@ -394,6 +394,10 @@ type
   end;
 
 
+type
+  TCSVScanProgressEvent = procedure(ABytesRead, ATotalBytes: Int64) of object;
+
+
   //search
   TDBField = (
    dbfTitle,
@@ -438,6 +442,7 @@ const
   TmpDir = 'temp';
 
 var
+
    AppName: string;
    WinCloseCanceled: Boolean = False;
 
@@ -550,6 +555,7 @@ var
     CSVInitialCellCapacity: Int64 = 64;
     CSVRowWidthScanMB: Integer = 10;
     CSVMinRowsForRowWidthScan: Integer = 1000;
+    CSVProgressUpdatePercent: Integer = 1;
 
     // Auto-Detect-Schalter (pro Feld einzeln)
     AutoDetectLineEnding: Boolean;
@@ -582,7 +588,14 @@ function CSVLineEndingStrToName(const AValue: string): string;
 function DetectLineEnding(const AFileName: string): string;
 function DetectDelimiter(const AFileName: string): Char;
 function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
-function EstimateCSVMaxLineWidth( const AFileName: string; AFromRow: Int64; AToRow: Int64; AScanRows: Int64; AQuoteChar: Char; out ATotalRowsInRange: Int64): Int64;
+function EstimateCSVMaxLineWidth(
+  const AFileName: string;
+  AFromRow: Int64;
+  AToRow: Int64;
+  AScanRows: Int64;
+  AQuoteChar: Char;
+  out ATotalRowsInRange: Int64;
+  AOnProgress: TCSVScanProgressEvent = nil): Int64;
 
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
@@ -1250,7 +1263,8 @@ end;
     AToRow: Int64;
     AScanRows: Int64;
     AQuoteChar: Char;
-    out ATotalRowsInRange: Int64): Int64;
+    out ATotalRowsInRange: Int64;
+    AOnProgress: TCSVScanProgressEvent): Int64;
   const
     BUF_SIZE = 4 * 1024 * 1024;
   var
@@ -1261,11 +1275,12 @@ end;
     MaxWidth: Int64;
     CurrentWidth: Int64;
     InQuote: Boolean;
-    DataRowInFile: Int64;      // 0 = keine Zeile, 1 = Header, 2 = Datenzeile 1, ...
-    DataRowIdx: Int64;         // 1 = Datenzeile 1, 2 = Datenzeile 2, ...
+    DataRowInFile: Int64;
+    DataRowIdx: Int64;
     InRange: Boolean;
     RowsScannedInRange: Int64;
     StopScan: Boolean;
+    TotalBytesRead: Int64;        // ← NEU
   begin
     Result := -1;
     ATotalRowsInRange := 0;
@@ -1281,11 +1296,18 @@ end;
       InRange := False;
       RowsScannedInRange := 0;
       StopScan := False;
+      TotalBytesRead := 0;        // ← NEU
 
       while not StopScan do
       begin
         BytesRead := FS.Read(Buf[0], BUF_SIZE);
         if BytesRead <= 0 then Break;
+
+        Inc(TotalBytesRead, BytesRead);   // ← NEU
+
+        // Progress-Callback
+        if Assigned(AOnProgress) then
+          AOnProgress(TotalBytesRead, FS.Size);
 
         P := Pointer(Buf);
         BufEnd := P + BytesRead;
@@ -1296,36 +1318,25 @@ end;
             InQuote := not InQuote
           else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
           begin
-            // ============================================================
-            // Zeilenende erreicht
-            // DataRowInFile zählt ALLE Zeilen (Header + Daten)
-            //   DataRowInFile = 1 → Header
-            //   DataRowInFile = 2 → Datenzeile 1
-            // ============================================================
             Inc(DataRowInFile);
-
-            // Datenzeilennummer (Header ausgeschlossen)
             DataRowIdx := DataRowInFile - 1;
 
             if DataRowIdx >= AFromRow then
             begin
               InRange := True;
 
-              // Range-Ende erreicht? (AToRow bezieht sich auf Datenzeilen)
               if (AToRow > 0) and (DataRowIdx > AToRow) then
               begin
                 StopScan := True;
                 Break;
               end;
 
-              // MaxWidth tracken
               if CurrentWidth > MaxWidth then
                 MaxWidth := CurrentWidth;
 
               Inc(RowsScannedInRange);
               Inc(ATotalRowsInRange);
 
-              // CustomScan: Limit erreicht?
               if (AScanRows > 0) and (RowsScannedInRange >= AScanRows) then
               begin
                 StopScan := True;
@@ -1335,7 +1346,6 @@ end;
 
             CurrentWidth := 0;
 
-            // CRLF als Einheit behandeln
             if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
               Inc(P);
           end
@@ -1346,9 +1356,7 @@ end;
         end;
       end;
 
-      // ============================================================
-      // Letzte Zeile ohne abschließenden Zeilenumbruch
-      // ============================================================
+      // Letzte Zeile ohne Newline
       if (not StopScan) and (CurrentWidth > 0) then
       begin
         Inc(DataRowInFile);
@@ -4995,6 +5003,8 @@ begin
   if CSVBufferSizeKB < CSVBlockSizeKB * 2 then
     CSVBufferSizeKB := CSVBlockSizeKB * 2;
 
+  CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
+
 
   //UpdateChecker
   AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
@@ -5114,20 +5124,21 @@ begin
   fIniFile.WriteInteger('CSVEditor','CSVInitialCellCapacity', CSVInitialCellCapacity);
   fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
   fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
+  fIniFile.WriteInteger('CSVEditor','CSVProgressUpdatePercent', CSVProgressUpdatePercent);
 
-    //UpdateChecker
-    fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
-    fIniFile.WriteBool('UpdateChecker','UnzipAfterDownload', UnzipAfterDownload);
-    fIniFile.WriteBool('UpdateChecker','RunNewVersionAfterUnzip', RunNewVersionAfterUnzip);
-    fIniFile.WriteBool('UpdateChecker','DeleteOldVersions', DeleteOldVersions);
+  //UpdateChecker
+  fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
+  fIniFile.WriteBool('UpdateChecker','UnzipAfterDownload', UnzipAfterDownload);
+  fIniFile.WriteBool('UpdateChecker','RunNewVersionAfterUnzip', RunNewVersionAfterUnzip);
+  fIniFile.WriteBool('UpdateChecker','DeleteOldVersions', DeleteOldVersions);
 
-    //Database
-    fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
+  //Database
+  fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
 
-    //SQLMonitor
-    fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
-    fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
-    fIniFile.WriteInteger('SQLMonitor', 'SlowQueryThreshold', SlowQueryThreshold);
+  //SQLMonitor
+  fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
+  fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
+  fIniFile.WriteInteger('SQLMonitor', 'SlowQueryThreshold', SlowQueryThreshold);
 end;
 
 

@@ -73,6 +73,7 @@ type
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
+    edtProgressUpdatePercent: TEdit;
     edtRowWidthScanRows: TEdit;
     edtFrom: TEdit;
     edtBlockSize: TEdit;
@@ -86,6 +87,7 @@ type
     JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
     Label10: TLabel;
+    Label5: TLabel;
     lblRowWidthScanRows: TLabel;
     lblActivePerformanceSettings: TLabel;
     Label2: TLabel;
@@ -157,8 +159,20 @@ type
     FLoadElapsedLabel: TLabel;
     FLoadStatusLabel: TLabel;
     FLoadDotCount: Integer;
-    procedure LoadTimerTick(Sender: TObject);
 
+    // Progress-Fenster Komponenten
+    FProgressForm: TForm;
+    FProgPhaseLbl: TLabel;
+    FProgBar: TProgressBar;
+    FProgInfoLbl: TLabel;
+    FProgSpeedLbl: TLabel;
+    FProgElapsedLbl: TLabel;
+    FProgETALbl: TLabel;
+    FProgCancelBtn: TButton;
+    FProgTotalRows: Int64;
+    FProgStartTime: TDateTime;
+
+    procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
     procedure LoadFile(const FileName: string);
     procedure SaveFile(const FileName: string);
@@ -169,11 +183,11 @@ type
     procedure SyncQuoteCharCombo;
     procedure ReadIni;
     procedure WriteIni;
-    function AskUseDetected(
-      const AFileName: string;
-      const ACurLE, ADetLE: string;
-      const ACurDel, ADetDel: Char;
-      const ACurQC, ADetQC: Char): TDetectChoice;
+    function AskUseDetected(const AFileName: string; const ACurLE, ADetLE: string; const ACurDel, ADetDel: Char; const ACurQC, ADetQC: Char): TDetectChoice;
+    procedure HandleScanProgress(ABytesRead, ATotalBytes: Int64);
+    procedure HandleLoadProgress(ARowsRead: Int64; AElapsedSeconds: Double);
+    procedure ProgCancelClick(Sender: TObject);
+    procedure BuildProgressForm;
   public
   end;
 
@@ -183,6 +197,154 @@ type
 implementation
 
 {$R *.lfm}
+
+procedure TfrmDataEditor.BuildProgressForm;
+var
+  PnlInfo, PnlProgress, PnlCancel: TPanel;
+begin
+  FProgressForm := TForm.Create(nil);
+  FProgressForm.Caption     := 'Loading...';
+  FProgressForm.Width       := 560;
+  FProgressForm.Height      := 320;
+  FProgressForm.Position    := poScreenCenter;
+  FProgressForm.BorderStyle := bsDialog;
+  FProgressForm.FormStyle   := fsStayOnTop;
+
+  // === Info-Panel oben ===
+  PnlInfo := TPanel.Create(FProgressForm);
+  PnlInfo.Parent := FProgressForm;
+  PnlInfo.Align := alTop;
+  PnlInfo.Height := 90;
+  PnlInfo.BevelOuter := bvNone;
+
+  FProgPhaseLbl := TLabel.Create(FProgressForm);
+  FProgPhaseLbl.Parent := PnlInfo;
+  FProgPhaseLbl.Left := 16;
+  FProgPhaseLbl.Top := 12;
+  FProgPhaseLbl.Width := 520;
+  FProgPhaseLbl.Caption := 'Preparing...';
+  FProgPhaseLbl.Font.Size := 12;
+  FProgPhaseLbl.Font.Style := [fsBold];
+
+  FProgInfoLbl := TLabel.Create(FProgressForm);
+  FProgInfoLbl.Parent := PnlInfo;
+  FProgInfoLbl.Left := 16;
+  FProgInfoLbl.Top := 45;
+  FProgInfoLbl.Width := 520;
+
+  // === Progress-Bar mitte ===
+  PnlProgress := TPanel.Create(FProgressForm);
+  PnlProgress.Parent := FProgressForm;
+  PnlProgress.Align := alTop;
+  PnlProgress.Height := 100;
+  PnlProgress.BevelOuter := bvNone;
+
+  FProgBar := TProgressBar.Create(FProgressForm);
+  FProgBar.Parent := PnlProgress;
+  FProgBar.Left := 16;
+  FProgBar.Top := 10;
+  FProgBar.Width := 520;
+  FProgBar.Height := 24;
+  FProgBar.Min := 0;
+  FProgBar.Max := 100;
+  FProgBar.Position := 0;
+
+  FProgElapsedLbl := TLabel.Create(FProgressForm);
+  FProgElapsedLbl.Parent := PnlProgress;
+  FProgElapsedLbl.Left := 16;
+  FProgElapsedLbl.Top := 45;
+  FProgElapsedLbl.Width := 250;
+
+  FProgSpeedLbl := TLabel.Create(FProgressForm);
+  FProgSpeedLbl.Parent := PnlProgress;
+  FProgSpeedLbl.Left := 280;
+  FProgSpeedLbl.Top := 45;
+  FProgSpeedLbl.Width := 256;
+
+  FProgETALbl := TLabel.Create(FProgressForm);
+  FProgETALbl.Parent := PnlProgress;
+  FProgETALbl.Left := 16;
+  FProgETALbl.Top := 68;
+  FProgETALbl.Width := 520;
+
+  // === Cancel unten ===
+  PnlCancel := TPanel.Create(FProgressForm);
+  PnlCancel.Parent := FProgressForm;
+  PnlCancel.Align := alClient;
+  PnlCancel.BevelOuter := bvNone;
+
+  FProgCancelBtn := TButton.Create(FProgressForm);
+  FProgCancelBtn.Parent := PnlCancel;
+  FProgCancelBtn.Caption := 'Cancel';
+  FProgCancelBtn.Width := 100;
+  FProgCancelBtn.Height := 30;
+  FProgCancelBtn.Left := (FProgressForm.ClientWidth - 100) div 2;
+  FProgCancelBtn.Top := 20;
+  FProgCancelBtn.OnClick := @ProgCancelClick;
+end;
+
+procedure TfrmDataEditor.HandleScanProgress(ABytesRead, ATotalBytes: Int64);
+var
+  Percent: Integer;
+begin
+  if ATotalBytes <= 0 then Exit;
+  Percent := (ABytesRead * 100) div ATotalBytes;
+  if Percent > 100 then Percent := 100;
+
+  FProgBar.Position := Percent;
+  FProgElapsedLbl.Caption := Format('Scan:   %s / %s MB',
+    [FormatFloat('#,##0', ABytesRead / (1024*1024)),
+     FormatFloat('#,##0', ATotalBytes / (1024*1024))]);
+  Application.ProcessMessages;
+end;
+
+procedure TfrmDataEditor.HandleLoadProgress(ARowsRead: Int64;
+  AElapsedSeconds: Double);
+var
+  Percent: Integer;
+  RowsPerSec, ETASeconds: Double;
+begin
+  if FProgTotalRows > 0 then
+  begin
+    Percent := (ARowsRead * 100) div FProgTotalRows;
+    if Percent > 100 then Percent := 100;
+  end
+  else
+    Percent := 0;
+
+  FProgBar.Position := Percent;
+  FProgInfoLbl.Caption := Format('Rows:   %s / %s   (%d%%)',
+    [FormatFloat('#,##0', ARowsRead),
+     FormatFloat('#,##0', FProgTotalRows),
+     Percent]);
+
+  if AElapsedSeconds > 0.5 then
+  begin
+    RowsPerSec := ARowsRead / AElapsedSeconds;
+    FProgSpeedLbl.Caption := Format('Speed:  %s rows/sec',
+      [FormatFloat('#,##0', RowsPerSec)]);
+
+    if (FProgTotalRows > ARowsRead) and (RowsPerSec > 0) then
+    begin
+      ETASeconds := (FProgTotalRows - ARowsRead) / RowsPerSec;
+      FProgETALbl.Caption := Format('ETA:    %s',
+        [FormatDateTime('hh:nn:ss', ETASeconds / SecsPerDay)]);
+    end;
+  end;
+
+  FProgElapsedLbl.Caption := Format('Elapsed: %s',
+    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay)]);
+
+  Application.ProcessMessages;
+end;
+
+procedure TfrmDataEditor.ProgCancelClick(Sender: TObject);
+begin
+  if Assigned(CSVFastDataset1) then
+    TCSVFastDataset(CSVFastDataset1).CancelRequested := True;
+  FProgCancelBtn.Enabled := False;
+  FProgCancelBtn.Caption := 'Cancelling...';
+end;
 
 procedure TfrmDataEditor.rbRangeChange(Sender: TObject);
 begin
@@ -413,6 +575,8 @@ begin
   edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
   edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
 
+  edtProgressUpdatePercent.Text := IntToStr(CSVProgressUpdatePercent);
+
   // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
   SyncDelimiterCombo;
@@ -441,6 +605,7 @@ begin
   CSVBlockSizeKB         := StrToIntDef(edtBlockSize.Text, 1024);
   CSVBufferSizeKB        := StrToIntDef(edtBufferSize.Text, 2048);
   CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
+  CSVProgressUpdatePercent := StrToIntDef(edtProgressUpdatePercent.Text, 1);
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -897,9 +1062,6 @@ end;
 
 procedure TfrmDataEditor.btnOpenFileClick(Sender: TObject);
 var
-  WaitForm: TForm;
-  PnlTop, PnlInfo, PnlStatus, PnlBottom: TPanel;
-  LblTitle, LblFile, LblSize, LblRows: TLabel;
   CSVThread: TCSVLoadThread;
   StartTime, EndTime: TDateTime;
   DiffSeconds, FileSizeMB: Double;
@@ -913,8 +1075,6 @@ var
   ScanStartTime: TDateTime;
   ScanElapsed: Double;
   MsgText: string;
-  ScanForm: TForm;
-  ScanLblInfo, ScanLblRange, ScanLblHint: TLabel;
   BufferSizeOriginal: Integer;
   BufferAutoAdjusted: Boolean;
   RowWidthScanMode: string;
@@ -923,9 +1083,6 @@ var
   ScanRows: Int64;
   TotalRowsInRange: Int64;
 begin
-  // ============================================================
-  // Initialisierung
-  // ============================================================
   MaxLineWidth       := 0;
   RequiredBufferKB   := 0;
   ScanElapsed        := 0;
@@ -940,7 +1097,6 @@ begin
   if not OpenDialog1.Execute then Exit;
 
   PageControl1.ActivePage := tsGrid;
-
   FFileName := OpenDialog1.FileName;
 
   if not SelectDataSetByFileName(FFileName) then
@@ -950,18 +1106,14 @@ begin
   end;
 
   SynEditSQL.Lines.Clear;
-
   SetCSVSettingsFromForm;
 
-  // ============================================================
-  // Load Range aus GUI lesen
-  // ============================================================
+  // Range aus GUI
   if rbRange.Checked then
   begin
     FromRow := StrToInt64Def(edtFrom.Text, 1);
     ToRow   := StrToInt64Def(edtTo.Text, 1000000);
-    if ToRow < FromRow then
-      ToRow := FromRow;
+    if ToRow < FromRow then ToRow := FromRow;
     RowWidthScanMode := Format('Range %d..%d', [FromRow, ToRow]);
   end
   else
@@ -971,135 +1123,9 @@ begin
     RowWidthScanMode := 'All Rows';
   end;
 
-  // ScanRows aus GUI lesen (0 = FullScan, >0 = CustomScan)
   ScanRows := StrToInt64Def(edtRowWidthScanRows.Text, 0);
 
-  // ============================================================
-  // Row Width Scan (immer, für CSV-Dateien)
-  // ============================================================
-  if LowerCase(ExtractFileExt(FFileName)) = '.csv' then
-  begin
-    ScanForm     := nil;
-    ScanLblInfo  := nil;
-    ScanLblRange := nil;
-    ScanLblHint  := nil;
-
-    try
-      ScanForm := TForm.Create(nil);
-      ScanForm.Caption     := 'Row Width Scan';
-      ScanForm.Width       := 440;
-      ScanForm.Height      := 150;
-      ScanForm.Position    := poScreenCenter;
-      ScanForm.BorderStyle := bsDialog;
-      ScanForm.FormStyle   := fsStayOnTop;
-
-      ScanLblInfo := TLabel.Create(ScanForm);
-      ScanLblInfo.Parent     := ScanForm;
-      ScanLblInfo.Left       := 16;
-      ScanLblInfo.Top        := 20;
-      ScanLblInfo.Width      := 400;
-      ScanLblInfo.Caption    := 'Determining maximum row width...';
-      ScanLblInfo.Font.Size  := 11;
-      ScanLblInfo.Font.Style := [fsBold];
-
-      ScanLblRange := TLabel.Create(ScanForm);
-      ScanLblRange.Parent  := ScanForm;
-      ScanLblRange.Left    := 16;
-      ScanLblRange.Top     := 55;
-      ScanLblRange.Width   := 400;
-      if rbRange.Checked then
-        ScanLblRange.Caption := Format('Range:      %s .. %s',
-          [FormatFloat('#,##0', FromRow), FormatFloat('#,##0', ToRow)])
-      else
-        ScanLblRange.Caption := 'Range:      All rows';
-
-      ScanLblHint := TLabel.Create(ScanForm);
-      ScanLblHint.Parent     := ScanForm;
-      ScanLblHint.Left       := 16;
-      ScanLblHint.Top        := 85;
-      ScanLblHint.Width      := 400;
-      if ScanRows > 0 then
-        ScanLblHint.Caption := Format('Scan mode:  CustomScan — first %s rows',
-          [FormatFloat('#,##0', ScanRows)])
-      else
-        ScanLblHint.Caption := 'Scan mode:  FullScan — all rows in range';
-      ScanLblHint.Font.Color := clGray;
-
-
-      ScanForm.Show;
-      ScanForm.BringToFront;
-      Application.ProcessMessages;
-      Sleep(200);
-      Application.ProcessMessages;
-
-      ScanStartTime := Now;
-      MaxLineWidth := EstimateCSVMaxLineWidth(
-        FFileName,
-        FromRow,
-        ToRow,
-        ScanRows,
-        CSVQuoteChar,
-        TotalRowsInRange);
-      ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
-    finally
-      if Assigned(ScanForm) then
-        FreeAndNil(ScanForm);
-    end;
-
-    // ------------------------------------------------------------
-    // BufferSize anpassen, falls nötig
-    // ------------------------------------------------------------
-    if MaxLineWidth > 0 then
-    begin
-      RequiredBufferKB := (MaxLineWidth * 2) div 1024 + 16;
-
-      if RequiredBufferKB > CSVBufferSizeKB then
-      begin
-        MsgText := Format(
-          'Row Width Scan:' + sLineBreak +
-          '  Scan time:                 %.2f s' + sLineBreak +
-          '  Max. row width:            %s Bytes (%.2f KB)' + sLineBreak +
-          '  Rows scanned:              %s' + sLineBreak +
-          sLineBreak +
-          'Current BufferSize:         %d KB' + sLineBreak +
-          'Required BufferSize:        %d KB' + sLineBreak + sLineBreak +
-          '→ BufferSize will be increased to %d KB.',
-          [ScanElapsed,
-           FormatFloat('#,##0', MaxLineWidth),
-           MaxLineWidth / 1024,
-           FormatFloat('#,##0', TotalRowsInRange),
-           CSVBufferSizeKB,
-           RequiredBufferKB,
-           RequiredBufferKB]);
-
-        MessageDlg(MsgText, mtInformation, [mbOK], 0);
-
-        BufferSizeOriginal := CSVBufferSizeKB;
-        BufferAutoAdjusted := True;
-
-        CSVBufferSizeKB := RequiredBufferKB;
-        edtBufferSize.Text := IntToStr(RequiredBufferKB);
-
-        SetCSVSettingsFromForm;
-      end;
-    end;
-  end;
-
-  // ============================================================
-  // Range ans Dataset übergeben
-  // ============================================================
-  TCSVFastDataset(CSVFastDataset1).SkipFirstRows := FromRow - 1;
-  if ToRow > 0 then
-    TCSVFastDataset(CSVFastDataset1).StopAfterRow := ToRow - FromRow + 1
-  else
-    TCSVFastDataset(CSVFastDataset1).StopAfterRow := 0;
-
-  DBNavigator1.DataSource := nil;
-  RxDBGrid1.DataSource := nil;
-
-  // ============================================================
-  // Dateigröße ermitteln
-  // ============================================================
+  // Dateigröße
   FileSize := 0;
   if FileExists(FFileName) then
   begin
@@ -1116,100 +1142,97 @@ begin
   FLoadStartTime := StartTime;
 
   // ============================================================
-  // Warteformular
+  // Progress-Fenster aufbauen
   // ============================================================
-  WaitForm := TForm.Create(nil);
+  BuildProgressForm;
+
+  // Labels mit Datei-Info
+  FProgInfoLbl.Caption := Format('File: %s   (%.2f MB)',
+    [ExtractFileName(FFileName), FileSizeMB]);
+
+  FProgressForm.Show;
+  FProgressForm.BringToFront;
+  Application.ProcessMessages;
+  Sleep(200);
+  Application.ProcessMessages;
+
   try
-    WaitForm.Caption     := 'Loading...';
-    WaitForm.Width       := 520;
-    WaitForm.Height      := 260;
-    WaitForm.Position    := poScreenCenter;
-    WaitForm.BorderStyle := bsDialog;
-    WaitForm.FormStyle   := fsStayOnTop;
+    // ============================================================
+    // Phase 1: Scan
+    // ============================================================
+    if LowerCase(ExtractFileExt(FFileName)) = '.csv' then
+    begin
+      FProgPhaseLbl.Caption := 'Analyzing row width...';
+      FProgBar.Position := 0;
+      FProgInfoLbl.Caption := Format('File: %s   (%.2f MB)',
+        [ExtractFileName(FFileName), FileSizeMB]);
+      FProgSpeedLbl.Caption := '';
+      FProgElapsedLbl.Caption := '';
+      FProgETALbl.Caption := '';
+      Application.ProcessMessages;
 
-    // === Titel ===
-    PnlTop := TPanel.Create(WaitForm);
-    PnlTop.Parent     := WaitForm;
-    PnlTop.Align      := alTop;
-    PnlTop.Height     := 45;
-    PnlTop.BevelOuter := bvNone;
+      ScanStartTime := Now;
+      MaxLineWidth := EstimateCSVMaxLineWidth(
+        FFileName,
+        FromRow,
+        ToRow,
+        ScanRows,
+        CSVQuoteChar,
+        TotalRowsInRange,
+        @HandleScanProgress);
+      ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
 
-    LblTitle := TLabel.Create(WaitForm);
-    LblTitle.Parent     := PnlTop;
-    LblTitle.Left       := 16;
-    LblTitle.Top        := 12;
-    LblTitle.Caption    := 'Loading file, please wait...';
-    LblTitle.Font.Size  := 11;
-    LblTitle.Font.Style := [fsBold];
-
-    // === Info-Panel ===
-    PnlInfo := TPanel.Create(WaitForm);
-    PnlInfo.Parent     := WaitForm;
-    PnlInfo.Align      := alTop;
-    PnlInfo.Height     := 85;
-    PnlInfo.BevelOuter := bvNone;
-
-    LblFile := TLabel.Create(WaitForm);
-    LblFile.Parent  := PnlInfo;
-    LblFile.Left    := 16;
-    LblFile.Top     := 8;
-    LblFile.Caption := 'File:     ' + ExtractFileName(FFileName);
-    LblFile.Width   := 480;
-
-    LblSize := TLabel.Create(WaitForm);
-    LblSize.Parent  := PnlInfo;
-    LblSize.Left    := 16;
-    LblSize.Top     := 30;
-    LblSize.Caption := Format('Size:     %s bytes (%.2f MB)',
-      [FormatFloat('#,##0', FileSize), FileSizeMB]);
-    LblSize.Width   := 480;
-
-    LblRows := TLabel.Create(WaitForm);
-    LblRows.Parent  := PnlInfo;
-    LblRows.Left    := 16;
-    LblRows.Top     := 52;
-    LblRows.Caption := 'Rows:     reading...';
-    LblRows.Width   := 480;
-
-    // === Status ===
-    PnlStatus := TPanel.Create(WaitForm);
-    PnlStatus.Parent     := WaitForm;
-    PnlStatus.Align      := alTop;
-    PnlStatus.Height     := 45;
-    PnlStatus.BevelOuter := bvNone;
-
-    FLoadStatusLabel := TLabel.Create(WaitForm);
-    FLoadStatusLabel.Parent     := PnlStatus;
-    FLoadStatusLabel.Left       := 16;
-    FLoadStatusLabel.Top        := 12;
-    FLoadStatusLabel.Caption    := 'Reading file, please wait...';
-    FLoadStatusLabel.Font.Size  := 10;
-    FLoadStatusLabel.Font.Style := [fsBold];
-    FLoadStatusLabel.Width      := 480;
-
-    // === Elapsed ===
-    PnlBottom := TPanel.Create(WaitForm);
-    PnlBottom.Parent     := WaitForm;
-    PnlBottom.Align      := alClient;
-    PnlBottom.BevelOuter := bvNone;
-
-    FLoadElapsedLabel := TLabel.Create(WaitForm);
-    FLoadElapsedLabel.Parent  := PnlBottom;
-    FLoadElapsedLabel.Left    := 16;
-    FLoadElapsedLabel.Top     := 12;
-    FLoadElapsedLabel.Caption := 'This may take a while for large files.';
-    FLoadElapsedLabel.Width   := 480;
-
-    // === SOFORT SICHTBAR ===
-    WaitForm.Show;
-    WaitForm.BringToFront;
-    Application.ProcessMessages;
-    Sleep(100);
-    Application.ProcessMessages;
+      // BufferSize anpassen
+      if MaxLineWidth > 0 then
+      begin
+        RequiredBufferKB := (MaxLineWidth * 2) div 1024 + 16;
+        if RequiredBufferKB > CSVBufferSizeKB then
+        begin
+          BufferSizeOriginal := CSVBufferSizeKB;
+          BufferAutoAdjusted := True;
+          CSVBufferSizeKB := RequiredBufferKB;
+          edtBufferSize.Text := IntToStr(RequiredBufferKB);
+          SetCSVSettingsFromForm;
+        end;
+      end;
+    end;
 
     // ============================================================
+    // Phase 2: Load
+    // ============================================================
+    FProgPhaseLbl.Caption := 'Loading rows...';
+    FProgBar.Position := 0;
+
+    // Progress-Total bestimmen
+    if ScanRows > 0 then
+      // CustomScan: theoretischer Range
+      FProgTotalRows := ToRow - FromRow + 1
+    else if TotalRowsInRange > 0 then
+      // FullScan: exakte Zahl
+      FProgTotalRows := TotalRowsInRange
+    else
+      FProgTotalRows := 0;
+
+    // Am Dataset setzen
+    TCSVFastDataset(CSVFastDataset1).OnProgress := @HandleLoadProgress;
+    TCSVFastDataset(CSVFastDataset1).TotalRowsForProgress := FProgTotalRows;
+    TCSVFastDataset(CSVFastDataset1).ProgressUpdatePercent :=
+      StrToIntDef(edtProgressUpdatePercent.Text, 1);
+    TCSVFastDataset(CSVFastDataset1).CancelRequested := False;
+
+    // Range ans Dataset
+    TCSVFastDataset(CSVFastDataset1).SkipFirstRows := FromRow - 1;
+    if ToRow > 0 then
+      TCSVFastDataset(CSVFastDataset1).StopAfterRow := ToRow - FromRow + 1
+    else
+      TCSVFastDataset(CSVFastDataset1).StopAfterRow := 0;
+
+    Application.ProcessMessages;
+
+    DBNavigator1.DataSource := nil;
+    RxDBGrid1.DataSource := nil;
+
     // Thread starten
-    // ============================================================
     CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
 
     while not CSVThread.Finished do
@@ -1218,42 +1241,29 @@ begin
       Sleep(20);
     end;
 
-    // ============================================================
-    // Fehler prüfen
-    // ============================================================
     LoadErr := CSVThread.LoadError;
     CSVThread.Free;
     CSVThread := nil;
 
+    TCSVFastDataset(CSVFastDataset1).OnProgress := nil;
+
+    // ProgressBar auf 100%
+    FProgBar.Position := 100;
+    Application.ProcessMessages;
+
     if LoadErr <> '' then
     begin
-      LblRows.Caption           := 'Rows:     — load failed —';
-      FLoadStatusLabel.Caption  := 'Error.';
-      FLoadElapsedLabel.Caption := 'Elapsed: ' +
-        FormatDateTime('hh:nn:ss', Now - StartTime);
-      Application.ProcessMessages;
-
-      MessageDlg(
-        'Could not load file:' + sLineBreak + sLineBreak +
-        'File: ' + ExtractFileName(FFileName) + sLineBreak +
-        'Ext:  ' + LowerCase(ExtractFileExt(FFileName)) + sLineBreak +
-        sLineBreak +
-        'Error:' + sLineBreak + LoadErr,
-        mtError, [mbOK], 0);
-
-      Caption := 'Turbobird - Data Editor';
-      btnCreateSQL.Enabled := False;
-      btnExportAs.Enabled  := False;
-
+      FProgPhaseLbl.Caption := 'Error';
+      FProgInfoLbl.Caption := 'Load failed: ' + LoadErr;
+      Sleep(1500);
       Exit;
     end;
 
-    // === Grid + Navigator sauber neu binden ===
-    RxDBGrid1.DataSource    := nil;
+    // Grid reaktivieren
+    RxDBGrid1.DataSource := nil;
     DBNavigator1.DataSource := nil;
     RxDBGrid1.Columns.Clear;
-
-    RxDBGrid1.DataSource    := DataSource1;
+    RxDBGrid1.DataSource := DataSource1;
     DBNavigator1.DataSource := DataSource1;
 
     if DataSource1.DataSet.Active and
@@ -1265,17 +1275,14 @@ begin
     EndTime  := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
-    // Status aktualisieren
-    LblRows.Caption           := 'Rows:     ' + FormatFloat('#,##0', RowCount);
-    FLoadStatusLabel.Caption  := 'Finished.';
-    FLoadElapsedLabel.Caption := 'Elapsed: ' +
-      FormatDateTime('hh:nn:ss', EndTime - StartTime);
+    // Kurz Erfolg anzeigen
+    FProgPhaseLbl.Caption := Format('Finished: %s rows',
+      [FormatFloat('#,##0', RowCount)]);
     Application.ProcessMessages;
-
-    Sleep(400);
+    Sleep(500);
 
   finally
-    WaitForm.Free;
+    FreeAndNil(FProgressForm);
   end;
 
   // ============================================================
