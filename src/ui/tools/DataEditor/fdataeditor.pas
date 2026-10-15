@@ -184,6 +184,8 @@ type
 
     FLastFreeRAMMB: Int64;
 
+    FCancelRequested: boolean;
+
     procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
     procedure LoadFile(const FileName: string);
@@ -220,7 +222,7 @@ begin
   FProgressForm.Height      := 440;
   FProgressForm.Position    := poScreenCenter;
   FProgressForm.BorderStyle := bsDialog;
-  FProgressForm.FormStyle   := fsStayOnTop;
+  FProgressForm.FormStyle   := fsNormal;
 
   // ============================================================
   // === Info-Panel (oben) ===
@@ -463,7 +465,7 @@ begin
         mtWarning, [mbYes, mbNo], 0) = mrYes then
       begin
         if Assigned(CSVFastDataset1) then
-          TCSVFastDataset(CSVFastDataset1).CancelRequested := True;
+          TCSVFastDataset(CSVFastDataset1).CancelFlag^ := True;
         FProgCancelBtn.Enabled := False;
         FProgCancelBtn.Caption := 'Cancelling...';
       end;
@@ -475,8 +477,7 @@ end;
 
 procedure TfrmDataEditor.ProgCancelClick(Sender: TObject);
 begin
-  if Assigned(CSVFastDataset1) then
-    TCSVFastDataset(CSVFastDataset1).CancelRequested := True;
+  FCancelRequested := True;   // ← reicht, weil der Reader den Pointer hat
   FProgCancelBtn.Enabled := False;
   FProgCancelBtn.Caption := 'Cancelling...';
 end;
@@ -1201,6 +1202,7 @@ var
   StartTime, EndTime: TDateTime;
   DiffSeconds, FileSizeMB: Double;
   FileSize: Int64;
+  FreeRAMBytes: Int64;
   RowCount: Integer;
   Stats: TTransferStatistic;
   ReportForm: TfrmReport;
@@ -1217,8 +1219,11 @@ var
   ToRow: Int64;
   ScanRows: Int64;
   TotalRowsInRange: Int64;
-  FreeRAMBytes: Int64;
+  Cancelled: Boolean;
 begin
+  // ============================================================
+  // Initialisierung
+  // ============================================================
   MaxLineWidth       := 0;
   RequiredBufferKB   := 0;
   ScanElapsed        := 0;
@@ -1229,6 +1234,7 @@ begin
   FromRow            := 1;
   ToRow              := 0;
   ScanRows           := 0;
+  Cancelled          := False;
 
   if not OpenDialog1.Execute then Exit;
 
@@ -1244,7 +1250,9 @@ begin
   SynEditSQL.Lines.Clear;
   SetCSVSettingsFromForm;
 
-  // Range aus GUI
+  // ============================================================
+  // Range aus GUI lesen
+  // ============================================================
   if rbRange.Checked then
   begin
     FromRow := StrToInt64Def(edtFrom.Text, 1);
@@ -1261,7 +1269,9 @@ begin
 
   ScanRows := StrToInt64Def(edtRowWidthScanRows.Text, 0);
 
-  // Dateigröße
+  // ============================================================
+  // Dateigröße ermitteln
+  // ============================================================
   FileSize := 0;
   if FileExists(FFileName) then
   begin
@@ -1274,8 +1284,28 @@ begin
   end;
   FileSizeMB := FileSize / (1024 * 1024);
 
-  StartTime := Now;
-  FLoadStartTime := StartTime;
+  // ============================================================
+  // Vorab-Warnung bei knappem RAM (VOR dem Scan)
+  // ============================================================
+  if FileSize > 0 then
+  begin
+    FreeRAMBytes := GetRAMFreeMB * 1024 * 1024;
+    if FileSize > (FreeRAMBytes * 8 div 10) then   // > 80% von Free RAM
+    begin
+      MsgText := Format(
+        'Warning: Large file!' + sLineBreak + sLineBreak +
+        'File size:      %s' + sLineBreak +
+        'Free RAM:       %s' + sLineBreak +
+        sLineBreak +
+        'The file may not fit in memory. Loading could cause' + sLineBreak +
+        'system slowdown or memory errors.' + sLineBreak + sLineBreak +
+        'Continue anyway?',
+        [FormatBytesSmart(FileSize), FormatBytesSmart(FreeRAMBytes)]);
+
+      if MessageDlg(MsgText, mtWarning, [mbYes, mbNo], 0) = mrNo then
+        Exit;
+    end;
+  end;
 
   // ============================================================
   // Progress-Fenster aufbauen
@@ -1287,25 +1317,20 @@ begin
     [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
 
   // RAM-Init
-  FProgTotalRAMMB     := GetRAMTotalMB;
-  FLastFreeRAMMB      := GetRAMFreeMB;
-  FRAMWarningShown    := False;
+  FProgTotalRAMMB      := GetRAMTotalMB;
+  FLastFreeRAMMB       := GetRAMFreeMB;
+  FRAMWarningShown     := False;
   FLoadProgressCounter := 0;
-
-  // RAM-Init
-  FProgTotalRAMMB := GetRAMTotalMB;
-  FRAMWarningShown := False;
-  FLoadProgressCounter := 0;
-
-  // Labels mit Datei-Info
-  FProgInfoLbl.Caption := Format('File: %s   (%s)',
-    [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
+  FCancelRequested     := False;
 
   FProgressForm.Show;
   FProgressForm.BringToFront;
   Application.ProcessMessages;
   Sleep(200);
   Application.ProcessMessages;
+
+  StartTime      := Now;
+  FLoadStartTime := StartTime;
 
   try
     // ============================================================
@@ -1316,22 +1341,34 @@ begin
       FProgPhaseLbl.Caption := 'Analyzing row width...';
       FProgBar.Position := 0;
       FProgInfoLbl.Caption := Format('File: %s   (%s)',
-         [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
+        [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
       FProgSpeedLbl.Caption := '';
       FProgElapsedLbl.Caption := '';
       FProgETALbl.Caption := '';
       Application.ProcessMessages;
 
-      ScanStartTime := Now;
-      MaxLineWidth := EstimateCSVMaxLineWidth(
-        FFileName,
-        FromRow,
-        ToRow,
-        ScanRows,
-        CSVQuoteChar,
-        TotalRowsInRange,
-        @HandleScanProgress);
-      ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
+      try
+        ScanStartTime := Now;
+        MaxLineWidth := EstimateCSVMaxLineWidth(
+          FFileName,
+          FromRow,
+          ToRow,
+          ScanRows,
+          CSVQuoteChar,
+          TotalRowsInRange,
+          @HandleScanProgress,
+          @FCancelRequested);
+        ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
+      except
+        on E: EAbort do
+        begin
+          Cancelled := True;
+          FProgPhaseLbl.Caption := 'Cancelled by user (scan)';
+          Application.ProcessMessages;
+          Sleep(1000);
+          Exit;
+        end;
+      end;
 
       // BufferSize anpassen
       if MaxLineWidth > 0 then
@@ -1349,33 +1386,6 @@ begin
     end;
 
     // ============================================================
-    // Vorab-Warnung bei knappem RAM
-    // ============================================================
-    if FileSize > 0 then
-    begin
-      FreeRAMBytes := GetRAMFreeMB * 1024 * 1024;
-      if FileSize > (FreeRAMBytes * 8 div 10) then   // > 80%
-      begin
-        MsgText := Format(
-          'Warning: Large file!' + sLineBreak + sLineBreak +
-          'File size:      %s' + sLineBreak +
-          'Free RAM:       %s' + sLineBreak +
-          sLineBreak +
-          'The file may not fit in memory. Loading could cause' + sLineBreak +
-          'system slowdown or memory errors.' + sLineBreak + sLineBreak +
-          'Continue anyway?',
-          [FormatBytesSmart(FileSize), FormatBytesSmart(FreeRAMBytes)]);
-
-        if MessageDlg(MsgText, mtWarning, [mbYes, mbNo], 0) = mrNo then
-        begin
-          if Assigned(FProgressForm) then
-            FreeAndNil(FProgressForm);
-          Exit;
-        end;
-      end;
-    end;
-
-    // ============================================================
     // Phase 2: Load
     // ============================================================
     FProgPhaseLbl.Caption := 'Loading rows...';
@@ -1383,10 +1393,8 @@ begin
 
     // Progress-Total bestimmen
     if ScanRows > 0 then
-      // CustomScan: theoretischer Range
       FProgTotalRows := ToRow - FromRow + 1
     else if TotalRowsInRange > 0 then
-      // FullScan: exakte Zahl
       FProgTotalRows := TotalRowsInRange
     else
       FProgTotalRows := 0;
@@ -1396,7 +1404,7 @@ begin
     TCSVFastDataset(CSVFastDataset1).TotalRowsForProgress := FProgTotalRows;
     TCSVFastDataset(CSVFastDataset1).ProgressUpdatePercent :=
       StrToIntDef(edtProgressUpdatePercent.Text, 1);
-    TCSVFastDataset(CSVFastDataset1).CancelRequested := False;
+    //TCSVFastDataset(CSVFastDataset1).CancelFlag^ := False;
 
     // Range ans Dataset
     TCSVFastDataset(CSVFastDataset1).SkipFirstRows := FromRow - 1;
@@ -1410,22 +1418,72 @@ begin
     DBNavigator1.DataSource := nil;
     RxDBGrid1.DataSource := nil;
 
+    FCancelRequested := False;
+    TCSVFastDataset(CSVFastDataset1).CancelFlag := @FCancelRequested;
     // Thread starten
-    CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
+    try
+      CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
 
-    while not CSVThread.Finished do
-    begin
-      Application.ProcessMessages;
-      Sleep(20);
+      while not CSVThread.Finished do
+      begin
+        Application.ProcessMessages;
+        Sleep(20);
+      end;
+
+      LoadErr := CSVThread.LoadError;
+      CSVThread.Free;
+      CSVThread := nil;
+    except
+      on E: EAbort do
+      begin
+        Cancelled := True;
+        LoadErr := 'Cancelled by user';
+      end;
     end;
-
-    LoadErr := CSVThread.LoadError;
-    CSVThread.Free;
-    CSVThread := nil;
 
     TCSVFastDataset(CSVFastDataset1).OnProgress := nil;
 
-    // ProgressBar auf 100%
+    // ============================================================
+    // Cancel-Behandlung
+    // ============================================================
+    if Cancelled or (LoadErr = 'Cancelled by user') then
+    begin
+      FProgPhaseLbl.Caption := 'Cancelled by user';
+      Application.ProcessMessages;
+
+      // ============================================================
+      // Dataset sauber zurücksetzen — kein Grid-Zugriff auf halb-geladenes Dataset
+      // ============================================================
+      try
+        RxDBGrid1.DataSource := nil;
+        DBNavigator1.DataSource := nil;
+        DataSource1.DataSet := nil;
+
+        if CSVFastDataset1.Active then
+          CSVFastDataset1.Close;
+        CSVFastDataset1.Fields.Clear;
+        CSVFastDataset1.FieldDefs.Clear;
+      except
+        // ignorieren — falls der Zustand komplett kaputt ist
+      end;
+
+      try
+        RxDBGrid1.Columns.Clear;
+      except
+      end;
+
+      // Status
+      Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
+      btnCreateSQL.Enabled := False;
+      btnExportAs.Enabled  := False;
+
+      Sleep(500);
+      Exit;
+    end;
+
+    // ============================================================
+    // Fehlerprüfung
+    // ============================================================
     FProgBar.Position := 100;
     Application.ProcessMessages;
 
@@ -1433,15 +1491,31 @@ begin
     begin
       FProgPhaseLbl.Caption := 'Error';
       FProgInfoLbl.Caption := 'Load failed: ' + LoadErr;
+      Application.ProcessMessages;
       Sleep(1500);
+
+      MessageDlg(
+        'Could not load file:' + sLineBreak + sLineBreak +
+        'File: ' + ExtractFileName(FFileName) + sLineBreak +
+        'Ext:  ' + LowerCase(ExtractFileExt(FFileName)) + sLineBreak +
+        sLineBreak +
+        'Error:' + sLineBreak + LoadErr,
+        mtError, [mbOK], 0);
+
+      Caption := 'Turbobird - Data Editor';
+      btnCreateSQL.Enabled := False;
+      btnExportAs.Enabled  := False;
       Exit;
     end;
 
+    // ============================================================
     // Grid reaktivieren
-    RxDBGrid1.DataSource := nil;
+    // ============================================================
+    RxDBGrid1.DataSource    := nil;
     DBNavigator1.DataSource := nil;
     RxDBGrid1.Columns.Clear;
-    RxDBGrid1.DataSource := DataSource1;
+
+    RxDBGrid1.DataSource    := DataSource1;
     DBNavigator1.DataSource := DataSource1;
 
     if DataSource1.DataSet.Active and
@@ -1453,14 +1527,15 @@ begin
     EndTime  := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
-    // Kurz Erfolg anzeigen
+    // Erfolg kurz anzeigen
     FProgPhaseLbl.Caption := Format('Finished: %s rows',
       [FormatFloat('#,##0', RowCount)]);
     Application.ProcessMessages;
     Sleep(500);
 
   finally
-    FreeAndNil(FProgressForm);
+    if Assigned(FProgressForm) then
+      FreeAndNil(FProgressForm);
   end;
 
   // ============================================================

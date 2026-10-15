@@ -599,8 +599,8 @@ function EstimateCSVMaxLineWidth(
   AScanRows: Int64;
   AQuoteChar: Char;
   out ATotalRowsInRange: Int64;
-  AOnProgress: TCSVScanProgressEvent = nil): Int64;
-
+  AOnProgress: TCSVScanProgressEvent = nil;
+  ACancelFlag: PBoolean = nil): Int64;
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
 function  GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
@@ -1287,7 +1287,8 @@ end;
     AScanRows: Int64;
     AQuoteChar: Char;
     out ATotalRowsInRange: Int64;
-    AOnProgress: TCSVScanProgressEvent): Int64;
+    AOnProgress: TCSVScanProgressEvent = nil;
+    ACancelFlag: PBoolean = nil): Int64;
   const
     BUF_SIZE = 4 * 1024 * 1024;
   var
@@ -1331,6 +1332,10 @@ end;
         // Progress-Callback
         if Assigned(AOnProgress) then
           AOnProgress(TotalBytesRead, FS.Size);
+
+        // Cancel-Check
+        if Assigned(ACancelFlag) and ACancelFlag^ then
+          raise EAbort.Create('Cancelled by user');
 
         P := Pointer(Buf);
         BufEnd := P + BytesRead;
