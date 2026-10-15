@@ -75,6 +75,23 @@ uses
   BaseUnix;
 {$ENDIF}
 
+function FormatMB(AMegabytes: Int64): string;
+var
+  FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
+  if AMegabytes >= 1024 * 1024 then       // ≥ 1 TB
+    Result := FormatFloat('#,##0.00', AMegabytes / (1024.0 * 1024), FS) + ' TB'
+  else if AMegabytes >= 1024 then         // ≥ 1 GB
+    Result := FormatFloat('#,##0.00', AMegabytes / 1024.0, FS) + ' GB'
+  else                                     // MB
+    Result := IntToStr(AMegabytes) + ' MB';
+end;
+
+
 // ---------------------------------------------------------------------------
 // CPU-Modell
 // ---------------------------------------------------------------------------
@@ -497,27 +514,21 @@ end;
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
 var
   SL: TStringList;
-  FS: TFormatSettings;
 begin
-  // Englischer Format-Stil — unabhängig vom OS-Locale
-  FS := DefaultFormatSettings;
-  FS.DecimalSeparator  := '.';
-  FS.ThousandSeparator := ',';
-
   SL := TStringList.Create;
   try
     SL.Add('Environment:');
     SL.Add('  OS:        ' + AInfo.OSName);
     SL.Add('  CPU:       ' + AInfo.CPUModel);
     SL.Add('  Cores:     ' + IntToStr(AInfo.CPUCores));
-    SL.Add('  RAM:       ' + FormatFloat('#,##0', AInfo.RAMTotalMB, FS) + ' MB');
-    SL.Add('  RAM free:  ' + FormatFloat('#,##0', AInfo.RAMFreeMB, FS) + ' MB');
+    SL.Add('  RAM:       ' + FormatMB(AInfo.RAMTotalMB));
+    SL.Add('  RAM free:  ' + FormatMB(AInfo.RAMFreeMB));
 
     if AInfo.DiskPath <> '' then
     begin
       SL.Add('  Disk (' + ExtractFileName(AInfo.DiskPath) + '):');
-      SL.Add('    Free:    ' + FormatFloat('#,##0', AInfo.DiskFreeMB, FS) + ' MB');
-      SL.Add('    Total:   ' + FormatFloat('#,##0', AInfo.DiskTotalMB, FS) + ' MB');
+      SL.Add('    Free:    ' + FormatMB(AInfo.DiskFreeMB));
+      SL.Add('    Total:   ' + FormatMB(AInfo.DiskTotalMB));
       if AInfo.DiskType <> '' then
         SL.Add('    Type:    ' + AInfo.DiskType);
     end;

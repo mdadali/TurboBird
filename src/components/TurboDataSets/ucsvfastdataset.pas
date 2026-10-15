@@ -1,20 +1,6 @@
 {
   uCSVFastDataset.pas
 
-  Hochperformanter CSV-Dataset für TurboBird.
-  Erbt von TCSVDataset und ersetzt den langsamen zeichenweisen
-  Parser durch einen PChar-Block-Scanner.
-
-  Kompatibel zu TCSVDataset: alle CSVOptions-Properties bleiben,
-  LoadFromCSVFile / SaveToCSVFile funktionieren wie gewohnt.
-
-  Autor: TurboBird
-  Lizenz: wie TurboBird
-}
-
-{
-  uCSVFastDataset.pas
-
   High-performance CSV dataset for TurboBird.
   Inherits from TCSVDataset and replaces the slow
   character-by-character parser with a PChar block scanner.
@@ -334,327 +320,7 @@ TEST DATA
   Hardware: Intel i5-4210H, SSD, 16 GB RAM, Linux
 
   ============================================================================ }
-{
-  uCSVFastDataset.pas
 
-  Hochperformanter CSV-Dataset für TurboBird.
-  Erbt von TCSVDataset und ersetzt den langsamen zeichenweisen
-  Parser durch einen PChar-Block-Scanner.
-
-  Kompatibel zu TCSVDataset: alle CSVOptions-Properties bleiben,
-  LoadFromCSVFile / SaveToCSVFile funktionieren wie gewohnt.
-
-  Autor: TurboBird / Partner-Session
-  Lizenz: wie TurboBird
-}
-
-{ ============================================================================
-  ARCHITEKTUR UND FUNKTIONSWEISE
-  ============================================================================
-
-  ZWECK
-  -----
-  TCSVFastDataset ist ein Drop-in-Ersatz für TCSVDataset. Es bietet
-  die gleiche öffentliche API (CSVOptions, LoadFromCSVFile,
-  SaveToCSVFile, FieldDefs, …), verwendet aber intern einen
-  völlig anderen Parser-Mechanismus, der CSV-Dateien um ein
-  Vielfaches schneller einliest als der Original-Parser in der
-  csvdataset-Unit.
-
-  Gemessene Leistung (i5-4210H, SSD, 16 GB RAM, Linux):
-    - 2 GB CSV, 26 Felder, 5.081.559 Zeilen in 36 Sekunden
-    - ~139.000 Zeilen pro Sekunde
-    - ~57 MB/s Durchsatz (Datei)
-  Zum Vergleich: pandas.read_csv erreicht auf derselben Maschine
-  typisch 30-50k rows/sec — Faktor 3-4 langsamer.
-
-
-  GRUNDPRINZIP: BLOCK-SCANNING STATT ZEICHENWEISE VERARBEITUNG
-  ------------------------------------------------------------
-  Der klassische TCSVDataset-Parser arbeitet zeichenweise:
-
-      for i := 1 to Length(Line) do
-        ...
-        S := S + C;            // String-Verkettung pro Zeichen
-        ...
-
-  Jede String-Verkettung alloziert einen neuen Speicherbereich und
-  kopiert den bisherigen Inhalt. Bei 26 Feldern mit langen Werten
-  und Millionen von Zeilen entsteht so ein O(n²)-Effekt allein
-  durch die Reallocations.
-
-  Unser Ansatz vermeidet das vollständig:
-
-  1. Die Datei wird in einem großen Block (Standard: 1 GB, per
-     BlockSize konfigurierbar) in einen Puffer gelesen.
-  2. Ein PChar-Scanner durchläuft den Puffer zeichenweise, ABER
-     ohne Speicher zu allozieren. Er merkt sich lediglich, wo
-     jede Zelle beginnt und endet.
-  3. Erst beim Befüllen des Field-Buffers wird der Zellinhalt
-     per Move() einmal in einen String kopiert.
-
-  Ergebnis: eine einzige Kopie pro Zelle statt N Kopien pro
-  Zeichen. Die Speicherbandbreite wird optimal ausgenutzt.
-
-
-  KOMPONENTENÜBERSICHT
-  --------------------
-
-  TCSVFastDataset (public)
-    Nach außen sichtbarer Ersatz für TCSVDataset. Kümmert sich um
-    Datei-Öffnen, Stream-Verwaltung und API-Kompatibilität.
-    Alle Properties von TCSVDataset bleiben unverändert.
-    Zusätzlich:
-      - BlockSize: Größe des Lese-Puffers in Bytes (Standard 1 GB).
-
-  TCSVFastPacketReader (intern)
-    Der eigentliche Parser. Erbt von TDataPacketReader (die
-    Basis-Klasse, die TCSVDataset intern für das Einlesen von
-    Datenpaketen erwartet). Überschreibt die PacketReader-API
-    (LoadFieldDefs, GotoNextRecord, RestoreRecord, …) mit
-    unserer schnellen PChar-Implementierung.
-
-  TCSVFastCellRef (intern)
-    Repräsentiert eine Zelle im Puffer: Zeiger auf Start + Länge.
-    Kein Kopieren von Daten. Die tatsächliche Umwandlung in einen
-    String passiert nur in CellToStr().
-
-
-  LESE-ABLAUF IM DETAIL
-  ---------------------
-
-  Schritt 1 — Buffer-Init (Constructor)
-    - FBufferSize := BlockSize (Standard: DEFAULT_BLOCK_SIZE)
-    - FBuffer := SetLength(BlockSize)       // 1 GB Speicher
-    - FCells := SetLength(MIN_CELL_CAPACITY) // 64 Zell-Refs
-
-  Schritt 2 — LoadFieldDefs
-    - RefillBuffer      // Puffer zum ersten Mal füllen
-    - SkipBOM           // UTF-8 BOM (EF BB BF) überspringen
-    - ScanRow           // Header-Zeile scannen → FCells
-    - FieldDefs aus Header-Namen aufbauen (falls
-      FirstLineAsFieldNames = True)
-    - Header-Zeile wird NICHT als Datenzeile geliefert
-
-  Schritt 3 — GotoNextRecord (Schleife vom TBufDataset)
-    - Prüfen ob Puffer erschöpft → RefillBuffer
-    - ScanRow           // nächste Datenzeile scannen
-    - Daten in FCells[] ablegen, kein Kopieren
-    - RestoreRecord füllt die Field-Buffer aus FCells
-
-  Schritt 4 — RestoreRecord
-    Für jede Zelle:
-    - Wenn Feldtyp = String → CellToStr + F.AsString := S
-    - Wenn Feldtyp = Integer → PCharToInt64Def (inline, schnell)
-    - Wenn Feldtyp = Float   → PCharToDoubleDef (inline)
-    - Wenn Feldtyp = Boolean → PCharEqualsIgnoreCase auf 'true' etc.
-    - Leere Zelle → F.Clear
-
-
-  DER PCHAR-SCANNER (ScanRow)
-  ---------------------------
-  Kernstück der Performance. Arbeitet ohne jede String-Allokation.
-
-  Pseudocode:
-
-    P := FBufPos                      // Zeiger in den Puffer
-    CellStart := P
-    InQ := FInQuote                   // Fortsetzung aus vorheriger Zeile
-    QChar := FQuoteChar
-    Delim := FDelimiter
-
-    while P < FBufEnd do
-      C := P^                         // ein Zeichen aus dem Puffer
-
-      if InQ then                     // im Quote-Modus?
-        if C = QChar then             // Quote-Ende?
-          if (P+1)^ = QChar then      // " -> ""
-            P += 2                    // escaped quote, weiter
-          else
-            InQ := False; P += 1      // Quote-Modus beendet
-        else
-          P += 1                      // normales Zeichen im Quote
-      else                            // außerhalb von Quotes
-        if C = QChar then
-          InQ := True; P += 1         // Quote-Modus beginnt
-        else if C = Delim then
-          AppendCell(CellStart, P-CellStart)   // Zelle abschließen
-          CellStart := P + 1
-          P += 1
-        else if C = CR or C = LF then
-          AppendCell(CellStart, P-CellStart)   // letzte Zelle
-          // CRLF als Einheit behandeln
-          P += (CR+LF) ? 2 : 1
-          FBufPos := P
-          Exit                        // Zeile fertig
-
-    // Puffer komplett durchsucht, aber Zeile unvollständig →
-    // RefillBuffer + Continue
-
-  Wichtige Details:
-
-  - Quote-Handling: "" innerhalb eines Quotes wird als ein "
-    interpretiert. "text" wird zu text.
-  - CRLF-Erkennung: Wenn CR am Pufferende steht und LF am Anfang
-    des nächsten Puffers liegt, wird korrekt über die Puffergrenze
-    hinweg erkannt (siehe RefillBuffer: Rest wird an Pufferanfang
-    verschoben).
-  - Zeilen über Puffergrenzen: Wenn ein \r\n genau auf die Grenze
-    fällt, bleiben FInQuote und FBufPos konsistent — die Zeile
-    wird beim nächsten ScanRow abgeschlossen.
-
-  Der Scanner ist bewusst NICHT rekursiv und NICHT mit
-  Exceptions belastet — jeder Byte wird nur einmal betrachtet.
-
-
-  PUFFER-VERWALTUNG (RefillBuffer)
-  --------------------------------
-  Wenn FBufPos das Ende des Puffers erreicht hat, wird RefillBuffer
-  aufgerufen:
-
-  1. Verbleibende Bytes am Puffer-Ende (z.B. halbe Zeile) werden
-     an den Puffer-Anfang kopiert (Move).
-  2. Neue Daten werden hinter die verbleibenden Bytes gelesen.
-  3. FBufStart, FBufPos, FBufEnd werden neu gesetzt.
-
-  Dadurch ist sichergestellt, dass Zeilen, die über die
-  Puffergrenze hinweg verlaufen, korrekt verarbeitet werden.
-
-  WICHTIG: Puffergröße und Positions-Rechnungen verwenden Int64,
-  damit Dateien > 2 GB verarbeitet werden können. Der 32-Bit-
-  Integer-Überlauf bei ~2,1 GB (MaxInt) war ein historischer Bug
-  und ist durch durchgängige Int64-Verwendung behoben.
-
-
-  ZELL-REFERENZEN (TCSVFastCellRef)
-  ---------------------------------
-    TCSVFastCellRef = record
-      Start: PChar;      // Zeiger in den Puffer
-      Len:   Int64;      // Länge der Zelle
-    end;
-
-  FCells ist ein dynamisches Array solcher Records. Es wächst
-  bei Bedarf (EnsureCellCapacity verdoppelt).
-
-  Der Vorteil: AppendCell kostet nur einen Zuweisungsvorgang von
-  zwei Feldern. Keine Allokation, keine Kopie. Bei 26 Feldern ×
-  5 Mio. Zeilen = 130 Mio. AppendCell-Aufrufe, die alle
-  praktisch kostenlos sind.
-
-  Die Umwandlung in einen String passiert ausschließlich in
-  CellToStr — und auch dort nur einmal pro Zelle pro Zeile
-  (nicht einmal pro Zeichen).
-
-
-  TYP-KONVERTIERUNG (PChar-Helfer)
-  --------------------------------
-  Alle Helfer sind `inline` deklariert, was FPC dazu bringt, sie
-  direkt an der Aufrufstelle zu expandieren — kein Funktions-
-  Overhead pro Zelle.
-
-  - PCharToInt64Def: Parst eine Ziffernfolge aus dem Puffer.
-    Erkennt optionales Vorzeichen, überläuft nicht, ignoriert
-    führende/nachfolgende Whitespace. Fallback auf Def bei
-    Fehler.
-    Kein Aufruf von StrToInt64 → keine Exception-Behandlung,
-    kein Locale-Lookup.
-
-  - PCharToDoubleDef: Parst Vorzeichen + Ganzzahl + Punkt +
-    Nachkommastellen. Kein Exponent (bei Bedarf Fallback).
-    Kein Aufruf von StrToFloat → keine Locale-Abhängigkeit
-    (Punkt als Dezimaltrenner ist fest verdrahtet — CSV ist
-    damit konsistent über alle Systeme).
-
-  - PCharEqualsIgnoreCase: Vergleicht Puffer-Bereich mit einem
-    String case-insensitiv (ASCII). Nur für BOOLEAN-Erkennung
-    ('true', 'false', 'yes', 'no') verwendet.
-
-
-  KOMPATIBILITÄT ZU TCSVDataset
-  -----------------------------
-  TCSVFastDataset erbt von TCSVDataset. Alle CSVOptions bleiben
-  unverändert nutzbar:
-
-    CSVOptions.Delimiter           — Trennzeichen
-    CSVOptions.QuoteChar           — Anführungszeichen
-    CSVOptions.LineEnding          — Zeilenende (CR, LF, CRLF)
-    CSVOptions.FirstLineAsFieldNames — Header-Zeile?
-    CSVOptions.DefaultFieldLength  — Standard-Feldlänge
-    CSVOptions.IgnoreOuterWhitespace
-    CSVOptions.QuoteOuterWhitespace
-
-  Der einzige API-Unterschied: BlockSize als published Property
-  (Standard 1 GB).
-
-  Damit ist der Austausch in bestehendem Code trivial:
-
-    // Vorher:
-    CSVDataset1: TCSVDataset;
-
-    // Nachher:
-    CSVDataset1: TCSVFastDataset;
-
-  Kein weiterer Code muss angepasst werden.
-
-
-  BESONDERHEITEN UND STOLPERSTEINE
-  --------------------------------
-  1. BlockSize ist die Puffergröße IN BYTES, nicht in Zeilen.
-     Standard 1 GB ist großzügig — bei vielen parallel geöffneten
-     Datasets reduziert man das auf 64 MB oder weniger.
-
-  2. Der Puffer wird bei jedem Dataset einmal alloziert — bei
-     4 gleichzeitig geöffneten CSVs mit 1 GB sind das 4 GB RAM.
-     Realistisch: 64 MB pro Dataset reichen für 99% aller Fälle.
-
-  3. RestoreRecord befüllt die Field-Buffer. Das bedeutet: Die
-     Umwandlung PChar → String/Integer/Double passiert einmal
-     pro Zelle pro Zeile. Danach hat TBufDataset die Daten und
-     arbeitet wie gehabt (Sortierung, Filter, Navigation).
-
-  4. Für Dateien mit Zellen > 2 GB (praktisch unmöglich bei CSV)
-     würde CellToStr eine Exception werfen. Das ist bewusst, weil
-     ein stiller Abschnitt (Truncation) viel schlimmer wäre.
-
-  5. Die Unit hat keine Abhängigkeit zu IBX oder Firebird — sie
-     ist reiner CSV-Leser. Die Anbindung an DB/Grid/etc. macht
-     der Aufrufer (DataEditor).
-
-
-  ERWEITERBARKEIT — PHASE 2 (nicht implementiert)
-  -----------------------------------------------
-  Aktuell fehlen:
-
-  - SaveToCSVFile mit eigenem PChar-Builder
-    (aktuell wird die geerbte SaveToCSVFile von TCSVDataset
-    verwendet — funktioniert, ist aber nicht optimiert)
-
-  - StoreRecord/StoreFieldDefs/FinalizeStoreRecords
-    (für CSV-Schreib-Modus aus TBufDataset heraus;
-    aktuell No-Op, weil Read-Only-Betrieb)
-
-  - RecognizeStream
-    (aktuell False; könnte später Magic-Bytes prüfen)
-
-  Diese Punkte sind bewusst Phase 2 — der aktuelle Code ist
-  stabil und performant für den Lese-Pfad, der in 95% aller
-  Anwendungsfälle gebraucht wird.
-
-
-  TESTDATEN
-  ---------
-  Verifiziert mit:
-
-  - 403 MB CSV, 26 Felder, 2.000.000 Zeilen:  ~14 Sekunden
-  - 2,05 GB CSV, 26 Felder, 5.081.559 Zeilen: ~36 Sekunden
-  - mixedCase/CAMEL Feldnamen (case-sensitive)
-  - CRLF und LF gemischt
-  - Quote-Char: " und '
-  - UTF-8 BOM am Dateianfang
-
-  Hardware: Intel i5-4210H, SSD, 16 GB RAM, Linux
-
-  ============================================================================ }
 unit uCSVFastDataset;
 
 {$mode objfpc}{$H+}
@@ -729,7 +395,9 @@ type
   FProgressUpdatePercent: Integer;
   FLastProgressPercent: Integer;
   FStartTime: TDateTime;
-  FCancelRequested: Boolean;
+
+  FCancelFlag: PBoolean;
+
   FProgressCounter: Integer;       // zählt Updates
 
   procedure RefillBuffer;
@@ -771,7 +439,7 @@ property ScannedRowCount: Int64 read FScannedRowCount;
 property OnProgress: TCSVLoadProgressEvent read FOnProgress write FOnProgress;
 property TotalRowsForProgress: Int64 read FTotalRowsForProgress write FTotalRowsForProgress;
 property ProgressUpdatePercent: Integer read FProgressUpdatePercent write FProgressUpdatePercent;
-property CancelRequested: Boolean read FCancelRequested write FCancelRequested;
+property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
 end;
 
   { ------------------------------------------------------------------
@@ -789,7 +457,7 @@ end;
       FOnProgress: TCSVLoadProgressEvent;
       FTotalRowsForProgress: Int64;
       FProgressUpdatePercent: Integer;
-      FCancelRequested: Boolean;
+      FCancelFlag: PBoolean;
 
       procedure SetBlockSizeKB(AValue: Integer);
       procedure SetBufferSizeKB(AValue: Integer);
@@ -810,7 +478,7 @@ end;
       property OnProgress: TCSVLoadProgressEvent read FOnProgress write FOnProgress;
       property TotalRowsForProgress: Int64 read FTotalRowsForProgress write FTotalRowsForProgress;
       property ProgressUpdatePercent: Integer read FProgressUpdatePercent write FProgressUpdatePercent;
-      property CancelRequested: Boolean read FCancelRequested write FCancelRequested;
+      property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
     published
       // Puffergrößen in KB (für den Endanwender verständlicher)
       property BlockSize: Integer read FBlockSizeKB write SetBlockSizeKB default 1024;
@@ -1200,8 +868,10 @@ begin
   FProgressUpdatePercent := 1;
   FLastProgressPercent := -1;
   FStartTime := 0;
-  FCancelRequested := False;
-    FProgressCounter := 0;
+
+  FCancelFlag := nil;
+
+  FProgressCounter := 0;
 end;
 
 constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
@@ -1210,7 +880,7 @@ begin
   FOnProgress := nil;
   FTotalRowsForProgress := 0;
   FProgressUpdatePercent := 1;
-  FCancelRequested := False;
+  FCancelFlag := nil;
 
   // Erst den Standard-Konstruktor aufrufen
   Create(ADataSet, AStream);
@@ -1450,7 +1120,7 @@ begin
 
           FOnProgress(FScannedRowCount, (Now - FStartTime) * SecsPerDay, FreeRAMMB);
 
-          if FCancelRequested then
+          if FCancelFlag^ then
             raise EAbort.Create('Cancelled by user');
         end;
       end;
@@ -1862,7 +1532,7 @@ begin
   R.OnProgress := FOnProgress;
   R.TotalRowsForProgress := FTotalRowsForProgress;
   R.ProgressUpdatePercent := FProgressUpdatePercent;
-  R.CancelRequested := FCancelRequested;
+  R.CancelFlag := FCancelFlag;
 
   Result := R;
 end;
@@ -1884,7 +1554,7 @@ begin
     P.OnProgress := FOnProgress;
     P.TotalRowsForProgress := FTotalRowsForProgress;
     P.ProgressUpdatePercent := FProgressUpdatePercent;
-    P.CancelRequested := FCancelRequested;
+    P.CancelFlag := FCancelFlag;
 
     if FieldDefs.Count > 0 then
       P.CreateFieldDefs := FieldDefs;

@@ -28,14 +28,14 @@ Schritte:
   2. In ein beliebiges gewünschtes Verzeichnis entpacken
   3. Standard-PascalScript aus Lazarus DEINSTALLIEREN
      (falls vorhanden)
-  4. PascalScript aus "src/components" installieren
-  5. Alle weiteren notwendigen Komponenten installieren.
-     Diese sind entweder über den Online-Package-Manager
-     oder direkt aus dem Verzeichnis "src/components" zu beziehen.
+  4. Folgende Packages aus "src/components" installieren:
 
-     Hinweis:
-     Lazarus meldet automatisch, welche Komponenten fehlen,
-     sobald das Projekt geöffnet wird.
+       - PascalScript
+       - jvdesign
+       - uib
+
+  5. Alle weiteren notwendigen Komponenten über den
+     Online-Package-Manager installieren.
 
 ------------------------------------------------------------------------
 3. WICHTIGER HINWEIS ZU PASCALSCRIPT
