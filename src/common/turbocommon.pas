@@ -579,6 +579,10 @@ var
 
 //end-Ini.File////////////////////////////////////////////////////////////////
 
+//Format
+function FormatBytesSmart(ABytes: Int64): string;
+
+
 //Files
 function CountTextFileLines(const AFileName: string; ABufferSize: Int64 = 0; ALineEnding: Char = #0): Int64;
 
@@ -887,6 +891,25 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses  Reg;
+
+//Format
+function FormatBytesSmart(ABytes: Int64): string;
+var
+  FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
+  if ABytes >= (Int64(1024) * 1024 * 1024) then
+    Result := FormatFloat('#,##0.00', ABytes / (1024.0 * 1024 * 1024), FS) + ' GB'
+  else if ABytes >= (Int64(1024) * 1024) then
+    Result := FormatFloat('#,##0.00', ABytes / (1024.0 * 1024), FS) + ' MB'
+  else if ABytes >= 1024 then
+    Result := FormatFloat('#,##0.00', ABytes / 1024.0, FS) + ' KB'
+  else
+    Result := IntToStr(ABytes) + ' Bytes';
+end;
 
 //Files
 function CountTextFileLines(const AFileName: string; ABufferSize: Int64; ALineEnding: Char): Int64;
@@ -1782,30 +1805,6 @@ begin
 end;
 
 // ---------------------------------------------------------------------------
-// Quelldatei-Größe formatieren
-// ---------------------------------------------------------------------------
-function FormatFileSize(ASize: Int64): string;
-var
-  FS: TFormatSettings;
-begin
-  // Englischer Format-Stil — unabhängig vom OS-Locale
-  FS := DefaultFormatSettings;
-  FS.DecimalSeparator  := '.';
-  FS.ThousandSeparator := ',';
-
-  if ASize <= 0 then
-    Result := ''
-  else if ASize >= 1024 * 1024 * 1024 then
-    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024 * 1024), FS) + ' GB'
-  else if ASize >= 1024 * 1024 then
-    Result := FormatFloat('#,##0.00', ASize / (1024 * 1024), FS) + ' MB'
-  else if ASize >= 1024 then
-    Result := FormatFloat('#,##0', ASize / 1024, FS) + ' KB'
-  else
-    Result := FormatFloat('#,##0', ASize, FS) + ' bytes';
-end;
-
-// ---------------------------------------------------------------------------
 // Environment-Sektion (gemeinsam für alle Report-Typen)
 // ---------------------------------------------------------------------------
 procedure AddEnvironmentSection(SL: TStringList; const Stats: TTransferStatistic);
@@ -1898,7 +1897,7 @@ begin
       if Stats.SourceFileFormat <> '' then
         SL.Add('  Format:    ' + Stats.SourceFileFormat);
       if Stats.SourceFileSize > 0 then
-        SL.Add('  Size:      ' + FormatFileSize(Stats.SourceFileSize));
+        SL.Add('  Size:      ' + FormatBytesSmart(Stats.SourceFileSize));
 
       SL.Add('');
     end;
@@ -1930,7 +1929,7 @@ begin
         SL.Add('  Path:      ' + ExtractFilePath(Stats.DestFileName));
       end;
       if Stats.DestFileSize > 0 then
-        SL.Add('  Size:      ' + FormatFileSize(Stats.DestFileSize));
+        SL.Add('  Size:      ' + FormatBytesSmart(Stats.DestFileSize));
 
       SL.Add('');
     end;

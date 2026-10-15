@@ -15,7 +15,7 @@ type
     CPUModel: string;
     CPUCores: Integer;
     RAMTotalMB: Int64;
-    RAMFreeMB: Int64;          // ← NEU: verfügbarer RAM
+    RAMFreeMB: Int64;          //verfügbarer RAM
     DiskFreeMB: Int64;
     DiskTotalMB: Int64;
     DiskPath: string;
@@ -24,8 +24,10 @@ type
   end;
 
 function GetSystemInfo(const APath: string = ''): TSystemInfo;
-function GetRAMFreeMB: Int64;   // ← NEU: nur der freie RAM
+function GetRAMTotalMB: Int64;
+function GetRAMFreeMB: Int64;   // nur der freie RAM
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
+
 
 implementation
 

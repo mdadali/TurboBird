@@ -666,7 +666,7 @@ uses
 
 type
   TCSVLoadProgressEvent = procedure(ARowsRead: Int64;
-    AElapsedSeconds: Double) of object;
+    AElapsedSeconds: Double; AFreeRAMMB: Int64) of object;
 
 type
   { Vorwärtsdeklaration }
@@ -730,6 +730,7 @@ type
   FLastProgressPercent: Integer;
   FStartTime: TDateTime;
   FCancelRequested: Boolean;
+  FProgressCounter: Integer;       // zählt Updates
 
   procedure RefillBuffer;
   procedure SkipBOM;
@@ -824,9 +825,184 @@ function PCharToInt64Def(P: PChar; Len: Int64; Def: Int64): Int64; inline;
 function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double): Double; inline;
 function PCharEqualsIgnoreCase(P: PChar; Len: Int64; const S: string): Boolean; inline;
 
+{ ------------------------------------------------------------------
+  GetFreeMemoryMB
+  Liefert den verfügbaren physischen RAM in MB.
+
+  Plattform-spezifisch:
+    Linux  : /proc/meminfo (MemAvailable, Fallback MemFree)
+    Windows: GlobalMemoryStatusEx (ullAvailPhys)
+    macOS  : vm_stat (Schätzung)
+
+  Rückgabe:
+    Verfügbarer RAM in MB. Bei Fehler: -1.
+  ------------------------------------------------------------------ }
+function GetFreeMemoryMB: Int64;
+
+{ ------------------------------------------------------------------
+  GetTotalMemoryMB
+  Liefert den gesamten physischen RAM in MB.
+
+  Plattform-spezifisch:
+    Linux  : /proc/meminfo (MemTotal)
+    Windows: GlobalMemoryStatusEx (ullTotalPhys)
+    macOS  : sysctl hw.memsize
+
+  Rückgabe:
+    Gesamt-RAM in MB. Bei Fehler: -1.
+  ------------------------------------------------------------------ }
+function GetTotalMemoryMB: Int64;
+
 procedure Register;
 
+
 implementation
+
+uses
+  {$IFDEF WINDOWS}
+  Windows
+  {$ENDIF}
+  {$IFDEF LINUX}
+  BaseUnix
+  {$ENDIF}
+  {$IFDEF DARWIN}
+  Process
+  {$ENDIF}
+  ;
+
+
+{ ==================================================================
+  RAM-Abfrage (plattform-spezifisch)
+  ================================================================== }
+
+{$IFDEF LINUX}
+function ReadMemInfoValue(const AKey: string): Int64;
+var
+  SL: TStringList;
+  I: Integer;
+  Line, ValStr: string;
+  MemKB: Int64;
+begin
+  Result := -1;
+  if not FileExists('/proc/meminfo') then Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile('/proc/meminfo');
+    for I := 0 to SL.Count - 1 do
+    begin
+      Line := SL[I];
+      if Pos(AKey + ':', Line) = 1 then
+      begin
+        ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
+        ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
+        if TryStrToInt64(ValStr, MemKB) then
+          Result := MemKB div 1024;   // kB → MB
+        Break;
+      end;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+function GetFreeMemoryMB: Int64;
+{$IFDEF LINUX}
+begin
+  // MemAvailable ist die beste Schätzung des Kernels
+  Result := ReadMemInfoValue('MemAvailable');
+  if Result < 0 then
+    Result := ReadMemInfoValue('MemFree');   // Fallback für ältere Kernel
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+type
+  TMemoryStatusEx = record
+    dwLength:                DWORD;
+    dwMemoryLoad:            DWORD;
+    ullTotalPhys:            QWord;
+    ullAvailPhys:            QWord;
+    ullTotalPageFile:        QWord;
+    ullAvailPageFile:        QWord;
+    ullTotalVirtual:         QWord;
+    ullAvailVirtual:         QWord;
+    ullAvailExtendedVirtual: QWord;
+  end;
+
+function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL;
+  stdcall; external 'kernel32.dll' name 'GlobalMemoryStatusEx';
+
+var
+  MemStatus: TMemoryStatusEx;
+begin
+  Result := -1;
+  FillChar(MemStatus, SizeOf(MemStatus), 0);
+  MemStatus.dwLength := SizeOf(MemStatus);
+  if GlobalMemoryStatusEx(MemStatus) then
+    Result := MemStatus.ullAvailPhys div (1024 * 1024);
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+uses
+  Process;
+var
+  P: TProcess;
+  SL: TStringList;
+begin
+  // Konservative Schätzung für macOS
+  Result := GetTotalMemoryMB div 10;
+end;
+{$ENDIF}
+
+function GetTotalMemoryMB: Int64;
+{$IFDEF LINUX}
+begin
+  Result := ReadMemInfoValue('MemTotal');
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+var
+  MemStatus: TMemoryStatusEx;
+begin
+  Result := -1;
+  FillChar(MemStatus, SizeOf(MemStatus), 0);
+  MemStatus.dwLength := SizeOf(MemStatus);
+  if GlobalMemoryStatusEx(MemStatus) then
+    Result := MemStatus.ullTotalPhys div (1024 * 1024);
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+var
+  P: TProcess;
+  SL: TStringList;
+  ValStr: string;
+begin
+  Result := -1;
+  P := TProcess.Create(nil);
+  SL := TStringList.Create;
+  try
+    P.Executable := '/usr/sbin/sysctl';
+    P.Parameters.Add('-n');
+    P.Parameters.Add('hw.memsize');
+    P.Options := [poUsePipes, poWaitOnExit];
+    P.Execute;
+    SL.LoadFromStream(P.Output);
+    if SL.Count > 0 then
+    begin
+      ValStr := Trim(SL[0]);
+      Result := StrToInt64Def(ValStr, 0) div (1024 * 1024);
+    end;
+  finally
+    SL.Free;
+    P.Free;
+  end;
+end;
+{$ENDIF}
 
 procedure Register;
 begin
@@ -1025,6 +1201,7 @@ begin
   FLastProgressPercent := -1;
   FStartTime := 0;
   FCancelRequested := False;
+    FProgressCounter := 0;
 end;
 
 constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
@@ -1145,6 +1322,7 @@ var
   BytesToRead: Int64;
   BytesRead: Integer;
   StreamRemaining: Int64;
+  FreeRAMMB: Int64;
 begin
   // 1. Ungelesenen Rest an den Pufferanfang verschieben
   Remaining := FBufEnd - FBufPos;
@@ -1194,6 +1372,7 @@ var
   QChar: Char;
   Delim: Char;
   NewPercent: Integer;
+  FreeRAMMB: Int64;
 begin
   FCellCount := 0;
   InQ := FInQuote;
@@ -1261,9 +1440,16 @@ begin
         if NewPercent >= (FLastProgressPercent + FProgressUpdatePercent) then
         begin
           FLastProgressPercent := NewPercent;
-          FOnProgress(FScannedRowCount, (Now - FStartTime) * SecsPerDay);
+          Inc(FProgressCounter);
 
-          // Cancel-Check
+          // RAM-Wert nur bei jedem 5. Update lesen
+          if (FProgressCounter mod 5) = 0 then
+            FreeRAMMB := GetFreeMemoryMB
+          else
+            FreeRAMMB := -1;   // -1 = unverändert
+
+          FOnProgress(FScannedRowCount, (Now - FStartTime) * SecsPerDay, FreeRAMMB);
+
           if FCancelRequested then
             raise EAbort.Create('Cancelled by user');
         end;

@@ -169,8 +169,20 @@ type
     FProgElapsedLbl: TLabel;
     FProgETALbl: TLabel;
     FProgCancelBtn: TButton;
+
+    // RAM-Komponenten
+    FProgRAMBar: TProgressBar;
+    FProgRAMInfoLbl: TLabel;
+    FProgRAMStatusLbl: TLabel;
+
+    // Progress-State
     FProgTotalRows: Int64;
     FProgStartTime: TDateTime;
+    FProgTotalRAMMB: Int64;
+    FRAMWarningShown: Boolean;
+    FLoadProgressCounter: Integer;
+
+    FLastFreeRAMMB: Int64;
 
     procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
@@ -185,7 +197,7 @@ type
     procedure WriteIni;
     function AskUseDetected(const AFileName: string; const ACurLE, ADetLE: string; const ACurDel, ADetDel: Char; const ACurQC, ADetQC: Char): TDetectChoice;
     procedure HandleScanProgress(ABytesRead, ATotalBytes: Int64);
-    procedure HandleLoadProgress(ARowsRead: Int64; AElapsedSeconds: Double);
+    procedure HandleLoadProgress(ARowsRead: Int64; AElapsedSeconds: Double; AFreeRAMMB: Int64);
     procedure ProgCancelClick(Sender: TObject);
     procedure BuildProgressForm;
   public
@@ -200,17 +212,19 @@ implementation
 
 procedure TfrmDataEditor.BuildProgressForm;
 var
-  PnlInfo, PnlProgress, PnlCancel: TPanel;
+  PnlInfo, PnlProgress, PnlRAM, PnlCancel: TPanel;
 begin
   FProgressForm := TForm.Create(nil);
   FProgressForm.Caption     := 'Loading...';
   FProgressForm.Width       := 560;
-  FProgressForm.Height      := 320;
+  FProgressForm.Height      := 440;
   FProgressForm.Position    := poScreenCenter;
   FProgressForm.BorderStyle := bsDialog;
   FProgressForm.FormStyle   := fsStayOnTop;
 
-  // === Info-Panel oben ===
+  // ============================================================
+  // === Info-Panel (oben) ===
+  // ============================================================
   PnlInfo := TPanel.Create(FProgressForm);
   PnlInfo.Parent := FProgressForm;
   PnlInfo.Align := alTop;
@@ -231,12 +245,15 @@ begin
   FProgInfoLbl.Left := 16;
   FProgInfoLbl.Top := 45;
   FProgInfoLbl.Width := 520;
+  FProgInfoLbl.Caption := '';
 
-  // === Progress-Bar mitte ===
+  // ============================================================
+  // === Progress-Panel (Mitte, Rows/Scan) ===
+  // ============================================================
   PnlProgress := TPanel.Create(FProgressForm);
   PnlProgress.Parent := FProgressForm;
   PnlProgress.Align := alTop;
-  PnlProgress.Height := 100;
+  PnlProgress.Height := 105;
   PnlProgress.BevelOuter := bvNone;
 
   FProgBar := TProgressBar.Create(FProgressForm);
@@ -267,7 +284,53 @@ begin
   FProgETALbl.Top := 68;
   FProgETALbl.Width := 520;
 
-  // === Cancel unten ===
+  // ============================================================
+  // === RAM-Panel ===
+  // ============================================================
+  PnlRAM := TPanel.Create(FProgressForm);
+  PnlRAM.Parent := FProgressForm;
+  PnlRAM.Align := alTop;
+  PnlRAM.Height := 105;
+  PnlRAM.BevelOuter := bvNone;
+
+  // Trennlinie
+  with TLabel.Create(FProgressForm) do
+  begin
+    Parent := PnlRAM;
+    Left := 16;
+    Top := 0;
+    Width := 520;
+    Caption := '──────────────────────────────────────────';
+    Font.Color := clGray;
+  end;
+
+  FProgRAMInfoLbl := TLabel.Create(FProgressForm);
+  FProgRAMInfoLbl.Parent := PnlRAM;
+  FProgRAMInfoLbl.Left := 16;
+  FProgRAMInfoLbl.Top := 20;
+  FProgRAMInfoLbl.Width := 520;
+  FProgRAMInfoLbl.Caption := 'RAM:      ...';
+
+  FProgRAMBar := TProgressBar.Create(FProgressForm);
+  FProgRAMBar.Parent := PnlRAM;
+  FProgRAMBar.Left := 16;
+  FProgRAMBar.Top := 45;
+  FProgRAMBar.Width := 520;
+  FProgRAMBar.Height := 20;
+  FProgRAMBar.Min := 0;
+  FProgRAMBar.Max := 100;
+  FProgRAMBar.Position := 0;
+
+  FProgRAMStatusLbl := TLabel.Create(FProgressForm);
+  FProgRAMStatusLbl.Parent := PnlRAM;
+  FProgRAMStatusLbl.Left := 16;
+  FProgRAMStatusLbl.Top := 70;
+  FProgRAMStatusLbl.Width := 520;
+  FProgRAMStatusLbl.Caption := '';
+
+  // ============================================================
+  // === Cancel-Panel (unten) ===
+  // ============================================================
   PnlCancel := TPanel.Create(FProgressForm);
   PnlCancel.Parent := FProgressForm;
   PnlCancel.Align := alClient;
@@ -279,7 +342,7 @@ begin
   FProgCancelBtn.Width := 100;
   FProgCancelBtn.Height := 30;
   FProgCancelBtn.Left := (FProgressForm.ClientWidth - 100) div 2;
-  FProgCancelBtn.Top := 20;
+  FProgCancelBtn.Top := 15;
   FProgCancelBtn.OnClick := @ProgCancelClick;
 end;
 
@@ -292,18 +355,22 @@ begin
   if Percent > 100 then Percent := 100;
 
   FProgBar.Position := Percent;
-  FProgElapsedLbl.Caption := Format('Scan:   %s / %s MB',
-    [FormatFloat('#,##0', ABytesRead / (1024*1024)),
-     FormatFloat('#,##0', ATotalBytes / (1024*1024))]);
+  FProgElapsedLbl.Caption := Format('Scan:   %s / %s',
+    [FormatBytesSmart(ABytesRead), FormatBytesSmart(ATotalBytes)]);
   Application.ProcessMessages;
 end;
 
 procedure TfrmDataEditor.HandleLoadProgress(ARowsRead: Int64;
-  AElapsedSeconds: Double);
+  AElapsedSeconds: Double; AFreeRAMMB: Int64);
 var
   Percent: Integer;
   RowsPerSec, ETASeconds: Double;
+  UsedRAMMB: Int64;
+  UsedPercent: Integer;
 begin
+  // ============================================================
+  // Rows-Progress (wie gehabt)
+  // ============================================================
   if FProgTotalRows > 0 then
   begin
     Percent := (ARowsRead * 100) div FProgTotalRows;
@@ -334,6 +401,74 @@ begin
 
   FProgElapsedLbl.Caption := Format('Elapsed: %s',
     [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay)]);
+
+  // ============================================================
+  // RAM-Update (nur wenn AFreeRAMMB >= 0, sonst letzten Wert nutzen)
+  // ============================================================
+  if AFreeRAMMB >= 0 then
+    FLastFreeRAMMB := AFreeRAMMB;
+
+  if FLastFreeRAMMB > 0 then
+  begin
+    // RAM-Bar: Verbrauch in % von Total
+    UsedRAMMB := FProgTotalRAMMB - FLastFreeRAMMB;
+    if UsedRAMMB < 0 then UsedRAMMB := 0;
+    if FProgTotalRAMMB > 0 then
+      UsedPercent := (UsedRAMMB * 100) div FProgTotalRAMMB
+    else
+      UsedPercent := 0;
+    if UsedPercent > 100 then UsedPercent := 100;
+
+    FProgRAMBar.Position := UsedPercent;
+    FProgRAMInfoLbl.Caption := Format('RAM:      %s used / %s total   (%d%%)',
+      [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
+       FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
+       UsedPercent]);
+
+    // Status + Farbe
+    if UsedPercent >= 85 then
+    begin
+      FProgRAMStatusLbl.Caption := 'Status:   CRITICAL - low memory!';
+      FProgRAMStatusLbl.Font.Color := clRed;
+      FProgRAMStatusLbl.Font.Style := [fsBold];
+    end
+    else if UsedPercent >= 70 then
+    begin
+      FProgRAMStatusLbl.Caption := 'Status:   WARNING - memory getting tight';
+      FProgRAMStatusLbl.Font.Color := clMaroon;
+      FProgRAMStatusLbl.Font.Style := [fsBold];
+    end
+    else
+    begin
+      FProgRAMStatusLbl.Caption := 'Status:   OK';
+      FProgRAMStatusLbl.Font.Color := clGreen;
+      FProgRAMStatusLbl.Font.Style := [];
+    end;
+
+    // ============================================================
+    // Warnung bei kritischem RAM (nur einmal)
+    // ============================================================
+    if (UsedPercent >= 85) and (not FRAMWarningShown) then
+    begin
+      FRAMWarningShown := True;
+
+      if MessageDlg(
+        'Warning: Low memory!' + sLineBreak + sLineBreak +
+        'Used RAM:  ' + FormatBytesSmart(UsedRAMMB * 1024 * 1024) + sLineBreak +
+        'Free RAM:  ' + FormatBytesSmart(FLastFreeRAMMB * 1024 * 1024) + sLineBreak +
+        sLineBreak +
+        'The system may become unresponsive or kill the application.' + sLineBreak +
+        sLineBreak +
+        'Cancel the load?',
+        mtWarning, [mbYes, mbNo], 0) = mrYes then
+      begin
+        if Assigned(CSVFastDataset1) then
+          TCSVFastDataset(CSVFastDataset1).CancelRequested := True;
+        FProgCancelBtn.Enabled := False;
+        FProgCancelBtn.Caption := 'Cancelling...';
+      end;
+    end;
+  end;
 
   Application.ProcessMessages;
 end;
@@ -1082,6 +1217,7 @@ var
   ToRow: Int64;
   ScanRows: Int64;
   TotalRowsInRange: Int64;
+  FreeRAMBytes: Int64;
 begin
   MaxLineWidth       := 0;
   RequiredBufferKB   := 0;
@@ -1146,9 +1282,24 @@ begin
   // ============================================================
   BuildProgressForm;
 
+  // Datei-Info
+  FProgInfoLbl.Caption := Format('File: %s   (%s)',
+    [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
+
+  // RAM-Init
+  FProgTotalRAMMB     := GetRAMTotalMB;
+  FLastFreeRAMMB      := GetRAMFreeMB;
+  FRAMWarningShown    := False;
+  FLoadProgressCounter := 0;
+
+  // RAM-Init
+  FProgTotalRAMMB := GetRAMTotalMB;
+  FRAMWarningShown := False;
+  FLoadProgressCounter := 0;
+
   // Labels mit Datei-Info
-  FProgInfoLbl.Caption := Format('File: %s   (%.2f MB)',
-    [ExtractFileName(FFileName), FileSizeMB]);
+  FProgInfoLbl.Caption := Format('File: %s   (%s)',
+    [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
 
   FProgressForm.Show;
   FProgressForm.BringToFront;
@@ -1164,8 +1315,8 @@ begin
     begin
       FProgPhaseLbl.Caption := 'Analyzing row width...';
       FProgBar.Position := 0;
-      FProgInfoLbl.Caption := Format('File: %s   (%.2f MB)',
-        [ExtractFileName(FFileName), FileSizeMB]);
+      FProgInfoLbl.Caption := Format('File: %s   (%s)',
+         [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
       FProgSpeedLbl.Caption := '';
       FProgElapsedLbl.Caption := '';
       FProgETALbl.Caption := '';
@@ -1193,6 +1344,33 @@ begin
           CSVBufferSizeKB := RequiredBufferKB;
           edtBufferSize.Text := IntToStr(RequiredBufferKB);
           SetCSVSettingsFromForm;
+        end;
+      end;
+    end;
+
+    // ============================================================
+    // Vorab-Warnung bei knappem RAM
+    // ============================================================
+    if FileSize > 0 then
+    begin
+      FreeRAMBytes := GetRAMFreeMB * 1024 * 1024;
+      if FileSize > (FreeRAMBytes * 8 div 10) then   // > 80%
+      begin
+        MsgText := Format(
+          'Warning: Large file!' + sLineBreak + sLineBreak +
+          'File size:      %s' + sLineBreak +
+          'Free RAM:       %s' + sLineBreak +
+          sLineBreak +
+          'The file may not fit in memory. Loading could cause' + sLineBreak +
+          'system slowdown or memory errors.' + sLineBreak + sLineBreak +
+          'Continue anyway?',
+          [FormatBytesSmart(FileSize), FormatBytesSmart(FreeRAMBytes)]);
+
+        if MessageDlg(MsgText, mtWarning, [mbYes, mbNo], 0) = mrNo then
+        begin
+          if Assigned(FProgressForm) then
+            FreeAndNil(FProgressForm);
+          Exit;
         end;
       end;
     end;
