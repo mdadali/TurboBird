@@ -73,26 +73,26 @@ type
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
-    edtMinRowsForRowWidthScan: TEdit;
-    edtRowWidthScanMB: TEdit;
+    edtRowWidthScanRows: TEdit;
+    edtFrom: TEdit;
     edtBlockSize: TEdit;
     edtBufferSize: TEdit;
     edtDefaultFieldLength: TEdit;
     edtInitialCellCapacity: TEdit;
+    edtTo: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
     grboxCSVFileRead: TGroupBox;
+    grboxRangeOptions: TGroupBox;
     JSONDataSet1: TJSONDataSet;
     Label1: TLabel;
-    lblMinRowsForRowWidthScan: TLabel;
-    lblRowWidthScanMB: TLabel;
+    Label10: TLabel;
+    lblRowWidthScanRows: TLabel;
     lblActivePerformanceSettings: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
-    Label5: TLabel;
     Label6: TLabel;
     Label7: TLabel;
-    Label8: TLabel;
     lbBlockSize: TLabel;
     lmExportDataAsHtml: TMenuItem;
     lmExportDataAsMarkDownTable: TMenuItem;
@@ -105,6 +105,8 @@ type
     OpenDialog1: TOpenDialog;
     Panel2: TPanel;
     pmGrid: TPopupMenu;
+    rbAllRows: TRadioButton;
+    rbRange: TRadioButton;
     RxDBGridExportPDF1: TRxDBGridExportPDF;
     RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
     RxDBGridPrint1: TRxDBGridPrint;
@@ -145,6 +147,8 @@ type
     procedure lmExportToClipboardClick(Sender: TObject);
     procedure lmPrintDataClick(Sender: TObject);
     procedure lmStdExportFormatsClick(Sender: TObject);
+
+    procedure rbRangeChange(Sender: TObject);
   private
     FFileName: string;
 
@@ -179,6 +183,12 @@ type
 implementation
 
 {$R *.lfm}
+
+procedure TfrmDataEditor.rbRangeChange(Sender: TObject);
+begin
+  edtFrom.Enabled := rbRange.Checked;
+  edtTo.Enabled   := rbRange.Checked;
+end;
 
 procedure TfrmDataEditor.LoadTimerTick(Sender: TObject);
 var
@@ -379,12 +389,11 @@ begin
   // Info-Label mit den tatsächlich aktiven Werten
   // ============================================================
   lblActivePerformanceSettings.Caption := Format(
-    'Active: Block=%d KB, Buffer=%d KB, Cells=%d, RowScan=%d MB, MinRows=%d',
+    'Active: Block=%d KB, Buffer=%d KB, Cells=%d, ScanRows=%d',
     [CSVBlockSizeKB,
      CSVBufferSizeKB,
      CSVInitialCellCapacity,
-     CSVRowWidthScanMB,
-     CSVMinRowsForRowWidthScan]);
+     StrToInt64Def(edtRowWidthScanRows.Text, 0)]);
 end;
 
 procedure TfrmDataEditor.ReadIni;
@@ -403,8 +412,6 @@ begin
   edtBlockSize.Text           := IntToStr(CSVBlockSizeKB);
   edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
   edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
-  edtRowWidthScanMB.Text          := IntToStr(CSVRowWidthScanMB);
-  edtMinRowsForRowWidthScan.Text  := IntToStr(CSVMinRowsForRowWidthScan);
 
   // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
@@ -434,8 +441,6 @@ begin
   CSVBlockSizeKB         := StrToIntDef(edtBlockSize.Text, 1024);
   CSVBufferSizeKB        := StrToIntDef(edtBufferSize.Text, 2048);
   CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
-  CSVRowWidthScanMB         := StrToIntDef(edtRowWidthScanMB.Text, 10);
-  CSVMinRowsForRowWidthScan := StrToIntDef(edtMinRowsForRowWidthScan.Text, 1000);
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -908,22 +913,29 @@ var
   ScanStartTime: TDateTime;
   ScanElapsed: Double;
   MsgText: string;
-  // Scan-WaitForm
   ScanForm: TForm;
   ScanLblInfo, ScanLblRange, ScanLblHint: TLabel;
   BufferSizeOriginal: Integer;
   BufferAutoAdjusted: Boolean;
   RowWidthScanMode: string;
+  FromRow: Int64;
+  ToRow: Int64;
+  ScanRows: Int64;
+  TotalRowsInRange: Int64;
 begin
   // ============================================================
-  // Initialisierung (verhindert Zufallswerte im Report)
+  // Initialisierung
   // ============================================================
   MaxLineWidth       := 0;
   RequiredBufferKB   := 0;
   ScanElapsed        := 0;
+  TotalRowsInRange   := 0;
   BufferAutoAdjusted := False;
   BufferSizeOriginal := CSVBufferSizeKB;
   RowWidthScanMode   := 'None';
+  FromRow            := 1;
+  ToRow              := 0;
+  ScanRows           := 0;
 
   if not OpenDialog1.Execute then Exit;
 
@@ -931,7 +943,6 @@ begin
 
   FFileName := OpenDialog1.FileName;
 
-  // SelectDataSetByFileName kann durch User-Cancel false zurückgeben
   if not SelectDataSetByFileName(FFileName) then
   begin
     FFileName := '';
@@ -943,20 +954,31 @@ begin
   SetCSVSettingsFromForm;
 
   // ============================================================
-  // Row Width Scan — nur bei CSV, wenn Scan aktiviert
+  // Load Range aus GUI lesen
   // ============================================================
-  if (LowerCase(ExtractFileExt(FFileName)) = '.csv') and
-     (CSVRowWidthScanMB <> 0) then
+  if rbRange.Checked then
   begin
-    // Scan-Modus für den Report
-    if CSVRowWidthScanMB < 0 then
-      RowWidthScanMode := 'Whole file'
-    else
-      RowWidthScanMode := Format('%d MB', [CSVRowWidthScanMB]);
+    FromRow := StrToInt64Def(edtFrom.Text, 1);
+    ToRow   := StrToInt64Def(edtTo.Text, 1000000);
+    if ToRow < FromRow then
+      ToRow := FromRow;
+    RowWidthScanMode := Format('Range %d..%d', [FromRow, ToRow]);
+  end
+  else
+  begin
+    FromRow := 1;
+    ToRow   := 0;
+    RowWidthScanMode := 'All Rows';
+  end;
 
-    // ============================================================
-    // Scan-WaitForm
-    // ============================================================
+  // ScanRows aus GUI lesen (0 = FullScan, >0 = CustomScan)
+  ScanRows := StrToInt64Def(edtRowWidthScanRows.Text, 0);
+
+  // ============================================================
+  // Row Width Scan (immer, für CSV-Dateien)
+  // ============================================================
+  if LowerCase(ExtractFileExt(FFileName)) = '.csv' then
+  begin
     ScanForm     := nil;
     ScanLblInfo  := nil;
     ScanLblRange := nil;
@@ -972,12 +994,12 @@ begin
       ScanForm.FormStyle   := fsStayOnTop;
 
       ScanLblInfo := TLabel.Create(ScanForm);
-      ScanLblInfo.Parent    := ScanForm;
-      ScanLblInfo.Left      := 16;
-      ScanLblInfo.Top       := 20;
-      ScanLblInfo.Width     := 400;
-      ScanLblInfo.Caption   := 'Determining maximum row width...';
-      ScanLblInfo.Font.Size := 11;
+      ScanLblInfo.Parent     := ScanForm;
+      ScanLblInfo.Left       := 16;
+      ScanLblInfo.Top        := 20;
+      ScanLblInfo.Width      := 400;
+      ScanLblInfo.Caption    := 'Determining maximum row width...';
+      ScanLblInfo.Font.Size  := 11;
       ScanLblInfo.Font.Style := [fsBold];
 
       ScanLblRange := TLabel.Create(ScanForm);
@@ -985,18 +1007,24 @@ begin
       ScanLblRange.Left    := 16;
       ScanLblRange.Top     := 55;
       ScanLblRange.Width   := 400;
-      if CSVRowWidthScanMB < 0 then
-        ScanLblRange.Caption := 'Mode: whole file (may take a while for large files)'
+      if rbRange.Checked then
+        ScanLblRange.Caption := Format('Range:      %s .. %s',
+          [FormatFloat('#,##0', FromRow), FormatFloat('#,##0', ToRow)])
       else
-        ScanLblRange.Caption := Format('Mode: scanning %d MB', [CSVRowWidthScanMB]);
+        ScanLblRange.Caption := 'Range:      All rows';
 
       ScanLblHint := TLabel.Create(ScanForm);
-      ScanLblHint.Parent    := ScanForm;
-      ScanLblHint.Left      := 16;
-      ScanLblHint.Top       := 85;
-      ScanLblHint.Width     := 400;
-      ScanLblHint.Caption   := 'Please wait...';
+      ScanLblHint.Parent     := ScanForm;
+      ScanLblHint.Left       := 16;
+      ScanLblHint.Top        := 85;
+      ScanLblHint.Width      := 400;
+      if ScanRows > 0 then
+        ScanLblHint.Caption := Format('Scan mode:  CustomScan — first %s rows',
+          [FormatFloat('#,##0', ScanRows)])
+      else
+        ScanLblHint.Caption := 'Scan mode:  FullScan — all rows in range';
       ScanLblHint.Font.Color := clGray;
+
 
       ScanForm.Show;
       ScanForm.BringToFront;
@@ -1004,28 +1032,25 @@ begin
       Sleep(200);
       Application.ProcessMessages;
 
-      // ============================================================
-      // Scan durchführen
-      // ============================================================
       ScanStartTime := Now;
       MaxLineWidth := EstimateCSVMaxLineWidth(
         FFileName,
-        CSVRowWidthScanMB,
-        CSVMinRowsForRowWidthScan,
-        CSVQuoteChar);
+        FromRow,
+        ToRow,
+        ScanRows,
+        CSVQuoteChar,
+        TotalRowsInRange);
       ScanElapsed := (Now - ScanStartTime) * SecsPerDay;
-
     finally
       if Assigned(ScanForm) then
         FreeAndNil(ScanForm);
     end;
 
-    // ============================================================
-    // Ergebnis auswerten
-    // ============================================================
+    // ------------------------------------------------------------
+    // BufferSize anpassen, falls nötig
+    // ------------------------------------------------------------
     if MaxLineWidth > 0 then
     begin
-      // BufferSize = 2× Zeilenbreite + 16 KB Reserve
       RequiredBufferKB := (MaxLineWidth * 2) div 1024 + 16;
 
       if RequiredBufferKB > CSVBufferSizeKB then
@@ -1034,6 +1059,7 @@ begin
           'Row Width Scan:' + sLineBreak +
           '  Scan time:                 %.2f s' + sLineBreak +
           '  Max. row width:            %s Bytes (%.2f KB)' + sLineBreak +
+          '  Rows scanned:              %s' + sLineBreak +
           sLineBreak +
           'Current BufferSize:         %d KB' + sLineBreak +
           'Required BufferSize:        %d KB' + sLineBreak + sLineBreak +
@@ -1041,6 +1067,7 @@ begin
           [ScanElapsed,
            FormatFloat('#,##0', MaxLineWidth),
            MaxLineWidth / 1024,
+           FormatFloat('#,##0', TotalRowsInRange),
            CSVBufferSizeKB,
            RequiredBufferKB,
            RequiredBufferKB]);
@@ -1053,32 +1080,19 @@ begin
         CSVBufferSizeKB := RequiredBufferKB;
         edtBufferSize.Text := IntToStr(RequiredBufferKB);
 
-        // ============================================================
-        // WICHTIG: Werte ans Dataset durchreichen, BEVOR Load startet
-        // ============================================================
         SetCSVSettingsFromForm;
-      end
-      else
-      begin
-        // --- BufferSize ausreichend ---
-        MsgText := Format(
-          'Row Width Scan:' + sLineBreak +
-          '  Scan time:                 %.2f s' + sLineBreak +
-          '  Max. row width:            %s Bytes (%.2f KB)' + sLineBreak +
-          sLineBreak +
-          'Current BufferSize:         %d KB' + sLineBreak +
-          'Required BufferSize:        %d KB' + sLineBreak + sLineBreak +
-          '→ BufferSize is sufficient. No changes.',
-          [ScanElapsed,
-           FormatFloat('#,##0', MaxLineWidth),
-           MaxLineWidth / 1024,
-           CSVBufferSizeKB,
-           RequiredBufferKB]);
-
-        MessageDlg(MsgText, mtInformation, [mbOK], 0);
       end;
     end;
   end;
+
+  // ============================================================
+  // Range ans Dataset übergeben
+  // ============================================================
+  TCSVFastDataset(CSVFastDataset1).SkipFirstRows := FromRow - 1;
+  if ToRow > 0 then
+    TCSVFastDataset(CSVFastDataset1).StopAfterRow := ToRow - FromRow + 1
+  else
+    TCSVFastDataset(CSVFastDataset1).StopAfterRow := 0;
 
   DBNavigator1.DataSource := nil;
   RxDBGrid1.DataSource := nil;
@@ -1121,11 +1135,11 @@ begin
     PnlTop.BevelOuter := bvNone;
 
     LblTitle := TLabel.Create(WaitForm);
-    LblTitle.Parent    := PnlTop;
-    LblTitle.Left      := 16;
-    LblTitle.Top       := 12;
-    LblTitle.Caption   := 'Loading file, please wait...';
-    LblTitle.Font.Size := 11;
+    LblTitle.Parent     := PnlTop;
+    LblTitle.Left       := 16;
+    LblTitle.Top        := 12;
+    LblTitle.Caption    := 'Loading file, please wait...';
+    LblTitle.Font.Size  := 11;
     LblTitle.Font.Style := [fsBold];
 
     // === Info-Panel ===
@@ -1165,13 +1179,13 @@ begin
     PnlStatus.BevelOuter := bvNone;
 
     FLoadStatusLabel := TLabel.Create(WaitForm);
-    FLoadStatusLabel.Parent    := PnlStatus;
-    FLoadStatusLabel.Left      := 16;
-    FLoadStatusLabel.Top       := 12;
-    FLoadStatusLabel.Caption   := 'Reading file, please wait...';
-    FLoadStatusLabel.Font.Size := 10;
+    FLoadStatusLabel.Parent     := PnlStatus;
+    FLoadStatusLabel.Left       := 16;
+    FLoadStatusLabel.Top        := 12;
+    FLoadStatusLabel.Caption    := 'Reading file, please wait...';
+    FLoadStatusLabel.Font.Size  := 10;
     FLoadStatusLabel.Font.Style := [fsBold];
-    FLoadStatusLabel.Width     := 480;
+    FLoadStatusLabel.Width      := 480;
 
     // === Elapsed ===
     PnlBottom := TPanel.Create(WaitForm);
@@ -1205,7 +1219,7 @@ begin
     end;
 
     // ============================================================
-    // Fehler prüfen — BEVOR wir die Grids reaktivieren
+    // Fehler prüfen
     // ============================================================
     LoadErr := CSVThread.LoadError;
     CSVThread.Free;
@@ -1213,8 +1227,8 @@ begin
 
     if LoadErr <> '' then
     begin
-      LblRows.Caption          := 'Rows:     — load failed —';
-      FLoadStatusLabel.Caption := 'Error.';
+      LblRows.Caption           := 'Rows:     — load failed —';
+      FLoadStatusLabel.Caption  := 'Error.';
       FLoadElapsedLabel.Caption := 'Elapsed: ' +
         FormatDateTime('hh:nn:ss', Now - StartTime);
       Application.ProcessMessages;
@@ -1234,25 +1248,26 @@ begin
       Exit;
     end;
 
-    // === Datasets reaktivieren ===
-    DataSource1.DataSet := DataSource1.DataSet;
-
-    DBNavigator1.DataSource := DataSource1;
-    RxDBGrid1.DataSource    := DataSource1;
-
+    // === Grid + Navigator sauber neu binden ===
+    RxDBGrid1.DataSource    := nil;
+    DBNavigator1.DataSource := nil;
     RxDBGrid1.Columns.Clear;
+
+    RxDBGrid1.DataSource    := DataSource1;
+    DBNavigator1.DataSource := DataSource1;
+
     if DataSource1.DataSet.Active and
        (not DataSource1.DataSet.IsEmpty) then
-    begin
       DataSource1.DataSet.First;
-    end;
+
+    RxDBGrid1.Refresh;
 
     EndTime  := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
     // Status aktualisieren
-    LblRows.Caption          := 'Rows:     ' + FormatFloat('#,##0', RowCount);
-    FLoadStatusLabel.Caption := 'Finished.';
+    LblRows.Caption           := 'Rows:     ' + FormatFloat('#,##0', RowCount);
+    FLoadStatusLabel.Caption  := 'Finished.';
     FLoadElapsedLabel.Caption := 'Elapsed: ' +
       FormatDateTime('hh:nn:ss', EndTime - StartTime);
     Application.ProcessMessages;
@@ -1287,11 +1302,10 @@ begin
   Stats.ElapsedSeconds := DiffSeconds;
   Stats.SystemInfo     := GetSystemInfo(FFileName);
 
-  // --- CSV-Optionen (nur bei CSV-Dateien) ---
+  // --- CSV-Optionen ---
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
      (DataSource1.DataSet = CSVFastDataset1) then
   begin
-    // Delimiter symbolisch darstellen
     if CSVFastDataset1.CSVOptions.Delimiter = #9 then
       Stats.CSVOptions := '    Delimiter: ' + QuotedStr('\t') + sLineBreak
     else if CSVFastDataset1.CSVOptions.Delimiter = ' ' then
@@ -1300,7 +1314,6 @@ begin
       Stats.CSVOptions := '    Delimiter: ' +
         QuotedStr(CSVFastDataset1.CSVOptions.Delimiter) + sLineBreak;
 
-    // QuoteChar
     if CSVFastDataset1.CSVOptions.QuoteChar = #0 then
       Stats.CSVOptions := Stats.CSVOptions +
         '    Quote Char: (none)' + sLineBreak
@@ -1319,17 +1332,17 @@ begin
         BoolToStr(CSVFastDataset1.CSVOptions.QuoteOuterWhitespace, 'Yes', 'No');
   end;
 
-  // ============================================================
-  // CSV Buffer Performance
-  // ============================================================
-  Stats.CSVBlockSizeKB         := CSVBlockSizeKB;
-  Stats.CSVBufferSizeKB        := CSVBufferSizeKB;
-  Stats.CSVInitialCellCapacity := CSVInitialCellCapacity;
-  Stats.CSVRowWidthScanMode    := RowWidthScanMode;
-  Stats.CSVRowWidthScanTime    := ScanElapsed;
-  Stats.CSVMaxRowWidth         := MaxLineWidth;
-  Stats.CSVBufferAutoAdjusted  := BufferAutoAdjusted;
-  Stats.CSVBufferOriginalKB    := BufferSizeOriginal;
+  // --- CSV Buffer Performance ---
+  Stats.CSVBlockSizeKB          := CSVBlockSizeKB;
+  Stats.CSVBufferSizeKB         := CSVBufferSizeKB;
+  Stats.CSVInitialCellCapacity  := CSVInitialCellCapacity;
+  Stats.CSVRowWidthScanMode     := RowWidthScanMode;
+  Stats.CSVRowWidthScanRows     := TotalRowsInRange;
+  Stats.CSVRowWidthScanIsCustom := (ScanRows > 0);
+  Stats.CSVRowWidthScanTime     := ScanElapsed;
+  Stats.CSVMaxRowWidth          := MaxLineWidth;
+  Stats.CSVBufferAutoAdjusted   := BufferAutoAdjusted;
+  Stats.CSVBufferOriginalKB     := BufferSizeOriginal;
 
   // --- Report anzeigen ---
   ReportForm := TfrmReport.Create(nil);

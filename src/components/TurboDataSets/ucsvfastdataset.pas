@@ -716,6 +716,10 @@ type
   FLineEnding: string;
   FIgnoreOuterWhitespace: Boolean;
 
+  FScannedRowCount: Int64;
+  FSkipFirstRows: Int64;
+  FStopAfterRow: Int64;
+
 procedure RefillBuffer;
 procedure SkipBOM;
 procedure ScanRow;
@@ -748,34 +752,44 @@ property Options: TCSVOptions read FOptions;
 property BlockSize: Integer read FBlockSize write SetBlockSize;
 property BufferSize: Int64 read FBufferSize write SetBufferSize;
 property InitialCellCapacity: Integer read FInitialCellCapacity write SetInitialCellCapacity;
+
+property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
+property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
+property ScannedRowCount: Int64 read FScannedRowCount;
 end;
 
   { ------------------------------------------------------------------
     TCSVFastDataset
     Drop-in-Ersatz für TCSVDataset.
     ------------------------------------------------------------------ }
-TCSVFastDataset = class(TCSVDataset)
-private
-FBlockSizeKB: Integer;
-FBufferSizeKB: Integer;
-FInitialCellCapacity: Integer;
-procedure SetBlockSizeKB(AValue: Integer);
-procedure SetBufferSizeKB(AValue: Integer);
-procedure SetInitialCellCapacity(AValue: Integer);
-protected
-class function DefaultPacketClass: TDataPacketReaderClass; override;
-function CreateDefaultPacketReader(aStream: TStream): TDataPacketReader; override;
-public
-constructor Create(AOwner: TComponent); override;
-procedure LoadFromCSVFile(const AFileName: string); reintroduce;
-procedure LoadFromCSVStream(AStream: TStream); reintroduce;
-procedure SaveToCSVFile(AFileName: string = ''); reintroduce;
-published
+    TCSVFastDataset = class(TCSVDataset)
+    private
+      FBlockSizeKB: Integer;
+      FBufferSizeKB: Integer;
+      FInitialCellCapacity: Integer;
+      FSkipFirstRows: Int64;
+      FStopAfterRow: Int64;
+      procedure SetBlockSizeKB(AValue: Integer);
+      procedure SetBufferSizeKB(AValue: Integer);
+      procedure SetInitialCellCapacity(AValue: Integer);
+    protected
+      class function DefaultPacketClass: TDataPacketReaderClass; override;
+      function CreateDefaultPacketReader(aStream: TStream): TDataPacketReader; override;
+    public
+      constructor Create(AOwner: TComponent); override;
+      procedure LoadFromCSVFile(const AFileName: string); reintroduce;
+      procedure LoadFromCSVStream(AStream: TStream); reintroduce;
+      procedure SaveToCSVFile(AFileName: string = ''); reintroduce;
+
+      // Range-Steuerung — programmatisch gesetzt, nicht im OI
+      property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
+      property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
+    published
       // Puffergrößen in KB (für den Endanwender verständlicher)
-property BlockSize: Integer read FBlockSizeKB write SetBlockSizeKB default 1024;
-property BufferSize: Integer read FBufferSizeKB write SetBufferSizeKB default 2048;
-property InitialCellCapacity: Integer read FInitialCellCapacity write SetInitialCellCapacity default 64;
-end;
+      property BlockSize: Integer read FBlockSizeKB write SetBlockSizeKB default 1024;
+      property BufferSize: Integer read FBufferSizeKB write SetBufferSizeKB default 2048;
+      property InitialCellCapacity: Integer read FInitialCellCapacity write SetInitialCellCapacity default 64;
+    end;
 
 { ------------------------------------------------------------------
   PChar-Helfer (inline, konservativ)
@@ -975,6 +989,10 @@ begin
   FDelimiter := ',';
   FLineEnding := sLineBreak;
   FIgnoreOuterWhitespace := False;
+
+  FScannedRowCount := 0;
+  FSkipFirstRows := 0;
+  FStopAfterRow := 0;
 end;
 
 constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
@@ -1189,6 +1207,7 @@ begin
     if (C = CR) or (C = LF) then
     begin
       AppendCell(CellStart, P - CellStart);
+      Inc(FScannedRowCount);
 
       if (C = CR) and (P + 1 < FBufEnd) and ((P + 1)^ = LF) then
         Inc(P, 2)
@@ -1226,55 +1245,12 @@ begin
   // FInQuote bleibt wie es war (Zustand vor diesem ScanRow)
 end;
 
-//Kritisch
-{procedure TCSVFastPacketReader.LoadFieldDefs(var AnAutoIncValue: Integer);
-var
-  I: Integer;
-  FN: string;
-begin
-  AnAutoIncValue := 0;
-
-  RefillBuffer;
-  SkipBOM;
-
-  ScanRow;
-
-  if FCreateFieldDefs <> nil then
-  begin
-    if FCreateFieldDefs.Count <> FCellCount then
-      DatabaseErrorFmt(
-        'CSV File Field count (%d) does not match dataset field count (%d).',
-        [FCellCount, FCreateFieldDefs.Count], DataSet.FieldDefs.Dataset);
-    if FFirstLineAsFieldNames then
-      for I := 0 to FCellCount - 1 do
-        if CompareText(CellToStr(FCells[I]), FCreateFieldDefs[I].Name) <> 0 then
-          DatabaseErrorFmt(
-            'CSV File field %d: name "%s" does not match dataset field name "%s".',
-            [I, CellToStr(FCells[I]), FCreateFieldDefs[I].Name],
-            DataSet.FieldDefs.Dataset);
-    DataSet.FieldDefs.Assign(FCreateFieldDefs);
-  end
-  else if FCellCount > 0 then
-  begin
-    for I := 0 to FCellCount - 1 do
-    begin
-      if FFirstLineAsFieldNames then
-        FN := CellToStr(FCells[I])
-      else
-        FN := Format('Column%d', [I + 1]);
-      DataSet.FieldDefs.Add(FN, ftString, FDefaultFieldLength);
-    end;
-  end;
-
-  if FFirstLineAsFieldNames then
-    ScanRow;
-end;}
-
 procedure TCSVFastPacketReader.LoadFieldDefs(var AnAutoIncValue: Integer);
 var
   I: Integer;
   FN: string;
   Retries: Integer;
+  SkipIdx: Int64;
 begin
   AnAutoIncValue := 0;
 
@@ -1282,25 +1258,19 @@ begin
   SkipBOM;
 
   // ============================================================
-  // Header-Zeile scannen (mit Retry-Loop für lange Header)
+  // Header-Zeile scannen
   // ============================================================
   Retries := 0;
   repeat
     ScanRow;
-
-    if FCellCount > 0 then
-      Break;   // Header komplett
-
-    if Stream.Position >= Stream.Size then
-      Break;   // Datei zu Ende
-
+    if FCellCount > 0 then Break;
+    if Stream.Position >= Stream.Size then Break;
     RefillBuffer;
     SkipBOM;
-
     Inc(Retries);
     if Retries > 1000 then
       raise Exception.CreateFmt(
-        'CSV header too large for buffer (%d bytes). Please increase BlockSize/BufferSize.',
+        'CSV header too large for buffer (%d bytes).',
         [FBufferSize]);
   until False;
 
@@ -1335,37 +1305,44 @@ begin
   end;
 
   // ============================================================
-  // Erste Datenzeile scannen (mit Retry-Loop!)
+  // Datenzeilen bis FromRow scannen
   // ============================================================
   if FFirstLineAsFieldNames then
   begin
-    Retries := 0;
-    repeat
-      if FBufPos >= FBufEnd then
-      begin
-        if Stream.Position >= Stream.Size then
-          Break;
+    FScannedRowCount := 0;   // Header zählt nicht
+
+    // Wir scannen (FSkipFirstRows + 1) Datenzeilen.
+    // Am Ende enthält FCells die erste Zeile im Range.
+    for SkipIdx := 0 to FSkipFirstRows do
+    begin
+      Retries := 0;
+      FCellCount := 0;
+      repeat
+        if FBufPos >= FBufEnd then
+        begin
+          if Stream.Position >= Stream.Size then Break;
+          RefillBuffer;
+          SkipBOM;
+        end;
+
+        ScanRow;
+
+        if FCellCount > 0 then Break;
+
+        if Stream.Position >= Stream.Size then Break;
+
         RefillBuffer;
         SkipBOM;
-      end;
 
-      ScanRow;
+        Inc(Retries);
+        if Retries > 1000 then
+          raise Exception.CreateFmt(
+            'CSV row too large for buffer (%d bytes).',
+            [FBufferSize]);
+      until False;
 
-      if FCellCount > 0 then
-        Break;   // erste Datenzeile komplett
-
-      if Stream.Position >= Stream.Size then
-        Break;   // Datei zu Ende
-
-      RefillBuffer;
-      SkipBOM;
-
-      Inc(Retries);
-      if Retries > 1000 then
-        raise Exception.CreateFmt(
-          'CSV row too large for buffer (%d bytes). Please increase BlockSize/BufferSize.',
-          [FBufferSize]);
-    until False;
+      if FCellCount = 0 then Break;   // EOF erreicht
+    end;
   end;
 end;
 
@@ -1397,6 +1374,12 @@ var
   C: TCSVFastCellRef;
   S: string;
 begin
+  // ============================================================
+  // Range-Anfang noch nicht erreicht? → Zeile verwerfen
+  // ============================================================
+  if FScannedRowCount <= FSkipFirstRows then
+    Exit;
+
   for I := 0 to FCellCount - 1 do
   begin
     if I >= DataSet.FieldCount then Break;
@@ -1443,37 +1426,29 @@ begin
     DataSet.Fields[I].Clear;
 end;
 
-{procedure TCSVFastPacketReader.GotoNextRecord;
-begin
-  if FEOF then Exit;
-
-  if FBufPos >= FBufEnd then
-  begin
-    if Stream.Position >= Stream.Size then
-    begin
-      FEOF := True;
-      FCellCount := 0;
-      Exit;
-    end;
-    RefillBuffer;
-    SkipBOM;
-  end;
-
-  ScanRow;
-
-  if FCellCount = 0 then
-    FEOF := True;
-end; }
-
 procedure TCSVFastPacketReader.GotoNextRecord;
 var
   Retries: Integer;
 begin
   if FEOF then Exit;
+
+  // ============================================================
+  // Range-Ende erreicht? → keine weiteren Zeilen liefern
+  // ============================================================
+  if (FStopAfterRow > 0) and
+     (FScannedRowCount - FSkipFirstRows >= FStopAfterRow) then
+  begin
+    FEOF := True;
+    FCellCount := 0;
+    Exit;
+  end;
+
   Retries := 0;
 
   repeat
-    // Puffer verbraucht? → Nachfüllen (außer wir sind am Stream-Ende)
+    // ============================================================
+    // Puffer verbraucht? → Nachfüllen
+    // ============================================================
     if FBufPos >= FBufEnd then
     begin
       if Stream.Position >= Stream.Size then
@@ -1486,14 +1461,18 @@ begin
       SkipBOM;
     end;
 
+    // ============================================================
+    // Nächste Zeile scannen
+    // ============================================================
     ScanRow;
 
     if FCellCount > 0 then
       Exit;   // Zeile komplett gelesen → fertig
 
-    // ScanRow hat die Zeile NICHT abgeschlossen (Puffer-Ende mittendrin).
-    // FBufPos zeigt jetzt wieder auf den Zeilen-Anfang.
-    // Stream am Ende? → keine Daten mehr, fertig.
+    // ============================================================
+    // ScanRow hat die Zeile NICHT abgeschlossen
+    // → Stream am Ende? Dann fertig.
+    // ============================================================
     if Stream.Position >= Stream.Size then
     begin
       FEOF := True;
@@ -1501,7 +1480,9 @@ begin
       Exit;
     end;
 
+    // ============================================================
     // Nachfüllen und nochmal versuchen
+    // ============================================================
     RefillBuffer;
     SkipBOM;
 
@@ -1628,6 +1609,8 @@ begin
   R.BlockSize := FBlockSizeKB * 1024;
   R.BufferSize := Int64(FBufferSizeKB) * 1024;
   R.InitialCellCapacity := FInitialCellCapacity;
+  R.SkipFirstRows := FSkipFirstRows;
+  R.StopAfterRow := FStopAfterRow;
   Result := R;
 end;
 
@@ -1639,16 +1622,18 @@ begin
 
   P := TCSVFastPacketReader.Create(Self, AStream, CSVOptions);
   try
-  P.BlockSize := FBlockSizeKB * 1024;
-  P.BufferSize := Int64(FBufferSizeKB) * 1024;
-  P.InitialCellCapacity := FInitialCellCapacity;
+    P.BlockSize := FBlockSizeKB * 1024;
+    P.BufferSize := Int64(FBufferSizeKB) * 1024;
+    P.InitialCellCapacity := FInitialCellCapacity;
+    P.SkipFirstRows := FSkipFirstRows;
+    P.StopAfterRow := FStopAfterRow;
 
-  if FieldDefs.Count > 0 then
-    P.CreateFieldDefs := FieldDefs;
-  SetDatasetPacket(P);
+    if FieldDefs.Count > 0 then
+      P.CreateFieldDefs := FieldDefs;
+    SetDatasetPacket(P);
   finally
-  P.Free;
-end;
+    P.Free;
+  end;
 end;
 
 procedure TCSVFastDataset.LoadFromCSVFile(const AFileName: string);

@@ -335,12 +335,12 @@ type
     Kind: TTransferKind;
 
     // === SOURCE ===
-    SourceKind: string;              // 'File', 'Firebird Table', 'External Table'
+    SourceKind: string;
     SourceServer: string;
     SourceDatabase: string;
     SourceTable: string;
     SourceServerVersion: string;
-    SourceFileFormat: string;        // CSV, JSON, XLSX
+    SourceFileFormat: string;
     SourceFileName: string;
     SourceFileSize: Int64;
 
@@ -350,7 +350,7 @@ type
     DestDatabase: string;
     DestTable: string;
     DestServerVersion: string;
-    DestFileName: string;            // Vollständiger Pfad
+    DestFileName: string;
     DestFileSize: Int64;
 
     // === OPTIONS ===
@@ -363,19 +363,21 @@ type
     FormulasApplied: string;
     CreateTableSQL: string;
 
-    CSVOptions: string;              // Mehrzeilige CSV-Parameter-Beschreibung
+    CSVOptions: string;
 
     // === CSV BUFFER PERFORMANCE ===
-    CSVBlockSizeKB: Integer;          // Block Size in KB
-    CSVBufferSizeKB: Integer;         // Buffer Size in KB (nach Anpassung)
-    CSVInitialCellCapacity: Integer;  // Initial Cells
-    CSVRowWidthScanMode: string;      // 'Whole file', 'X MB', 'None'
-    CSVRowWidthScanTime: Double;      // Scan-Dauer in Sekunden
-    CSVMaxRowWidth: Int64;            // Ermittelte max. Zeilenbreite in Bytes
-    CSVBufferAutoAdjusted: Boolean;   // Wurde BufferSize automatisch angepasst?
-    CSVBufferOriginalKB: Integer;     // BufferSize vor der Anpassung
+    CSVBlockSizeKB: Integer;            // Block Size in KB
+    CSVBufferSizeKB: Integer;           // Buffer Size in KB (nach Anpassung)
+    CSVInitialCellCapacity: Integer;    // Initial Cells
+    CSVRowWidthScanMode: string;        // 'Whole file' oder 'Range 1..1250000'
+    CSVRowWidthScanRows: Int64;         // Wie viele Zeilen wurden gescannt
+    CSVRowWidthScanIsCustom: Boolean;   // TRUE = CustomScan, FALSE = FullScan
+    CSVRowWidthScanTime: Double;        // Scan-Dauer in Sekunden
+    CSVMaxRowWidth: Int64;              // Ermittelte max. Zeilenbreite in Bytes
+    CSVBufferAutoAdjusted: Boolean;     // Wurde BufferSize automatisch angepasst?
+    CSVBufferOriginalKB: Integer;       // BufferSize vor der Anpassung
 
-    OptionsExtra: string;            // Zusätzliche Optionen (z.B. 'Read-Only')
+    OptionsExtra: string;
 
     PresetName: string;
     PresetFileName: string;
@@ -390,7 +392,6 @@ type
     ClientLibVersion: string;
     SystemInfo: TSystemInfo;
   end;
-
 
 
   //search
@@ -583,9 +584,11 @@ function DetectDelimiter(const AFileName: string): Char;
 function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
 function EstimateCSVMaxLineWidth(
   const AFileName: string;
-  AMaxScanMB: Integer = 10;
-  AMinScanRows: Integer = 1000;
-  AQuoteChar: Char = '"'): Int64;
+  AFromRow: Int64;
+  AToRow: Int64;
+  AScanRows: Int64;
+  AQuoteChar: Char;
+  out ATotalRowsInRange: Int64): Int64;
 
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
@@ -1222,13 +1225,40 @@ begin
     Result := '"';
 end;
 
+{ ------------------------------------------------------------------
+  EstimateCSVMaxLineWidth
+  Scannt eine CSV-Datei und liefert die maximale Zeilenbreite.
+
+  Parameter:
+    AFileName    : Datei
+    AFromRow     : Erste Datenzeile im Range (1-basiert, ohne Header)
+    AToRow       : Letzte Datenzeile im Range (0 = bis Datei-Ende)
+    AScanRows    : 0 = FullScan (kompletter Range)
+                   >0 = CustomScan (nur die ersten N Zeilen ab AFromRow)
+    AQuoteChar   : Quote-Zeichen (z.B. ")
+
+  Out:
+    ATotalRowsInRange : Anzahl gescannter Datenzeilen
+                        - bei FullScan: exakt
+                        - bei CustomScan: = AScanRows
+
+  Return:
+    Maximale Zeilenbreite in Bytes, oder -1 bei Fehler.
+
+  Hinweis:
+    Bei CustomScan wird der Rest des Range NICHT geprüft.
+    Das ist gewollt: User akzeptiert bewusst das Risiko,
+    dass später eine größere Zeile auftaucht.
+  ------------------------------------------------------------------ }
 function EstimateCSVMaxLineWidth(
   const AFileName: string;
-  AMaxScanMB: Integer;
-  AMinScanRows: Integer;
-  AQuoteChar: Char): Int64;
+  AFromRow: Int64;
+  AToRow: Int64;
+  AScanRows: Int64;
+  AQuoteChar: Char;
+  out ATotalRowsInRange: Int64): Int64;
 const
-  BUF_SIZE = 4 * 1024 * 1024;   // 4 MB Block
+  BUF_SIZE = 4 * 1024 * 1024;
 var
   FS: TFileStream;
   Buf: TBytes;
@@ -1237,47 +1267,30 @@ var
   MaxWidth: Int64;
   CurrentWidth: Int64;
   InQuote: Boolean;
-  TotalRead: Int64;
-  RowCount: Int64;
-  MaxBytes: Int64;
-  ScanWholeFile: Boolean;
+  DataRowInFile: Int64;      // 0 = Header, 1 = erste Datenzeile, ...
+  InRange: Boolean;
+  RowsScannedInRange: Int64;
   StopScan: Boolean;
 begin
   Result := -1;
+  ATotalRowsInRange := 0;
   if not FileExists(AFileName) then Exit;
 
   FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
   try
-    // ============================================================
-    // Semantik:
-    //   -1  → ganze Datei
-    //    0  → (sollte nicht aufgerufen werden, aber sicherheitshalber ganze Datei)
-    //   >0  → so viele MB
-    // ============================================================
-    ScanWholeFile := (AMaxScanMB <= 0);
-
-    if ScanWholeFile then
-      MaxBytes := FS.Size
-    else
-    begin
-      MaxBytes := Int64(AMaxScanMB) * 1024 * 1024;
-      if MaxBytes > FS.Size then
-        MaxBytes := FS.Size;
-    end;
-
     SetLength(Buf, BUF_SIZE);
-
     MaxWidth := 0;
     CurrentWidth := 0;
     InQuote := False;
-    TotalRead := 0;
-    RowCount := 0;
+    DataRowInFile := 0;
+    InRange := False;
+    RowsScannedInRange := 0;
     StopScan := False;
 
     while not StopScan do
     begin
       BytesRead := FS.Read(Buf[0], BUF_SIZE);
-      if BytesRead <= 0 then Break;   // Datei-Ende
+      if BytesRead <= 0 then Break;
 
       P := Pointer(Buf);
       BufEnd := P + BytesRead;
@@ -1288,12 +1301,44 @@ begin
           InQuote := not InQuote
         else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
         begin
-          if CurrentWidth > MaxWidth then
-            MaxWidth := CurrentWidth;
-          CurrentWidth := 0;
-          Inc(RowCount);
+          // ============================================================
+          // Zeilenende erreicht
+          // ============================================================
+          Inc(DataRowInFile);
 
-          // CRLF: LF überspringen
+          // Datenzeile #DataRowInFile ist die erste ab Zeile 1 (Header = Zeile 0)
+          // DataRowInFile = 1  →  erste Datenzeile
+          // DataRowInFile = N  →  Datenzeile N
+
+          if DataRowInFile >= AFromRow then
+          begin
+            InRange := True;
+
+            // Range-Ende erreicht (nur wenn AToRow > 0)?
+            if (AToRow > 0) and (DataRowInFile > AToRow) then
+            begin
+              StopScan := True;
+              Break;
+            end;
+
+            // MaxWidth tracken
+            if CurrentWidth > MaxWidth then
+              MaxWidth := CurrentWidth;
+
+            Inc(RowsScannedInRange);
+            Inc(ATotalRowsInRange);
+
+            // CustomScan: Limit erreicht?
+            if (AScanRows > 0) and (RowsScannedInRange >= AScanRows) then
+            begin
+              StopScan := True;
+              Break;
+            end;
+          end;
+
+          CurrentWidth := 0;
+
+          // CRLF überspringen
           if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
             Inc(P);
         end
@@ -1302,29 +1347,10 @@ begin
 
         Inc(P);
       end;
-
-      Inc(TotalRead, BytesRead);
-
-      // ============================================================
-      // Stop-Bedingungen
-      // ============================================================
-      if not ScanWholeFile then
-      begin
-        // MB-Limit erreicht UND MinRows erfüllt → Stop
-        if (TotalRead >= MaxBytes) and
-           ((AMinScanRows <= 0) or (RowCount >= AMinScanRows)) then
-          StopScan := True;
-
-        // MinRows erreicht → Stop (unabhängig von MB)
-        if (AMinScanRows > 0) and (RowCount >= AMinScanRows) and
-           (TotalRead >= MaxBytes) then
-          StopScan := True;
-      end;
-      // ScanWholeFile → nur Datei-Ende stoppt (durch BytesRead <= 0)
     end;
 
-    // Letzte angefangene Zeile noch berücksichtigen
-    if CurrentWidth > MaxWidth then
+    // Letzte angefangene Zeile (nur wenn im Range)
+    if InRange and (CurrentWidth > MaxWidth) then
       MaxWidth := CurrentWidth;
 
     Result := MaxWidth;
@@ -1958,6 +1984,16 @@ begin
         if Stats.CSVRowWidthScanMode <> '' then
           SL.Add('    Row Width Scan Mode:   ' + Stats.CSVRowWidthScanMode);
 
+        if Stats.CSVRowWidthScanRows > 0 then
+        begin
+          if Stats.CSVRowWidthScanIsCustom then
+            SL.Add(Format('    Row Width Scan Rows:   %s (CustomScan)',
+              [FormatNumberEN(Stats.CSVRowWidthScanRows)]))
+          else
+            SL.Add(Format('    Row Width Scan Rows:   %s (FullScan)',
+              [FormatNumberEN(Stats.CSVRowWidthScanRows)]));
+        end;
+
         if Stats.CSVRowWidthScanTime > 0 then
           SL.Add(Format('    Row Width Scan Time:   %.3f s', [Stats.CSVRowWidthScanTime]));
 
@@ -1965,6 +2001,10 @@ begin
           SL.Add(Format('    Max Row Width:         %s Bytes (%.2f KB)',
             [FormatNumberEN(Stats.CSVMaxRowWidth),
              Stats.CSVMaxRowWidth / 1024]));
+
+        // Warnung bei CustomScan
+        if Stats.CSVRowWidthScanIsCustom then
+          SL.Add('    Note:                  CustomScan only - later rows may be wider');
       end;
 
       SL.Add('');
