@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 802
+  Left = 569
   Height = 894
-  Top = 116
+  Top = 439
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894

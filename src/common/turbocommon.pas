@@ -582,13 +582,7 @@ function CSVLineEndingStrToName(const AValue: string): string;
 function DetectLineEnding(const AFileName: string): string;
 function DetectDelimiter(const AFileName: string): Char;
 function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
-function EstimateCSVMaxLineWidth(
-  const AFileName: string;
-  AFromRow: Int64;
-  AToRow: Int64;
-  AScanRows: Int64;
-  AQuoteChar: Char;
-  out ATotalRowsInRange: Int64): Int64;
+function EstimateCSVMaxLineWidth( const AFileName: string; AFromRow: Int64; AToRow: Int64; AScanRows: Int64; AQuoteChar: Char; out ATotalRowsInRange: Int64): Int64;
 
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
@@ -1250,114 +1244,132 @@ end;
     Das ist gewollt: User akzeptiert bewusst das Risiko,
     dass später eine größere Zeile auftaucht.
   ------------------------------------------------------------------ }
-function EstimateCSVMaxLineWidth(
-  const AFileName: string;
-  AFromRow: Int64;
-  AToRow: Int64;
-  AScanRows: Int64;
-  AQuoteChar: Char;
-  out ATotalRowsInRange: Int64): Int64;
-const
-  BUF_SIZE = 4 * 1024 * 1024;
-var
-  FS: TFileStream;
-  Buf: TBytes;
-  P, BufEnd: PChar;
-  BytesRead: Integer;
-  MaxWidth: Int64;
-  CurrentWidth: Int64;
-  InQuote: Boolean;
-  DataRowInFile: Int64;      // 0 = Header, 1 = erste Datenzeile, ...
-  InRange: Boolean;
-  RowsScannedInRange: Int64;
-  StopScan: Boolean;
-begin
-  Result := -1;
-  ATotalRowsInRange := 0;
-  if not FileExists(AFileName) then Exit;
+  function EstimateCSVMaxLineWidth(
+    const AFileName: string;
+    AFromRow: Int64;
+    AToRow: Int64;
+    AScanRows: Int64;
+    AQuoteChar: Char;
+    out ATotalRowsInRange: Int64): Int64;
+  const
+    BUF_SIZE = 4 * 1024 * 1024;
+  var
+    FS: TFileStream;
+    Buf: TBytes;
+    P, BufEnd: PChar;
+    BytesRead: Integer;
+    MaxWidth: Int64;
+    CurrentWidth: Int64;
+    InQuote: Boolean;
+    DataRowInFile: Int64;      // 0 = keine Zeile, 1 = Header, 2 = Datenzeile 1, ...
+    DataRowIdx: Int64;         // 1 = Datenzeile 1, 2 = Datenzeile 2, ...
+    InRange: Boolean;
+    RowsScannedInRange: Int64;
+    StopScan: Boolean;
+  begin
+    Result := -1;
+    ATotalRowsInRange := 0;
+    if not FileExists(AFileName) then Exit;
 
-  FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
-  try
-    SetLength(Buf, BUF_SIZE);
-    MaxWidth := 0;
-    CurrentWidth := 0;
-    InQuote := False;
-    DataRowInFile := 0;
-    InRange := False;
-    RowsScannedInRange := 0;
-    StopScan := False;
+    FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+    try
+      SetLength(Buf, BUF_SIZE);
+      MaxWidth := 0;
+      CurrentWidth := 0;
+      InQuote := False;
+      DataRowInFile := 0;
+      InRange := False;
+      RowsScannedInRange := 0;
+      StopScan := False;
 
-    while not StopScan do
-    begin
-      BytesRead := FS.Read(Buf[0], BUF_SIZE);
-      if BytesRead <= 0 then Break;
-
-      P := Pointer(Buf);
-      BufEnd := P + BytesRead;
-
-      while P < BufEnd do
+      while not StopScan do
       begin
-        if P^ = AQuoteChar then
-          InQuote := not InQuote
-        else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
+        BytesRead := FS.Read(Buf[0], BUF_SIZE);
+        if BytesRead <= 0 then Break;
+
+        P := Pointer(Buf);
+        BufEnd := P + BytesRead;
+
+        while P < BufEnd do
         begin
-          // ============================================================
-          // Zeilenende erreicht
-          // ============================================================
-          Inc(DataRowInFile);
-
-          // Datenzeile #DataRowInFile ist die erste ab Zeile 1 (Header = Zeile 0)
-          // DataRowInFile = 1  →  erste Datenzeile
-          // DataRowInFile = N  →  Datenzeile N
-
-          if DataRowInFile >= AFromRow then
+          if P^ = AQuoteChar then
+            InQuote := not InQuote
+          else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
           begin
-            InRange := True;
+            // ============================================================
+            // Zeilenende erreicht
+            // DataRowInFile zählt ALLE Zeilen (Header + Daten)
+            //   DataRowInFile = 1 → Header
+            //   DataRowInFile = 2 → Datenzeile 1
+            // ============================================================
+            Inc(DataRowInFile);
 
-            // Range-Ende erreicht (nur wenn AToRow > 0)?
-            if (AToRow > 0) and (DataRowInFile > AToRow) then
+            // Datenzeilennummer (Header ausgeschlossen)
+            DataRowIdx := DataRowInFile - 1;
+
+            if DataRowIdx >= AFromRow then
             begin
-              StopScan := True;
-              Break;
+              InRange := True;
+
+              // Range-Ende erreicht? (AToRow bezieht sich auf Datenzeilen)
+              if (AToRow > 0) and (DataRowIdx > AToRow) then
+              begin
+                StopScan := True;
+                Break;
+              end;
+
+              // MaxWidth tracken
+              if CurrentWidth > MaxWidth then
+                MaxWidth := CurrentWidth;
+
+              Inc(RowsScannedInRange);
+              Inc(ATotalRowsInRange);
+
+              // CustomScan: Limit erreicht?
+              if (AScanRows > 0) and (RowsScannedInRange >= AScanRows) then
+              begin
+                StopScan := True;
+                Break;
+              end;
             end;
 
-            // MaxWidth tracken
+            CurrentWidth := 0;
+
+            // CRLF als Einheit behandeln
+            if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
+              Inc(P);
+          end
+          else
+            Inc(CurrentWidth);
+
+          Inc(P);
+        end;
+      end;
+
+      // ============================================================
+      // Letzte Zeile ohne abschließenden Zeilenumbruch
+      // ============================================================
+      if (not StopScan) and (CurrentWidth > 0) then
+      begin
+        Inc(DataRowInFile);
+        DataRowIdx := DataRowInFile - 1;
+
+        if DataRowIdx >= AFromRow then
+        begin
+          if (AToRow = 0) or (DataRowIdx <= AToRow) then
+          begin
             if CurrentWidth > MaxWidth then
               MaxWidth := CurrentWidth;
-
-            Inc(RowsScannedInRange);
             Inc(ATotalRowsInRange);
-
-            // CustomScan: Limit erreicht?
-            if (AScanRows > 0) and (RowsScannedInRange >= AScanRows) then
-            begin
-              StopScan := True;
-              Break;
-            end;
           end;
-
-          CurrentWidth := 0;
-
-          // CRLF überspringen
-          if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
-            Inc(P);
-        end
-        else
-          Inc(CurrentWidth);
-
-        Inc(P);
+        end;
       end;
+
+      Result := MaxWidth;
+    finally
+      FS.Free;
     end;
-
-    // Letzte angefangene Zeile (nur wenn im Range)
-    if InRange and (CurrentWidth > MaxWidth) then
-      MaxWidth := CurrentWidth;
-
-    Result := MaxWidth;
-  finally
-    FS.Free;
   end;
-end;
 
 // ============================================================================
 // Markiert eine TIBDatabase-Instanz mit ihrem RegisteredDatabases-Index.
