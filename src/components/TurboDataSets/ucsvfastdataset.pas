@@ -665,6 +665,10 @@ uses
   Classes, SysUtils, DB, BufDataset, csvdataset, csvreadwrite;
 
 type
+  TCSVLoadProgressEvent = procedure(ARowsRead: Int64;
+    AElapsedSeconds: Double) of object;
+
+type
   { Vorwärtsdeklaration }
   TCSVFastDataset = class;
 
@@ -720,9 +724,16 @@ type
   FSkipFirstRows: Int64;
   FStopAfterRow: Int64;
 
-procedure RefillBuffer;
-procedure SkipBOM;
-procedure ScanRow;
+  FOnProgress: TCSVLoadProgressEvent;
+  FTotalRowsForProgress: Int64;
+  FProgressUpdatePercent: Integer;
+  FLastProgressPercent: Integer;
+  FStartTime: TDateTime;
+  FCancelRequested: Boolean;
+
+  procedure RefillBuffer;
+  procedure SkipBOM;
+  procedure ScanRow;
 procedure AppendCell(Start: PChar; Len: Int64);
 procedure EnsureCellCapacity;
 function  CellToStr(const C: TCSVFastCellRef): string;
@@ -756,6 +767,10 @@ property InitialCellCapacity: Integer read FInitialCellCapacity write SetInitial
 property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
 property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
 property ScannedRowCount: Int64 read FScannedRowCount;
+property OnProgress: TCSVLoadProgressEvent read FOnProgress write FOnProgress;
+property TotalRowsForProgress: Int64 read FTotalRowsForProgress write FTotalRowsForProgress;
+property ProgressUpdatePercent: Integer read FProgressUpdatePercent write FProgressUpdatePercent;
+property CancelRequested: Boolean read FCancelRequested write FCancelRequested;
 end;
 
   { ------------------------------------------------------------------
@@ -769,6 +784,12 @@ end;
       FInitialCellCapacity: Integer;
       FSkipFirstRows: Int64;
       FStopAfterRow: Int64;
+
+      FOnProgress: TCSVLoadProgressEvent;
+      FTotalRowsForProgress: Int64;
+      FProgressUpdatePercent: Integer;
+      FCancelRequested: Boolean;
+
       procedure SetBlockSizeKB(AValue: Integer);
       procedure SetBufferSizeKB(AValue: Integer);
       procedure SetInitialCellCapacity(AValue: Integer);
@@ -784,6 +805,11 @@ end;
       // Range-Steuerung — programmatisch gesetzt, nicht im OI
       property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
       property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
+
+      property OnProgress: TCSVLoadProgressEvent read FOnProgress write FOnProgress;
+      property TotalRowsForProgress: Int64 read FTotalRowsForProgress write FTotalRowsForProgress;
+      property ProgressUpdatePercent: Integer read FProgressUpdatePercent write FProgressUpdatePercent;
+      property CancelRequested: Boolean read FCancelRequested write FCancelRequested;
     published
       // Puffergrößen in KB (für den Endanwender verständlicher)
       property BlockSize: Integer read FBlockSizeKB write SetBlockSizeKB default 1024;
@@ -993,11 +1019,22 @@ begin
   FScannedRowCount := 0;
   FSkipFirstRows := 0;
   FStopAfterRow := 0;
+
+  FTotalRowsForProgress := 0;
+  FProgressUpdatePercent := 1;
+  FLastProgressPercent := -1;
+  FStartTime := 0;
+  FCancelRequested := False;
 end;
 
 constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
                                         AStream: TStream; AOptions: TCSVOptions);
 begin
+  FOnProgress := nil;
+  FTotalRowsForProgress := 0;
+  FProgressUpdatePercent := 1;
+  FCancelRequested := False;
+
   // Erst den Standard-Konstruktor aufrufen
   Create(ADataSet, AStream);
 
@@ -1156,6 +1193,7 @@ var
   InQ: Boolean;
   QChar: Char;
   Delim: Char;
+  NewPercent: Integer;
 begin
   FCellCount := 0;
   InQ := FInQuote;
@@ -1208,6 +1246,29 @@ begin
     begin
       AppendCell(CellStart, P - CellStart);
       Inc(FScannedRowCount);
+
+      // ============================================================
+      // Progress-Callback (prozent-basiert)
+      // ============================================================
+      if (FProgressUpdatePercent > 0) and
+         (FTotalRowsForProgress > 0) and
+         Assigned(FOnProgress) then
+      begin
+        if FStartTime = 0 then
+          FStartTime := Now;
+
+        NewPercent := (FScannedRowCount * 100) div FTotalRowsForProgress;
+        if NewPercent >= (FLastProgressPercent + FProgressUpdatePercent) then
+        begin
+          FLastProgressPercent := NewPercent;
+          FOnProgress(FScannedRowCount, (Now - FStartTime) * SecsPerDay);
+
+          // Cancel-Check
+          if FCancelRequested then
+            raise EAbort.Create('Cancelled by user');
+        end;
+      end;
+
 
       if (C = CR) and (P + 1 < FBufEnd) and ((P + 1)^ = LF) then
         Inc(P, 2)
@@ -1611,6 +1672,12 @@ begin
   R.InitialCellCapacity := FInitialCellCapacity;
   R.SkipFirstRows := FSkipFirstRows;
   R.StopAfterRow := FStopAfterRow;
+
+  R.OnProgress := FOnProgress;
+  R.TotalRowsForProgress := FTotalRowsForProgress;
+  R.ProgressUpdatePercent := FProgressUpdatePercent;
+  R.CancelRequested := FCancelRequested;
+
   Result := R;
 end;
 
@@ -1627,6 +1694,11 @@ begin
     P.InitialCellCapacity := FInitialCellCapacity;
     P.SkipFirstRows := FSkipFirstRows;
     P.StopAfterRow := FStopAfterRow;
+
+    P.OnProgress := FOnProgress;
+    P.TotalRowsForProgress := FTotalRowsForProgress;
+    P.ProgressUpdatePercent := FProgressUpdatePercent;
+    P.CancelRequested := FCancelRequested;
 
     if FieldDefs.Count > 0 then
       P.CreateFieldDefs := FieldDefs;
