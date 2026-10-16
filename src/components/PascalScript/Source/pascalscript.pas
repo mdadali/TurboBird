@@ -11,7 +11,7 @@ uses
   uPSR_stdctrls, PascalScript_Core_Reg, uPSC_buttons, uPSC_controls, 
   uPSC_extctrls, uPSC_forms, uPSC_graphics, uPSC_menus, uPSC_stdctrls, 
   uPSComponent_Forms, uPSComponent_StdCtrls, uPSR_buttons, uPSR_controls, 
-  uPSR_extctrls, uPSR_forms, uPSR_graphics, uPSR_menus, uPSI_uib, 
+  uPSR_extctrls, uPSR_forms, uPSR_graphics, uPSR_menus,
   LazarusPackageIntf;
 
 implementation

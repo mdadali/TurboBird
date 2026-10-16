@@ -366,8 +366,8 @@ type
     CSVOptions: string;
 
     // === CSV BUFFER PERFORMANCE ===
-    CSVBlockSizeKB: Integer;            // Block Size in KB
-    CSVBufferSizeKB: Integer;           // Buffer Size in KB (nach Anpassung)
+    CSVBlockSizeBytes: Integer;            // Block Size in Byte
+    CSVBufferSizeBytes: Integer;           // Buffer Size in Byte (nach Anpassung)
     CSVInitialCellCapacity: Integer;    // Initial Cells
     CSVRowWidthScanMode: string;        // 'Whole file' oder 'Range 1..1250000'
     CSVRowWidthScanRows: Int64;         // Wie viele Zeilen wurden gescannt
@@ -375,7 +375,7 @@ type
     CSVRowWidthScanTime: Double;        // Scan-Dauer in Sekunden
     CSVMaxRowWidth: Int64;              // Ermittelte max. Zeilenbreite in Bytes
     CSVBufferAutoAdjusted: Boolean;     // Wurde BufferSize automatisch angepasst?
-    CSVBufferOriginalKB: Integer;       // BufferSize vor der Anpassung
+    CSVBufferOriginalBytes: Int64;      // BufferSize vor der Anpassung
 
     OptionsExtra: string;
 
@@ -550,8 +550,8 @@ var
     CSVQuoteOuterWhitespace: boolean;
 
     //CSV FileRead Options
-    CSVBlockSizeKB: Int64 = 1024;
-    CSVBufferSizeKB: Int64 = 2048;
+    CSVBlockSizeBytes: Integer = 1048576;      // 1 MB
+    CSVBufferSizeBytes: Int64 = 2097152;       // 2 MB
     CSVInitialCellCapacity: Int64 = 64;
     CSVRowWidthScanMB: Integer = 10;
     CSVMinRowsForRowWidthScan: Integer = 1000;
@@ -1983,23 +1983,23 @@ begin
       // ============================================================
       // CSV BUFFER PERFORMANCE
       // ============================================================
-      if (Stats.CSVBlockSizeKB > 0) or
-         (Stats.CSVBufferSizeKB > 0) or
+      if (Stats.CSVBlockSizeBytes > 0) or
+         (Stats.CSVBufferSizeBytes > 0) or
          (Stats.CSVRowWidthScanMode <> '') then
       begin
         SL.Add('');
         SL.Add('  Buffer Performance:');
 
-        if Stats.CSVBlockSizeKB > 0 then
-          SL.Add('    Block Size:            ' + IntToStr(Stats.CSVBlockSizeKB) + ' KB');
+        if Stats.CSVBlockSizeBytes > 0 then
+          SL.Add('    Block Size:            ' + IntToStr(Stats.CSVBlockSizeBytes) + ' KB');
 
-        if Stats.CSVBufferSizeKB > 0 then
+        if Stats.CSVBufferSizeBytes > 0 then
         begin
           if Stats.CSVBufferAutoAdjusted then
             SL.Add(Format('    Buffer Size:           %d KB (auto-adjusted from %d KB)',
-              [Stats.CSVBufferSizeKB, Stats.CSVBufferOriginalKB]))
+              [Stats.CSVBufferSizeBytes, Stats.CSVBufferOriginalBytes]))
           else
-            SL.Add('    Buffer Size:           ' + IntToStr(Stats.CSVBufferSizeKB) + ' KB');
+            SL.Add('    Buffer Size:           ' + IntToStr(Stats.CSVBufferSizeBytes) + ' KB');
         end;
 
         if Stats.CSVInitialCellCapacity > 0 then
@@ -4997,15 +4997,15 @@ begin
   AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
 
   // Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
-  CSVBlockSizeKB           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
-  CSVBufferSizeKB          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
+  CSVBlockSizeBytes           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
+  CSVBufferSizeBytes          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
   CSVInitialCellCapacity   := fIniFile.ReadInteger('CSVEditor','CSVInitialCellCapacity', 64);
   CSVRowWidthScanMB         := fIniFile.ReadInteger('CSVEditor','CSVRowWidthScanMB', 10);
   CSVMinRowsForRowWidthScan := fIniFile.ReadInteger('CSVEditor','CSVMinRowsForRowWidthScan', 1000);
 
   // Sicherheitskorrektur: BufferSize muss >= BlockSize * 2 sein
-  if CSVBufferSizeKB < CSVBlockSizeKB * 2 then
-    CSVBufferSizeKB := CSVBlockSizeKB * 2;
+  if CSVBufferSizeBytes < CSVBlockSizeBytes * 2 then
+    CSVBufferSizeBytes := CSVBlockSizeBytes * 2;
 
   CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
 
@@ -5123,8 +5123,8 @@ begin
   fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
   fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
   // Performance-Parameter
-  fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeKB);
-  fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeKB);
+  fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeBytes);
+  fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeBytes);
   fIniFile.WriteInteger('CSVEditor','CSVInitialCellCapacity', CSVInitialCellCapacity);
   fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
   fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);

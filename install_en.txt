@@ -33,6 +33,7 @@ Steps:
        - PascalScript
        - jvdesign
        - uib
+       - TurboDataSets
 
   5. Install all other required components via the
      Online Package Manager.

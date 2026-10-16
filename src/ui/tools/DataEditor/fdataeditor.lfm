@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 841
+  Left = 966
   Height = 894
-  Top = 157
+  Top = 413
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894
@@ -899,8 +899,8 @@ object frmDataEditor: TfrmDataEditor
           Left = 32
           Height = 19
           Top = 32
-          Width = 88
-          Caption = 'Block Size (KB)'
+          Width = 100
+          Caption = 'Block Size (Byte)'
         end
         object edtBlockSize: TEdit
           Left = 240
@@ -914,8 +914,8 @@ object frmDataEditor: TfrmDataEditor
           Left = 32
           Height = 19
           Top = 80
-          Width = 95
-          Caption = 'Buffer Size (KB)'
+          Width = 107
+          Caption = 'Buffer Size (Byte)'
         end
         object edtBufferSize: TEdit
           Left = 240
@@ -1039,27 +1039,27 @@ object frmDataEditor: TfrmDataEditor
     end
   end
   object DataSource1: TDataSource
-    Left = 840
-    Top = 352
+    Left = 703
+    Top = 112
   end
   object OpenDialog1: TOpenDialog
-    Left = 688
-    Top = 464
+    Left = 568
+    Top = 472
   end
   object SaveDialog1: TSaveDialog
-    Left = 624
-    Top = 544
+    Left = 568
+    Top = 584
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlFirebird40
-    Left = 568
-    Top = 272
+    Left = 536
+    Top = 208
   end
   object pmGrid: TPopupMenu
-    Left = 808
-    Top = 440
+    Left = 936
+    Top = 312
     object Separator2: TMenuItem
       Caption = '-'
       Visible = False
@@ -1106,8 +1106,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = [rxpoShowTitle, rxpoShowFooter, rxpoShowGridColor, rxpoShowFooterColor, rxpoShowReportTitle]
     ShowProgress = True
-    Left = 720
-    Top = 264
+    Left = 568
+    Top = 288
   end
   object RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet
     RxDBGrid = RxDBGrid1
@@ -1115,8 +1115,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = []
     DefaultExt = rdeNone
-    Left = 664
-    Top = 368
+    Left = 568
+    Top = 376
   end
   object RxDBGridExportPDF1: TRxDBGridExportPDF
     Caption = 'Export to PDF file'
@@ -1130,8 +1130,8 @@ object frmDataEditor: TfrmDataEditor
   object sWorksheetDataset1: TsWorksheetDataset
     AutoCalcFields = False
     FieldDefs = <>
-    Left = 880
-    Top = 576
+    Left = 936
+    Top = 664
   end
   object SdfDataSet1: TSdfDataSet
     FileMustExist = True
@@ -1142,23 +1142,23 @@ object frmDataEditor: TfrmDataEditor
     Delimiter = ','
     FirstLineAsSchema = False
     StripTrailingDelimiters = False
-    Left = 720
-    Top = 312
+    Left = 936
+    Top = 432
   end
   object FixedFormatDataSet1: TFixedFormatDataSet
     FileMustExist = True
     ReadOnly = False
     FieldDefs = <>
     AutoCalcFields = False
-    Left = 824
-    Top = 416
+    Left = 936
+    Top = 568
   end
   object Dbf1: TDbf
     IndexDefs = <>
     TableLevel = 4
     FilterOptions = []
-    Left = 800
-    Top = 200
+    Left = 936
+    Top = 216
   end
   object CSVFastDataset1: TCSVFastDataset
     FieldDefs = <>
@@ -1170,12 +1170,14 @@ object frmDataEditor: TfrmDataEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    Left = 630
-    Top = 197
+    InitialCellCapacity = 64
+    ProgressUpdatePercent = 1
+    Left = 936
+    Top = 80
   end
-  object JSONDataSet1: TJSONDataSet
+  object JSONFastDataSet1: TJSONFastDataSet
     FieldDefs = <>
-    Left = 656
-    Top = 556
+    Left = 1070
+    Top = 85
   end
 end

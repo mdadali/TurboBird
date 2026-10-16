@@ -5,10 +5,10 @@ unit fdataeditor;
 interface
 
 uses
-  Classes, SysUtils, Math, DB, csvdataset, SdfData, dbf, Forms, Controls, Graphics,
-  Dialogs, Clipbrd, DBCtrls, StdCtrls, ExtCtrls, ComCtrls, Menus, SynEdit,
-  SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf, RxDBGridPrintGrid,
-  RxDBGridExportSpreadSheet, fpsDataset,
+  Classes, SysUtils, Math, DB, csvdataset, SdfData, dbf, fpjsondataset, Forms,
+  Controls, Graphics, Dialogs, Clipbrd, DBCtrls, StdCtrls, ExtCtrls, ComCtrls,
+  Menus, SynEdit, SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf,
+  RxDBGridPrintGrid, RxDBGridExportSpreadSheet, fpsDataset,
 
 
   IB,
@@ -20,8 +20,7 @@ uses
   SysTables,
   uthemeselector,
   uGenSQLFromCSVDataset,
-  c_json_dataset,
-  uCSVFastDataset,
+  uCSVFastDataset, uJSONFastDataSet,
   uCreateTableFromDataSet,
 
   fdataexportersintrf,
@@ -84,7 +83,7 @@ type
     FixedFormatDataSet1: TFixedFormatDataSet;
     grboxCSVFileRead: TGroupBox;
     grboxRangeOptions: TGroupBox;
-    JSONDataSet1: TJSONDataSet;
+    JSONFastDataSet1: TJSONFastDataSet;
     Label1: TLabel;
     Label10: TLabel;
     Label5: TLabel;
@@ -548,8 +547,8 @@ begin
     if FOwner.DataSource1.DataSet = FOwner.CSVFastDataset1 then
       FOwner.CSVFastDataset1.LoadFromCSVFile(FFileName)
 
-    else if FOwner.DataSource1.DataSet = FOwner.JSONDataset1 then
-      FOwner.JSONDataset1.LoadFromFile(FFileName)
+    else if FOwner.DataSource1.DataSet = FOwner.JSONFastDataSet1 then
+      FOwner.JSONFastDataSet1.LoadFromFile(FFileName)
 
     else if FOwner.DataSource1.DataSet = FOwner.sWorksheetDataset1 then
     begin
@@ -649,6 +648,9 @@ end;
 
 procedure TfrmDataEditor.SetCSVSettingsFromForm;
 begin
+  // ============================================================
+  // CSV-Optionen
+  // ============================================================
   CSVFastDataset1.CSVOptions.DefaultFieldLength := StrToIntDef(edtDefaultFieldLength.Text, 50);
   CSVFastDataset1.CSVOptions.Delimiter := CSVDelimiter;
   CSVFastDataset1.CSVOptions.LineEnding := CSVLineEnding;
@@ -663,33 +665,37 @@ begin
   CSVFastDataset1.CSVOptions.QuoteOuterWhitespace  := chkBoxQuoteOuterWhiteSpace.Checked;
 
   // ============================================================
-  // CSVFastDataSet Performance-Parameter
+  // Performance-Parameter: GUI → Dataset (alle in BYTES)
   // ============================================================
   TCSVFastDataset(CSVFastDataset1).BlockSize :=
-      StrToIntDef(edtBlockSize.Text, 1024);
+      StrToIntDef(edtBlockSize.Text, 1048576);
   TCSVFastDataset(CSVFastDataset1).BufferSize :=
-      StrToIntDef(edtBufferSize.Text, 2048);
+      StrToInt64Def(edtBufferSize.Text, 2097152);
   TCSVFastDataset(CSVFastDataset1).InitialCellCapacity :=
       StrToIntDef(edtInitialCellCapacity.Text, 64);
 
   // ============================================================
-  // Tatsächliche (ggf. geklemmte) Werte zurück in GUI + Globals
+  // Dataset → globale Variablen
+  // (die Setter könnten Werte angepasst haben)
   // ============================================================
-  CSVBlockSizeKB         := TCSVFastDataset(CSVFastDataset1).BlockSize;
-  CSVBufferSizeKB        := TCSVFastDataset(CSVFastDataset1).BufferSize;
+  CSVBlockSizeBytes      := TCSVFastDataset(CSVFastDataset1).BlockSize;
+  CSVBufferSizeBytes     := TCSVFastDataset(CSVFastDataset1).BufferSize;
   CSVInitialCellCapacity := TCSVFastDataset(CSVFastDataset1).InitialCellCapacity;
 
-  edtBlockSize.Text           := IntToStr(CSVBlockSizeKB);
-  edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
+  // ============================================================
+  // Globale Variablen → GUI (Rückspiegelung)
+  // ============================================================
+  edtBlockSize.Text           := IntToStr(CSVBlockSizeBytes);
+  edtBufferSize.Text          := IntToStr(CSVBufferSizeBytes);
   edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
 
   // ============================================================
   // Info-Label mit den tatsächlich aktiven Werten
   // ============================================================
   lblActivePerformanceSettings.Caption := Format(
-    'Active: Block=%d KB, Buffer=%d KB, Cells=%d, ScanRows=%d',
-    [CSVBlockSizeKB,
-     CSVBufferSizeKB,
+    'Active: Block=%s, Buffer=%s, Cells=%d, ScanRows=%d',
+    [FormatBytesSmart(CSVBlockSizeBytes),
+     FormatBytesSmart(CSVBufferSizeBytes),
      CSVInitialCellCapacity,
      StrToInt64Def(edtRowWidthScanRows.Text, 0)]);
 end;
@@ -707,8 +713,8 @@ begin
   CheckBoxAutoDedectQuoteChar.Checked  := AutoDetectQuoteChar;
 
   //CSVFastDataSet Performance-Parameter aus grboxCSVFileRead
-  edtBlockSize.Text           := IntToStr(CSVBlockSizeKB);
-  edtBufferSize.Text          := IntToStr(CSVBufferSizeKB);
+  edtBlockSize.Text  := IntToStr(CSVBlockSizeBytes);
+  edtBufferSize.Text := IntToStr(CSVBufferSizeBytes);
   edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
 
   edtProgressUpdatePercent.Text := IntToStr(CSVProgressUpdatePercent);
@@ -738,8 +744,8 @@ begin
 
 
   //CSVFastDataSet Performance-Parameter
-  CSVBlockSizeKB         := StrToIntDef(edtBlockSize.Text, 1024);
-  CSVBufferSizeKB        := StrToIntDef(edtBufferSize.Text, 2048);
+  CSVBlockSizeBytes  := StrToIntDef(edtBlockSize.Text, 1048576);
+  CSVBufferSizeBytes := StrToInt64Def(edtBufferSize.Text, 2097152);
   CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
   CSVProgressUpdatePercent := StrToIntDef(edtProgressUpdatePercent.Text, 1);
 end;
@@ -786,25 +792,25 @@ begin
     end;
   end;
 
-  // ---- JSONDataset1 ----
-  if Assigned(JSONDataset1) then
+  // ---- JSONFastDataSe1 ----
+  if Assigned(JSONFastDataSet1) then
   begin
-    if JSONDataset1.Active then
-      JSONDataset1.DisableControls;
+    if JSONFastDataSet1.Active then
+      JSONFastDataSet1.DisableControls;
     try
       try
-        if JSONDataset1.Active then
-          JSONDataset1.Close;
+        if JSONFastDataSet1.Active then
+          JSONFastDataSet1.Close;
       except end;
       try
-        JSONDataset1.Fields.Clear;
+        JSONFastDataSet1.Fields.Clear;
       except end;
       try
-        JSONDataset1.FieldDefs.Clear;
+        JSONFastDataSet1.FieldDefs.Clear;
       except end;
     finally
-      if JSONDataset1.Active then
-        JSONDataset1.EnableControls;
+      if JSONFastDataSet1.Active then
+        JSONFastDataSet1.EnableControls;
     end;
   end;
 
@@ -927,8 +933,8 @@ begin
   if DataSource1.DataSet = CSVFastDataset1 then
     CSVFastDataset1.LoadFromCSVFile(FileName)
 
-  else if DataSource1.DataSet = JSONDataset1 then
-    JSONDataset1.LoadFromFile(FileName)
+  else if DataSource1.DataSet = JSONFastDataSe1 then
+    JSONFastDataSe1.LoadFromFile(FileName)
 
   else if DataSource1.DataSet = sWorksheetDataset1 then
   begin
@@ -990,8 +996,8 @@ begin
     if DS = CSVFastDataset1 then
       CSVFastDataset1.LoadFromCSVFile(FileName)
 
-    else if DS = JSONDataset1 then
-      JSONDataset1.LoadFromFile(FileName)
+    else if DS = JSONFastDataSet1 then
+      JSONFastDataSet1.LoadFromFile(FileName)
 
     else if DS = sWorksheetDataset1 then
     begin
@@ -1043,7 +1049,7 @@ begin
   RxDBGrid1.EndUpdate(True);
 end;
 
-procedure SaveJSONToFile(DataSet: TJSONDataSet; const FileName: string);
+procedure SaveJSONToFile(DataSet: TJSONFastDataSet; const FileName: string);
 var
   JSONText: string;
   SL: TStringList;
@@ -1070,8 +1076,8 @@ begin
   // Für dateibasierte Datasets: direkt speichern
   if DataSource1.DataSet = CSVFastDataset1 then
     CSVFastDataset1.SaveToCSVFile(FileName)
-  else if DataSource1.DataSet = JSONDataSet1 then
-    SaveJSONToFile(JSONDataSet1, FileName)
+  else if DataSource1.DataSet = JSONFastDataSet1 then
+    SaveJSONToFile(JSONFastDataSet1, FileName)
   else if DataSource1.DataSet = sWorksheetDataset1 then
     sWorksheetDataset1.Flush
   else if DataSource1.DataSet = Dbf1 then
@@ -1159,7 +1165,7 @@ begin
   end
 
   else if (Ext = '.json') then
-    DataSource1.DataSet := JSONDataSet1
+    DataSource1.DataSet := JSONFastDataSet1
 
   else if (Ext = '.xlsx') or (Ext = '.xls') or (Ext = '.xml')
        or (Ext = '.html') or (Ext = '.htm') or (Ext = '.ods')
@@ -1208,11 +1214,11 @@ var
   ReportForm: TfrmReport;
   LoadErr: string;
   MaxLineWidth: Int64;
-  RequiredBufferKB: Int64;
+  RequiredBufferBytes: Int64;
   ScanStartTime: TDateTime;
   ScanElapsed: Double;
   MsgText: string;
-  BufferSizeOriginal: Integer;
+  BufferSizeOriginalBytes: Int64;
   BufferAutoAdjusted: Boolean;
   RowWidthScanMode: string;
   FromRow: Int64;
@@ -1225,11 +1231,11 @@ begin
   // Initialisierung
   // ============================================================
   MaxLineWidth       := 0;
-  RequiredBufferKB   := 0;
+  RequiredBufferBytes   := 0;
   ScanElapsed        := 0;
   TotalRowsInRange   := 0;
   BufferAutoAdjusted := False;
-  BufferSizeOriginal := CSVBufferSizeKB;
+  BufferSizeOriginalBytes := CSVBufferSizeBytes;
   RowWidthScanMode   := 'None';
   FromRow            := 1;
   ToRow              := 0;
@@ -1325,9 +1331,9 @@ begin
 
   FProgressForm.Show;
   FProgressForm.BringToFront;
-  Application.ProcessMessages;
+  //Application.ProcessMessages;
   Sleep(200);
-  Application.ProcessMessages;
+  //Application.ProcessMessages;
 
   StartTime      := Now;
   FLoadStartTime := StartTime;
@@ -1370,19 +1376,44 @@ begin
         end;
       end;
 
-      // BufferSize anpassen
       if MaxLineWidth > 0 then
       begin
-        RequiredBufferKB := (MaxLineWidth * 2) div 1024 + 16;
-        if RequiredBufferKB > CSVBufferSizeKB then
+        RequiredBufferBytes := (MaxLineWidth * 2) + (16 * 1024);   // 2× row width + 16 KB reserve
+
+        if RequiredBufferBytes > CSVBufferSizeBytes then
         begin
-          BufferSizeOriginal := CSVBufferSizeKB;
-          BufferAutoAdjusted := True;
-          CSVBufferSizeKB := RequiredBufferKB;
-          edtBufferSize.Text := IntToStr(RequiredBufferKB);
-          SetCSVSettingsFromForm;
+          MsgText := Format(
+            'The current BufferSize is too small for this file.' + sLineBreak +
+            sLineBreak +
+            'Max row width (from scan):   %s' + sLineBreak +
+            'Required BufferSize:         %s' + sLineBreak +
+            'Current BufferSize:          %s' + sLineBreak +
+            sLineBreak +
+            'Increase BufferSize automatically?',
+            [FormatBytesSmart(MaxLineWidth),
+             FormatBytesSmart(RequiredBufferBytes),
+             FormatBytesSmart(CSVBufferSizeBytes)]);
+
+          if MessageDlg(MsgText, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+          begin
+            BufferSizeOriginalBytes := CSVBufferSizeBytes;
+            BufferAutoAdjusted       := True;
+
+            CSVBufferSizeBytes := RequiredBufferBytes;
+            edtBufferSize.Text := IntToStr(RequiredBufferBytes);
+
+            SetCSVSettingsFromForm;
+          end
+          else
+          begin
+            // User declined — load with the current (small) BufferSize.
+            // The load will most likely fail with a clear exception
+            // from the reader ("CSV row too large for buffer ...").
+            BufferAutoAdjusted := False;
+          end;
         end;
       end;
+
     end;
 
     // ============================================================
@@ -1593,8 +1624,8 @@ begin
   end;
 
   // --- CSV Buffer Performance ---
-  Stats.CSVBlockSizeKB          := CSVBlockSizeKB;
-  Stats.CSVBufferSizeKB         := CSVBufferSizeKB;
+  Stats.CSVBlockSizeBytes          := CSVBlockSizeBytes;
+  Stats.CSVBufferSizeBytes         := CSVBufferSizeBytes;
   Stats.CSVInitialCellCapacity  := CSVInitialCellCapacity;
   Stats.CSVRowWidthScanMode     := RowWidthScanMode;
   Stats.CSVRowWidthScanRows     := TotalRowsInRange;
@@ -1602,8 +1633,7 @@ begin
   Stats.CSVRowWidthScanTime     := ScanElapsed;
   Stats.CSVMaxRowWidth          := MaxLineWidth;
   Stats.CSVBufferAutoAdjusted   := BufferAutoAdjusted;
-  Stats.CSVBufferOriginalKB     := BufferSizeOriginal;
-
+  Stats.CSVBufferOriginalBytes  := BufferSizeOriginalBytes;
   // --- Report anzeigen ---
   ReportForm := TfrmReport.Create(nil);
   try

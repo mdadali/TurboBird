@@ -29,7 +29,7 @@ uses
   udb_udr_func_fetcher, sqldblib, fbcommon, ucopytabledatarowbyrow, uReport,
   fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder,
   QBDirFrm, QBLnkFrm, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
-  fMarkDownTableExport, fhtmlexport, fpcstdexporters, uArrayFormTest,
+  fMarkDownTableExport, fhtmlexport, fpcstdexporters,
   fserverregistry, tb_netutils,
 
 
@@ -56,13 +56,12 @@ uses
   IBSQLMonitor,
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
-  datamodulesystem, jvRuntimeDesign, pascalscript, uPSI_uibconst, fservers,
-  fActivityMonitor, edit_tabledata_new, foreign_key_table, ibsqleditor,
-  IBTransactionEdit, fdataeditor, fSQLParser, u_psstudio,
+  datamodulesystem, jvRuntimeDesign, uiblaz, pascalscript, uPSI_uibconst,
+  fservers, fActivityMonitor, edit_tabledata_new, foreign_key_table,
+  ibsqleditor, IBTransactionEdit, fdataeditor, fSQLParser, u_psstudio,
   u_consoleide, db_reader, DbGridForm, edit_primarykey, UniqueConstraints,
-  CheckConstraints, NotNullConstraints,
-  clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, ServerDBFieldSelector, About,
+  CheckConstraints, NotNullConstraints, clone_table_to_external_table_dialog,
+  clone_table_dialog, uCreateTableFromDataSet, ServerDBFieldSelector, About,
   uSystemInfo, uProblemFieldsDialog, uCopyTableDataFBIntf;
 
 const
