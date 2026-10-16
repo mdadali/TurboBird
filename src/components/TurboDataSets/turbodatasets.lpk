@@ -11,14 +11,14 @@
     </CompilerOptions>
     <Files>
       <Item>
-        <Filename Value="c_json_dataset.pas"/>
-        <HasRegisterProc Value="True"/>
-        <UnitName Value="c_json_dataset"/>
-      </Item>
-      <Item>
         <Filename Value="ucsvfastdataset.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="uCSVFastDataset"/>
+      </Item>
+      <Item>
+        <Filename Value="ujsonfastdataset.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uJSONFastDataSet"/>
       </Item>
     </Files>
     <RequiredPkgs>

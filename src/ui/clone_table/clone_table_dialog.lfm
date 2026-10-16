@@ -1,18 +1,18 @@
 object frmCloneTable: TfrmCloneTable
-  Left = 583
+  Left = 474
   Height = 779
-  Top = 180
+  Top = 228
   Width = 1444
   Align = alTop
   BorderStyle = bsDialog
   Caption = 'Clone Table'
   ClientHeight = 779
   ClientWidth = 1444
+  Position = poMainFormCenter
+  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
-  Position = poMainFormCenter
-  LCLVersion = '2.2.6.0'
   object StatusBar1: TStatusBar
     Left = 0
     Height = 21
@@ -66,9 +66,9 @@ object frmCloneTable: TfrmCloneTable
             Top = 8
             Width = 355
             ItemHeight = 0
-            OnChange = comboxDestServerChange
             Style = csDropDownList
             TabOrder = 0
+            OnChange = comboxDestServerChange
           end
           object Label5: TLabel
             Left = 10
@@ -84,9 +84,9 @@ object frmCloneTable: TfrmCloneTable
             Top = 58
             Width = 357
             ItemHeight = 0
-            OnChange = comboxDestDBChange
             Style = csDropDownList
             TabOrder = 1
+            OnChange = comboxDestDBChange
           end
           object btnNewDB: TButton
             Left = 500
@@ -128,8 +128,8 @@ object frmCloneTable: TfrmCloneTable
             Top = 160
             Width = 110
             Caption = 'External Table'
-            OnChange = chkboxExternalTableChange
             TabOrder = 5
+            OnChange = chkboxExternalTableChange
           end
           object edtExternalFile: TEdit
             Left = 140
@@ -146,8 +146,8 @@ object frmCloneTable: TfrmCloneTable
             Width = 38
             Caption = '...'
             Enabled = False
-            OnClick = btnExternalFileClick
             TabOrder = 7
+            OnClick = btnExternalFileClick
           end
         end
         object grBoxSource: TGroupBox
@@ -174,9 +174,9 @@ object frmCloneTable: TfrmCloneTable
             Top = 108
             Width = 320
             ItemHeight = 0
-            OnChange = comboxSourceTablesChange
             Style = csDropDownList
             TabOrder = 0
+            OnChange = comboxSourceTablesChange
           end
           object comboxSourceServer: TComboBox
             Left = 110
@@ -184,9 +184,9 @@ object frmCloneTable: TfrmCloneTable
             Top = 8
             Width = 320
             ItemHeight = 0
-            OnChange = comboxSourceServerChange
             Style = csDropDownList
             TabOrder = 1
+            OnChange = comboxSourceServerChange
           end
           object comboxSourceDB: TComboBox
             Left = 110
@@ -194,9 +194,9 @@ object frmCloneTable: TfrmCloneTable
             Top = 58
             Width = 320
             ItemHeight = 0
-            OnChange = comboxSourceDBChange
             Style = csDropDownList
             TabOrder = 2
+            OnChange = comboxSourceDBChange
           end
           object Label6: TLabel
             Left = 10
@@ -231,9 +231,9 @@ object frmCloneTable: TfrmCloneTable
               Width = 275
               Align = alClient
               ItemHeight = 0
-              OnClickCheck = chkLstFieldsClickCheck
               TabOrder = 0
               TopIndex = -1
+              OnClickCheck = chkLstFieldsClickCheck
             end
             object pnlFieldsSelectButtons: TPanel
               Left = 0
@@ -250,8 +250,8 @@ object frmCloneTable: TfrmCloneTable
                 Top = 8
                 Width = 111
                 Caption = 'Select All'
-                OnClick = btnSelectAllClick
                 TabOrder = 0
+                OnClick = btnSelectAllClick
               end
               object btnDeselectAll: TButton
                 Left = 128
@@ -259,8 +259,8 @@ object frmCloneTable: TfrmCloneTable
                 Top = 8
                 Width = 112
                 Caption = 'Deselect All'
-                OnClick = btnDeselectAllClick
                 TabOrder = 1
+                OnClick = btnDeselectAllClick
               end
             end
           end
@@ -315,9 +315,9 @@ object frmCloneTable: TfrmCloneTable
           Width = 74
           Caption = 'All Rows'
           Checked = True
-          OnChange = rbAllRowsChange
           TabOrder = 0
           TabStop = True
+          OnChange = rbAllRowsChange
         end
         object rbRange: TRadioButton
           Left = 112
@@ -381,8 +381,8 @@ object frmCloneTable: TfrmCloneTable
             Top = 7
             Width = 120
             Caption = 'Refresh Presets'
-            OnClick = btnRefreshPresetsClick
             TabOrder = 1
+            OnClick = btnRefreshPresetsClick
           end
         end
         object grBoxCopyMethod: TGroupBox
@@ -445,8 +445,8 @@ object frmCloneTable: TfrmCloneTable
           Top = 160
           Width = 192
           Caption = 'Generate Test Formulas'
-          OnClick = btnGenTestFormulasClick
           TabOrder = 7
+          OnClick = btnGenTestFormulasClick
         end
         object chkCopyData: TCheckBox
           Left = 24
@@ -472,8 +472,8 @@ object frmCloneTable: TfrmCloneTable
           Top = 3
           Width = 104
           Caption = 'Execute'
-          OnClick = btnExecuteClick
           TabOrder = 0
+          OnClick = btnExecuteClick
         end
         object btnCancelGlobal: TButton
           Left = 960
@@ -481,8 +481,8 @@ object frmCloneTable: TfrmCloneTable
           Top = 3
           Width = 104
           Caption = 'Close'
-          OnClick = btnCancelGlobalClick
           TabOrder = 1
+          OnClick = btnCancelGlobalClick
         end
         object btnPreviewSQL: TButton
           Left = 573
@@ -490,8 +490,8 @@ object frmCloneTable: TfrmCloneTable
           Top = 3
           Width = 104
           Caption = 'Preview SQL'
-          OnClick = btnPreviewSQLClick
           TabOrder = 2
+          OnClick = btnPreviewSQLClick
         end
         object btnAddToQueue: TButton
           Left = 696
@@ -499,8 +499,8 @@ object frmCloneTable: TfrmCloneTable
           Top = 3
           Width = 104
           Caption = 'Add to Queue'
-          OnClick = btnAddToQueueClick
           TabOrder = 3
+          OnClick = btnAddToQueueClick
         end
       end
     end
@@ -531,9 +531,9 @@ object frmCloneTable: TfrmCloneTable
           Height = 31
           Top = 56
           Width = 80
-          OnExit = edtLocalBatchSizeExit
           TabOrder = 0
           Text = '2000000'
+          OnExit = edtLocalBatchSizeExit
         end
         object lblLocalBatchInfo: TLabel
           Left = 32
@@ -566,9 +566,9 @@ object frmCloneTable: TfrmCloneTable
           Height = 31
           Top = 56
           Width = 80
-          OnExit = edtExecBlockBatchExit
           TabOrder = 0
           Text = '1000'
+          OnExit = edtExecBlockBatchExit
         end
         object lblExecBlockInfo: TLabel
           Left = 21

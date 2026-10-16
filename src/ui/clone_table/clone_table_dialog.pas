@@ -8,7 +8,6 @@ uses
   Classes, SysUtils, Forms, Controls, ComCtrls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Grids, CheckLst, Menus, IB, IBQuery, IBDatabase, IBDatabaseInfo,
   IBExtract, ibxscript,  IBSQL,
-
   SysTables,
   turbocommon,
   fbcommon,

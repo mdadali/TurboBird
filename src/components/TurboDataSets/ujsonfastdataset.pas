@@ -1,4 +1,4 @@
-unit c_json_dataset;
+unit uJSONFastDataSet;
 
 {$mode objfpc}{$H+}
 
@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, fpjson, jsonparser, BufDataset, DB;
 
 type
-  TJSONDataSet = class(TBufDataset)
+  TJSONFastDataSet = class(TBufDataset)
   private
     function JSONTypeToFieldType(AType: TJSONType): TFieldType;
   public
@@ -23,12 +23,12 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('Data Access', [TJSONDataSet]);
+  RegisterComponents('Data Access', [TJSONFastDataSet]);
 end;
 
-{ TJSONDataSet }
+{ TJSONFastDataSet }
 
-function TJSONDataSet.JSONTypeToFieldType(AType: TJSONType): TFieldType;
+function TJSONFastDataSet.JSONTypeToFieldType(AType: TJSONType): TFieldType;
 begin
   case AType of
     jtNumber: Result := ftFloat;
@@ -39,7 +39,7 @@ begin
   end;
 end;
 
-procedure TJSONDataSet.LoadFromJSON(const JSONText: string);
+procedure TJSONFastDataSet.LoadFromJSON(const JSONText: string);
 var
   Data: TJSONData;
   Arr: TJSONArray;
@@ -101,7 +101,7 @@ begin
   end;
 end;
 
-procedure TJSONDataSet.LoadFromFile(const AFileName: string);
+procedure TJSONFastDataSet.LoadFromFile(const AFileName: string);
 var
   FS: TFileStream;
   Bytes: TBytes;
@@ -118,7 +118,7 @@ begin
   end;
 end;
 
-function TJSONDataSet.SaveToJSON: string;
+function TJSONFastDataSet.SaveToJSON: string;
 var
   Arr: TJSONArray;
   Obj: TJSONObject;

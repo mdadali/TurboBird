@@ -8,14 +8,14 @@ unit TurboDataSets;
 interface
 
 uses
-  c_json_dataset, uCSVFastDataset, LazarusPackageIntf;
+  uCSVFastDataset, uJSONFastDataSet, LazarusPackageIntf;
 
 implementation
 
 procedure Register;
 begin
-  RegisterUnit('c_json_dataset', @c_json_dataset.Register);
   RegisterUnit('uCSVFastDataset', @uCSVFastDataset.Register);
+  RegisterUnit('uJSONFastDataSet', @uJSONFastDataSet.Register);
 end;
 
 initialization
