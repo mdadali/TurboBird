@@ -1,16 +1,16 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 966
+  Left = 936
   Height = 894
-  Top = 413
+  Top = 242
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894
   ClientWidth = 1496
-  Position = poMainFormCenter
-  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
   object Panel1: TPanel
     Left = 0
     Height = 50
@@ -36,9 +36,9 @@ object frmDataEditor: TfrmDataEditor
       ClientHeight = 48
       ClientWidth = 912
       DataSource = DataSource1
+      OnClick = DBNavigator1Click
       Options = []
       TabOrder = 0
-      OnClick = DBNavigator1Click
     end
     object btnOpenFile: TButton
       Left = 1
@@ -47,8 +47,8 @@ object frmDataEditor: TfrmDataEditor
       Width = 100
       Align = alLeft
       Caption = 'Open'
-      TabOrder = 1
       OnClick = btnOpenFileClick
+      TabOrder = 1
     end
     object btnExportAs: TButton
       Left = 101
@@ -58,8 +58,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Export'
       Enabled = False
-      TabOrder = 2
       OnClick = btnExportAsClick
+      TabOrder = 2
     end
     object btnCreateSQL: TButton
       Left = 201
@@ -69,8 +69,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Create SQL'
       Enabled = False
-      TabOrder = 3
       OnClick = btnCreateSQLClick
+      TabOrder = 3
     end
     object btnCopySQL: TButton
       Left = 301
@@ -80,8 +80,8 @@ object frmDataEditor: TfrmDataEditor
       Align = alLeft
       Caption = 'Copy SQL'
       Enabled = False
-      TabOrder = 4
       OnClick = btnCopySQLClick
+      TabOrder = 4
     end
     object btnCreateTable: TButton
       Left = 401
@@ -90,8 +90,8 @@ object frmDataEditor: TfrmDataEditor
       Width = 107
       Align = alLeft
       Caption = 'Create Table'
-      TabOrder = 5
       OnClick = btnCreateTableClick
+      TabOrder = 5
     end
     object Button1: TButton
       Left = 508
@@ -100,8 +100,8 @@ object frmDataEditor: TfrmDataEditor
       Width = 75
       Align = alLeft
       Caption = 'Button1'
-      TabOrder = 6
       OnClick = Button1Click
+      TabOrder = 6
     end
   end
   object PageControl1: TPageControl
@@ -109,9 +109,9 @@ object frmDataEditor: TfrmDataEditor
     Height = 844
     Top = 50
     Width = 1496
-    ActivePage = tsCommonSettings
+    ActivePage = tsGrid
     Align = alClient
-    TabIndex = 4
+    TabIndex = 0
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -188,6 +188,7 @@ object frmDataEditor: TfrmDataEditor
         Align = alClient
         Color = clWindow
         DrawFullLine = False
+        FocusColor = clRed
         SelectedColor = clHighlight
         DataSource = DataSource1
         Options = [dgEditing, dgTitles, dgIndicator, dgColumnResize, dgColumnMove, dgColLines, dgRowLines, dgAlwaysShowSelection, dgConfirmDelete, dgCancelOnExit, dgHeaderPushedLook]
@@ -680,10 +681,6 @@ object frmDataEditor: TfrmDataEditor
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
             MouseActions = <>
-            MaxExtraMarksColums = 0
-            Options = [sgmoDeDuplicateMarksOnOverflow]
-            MarkupInfo.Background = clBtnFace
-            MarkupInfo.Foreground = clNone
           end
           object SynGutterLineNumber1: TSynGutterLineNumber
             Width = 17
@@ -700,9 +697,6 @@ object frmDataEditor: TfrmDataEditor
             MouseActions = <>
             ModifiedColor = 59900
             SavedColor = clGreen
-            MarkupInfo.Background = clNone
-            MarkupInfo.Foreground = clGreen
-            MarkupInfo.FrameColor = 59900
           end
           object SynGutterSeparator1: TSynGutterSeparator
             Width = 2
@@ -795,10 +789,10 @@ object frmDataEditor: TfrmDataEditor
           'CR'
           'LineEnding'
         )
+        OnChange = cmbboxLineEndingChange
         Style = csDropDownList
         TabOrder = 4
         Text = 'CRLF'
-        OnChange = cmbboxLineEndingChange
       end
       object cmbboxDelimiter: TComboBox
         Left = 272
@@ -813,9 +807,9 @@ object frmDataEditor: TfrmDataEditor
           '|'
           'Space'
         )
+        OnChange = cmbboxDelimiterChange
         Style = csDropDownList
         TabOrder = 5
-        OnChange = cmbboxDelimiterChange
       end
       object Label4: TLabel
         Left = 56
@@ -838,10 +832,10 @@ object frmDataEditor: TfrmDataEditor
           '(none)'
           'Custom...'
         )
+        OnChange = cmbboxQuoteCharChange
         Style = csDropDownList
         TabOrder = 6
         Text = '"'
-        OnChange = cmbboxQuoteCharChange
       end
       object Label2: TLabel
         Left = 56
@@ -892,7 +886,7 @@ object frmDataEditor: TfrmDataEditor
         Top = 24
         Width = 512
         Caption = 'CSV - File Read'
-        ClientHeight = 572
+        ClientHeight = 590
         ClientWidth = 510
         TabOrder = 0
         object lbBlockSize: TLabel
@@ -901,6 +895,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 32
           Width = 100
           Caption = 'Block Size (Byte)'
+          ParentColor = False
         end
         object edtBlockSize: TEdit
           Left = 240
@@ -916,6 +911,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 80
           Width = 107
           Caption = 'Buffer Size (Byte)'
+          ParentColor = False
         end
         object edtBufferSize: TEdit
           Left = 240
@@ -931,6 +927,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 128
           Width = 113
           Caption = 'Initial Cell Capacity'
+          ParentColor = False
         end
         object edtInitialCellCapacity: TEdit
           Left = 240
@@ -946,6 +943,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 456
           Width = 176
           Caption = 'Active Performance Settings'
+          ParentColor = False
         end
         object grboxRangeOptions: TGroupBox
           Left = 32
@@ -953,7 +951,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 240
           Width = 320
           Caption = 'Load Range'
-          ClientHeight = 130
+          ClientHeight = 148
           ClientWidth = 318
           TabOrder = 3
           object rbAllRows: TRadioButton
@@ -963,9 +961,9 @@ object frmDataEditor: TfrmDataEditor
             Width = 74
             Caption = 'All Rows'
             Checked = True
+            OnChange = rbRangeChange
             TabOrder = 0
             TabStop = True
-            OnChange = rbRangeChange
           end
           object rbRange: TRadioButton
             Left = 16
@@ -973,8 +971,8 @@ object frmDataEditor: TfrmDataEditor
             Top = 56
             Width = 63
             Caption = 'Range'
-            TabOrder = 1
             OnChange = rbRangeChange
+            TabOrder = 1
           end
           object edtFrom: TEdit
             Left = 96
@@ -1011,6 +1009,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 192
           Width = 135
           Caption = 'Row Width Scan Rows:'
+          ParentColor = False
         end
         object edtRowWidthScanRows: TEdit
           Left = 240
@@ -1026,6 +1025,7 @@ object frmDataEditor: TfrmDataEditor
           Top = 416
           Width = 154
           Caption = 'Progress Update Percent'
+          ParentColor = False
         end
         object edtProgressUpdatePercent: TEdit
           Left = 240
