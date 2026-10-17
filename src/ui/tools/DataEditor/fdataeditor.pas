@@ -185,6 +185,16 @@ type
 
     FCancelRequested: boolean;
 
+
+    // Interval-Sampling für Load-Speed
+    FProgressSamples: array of Double;    // rows/sec pro Intervall
+    FLastProgressRows: Int64;
+    FLastProgressSeconds: Double;
+
+    FScanStartTick: QWord;
+    FLastProgressBytes: Int64;
+    FProgressBytesSamples: array of Double;
+
     procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
     procedure LoadFile(const FileName: string);
@@ -198,11 +208,8 @@ type
     procedure WriteIni;
     function AskUseDetected(const AFileName: string; const ACurLE, ADetLE: string; const ACurDel, ADetDel: Char; const ACurQC, ADetQC: Char): TDetectChoice;
     procedure HandleScanProgress(ABytesRead, ATotalBytes: Int64);
-    procedure HandleLoadProgress(
-      ARowsRead: Int64;
-      AElapsedSeconds: Double;
-      AFreeRAMMB: Int64;
-      AEstimatedUsageMB: Int64);
+    procedure HandleLoadProgress(ARowsRead: Int64; ABytesRead: Int64;
+      AElapsedSeconds: Double; AFreeRAMMB: Int64; AEstimatedUsageMB: Int64);
     procedure ProgCancelClick(Sender: TObject);
     procedure BuildProgressForm;
   public
@@ -354,48 +361,79 @@ end;
 procedure TfrmDataEditor.HandleScanProgress(ABytesRead, ATotalBytes: Int64);
 var
   Percent: Integer;
+  ElapsedSeconds, BytesPerSec: Double;
 begin
   if ATotalBytes <= 0 then Exit;
 
   Percent := (ABytesRead * 100) div ATotalBytes;
   if Percent > 100 then Percent := 100;
 
-  // Fortschrittsbalken
   FProgBar.Position := Percent;
 
-  // Info-Zeile mit Bytes
-  FProgElapsedLbl.Caption := Format('Scan:   %s / %s   (%d%%)',
+  // Zeit seit Scan-Start (monotonic, Millisekunden-genau)
+  ElapsedSeconds := (GetTickCount64 - FScanStartTick) / 1000.0;
+  if ElapsedSeconds > 0.2 then
+    BytesPerSec := ABytesRead / ElapsedSeconds
+  else
+    BytesPerSec := 0;
+
+  FProgInfoLbl.Caption := Format('Scan:   %s / %s   (%d%%)',
     [FormatBytesSmart(ABytesRead),
      FormatBytesSmart(ATotalBytes),
      Percent]);
 
-  // ETA / Speed ist während des Scans nicht sinnvoll —
-  // der Scan ist I/O-limitiert und die Zeilenanzahl steht
-  // erst am Ende fest.
-  FProgSpeedLbl.Caption := '';
-  FProgETALbl.Caption   := '';
+  if BytesPerSec > 0 then
+    FProgSpeedLbl.Caption := Format('Speed:  %s/sec  |  Elapsed: %s',
+      [FormatBytesSmart(Round(BytesPerSec)),
+       FormatDateTime('hh:nn:ss', ElapsedSeconds / SecsPerDay)])
+  else
+    FProgSpeedLbl.Caption := '';
 
-  // Kein RAM-Update während Scan — der RAM-Verbrauch beim
-  // Scan ist minimal (nur 4 MB Buffer) und nicht aussagekräftig
-  // für den späteren Load. Das RAM-Panel bleibt vom vorherigen
-  // Zustand unberührt.
+  FProgETALbl.Caption := '';   // beim Scan kein ETA — Zeilen sind noch nicht gezählt
 
   Application.ProcessMessages;
 end;
 
-procedure TfrmDataEditor.HandleLoadProgress(
-  ARowsRead: Int64;
-  AElapsedSeconds: Double;
-  AFreeRAMMB: Int64;
-  AEstimatedUsageMB: Int64);
+procedure TfrmDataEditor.HandleLoadProgress(ARowsRead: Int64; ABytesRead: Int64;
+  AElapsedSeconds: Double; AFreeRAMMB: Int64; AEstimatedUsageMB: Int64);
 var
   Percent: Integer;
-  RowsPerSec, ETASeconds: Double;
+  RowsPerSec, BytesPerSec, ETASeconds: Double;
   UsedRAMMB: Int64;
   UsedPercent: Integer;
+  IntervalRows, IntervalBytes: Double;
+  RowWidthAvg: Double;
 begin
   // ============================================================
-  // Rows-Progress
+  // Interval-Sample für Report (rows/sec UND bytes/sec)
+  //
+  // Das erste Event setzt nur den Startpunkt. Jedes weitere
+  // liefert eine Momentangeschwindigkeit. Für den Report
+  // mitteln wir die Intervalle ohne das letzte (siehe
+  // btnOpenFileClick).
+  // ============================================================
+  if (FLastProgressSeconds > 0) and
+     (AElapsedSeconds > FLastProgressSeconds) then
+  begin
+    IntervalRows := (ARowsRead - FLastProgressRows) /
+                    (AElapsedSeconds - FLastProgressSeconds);
+    IntervalBytes := (ABytesRead - FLastProgressBytes) /
+                     (AElapsedSeconds - FLastProgressSeconds);
+    if IntervalRows > 0 then
+    begin
+      SetLength(FProgressSamples, Length(FProgressSamples) + 1);
+      FProgressSamples[High(FProgressSamples)] := IntervalRows;
+
+      SetLength(FProgressBytesSamples, Length(FProgressBytesSamples) + 1);
+      FProgressBytesSamples[High(FProgressBytesSamples)] := IntervalBytes;
+    end;
+  end;
+  FLastProgressRows    := ARowsRead;
+  FLastProgressBytes   := ABytesRead;
+  FLastProgressSeconds := AElapsedSeconds;
+
+  // ============================================================
+  // Rows-Progress (Fortschrittsbalken + Zähler)
   // ============================================================
   if FProgTotalRows > 0 then
   begin
@@ -412,14 +450,18 @@ begin
      Percent]);
 
   // ============================================================
-  // Speed + ETA
+  // Speed-Zeile: rows/sec + Bytes/sec
   // ============================================================
   if AElapsedSeconds > 0.5 then
   begin
-    RowsPerSec := ARowsRead / AElapsedSeconds;
-    FProgSpeedLbl.Caption := Format('Speed:  %s rows/sec',
-      [FormatFloat('#,##0', RowsPerSec)]);
+    RowsPerSec  := ARowsRead / AElapsedSeconds;
+    BytesPerSec := ABytesRead / AElapsedSeconds;
 
+    FProgSpeedLbl.Caption := Format('Speed:  %s rows/sec  |  %s/sec',
+      [FormatFloat('#,##0', RowsPerSec),
+       FormatBytesSmart(Round(BytesPerSec))]);
+
+    // ETA (nur wenn wir die Gesamtzeilen kennen)
     if (FProgTotalRows > ARowsRead) and (RowsPerSec > 0) then
     begin
       ETASeconds := (FProgTotalRows - ARowsRead) / RowsPerSec;
@@ -428,48 +470,33 @@ begin
     end
     else
       FProgETALbl.Caption := '';
+  end
+  else
+  begin
+    // Noch keine stabile Rate — lieber leer als geraten
+    FProgSpeedLbl.Caption := '';
+    FProgETALbl.Caption   := '';
   end;
 
-  FProgElapsedLbl.Caption := Format('Elapsed: %s',
-    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay)]);
+  FProgElapsedLbl.Caption := Format('Elapsed: %s  |  Loaded: %s',
+    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay),
+     FormatBytesSmart(ABytesRead)]);
 
   // ============================================================
-  // RAM-Update
-  //
-  // Der Reader liefert uns:
-  //   AFreeRAMMB        - Free-RAM zum Start (oder -1)
-  //   AEstimatedUsageMB - geschätzter Verbrauch (oder -1)
-  //
-  // Wenn beide Werte da sind, nutzen wir direkt die Schätzung des
-  // Readers — das ist präziser als "Total - aktuell frei", weil
-  // Free-RAM auch von anderen Prozessen schwankt.
-  //
-  // Fallback, wenn der Reader keine Schätzung liefern kann
-  // (z.B. InitialFreeRAM_MB oder MaxRowWidth nicht gesetzt):
-  // alte Berechnung über FProgTotalRAMMB - FLastFreeRAMMB.
+  // RAM-Update (unverändert, wie zuletzt)
   // ============================================================
-
-  // Free-RAM nur überschreiben, wenn der Reader einen frischen
-  // Wert liefert. -1 = "unverändert" (z.B. falls der Reader
-  // selbst drosselt oder wir keinen Start-Wert gesetzt haben).
   if AFreeRAMMB >= 0 then
     FLastFreeRAMMB := AFreeRAMMB;
 
-  // ---- Verbrauch bestimmen ----
   if AEstimatedUsageMB > 0 then
-  begin
-    // Bevorzugter Pfad: Reader-Schätzung
-    UsedRAMMB := AEstimatedUsageMB;
-  end
+    UsedRAMMB := AEstimatedUsageMB
   else if FLastFreeRAMMB > 0 then
   begin
-    // Fallback: Total - Free
     UsedRAMMB := FProgTotalRAMMB - FLastFreeRAMMB;
     if UsedRAMMB < 0 then UsedRAMMB := 0;
   end
   else
   begin
-    // Keine Daten — RAM-Anzeige leer lassen, aber nicht abstürzen
     FProgRAMBar.Position := 0;
     FProgRAMInfoLbl.Caption := 'RAM:      (no data)';
     FProgRAMStatusLbl.Caption := '';
@@ -477,21 +504,18 @@ begin
     Exit;
   end;
 
-  // ---- Prozent berechnen ----
   if FProgTotalRAMMB > 0 then
     UsedPercent := (UsedRAMMB * 100) div FProgTotalRAMMB
   else
     UsedPercent := 0;
   if UsedPercent > 100 then UsedPercent := 100;
 
-  // ---- Bar + Info-Label ----
   FProgRAMBar.Position := UsedPercent;
   FProgRAMInfoLbl.Caption := Format('RAM:      %s used / %s total   (%d%%)',
     [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
      FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
      UsedPercent]);
 
-  // ---- Status + Farbe ----
   if UsedPercent >= 85 then
   begin
     FProgRAMStatusLbl.Caption := 'Status:   CRITICAL - low memory!';
@@ -511,9 +535,6 @@ begin
     FProgRAMStatusLbl.Font.Style := [];
   end;
 
-  // ============================================================
-  // Warnung bei kritischem RAM (nur einmal pro Load)
-  // ============================================================
   if (UsedPercent >= 85) and (not FRAMWarningShown) then
   begin
     FRAMWarningShown := True;
@@ -528,7 +549,7 @@ begin
       'Cancel the load?',
       mtWarning, [mbYes, mbNo], 0) = mrYes then
     begin
-      FCancelRequested := True;   // Reader prüft den Pointer
+      FCancelRequested := True;
       FProgCancelBtn.Enabled := False;
       FProgCancelBtn.Caption := 'Cancelling...';
     end;
@@ -1289,6 +1310,10 @@ var
   ScanRows: Int64;
   TotalRowsInRange: Int64;
   Cancelled: Boolean;
+  LoadSpeedAvg: Double;
+  LoadBytesPerSecAvg: Double;
+  Sum: Double;
+  I: Integer;
 begin
   // ============================================================
   // Initialisierung
@@ -1392,6 +1417,10 @@ begin
   FLoadProgressCounter := 0;
   FCancelRequested     := False;
 
+  FScanStartTick        := GetTickCount64;   // für Scan-Rate
+  FLastProgressBytes    := 0;
+  SetLength(FProgressBytesSamples, 0);
+
   FProgressForm.Show;
   FProgressForm.BringToFront;
   //Application.ProcessMessages;
@@ -1418,6 +1447,7 @@ begin
 
       try
         ScanStartTime := Now;
+        FScanStartTick := GetTickCount64;
         MaxLineWidth := EstimateCSVMaxLineWidth(
           FFileName,
           FromRow,
@@ -1516,6 +1546,11 @@ begin
     TCSVFastDataset(CSVFastDataset1).CancelFlag := @FCancelRequested;
     // Thread starten
     try
+      // Interval-Sampling zurücksetzen
+      SetLength(FProgressSamples, 0);
+      FLastProgressRows    := 0;
+      FLastProgressSeconds := 0;
+
       CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
 
       while not CSVThread.Finished do
@@ -1527,6 +1562,38 @@ begin
       LoadErr := CSVThread.LoadError;
       CSVThread.Free;
       CSVThread := nil;
+
+      // ============================================================
+      // Load-Speed: Mittel der Intervalle, LETZTES verworfen.
+      //
+      // Begründung: Das letzte "Force"-Event am Ende kann nur noch
+      // wenige hundert Zeilen in wenigen Millisekunden umfassen —
+      // die Momentanrate wäre dann absurd hoch und würde den
+      // Mittelwert nach oben verzerren.
+      // ============================================================
+      LoadSpeedAvg := 0;
+      if Length(FProgressSamples) > 1 then
+      begin
+        Sum := 0;
+        for I := 0 to Length(FProgressSamples) - 2 do
+          Sum := Sum + FProgressSamples[I];
+        LoadSpeedAvg := Sum / (Length(FProgressSamples) - 1);
+      end
+      else if Length(FProgressSamples) = 1 then
+        LoadSpeedAvg := FProgressSamples[0];
+
+      //Bytes/sec (Interval-Mean ohne letztes Sample)
+      LoadBytesPerSecAvg := 0;
+      if Length(FProgressBytesSamples) > 1 then
+      begin
+        Sum := 0;
+        for I := 0 to Length(FProgressBytesSamples) - 2 do
+          Sum := Sum + FProgressBytesSamples[I];
+        LoadBytesPerSecAvg := Sum / (Length(FProgressBytesSamples) - 1);
+      end
+      else if Length(FProgressBytesSamples) = 1 then
+        LoadBytesPerSecAvg := FProgressBytesSamples[0];
+
     except
       on E: EAbort do
       begin
@@ -1641,6 +1708,29 @@ begin
   btnCreateSQL.Enabled := True;
   btnExportAs.Enabled  := True;
 
+  // ============================================================
+  // End-Statistik als Report
+  // ============================================================
+  DiffSeconds := (EndTime - StartTime) * 86400.0;
+
+  Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
+  btnCreateSQL.Enabled := True;
+  btnExportAs.Enabled  := True;
+
+  // ============================================================
+  // NEU: Load-Speed — Interval-Mean ohne letztes Sample
+  // ============================================================
+  LoadSpeedAvg := 0;
+  if Length(FProgressSamples) > 1 then
+  begin
+    Sum := 0;
+    for I := 0 to Length(FProgressSamples) - 2 do
+      Sum := Sum + FProgressSamples[I];
+    LoadSpeedAvg := Sum / (Length(FProgressSamples) - 1);
+  end
+  else if Length(FProgressSamples) = 1 then
+    LoadSpeedAvg := FProgressSamples[0];
+
   // --- Statistik-Record füllen ---
   FillChar(Stats, SizeOf(Stats), 0);
   Stats.Kind             := tkLoadFile;
@@ -1654,7 +1744,13 @@ begin
   Stats.RowsProcessed  := RowCount;
   Stats.FieldsCount    := DataSource1.DataSet.FieldCount;
   Stats.ElapsedSeconds := DiffSeconds;
+
+  // NEU — die zwei Zeilen genau hier:
+  Stats.LoadElapsedSeconds := FLastProgressSeconds;
+  Stats.RowsPerSecond      := LoadSpeedAvg;
+
   Stats.SystemInfo     := GetSystemInfo(FFileName);
+
 
   // --- CSV-Optionen ---
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and

@@ -363,6 +363,9 @@ type
     FormulasApplied: string;
     CreateTableSQL: string;
 
+    RowsPerSecond: Double;         // Load only, Interval-Mean
+    LoadElapsedSeconds: Double;    // Load only (ohne Scan)
+
     CSVOptions: string;
 
     // === CSV BUFFER PERFORMANCE ===
@@ -1849,14 +1852,25 @@ end;
 // ---------------------------------------------------------------------------
 // Hauptfunktion: Transfer-Report formatieren
 // ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
-// Hauptfunktion: Transfer-Report formatieren
-// ---------------------------------------------------------------------------
 function FormatTransferReport(const Stats: TTransferStatistic): string;
 var
   SL: TStringList;
   RowsPerSec: Double;
   FS: TFormatSettings;
+
+  // Lokaler Helfer für Speed-Ermittlung (Fallback-Kette)
+  function ComputeRowsPerSec: Double;
+  begin
+    if Stats.RowsPerSecond > 0 then
+      Result := Stats.RowsPerSecond                                    // 1. Wahl: Interval-Mean
+    else if (Stats.LoadElapsedSeconds > 0) and (Stats.RowsProcessed > 0) then
+      Result := Stats.RowsProcessed / Stats.LoadElapsedSeconds         // 2. Wahl: Load-only
+    else if (Stats.ElapsedSeconds > 0) and (Stats.RowsProcessed > 0) then
+      Result := Stats.RowsProcessed / Stats.ElapsedSeconds             // 3. Wahl: Total (Fallback)
+    else
+      Result := 0;
+  end;
+
 begin
   // Englischer Format-Stil — unabhängig vom OS-Locale
   FS := DefaultFormatSettings;
@@ -1988,7 +2002,7 @@ begin
       end;
 
       // ============================================================
-      // CSV BUFFER PERFORMANCE
+      // CSV BUFFER PERFORMANCE  (Bytes, nicht KB!)
       // ============================================================
       if (Stats.CSVBlockSizeBytes > 0) or
          (Stats.CSVBufferSizeBytes > 0) or
@@ -1998,15 +2012,21 @@ begin
         SL.Add('  Buffer Performance:');
 
         if Stats.CSVBlockSizeBytes > 0 then
-          SL.Add('    Block Size:            ' + IntToStr(Stats.CSVBlockSizeBytes) + ' KB');
+          SL.Add(Format('    Block Size:            %s (%s Bytes)',
+            [FormatBytesSmart(Stats.CSVBlockSizeBytes),
+             FormatNumberEN(Stats.CSVBlockSizeBytes)]));
 
         if Stats.CSVBufferSizeBytes > 0 then
         begin
           if Stats.CSVBufferAutoAdjusted then
-            SL.Add(Format('    Buffer Size:           %d KB (auto-adjusted from %d KB)',
-              [Stats.CSVBufferSizeBytes, Stats.CSVBufferOriginalBytes]))
+            SL.Add(Format('    Buffer Size:           %s (%s Bytes) — auto-adjusted from %s',
+              [FormatBytesSmart(Stats.CSVBufferSizeBytes),
+               FormatNumberEN(Stats.CSVBufferSizeBytes),
+               FormatBytesSmart(Stats.CSVBufferOriginalBytes)]))
           else
-            SL.Add('    Buffer Size:           ' + IntToStr(Stats.CSVBufferSizeBytes) + ' KB');
+            SL.Add(Format('    Buffer Size:           %s (%s Bytes)',
+              [FormatBytesSmart(Stats.CSVBufferSizeBytes),
+               FormatNumberEN(Stats.CSVBufferSizeBytes)]));
         end;
 
         if Stats.CSVInitialCellCapacity > 0 then
@@ -2029,9 +2049,9 @@ begin
           SL.Add(Format('    Row Width Scan Time:   %.3f s', [Stats.CSVRowWidthScanTime]));
 
         if Stats.CSVMaxRowWidth > 0 then
-          SL.Add(Format('    Max Row Width:         %s Bytes (%.2f KB)',
+          SL.Add(Format('    Max Row Width:         %s Bytes (%s)',
             [FormatNumberEN(Stats.CSVMaxRowWidth),
-             Stats.CSVMaxRowWidth / 1024]));
+             FormatBytesSmart(Stats.CSVMaxRowWidth)]));
 
         // Warnung bei CustomScan
         if Stats.CSVRowWidthScanIsCustom then
@@ -2070,17 +2090,31 @@ begin
     end;
 
     // ======================================================================
-    // RESULT
+    // RESULT  — getrennte Zeiten, ehrliche Speed
     // ======================================================================
     SL.Add('Result:');
     SL.Add('  Rows:          ' + FormatNumberEN(Stats.RowsProcessed));
     if Stats.FieldsCount > 0 then
       SL.Add('  Fields:        ' + IntToStr(Stats.FieldsCount));
-    SL.Add('  Time:          ' + FormatDateTime('hh:nn:ss.zzz',
+
+    // Scan-Zeit nur zeigen, wenn sie auch separat erfasst wurde
+    if Stats.CSVRowWidthScanTime > 0 then
+      SL.Add('  Scan Time:     ' + FormatDateTime('hh:nn:ss.zzz',
+        Stats.CSVRowWidthScanTime / SecsPerDay));
+
+    // Load-Zeit nur zeigen, wenn sie separat erfasst wurde
+    if Stats.LoadElapsedSeconds > 0 then
+      SL.Add('  Load Time:     ' + FormatDateTime('hh:nn:ss.zzz',
+        Stats.LoadElapsedSeconds / SecsPerDay));
+
+    // Total-Time immer
+    SL.Add('  Total Time:    ' + FormatDateTime('hh:nn:ss.zzz',
       Stats.ElapsedSeconds / SecsPerDay));
 
-    RowsPerSec := CopyStatsRowsPerSec(Stats);
-    SL.Add('  Speed:         ' + FormatFloat('#,##0', Round(RowsPerSec), FS) + ' rows/sec');
+    // Speed: primär RowsPerSecond, sonst Load-, sonst Total-basiert
+    RowsPerSec := ComputeRowsPerSec;
+    if RowsPerSec > 0 then
+      SL.Add('  Speed:         ' + FormatFloat('#,##0', RowsPerSec, FS) + ' rows/sec');
     SL.Add('');
 
     // ======================================================================
