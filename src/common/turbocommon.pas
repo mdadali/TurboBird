@@ -1283,8 +1283,8 @@ end;
   function EstimateCSVMaxLineWidth(
     const AFileName: string;
     AFromRow: Int64;
-    AToRow: Int64;
-    AScanRows: Int64;
+    AToRow: Int64;          // 0 = no upper limit
+    AScanRows: Int64;       // 0 = full scan of range
     AQuoteChar: Char;
     out ATotalRowsInRange: Int64;
     AOnProgress: TCSVScanProgressEvent = nil;
@@ -1296,15 +1296,13 @@ end;
     Buf: TBytes;
     P, BufEnd: PChar;
     BytesRead: Integer;
-    MaxWidth: Int64;
-    CurrentWidth: Int64;
+    MaxWidth, CurrentWidth: Int64;
     InQuote: Boolean;
-    DataRowInFile: Int64;
-    DataRowIdx: Int64;
-    InRange: Boolean;
+    PendingLF: Boolean;
+    DataRowInFile, DataRowIdx: Int64;
     RowsScannedInRange: Int64;
     StopScan: Boolean;
-    TotalBytesRead: Int64;        // ← NEU
+    TotalBytesRead: Int64;
   begin
     Result := -1;
     ATotalRowsInRange := 0;
@@ -1313,37 +1311,46 @@ end;
     FS := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
     try
       SetLength(Buf, BUF_SIZE);
-      MaxWidth := 0;
-      CurrentWidth := 0;
-      InQuote := False;
-      DataRowInFile := 0;
-      InRange := False;
+      MaxWidth           := 0;
+      CurrentWidth       := 0;
+      InQuote            := False;
+      PendingLF          := False;
+      DataRowInFile      := 0;
       RowsScannedInRange := 0;
-      StopScan := False;
-      TotalBytesRead := 0;        // ← NEU
+      StopScan           := False;
+      TotalBytesRead     := 0;
 
       while not StopScan do
       begin
         BytesRead := FS.Read(Buf[0], BUF_SIZE);
         if BytesRead <= 0 then Break;
 
-        Inc(TotalBytesRead, BytesRead);   // ← NEU
+        Inc(TotalBytesRead, BytesRead);
 
-        // Progress-Callback
         if Assigned(AOnProgress) then
           AOnProgress(TotalBytesRead, FS.Size);
 
-        // Cancel-Check
         if Assigned(ACancelFlag) and ACancelFlag^ then
           raise EAbort.Create('Cancelled by user');
 
         P := Pointer(Buf);
         BufEnd := P + BytesRead;
 
+        // Consume LF that belonged to a CR at the previous buffer end.
+        if PendingLF then
+        begin
+          PendingLF := False;
+          if (P < BufEnd) and (P^ = #10) then
+            Inc(P);
+        end;
+
         while P < BufEnd do
         begin
           if P^ = AQuoteChar then
-            InQuote := not InQuote
+          begin
+            InQuote := not InQuote;
+            Inc(CurrentWidth);   // quote bytes count towards row width
+          end
           else if (not InQuote) and ((P^ = #10) or (P^ = #13)) then
           begin
             Inc(DataRowInFile);
@@ -1351,17 +1358,13 @@ end;
 
             if DataRowIdx >= AFromRow then
             begin
-              InRange := True;
-
               if (AToRow > 0) and (DataRowIdx > AToRow) then
               begin
                 StopScan := True;
                 Break;
               end;
 
-              if CurrentWidth > MaxWidth then
-                MaxWidth := CurrentWidth;
-
+              if CurrentWidth > MaxWidth then MaxWidth := CurrentWidth;
               Inc(RowsScannedInRange);
               Inc(ATotalRowsInRange);
 
@@ -1374,8 +1377,14 @@ end;
 
             CurrentWidth := 0;
 
-            if (P^ = #13) and (P + 1 < BufEnd) and ((P + 1)^ = #10) then
-              Inc(P);
+            if P^ = #13 then
+            begin
+              if (P + 1 < BufEnd) and ((P + 1)^ = #10) then
+                Inc(P)               // CRLF inside buffer
+              else if P + 1 >= BufEnd then
+                PendingLF := True;   // CR at boundary; LF may start next buffer
+              // else: bare CR
+            end;
           end
           else
             Inc(CurrentWidth);
@@ -1384,18 +1393,16 @@ end;
         end;
       end;
 
-      // Letzte Zeile ohne Newline
-      if (not StopScan) and (CurrentWidth > 0) then
+      // Last row without trailing newline.
+      if (not StopScan) and (not PendingLF) and (CurrentWidth > 0) then
       begin
         Inc(DataRowInFile);
         DataRowIdx := DataRowInFile - 1;
-
         if DataRowIdx >= AFromRow then
         begin
           if (AToRow = 0) or (DataRowIdx <= AToRow) then
           begin
-            if CurrentWidth > MaxWidth then
-              MaxWidth := CurrentWidth;
+            if CurrentWidth > MaxWidth then MaxWidth := CurrentWidth;
             Inc(ATotalRowsInRange);
           end;
         end;

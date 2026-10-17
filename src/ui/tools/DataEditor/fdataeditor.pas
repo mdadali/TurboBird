@@ -198,7 +198,11 @@ type
     procedure WriteIni;
     function AskUseDetected(const AFileName: string; const ACurLE, ADetLE: string; const ACurDel, ADetDel: Char; const ACurQC, ADetQC: Char): TDetectChoice;
     procedure HandleScanProgress(ABytesRead, ATotalBytes: Int64);
-    procedure HandleLoadProgress(ARowsRead: Int64; AElapsedSeconds: Double; AFreeRAMMB: Int64);
+    procedure HandleLoadProgress(
+      ARowsRead: Int64;
+      AElapsedSeconds: Double;
+      AFreeRAMMB: Int64;
+      AEstimatedUsageMB: Int64);
     procedure ProgCancelClick(Sender: TObject);
     procedure BuildProgressForm;
   public
@@ -352,17 +356,38 @@ var
   Percent: Integer;
 begin
   if ATotalBytes <= 0 then Exit;
+
   Percent := (ABytesRead * 100) div ATotalBytes;
   if Percent > 100 then Percent := 100;
 
+  // Fortschrittsbalken
   FProgBar.Position := Percent;
-  FProgElapsedLbl.Caption := Format('Scan:   %s / %s',
-    [FormatBytesSmart(ABytesRead), FormatBytesSmart(ATotalBytes)]);
+
+  // Info-Zeile mit Bytes
+  FProgElapsedLbl.Caption := Format('Scan:   %s / %s   (%d%%)',
+    [FormatBytesSmart(ABytesRead),
+     FormatBytesSmart(ATotalBytes),
+     Percent]);
+
+  // ETA / Speed ist während des Scans nicht sinnvoll —
+  // der Scan ist I/O-limitiert und die Zeilenanzahl steht
+  // erst am Ende fest.
+  FProgSpeedLbl.Caption := '';
+  FProgETALbl.Caption   := '';
+
+  // Kein RAM-Update während Scan — der RAM-Verbrauch beim
+  // Scan ist minimal (nur 4 MB Buffer) und nicht aussagekräftig
+  // für den späteren Load. Das RAM-Panel bleibt vom vorherigen
+  // Zustand unberührt.
+
   Application.ProcessMessages;
 end;
 
-procedure TfrmDataEditor.HandleLoadProgress(ARowsRead: Int64;
-  AElapsedSeconds: Double; AFreeRAMMB: Int64);
+procedure TfrmDataEditor.HandleLoadProgress(
+  ARowsRead: Int64;
+  AElapsedSeconds: Double;
+  AFreeRAMMB: Int64;
+  AEstimatedUsageMB: Int64);
 var
   Percent: Integer;
   RowsPerSec, ETASeconds: Double;
@@ -370,7 +395,7 @@ var
   UsedPercent: Integer;
 begin
   // ============================================================
-  // Rows-Progress (wie gehabt)
+  // Rows-Progress
   // ============================================================
   if FProgTotalRows > 0 then
   begin
@@ -386,6 +411,9 @@ begin
      FormatFloat('#,##0', FProgTotalRows),
      Percent]);
 
+  // ============================================================
+  // Speed + ETA
+  // ============================================================
   if AElapsedSeconds > 0.5 then
   begin
     RowsPerSec := ARowsRead / AElapsedSeconds;
@@ -397,77 +425,112 @@ begin
       ETASeconds := (FProgTotalRows - ARowsRead) / RowsPerSec;
       FProgETALbl.Caption := Format('ETA:    %s',
         [FormatDateTime('hh:nn:ss', ETASeconds / SecsPerDay)]);
-    end;
+    end
+    else
+      FProgETALbl.Caption := '';
   end;
 
   FProgElapsedLbl.Caption := Format('Elapsed: %s',
     [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay)]);
 
   // ============================================================
-  // RAM-Update (nur wenn AFreeRAMMB >= 0, sonst letzten Wert nutzen)
+  // RAM-Update
+  //
+  // Der Reader liefert uns:
+  //   AFreeRAMMB        - Free-RAM zum Start (oder -1)
+  //   AEstimatedUsageMB - geschätzter Verbrauch (oder -1)
+  //
+  // Wenn beide Werte da sind, nutzen wir direkt die Schätzung des
+  // Readers — das ist präziser als "Total - aktuell frei", weil
+  // Free-RAM auch von anderen Prozessen schwankt.
+  //
+  // Fallback, wenn der Reader keine Schätzung liefern kann
+  // (z.B. InitialFreeRAM_MB oder MaxRowWidth nicht gesetzt):
+  // alte Berechnung über FProgTotalRAMMB - FLastFreeRAMMB.
   // ============================================================
+
+  // Free-RAM nur überschreiben, wenn der Reader einen frischen
+  // Wert liefert. -1 = "unverändert" (z.B. falls der Reader
+  // selbst drosselt oder wir keinen Start-Wert gesetzt haben).
   if AFreeRAMMB >= 0 then
     FLastFreeRAMMB := AFreeRAMMB;
 
-  if FLastFreeRAMMB > 0 then
+  // ---- Verbrauch bestimmen ----
+  if AEstimatedUsageMB > 0 then
   begin
-    // RAM-Bar: Verbrauch in % von Total
+    // Bevorzugter Pfad: Reader-Schätzung
+    UsedRAMMB := AEstimatedUsageMB;
+  end
+  else if FLastFreeRAMMB > 0 then
+  begin
+    // Fallback: Total - Free
     UsedRAMMB := FProgTotalRAMMB - FLastFreeRAMMB;
     if UsedRAMMB < 0 then UsedRAMMB := 0;
-    if FProgTotalRAMMB > 0 then
-      UsedPercent := (UsedRAMMB * 100) div FProgTotalRAMMB
-    else
-      UsedPercent := 0;
-    if UsedPercent > 100 then UsedPercent := 100;
+  end
+  else
+  begin
+    // Keine Daten — RAM-Anzeige leer lassen, aber nicht abstürzen
+    FProgRAMBar.Position := 0;
+    FProgRAMInfoLbl.Caption := 'RAM:      (no data)';
+    FProgRAMStatusLbl.Caption := '';
+    Application.ProcessMessages;
+    Exit;
+  end;
 
-    FProgRAMBar.Position := UsedPercent;
-    FProgRAMInfoLbl.Caption := Format('RAM:      %s used / %s total   (%d%%)',
-      [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
-       FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
-       UsedPercent]);
+  // ---- Prozent berechnen ----
+  if FProgTotalRAMMB > 0 then
+    UsedPercent := (UsedRAMMB * 100) div FProgTotalRAMMB
+  else
+    UsedPercent := 0;
+  if UsedPercent > 100 then UsedPercent := 100;
 
-    // Status + Farbe
-    if UsedPercent >= 85 then
-    begin
-      FProgRAMStatusLbl.Caption := 'Status:   CRITICAL - low memory!';
-      FProgRAMStatusLbl.Font.Color := clRed;
-      FProgRAMStatusLbl.Font.Style := [fsBold];
-    end
-    else if UsedPercent >= 70 then
-    begin
-      FProgRAMStatusLbl.Caption := 'Status:   WARNING - memory getting tight';
-      FProgRAMStatusLbl.Font.Color := clMaroon;
-      FProgRAMStatusLbl.Font.Style := [fsBold];
-    end
-    else
-    begin
-      FProgRAMStatusLbl.Caption := 'Status:   OK';
-      FProgRAMStatusLbl.Font.Color := clGreen;
-      FProgRAMStatusLbl.Font.Style := [];
-    end;
+  // ---- Bar + Info-Label ----
+  FProgRAMBar.Position := UsedPercent;
+  FProgRAMInfoLbl.Caption := Format('RAM:      %s used / %s total   (%d%%)',
+    [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
+     FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
+     UsedPercent]);
 
-    // ============================================================
-    // Warnung bei kritischem RAM (nur einmal)
-    // ============================================================
-    if (UsedPercent >= 85) and (not FRAMWarningShown) then
-    begin
-      FRAMWarningShown := True;
+  // ---- Status + Farbe ----
+  if UsedPercent >= 85 then
+  begin
+    FProgRAMStatusLbl.Caption := 'Status:   CRITICAL - low memory!';
+    FProgRAMStatusLbl.Font.Color := clRed;
+    FProgRAMStatusLbl.Font.Style := [fsBold];
+  end
+  else if UsedPercent >= 70 then
+  begin
+    FProgRAMStatusLbl.Caption := 'Status:   WARNING - memory getting tight';
+    FProgRAMStatusLbl.Font.Color := clMaroon;
+    FProgRAMStatusLbl.Font.Style := [fsBold];
+  end
+  else
+  begin
+    FProgRAMStatusLbl.Caption := 'Status:   OK';
+    FProgRAMStatusLbl.Font.Color := clGreen;
+    FProgRAMStatusLbl.Font.Style := [];
+  end;
 
-      if MessageDlg(
-        'Warning: Low memory!' + sLineBreak + sLineBreak +
-        'Used RAM:  ' + FormatBytesSmart(UsedRAMMB * 1024 * 1024) + sLineBreak +
-        'Free RAM:  ' + FormatBytesSmart(FLastFreeRAMMB * 1024 * 1024) + sLineBreak +
-        sLineBreak +
-        'The system may become unresponsive or kill the application.' + sLineBreak +
-        sLineBreak +
-        'Cancel the load?',
-        mtWarning, [mbYes, mbNo], 0) = mrYes then
-      begin
-        if Assigned(CSVFastDataset1) then
-          TCSVFastDataset(CSVFastDataset1).CancelFlag^ := True;
-        FProgCancelBtn.Enabled := False;
-        FProgCancelBtn.Caption := 'Cancelling...';
-      end;
+  // ============================================================
+  // Warnung bei kritischem RAM (nur einmal pro Load)
+  // ============================================================
+  if (UsedPercent >= 85) and (not FRAMWarningShown) then
+  begin
+    FRAMWarningShown := True;
+
+    if MessageDlg(
+      'Warning: Low memory!' + sLineBreak + sLineBreak +
+      'Used RAM:  ' + FormatBytesSmart(UsedRAMMB * 1024 * 1024) + sLineBreak +
+      'Free RAM:  ' + FormatBytesSmart(FLastFreeRAMMB * 1024 * 1024) + sLineBreak +
+      sLineBreak +
+      'The system may become unresponsive or kill the application.' + sLineBreak +
+      sLineBreak +
+      'Cancel the load?',
+      mtWarning, [mbYes, mbNo], 0) = mrYes then
+    begin
+      FCancelRequested := True;   // Reader prüft den Pointer
+      FProgCancelBtn.Enabled := False;
+      FProgCancelBtn.Caption := 'Cancelling...';
     end;
   end;
 

@@ -12321,36 +12321,60 @@ end;
 function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer; forward;
 
 procedure MyAllMethodsHandler;
-{$IFDEF CPUX64}
+{$ifdef CPUX64}
+//  On entry:
+//  RCX = Self pointer
+//  RDX, R8, R9 = param1 .. param3
+//  STACK = param4... paramcount
 asm
-  sub rsp, 20h
-  mov rdx, rsp
-  call MyAllMethodsHandler2
-  add rsp, 20h
+  PUSH  R9
+  MOV   R9,R8     // R9:=_ECX
+  MOV   R8,RDX    // R8:=_EDX
+  MOV   RDX, RSP  // RDX:=Stack
+  SUB   RSP, 20h
+  CALL MyAllMethodsHandler2
+  ADD   RSP, 20h  //Restore stack
+  POP   R9
 end;
-{$ELSE}
+{$else}
+//  32-bit i386 register calling convention.
+//
+//  On entry from the VCL event dispatcher:
+//    EAX = Self pointer
+//    EDX = param1  (_EDX)
+//    ECX = param2  (_ECX)
+//    STACK: [ESP]   = return address of the caller
+//           [ESP+4] = param3
+//           [ESP+8] = param4, ...
+//
+//  We call MyAllMethodsHandler2(Self, Stack, _EDX, _ECX):
+//    * Stack must point to param3 of the original call.
+//    * _ECX is the 4th arg -> passed on the stack.
+//  We also reserve one extra 4-byte slot just below the return address
+//  so handler2 can write the event's return value into it (for
+//  register-returnable types: Boolean, Integer, Char, Class, PChar, ...).
+//
+//  Stack layout while calling handler2 (E = ESP on entry):
+//    [E-12] = original EDX  -> popped into ECX (3rd arg)
+//    [E-8]  = original ECX  -> 4th arg (_ECX)
+//    [E-4]  = 0             -> return value slot
+//    [E]    = return address of the original caller
+//    [E+4]  = param3 of original call (= Stack)
 asm
-  push ecx            // Salva ECX originale (3° parametro target)
-  push edx            // Salva EDX originale (2° parametro target)
-
-  mov ecx, esp        // Prepara _ECX (puntatore al valore originale di EDX)
-  add ecx, 4          // Prepara _EDX (puntatore al valore originale di ECX)
-
-  mov edx, esp        // Prepara Stack (passato in EDX per la convention 'register')
-  add edx, 12         // Offset dello stack prima dei PUSH
-
-  // EAX contiene già 'Self'
-  call MyAllMethodsHandler2
-
-  add esp, 8          // Ripristina lo stack dai 2 PUSH
-
-  // Gestione del valore di ritorno e pulizia stack PascalScript
-  mov edx, [esp]
-  add esp, eax
-  mov [esp], edx
+  push  0                 // [E-4] = 0: return value slot
+  push  ecx               // [E-8] = original ECX: 4th arg for handler2
+  push  edx               // [E-12] = original EDX
+  mov   edx, esp
+  add   edx, 16           // edx = E+4 = &param3
+  pop   ecx               // ecx = original EDX (=_EDX), esp = E-8
+  call  MyAllMethodsHandler2
+                          // handler2 may have written the event's
+                          // return value to [E-4]; ESP is back to E-8
+  mov   eax, [esp+4]      // eax := [E-4] (return value slot)
+  add   esp, 8            // drop our two remaining pushed slots -> ESP = E
+                          // implicit RET pops the return address from [E]
 end;
-{$ENDIF}
-
+{$endif}
 
 function ResultAsRegister(b: TPSTypeRec): Boolean;
 begin
@@ -12834,7 +12858,6 @@ begin
 end;
 {$ELSE}
 // ... qui ci sono le altre funzioni 32 bit ...
-
 function MyAllMethodsHandler2(Self: PScriptMethodInfo; const Stack: PPointer; _EDX, _ECX: Pointer): Integer;
 var
   Decl: tbtString;
@@ -12844,69 +12867,60 @@ var
   cpt: PIFTypeRec;
   fmod: tbtchar;
   s, e: tbtString;
-  FStack: pointer;
+  FStack: Pointer;
   ex: TPSExceptionHandler;
 begin
   Decl := TPSInternalProcRec(Self^.Se.FProcs[Self^.ProcNo]).ExportDecl;
 
   FStack := Stack;
   Params := TPSList.Create;
-  s := decl;
+
+  // Parameter-Slots vorbereiten
+  s := Decl;
   grfw(s);
   while s <> '' do
   begin
     Params.Add(nil);
     grfw(s);
   end;
-  c := Params.Count;
+  C := Params.Count;
   regno := 0;
   Result := 0;
 
-  s := decl;
+  // Register-Parameter (EDX, ECX) befüllen
+  s := Decl;
   grfw(s);
-
-  for i := c - 1 downto 0 do
+  for I := C - 1 downto 0 do
   begin
     e := grfw(s);
     fmod := e[1];
-    delete(e, 1, 1);
+    Delete(e, 1, 1);
     cpt := Self.Se.GetTypeNo(StrToInt(e));
-    if ((fmod = '%') or (fmod = '!') or (AlwaysAsVariable(cpt))) and (RegNo < 2) then
+
+    if ((fmod = '%') or (fmod = '!') or AlwaysAsVariable(cpt)) and (regno < 2) then
     begin
-      tmp := CreateHeapVariant(self.Se.FindType2(btPointer));
-      PPSVariantPointer(tmp).DestType := cpt;
-      Params[i] := tmp;
+      Tmp := CreateHeapVariant(Self.Se.FindType2(btPointer));
+      PPSVariantPointer(Tmp).DestType := cpt;
+      Params[I] := Tmp;
       case regno of
-        0: begin
-             PPSVariantPointer(tmp).DataDest := Pointer(_EDX);
-             inc(regno);
-           end;
-        1: begin
-             PPSVariantPointer(tmp).DataDest := Pointer(_ECX);
-             inc(regno);
-           end;
+        0: begin PPSVariantPointer(Tmp).DataDest := Pointer(_EDX); Inc(regno); end;
+        1: begin PPSVariantPointer(Tmp).DataDest := Pointer(_ECX); Inc(regno); end;
       end;
     end
-    else if SupportsRegister(cpt) and (RegNo < 2) then
+    else if SupportsRegister(cpt) and (regno < 2) then
     begin
-      tmp := CreateHeapVariant(cpt);
-      Params[i] := tmp;
+      Tmp := CreateHeapVariant(cpt);
+      Params[I] := Tmp;
       case regno of
-        0: begin
-             CopyArrayContents(@PPSVariantData(tmp)^.Data, @_EDX, 1, cpt);
-             inc(regno);
-           end;
-        1: begin
-             CopyArrayContents(@PPSVariantData(tmp)^.Data, @_ECX, 1, cpt);
-             inc(regno);
-           end;
+        0: begin CopyArrayContents(@PPSVariantData(Tmp)^.Data, @_EDX, 1, cpt); Inc(regno); end;
+        1: begin CopyArrayContents(@PPSVariantData(Tmp)^.Data, @_ECX, 1, cpt); Inc(regno); end;
       end;
     end;
   end;
 
-  s := decl;
+  // Return-Wert
+  s := Decl;
   e := grfw(s);
-
   if e <> '-1' then
   begin
     cpt := Self.Se.GetTypeNo(StrToInt(e));
@@ -12919,46 +12933,53 @@ begin
         0: PPSVariantPointer(Res).DataDest := Pointer(_EDX);
         1: PPSVariantPointer(Res).DataDest := Pointer(_ECX);
       else
-        PPSVariantPointer(Res).DataDest := Pointer(FStack^);
-        Inc(Result, PointerSize);
-        FStack := Pointer(IPointer(FStack) + PointerSize);
+        begin
+          PPSVariantPointer(Res).DataDest := Pointer(FStack^);
+          Inc(Result, PointerSize);
+          FStack := Pointer(IPointer(FStack) + PointerSize);
+        end;
       end;
-    end else
+    end
+    else
     begin
       Res := CreateHeapVariant(cpt);
       Params.Add(Res);
     end;
-  end else Res := nil;
+  end
+  else
+    Res := nil;
 
-  s := decl;
+  // Restliche Parameter vom Stack holen
+  s := Decl;
   grfw(s);
-
-  for i := 0 to c - 1 do
+  for I := 0 to C - 1 do
   begin
-    e := grfw(s);
+    e := grlw(s);
     fmod := e[1];
-    delete(e, 1, 1);
-    if Params[i] <> nil then Continue;
+    Delete(e, 1, 1);
+    if Params[I] <> nil then Continue;
+
     cpt := Self.Se.GetTypeNo(StrToInt(e));
-    if (fmod = '%') or (fmod = '!') or (AlwaysAsVariable(cpt)) then
+    if (fmod = '%') or (fmod = '!') or AlwaysAsVariable(cpt) then
     begin
-      tmp := CreateHeapVariant(self.Se.FindType2(btPointer));
-      PPSVariantPointer(tmp).DestType := cpt;
-      Params[i] := tmp;
-      PPSVariantPointer(tmp).DataDest := Pointer(FStack^);
+      Tmp := CreateHeapVariant(Self.Se.FindType2(btPointer));
+      PPSVariantPointer(Tmp).DestType := cpt;
+      Params[I] := Tmp;
+      PPSVariantPointer(Tmp).DataDest := Pointer(FStack^);
       FStack := Pointer(IPointer(FStack) + PointerSize);
       Inc(Result, PointerSize);
     end
     else
     begin
-      tmp := CreateHeapVariant(cpt);
-      Params[i] := tmp;
-      CopyArrayContents(@PPSVariantData(tmp)^.Data, Pointer(FStack), 1, cpt);
+      Tmp := CreateHeapVariant(cpt);
+      Params[I] := Tmp;
+      CopyArrayContents(@PPSVariantData(Tmp)^.Data, Pointer(FStack), 1, cpt);
       FStack := Pointer((IPointer(FStack) + cpt.RealSize + 3) and not 3);
       Inc(Result, (cpt.RealSize + 3) and not 3);
     end;
   end;
 
+  // Exception-Frame + Ausführung
   ex := TPSExceptionHandler.Create;
   ex.FinallyOffset := InvalidVal;
   ex.ExceptOffset := InvalidVal;
@@ -12966,46 +12987,52 @@ begin
   ex.EndOfBlock := InvalidVal;
   ex.CurrProc := nil;
   ex.BasePtr := Self.Se.FCurrStackBase;
-  Ex.StackSize := Self.Se.FStack.Count;
-  i := Self.Se.FExceptionStack.Add(ex);
+  ex.StackSize := Self.Se.FStack.Count;
+  I := Self.Se.FExceptionStack.Add(ex);
 
   Self.Se.RunProc(Params, Self.ProcNo);
 
-  if Self.Se.FExceptionStack[i] = ex then
+  if Self.Se.FExceptionStack[I] = ex then
   begin
     Self.Se.FExceptionStack.Remove(ex);
     ex.Free;
   end;
 
-  if (Res <> nil) then
+  // Return-Wert zurückschreiben (nur wenn nötig)
+  if Res <> nil then
   begin
     Params.DeleteLast;
-    if (ResultAsRegister(Res.FType)) then
+    if ResultAsRegister(Res.FType) then
     begin
-      if (res^.FType.BaseType = btSingle) or (res^.FType.BaseType = btDouble) or
-         (res^.FType.BaseType = btCurrency) or (res^.FType.BaseType = btExtended) then
+      if Res.FType.BaseType in [btSingle, btDouble, btCurrency, btExtended] then
       begin
-        case Res^.FType.BaseType of
-          btSingle: PutOnFPUStackExtended(PPSVariantSingle(res).Data);
-          btDouble: PutOnFPUStackExtended(PPSVariantDouble(res).Data);
-          btExtended: PutOnFPUStackExtended(PPSVariantExtended(res).Data);
-          btCurrency: PutOnFPUStackExtended(PPSVariantCurrency(res).Data);
+        case Res.FType.BaseType of
+          btSingle:   PutOnFPUStackExtended(PPSVariantSingle(Res).Data);
+          btDouble:   PutOnFPUStackExtended(PPSVariantDouble(Res).Data);
+          btExtended: PutOnFPUStackExtended(PPSVariantExtended(Res).Data);
+          btCurrency: PutOnFPUStackExtended(PPSVariantCurrency(Res).Data);
         end;
         DestroyHeapVariant(Res);
         Res := nil;
-      end else
+      end
+      else
       begin
-{$IFNDEF PS_NOINT64}
-        if (res^.FType.BaseType <> btS64) and (res^.FType.BaseType <> btU64) then
-{$ENDIF}
-          CopyArrayContents(Pointer(IPointer(Stack) - PointerSize2), @PPSVariantData(res)^.Data, 1, Res^.FType);
+        // WICHTIG: korrekte Adresse des Return-Slots aus dem Assembler
+        // Stack zeigt auf param3, der Return-Slot liegt 8 Bytes darunter
+        // (wegen der zwei Pushes + dem 0-Slot)
+        {$IFNDEF PS_NOINT64}
+        if Res.FType.BaseType <> btS64 then
+        {$ENDIF}
+          CopyArrayContents(Pointer(IPointer(Stack) - PointerSize * 2),
+                            @PPSVariantData(Res)^.Data, 1, Res.FType);
       end;
     end;
-    if Res <> nil then DestroyHeapVariant(res);
+    if Res <> nil then
+      DestroyHeapVariant(Res);
   end;
 
-  for i := 0 to Params.Count - 1 do
-    DestroyHeapVariant(Params[i]);
+  for I := 0 to Params.Count - 1 do
+    DestroyHeapVariant(Params[I]);
   Params.Free;
 
   if Self.Se.ExEx <> erNoError then
@@ -13015,10 +13042,14 @@ begin
       FStack := Self.Se.ExObject;
       Self.Se.ExObject := nil;
       raise TObject(FStack);
-    end else
-      raise EPSException.Create(PSErrorToString(Self.SE.ExceptionCode, Self.Se.ExceptionString), Self.Se, Self.Se.ExProc, Self.Se.ExPos);
+    end
+    else
+      raise EPSException.Create(
+        PSErrorToString(Self.Se.ExceptionCode, Self.Se.ExceptionString),
+        Self.Se, Self.Se.ExProc, Self.Se.ExPos);
   end;
 end;
+
 
 function MyAllMethodsHandler3(Self: PScriptMethodInfo; _EDX, _ECX: Pointer; Stack: PPointer): Integer;
 var
