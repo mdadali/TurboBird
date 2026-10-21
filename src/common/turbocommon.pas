@@ -365,24 +365,24 @@ type
     CreateTableSQL: string;
 
     RowsPerSecond: Double;         // Load only, Interval-Mean
-    BytesPerSecond: Double;        // NEU: Load only, Interval-Mean
+    BytesPerSecond: Double;        // Load only, Interval-Mean
     LoadElapsedSeconds: Double;    // Load only (ohne Scan)
 
     CSVOptions: string;
 
     // === CSV BUFFER PERFORMANCE ===
-    CSVBlockSizeBytes: Integer;            // Block Size in Byte
-    CSVBufferSizeBytes: Integer;           // Buffer Size in Byte (nach Anpassung)
-    CSVInitialCellCapacity: Integer;       // Initial Cells
-    CSVRowWidthScanMode: string;           // 'Whole file' oder 'Range 1..1250000'
-    CSVRowWidthScanRows: Int64;            // Wie viele Zeilen wurden gescannt
-    CSVRowWidthScanIsCustom: Boolean;      // TRUE = CustomScan, FALSE = FullScan
-    CSVRowWidthScanTime: Double;           // Scan-Dauer in Sekunden
-    CSVMaxRowWidth: Int64;                 // Ermittelte max. Zeilenbreite in Bytes
-    CSVBufferAutoAdjusted: Boolean;        // Wurde BufferSize automatisch angepasst?
-    CSVBufferOriginalBytes: Int64;         // BufferSize vor der Anpassung
-    CSVBlockAutoAdjusted: Boolean;         // Wurde BlockSize automatisch angepasst?
-    CSVBlockOriginalBytes: Int64;          // BlockSize vor der Anpassung
+    CSVBlockSizeBytes: Integer;
+    CSVBufferSizeBytes: Integer;
+    CSVInitialCellCapacity: Integer;
+    CSVRowWidthScanMode: string;
+    CSVRowWidthScanRows: Int64;
+    CSVRowWidthScanIsCustom: Boolean;
+    CSVRowWidthScanTime: Double;
+    CSVMaxRowWidth: Int64;
+    CSVBufferAutoAdjusted: Boolean;
+    CSVBufferOriginalBytes: Int64;
+    CSVBlockAutoAdjusted: Boolean;
+    CSVBlockOriginalBytes: Int64;
 
     OptionsExtra: string;
 
@@ -396,8 +396,11 @@ type
     ElapsedSeconds: Double;
 
     // === MEMORY ===
-    PeakRAMUsageMB:    Int64;    // höchster gemessener Systemverbrauch
-    PeakEstimatedMB:   Int64;    // höchste Dataset-Schätzung
+    PeakRAMUsageMB:    Int64;       // höchster gemessener Systemverbrauch
+    PeakEstimatedMB:   Int64;       // höchste Dataset-Schätzung
+    PeakSwapUsedMB:    Int64;       // NEU: höchster gemessener Swap-Verbrauch
+    SwapTotalMB:       Int64;       // NEU: Swap-Gesamt beim Start
+    ThrashingDetected: Boolean;     // NEU: Swap-Wachstum > 500 MB
 
     // === ENVIRONMENT ===
     ClientLibVersion: string;
@@ -1851,6 +1854,7 @@ end;
 procedure AddEnvironmentSection(SL: TStringList; const Stats: TTransferStatistic);
 var
   FS: TFormatSettings;
+  SwapUsedMB: Int64;
 begin
   // Englischer Format-Stil — unabhängig vom OS-Locale
   FS := DefaultFormatSettings;
@@ -1864,6 +1868,15 @@ begin
   SL.Add('  CPU:       ' + Stats.SystemInfo.CPUModel);
   SL.Add('  Cores:     ' + IntToStr(Stats.SystemInfo.CPUCores));
   SL.Add('  RAM:       ' + FormatFloat('#,##0', Stats.SystemInfo.RAMTotalMB, FS) + ' MB');
+
+  // NEU: Swap-Zeile — nur wenn das System überhaupt Swap hat
+  if Stats.SystemInfo.SwapTotalMB > 0 then
+  begin
+    SwapUsedMB := Stats.SystemInfo.SwapTotalMB - Stats.SystemInfo.SwapFreeMB;
+    SL.Add('  Swap:      ' +
+      FormatFloat('#,##0', Stats.SystemInfo.SwapTotalMB, FS) + ' MB total / ' +
+      FormatFloat('#,##0', SwapUsedMB, FS) + ' MB used');
+  end;
 
   if Stats.SystemInfo.DiskPath <> '' then
   begin
@@ -2092,6 +2105,9 @@ begin
       SL.Add('');
     end;
 
+    // ======================================================================
+    // RESULT — Scan / Load / Total getrennt, ehrliche Speed
+    // ======================================================================
     SL.Add('Result:');
     SL.Add('  Rows:          ' + FormatNumberEN(Stats.RowsProcessed));
     if Stats.FieldsCount > 0 then
@@ -2114,15 +2130,23 @@ begin
     if Stats.BytesPerSecond > 0 then
       SL.Add('  Data Rate:     ' + FormatBytesSmart(Round(Stats.BytesPerSecond)) + '/sec');
 
-    if Stats.BytesPerSecond > 0 then
-      SL.Add('  Data Rate:     ' + FormatBytesSmart(Round(Stats.BytesPerSecond)) + '/sec');
-
     // === MEMORY ===
     if Stats.PeakRAMUsageMB > 0 then
       SL.Add('  Peak RAM:      ' + FormatBytesSmart(Stats.PeakRAMUsageMB * 1024 * 1024));
     if Stats.PeakEstimatedMB > 0 then
       SL.Add('  Dataset Peak:  ' + FormatBytesSmart(Stats.PeakEstimatedMB * 1024 * 1024) +
              ' (estimated)');
+
+    // === SWAP ===
+    if Stats.SwapTotalMB > 0 then
+    begin
+      if Stats.PeakSwapUsedMB > 0 then
+        SL.Add('  Peak Swap:     ' + FormatBytesSmart(Stats.PeakSwapUsedMB * 1024 * 1024) +
+               ' / ' + FormatBytesSmart(Stats.SwapTotalMB * 1024 * 1024));
+    end;
+
+    if Stats.ThrashingDetected then
+      SL.Add('  Note:          Swapping detected — load was slower than RAM-only');
 
     SL.Add('');
 

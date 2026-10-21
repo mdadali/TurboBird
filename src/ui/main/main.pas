@@ -320,8 +320,13 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
+
+    function EnsureServerRegistered: Boolean;
+    function EnsureDatabaseSelected: Boolean;
+    function EnsureTableSelected: Boolean;
     procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
       var Handled: Boolean);
+
     procedure ImNewFBFunctionClick(Sender: TObject);
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
@@ -717,25 +722,166 @@ begin
     frmUpdateChecker.PerformAutoSearch;
 end;
 
+{ ------------------------------------------------------------------
+  Vorbedingungs-Prüfungen für Aktionen der Startseite
+  ------------------------------------------------------------------ }
+function TfmMain.EnsureServerRegistered: Boolean;
+begin
+  Result := Length(RegisteredServers) > 0;
+  if not Result then
+    MessageDlg(
+      'Es ist noch kein Server registriert.' + LineEnding + LineEnding +
+      'Bitte registrieren Sie zuerst einen Server (Schritt 1 der Startseite), ' +
+      'bevor Sie Datenbanken anlegen, registrieren oder verwalten können.',
+      mtWarning, [mbOK], 0);
+end;
+
+function TfmMain.EnsureDatabaseSelected: Boolean;
+begin
+  Result := EnsureServerRegistered;
+  if not Result then Exit;
+
+  if (tvMain.Selected = nil) or (tvMain.Selected.Level < 1) then
+  begin
+    MessageDlg(
+      'Bitte markieren Sie zuerst eine Datenbank im Baum links.' + LineEnding +
+      LineEnding +
+      'Diese Aktion bezieht sich auf eine konkrete Datenbank.',
+      mtWarning, [mbOK], 0);
+    Result := False;
+  end;
+end;
+
+function TfmMain.EnsureTableSelected: Boolean;
+var
+  NodeInfo: TPNodeInfos;
+begin
+  Result := EnsureDatabaseSelected;
+  if not Result then Exit;
+
+  NodeInfo := TPNodeInfos(tvMain.Selected.Data);
+  if (NodeInfo = nil) or (NodeInfo^.ObjectType <> tvotTable) then
+  begin
+    MessageDlg(
+      'Bitte markieren Sie zuerst eine Tabelle im Baum links.' + LineEnding +
+      LineEnding +
+      'Diese Aktion bezieht sich auf eine konkrete Tabelle.',
+      mtWarning, [mbOK], 0);
+    Result := False;
+  end;
+end;
+
 procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
-var htmlPath: string;
+var
+  htmlPath, LocalAction, UrlLower: string;
 begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
+  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+              'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
+  UrlLower := LowerCase(SRC);
 
+  // --- TurboBird action URIs: tb://<action> ---
+  if Pos('tb://', UrlLower) = 1 then
+  begin
+    LocalAction := LowerCase(Copy(SRC, 6, MaxInt));
+
+    // ----- Ohne Vorbedingung (immer verfügbar) -----
+    if      LocalAction = 'registerserver' then lmServerRegistryClick(nil)
+    else if LocalAction = 'setfbclient'    then lmSetFBClientClick(nil)
+    else if LocalAction = 'theme'          then mnThemeClick(nil)
+    else if LocalAction = 'editorfont'     then mnEditorFontClick(nil)
+    else if LocalAction = 'servertools'    then tbServerInventoryAsTextClick(nil)
+    else if LocalAction = 'checkupdate'    then mnCheckForUpdateClick(nil)
+    else if LocalAction = 'about'          then mnAboutClick(nil)
+    else if LocalAction = 'exit'           then Close
+
+    // ----- Eigenständige Tools ohne DB-Bezug -----
+    else if LocalAction = 'dataeditor'     then mnDataEditorClick(nil)
+    else if LocalAction = 'dbreader'       then mnDBReaderClick(nil)
+    else if LocalAction = 'passtudio'      then mnuPascalScriptClick(nil)
+    else if LocalAction = 'sqlparser'      then mnSQLParserClick(nil)
+
+    // ----- Server erforderlich -----
+    else if LocalAction = 'createdb' then
+    begin
+      if EnsureServerRegistered then lmCreateDBClick(nil);
+    end
+    else if LocalAction = 'registerdb' then
+    begin
+      if EnsureServerRegistered then mnRegDBClick(nil);
+    end
+    else if LocalAction = 'restore' then
+    begin
+      if EnsureServerRegistered then mnRestoreClick(nil);
+    end
+
+    // ----- Datenbank erforderlich -----
+    else if LocalAction = 'backup' then
+    begin
+      if EnsureDatabaseSelected then lmBackupNewClick(nil);
+    end
+    else if LocalAction = 'activitymonitor' then
+    begin
+      if EnsureDatabaseSelected then lmActivityMonitorClick(nil);
+    end
+    else if LocalAction = 'sqlmonitor' then
+    begin
+      if EnsureDatabaseSelected then mnSQLMonitorClick(nil);
+    end
+    else if LocalAction = 'integrity' then
+    begin
+      if EnsureDatabaseSelected then tbCheckDBIntegrityClick(nil);
+    end
+    else if LocalAction = 'recalcstats' then
+    begin
+      if EnsureDatabaseSelected then lmRecalculateStatisticsClick(nil);
+    end
+    else if LocalAction = 'scriptengine' then
+    begin
+      if EnsureDatabaseSelected then lmScriptEngineClick(nil);
+    end
+    else if LocalAction = 'scriptdb' then
+    begin
+      if EnsureDatabaseSelected then lmScriptDatabaseClick(nil);
+    end
+    else if LocalAction = 'newform' then
+    begin
+      if EnsureDatabaseSelected then lmNewFormClick(nil);
+    end
+
+    // ----- Tabelle erforderlich -----
+    else if LocalAction = 'bulkclone' then
+    begin
+      if EnsureTableSelected then lmCloneTableClick(nil);
+    end
+
+    else if LocalAction = 'tablemanage' then
+     begin
+       if EnsureTableSelected then lmTableManageClick(nil);
+     end
+     else if LocalAction = 'csvbulkexport' then
+     begin
+       if EnsureTableSelected then lmCSVBulkExporterClick(nil);
+     end;
+
+    Handled := True;
+    Exit;
+  end;
+
+  // --- Lokale Datei oder externer Link ---
   if (Pos('http://', SRC) = 0) and (Pos('https://', SRC) = 0) then
   begin
     if FileExists(htmlPath + SRC) then
       HtmlViewer1.LoadFromFile(htmlPath + SRC)
     else
-    HtmlViewer1.LoadFromFile(
-      IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html');
+      HtmlViewer1.LoadFromFile(
+        IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+        'data' + PathDelim + 'help' + PathDelim + Language + PathDelim +
+        'filenotfound.html');
   end
   else
-  begin
-    // Externe Links öffnen im Standardbrowser
     OpenURL(SRC);
-  end;
+
   Handled := true;
 end;
 

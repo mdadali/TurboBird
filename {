@@ -1,0 +1,30 @@
+{
+  "default_provider": "ollama",
+  "default_model": "qwen2.5-coder:7b",
+
+  "providers": [
+    {
+      "name": "ollama",
+      "kind": "ollama",
+      "api_base": "http://host.docker.internal:11434",
+      "api_key": "",
+      "model": "qwen2.5-coder:7b"
+    }
+  ],
+
+  "fallbacks": [],
+
+  "gateway": {
+    "log_level": "info",
+    "bind_addr": "0.0.0.0",
+    "port": 8088,
+    "token": "${PASCLAW_GATEWAY_TOKEN}"
+  },
+
+  "sandbox": {
+    "restrict_to_workspace": true,
+    "workspace": "${PASCLAW_HOME}/workspace",
+    "shell_deny_enabled": true,
+    "block_private_networks": true
+  }
+}
