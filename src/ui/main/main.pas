@@ -308,6 +308,7 @@ type
     tbtnAbout: TToolButton;
     tbCheckDBIntegrity: TToolButton;
     tbSQLMonitor: TToolButton;
+    tbServerInventoryAsText: TToolButton;
     ToolButton3: TToolButton;
     tbtnEditorFont: TToolButton;
     tsMain: TTabSheet;
@@ -473,6 +474,7 @@ type
       const Url: string);
     procedure pmDatabasePopup(Sender: TObject);
     procedure tbCheckDBIntegrityClick(Sender: TObject);
+    procedure tbServerInventoryAsTextClick(Sender: TObject);
     procedure tbSQLMonitorClick(Sender: TObject);
     procedure tvMainAddition(Sender: TObject; Node: TTreeNode);
     procedure tvMainChange(Sender: TObject; Node: TTreeNode);
@@ -1742,6 +1744,22 @@ begin
   mnRestoreClick(nil);
 end;
 
+{ ============================================================
+  lmBackupNewClick: Startet den Backup-Dialog für die markierte DB.
+
+  NEU (gegenüber der letzten Version):
+    - DisplayAlias wird an den Dialog übergeben, damit
+      FormShow den Alias im ServerName-Feld und in der
+      Caption anzeigen kann.
+
+  Alle anderen Korrekturen aus der letzten Runde bleiben:
+    - ByAlias-Lookup (richtiger Record bei mehreren Aliasen
+      auf demselben echten Server).
+    - Passwort-Fallback aus Session-Cache.
+    - FirebirdLibraryPathName explizit setzen.
+    - Verbindung trennen vor Free.
+    - try/finally um Create/Free.
+  ============================================================ }
 procedure TfmMain.lmBackupNewClick(Sender: TObject);
 var
   TmpBackupDlg: TBackupDlg;
@@ -1753,12 +1771,17 @@ var
   ServerErrStr: string;
   BackupFileName: string;
   TS: string;
+  RealServerName, DisplayAlias: string;
+  PasswordToUse: string;
 begin
   if tvMain.Items.Count = 0 then exit;
   if tvMain.Selected = nil then exit;
   if tvMain.Selected.Level <> 1 then exit;
 
-  if not IsServerReachable(tvMain.Selected.Parent.Text, ServerErrStr) then
+  RealServerName := GetServerNameFromNode(tvMain.Selected.Parent);
+  DisplayAlias   := GetServerAliasFromNode(tvMain.Selected.Parent);
+
+  if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
     MessageDlg(ServerErrStr, mtError, [mbOK], 0);
     Exit;
@@ -1769,17 +1792,31 @@ begin
   isDbConnected := RegisteredDatabases[dbIndex].IBDatabase.Connected;
 
   DBRec := RegisteredDatabases[dbIndex];
-  ServerRec := GetServerRecordFromFileByName(DBRec.RegRec.ServerName);
 
+  // Alias-Lookup: bei mehreren Aliasen auf demselben echten
+  // Server würde ByName den falschen Record liefern.
+  ServerRec := GetServerRecordFromFileByAlias(DisplayAlias);
+
+  // Passwort-Fallback: Session-Cache nutzen, wenn kein
+  // Passwort gespeichert ist
+  PasswordToUse := Trim(ServerRec.Password);
+  if PasswordToUse = '' then
+    PasswordToUse := GetServerSessionPassword(RealServerName);
+
+  TmpIniFile := nil;
+  TmpBackupDlg := nil;
   try
-    TmpIniFile :=  TIniFile.Create(fIniFileName, []);
-    CloseDBBeforeBackup :=  TmpIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
+    TmpIniFile := TIniFile.Create(fIniFileName, []);
+    CloseDBBeforeBackup := TmpIniFile.ReadBool('Backup', 'CloseDBBeforeBackup', true);
 
-    if  CloseDBBeforeBackup then
+    if CloseDBBeforeBackup then
       if isDbConnected then
         CloseDB(dbIndex, true);
 
     TmpBackupDlg := TBackupDlg.Create(Self);
+
+    // Alias an den Dialog übergeben (für ServerName-Feld + Caption)
+    TmpBackupDlg.DisplayAlias := DisplayAlias;
 
     try
       if TmpBackupDlg.IBXServicesConnection1.Connected then
@@ -1789,12 +1826,19 @@ begin
       TmpBackupDlg.IBXServicesConnection1.PortNo := ServerRec.Port;
       TmpBackupDlg.IBXServicesConnection1.Protocol := ServerRec.Protocol;
 
+      // Client-Library des Ziel-Servers setzen — sonst nutzt
+      // die API die globale Lib (falsche FB-Version möglich).
+      TmpBackupDlg.IBXServicesConnection1.FirebirdLibraryPathName :=
+        ServerRec.ClientLibraryPath;
+
       TmpBackupDlg.IBXServicesConnection1.Params.Clear;
       TmpBackupDlg.IBXServicesConnection1.Params.Add('user_name=' + ServerRec.UserName);
-      TmpBackupDlg.IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
+      if PasswordToUse <> '' then
+        TmpBackupDlg.IBXServicesConnection1.Params.Add('password=' + PasswordToUse);
       TmpBackupDlg.IBXServicesConnection1.LoginPrompt := False;
 
       TmpBackupDlg.IBXServicesConnection1.Connected := True;
+
       TmpBackupDlg.IBXClientSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
       TmpBackupDlg.IBXServerSideBackupService1.DatabaseName := DBRec.RegRec.DatabaseName;
 
@@ -1802,7 +1846,6 @@ begin
       BackupFileName := ChangeFileExt(BackupFileName, '');
       TS := FormatDateTime('yyyy_mm_dd_hh_nn_ss', Now);
       BackupFileName := BackupFileName + '_' + TS;
-
       BackupFileName := ChangeFileExt(BackupFileName, '.fbk');
       TmpBackupDlg.BackupFileName.Text := BackupFileName;
 
@@ -1813,25 +1856,62 @@ begin
     end;
 
   finally
-    TmpIniFile.Free;
-    TmpBackupDlg.Free;
+    // Verbindung trennen, bevor die Komponente freigegeben wird
+    if Assigned(TmpBackupDlg) then
+    begin
+      try
+        if TmpBackupDlg.IBXServicesConnection1.Connected then
+          TmpBackupDlg.IBXServicesConnection1.Connected := False;
+      except
+      end;
+      TmpBackupDlg.Free;
+    end;
 
+    if Assigned(TmpIniFile) then
+      TmpIniFile.Free;
+
+    // DB wieder verbinden, falls sie vorher verbunden war
     if isDbConnected and (not RegisteredDatabases[dbIndex].IBDatabase.Connected) then
       RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
   end;
 end;
 
-procedure TfmMain.mnRestoreClick(Sender: TObject);
-var TmpRestoreDlg: TRestoreDlg;
-    ServerName, DatabaseName: string;
-    SelNode, ServerNode, DBNode: TTreeNode;
-    dbIndex: integer;
-    ServerErrStr: string;
+{ ============================================================
+  mnRestoreClick: Startet den Restore-Dialog.
 
-    ServerRec: TServerRecord;
-    TmpModalResult: TModalResult;
-    cboxItems: TStringList;
-    isDbConnected: boolean;
+  NEU:
+    - An Init wird DisplayAlias (nicht RealServerName) übergeben.
+      Grund: Bei zwei Aliasen auf demselben echten Server
+      (Prod/Test → beide FB60Local) würde Init sonst via
+      GetServerRecordFromFileByName den ersten Record finden
+      (falscher Port, falsches User/Password) und die
+      Restore-Verbindung falsch aufbauen.
+
+    - ServerRec für fmReg-Prefill kommt ebenfalls aus
+      GetServerRecordFromFileByAlias(DisplayAlias) — damit
+      stimmen Port/User/Password/Charset beim anschließenden
+      Registrieren.
+
+    - IsServerReachable bleibt mit RealServerName (echter Name)
+      — das ist korrekt, weil die Funktion serverseitig
+      auflösen muss.
+
+  Der Rest (DBNode-Erkennung, DatabaseName, fmReg-Prefill,
+  TreeView-Reload) bleibt funktional unverändert.
+  ============================================================ }
+procedure TfmMain.mnRestoreClick(Sender: TObject);
+var
+  TmpRestoreDlg: TRestoreDlg;
+  RealServerName, DatabaseName: string;
+  SelNode, ServerNode, DBNode: TTreeNode;
+  dbIndex: integer;
+  ServerErrStr: string;
+  ServerRec: TServerRecord;
+  TmpModalResult: TModalResult;
+  cboxItems: TStringList;
+  isDbConnected: boolean;
+  DisplayAlias: string;
+  Idx: Integer;
 begin
   if tvMain.Items.Count = 0 then
   begin
@@ -1852,9 +1932,10 @@ begin
 
   ServerNode := turbocommon.GetAncestorAtLevel(SelNode, 0);
 
-  ServerName := ServerNode.Text;
+  RealServerName := GetServerNameFromNode(ServerNode);
+  DisplayAlias   := GetServerAliasFromNode(ServerNode);
 
-  if not IsServerReachable(ServerName, ServerErrStr) then
+  if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
     MessageDlg(ServerErrStr, mtError, [mbOK], 0);
     Exit;
@@ -1874,60 +1955,67 @@ begin
     DatabaseName := 'RestoredDB_at_' + FormatDateTime('yyyy_mm_dd_hh_nn_ss', Now) + '.fdb';
 
   TmpRestoreDlg := TRestoreDlg.Create(self);
-  TmpRestoreDlg.Init(ServerName, DatabaseName, DefaultPageSize, DefaultNumBuffers);
+  try
+    TmpRestoreDlg.Init(DisplayAlias, DatabaseName, DefaultPageSize, DefaultNumBuffers);
 
-  TmpModalResult := TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
+    TmpModalResult := TmpRestoreDlg.ShowModal(DefaultPageSize, DefaultNumBuffers);
 
-  if not RegisterDBAfterRestore then exit;
+    if not RegisterDBAfterRestore then exit;
 
-  if  TmpModalResult = mrOK then
-  begin
-    ServerRec := GetServerRecordFromFileByName(ServerName);
-    if DBNode = nil then
+    if TmpModalResult = mrOK then
     begin
-      try
-        cboxItems := GetServerListFromTreeView;
-        fmReg.cboxServers.Items.Assign(cboxItems);
+      ServerRec := GetServerRecordFromFileByAlias(DisplayAlias);
 
-        fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(ServerName);
+      if DBNode = nil then
+      begin
+        try
+          cboxItems := GetServerAliasListFromTreeView;
+          fmReg.cboxServers.Items.Assign(cboxItems);
 
-        if ServerRec.IsEmbedded then
-          fmReg.edDatabaseName.Text := TmpRestoreDlg.strGridsegments.Cells[0, 0] //TmpRestoreDlg.DBName.Text
-        else
-          fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.strGridsegments.Cells[0, 0]);
-          //fmReg.edDatabaseName.Text := MakeConnectionString(ServerRec.ServerName, ServerRec.Port, TmpRestoreDlg.DBName.Text);
+          Idx := fmReg.cboxServers.Items.IndexOf(DisplayAlias);
+          if Idx < 0 then
+            Idx := fmReg.cboxServers.Items.IndexOf(RealServerName);
+          fmReg.cboxServers.ItemIndex := Idx;
 
-        fmReg.edTitle.Text :=  ChangeFileExt(ExtractFileName(TmpRestoreDlg.strGridsegments.Cells[0, 0]), '');
+          if ServerRec.IsEmbedded then
+            fmReg.edDatabaseName.Text := TmpRestoreDlg.strGridsegments.Cells[0, 0]
+          else
+            fmReg.edDatabaseName.Text := MakeConnectionString(
+              ServerRec.ServerName, ServerRec.Port,
+              TmpRestoreDlg.strGridsegments.Cells[0, 0]);
 
-        fmReg.edtPort.Text := ServerRec.Port;
-        fmReg.cboxSQLDialect.ItemIndex := 2;
-        fmReg.cbCharset.ItemIndex := fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
-        fmReg.edtUserName.Text := ServerRec.UserName;
-        fmReg.edtPassword.Text := ServerRec.Password;
-        fmReg.edtRole.Text := ServerRec.Role;
+          fmReg.edTitle.Text := ChangeFileExt(
+            ExtractFileName(TmpRestoreDlg.strGridsegments.Cells[0, 0]), '');
 
-        fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
-        fmReg.edtPort.Text := ServerRec.Port;
+          fmReg.edtPort.Text := ServerRec.Port;
+          fmReg.cboxSQLDialect.ItemIndex := 2;
+          fmReg.cbCharset.ItemIndex := fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
+          fmReg.edtUserName.Text := ServerRec.UserName;
+          fmReg.edtPassword.Text := ServerRec.Password;
+          fmReg.edtRole.Text := ServerRec.Role;
+          fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
 
-        fmReg.NewReg:= True;
-        ModalResult := fmReg.ShowModal;
-      finally
-        cboxItems.Free;
-        LoadRegisteredDatabases;
-        ServerNode := GetServerNodeByServerName(ServerName);
-        if ServerNode <> nil then
-          ServerNode.Expand(false);
+          fmReg.NewReg := True;
+          ModalResult := fmReg.ShowModal;
+        finally
+          cboxItems.Free;
+          LoadRegisteredDatabases;
+
+          // NEU: Knoten über ALIAS finden
+          ServerNode := GetServerNodeByAlias(DisplayAlias);
+          if ServerNode <> nil then
+            ServerNode.Expand(false);
+        end;
+      end else
+      begin
+        DBNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
+        DBNode.DeleteChildren;
+        AddRootObjects(DBNode);
       end;
-    end else
-    begin
-      DBNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 1);
-      DBNode.DeleteChildren;
-      AddRootObjects(DBNode);
-      //if isDbConnected then
-        //RegisteredDatabases[dbIndex].IBDatabase.Connected := True;
     end;
+  finally
+    TmpRestoreDlg.Free;
   end;
-  TmpRestoreDlg.Free;
 end;
 
 procedure TfmMain.lmRestoreNewClick(Sender: TObject);
@@ -2323,11 +2411,48 @@ begin
   //CloneTableAsExternal(GetClearNodeText(TableName), DBIndex);
 end;
 
+{ ============================================================
+  lmCreateDBClick: Öffnet die CreateDB-Maske.
+
+  NEU:
+    - ComboBox in fmCreateDB wird mit ALIASEN gefüllt
+      (GetServerAliasListFromTreeView statt GetServerListFromTreeView).
+      Konsistent zur TreeView und zum Rest der App.
+
+    - Server-Identifikation getrennt:
+        RealServerName  — für IsServerReachable und für den
+                          TreeView-Reload nach dem Erstellen
+                          (GetServerNameFromNode).
+        DisplayAlias    — für die ComboBox-Auswahl
+                          (GetServerAliasFromNode).
+
+    - ComboBox-Auswahl über Alias (IndexOf(DisplayAlias)).
+      Damit funktioniert CreateDb.Init (Schritt 2), das
+      GetServerRecordFromFileByAlias(Trim(cmbBoxServers.Text))
+      aufruft und den Record über den Alias findet.
+
+    - Defensive Prüfungen:
+        AliasList = nil / leer  → klare Meldung statt Crash.
+        SelectedServerNode = nil → frühzeitig raus.
+
+    - Nach erfolgreichem Erstellen: TreeView-Reload und
+      Server-Knoten expandieren über GetServerNodeByServerName
+      (echter Name) — GetServerNodeByServerName nutzt intern
+      ServerSession.ServerName und findet den richtigen Knoten
+      auch bei Alias-Anzeige.
+
+  Was NICHT geändert wird:
+    - Der mrOK-Fall lädt die Registry neu und expandiert den
+      Knoten — unverändert, nur mit echtem Servernamen.
+  ============================================================ }
 procedure TfmMain.lmCreateDBClick(Sender: TObject);
-var cboxItems: TStringList;
-    SelectedServerNode: TTreeNode;
-    ServerName: string;
-    ServerErrStr: string;
+var
+  AliasList: TStringList;
+  SelectedServerNode: TTreeNode;
+  RealServerName: string;
+  DisplayAlias: string;
+  ServerErrStr: string;
+  Idx: Integer;
 begin
   if tvMain.Items.Count = 0 then
   begin
@@ -2335,38 +2460,61 @@ begin
     exit;
   end;
 
-  try
-    cboxItems := GetServerListFromTreeView;
+  AliasList := GetServerAliasListFromTreeView;
+  if (AliasList = nil) or (AliasList.Count = 0) then
+  begin
+    if Assigned(AliasList) then
+      AliasList.Free;
+    MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
+    Exit;
+  end;
 
+  try
     if tvMain.Selected = nil then
       tvMain.Selected := tvMain.Items[0];
 
     SelectedServerNode := turbocommon.GetAncestorAtLevel(tvMain.Selected, 0);
 
-    if not IsServerReachable(SelectedServerNode.Text, ServerErrStr) then
+    if SelectedServerNode = nil then
+    begin
+      MessageDlg('Please select a server node first.', mtWarning, [mbOK], 0);
+      Exit;
+    end;
+
+    RealServerName := GetServerNameFromNode(SelectedServerNode);
+    DisplayAlias   := GetServerAliasFromNode(SelectedServerNode);
+
+    if not IsServerReachable(RealServerName, ServerErrStr) then
     begin
       MessageDlg(ServerErrStr, mtError, [mbOK], 0);
       Exit;
     end;
 
-    ServerName := SelectedServerNode.Text;
+    fmCreateDB.cmbBoxServers.Items.Assign(AliasList);
 
-    fmCreateDB.cmbBoxServers.Items.Assign(cboxItems);
+    Idx := fmCreateDB.cmbBoxServers.Items.IndexOf(DisplayAlias);
+    if Idx >= 0 then
+      fmCreateDB.cmbBoxServers.ItemIndex := Idx
+    else if fmCreateDB.cmbBoxServers.Items.Count > 0 then
+      fmCreateDB.cmbBoxServers.ItemIndex := 0;
 
-    fmCreateDB.cmbBoxServers.ItemIndex := fmCreateDB.cmbBoxServers.Items.IndexOf(SelectedServerNode.Text);
-
-    fmCreateDB.edNewDatabase.Text:= '';
+    fmCreateDB.edNewDatabase.Text := '';
     fmCreateDB.Init;
+
     if fmCreateDB.ShowModal = mrOK then
     begin
       LoadRegisteredDatabases;
-      SelectedServerNode := GetServerNodeByServerName(ServerName);
+
+      // NEU: Knoten über ALIAS finden — bei mehreren Aliasen auf
+      // demselben echten Server würde GetServerNodeByServerName
+      // immer den ersten finden.
+      SelectedServerNode := GetServerNodeByAlias(DisplayAlias);
       if SelectedServerNode <> nil then
         SelectedServerNode.Expand(false);
     end;
 
   finally
-    cboxItems.Free;
+    AliasList.Free;
   end;
 end;
 
@@ -2379,6 +2527,7 @@ var
   //MainForm: TMainForm;  //DBAdmin
   ShortTitle, FullHint, DBAlias: string;
   ServerErrStr: string;
+  RealServerName: string;
 begin
   SelNode := tvMain.Selected;
   if (SelNode = nil) or (SelNode.Parent = nil) then Exit;
@@ -2389,7 +2538,10 @@ begin
 
   ServerNode := turbocommon.GetAncestorAtLevel(SelNode, 0);
 
-  if not IsServerReachable(ServerNode.Text, ServerErrStr) then
+  // Echten Servernamen ermitteln (nicht Node.Text)
+  RealServerName := GetServerNameFromNode(ServerNode);
+
+  if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
     MessageDlg(ServerErrStr, mtError, [mbOK], 0);
     Exit;
@@ -5045,14 +5197,40 @@ begin
   lmPermissionsClick(Sender);
 end;
 
+{ ============================================================
+  lmScriptEngineClick: Öffnet den Script Engine für die markierte
+  DB.
+
+  NEU:
+    - Klare Trennung der Variablen:
+        DBTitle      — der DB-Titel (DBNode.Text)
+        DisplayAlias — Server-Alias (GetServerAliasFromNode)
+        RealServerName — echter Servername (nur für die Hint-
+                         Zusatzinfo, falls der Anwender den
+                         echten Namen braucht)
+
+    - Hint zeigt explizit:
+        Server (Alias): <Alias>
+        Server (real):  <echter Name>  ← nur wenn ≠ Alias
+      Damit ist bei mehreren Aliasen auf demselben echten
+      Server sofort ersichtlich, welcher gemeint ist.
+
+    - Variable DBAlias → DBTitle umbenannt. Der alte Name war
+      irreführend (DBNode.Text ist der DB-Titel, kein Alias).
+
+    - GetServerAliasFromNode/GetServerNameFromNode statt
+      direktem Node.Text-Zugriff — dadurch konsistent zur
+      restlichen App und robust gegen künftige Änderungen
+      der Knoten-Struktur.
+  ============================================================ }
 procedure TfmMain.lmScriptEngineClick(Sender: TObject);
 var
   frmScriptEngine: TfrmScriptEngine;
   dbIndex: integer;
-  DBNode: TTreeNode;
+  DBNode, ServerNode: TTreeNode;
   NodeInfos: TPNodeInfos;
   ATab: TTabSheet;
-  Title, FullHint, DBAlias: string;
+  Title, FullHint, DBTitle, DisplayAlias, RealServerName: string;
 begin
   DBNode := tvMain.Selected;
   if DBNode = nil then exit;
@@ -5063,6 +5241,10 @@ begin
 
   NodeInfos := TPNodeInfos(DBNode.Data);
   dbIndex := NodeInfos^.dbIndex;
+
+  ServerNode := DBNode.Parent;
+  DisplayAlias   := GetServerAliasFromNode(ServerNode);
+  RealServerName := GetServerNameFromNode(ServerNode);
 
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfrmScriptEngine) then
     frmScriptEngine := TfrmScriptEngine(NodeInfos^.ViewForm)
@@ -5084,26 +5266,32 @@ begin
   PageControl1.ActivePage := ATab;
   ATab.Tag := dbIndex;
 
-  DBAlias :=  DBNode.Text;
-  Title   := 'Scripter#' + DBAlias + IntToStr(dbIndex);
+  DBTitle := DBNode.Text;
+  Title   := 'Scripter#' + DBTitle + IntToStr(dbIndex);
   ATab.Caption := Title;
   frmScriptEngine.Caption := Title;
 
-  // Detaillierte Infos als Hint
-
+  // Hint mit Alias und (falls abweichend) echtem Servernamen
   FullHint :=
-    'Server:   ' + DBNode.Parent.Text + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
+    'Server (Alias): ' + DisplayAlias + sLineBreak;
+
+  if (RealServerName <> '') and (not SameText(RealServerName, DisplayAlias)) then
+    FullHint := FullHint +
+      'Server (real):  ' + RealServerName + sLineBreak;
+
+  FullHint := FullHint +
+    'DBAlias:  ' + DBTitle + sLineBreak +
     'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
     'Object type: Script Engine';
+
   ATab.Hint := FullHint;
   ATab.ShowHint := True;
 
   // Form initialisieren
   frmScriptEngine.Init(dbIndex, NodeInfos);
+  frmScriptEngine.DisplayAlias := DisplayAlias;
   frmScriptEngine.Show;
 end;
-
 
 procedure TfmMain.lmRolePerManagementClick(Sender: TObject);
 var
@@ -7940,30 +8128,61 @@ begin
   end;
 end;
 
+{ ============================================================
+  lmRecalculateStatisticsClick: Setzt SET STATISTICS INDEX für
+  alle Indizes der markierten DB.
+
+  Hinweis zur Struktur:
+    Pascal erlaubt kein try..except..finally in EINEM Block.
+    Deshalb sind zwei verschachtelte try-Blöcke nötig:
+      - äußerer try..finally → Cursor wird IMMER zurückgesetzt
+      - innerer try..except  → Fehler werden abgefangen
+  ============================================================ }
 procedure TfmMain.lmRecalculateStatisticsClick(Sender: TObject);
 var
-  Message: string;
+  Processed, Failed: Integer;
+  FirstError: string;
 begin
-  //Recalculate index statistics. May take a while for big dbs.
-  Message:= '';
-  Screen.Cursor:= crSQLWait;
+  if tvMain.Selected = nil then Exit;
+  if tvMain.Selected.Data = nil then Exit;
+
+  Screen.Cursor := crSQLWait;
   Application.ProcessMessages;
   try
+    // innerer try..except — fängt alle Fehler ab
     try
-      dmSysTables.RecalculateIndexStatistics(TPNodeInfos(tvMain.Selected.Data)^.dbIndex);
+      if dmSysTables.RecalculateIndexStatistics(
+               TPNodeInfos(tvMain.Selected.Data)^.dbIndex,
+               Processed, Failed, FirstError) then
+      begin
+        MessageDlg(
+          Format('Recalculation of index statistics complete for %d indices.',
+                 [Processed]),
+          mtInformation, [mbOK], 0);
+      end
+      else
+      begin
+        if Processed = 0 then
+          MessageDlg('Could not recalculate index statistics:' + sLineBreak +
+                     sLineBreak + FirstError,
+                     mtError, [mbOK], 0)
+        else
+          MessageDlg(
+            Format('Recalculated %d of %d indices.' + sLineBreak +
+                   sLineBreak +
+                   'First error: %s',
+                   [Processed, Processed + Failed, FirstError]),
+            mtWarning, [mbOK], 0);
+      end;
     except
       on E: Exception do
-      begin
-        Message:= E.Message
-      end;
+        MessageDlg('Error recalculating index statistics:' + sLineBreak +
+                   E.Message, mtError, [mbOK], 0);
     end;
   finally
-    Screen.Cursor:= crDefault;
+    // äußerer try..finally — Cursor wird IMMER zurückgesetzt
+    Screen.Cursor := crDefault;
   end;
-  if Message='' then
-    ShowMessage('Recalculation of index statistics complete.')
-  else
-    ShowMessage('Error recalculating index statistics: '+Message);
 end;
 
 procedure TfmMain.mnBulkCloneClick(Sender: TObject);
@@ -8054,9 +8273,12 @@ end;
 
 (**********  Register New database  ***********)
 procedure TfmMain.mnRegDBClick(Sender: TObject);
-var ServerComboBoxIdx: integer;
-    ServerRec: TserverRecord;
-    ServerNode: TTreeNode;
+var
+  ServerRec: TServerRecord;
+  ServerNode: TTreeNode;
+  RealServerName: string;
+  DisplayAlias: string;
+  Idx: Integer;
 begin
   if tvMain.Items.Count = 0 then
   begin
@@ -8073,22 +8295,51 @@ begin
     tvMain.Selected := GetAncestorAtLevel(tvMain.Selected, 0);
 
   if (tvMain.Selected = nil) then
-    ServerRec := GetServerRecordFromFileByIndex(0)
+  begin
+    ServerRec := GetServerRecordFromFileByIndex(0);
+    DisplayAlias := Trim(ServerRec.ServerAlias);
+    if DisplayAlias = '' then
+      DisplayAlias := Trim(ServerRec.ServerName);
+    RealServerName := '';
+  end
   else
-    ServerRec := GetServerRecordFromFileByName(tvMain.Selected.Text);
+  begin
+    RealServerName := GetServerNameFromNode(tvMain.Selected);
+    DisplayAlias   := GetServerAliasFromNode(tvMain.Selected);
+    ServerRec := GetServerRecordFromFileByAlias(DisplayAlias);
+  end;
 
-  fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(Trim(ServerRec.ServerName));
-  fmReg.edTitle.Text := '';
-  fmReg.edtRole.Text := ServerRec.Role;
-  fmReg.cboxSQLDialect.ItemIndex := 2;  //SQLDialect = 3
-  fmReg.cbCharset.ItemIndex :=  fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
-  fmReg.edtUserName.Text := ServerRec.UserName;
-  fmReg.edtPassword.Text := ServerRec.Password;
-  fmReg.cxSavePassword.Checked := (ServerRec.Password <> '');
-  fmReg.chkboxOverwriteServerClientLib.Checked := false;
+  // Combo DEAKTIVIEREN
+  fmReg.cboxServers.Enabled := False;
+
+  Idx := fmReg.cboxServers.Items.IndexOf(DisplayAlias);
+  if Idx >= 0 then
+    fmReg.cboxServers.ItemIndex := Idx
+  else
+  begin
+    MessageDlg('Server "' + DisplayAlias + '" not found in registry.',
+      mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // Server-bezogene Felder DIREKT befüllen
   fmReg.edtFBClient.Text := ServerRec.ClientLibraryPath;
-  fmReg.edtPort.Text := ServerRec.Port;
+  fmReg.edtPort.Text     := ServerRec.Port;
+  fmReg.edtUserName.Text := ServerRec.UserName;
+  fmReg.edtRole.Text     := ServerRec.Role;
 
+  if ServerRec.Charset <> '' then
+    if fmReg.cbCharset.Items.IndexOf(ServerRec.Charset) >= 0 then
+      fmReg.cbCharset.ItemIndex := fmReg.cbCharset.Items.IndexOf(ServerRec.Charset);
+
+  fmReg.cboxSQLDialect.ItemIndex := 2;
+
+  // DB-spezifische Felder LEEREN
+  fmReg.edTitle.Text := '';
+  fmReg.edDatabaseName.Text := '';
+  fmReg.edtPassword.Text := '';
+  fmReg.cxSavePassword.Checked := False;
+  fmReg.chkboxOverwriteServerClientLib.Checked := false;
   fmReg.chkBoxConnectDBOnStart.Checked := false;
 
   if fmReg.ShowModal = mrOK then
@@ -8096,7 +8347,11 @@ begin
     LoadRegisteredDatabases;
     fmReg.SaveRegistrations;
     LoadRegisteredDatabases;
-    ServerNode := GetServerNodeByServerName(ServerRec.ServerName);
+
+    // NEU: Knoten über ALIAS finden — bei mehreren Aliasen auf
+    // demselben echten Server würde GetServerNodeByServerName
+    // immer den ersten finden.
+    ServerNode := GetServerNodeByAlias(DisplayAlias);
     if ServerNode <> nil then
       ServerNode.Expand(false);
   end;
@@ -8106,8 +8361,11 @@ end;
 procedure TfmMain.lmEditDBRegClick(Sender: TObject);
 var
   Rec: TRegisteredDatabase;
-  SelNode: TTreeNode;
-  ServerName: string;
+  SelNode, ServerNode: TTreeNode;
+  RealServerName: string;
+  DisplayAlias: string;
+  Idx: Integer;
+  ServerRec: TServerRecord;
 begin
   if tvMain.Items.Count = 0 then exit;
   if tvMain.Selected = nil then exit;
@@ -8116,41 +8374,59 @@ begin
   fmReg.RefreshServerCombobox;
 
   SelNode := tvMain.Selected;
-  ServerName := SelNode.Parent.Text;
+  ServerNode := SelNode.Parent;
 
-  if SelNode <> nil then
+  RealServerName := GetServerNameFromNode(ServerNode);
+  DisplayAlias   := GetServerAliasFromNode(ServerNode);
+
+  fmReg.NewReg:= False;
+  fmReg.bbReg.Caption:= 'Save';
+  fmreg.RecPos:= RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex].Index;
+
+  Rec:= RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex].OrigRegRec;
+
+  fmReg.edDatabaseName.Text:= Rec.DatabaseName;
+  fmReg.edTitle.Text:= Rec.Title;
+  fmReg.edtUserName.Text:= Rec.UserName;
+  fmReg.edtPassword.Text:= Rec.Password;
+  fmReg.cbCharset.Text:= Rec.Charset;
+  fmReg.edtRole.Text:= Rec.Role;
+  fmReg.cxSavePassword.Checked:= Rec.SavePassword;
+  fmReg.edtFBClient.Text := Rec.FireBirdClientLibPath;
+  fmReg.edtPort.Text := Rec.Port;
+
+  fmReg.chkboxOverwriteServerClientLib.Checked := Rec.OverwriteLoadedClientLib;
+  fmReg.chkBoxConnectDBOnStart.Checked := Rec.ConnectOnApplicationStart;
+
+  Idx := fmReg.cboxServers.Items.IndexOf(Trim(Rec.ServerName));
+  if Idx < 0 then
   begin
-    fmReg.NewReg:= False;
-    fmReg.bbReg.Caption:= 'Save';
-    fmreg.RecPos:= RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex].Index;
+    ServerRec := GetServerRecordFromFileByName(Rec.ServerName);
+    if Trim(ServerRec.ServerAlias) <> '' then
+      Idx := fmReg.cboxServers.Items.IndexOf(Trim(ServerRec.ServerAlias));
+    if (Idx < 0) and (Trim(ServerRec.ServerName) <> '') then
+      Idx := fmReg.cboxServers.Items.IndexOf(Trim(ServerRec.ServerName));
+  end;
 
-    Rec:= RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex].OrigRegRec;
+  if Idx >= 0 then
+    fmReg.cboxServers.ItemIndex := Idx
+  else
+    fmReg.cboxServers.ItemIndex := -1;
 
-    fmReg.edDatabaseName.Text:= Rec.DatabaseName;
-    fmReg.edTitle.Text:= Rec.Title;
-    fmReg.edtUserName.Text:= Rec.UserName;
-    fmReg.edtPassword.Text:= Rec.Password;
-    fmReg.cbCharset.Text:= Rec.Charset;
-    fmReg.edtRole.Text:= Rec.Role;
-    fmReg.cxSavePassword.Checked:= Rec.SavePassword;
-    fmReg.edtFBClient.Text := Rec.FireBirdClientLibPath;
-    fmReg.edtPort.Text := Rec.Port;
+  fmReg.cboxServers.Enabled := false;
 
-    fmReg.chkboxOverwriteServerClientLib.Checked := Rec.OverwriteLoadedClientLib;
-    fmReg.chkBoxConnectDBOnStart.Checked := Rec.ConnectOnApplicationStart;
+  if fmReg.ShowModal = mrOK then
+  begin
+    LoadRegisteredDatabases;
+    fmReg.SaveRegistrations;
+    LoadRegisteredDatabases;
 
-    fmReg.cboxServers.ItemIndex := fmReg.cboxServers.Items.IndexOf(Rec.ServerName);
-    fmReg.cboxServers.Enabled   := false;
-
-    if fmReg.ShowModal = mrOK then
-    begin
-      LoadRegisteredDatabases;
-      fmReg.SaveRegistrations;
-      LoadRegisteredDatabases;
-      SelNode := GetServerNodeByServerName(ServerName);
-      if SelNode <> nil then
-        SelNode.Expand(false);
-    end;
+    // NEU: Knoten über ALIAS finden — bei mehreren Aliasen auf
+    // demselben echten Server würde GetServerNodeByServerName
+    // immer den ersten finden.
+    SelNode := GetServerNodeByAlias(DisplayAlias);
+    if SelNode <> nil then
+      SelNode.Expand(false);
   end;
 end;
 
@@ -8166,12 +8442,40 @@ begin
   fmAbout.Free;}
 end;
 
-(****************  Unregister database *************)
+{ ============================================================
+  lmUnregisterDatabaseClick: Entfernt eine DB-Registrierung
+  aus databases.reg und aus der TreeView.
+
+  NEU:
+    - DisplayAlias wird über GetServerAliasFromNode ermittelt,
+      bevor der Knoten gelöscht wird. Vorher wurde Node.Text
+      verwendet — das ist seit der Alias-Umstellung der
+      Anzeige-Name (Alias), und GetServerNodeByServerName
+      würde nach dem Reload nichts finden (weil es intern
+      nach ServerSession.ServerName sucht).
+
+    - Nach dem Reload wird der Server-Knoten über
+      GetServerNodeByAlias gesucht — konsistent zu allen
+      anderen Stellen der App.
+
+    - Nicht mehr benötigte Variable SerVerNode entfernt
+      (war ohnehin nicht verwendet).
+
+  DeleteDBRegistrationFromFile bleibt unverändert: Der
+  übergebene Servername kommt aus RegRec.ServerName (dem
+  Wert, der tatsächlich in der Datei steht) — dadurch
+  funktioniert der Delete sowohl für neue Registrierungen
+  (Alias in der Datei) als auch für Legacy-Registrierungen
+  (echter Servername in der Datei).
+
+  Die Datenbank wird vor dem Delete getrennt (IBDatabase.Connected := False),
+  damit keine offene Verbindung zurückbleibt.
+  ============================================================ }
 procedure TfmMain.lmUnregisterDatabaseClick(Sender: TObject);
-var DBNode, SerVerNode: TTreeNode;
-    Rec: TDatabaseRec;
-    Title: string;
-    ServerName: string;
+var
+  DBNode, ServerNode: TTreeNode;
+  Title: string;
+  DisplayAlias: string;
 begin
   if tvMain.Items.Count = 0 then exit;
   if tvMain.Selected = nil then exit;
@@ -8180,19 +8484,31 @@ begin
   DBNode := GetAncestorAtLevel(tvMain.Selected, 1);
   if (DBNode <> nil) then
   begin
-    if MessageDlg('Are you sure you want to Unregister this database ?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    if MessageDlg('Are you sure you want to Unregister this database ?',
+                  mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
       ServerNode := DBNode.Parent;
-      ServerName := ServerNode.Text;
-      If RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].IBDatabase.Connected then
-        RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].IBDatabase.Connected := false;
-        //CloseDB(TPNodeInfos(DBNode.Data)^.dbIndex);
 
+      // Alias merken — VOR dem Löschen des DB-Knotens.
+      // GetServerAliasFromNode liest den Alias aus der
+      // ServerSession (Fallback: Node.Text).
+      DisplayAlias := GetServerAliasFromNode(ServerNode);
+
+      // DB trennen (keine offene Verbindung zurücklassen)
+      if RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].IBDatabase.Connected then
+        RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].IBDatabase.Connected := False;
+
+      // Registrierung aus der Datei entfernen
       Title := RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.Title;
-      DeleteDBRegistrationFromFile(Title, RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.ServerName);
+      DeleteDBRegistrationFromFile(Title,
+        RegisteredDatabases[TPNodeInfos(DBNode.Data)^.dbIndex].RegRec.ServerName);
+
+      // Knoten löschen + Reload
       tvMain.Items.Delete(DBNode);
       LoadRegisteredDatabases;
-      ServerNode := GetServerNodeByServerName(ServerName);
+
+      // Server-Knoten über Alias wiederfinden und expandieren
+      ServerNode := GetServerNodeByAlias(DisplayAlias);
       if ServerNode <> nil then
         ServerNode.Expand(false);
     end;
@@ -8565,6 +8881,11 @@ begin
       fmCheckDBIntegrity.Free;
     end;
   end;
+end;
+
+procedure TfmMain.tbServerInventoryAsTextClick(Sender: TObject);
+begin
+  ShowMessage(GetServerInventoryAsText);
 end;
 
 procedure TfmMain.tbSQLMonitorClick(Sender: TObject);
@@ -9012,17 +9333,38 @@ begin
   end;
 end;
 
-// ============================================================================
-// Called when the user tries to expand a database node (Level 1).
-// Here we check the connection and optionally prevent expansion.
-// ============================================================================
+{ ============================================================
+  tvMainExpanding: Wird beim Aufklappen eines TreeView-Knotens
+  aufgerufen.
+
+  NEU (gegenüber der letzten Version):
+    - DisplayAlias wird zusätzlich ermittelt und an
+      IsServerReachable und CreateServerSessionFromRegistry
+      übergeben. Beide Funktionen nutzen intern ByAlias-
+      Lookup — dadurch wird bei mehreren Aliasen auf
+      demselben echten Server (Prod/Test → beide FB60Local)
+      der richtige Record mit richtigem Port/User/Password
+      verwendet.
+
+    - Defensive Prüfung: Wenn CreateServerSessionFromRegistry
+      nil zurückgibt (Server-Record nicht gefunden), wird der
+      Knoten nicht aufgeklappt und der User bekommt eine
+      Meldung.
+
+    - Endlosschleifen-Fix aus der vorherigen Runde bleibt
+      erhalten (MAX_CONNECT_RETRIES = 5, Retry/Cancel-Dialog).
+  ============================================================ }
 procedure TfmMain.tvMainExpanding(Sender: TObject; Node: TTreeNode; var AllowExpansion: Boolean);
+const
+  MAX_CONNECT_RETRIES = 5;
 var
   Rec: TRegisteredDatabase;
   NodeInfo: TPNodeInfos;
   ServerSession: TServerSession;
   ServerErrStr: string;
   WasDBConnectedOnEntry: Boolean;
+  RealServerName, DisplayAlias: string;
+  RetryCount: Integer;
 begin
   try
     Screen.Cursor := crSQLWait;
@@ -9037,11 +9379,22 @@ begin
     NodeInfo := Node.Data;
 
     // ============================================================
-    // SERVER-NODE (Level 0) - Server-Login mit TfrmLoginServiceManager
+    // SERVER-NODE (Level 0)
     // ============================================================
     if Node.Level = 0 then
     begin
-      if not IsServerReachable(Node.Text, ServerErrStr) then
+      RealServerName := GetServerNameFromNode(Node);
+      DisplayAlias   := GetServerAliasFromNode(Node);
+
+      if DisplayAlias = '' then
+      begin
+        AllowExpansion := False;
+        Exit;
+      end;
+
+      // IsServerReachable nutzt intern ByAlias-Lookup —
+      // dadurch wird der richtige Record gefunden.
+      if not IsServerReachable(DisplayAlias, ServerErrStr) then
       begin
         AllowExpansion := False;
         if ServerErrStr <> 'Login cancelled by user.' then
@@ -9052,7 +9405,19 @@ begin
       // Server-Session im Node speichern (einmalig)
       if TPNodeInfos(Node.Data)^.ServerSession = nil then
       begin
-        ServerSession := CreateServerSessionFromRegistry(Node.Text);
+        // CreateServerSessionFromRegistry nutzt intern ByAlias —
+        // bei zwei Aliasen auf demselben echten Server wird der
+        // richtige Record verwendet (nicht der erste).
+        ServerSession := CreateServerSessionFromRegistry(DisplayAlias);
+
+        if ServerSession = nil then
+        begin
+          AllowExpansion := False;
+          MessageDlg('Server record not found for "' + DisplayAlias + '".',
+            mtError, [mbOK], 0);
+          Exit;
+        end;
+
         TPNodeInfos(Node.Data)^.ServerSession := ServerSession;
 
         if ServerSession.IBXConnect then
@@ -9071,64 +9436,52 @@ begin
     end;
 
     // ============================================================
-    // DATABASE-NODE (Level 1) - Login über OnDatabaseLogin-Event
+    // DATABASE-NODE (Level 1)
     // ============================================================
     if Node.Level = 1 then
     begin
       Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
-      // Nur wenn DB noch nicht verbunden ist
       if not RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected then
       begin
         WasDBConnectedOnEntry := False;
-        // DB-Params setzen
-        //RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.OnLogin := @dmSysTables.OnDatabaseLogin;
 
-        //Zuerst mit gespeicherten Daten versuchen.
         RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['user_name'] := Rec.UserName;
         RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password']  := Rec.Password;
         RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.LoginPrompt := True;
 
+        RetryCount := 0;
         repeat
+          Inc(RetryCount);
+
           try
-
             RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Connected := True;
-            //Falls  Connected := True;   funktioniert hat, hat TdmSysTables.OnDatabaseLogin
-            //EnterPassword formular geöffnet und User hat mit Daten befüllt.
-            //Wenn  Exceptionblock ausgeführt wird, die daten in Rec werden zurückgesetzt.
 
-            // ============================================================
-            // Verbindung war erfolgreich → Cache & .reg befüllen
-            // ============================================================
             Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
             SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName, Rec.Password);
 
             if Rec.SavePassword then
             begin
-              // In die .reg-Datei schreiben
               EditRegisteredDB(Rec);
             end
-            else begin
-              // Nur in den Session-Cache (kein .reg-Schreiben!)
+            else
+            begin
               if Rec.Password <> '' then
               begin
                 SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName, Rec.Password);
 
-                //Password aus Festplatte löschen
                 RegisteredDatabases[NodeInfo^.dbIndex].RegRec.Password := '';
                 RegisteredDatabases[NodeInfo^.dbIndex].RegRec.SavePassword := false;
                 EditRegisteredDB(RegisteredDatabases[NodeInfo^.dbIndex].RegRec);
               end;
             end;
 
-            Break;  // Erfolg → Schleife verlassen
+            Break;
 
           except
             on E: Exception do
             begin
-              // Login fehlgeschlagen-  Die Logindaten aus  TdmSysTables.OnDatabaseLogin
-              //EnterPassword formular waren nicht korrekt /oder User hat Cancel geclickt.
               if E is EAbort then
               begin
                 RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := '';
@@ -9138,23 +9491,39 @@ begin
                 Exit;
               end;
 
-              // Login fehlgeschlagen → Fehler zeigen, dann Maske erneut
-              MessageDlg('Database connection failed: ' + E.Message,
-                         mtError, [mbOK], 0);
+              if RetryCount >= MAX_CONNECT_RETRIES then
+              begin
+                MessageDlg('Database connection failed after ' +
+                           IntToStr(MAX_CONNECT_RETRIES) + ' attempts.' + sLineBreak +
+                           sLineBreak +
+                           'Last error: ' + E.Message,
+                           mtError, [mbOK], 0);
+                RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := '';
+                AllowExpansion := False;
+                Exit;
+              end;
 
-              // Passwort leeren, damit OnLogin die Maske erneut zeigt
+              if MessageDlg(
+                   'Database connection failed (attempt ' +
+                   IntToStr(RetryCount) + ' of ' + IntToStr(MAX_CONNECT_RETRIES) + '):' +
+                   sLineBreak + sLineBreak +
+                   E.Message + sLineBreak + sLineBreak +
+                   'Do you want to retry?',
+                   mtError, [mbRetry, mbCancel], 0) <> mrRetry then
+              begin
+                RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := '';
+                AllowExpansion := False;
+                Exit;
+              end;
+
               RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := '';
             end;
           end;
         until False;
-
       end;
 
-
-      // Neu lesen (kann durch OnLogin geändert worden sein)
       Rec := RegisteredDatabases[NodeInfo^.dbIndex].RegRec;
 
-      // Root-Objekte laden — Version aus RegRec (immer korrekt vorhanden)
       if (Node.Count > 0) and (Node.Items[0].Text = 'Loading...') then
       begin
         Node.Items[0].Delete;
@@ -9166,7 +9535,6 @@ begin
       RegisteredDatabases[NodeInfo^.dbIndex].RegRec.LastOpened     := Now;
       RegisteredDatabases[NodeInfo^.dbIndex].OrigRegRec.LastOpened := Now;
 
-      // Extractor initialisieren
       if NodeInfo^.SimpleObjExtractor = nil then
         NodeInfo^.SimpleObjExtractor := TSimpleObjExtractor.Create(NodeInfo^.dbIndex)
       else if MainTreeViewAlwaysRefresh or MetaDataChanged or (not WasDBConnectedOnEntry) then
@@ -9183,7 +9551,6 @@ begin
         MetaDataChanged := False;
       end;
     end;
-
 
     // ============================================================
     // OBJECT-NODE (Level > 1)
@@ -9220,7 +9587,6 @@ begin
     Application.ProcessMessages;
   end;
 end;
-
 
 (**********************            Double click        *********************************)
 procedure TfmMain.tvMainDblClick(Sender: TObject);
@@ -10015,6 +10381,29 @@ begin
   DummyNode := tvMain.Items.AddChild(CNode, 'Loading...');
 end;
 
+{ ============================================================
+  Lädt alle Datenbank-Registrierungen aus databases.reg und
+  hängt sie als Kind-Knoten an den jeweiligen Server-Knoten.
+
+  Server-Lookup erfolgt über GetServerNodeByAlias():
+    Pass 1 → sucht nach ServerSession.ServerAlias
+             (neue DB-Registrierungen, künftig eindeutig)
+    Pass 2 → sucht nach ServerSession.ServerName
+             (Legacy-DB-Registrierungen, sanfte Migration)
+
+  Da der Alias systemweit eindeutig ist (Pflicht!), kann eine
+  DB-Registrierung ab Schritt C nur noch einem bestimmten
+  Server-Alias zugeordnet werden — auch wenn mehrere Server-
+  Einträge auf denselben echten Servernamen zeigen (z.B.
+  "Lokal-Test" und "Lokal-Prod" beide auf "localhost").
+
+  Defensive Härtung:
+    - ServerRecord = leer (Server nicht in servers.reg) →
+      ClientLibPath bleibt leer, DB wird trotzdem registriert
+    - ServerNode = nil (verwaiste DB-Registrierung) →
+      Warnung + Skip, kein Crash
+    - Assigned(MainNode.Data) vor ObjectType-Zuweisung
+  ============================================================ }
 Function TfmMain.LoadRegisteredDatabases: Boolean;
 var
   Rec: TRegisteredDatabase;
@@ -10028,6 +10417,7 @@ var
   ServerRecord: TServerRecord;
   ClientLibPath: string;
 begin
+  Result := False;
   try
     tvMain.Items.Clear;
 
@@ -10048,7 +10438,6 @@ begin
 
     if FileExists(FileName) then
     begin
-      //ShowMessage(IntToStr(FileSize(FileName) mod SizeOf(TRegisteredDatabase)));
       AssignFile(F, FileName);
       Reset(F);
       i:= 0;
@@ -10058,7 +10447,7 @@ begin
         if not Rec.Deleted then
         begin
           AServerName := Rec.ServerName;
-          ServerRecord := GetServerRecordFromFileByName(AServerName);
+          ServerRecord := GetServerRecordFromFileByAlias(AServerName);
 
           SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
           with RegisteredDatabases[high(RegisteredDatabases)] do
@@ -10083,18 +10472,6 @@ begin
 
             IBDatabase.TraceFlags := StringToTraceFlags(turbocommon.TraceFlags);
 
-            {if Rec.IsEmbedded then
-            begin
-              IBLocalDBSupport := TIBLocalDBSupport.Create(self);
-              IBLocalDBSupport.DatabaseName := ExtractFileName(IBDatabase.DatabaseName);
-              IBLocalDBSupport.FirebirdDirectory := ServerRecord.RootPath;
-              IBLocalDBSupport.EmptyDBArchive := ChangeFileExt(IBDatabase.DatabaseName, '.gbk');
-              IBLocalDBSupport.ServicesConnection.FirebirdLibraryPathName := ServerRecord.RootPath;
-              IBLocalDBSupport.RequiredVersionNo := 2;
-              IBLocalDBSupport.Database := IBDatabase;
-              IBLocalDBSupport.Enabled := true;
-            end;}
-
             if Trim(RegRec.TxConfig) <> '' then
               IBTransaction.Params.Text := RegRec.TxConfig
             else
@@ -10107,8 +10484,6 @@ begin
               );
               RegRec.TxConfig := IBTransaction.Params.Text;
             end;
-
-            //ShowMessage(IBTransaction.Params.Text);
 
             IBQuery := TIBQuery.Create(nil);
             IBQuery.Database := IBDatabase;
@@ -10143,120 +10518,160 @@ begin
             IBDatabaseInfo.Database := IBDatabase;
           end;
 
-          // Server node
-          //AServerName:= GetServerName(Rec.DatabaseName);
-          AServerName := Rec.ServerName;
-          ServerNode:= GetServerNodeByServerName(AServerName);
+          // Server-Knoten über Alias-Lookup suchen.
+          // GetServerNodeByAlias nutzt Pass 1 (Alias) und
+          // fällt bei Bedarf auf Pass 2 (echter Servername)
+          // zurück — daher funktionieren sowohl neue als auch
+          // bestehende DB-Registrierungen.
+          ServerNode := GetServerNodeByAlias(Rec.ServerName);
 
-          {if ServerNode = nil then // Add new Server node
+          if ServerNode = nil then
           begin
-            tvMain.Items.Add(nil, '');
-            ServerNode:= tvMain.Items.Add(nil, AServerName);
-            ServerNode.ImageIndex:= 25;
-            ServerNode.SelectedIndex:= 26;
-            TPNodeInfos(ServerNode.Data)^.ObjectType := tvotServer;
-          end;}
+            // Verwaiste DB-Registrierung: weder Alias noch
+            // echter Servername passen zu einem TreeView-Knoten.
+            // → Warnung ausgeben, DB-Eintrag trotzdem im Array
+            //   behalten (für spätere Bereinigung), aber keinen
+            //   TreeView-Knoten anlegen, um den Crash zu vermeiden.
+            ShowMessage('Warning: Database "' + Rec.Title +
+                        '" is registered on server "' + Rec.ServerName +
+                        '", but that server is not registered. ' +
+                        'Skipping TreeView entry.');
+            Inc(i);
+            Continue;
+          end;
 
           // Display databases
-          MainNode:= tvMain.Items.AddChild(ServerNode, Rec.Title);
-          MainNode.ImageIndex:= 3;
-          MainNode.SelectedIndex:= 3;
-          TPNodeInfos(MainNode.Data)^.dbIndex := i;
-          TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
+          MainNode := tvMain.Items.AddChild(ServerNode, Rec.Title);
+          MainNode.ImageIndex := 3;
+          MainNode.SelectedIndex := 3;
+
+          if Assigned(MainNode.Data) then
+          begin
+            TPNodeInfos(MainNode.Data)^.dbIndex := i;
+            TPNodeInfos(MainNode.Data)^.ObjectType := tvotDatabase;
+          end;
+
           DummyNode := tvMain.Items.AddChild(MainNode, 'Loading...');
 
-          tvMain.PopupMenu:= pmDatabase;
+          tvMain.PopupMenu := pmDatabase;
           tbCheckDBIntegrity.Enabled := true;
 
-           Inc(i);
+          Inc(i);
         end;
-
       end;
       CloseFile(F);
     end;
 
-    Result:= True;
+    Result := True;
   except
     on E: Exception do
     begin
-      Result:= False;
+      Result := False;
       ShowMessage('Error: ' + E.Message);
     end;
   end;
 end;
 
-function TfmMain.LoadRegisteredServers: Boolean;
-var
-  F: file of TServerRecord;
-  Rec: TServerRecord;
-  ServerNode, BlankNode: TTreeNode;
-  NodeInfo: TPNodeInfos;
-  i: Integer;
-  FileName: string;
-  ServerSession: TServerSession;
-begin
-  Result := False;
-  tvMain.Items.Clear;
-  SetLength(RegisteredServers, 0);
-  try
-    FileName := getConfigurationDirectory + ServersRegFile;
-    if not FileExists(FileName) then
-      Exit;
+{ ============================================================
+  Lädt alle Server-Registrierungen aus servers.reg und baut
+  die Server-Knoten (Level 0) in der TreeView auf.
 
-    AssignFile(F, FileName);
-    Reset(F);
-    i := 0;
-    while not Eof(F) do
-    begin
-      Read(F, Rec);
+  NEU: Der Knoten-Text zeigt den ALIAS (Fallback: ServerName,
+  wenn kein Alias gepflegt ist).
 
-      // In Array aufnehmen
-      SetLength(RegisteredServers, Length(RegisteredServers)+1);
-      RegisteredServers[High(RegisteredServers)] := Rec;
+  Die ServerSession wird mit den ECHTEN Werten befüllt
+  (ServerName = echter Name, ServerAlias = Alias). Alle
+  internen Lookups (GetServerNameFromNode, GetServerNode-
+  ByServerName, GetServerListFromTreeView etc.) greifen
+  auf ServerSession.ServerName zu und bleiben funktionsfähig.
 
-      // TreeView-Knoten erstellen
-      ServerNode := tvMain.Items.Add(nil, Rec.ServerName);
-      //ServerNode := tvMain.Items.Add(nil, Rec.ServerAlias);
+  Der leere "BlankNode" pro Server bleibt erhalten — er dient
+  als visueller Trenner zwischen den Servern in der TreeView.
+  ============================================================ }
+  Function TfmMain.LoadRegisteredServers: Boolean;
+  var
+    F: file of TServerRecord;
+    Rec: TServerRecord;
+    ServerNode, BlankNode: TTreeNode;
+    NodeInfo: TPNodeInfos;
+    i: Integer;
+    FileName: string;
+    ServerSession: TServerSession;
+    DisplayName: string;
+  begin
+    Result := False;
+    tvMain.Items.Clear;
+    SetLength(RegisteredServers, 0);
+    try
+      FileName := getConfigurationDirectory + ServersRegFile;
+      if not FileExists(FileName) then
+        Exit;
 
-      BlankNode := tvMain.Items.Add(nil, '');
-      if Assigned(BlankNode.Data) then
-        TPNodeInfos(BlankNode.Data)^.ObjectType := tvotNone;
+      AssignFile(F, FileName);
+      Reset(F);
+      i := 0;
+      while not Eof(F) do
+      begin
+        Read(F, Rec);
 
-      ServerNode.ImageIndex := 25;
-      ServerNode.SelectedIndex := 25;
-      NodeInfo := TPNodeInfos(ServerNode.Data);
-      NodeInfo^.ObjectType := tvotServer;
-      NodeInfo^.Refreshable := false;
+        SetLength(RegisteredServers, Length(RegisteredServers)+1);
+        RegisteredServers[High(RegisteredServers)] := Rec;
 
-      NodeInfo^.ServerSession := TServerSession.Create(Rec.ServerName,
-                                                       Rec.ServerAlias,
-                                                       Rec.UserName,
-                                                       Rec.Password,
-                                                       Rec.Role,
-                                                       Rec.Protocol,
-                                                       Rec.Port,
-                                                       Rec.Charset,
-                                                       Rec.RootPath,
-                                                       Rec.ClientLibraryPath,
-                                                       Rec.ConfigFilePath,
-                                                       Rec.VersionMinor,
-                                                       Rec.VersionMajor,
-                                                       Rec.LoadRegisteredClientLib,
-                                                       Rec.IsEmbedded,
-                                                       Rec.ConnectTimeoutMS,
-                                                       Rec.RetryCount,
-                                                       Rec.QueryTimeoutMS
-                                                       );
+        // Anzeige-Name: Alias, Fallback auf ServerName
+        if Trim(Rec.ServerAlias) <> '' then
+          DisplayName := Trim(Rec.ServerAlias)
+        else
+          DisplayName := Trim(Rec.ServerName);
 
-      Inc(i);
+        ServerNode := tvMain.Items.Add(nil, DisplayName);
+
+        BlankNode := tvMain.Items.Add(nil, '');
+        if Assigned(BlankNode.Data) then
+          TPNodeInfos(BlankNode.Data)^.ObjectType := tvotNone;
+
+        ServerNode.ImageIndex := 25;
+        ServerNode.SelectedIndex := 25;
+        NodeInfo := TPNodeInfos(ServerNode.Data);
+        NodeInfo^.ObjectType := tvotServer;
+        NodeInfo^.Refreshable := false;
+
+        NodeInfo^.ServerSession := TServerSession.Create(Rec.ServerName,
+                                                         Rec.ServerAlias,
+                                                         Rec.UserName,
+                                                         Rec.Password,
+                                                         Rec.Role,
+                                                         Rec.Protocol,
+                                                         Rec.Port,
+                                                         Rec.Charset,
+                                                         Rec.RootPath,
+                                                         Rec.ClientLibraryPath,
+                                                         Rec.ConfigFilePath,
+                                                         Rec.VersionMinor,
+                                                         Rec.VersionMajor,
+                                                         Rec.LoadRegisteredClientLib,
+                                                         Rec.IsEmbedded,
+                                                         Rec.ConnectTimeoutMS,
+                                                         Rec.RetryCount,
+                                                         Rec.QueryTimeoutMS
+                                                         );
+
+        // NEU: VersionString explizit setzen. TServerSession.Create
+        // nimmt keinen VersionString entgegen — ohne diese Zeile
+        // bleibt FBVersionString leer, und BuildServerRecordFromSession
+        // würde den (leeren) Wert zurück in den Record kopieren.
+        // Folge: Version-Feld im Edit-Dialog ist leer, obwohl der
+        // Wert in servers.reg steht.
+        NodeInfo^.ServerSession.FBVersionString := Rec.VersionString;
+
+        Inc(i);
+      end;
+      CloseFile(F);
+      Result := True;
+    except
+      on E: Exception do
+        ShowMessage('LoadRegisteredServers error: ' + E.Message);
     end;
-    CloseFile(F);
-    Result := True;
-  except
-    on E: Exception do
-      ShowMessage('LoadRegisteredServers error: ' + E.Message);
   end;
-end;
 
 (**********************           Find QueryWindow                *********************************)
 
@@ -10402,7 +10817,6 @@ begin
   else
     ATreeView.ExpandSignColor := clWhite;
 end;
-
 
 procedure TfmMain.SelectTreeViewNode(ARoutineInfo: TRoutineInfo);
 

@@ -889,18 +889,27 @@ end;
 procedure TfrmCloneTable.ApplyInitialSelection;
 var
   i: Integer;
-  ServerName, DBTitle: string;
+  ServerRec: TServerRecord;
+  DBTitle, DisplayAlias: string;
 begin
-  // Nur wenn eine Vorbelegung gewünscht ist
   if (FInitialDBIndex < 0) or (FInitialDBIndex >= Length(RegisteredDatabases)) then
     Exit;
 
-  // Server + DB-Titel aus dem Registrierungseintrag holen
-  ServerName := RegisteredDatabases[FInitialDBIndex].RegRec.ServerName;
-  DBTitle    := RegisteredDatabases[FInitialDBIndex].RegRec.Title;
+  DBTitle := RegisteredDatabases[FInitialDBIndex].RegRec.Title;
+
+  // Anzeige-Alias ermitteln (Rec.ServerName kann Alias oder
+  // echter Name sein — bei Legacy den Alias aus dem Server-Record
+  // holen).
+  ServerRec := GetServerRecordFromFileByAlias(
+                 RegisteredDatabases[FInitialDBIndex].RegRec.ServerName);
+
+  if Trim(ServerRec.ServerAlias) <> '' then
+    DisplayAlias := Trim(ServerRec.ServerAlias)
+  else
+    DisplayAlias := Trim(ServerRec.ServerName);
 
   // --- Source-Server setzen ---
-  i := comboxSourceServer.Items.IndexOf(ServerName);
+  i := comboxSourceServer.Items.IndexOf(DisplayAlias);
   if i >= 0 then
     comboxSourceServer.ItemIndex := i;
 
@@ -910,36 +919,45 @@ begin
   if i >= 0 then
     comboxSourceDB.ItemIndex := i;
 
-  // --- Dest-Server: gleicher Server wie Source (sinnvoller Default) ---
-  i := comboxDestServer.Items.IndexOf(ServerName);
+  // --- Dest-Server: gleicher Server wie Source ---
+  i := comboxDestServer.Items.IndexOf(DisplayAlias);
   if i >= 0 then
     comboxDestServer.ItemIndex := i;
 end;
 
 procedure TfrmCloneTable.UpdateCopyMethodAvailability;
 var
+  SourceRec, DestRec: TServerRecord;
   SameServer, SameDB: Boolean;
   ServerVersionMajor, ServerVersionMinor: Word;
   SupportsExecuteBlock: Boolean;
 begin
   if FDestDBIndex < 0 then Exit;
 
-  // FBIntf: immer verfügbar (Same-DB und Cross-DB)
-    rbFBIntf.Enabled := True;
+  rbFBIntf.Enabled := True;
 
-  SameServer := SameText(Trim(comboxSourceServer.Text), Trim(comboxDestServer.Text));
-  SameDB     := SameServer and SameText(Trim(comboxSourceDB.Text), Trim(comboxDestDB.Text));
+  // SameServer wird über ECHTE Servernamen geprüft (nicht über
+  // Anzeige-Alias) — bei zwei Aliasen auf demselben echten
+  // Server (Prod/Test → beide FB60Local) sind sie physisch
+  // derselbe Server, also sind INSERT...SELECT bzw.
+  // Cross-DB-Optimierungen anwendbar.
+  SameServer := False;
+  if (Trim(comboxSourceServer.Text) <> '') and (Trim(comboxDestServer.Text) <> '') then
+  begin
+    SourceRec := GetServerRecordFromFileByAlias(Trim(comboxSourceServer.Text));
+    DestRec   := GetServerRecordFromFileByAlias(Trim(comboxDestServer.Text));
+    if (Trim(SourceRec.ServerName) <> '') and (Trim(DestRec.ServerName) <> '') then
+      SameServer := SameText(Trim(SourceRec.ServerName), Trim(DestRec.ServerName));
+  end;
+
+  SameDB := SameServer and (FSourceDBIndex >= 0) and (FSourceDBIndex = FDestDBIndex);
 
   ServerVersionMajor := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionMajor;
   ServerVersionMinor := RegisteredDatabases[FDestDBIndex].RegRec.ServerVersionMinor;
 
-  // Execute Block mit ON EXTERNAL DATA SOURCE erst ab FB 2.1
   SupportsExecuteBlock := (ServerVersionMajor > 2) or
                           ((ServerVersionMajor = 2) and (ServerVersionMinor >= 1));
 
-  // ============================================================
-  // Enabled-Zustände pro Methode
-  // ============================================================
   rbInsertSelect.Enabled := SameDB;
 
   if SameDB then
@@ -949,19 +967,13 @@ begin
 
   rbRowByRow.Enabled := True;
 
-  // ============================================================
-  // Vorauswahl — immer die beste verfügbare Methode
-  // ============================================================
   if SameDB then
   begin
-    // Same-DB → Insert-Select ist immer die beste Wahl
     rbInsertSelect.Checked := True;
-
     StatusBar1.SimpleText := 'Same database: Insert Select (fastest) or Row-by-Row.';
   end
   else
   begin
-    // Cross-DB → Execute Block (wenn verfügbar), sonst Row-by-Row
     if SupportsExecuteBlock then
     begin
       rbExecuteBlock.Checked := True;
@@ -1020,23 +1032,16 @@ begin
 end;
 
 procedure TfrmCloneTable.comboxSourceDBChange(Sender: TObject);
-var
-  i: Integer;
 begin
   if FUpdatingCombos then Exit;
   FUpdatingCombos := True;
   try
     comboxSourceTables.Items.Clear;
 
-    // FSourceDBIndex frisch ermitteln (falls noch -1)
-    FSourceDBIndex := -1;
-    for i := 0 to High(RegisteredDatabases) do
-      if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxSourceServer.Text)) and
-         SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxSourceDB.Text)) then
-      begin
-        FSourceDBIndex := i;
-        Break;
-      end;
+    // Alias-Lookup mit Fallback auf echten Namen
+    FSourceDBIndex := FindDBIndexByTitleAndServer(
+                        Trim(comboxSourceDB.Text),
+                        Trim(comboxSourceServer.Text));
 
     // Wenn die geteilte DB nicht verbunden ist → Login-Flow auslösen
     if (FSourceDBIndex >= 0) and
@@ -1050,7 +1055,8 @@ begin
       edtDestTable.Text := Trim(comboxSourceTables.Text) + '_CLONED';
       LoadFields;
     end
-    else StatusBar1.SimpleText := 'Source database not connected.';
+    else
+      StatusBar1.SimpleText := 'Source database not connected.';
 
   finally
     FUpdatingCombos := False;
@@ -1142,14 +1148,15 @@ end;
 
 function TfrmCloneTable.FillSourceServerCombo: boolean;
 var
-  ServerList: TStringList;
+  AliasList: TStringList;
 begin
   Result := False;
   comboxSourceServer.Items.Clear;
 
+  AliasList := GetServerAliasListFromTreeView;
+  if AliasList = nil then Exit;
   try
-    ServerList := GetServerListFromTreeView;
-    comboxSourceServer.Items.Assign(ServerList);
+    comboxSourceServer.Items.Assign(AliasList);
     if comboxSourceServer.Items.Count > 0 then
     begin
       comboxSourceServer.ItemIndex := 0;
@@ -1157,29 +1164,26 @@ begin
       FillSourceDBCombo;
     end;
   finally
-    ServerList.Free;
+    AliasList.Free;
   end;
 end;
 
 function TfrmCloneTable.FillSourceDBCombo: boolean;
 var
-  i, PreserveIdx: Integer;
+  PreserveIdx: Integer;
   PreserveTitle: string;
 begin
   Result := False;
 
-  // Aktuelle Auswahl merken (falls vorhanden)
   PreserveTitle := Trim(comboxSourceDB.Text);
 
-  comboxSourceDB.Items.Clear;
-
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxSourceServer.Text) then
-      comboxSourceDB.Items.Add(RegisteredDatabases[i].RegRec.Title);
+  // Nutzt die neue Hilfsfunktion — löst Alias↔echter-Name
+  // korrekt auf (Legacy-DBs gehören dem ersten Server mit
+  // diesem echten Namen).
+  GetDBTitlesForServer(comboxSourceServer.Text, comboxSourceDB.Items);
 
   if comboxSourceDB.Items.Count > 0 then
   begin
-    // Versuche die vorherige Auswahl zu erhalten
     PreserveIdx := comboxSourceDB.Items.IndexOf(PreserveTitle);
     if PreserveIdx >= 0 then
       comboxSourceDB.ItemIndex := PreserveIdx
@@ -1268,74 +1272,51 @@ end;
 
 function TfrmCloneTable.ConfigureSourceConnection: boolean;
 var
-  i: Integer;
   DBRec: TDatabaseRec;
   Pwd: string;
 begin
   Result := False;
-  FSourceDBIndex := -1;
   Pwd := '';
 
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxSourceServer.Text)) and
-       SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxSourceDB.Text)) then
-    begin
-      FSourceDBIndex := i;
-      Break;
-    end;
+  FSourceDBIndex := FindDBIndexByTitleAndServer(
+                      Trim(comboxSourceDB.Text),
+                      Trim(comboxSourceServer.Text));
 
   if FSourceDBIndex < 0 then Exit;
 
   try
     DBRec := RegisteredDatabases[FSourceDBIndex];
 
-    // Trenne die Form-eigene Verbindung, falls sie noch offen ist
     if IBDBSource.Connected then
       IBDBSource.Connected := False;
     if IBTransSource.InTransaction then
       IBTransSource.Rollback;
 
-    // --- Einstellungen von der geteilten DB in die Form-Component kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBSource);
     SetDBInstanceIndex(IBDBSource, FSourceDBIndex);
 
-    // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
     if Trim(IBDBSource.Params.Values['user_name']) = '' then
       IBDBSource.Params.Values['user_name'] := DBRec.RegRec.UserName;
 
     if Trim(IBDBSource.Params.Values['password']) = '' then
     begin
       Pwd := DBRec.RegRec.Password;
-
       if Pwd = '' then
         Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
-
-      //if Pwd = '' then
-        //Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
-
       if (Pwd = '') and DBRec.RegRec.IsEmbedded then
         Pwd := 'embedded_local';
-
       if Pwd <> '' then
         IBDBSource.Params.Values['password'] := Pwd;
     end;
 
-    // --- Transaktion: Params kopieren + validieren ---
     IBTransSource.Params.Clear;
     IBTransSource.Params.Assign(DBRec.IBTransaction.Params);
-
-    // Defaults greifen, wenn die kopierten Params leer oder Müll sind
     EnsureTransactionParams(IBTransSource, DefTxFileName);
-
     if not IsTransactionParamsValid(IBTransSource) then
-      // Falls Assign Müll geliefert hat → hart auf Default
       EnsureTransactionParams(IBTransSource, '');
 
-    // DefaultDatabase explizit setzen (Pflicht für StartTransaction!)
     IBTransSource.DefaultDatabase := IBDBSource;
 
-
-    // --- Jetzt verbinden (Form-eigene Verbindung!) ---
     if not IBDBSource.Connected then
       IBDBSource.Connected := True;
 
@@ -1356,75 +1337,54 @@ end;
 
 function TfrmCloneTable.ConfigureDestConnection: boolean;
 var
-  i: Integer;
   DBRec: TDatabaseRec;
   Pwd: string;
 begin
   Result := False;
-  FDestDBIndex := -1;
   Pwd := '';
 
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxDestServer.Text)) and
-       SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxDestDB.Text)) then
-    begin
-      FDestDBIndex := i;
-      Break;
-    end;
+  FDestDBIndex := FindDBIndexByTitleAndServer(
+                    Trim(comboxDestDB.Text),
+                    Trim(comboxDestServer.Text));
 
   if FDestDBIndex < 0 then Exit;
 
   try
     DBRec := RegisteredDatabases[FDestDBIndex];
 
-    // Trenne die Form-eigene Verbindung, falls sie noch offen ist
     if IBDBDest.Connected then
       IBDBDest.Connected := False;
     if IBTransDest.InTransaction then
       IBTransDest.Rollback;
 
-    // --- Einstellungen kopieren ---
     AssignIBDatabase(DBRec.IBDatabase, IBDBDest);
     SetDBInstanceIndex(IBDBDest, FDestDBIndex);
 
-    // --- Credentials nachreichen (RegRec → Session-Cache → Live) ---
     if Trim(IBDBDest.Params.Values['user_name']) = '' then
       IBDBDest.Params.Values['user_name'] := DBRec.RegRec.UserName;
 
     if Trim(IBDBDest.Params.Values['password']) = '' then
     begin
       Pwd := DBRec.RegRec.Password;
-
       if Pwd = '' then
         Pwd := GetDBSessionPassword(DBRec.RegRec.ServerName, DBRec.RegRec.DatabaseName);
-
-      //if Pwd = '' then
-        //Pwd := GetServerSessionPassword(DBRec.RegRec.ServerName);
-
       if (Pwd = '') and DBRec.RegRec.IsEmbedded then
         Pwd := 'embedded_local';
-
       if Pwd <> '' then
         IBDBDest.Params.Values['password'] := Pwd;
     end;
 
-    // --- Transaktion: Params kopieren + validieren ---
     IBTransDest.Params.Clear;
     IBTransDest.Params.Assign(DBRec.IBTransaction.Params);
-
     EnsureTransactionParams(IBTransDest, DefTxFileName);
-
     if not IsTransactionParamsValid(IBTransDest) then
       EnsureTransactionParams(IBTransDest, '');
 
-    // DefaultDatabase VOR StartTransaction setzen!
     IBTransDest.DefaultDatabase := IBDBDest;
 
-    // --- Query an die Form-eigenen Komponenten binden ---
     IBQueryDest.Database := IBDBDest;
     IBQueryDest.Transaction := IBTransDest;
 
-    // --- Verbinden ---
     if not IBDBDest.Connected then
       IBDBDest.Connected := True;
 
@@ -1433,7 +1393,6 @@ begin
     if not IBTransDest.InTransaction then
       IBTransDest.StartTransaction;
 
-    // --- Skript-Component an die Form-eigenen Komponenten binden ---
     IBXScript1.Database := IBDBDest;
     IBXScript1.Transaction := IBTransDest;
 
@@ -1472,23 +1431,14 @@ begin
 end;
 
 procedure TfrmCloneTable.comboxDestDBChange(Sender: TObject);
-var
-  i: Integer;
 begin
   if FUpdatingCombos then Exit;
   FUpdatingCombos := True;
   try
-    // FDestDBIndex frisch ermitteln (falls noch -1)
-    FDestDBIndex := -1;
-    for i := 0 to High(RegisteredDatabases) do
-      if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxDestServer.Text)) and
-         SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxDestDB.Text)) then
-      begin
-        FDestDBIndex := i;
-        Break;
-      end;
+    FDestDBIndex := FindDBIndexByTitleAndServer(
+                      Trim(comboxDestDB.Text),
+                      Trim(comboxDestServer.Text));
 
-    // Wenn die geteilte DB nicht verbunden ist → Login-Flow auslösen
     if (FDestDBIndex >= 0) and
        Assigned(RegisteredDatabases[FDestDBIndex].IBDatabase) and
        (not RegisteredDatabases[FDestDBIndex].IBDatabase.Connected) then
@@ -1511,14 +1461,15 @@ end;
 
 function TfrmCloneTable.FillDestServerCombo: boolean;
 var
-  ServerList: TStringList;
+  AliasList: TStringList;
 begin
   Result := False;
   comboxDestServer.Items.Clear;
 
+  AliasList := GetServerAliasListFromTreeView;
+  if AliasList = nil then Exit;
   try
-    ServerList := GetServerListFromTreeView;
-    comboxDestServer.Items.Assign(ServerList);
+    comboxDestServer.Items.Assign(AliasList);
     if comboxDestServer.Items.Count > 0 then
     begin
       comboxDestServer.ItemIndex := 0;
@@ -1526,20 +1477,16 @@ begin
       Result := True;
     end;
   finally
-    ServerList.Free;
+    AliasList.Free;
   end;
 end;
 
 function TfrmCloneTable.FillDestDBCombo: boolean;
-var
-  i: Integer;
 begin
   Result := False;
   comboxDestDB.Items.Clear;
 
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxDestServer.Text) then
-      comboxDestDB.Items.Add(RegisteredDatabases[i].RegRec.Title);
+  GetDBTitlesForServer(comboxDestServer.Text, comboxDestDB.Items);
 
   if comboxDestDB.Items.Count > 0 then
   begin
@@ -2401,6 +2348,7 @@ begin
 
   StatusBar1.SimpleText := 'Copy completed: ' + Trim(comboxSourceTables.Text) + ' → ' + DestTable;
 end;
+
 
 procedure TfrmCloneTable.btnExternalFileClick(Sender: TObject);
 begin

@@ -31,6 +31,24 @@ uses
   uSystemInfo
 ;
 
+
+type
+  TCSVConfigStatus = (
+    ccsOptimal,       // Zeile passt, Performance gut → kein Dialog
+    ccsSuboptimal,    // Zeile passt, aber langsam → Dialog empfohlen
+    ccsBroken         // Zeile passt nicht → Dialog zwingend
+  );
+
+  TCSVConfigCheck = record
+    Status:            TCSVConfigStatus;
+    MaxRowWidth:       Int64;
+    CurrentBlockSize:  Int64;
+    CurrentBufferSize: Int64;
+    OptimalBlockSize:  Int64;
+    OptimalBufferSize: Int64;
+    Reason:            string;
+  end;
+
 type
   TDetectChoice = (dcUseDetected, dcKeepCurrent, dcCancel);
 
@@ -59,6 +77,7 @@ type
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
     Button1: TButton;
+    chkBoxAutoTuneCSVBuffer: TCheckBox;
     CheckBoxAutoDedectLineEnding: TCheckBox;
     CheckBoxAutoDedectQuoteChar: TCheckBox;
     CheckBoxAutoDedectDelimiter: TCheckBox;
@@ -133,6 +152,7 @@ type
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    procedure chkBoxAutoTuneCSVBufferChange(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
     procedure cmbboxQuoteCharChange(Sender: TObject);
@@ -194,6 +214,15 @@ type
     FScanStartTick: QWord;
     FLastProgressBytes: Int64;
     FProgressBytesSamples: array of Double;
+
+    FProgressAutoTuneNote: string;
+    function CheckCSVConfiguration(
+      AMaxRowWidth: Int64;
+      ACurrentBlockSize: Int64;
+      ACurrentBufferSize: Int64): TCSVConfigCheck;
+    function AskApplyCSVConfig(const ACheck: TCSVConfigCheck): TDetectChoice;
+    procedure ShowProgressAutoTuneNote(const ACheck: TCSVConfigCheck);
+    procedure ResetAutoTuneProgressNote;
 
     procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
@@ -803,11 +832,12 @@ begin
 
   edtProgressUpdatePercent.Text := IntToStr(CSVProgressUpdatePercent);
 
+  chkBoxAutoTuneCSVBuffer.Checked := CSVAutoTuneCSVBuffer;
+
   // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
   SyncDelimiterCombo;
   SyncQuoteCharCombo;
-
 end;
 
 procedure TfrmDataEditor.WriteIni;
@@ -832,6 +862,7 @@ begin
   CSVBufferSizeBytes := StrToInt64Def(edtBufferSize.Text, 2097152);
   CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
   CSVProgressUpdatePercent := StrToIntDef(edtProgressUpdatePercent.Text, 1);
+  CSVAutoTuneCSVBuffer :=  chkBoxAutoTuneCSVBuffer.Checked;
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -1289,8 +1320,6 @@ end;
 procedure TfrmDataEditor.btnOpenFileClick(Sender: TObject);
 var
   CSVThread: TCSVLoadThread;
-  StartTime, EndTime: TDateTime;
-  DiffSeconds, FileSizeMB: Double;
   FileSize: Int64;
   FreeRAMBytes: Int64;
   RowCount: Integer;
@@ -1298,12 +1327,9 @@ var
   ReportForm: TfrmReport;
   LoadErr: string;
   MaxLineWidth: Int64;
-  RequiredBufferBytes: Int64;
   ScanStartTime: TDateTime;
   ScanElapsed: Double;
   MsgText: string;
-  BufferSizeOriginalBytes: Int64;
-  BufferAutoAdjusted: Boolean;
   RowWidthScanMode: string;
   FromRow: Int64;
   ToRow: Int64;
@@ -1314,21 +1340,32 @@ var
   LoadBytesPerSecAvg: Double;
   Sum: Double;
   I: Integer;
+
+  Check: TCSVConfigCheck;
+  Choice: TDetectChoice;
+  BlockSizeOriginalBytes: Int64;
+  BufferSizeOriginalBytes: Int64;
+  BlockAutoAdjusted: Boolean;
+  BufferAutoAdjusted: Boolean;
 begin
   // ============================================================
   // Initialisierung
   // ============================================================
-  MaxLineWidth       := 0;
-  RequiredBufferBytes   := 0;
-  ScanElapsed        := 0;
-  TotalRowsInRange   := 0;
-  BufferAutoAdjusted := False;
+  MaxLineWidth            := 0;
+  ScanElapsed             := 0;
+  TotalRowsInRange        := 0;
+  RowWidthScanMode        := 'None';
+  FromRow                 := 1;
+  ToRow                   := 0;
+  ScanRows                := 0;
+  Cancelled               := False;
+  LoadSpeedAvg            := 0;
+  LoadBytesPerSecAvg      := 0;
+
+  BlockSizeOriginalBytes  := CSVBlockSizeBytes;
   BufferSizeOriginalBytes := CSVBufferSizeBytes;
-  RowWidthScanMode   := 'None';
-  FromRow            := 1;
-  ToRow              := 0;
-  ScanRows           := 0;
-  Cancelled          := False;
+  BlockAutoAdjusted       := False;
+  BufferAutoAdjusted      := False;
 
   if not OpenDialog1.Execute then Exit;
 
@@ -1376,15 +1413,14 @@ begin
       Free;
     end;
   end;
-  FileSizeMB := FileSize / (1024 * 1024);
 
   // ============================================================
-  // Vorab-Warnung bei knappem RAM (VOR dem Scan)
+  // Vorab-Warnung bei knappem RAM
   // ============================================================
   if FileSize > 0 then
   begin
     FreeRAMBytes := GetRAMFreeMB * 1024 * 1024;
-    if FileSize > (FreeRAMBytes * 8 div 10) then   // > 80% von Free RAM
+    if FileSize > (FreeRAMBytes * 8 div 10) then
     begin
       MsgText := Format(
         'Warning: Large file!' + sLineBreak + sLineBreak +
@@ -1406,29 +1442,25 @@ begin
   // ============================================================
   BuildProgressForm;
 
-  // Datei-Info
   FProgInfoLbl.Caption := Format('File: %s   (%s)',
     [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
 
-  // RAM-Init
   FProgTotalRAMMB      := GetRAMTotalMB;
   FLastFreeRAMMB       := GetRAMFreeMB;
   FRAMWarningShown     := False;
   FLoadProgressCounter := 0;
   FCancelRequested     := False;
 
-  FScanStartTick        := GetTickCount64;   // für Scan-Rate
+  FScanStartTick        := 0;
   FLastProgressBytes    := 0;
   SetLength(FProgressBytesSamples, 0);
+  ResetAutoTuneProgressNote;
 
   FProgressForm.Show;
   FProgressForm.BringToFront;
-  //Application.ProcessMessages;
   Sleep(200);
-  //Application.ProcessMessages;
 
-  StartTime      := Now;
-  FLoadStartTime := StartTime;
+  FLoadStartTime := Now;
 
   try
     // ============================================================
@@ -1440,13 +1472,13 @@ begin
       FProgBar.Position := 0;
       FProgInfoLbl.Caption := Format('File: %s   (%s)',
         [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
-      FProgSpeedLbl.Caption := '';
+      FProgSpeedLbl.Caption   := '';
       FProgElapsedLbl.Caption := '';
-      FProgETALbl.Caption := '';
+      FProgETALbl.Caption     := '';
       Application.ProcessMessages;
 
       try
-        ScanStartTime := Now;
+        ScanStartTime  := Now;
         FScanStartTick := GetTickCount64;
         MaxLineWidth := EstimateCSVMaxLineWidth(
           FFileName,
@@ -1469,44 +1501,85 @@ begin
         end;
       end;
 
+      // --------------------------------------------------------
+      // Configuration Check
+      // --------------------------------------------------------
       if MaxLineWidth > 0 then
       begin
-        RequiredBufferBytes := (MaxLineWidth * 2) + (16 * 1024);   // 2× row width + 16 KB reserve
+        Check := CheckCSVConfiguration(
+          MaxLineWidth,
+          CSVBlockSizeBytes,
+          CSVBufferSizeBytes);
 
-        if RequiredBufferBytes > CSVBufferSizeBytes then
-        begin
-          MsgText := Format(
-            'The current BufferSize is too small for this file.' + sLineBreak +
-            sLineBreak +
-            'Max row width (from scan):   %s' + sLineBreak +
-            'Required BufferSize:         %s' + sLineBreak +
-            'Current BufferSize:          %s' + sLineBreak +
-            sLineBreak +
-            'Increase BufferSize automatically?',
-            [FormatBytesSmart(MaxLineWidth),
-             FormatBytesSmart(RequiredBufferBytes),
-             FormatBytesSmart(CSVBufferSizeBytes)]);
+        case Check.Status of
 
-          if MessageDlg(MsgText, mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-          begin
-            BufferSizeOriginalBytes := CSVBufferSizeBytes;
-            BufferAutoAdjusted       := True;
+          ccsOptimal:
+            begin
+              // Nichts tun — Load startet sofort
+            end;
 
-            CSVBufferSizeBytes := RequiredBufferBytes;
-            edtBufferSize.Text := IntToStr(RequiredBufferBytes);
+          ccsSuboptimal:
+            begin
+              Choice := AskApplyCSVConfig(Check);
+              case Choice of
+                dcUseDetected:
+                  begin
+                    if chkBoxAutoTuneCSVBuffer.Checked  then
+                      ShowProgressAutoTuneNote(Check);
 
-            SetCSVSettingsFromForm;
-          end
-          else
-          begin
-            // User declined — load with the current (small) BufferSize.
-            // The load will most likely fail with a clear exception
-            // from the reader ("CSV row too large for buffer ...").
-            BufferAutoAdjusted := False;
-          end;
+                    BlockSizeOriginalBytes  := CSVBlockSizeBytes;
+                    BufferSizeOriginalBytes := CSVBufferSizeBytes;
+
+                    BlockAutoAdjusted  := Check.OptimalBlockSize  <> CSVBlockSizeBytes;
+                    BufferAutoAdjusted := Check.OptimalBufferSize <> CSVBufferSizeBytes;
+
+                    CSVBlockSizeBytes  := Check.OptimalBlockSize;
+                    CSVBufferSizeBytes := Check.OptimalBufferSize;
+                    edtBlockSize.Text  := IntToStr(CSVBlockSizeBytes);
+                    edtBufferSize.Text := IntToStr(CSVBufferSizeBytes);
+                    SetCSVSettingsFromForm;
+                  end;
+
+                dcKeepCurrent:
+                  begin
+                    // Nichts ändern, weiter mit aktuellen Werten
+                  end;
+
+                dcCancel:
+                  begin
+                    FProgPhaseLbl.Caption := 'Cancelled by user (configuration)';
+                    Application.ProcessMessages;
+                    Sleep(500);
+                    Exit;
+                  end;
+              end;
+            end;
+
+          ccsBroken:
+            begin
+              Choice := AskApplyCSVConfig(Check);
+              if Choice = dcCancel then
+              begin
+                FProgPhaseLbl.Caption := 'Cancelled by user (configuration)';
+                Application.ProcessMessages;
+                Sleep(500);
+                Exit;
+              end;
+
+              BlockSizeOriginalBytes  := CSVBlockSizeBytes;
+              BufferSizeOriginalBytes := CSVBufferSizeBytes;
+
+              BlockAutoAdjusted  := Check.OptimalBlockSize  <> CSVBlockSizeBytes;
+              BufferAutoAdjusted := Check.OptimalBufferSize <> CSVBufferSizeBytes;
+
+              CSVBlockSizeBytes  := Check.OptimalBlockSize;
+              CSVBufferSizeBytes := Check.OptimalBufferSize;
+              edtBlockSize.Text  := IntToStr(CSVBlockSizeBytes);
+              edtBufferSize.Text := IntToStr(CSVBufferSizeBytes);
+              SetCSVSettingsFromForm;
+            end;
         end;
       end;
-
     end;
 
     // ============================================================
@@ -1515,7 +1588,6 @@ begin
     FProgPhaseLbl.Caption := 'Loading rows...';
     FProgBar.Position := 0;
 
-    // Progress-Total bestimmen
     if ScanRows > 0 then
       FProgTotalRows := ToRow - FromRow + 1
     else if TotalRowsInRange > 0 then
@@ -1523,14 +1595,14 @@ begin
     else
       FProgTotalRows := 0;
 
-    // Am Dataset setzen
     TCSVFastDataset(CSVFastDataset1).OnProgress := @HandleLoadProgress;
     TCSVFastDataset(CSVFastDataset1).TotalRowsForProgress := FProgTotalRows;
     TCSVFastDataset(CSVFastDataset1).ProgressUpdatePercent :=
       StrToIntDef(edtProgressUpdatePercent.Text, 1);
-    //TCSVFastDataset(CSVFastDataset1).CancelFlag^ := False;
 
-    // Range ans Dataset
+    TCSVFastDataset(CSVFastDataset1).MaxRowWidth       := MaxLineWidth;
+    TCSVFastDataset(CSVFastDataset1).InitialFreeRAM_MB := FLastFreeRAMMB;
+
     TCSVFastDataset(CSVFastDataset1).SkipFirstRows := FromRow - 1;
     if ToRow > 0 then
       TCSVFastDataset(CSVFastDataset1).StopAfterRow := ToRow - FromRow + 1
@@ -1540,17 +1612,16 @@ begin
     Application.ProcessMessages;
 
     DBNavigator1.DataSource := nil;
-    RxDBGrid1.DataSource := nil;
+    RxDBGrid1.DataSource    := nil;
 
     FCancelRequested := False;
     TCSVFastDataset(CSVFastDataset1).CancelFlag := @FCancelRequested;
-    // Thread starten
-    try
-      // Interval-Sampling zurücksetzen
-      SetLength(FProgressSamples, 0);
-      FLastProgressRows    := 0;
-      FLastProgressSeconds := 0;
 
+    SetLength(FProgressSamples, 0);
+    FLastProgressRows    := 0;
+    FLastProgressSeconds := 0;
+
+    try
       CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
 
       while not CSVThread.Finished do
@@ -1562,38 +1633,6 @@ begin
       LoadErr := CSVThread.LoadError;
       CSVThread.Free;
       CSVThread := nil;
-
-      // ============================================================
-      // Load-Speed: Mittel der Intervalle, LETZTES verworfen.
-      //
-      // Begründung: Das letzte "Force"-Event am Ende kann nur noch
-      // wenige hundert Zeilen in wenigen Millisekunden umfassen —
-      // die Momentanrate wäre dann absurd hoch und würde den
-      // Mittelwert nach oben verzerren.
-      // ============================================================
-      LoadSpeedAvg := 0;
-      if Length(FProgressSamples) > 1 then
-      begin
-        Sum := 0;
-        for I := 0 to Length(FProgressSamples) - 2 do
-          Sum := Sum + FProgressSamples[I];
-        LoadSpeedAvg := Sum / (Length(FProgressSamples) - 1);
-      end
-      else if Length(FProgressSamples) = 1 then
-        LoadSpeedAvg := FProgressSamples[0];
-
-      //Bytes/sec (Interval-Mean ohne letztes Sample)
-      LoadBytesPerSecAvg := 0;
-      if Length(FProgressBytesSamples) > 1 then
-      begin
-        Sum := 0;
-        for I := 0 to Length(FProgressBytesSamples) - 2 do
-          Sum := Sum + FProgressBytesSamples[I];
-        LoadBytesPerSecAvg := Sum / (Length(FProgressBytesSamples) - 1);
-      end
-      else if Length(FProgressBytesSamples) = 1 then
-        LoadBytesPerSecAvg := FProgressBytesSamples[0];
-
     except
       on E: EAbort do
       begin
@@ -1604,6 +1643,13 @@ begin
 
     TCSVFastDataset(CSVFastDataset1).OnProgress := nil;
 
+    if TCSVFastDataset(CSVFastDataset1).Aborted then
+    begin
+      Cancelled := True;
+      if LoadErr = '' then
+        LoadErr := 'Cancelled by user';
+    end;
+
     // ============================================================
     // Cancel-Behandlung
     // ============================================================
@@ -1612,20 +1658,16 @@ begin
       FProgPhaseLbl.Caption := 'Cancelled by user';
       Application.ProcessMessages;
 
-      // ============================================================
-      // Dataset sauber zurücksetzen — kein Grid-Zugriff auf halb-geladenes Dataset
-      // ============================================================
       try
-        RxDBGrid1.DataSource := nil;
+        RxDBGrid1.DataSource    := nil;
         DBNavigator1.DataSource := nil;
-        DataSource1.DataSet := nil;
+        DataSource1.DataSet     := nil;
 
         if CSVFastDataset1.Active then
           CSVFastDataset1.Close;
         CSVFastDataset1.Fields.Clear;
         CSVFastDataset1.FieldDefs.Clear;
       except
-        // ignorieren — falls der Zustand komplett kaputt ist
       end;
 
       try
@@ -1633,7 +1675,6 @@ begin
       except
       end;
 
-      // Status
       Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
       btnCreateSQL.Enabled := False;
       btnExportAs.Enabled  := False;
@@ -1651,7 +1692,7 @@ begin
     if LoadErr <> '' then
     begin
       FProgPhaseLbl.Caption := 'Error';
-      FProgInfoLbl.Caption := 'Load failed: ' + LoadErr;
+      FProgInfoLbl.Caption  := 'Load failed: ' + LoadErr;
       Application.ProcessMessages;
       Sleep(1500);
 
@@ -1685,10 +1726,8 @@ begin
 
     RxDBGrid1.Refresh;
 
-    EndTime  := Now;
     RowCount := DataSource1.DataSet.RecordCount;
 
-    // Erfolg kurz anzeigen
     FProgPhaseLbl.Caption := Format('Finished: %s rows',
       [FormatFloat('#,##0', RowCount)]);
     Application.ProcessMessages;
@@ -1701,24 +1740,18 @@ begin
 
   // ============================================================
   // End-Statistik als Report
+  //
+  // Total Time = Scan + Load (ohne Dialog-Zeit, ohne Wartezeit).
+  // Beide Zeiten werden von ihren jeweiligen Quellen gemessen:
+  //   - ScanElapsed        : im GUI, Now-Differenz um den Scan-Aufruf
+  //   - FLastProgressSeconds: vom Reader, in Sekunden
   // ============================================================
-  DiffSeconds := (EndTime - StartTime) * 86400.0;
-
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
   btnCreateSQL.Enabled := True;
   btnExportAs.Enabled  := True;
 
   // ============================================================
-  // End-Statistik als Report
-  // ============================================================
-  DiffSeconds := (EndTime - StartTime) * 86400.0;
-
-  Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
-  btnCreateSQL.Enabled := True;
-  btnExportAs.Enabled  := True;
-
-  // ============================================================
-  // NEU: Load-Speed — Interval-Mean ohne letztes Sample
+  // Load-Speed: Interval-Mean ohne letztes Sample
   // ============================================================
   LoadSpeedAvg := 0;
   if Length(FProgressSamples) > 1 then
@@ -1730,6 +1763,17 @@ begin
   end
   else if Length(FProgressSamples) = 1 then
     LoadSpeedAvg := FProgressSamples[0];
+
+  LoadBytesPerSecAvg := 0;
+  if Length(FProgressBytesSamples) > 1 then
+  begin
+    Sum := 0;
+    for I := 0 to Length(FProgressBytesSamples) - 2 do
+      Sum := Sum + FProgressBytesSamples[I];
+    LoadBytesPerSecAvg := Sum / (Length(FProgressBytesSamples) - 1);
+  end
+  else if Length(FProgressBytesSamples) = 1 then
+    LoadBytesPerSecAvg := FProgressBytesSamples[0];
 
   // --- Statistik-Record füllen ---
   FillChar(Stats, SizeOf(Stats), 0);
@@ -1743,14 +1787,15 @@ begin
   Stats.OptionsExtra   := 'Read-Only';
   Stats.RowsProcessed  := RowCount;
   Stats.FieldsCount    := DataSource1.DataSet.FieldCount;
-  Stats.ElapsedSeconds := DiffSeconds;
 
-  // NEU — die zwei Zeilen genau hier:
+  // Total Time = Scan + Load
+  Stats.ElapsedSeconds := ScanElapsed + FLastProgressSeconds;
+
   Stats.LoadElapsedSeconds := FLastProgressSeconds;
   Stats.RowsPerSecond      := LoadSpeedAvg;
+  Stats.BytesPerSecond     := LoadBytesPerSecAvg;
 
-  Stats.SystemInfo     := GetSystemInfo(FFileName);
-
+  Stats.SystemInfo := GetSystemInfo(FFileName);
 
   // --- CSV-Optionen ---
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
@@ -1783,16 +1828,19 @@ begin
   end;
 
   // --- CSV Buffer Performance ---
-  Stats.CSVBlockSizeBytes          := CSVBlockSizeBytes;
-  Stats.CSVBufferSizeBytes         := CSVBufferSizeBytes;
-  Stats.CSVInitialCellCapacity  := CSVInitialCellCapacity;
-  Stats.CSVRowWidthScanMode     := RowWidthScanMode;
-  Stats.CSVRowWidthScanRows     := TotalRowsInRange;
-  Stats.CSVRowWidthScanIsCustom := (ScanRows > 0);
-  Stats.CSVRowWidthScanTime     := ScanElapsed;
-  Stats.CSVMaxRowWidth          := MaxLineWidth;
-  Stats.CSVBufferAutoAdjusted   := BufferAutoAdjusted;
-  Stats.CSVBufferOriginalBytes  := BufferSizeOriginalBytes;
+  Stats.CSVBlockSizeBytes        := CSVBlockSizeBytes;
+  Stats.CSVBufferSizeBytes       := CSVBufferSizeBytes;
+  Stats.CSVInitialCellCapacity   := CSVInitialCellCapacity;
+  Stats.CSVRowWidthScanMode      := RowWidthScanMode;
+  Stats.CSVRowWidthScanRows      := TotalRowsInRange;
+  Stats.CSVRowWidthScanIsCustom  := (ScanRows > 0);
+  Stats.CSVRowWidthScanTime      := ScanElapsed;
+  Stats.CSVMaxRowWidth           := MaxLineWidth;
+  Stats.CSVBufferAutoAdjusted    := BufferAutoAdjusted;
+  Stats.CSVBufferOriginalBytes   := BufferSizeOriginalBytes;
+  Stats.CSVBlockAutoAdjusted     := BlockAutoAdjusted;
+  Stats.CSVBlockOriginalBytes    := BlockSizeOriginalBytes;
+
   // --- Report anzeigen ---
   ReportForm := TfrmReport.Create(nil);
   try
@@ -1892,6 +1940,8 @@ end;
 
 procedure TfrmDataEditor.FormCreate(Sender: TObject);
 begin
+  chkBoxAutoTuneCSVBuffer.Checked :=  CSVAutoTuneCSVBuffer;
+
   ReadIni;
   OpenDialog1.Filter :=
     'All supported files|*.csv;*.json;*.xml;*.html;*.htm;*.xls;*.xlsx;*.odt;*.dbf;*.sdf;*.txt;*.wiki;*.wikitable|' +
@@ -1936,6 +1986,11 @@ end;
 procedure TfrmDataEditor.Button1Click(Sender: TObject);
 begin
   ShowMessage(IntToStr(CSVFastDataset1.RecordCount));
+end;
+
+procedure TfrmDataEditor.chkBoxAutoTuneCSVBufferChange(Sender: TObject);
+begin
+  CSVAutoTuneCSVBuffer := chkBoxAutoTuneCSVBuffer.Checked;
 end;
 
 procedure TfrmDataEditor.cmbboxDelimiterChange(Sender: TObject);
@@ -2345,6 +2400,307 @@ begin
   finally
     Dlg.Free;
   end;
+end;
+
+function TfrmDataEditor.CheckCSVConfiguration(
+  AMaxRowWidth: Int64;
+  ACurrentBlockSize: Int64;
+  ACurrentBufferSize: Int64): TCSVConfigCheck;
+const
+  MIN_PERFORMANCE_BLOCK = 1048576;   // 1 MB
+  MAX_BLOCK_HARD_LIMIT  = 16777216;  // 16 MB
+  BUFFER_SAFETY_MARGIN  = 16384;     // 16 KB
+var
+  NeedBlock: Int64;
+  NeedBuffer: Int64;
+begin
+  Result.Status            := ccsOptimal;
+  Result.MaxRowWidth       := AMaxRowWidth;   // NEU
+  Result.CurrentBlockSize  := ACurrentBlockSize;
+  Result.CurrentBufferSize := ACurrentBufferSize;
+  Result.Reason            := '';
+
+  if AMaxRowWidth <= 0 then
+  begin
+    Result.OptimalBlockSize  := ACurrentBlockSize;
+    Result.OptimalBufferSize := ACurrentBufferSize;
+    Exit;
+  end;
+
+  NeedBlock := AMaxRowWidth * 2;
+  if NeedBlock < MIN_PERFORMANCE_BLOCK then
+    NeedBlock := MIN_PERFORMANCE_BLOCK;
+  if NeedBlock > MAX_BLOCK_HARD_LIMIT then
+    NeedBlock := MAX_BLOCK_HARD_LIMIT;
+
+  NeedBuffer := NeedBlock * 2;
+  if NeedBuffer < (AMaxRowWidth * 2 + BUFFER_SAFETY_MARGIN) then
+    NeedBuffer := AMaxRowWidth * 2 + BUFFER_SAFETY_MARGIN;
+
+  Result.OptimalBlockSize  := NeedBlock;
+  Result.OptimalBufferSize := NeedBuffer;
+
+  if ACurrentBufferSize < (AMaxRowWidth * 2 + BUFFER_SAFETY_MARGIN) then
+  begin
+    Result.Status := ccsBroken;
+    Result.Reason := Format(
+      'The current BufferSize (%s) is too small for rows of ' +
+      'up to %s. The load would fail.',
+      [FormatBytesSmart(ACurrentBufferSize), FormatBytesSmart(AMaxRowWidth)]);
+    Exit;
+  end;
+
+  if ACurrentBlockSize < (AMaxRowWidth * 2) then
+  begin
+    Result.Status := ccsSuboptimal;
+    Result.Reason := Format(
+      'The current BlockSize (%s) is smaller than 2 × max row width ' +
+      '(%s). Rows will be reassembled across multiple blocks, ' +
+      'which can be several times slower.',
+      [FormatBytesSmart(ACurrentBlockSize), FormatBytesSmart(AMaxRowWidth)]);
+    Exit;
+  end;
+
+  if ACurrentBufferSize < (ACurrentBlockSize * 2) then
+  begin
+    Result.Status := ccsSuboptimal;
+    Result.Reason := Format(
+      'The current BufferSize (%s) is smaller than 2 × BlockSize (%s). ' +
+      'This may cause unnecessary refills.',
+      [FormatBytesSmart(ACurrentBufferSize),
+       FormatBytesSmart(ACurrentBlockSize)]);
+    Exit;
+  end;
+end;
+
+function TfrmDataEditor.AskApplyCSVConfig(const ACheck: TCSVConfigCheck): TDetectChoice;
+var
+  Dlg: TForm;
+  Memo: TMemo;
+  LblTitle: TLabel;
+  BtnApply, BtnKeep, BtnCancel: TButton;
+  Content: TStringList;
+  Ratio: Double;
+begin
+  // ------------------------------------------------------------
+  // ccsBroken: Dialog zwingend, kein "Keep Current"
+  //           (Keep Current würde garantiert zum Fehler führen)
+  // ------------------------------------------------------------
+  if ACheck.Status = ccsBroken then
+  begin
+    Result := dcCancel;
+
+    Dlg := TForm.Create(nil);
+    try
+      Dlg.Caption     := 'CSV Configuration — ERROR';
+      Dlg.Width       := 640;
+      Dlg.Height      := 340;
+      Dlg.Position    := poScreenCenter;
+      Dlg.BorderStyle := bsDialog;
+
+      LblTitle := TLabel.Create(Dlg);
+      LblTitle.Parent  := Dlg;
+      LblTitle.Left    := 16;
+      LblTitle.Top     := 12;
+      LblTitle.Width   := 608;
+      LblTitle.Caption := 'The current settings will cause the load to fail:';
+      LblTitle.Font.Style := [fsBold];
+      LblTitle.Font.Color := clRed;
+
+      Content := TStringList.Create;
+      try
+        Content.Add(Format('  Max Row Width (from scan):  %s',
+          [FormatBytesSmart(ACheck.MaxRowWidth)]));
+        Content.Add('');
+        Content.Add('                     Current        Required');
+        Content.Add('  ─────────────     ─────────      ─────────');
+        Content.Add(Format('  BlockSize         %-14s %s',
+          [FormatBytesSmart(ACheck.CurrentBlockSize),
+           FormatBytesSmart(ACheck.OptimalBlockSize)]));
+        Content.Add(Format('  BufferSize        %-14s %s',
+          [FormatBytesSmart(ACheck.CurrentBufferSize),
+           FormatBytesSmart(ACheck.OptimalBufferSize)]));
+        Content.Add('');
+        Content.Add(ACheck.Reason);
+        Content.Add('');
+        Content.Add('Choose an action:');
+        Content.Add('');
+        Content.Add('  [Fix and Continue]  — Apply required values and start load');
+        Content.Add('  [Cancel]            — Do not load the file');
+
+        Memo := TMemo.Create(Dlg);
+        Memo.Parent     := Dlg;
+        Memo.Left       := 16;
+        Memo.Top        := 38;
+        Memo.Width      := 608;
+        Memo.Height     := 220;
+        Memo.ReadOnly   := True;
+        Memo.ScrollBars := ssVertical;
+        Memo.Font.Name  := 'Courier New';
+        Memo.Font.Size  := 10;
+        Memo.Lines.Assign(Content);
+      finally
+        Content.Free;
+      end;
+
+      BtnApply := TButton.Create(Dlg);
+      BtnApply.Parent      := Dlg;
+      BtnApply.Caption     := 'Fix and Continue';
+      BtnApply.Left        := 340;
+      BtnApply.Top         := 270;
+      BtnApply.Width       := 140;
+      BtnApply.Default     := True;
+      BtnApply.ModalResult := mrYes;
+
+      BtnCancel := TButton.Create(Dlg);
+      BtnCancel.Parent      := Dlg;
+      BtnCancel.Caption     := 'Cancel';
+      BtnCancel.Left        := 490;
+      BtnCancel.Top         := 270;
+      BtnCancel.Width       := 134;
+      BtnCancel.ModalResult := mrCancel;
+
+      case Dlg.ShowModal of
+        mrYes: Result := dcUseDetected;   // Fix and Continue
+      else
+        Result := dcCancel;               // Cancel oder Fenster geschlossen
+      end;
+    finally
+      Dlg.Free;
+    end;
+    Exit;
+  end;
+
+  // ------------------------------------------------------------
+  // ccsSuboptimal + AutoTuneCSVBuffer = True: KEIN Dialog.
+  // Der Hinweis erscheint im Progress-Fenster und im Report.
+  // ------------------------------------------------------------
+  if chkBoxAutoTuneCSVBuffer.Checked  then
+  begin
+    Result := dcUseDetected;
+    Exit;
+  end;
+
+  // ------------------------------------------------------------
+  // ccsSuboptimal + AutoTuneCSVBuffer = False: Dialog mit 3 Optionen
+  // ------------------------------------------------------------
+  if (ACheck.CurrentBlockSize > 0) and
+     (ACheck.CurrentBlockSize < ACheck.OptimalBlockSize) then
+    Ratio := ACheck.OptimalBlockSize / ACheck.CurrentBlockSize
+  else
+    Ratio := 0;
+
+  Result := dcCancel;
+
+  Dlg := TForm.Create(nil);
+  try
+    Dlg.Caption     := 'CSV Configuration Check';
+    Dlg.Width       := 640;
+    Dlg.Height      := 380;
+    Dlg.Position    := poScreenCenter;
+    Dlg.BorderStyle := bsDialog;
+
+    LblTitle := TLabel.Create(Dlg);
+    LblTitle.Parent  := Dlg;
+    LblTitle.Left    := 16;
+    LblTitle.Top     := 12;
+    LblTitle.Width   := 608;
+    LblTitle.Caption := 'Configuration could be improved for this file:';
+    LblTitle.Font.Style := [fsBold];
+
+    Content := TStringList.Create;
+    try
+      Content.Add(Format('  Max Row Width (from scan):  %s',
+        [FormatBytesSmart(ACheck.MaxRowWidth)]));
+      Content.Add('');
+      Content.Add('                     Current        Recommended');
+      Content.Add('  ─────────────     ─────────      ───────────');
+      Content.Add(Format('  BlockSize         %-14s %s',
+        [FormatBytesSmart(ACheck.CurrentBlockSize),
+         FormatBytesSmart(ACheck.OptimalBlockSize)]));
+      Content.Add(Format('  BufferSize        %-14s %s',
+        [FormatBytesSmart(ACheck.CurrentBufferSize),
+         FormatBytesSmart(ACheck.OptimalBufferSize)]));
+      Content.Add('');
+      Content.Add(ACheck.Reason);
+      if Ratio > 1.5 then
+        Content.Add(Format('  (BlockSize ratio: %.1f× → potentially %.1f× faster load)',
+          [Ratio, Ratio]));
+      Content.Add('');
+      Content.Add('Choose an action:');
+      Content.Add('');
+      Content.Add('  [Use Recommended]  — Apply recommended values and start load');
+      Content.Add('  [Keep Current]     — Start load with current settings (slower)');
+      Content.Add('  [Cancel]           — Do not load the file');
+
+      Memo := TMemo.Create(Dlg);
+      Memo.Parent     := Dlg;
+      Memo.Left       := 16;
+      Memo.Top        := 38;
+      Memo.Width      := 608;
+      Memo.Height     := 260;
+      Memo.ReadOnly   := True;
+      Memo.ScrollBars := ssVertical;
+      Memo.Font.Name  := 'Courier New';
+      Memo.Font.Size  := 10;
+      Memo.Lines.Assign(Content);
+    finally
+      Content.Free;
+    end;
+
+    BtnApply := TButton.Create(Dlg);
+    BtnApply.Parent      := Dlg;
+    BtnApply.Caption     := 'Use Recommended';
+    BtnApply.Left        := 200;
+    BtnApply.Top         := 310;
+    BtnApply.Width       := 140;
+    BtnApply.Default     := True;
+    BtnApply.ModalResult := mrYes;
+
+    BtnKeep := TButton.Create(Dlg);
+    BtnKeep.Parent      := Dlg;
+    BtnKeep.Caption     := 'Keep Current';
+    BtnKeep.Left        := 345;
+    BtnKeep.Top         := 310;
+    BtnKeep.Width       := 140;
+    BtnKeep.ModalResult := mrNo;
+
+    BtnCancel := TButton.Create(Dlg);
+    BtnCancel.Parent      := Dlg;
+    BtnCancel.Caption     := 'Cancel';
+    BtnCancel.Left        := 490;
+    BtnCancel.Top         := 310;
+    BtnCancel.Width       := 134;
+    BtnCancel.ModalResult := mrCancel;
+
+    case Dlg.ShowModal of
+      mrYes: Result := dcUseDetected;    // Use Recommended
+      mrNo:  Result := dcKeepCurrent;    // Keep Current
+    else
+      Result := dcCancel;                // Cancel oder Fenster geschlossen
+    end;
+  finally
+    Dlg.Free;
+  end;
+end;
+
+procedure TfrmDataEditor.ShowProgressAutoTuneNote(const ACheck: TCSVConfigCheck);
+begin
+  FProgressAutoTuneNote := Format(
+    'Auto-tuned: BlockSize %s → %s, BufferSize %s → %s',
+    [FormatBytesSmart(ACheck.CurrentBlockSize),
+     FormatBytesSmart(ACheck.OptimalBlockSize),
+     FormatBytesSmart(ACheck.CurrentBufferSize),
+     FormatBytesSmart(ACheck.OptimalBufferSize)]);
+
+  // Zeile im Progress-Fenster anzeigen — unterhalb der Info-Zeile
+  if Assigned(FProgETALbl) then
+    FProgETALbl.Caption := FProgressAutoTuneNote;
+end;
+
+procedure TfrmDataEditor.ResetAutoTuneProgressNote;
+begin
+  FProgressAutoTuneNote := '';
 end;
 
 end.

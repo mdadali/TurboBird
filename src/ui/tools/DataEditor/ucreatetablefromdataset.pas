@@ -362,37 +362,29 @@ begin
     Result := BaseType;
 end;
 
-// ============================================================================
-// COMBO-BEFÜLLUNG
-// ============================================================================
-
 procedure TfrmCreateTableFromDataSet.FillServerCombo;
 var
-  List: TStringList;
+  AliasList: TStringList;
 begin
-  List := GetServerListFromTreeView;
+  // ComboBox mit ALIASEN füllen (konsistent zu TreeView und
+  // allen anderen Masken).
+  AliasList := GetServerAliasListFromTreeView;
+  if AliasList = nil then Exit;
   try
-    cmbBoxServers.Items.Assign(List);
+    cmbBoxServers.Items.Assign(AliasList);
     if cmbBoxServers.Items.Count = 0 then
-      cmbBoxDBs.Text:= '<No database available>'
-    //else
-      //FillDBCombo;
+      cmbBoxDBs.Text := '<No database available>';
   finally
-    List.Free;
+    AliasList.Free;
   end;
 end;
 
 procedure TfrmCreateTableFromDataSet.FillDBCombo;
-var
-  i: Integer;
 begin
-  cmbBoxDBs.Items.Clear;
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, cmbBoxServers.Text) then
-      cmbBoxDBs.Items.Add(RegisteredDatabases[i].RegRec.Title);
-
-  //if cmbBoxDBs.Items.Count > 0 then
-    //cmbBoxDBs.ItemIndex := 0
+  // GetDBTitlesForServer löst Alias↔echter-Name auf — bei
+  // zwei Aliasen auf demselben echten Server gehören DBs unter
+  // 'Prod' nicht zu 'Test'.
+  GetDBTitlesForServer(cmbBoxServers.Text, cmbBoxDBs.Items);
 
   if cmbBoxDBs.Items.Count = 0 then
     cmbBoxDBs.Items.Add('<No database available>');
@@ -518,14 +510,12 @@ end;
 // ============================================================================
 
 function TfrmCreateTableFromDataSet.GetTargetDBIndex: Integer;
-var
-  i: Integer;
 begin
-  Result := -1;
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, cmbBoxServers.Text) and
-       SameText(RegisteredDatabases[i].RegRec.Title, cmbBoxDBs.Text) then
-      Exit(i);
+  // Alias-Lookup mit Fallback auf echten Namen (FindDBIndex-
+  // ByTitleAndServer nutzt intern GetServerRecordFromFileByAlias).
+  Result := FindDBIndexByTitleAndServer(
+              Trim(cmbBoxDBs.Text),
+              Trim(cmbBoxServers.Text));
 end;
 
 function TfrmCreateTableFromDataSet.GetTargetTable: string;

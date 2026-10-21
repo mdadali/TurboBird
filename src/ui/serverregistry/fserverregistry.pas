@@ -37,7 +37,7 @@ type
     btnAddServer: TButton;
     btnDeleteServer: TButton;
     btnOpenRootPath: TButton;
-    cbServerName: TComboBox;
+    cbServerAlias: TComboBox;
     cboxLoadRegisteredClientLib: TCheckBox;
     edtRootPath: TEdit;
     edtVersionMinor: TEdit;
@@ -48,7 +48,7 @@ type
     edtConnectionTimeout: TEdit;
     edtConfigFilePath: TEdit;
     edtPort: TEdit;
-    edtServerAlias: TEdit;
+    edtServerName: TEdit;
     edtUserName: TEdit;
     edtRole: TEdit;
     cbProtocol: TComboBox;
@@ -99,10 +99,10 @@ type
     procedure edtPasswordChange(Sender: TObject);
     procedure edtPortChange(Sender: TObject);
     procedure edtRoleChange(Sender: TObject);
-    procedure edtServerAliasChange(Sender: TObject);
+    procedure edtServerNameChange(Sender: TObject);
     procedure edtUserNameChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure cbServerNameChange(Sender: TObject);
+    procedure cbServerAliasChange(Sender: TObject);
     procedure btnClientLibClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure GroupBox1Click(Sender: TObject);
@@ -113,6 +113,7 @@ type
     FServerSession: TServerSession;
     FSelectedServer: string;
     FIsNewServer: boolean;
+    FNewServerNode: TTreeNode;
     procedure PopulateCharsets;
     procedure PopulateProtocols;
 
@@ -146,10 +147,10 @@ implementation
 procedure TfmServerRegistry.ResetForm;
 begin
   // Server-Auswahl zurücksetzen
-  //cbServerName.ItemIndex := -1;
+  //cbServerAlias.ItemIndex := -1;
 
   // Alle Eingabefelder leeren
-  edtServerAlias.Clear;
+  edtServerName.Clear;
   edtUserName.Text := 'SYSDBA';
   edtRole.Clear;
   edtPassword.Text := 'masterkey';
@@ -183,24 +184,30 @@ begin
 end;
 
 procedure TfmServerRegistry.FillServerCombobox;
-var ServerList: TStringList;
+var
+  AliasList: TStringList;
   i: integer;
 begin
-  ServerList := GetServerListFromTreeView;
-  if ServerList = nil then
+  // ComboBox zeigt künftig ALIASE (GetServerAliasListFromTreeView).
+  // Die internen Lookups arbeiten weiterhin mit den echten
+  // Servernamen (GetServerListFromTreeView / ServerSession.ServerName).
+  AliasList := GetServerAliasListFromTreeView;
+  if AliasList = nil then
     exit;
 
   try
-    cbServerName.Items.Clear;
-    for i := 0 to ServerList.Count - 1 do
+    cbServerAlias.Items.Clear;
+    for i := 0 to AliasList.Count - 1 do
     begin
-      CheckPortNumber(ServerList[i]);
-      cbServerName.Items.Add(ServerList[i]);
+      // CheckPortNumber arbeitet auf dem Anzeige-Namen (Alias).
+      // Aliase enthalten i. d. R. keinen "/port"-Suffix, daher
+      // bleibt edtPort hier unverändert auf "enabled".
+      CheckPortNumber(AliasList[i]);
+      cbServerAlias.Items.Add(AliasList[i]);
     end;
   finally
-    ServerList.Free;
+    AliasList.Free;
   end;
-
 end;
 
 function TfmServerRegistry.CheckPortNumber(AServerName: string): boolean;
@@ -249,41 +256,17 @@ begin
   FIsNewServer := false;
   FillServerCombobox;
 
-  if cbServerName.Items.Count > 0 then
+  if cbServerAlias.Items.Count > 0 then
     bbTestConnection.Enabled := true;
 
   PopulateCharsets;
 end;
 
-{procedure TfmServerRegistry.init(ANode: TTreeNode);
-var Rec:TServerRecord;
-    SavedPwd: boolean;
-begin
-  if not Assigned(ANode.Data) then
-    exit;
-
-  FServerSession := TPNodeInfos(ANode.Data)^.ServerSession;
-  if FServerSession = nil then
-  begin
-    CreateServerSession(FServerSession, Trim(ANode.Text));
-    FIsNewServer := true;
-    cbServerName.ItemIndex := -1;
-  end else
-  begin
-    cbServerName.ItemIndex := cbServerName.Items.IndexOf(FSelectedServer);
-    FIsNewServer := false;
-  end;
-
-  //UpdateControlsForProtocol;
-  FSelectedServer := FServerSession.ServerName;
-  SavedPwd := FServerSession.Password <> '';
-  Rec := BuildServerRecordFromSession(FServerSession, SavedPwd);
-  FillFormFromServerRecord(Rec);
-end;}
-
 procedure TfmServerRegistry.init(ANode: TTreeNode);
-var Rec:TServerRecord;
-    SavedPwd: boolean;
+var
+  Rec: TServerRecord;
+  SavedPwd: boolean;
+  DisplayAlias: string;
 begin
   if not Assigned(ANode.Data) then
     exit;
@@ -294,42 +277,81 @@ begin
   begin
     CreateServerSession(FServerSession, Trim(ANode.Text));
     FIsNewServer := true;
-    cbServerName.ItemIndex := -1;
-  end else
-  begin
+    cbServerAlias.ItemIndex := -1;
+  end
+  else
     FIsNewServer := false;
-  end;
 
-  // FSelectedServer IMMER setzen (für neue UND bestehende)
+  // FSelectedServer IMMER setzen (echter Servername)
   FSelectedServer := FServerSession.ServerName;
 
+  // NEU: ComboBox-Index über den ALIAS setzen, nicht über den
+  // echten Servernamen — die ComboBox enthält Aliase.
   if not FIsNewServer then
-    cbServerName.ItemIndex := cbServerName.Items.IndexOf(FSelectedServer);
+  begin
+    if Trim(FServerSession.ServerAlias) <> '' then
+      DisplayAlias := Trim(FServerSession.ServerAlias)
+    else
+      DisplayAlias := Trim(FServerSession.ServerName);
+
+    cbServerAlias.ItemIndex := cbServerAlias.Items.IndexOf(DisplayAlias);
+  end;
 
   SavedPwd := FServerSession.Password <> '';
   Rec := BuildServerRecordFromSession(FServerSession, SavedPwd);
   FillFormFromServerRecord(Rec);
 end;
 
+{ ============================================================
+  FormShow: Wird NACH Init aufgerufen.
+
+  Init hat den ComboBox-Index bereits über den ALIAS des
+  aktuell bearbeiteten Servers gesetzt. FormShow darf diesen
+  Wert NICHT überschreiben — sonst landet bei mehreren
+  Aliasen auf demselben echten Servernamen (z.B. Prod/Test/
+  Clone alle auf FB60Local) immer der erste Alias in der
+  ComboBox, und die ganze Maske wird mit den falschen
+  Server-Daten befüllt.
+
+  Alte Version:
+    idx := cbServerAlias.Items.IndexOf(FSelectedServer);
+  FSelectedServer ist der ECHTE Servername ('FB60Local'),
+  der in der Alias-Liste nicht vorkommt → idx = -1 →
+  ItemIndex := 0 → FALSCHER Server.
+
+  Neue Version: Nur nachbessern, wenn Init den Index nicht
+  setzen konnte (ItemIndex < 0).
+  ============================================================ }
 procedure TfmServerRegistry.FormShow(Sender: TObject);
-var idx: Integer;
+var
+  idx: Integer;
+  DisplayAlias: string;
 begin
   UpdateControlsForProtocol;
-
   frmThemeSelector.btnApplyClick(self);
+  cbServerAlias.SetFocus;
 
-  cbServerName.SetFocus;
-
-  if cbServerName.Items.Count = 0 then
+  if cbServerAlias.Items.Count = 0 then
     exit;
 
-  idx := cbServerName.Items.IndexOf(FSelectedServer);
-  if idx >= 0 then
-    cbServerName.ItemIndex := idx
-  else
-    cbServerName.ItemIndex := 0;
+  // Wenn Init bereits einen gültigen ItemIndex gesetzt hat,
+  // diesen respektieren — sonst würde der falsche Alias
+  // selektiert.
+  if cbServerAlias.ItemIndex < 0 then
+  begin
+    if Trim(FServerSession.ServerAlias) <> '' then
+      DisplayAlias := Trim(FServerSession.ServerAlias)
+    else
+      DisplayAlias := Trim(FServerSession.ServerName);
 
-  cbServerNameChange(nil);
+    idx := cbServerAlias.Items.IndexOf(DisplayAlias);
+    if idx >= 0 then
+      cbServerAlias.ItemIndex := idx
+    else
+      cbServerAlias.ItemIndex := 0;
+  end;
+
+  cbServerAliasChange(nil);
 end;
 
 procedure TfmServerRegistry.GroupBox1Click(Sender: TObject);
@@ -364,11 +386,11 @@ var
 begin
   IsLocal := (LowerCase(Trim(cbProtocol.Text)) = 'local');
 
-  edtPassword.Enabled := not IsLocal;
+  //edtPassword.Enabled := not IsLocal;
   if not edtPassword.Enabled then
     edtPassword.Text := '';
 
-  chkSavePassword.Enabled := not IsLocal;
+  //chkSavePassword.Enabled := not IsLocal;
   if not chkSavePassword.Enabled then
     chkSavePassword.Checked := false;
 
@@ -406,7 +428,7 @@ begin
    //bbReg.Enabled := false;
 end;
 
-procedure TfmServerRegistry.edtServerAliasChange(Sender: TObject);
+procedure TfmServerRegistry.edtServerNameChange(Sender: TObject);
 begin
    //bbReg.Enabled := false;
 end;
@@ -498,11 +520,11 @@ var
   NewServer: string;
   i: Integer;
   Node: TTreeNode;
+  ServerList: TStringList;
+  AlreadyExists: Boolean;
 begin
-  if not InputQuery('Add New Server', 'Enter the server name:', NewServer) then
-    Exit; // User hat abgebrochen
-
-  //bbReg.Enabled := false;
+  if not InputQuery('Add New Server', 'Enter the server alias:', NewServer) then
+    Exit;
 
   NewServer := Trim(NewServer);
   if NewServer = '' then
@@ -511,26 +533,44 @@ begin
     Exit;
   end;
 
-  // Prüfen ob schon vorhanden
-  for i := 0 to cbServerName.Items.Count - 1 do
-    if SameText(cbServerName.Items[i], NewServer) then
-    begin
-      MessageDlg('This server already exists in the list.', mtInformation, [mbOK], 0);
-      cbServerName.ItemIndex := i;
-      Exit;
+  // Prüfen ob schon vorhanden — über die ECHTEN Servernamen
+  AlreadyExists := False;
+  ServerList := GetServerListFromTreeView;
+  if Assigned(ServerList) then
+  begin
+    try
+      for i := 0 to ServerList.Count - 1 do
+      begin
+        if SameText(ServerList[i], NewServer) then
+        begin
+          AlreadyExists := True;
+          Break;
+        end;
+      end;
+    finally
+      ServerList.Free;
     end;
+  end;
 
-  // Neuen Server hinzufügen
+  if AlreadyExists then
+  begin
+    MessageDlg('This server already exists in the list.', mtInformation, [mbOK], 0);
+    Exit;
+  end;
+
+  // Neuen Server-Knoten anlegen
   Node := turbocommon.MainTreeView.Items.Add(nil, NewServer);
   TPNodeInfos(Node.Data)^.ObjectType := tvotServer;
   Node.Visible := false;
-  Node.Text := NewServer;
 
-  cbServerName.Items.Add(NewServer);
-  cbServerName.ItemIndex := cbServerName.Items.Count - 1;
+  // WICHTIG: Den neuen Knoten merken. Er wird erst in bbRegClick
+  // sichtbar gemacht und auf den Alias umbenannt. Ohne diese
+  // Referenz würde GetServerNodeByServerName bei zwei Servern
+  // mit demselben echten Servernamen den FALSCHEN Knoten finden
+  // und umbenennen.
+  FNewServerNode := Node;
 
   bbTestConnection.Enabled := true;
-  //bbReg.Enabled := true;
 
   MessageDlg('New server "' + NewServer + '" has been added.' + sLineBreak +
              'Please complete the details and save.', mtInformation, [mbOK], 0);
@@ -539,31 +579,11 @@ begin
   Init(Node);
   UpdateControlsForProtocol;
 
-  btnAddServer.Enabled := false;
-end;
+  FillServerCombobox;
+  if cbServerAlias.Items.Count > 0 then
+    cbServerAlias.ItemIndex := cbServerAlias.Items.Count - 1;
 
-procedure TfmServerRegistry.CreateServerSession(var AServerSession: TServerSession; AServerName: string);
-begin
-  AServerSession := TServerSession.Create(
-      AServerName,
-      'Alias for ' + AServerName,
-      'SYSDBA',  //UserName
-      '',        //Password
-      '',        //Role
-      TProtocol(cbProtocol.ItemIndex),
-      '3050',   //port
-      'UTF8',
-      '/opt/firebird',
-      '/opt/firebird/lib/libfbclient.so',
-      '/opt/firebird/firebird.conf',
-      0, //minor
-      0, //major
-      false,
-      false,
-      2000, //Connection Timeout in ms.
-      3,    //RetryCount
-      0     //Query Timeout in ms.
-    );
+  btnAddServer.Enabled := false;
 end;
 
 procedure TfmServerRegistry.bbTestConnectionClick(Sender: TObject);
@@ -615,7 +635,7 @@ begin
   ServicesConn := TIBXServicesConnection.Create(nil);
   IBXSecurityService := TIBXSecurityService.Create(nil);
   try
-    // 1️⃣ ServicesConnection auf Basis FServerSession konfigurieren
+    //ServicesConnection auf Basis FServerSession konfigurieren
     ServicesConn.Protocol := FServerSession.Protocol;
     ServicesConn.ServerName := FServerSession.ServerName;
     ServicesConn.Params.Clear;
@@ -624,12 +644,12 @@ begin
     ServicesConn.Params.Add('password=' + FServerSession.Password);
     ServicesConn.LoginPrompt := False;
 
-    // 2️⃣ SecurityService mit ServicesConnection verbinden
+    // SecurityService mit ServicesConnection verbinden
     IBXSecurityService.ServicesConnection := ServicesConn;
     IBXSecurityService.UserName := FServerSession.UserName;
     IBXSecurityService.Password := FServerSession.Password;
 
-    // 3️⃣ Verbindung aufbauen
+    // Verbindung aufbauen
     try
       ServicesConn.Connected := True;
     except
@@ -640,10 +660,10 @@ begin
       end;
     end;
 
-    // 4️⃣ UserInfo abrufen
+    // UserInfo abrufen
     IBXSecurityService.DisplayUsers;
 
-    // 5️⃣ Prüfen, ob Dummy-User bereits existiert
+    // Prüfen, ob Dummy-User bereits existiert
     UserExists := False;
     for i := 0 to IBXSecurityService.UserInfoCount - 1 do
     begin
@@ -673,24 +693,115 @@ begin
   end;
 end;
 
+{ ============================================================
+  Speichert die Server-Registrierung.
+
+  NEU: Wenn noch keine Version bekannt ist (weder aus dem
+  Record noch aus einer vorangegangenen Test-Connection),
+  wird automatisch eine Verbindung aufgebaut und die Version
+  ermittelt — genau der Verhalten, den der User beim Test-
+  Connection-Button sieht, nur eben automatisch beim Speichern.
+  Damit landen neue Server immer mit korrekter Version in
+  servers.reg.
+
+  Bei Verbindungsfehler fragt eine Meldung, ob trotzdem ohne
+  Versions-Info gespeichert werden soll.
+  ============================================================ }
 procedure TfmServerRegistry.bbRegClick(Sender: TObject);
 var
   Rec: TServerRecord;
   SavePwd: Boolean;
-  tmpNode, InfoNode: TTreeNode;
+  tmpNode: TTreeNode;
+  OldAlias, NewAlias: string;
+  RealServerName: string;
+  MigratedCount: Integer;
+  WasNewServer: Boolean;
+  NeedAutoTest: Boolean;
 begin
-  if FServerSession.FBVersionMajor = 0 then //keine Server infos
-  begin
-    // Aktuelle Einstellungen übernehmen
-    FillServerRecordFromForm(Rec);
+  OldAlias       := Trim(FServerSession.ServerAlias);
+  RealServerName := Trim(FServerSession.ServerName);
+  WasNewServer   := FIsNewServer;
 
-    // Session aktualisieren und trennen
-    FServerSession.Disconnect;
-    ApplyServerRecordToSession(Rec, FServerSession);
+  NewAlias := Trim(cbServerAlias.Text);
+  if NewAlias = '' then
+  begin
+    MessageDlg('Server alias cannot be empty.', mtError, [mbOK], 0);
+    cbServerAlias.SetFocus;
+    Exit;
   end;
 
-  SavePwd := chkSavePassword.Checked;
+  if not IsServerAliasUnique(NewAlias, OldAlias, RealServerName) then
+  begin
+    MessageDlg('The alias "' + NewAlias + '" is already in use by another server.' +
+               sLineBreak + sLineBreak +
+               'Server aliases must be system-wide unique.',
+               mtError, [mbOK], 0);
+    cbServerAlias.SetFocus;
+    Exit;
+  end;
 
+  FillServerRecordFromForm(Rec);
+
+  // NEU: Auto-Test auch triggern, wenn NUR der VersionString leer
+  // ist (z.B. alte Registrierung ohne String, oder frische Session).
+  // Vorher: AND — VersionMajor=6 und VersionString='' wurde nicht
+  // erkannt, weil Major != 0 war.
+  NeedAutoTest := (Rec.VersionMajor = 0) or (Trim(Rec.VersionString) = '');
+
+  if NeedAutoTest then
+  begin
+    FServerSession.Disconnect;
+    ApplyServerRecordToSession(Rec, FServerSession);
+
+    try
+      FServerSession.IBXConnect;
+
+      if FServerSession.Connected then
+      begin
+        Rec.VersionMajor  := FServerSession.FBVersionMajor;
+        Rec.VersionMinor  := FServerSession.FBVersionMinor;
+        Rec.VersionString := FServerSession.FBVersionString;
+
+        edtVersionMajor.Text  := IntToStr(Rec.VersionMajor);
+        edtVersionMinor.Text  := IntToStr(Rec.VersionMinor);
+        edtVersionString.Text := Rec.VersionString;
+      end
+      else
+      begin
+        if MessageDlg(
+             'Automatic version detection failed:' + sLineBreak +
+             sLineBreak +
+             FServerSession.ErrorStr + sLineBreak +
+             sLineBreak +
+             'Register the server anyway (without version info)?',
+             mtWarning, [mbYes, mbNo], 0) <> mrYes then
+        begin
+          FServerSession.Disconnect;
+          Exit;
+        end;
+      end;
+    except
+      on E: Exception do
+      begin
+        if MessageDlg(
+             'Automatic version detection failed:' + sLineBreak +
+             sLineBreak +
+             E.Message + sLineBreak +
+             sLineBreak +
+             'Register the server anyway (without version info)?',
+             mtWarning, [mbYes, mbNo], 0) <> mrYes then
+        begin
+          FServerSession.Disconnect;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
+  FServerSession.Disconnect;
+  ApplyServerRecordToSession(Rec, FServerSession);
+
+  SavePwd := chkSavePassword.Checked;
   if SavePwd then
     SavePwd := SavePwd and (MessageDlg(
       'Warning: Your password will be stored unencrypted!' + sLineBreak +
@@ -700,46 +811,103 @@ begin
       0
     ) = mrYes);
 
+  MigratedCount := 0;
+
   try
     Rec := BuildServerRecordFromSession(FServerSession, SavePwd);
 
-    if FIsNewServer then
+    if not SameText(OldAlias, NewAlias) then
     begin
-      FSelectedServer :=  Trim(cbServerName.Text);
-      tmpNode := GetServerNodeByServerName(FSelectedServer);
-      tmpNode.Visible := true;
-      //tmpNode := turbocommon.MainTreeView.Items.Add(nil, cbServerName.Text);
-      tmpNode.ImageIndex := 25;
-      tmpNode.SelectedIndex := 25;
-      TPNodeInfos(tmpNode.Data)^.ObjectType := tvotServer;
-      turbocommon.MainTreeView.Selected := tmpNode;
-      turbocommon.MainTreeView.Selected := turbocommon.MainTreeView.Items[0];
+      if OldAlias <> '' then
+        MigratedCount := RenameDBRegistrationsServerAlias(OldAlias, NewAlias, RealServerName)
+      else if RealServerName <> '' then
+        MigratedCount := RenameDBRegistrationsServerAlias(RealServerName, NewAlias, RealServerName);
+    end;
+
+    if WasNewServer then
+    begin
+      tmpNode := FNewServerNode;
+
+      if Assigned(tmpNode) then
+      begin
+        tmpNode.Visible := true;
+        tmpNode.ImageIndex := 25;
+        tmpNode.SelectedIndex := 25;
+        TPNodeInfos(tmpNode.Data)^.ObjectType := tvotServer;
+
+        tmpNode.Text := NewAlias;
+
+        turbocommon.MainTreeView.Selected := tmpNode;
+        turbocommon.MainTreeView.Selected := turbocommon.MainTreeView.Items[0];
+      end;
+
+      FNewServerNode := nil;
       FIsNewServer := false;
+    end
+    else
+    begin
+      if OldAlias <> '' then
+        tmpNode := GetServerNodeByAlias(OldAlias)
+      else
+        tmpNode := GetServerNodeByServerName(RealServerName);
+
+      if Assigned(tmpNode) then
+      begin
+        tmpNode.Text := NewAlias;
+        if Assigned(TPNodeInfos(tmpNode.Data)^.ServerSession) then
+        begin
+          TPNodeInfos(tmpNode.Data)^.ServerSession.ServerAlias := NewAlias;
+          TPNodeInfos(tmpNode.Data)^.ServerSession.FBVersionString := Rec.VersionString;
+        end;
+      end;
     end;
   finally
-    SaveServerDataToFile(Rec);
+    SaveServerDataToFile(Rec, OldAlias);
     Application.ProcessMessages;
   end;
 
+  FillServerCombobox;
+  if cbServerAlias.Items.Count > 0 then
+  begin
+    cbServerAlias.ItemIndex := cbServerAlias.Items.IndexOf(NewAlias);
+    if cbServerAlias.ItemIndex < 0 then
+      cbServerAlias.ItemIndex := 0;
+  end;
+
   btnAddServer.Enabled := true;
+
+  if MigratedCount > 0 then
+    MessageDlg(IntToStr(MigratedCount) + ' database registration(s) were updated to the new server alias.',
+      mtInformation, [mbOK], 0);
+
   ModalResult := mrOk;
 end;
 
 procedure TfmServerRegistry.bbCancelClick(Sender: TObject);
-var tmpNode: TTreeNode;
+var
+  tmpNode: TTreeNode;
 begin
   if FIsNewServer then
   begin
-    tmpNode := GetServerNodeByServerName(Trim(cbServerName.Text));
-    if Assigned(TmpNode) then
+    // NEU: Den gemerkten Knoten verwenden — nicht über den
+    // Servernamen suchen, weil das bei zwei Servern mit demselben
+    // echten Servernamen den falschen Knoten finden würde.
+    tmpNode := FNewServerNode;
+
+    if Assigned(tmpNode) then
     begin
-      if  Assigned(TmpNode.Data) then
-        if Assigned(TPNodeInfos(TmpNode.Data)^.ServerSession) then
-          if TPNodeInfos(TmpNode.Data)^.ServerSession.Connected then
-            TPNodeInfos(TmpNode.Data)^.ServerSession.Disconnect;
+      if Assigned(tmpNode.Data) then
+        if Assigned(TPNodeInfos(tmpNode.Data)^.ServerSession) then
+          if TPNodeInfos(tmpNode.Data)^.ServerSession.Connected then
+            TPNodeInfos(tmpNode.Data)^.ServerSession.Disconnect;
+
       turbocommon.MainTreeView.Items.Delete(tmpNode);
     end;
+
+    FNewServerNode := nil;
+    FIsNewServer := false;
   end;
+
   btnAddServer.Enabled := true;
 end;
 
@@ -750,14 +918,23 @@ var
   idx: Integer;
   Node: TTreeNode;
 begin
-  if cbServerName.ItemIndex < 0 then
+  if cbServerAlias.ItemIndex < 0 then
   begin
     MessageDlg('Please select a server to delete.', mtWarning, [mbOK], 0);
     Exit;
   end;
 
+  // ComboBox zeigt den Alias — echten Servernamen holen
+  ServerRec := GetServerRecordFromFileByAlias(cbServerAlias.Text);
+  ServerName := Trim(ServerRec.ServerName);
+
+  if ServerName = '' then
+  begin
+    MessageDlg('Selected server record not found.', mtError, [mbOK], 0);
+    Exit;
+  end;
+
   //bbReg.Enabled := False;
-  ServerName := cbServerName.Text;
   Node := GetServerNodeByServerName(ServerName);
 
   // Prüfen, ob Server in TreeView noch Childnodes hat
@@ -785,7 +962,8 @@ begin
 
   // Server auch aus TreeView entfernen
   turbocommon.MainTreeView.Selected := nil;
-  turbocommon.MainTreeView.Items.Delete(Node);
+  if Assigned(Node) then
+    turbocommon.MainTreeView.Items.Delete(Node);
 
   if Assigned(FServerSession) then
   begin
@@ -796,23 +974,16 @@ begin
     end;
   end;
 
-  // Server auch aus ComboBox entfernen
-  idx := cbServerName.Items.IndexOf(ServerName);
-  if idx >= 0 then
-  begin
-    cbServerName.Items.Delete(idx);
-  end;
+  // ComboBox neu befüllen (enthält künftig Aliase)
+  FillServerCombobox;
 
-  if cbServerName.Items.Count > 0 then
+  if cbServerAlias.Items.Count > 0 then
   begin
-    cbServerName.ItemIndex := 0;
-    Node := GetServerNodeByServerName(Trim(cbServerName.Text));
-    ServerRec  := GetServerRecordFromFileByName(cbServerName.Text);
-    ApplyServerRecordToSession(ServerRec, TPNodeInfos(Node.Data)^.ServerSession);
-    Init(Node);
+    cbServerAlias.ItemIndex := 0;
+    cbServerAliasChange(nil);
   end else
   begin
-    ResetForm
+    ResetForm;
     //bbReg.Enabled := False;
   end;
 
@@ -840,11 +1011,12 @@ begin
 }
 end;
 
-{ Serverdaten laden oder Defaults setzen }
-procedure TfmServerRegistry.cbServerNameChange(Sender: TObject);
-var Rec: TServerRecord;
+procedure TfmServerRegistry.cbServerAliasChange(Sender: TObject);
+var
+  Rec: TServerRecord;
 begin
-  Rec := GetServerRecordFromFileByName(cbServerName.Text);
+  // ComboBox zeigt den Alias — Lookup über Alias
+  Rec := GetServerRecordFromFileByAlias(cbServerAlias.Text);
   cbProtocol.OnChange := nil;
 
   if Ord(Rec.Protocol) < cbProtocol.Items.Count then
@@ -855,7 +1027,9 @@ begin
   UpdateControlsForProtocol;
   cbProtocol.OnChange := @cbProtocolChange;
 
-  FSelectedServer := cbServerName.Text;
+  // FSelectedServer ist der ECHTE Servername — für alle
+  // nachfolgenden Lookups (GetServerNodeByServerName etc.)
+  FSelectedServer := Trim(Rec.ServerName);
   //bbReg.Enabled := false;
 
   if Rec.ServerName <> '' then
@@ -865,17 +1039,21 @@ begin
   begin
     ResetForm;
   end;
-
 end;
 
 procedure TfmServerRegistry.FillServerRecordFromForm(var Rec: TServerRecord);
 begin
-  Rec.ServerName        := cbServerName.Text;
-  Rec.ServerAlias       := edtServerAlias.Text;
+  // cbServerAlias  = TComboBox → zeigt den ALIAS
+  // edtServerName = TEdit     → zeigt den ECHTEN Servernamen
+  Rec.ServerAlias       := cbServerAlias.Text;
+  Rec.ServerName        := edtServerName.Text;
 
-  {Rec.VersionString     := edtVersionString.Text;
-  Rec.VersionMajor      := StrToInt(edtVersionMajor.Text);
-  Rec.VersionMinor      := StrToInt(edtVersionMinor.Text);}
+  // Version aus den Formular-Feldern übernehmen (Fix aus der
+  // letzten Runde: verhindert, dass ApplyServerRecordToSession
+  // eine per Test Connection ermittelte Version mit 0 überschreibt).
+  Rec.VersionString     := edtVersionString.Text;
+  Rec.VersionMajor      := StrToIntDef(edtVersionMajor.Text, 0);
+  Rec.VersionMinor      := StrToIntDef(edtVersionMinor.Text, 0);
 
   Rec.UserName          := edtUserName.Text;
   Rec.Role              := edtRole.Text;
@@ -892,13 +1070,53 @@ begin
   Rec.ConnectTimeoutMS := StrToInt(edtConnectionTimeout.Text);
   Rec.RetryCount       := StrToInt(edtRetryCount.Text);
   Rec.QueryTimeoutMS   := StrToInt(edtQueryTimeout.Text);
+end;
 
+procedure TfmServerRegistry.CreateServerSession(var AServerSession: TServerSession; AServerName: string);
+begin
+  // Default-Alias LEER lassen. Der Anzeige-Name fällt dann
+  // automatisch auf den echten Servernamen zurück (siehe
+  // GetServerAliasFromNode / GetServerAliasListFromTreeView).
+  //
+  // Würde hier "Alias for " + AServerName stehen, bekämen zwei
+  // Server mit demselben echten Servernamen denselben Default-
+  // Alias — und IsServerAliasUnique würde den zweiten Server
+  // blockieren, bis der Anwender manuell einen Alias eintippt.
+  AServerSession := TServerSession.Create(
+      AServerName,
+      '',        //ServerAlias — leer, Anwender kann ihn im Dialog setzen
+      'SYSDBA',  //UserName
+      '',        //Password
+      '',        //Role
+      TProtocol(cbProtocol.ItemIndex),
+      '3050',    //port
+      'UTF8',
+      '/opt/firebird',
+      '/opt/firebird/lib/libfbclient.so',
+      '/opt/firebird/firebird.conf',
+      0,         //minor
+      0,         //major
+      false,
+      false,
+      2000,      //Connection Timeout in ms.
+      3,         //RetryCount
+      0          //Query Timeout in ms.
+    );
 end;
 
 procedure TfmServerRegistry.FillFormFromServerRecord(const Rec: TServerRecord);
+var
+  DisplayAlias: string;
 begin
-  cbServerName.Text        := Rec.ServerName;
-  edtServerAlias.Text      := Rec.ServerAlias;
+  // cbServerAlias  = TComboBox → zeigt den ALIAS
+  // edtServerName = TEdit     → zeigt den ECHTEN Servernamen
+  if Trim(Rec.ServerAlias) <> '' then
+    DisplayAlias := Rec.ServerAlias
+  else
+    DisplayAlias := Rec.ServerName;
+
+  cbServerAlias.Text   := DisplayAlias;
+  edtServerName.Text  := Rec.ServerName;
 
   edtVersionString.Text    := Rec.VersionString;
   edtVersionMajor.Text     := IntToStr(Rec.VersionMajor);
@@ -926,7 +1144,6 @@ begin
 
   cboxLoadRegisteredClientLib.Checked  := Rec.LoadRegisteredClientLib;
 
-  //ShowMessage(BoolToStr(Rec.LoadRegisteredClientLib));
   chkSavePassword.Checked  := (Rec.Password <> '');
 
   edtConnectionTimeout.Text := IntToStr(Rec.ConnectTimeoutMS);
@@ -936,12 +1153,10 @@ end;
 
 function TfmServerRegistry.GetServerRecordFromForm: TServerRecord;
 begin
-  Result.ServerName        := cbServerName.Text;
-  Result.ServerAlias       := edtServerAlias.Text;
-
-  {Rec.VersionString        := edtVersionString.Text;
-  Rec.VersionMajor         := StrToInt(edtVersionMajor.Text);
-  Rec.VersionMinor         := StrToInt(edtVersionMinor.Text);}
+  // cbServerAlias  = TComboBox → zeigt den ALIAS
+  // edtServerName = TEdit     → zeigt den ECHTEN Servernamen
+  Result.ServerAlias       := cbServerAlias.Text;
+  Result.ServerName        := edtServerName.Text;
 
   Result.UserName          := edtUserName.Text;
   Result.Role              := edtRole.Text;

@@ -23,7 +23,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1306"/>
+      <BuildNr Value="1314"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -53,7 +53,6 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
-            <TargetProcessor Value="COREI"/>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
@@ -74,11 +73,11 @@
 -dPS_USESSUPPORT"/>
             <ExecuteBefore>
               <Command Value="./gen_versions_scripts.sh"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteBefore>
             <ExecuteAfter>
               <Command Value="./choose_target_script.sh $(TargetFile)"/>
-              <CompileReasons Run="False"/>
+              <CompileReasons Compile="False" Run="False"/>
             </ExecuteAfter>
           </Other>
         </CompilerOptions>
@@ -830,102 +829,105 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="31">
+    <RequiredPackages Count="32">
       <Item1>
-        <PackageName Value="pascalscriptfcl"/>
+        <PackageName Value="atsynedit_package"/>
       </Item1>
       <Item2>
-        <PackageName Value="UIBLaz"/>
+        <PackageName Value="pascalscriptfcl"/>
       </Item2>
       <Item3>
-        <PackageName Value="TurboDataSets"/>
+        <PackageName Value="UIBLaz"/>
       </Item3>
       <Item4>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="TurboDataSets"/>
       </Item4>
       <Item5>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="FrameViewer09"/>
       </Item5>
       <Item6>
-        <PackageName Value="jvRuntimeDesign"/>
+        <PackageName Value="pascalscript"/>
       </Item6>
       <Item7>
-        <PackageName Value="DBFLaz"/>
+        <PackageName Value="jvRuntimeDesign"/>
       </Item7>
       <Item8>
-        <PackageName Value="SDFLaz"/>
+        <PackageName Value="DBFLaz"/>
       </Item8>
       <Item9>
-        <PackageName Value="laz_fpspreadsheet_dataset"/>
+        <PackageName Value="SDFLaz"/>
       </Item9>
       <Item10>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="laz_fpspreadsheet_dataset"/>
       </Item10>
       <Item11>
-        <PackageName Value="encconv_package"/>
+        <PackageName Value="ibnongui"/>
       </Item11>
       <Item12>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="encconv_package"/>
       </Item12>
       <Item13>
-        <PackageName Value="rxdbgrid_print"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item13>
       <Item14>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item14>
       <Item15>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="rxnew"/>
       </Item15>
       <Item16>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="indylaz"/>
       </Item16>
       <Item17>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item17>
       <Item18>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="atbinhex_package"/>
       </Item18>
       <Item19>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="lazreport"/>
       </Item19>
       <Item20>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="lazdbexport"/>
       </Item20>
       <Item21>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item21>
       <Item22>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item22>
       <Item23>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item23>
       <Item24>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="dclibx"/>
       </Item24>
       <Item25>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="iblocaldb"/>
       </Item25>
       <Item26>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="ibcontrols"/>
       </Item26>
       <Item27>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="ibexpress"/>
       </Item27>
       <Item28>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="Abbrevia"/>
       </Item28>
       <Item29>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="MemDSLaz"/>
       </Item29>
       <Item30>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item30>
       <Item31>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item31>
+      <Item32>
+        <PackageName Value="LCL"/>
+      </Item32>
     </RequiredPackages>
     <Units Count="125">
       <Unit0>

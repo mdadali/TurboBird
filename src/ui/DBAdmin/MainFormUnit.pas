@@ -491,7 +491,7 @@ begin
   if DBRec.OverwriteLoadedClientLib then
     DBDataModule.IBDatabase1.FirebirdLibraryPathName :=  DBRec.FireBirdClientLibPath
   else begin
-    ServerRec := GetServerRecordFromFileByName(DBRec.ServerName);
+    ServerRec := GetServerRecordFromFileByAlias(DBRec.ServerName);
     DBDataModule.IBDatabase1.FirebirdLibraryPathName := ServerRec.ClientLibraryPath;
   end;
 
