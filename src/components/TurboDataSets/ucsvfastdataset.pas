@@ -50,22 +50,17 @@ uses
 type
   { Progress event.
 
-    ARowsRead         - Data rows read so far (header excluded).
-    AElapsedSeconds   - Elapsed seconds since load started.
-    AFreeRAMMB        - Free physical RAM in MB at load start,
-                        or -1 if the caller did not supply it.
-    AEstimatedUsageMB - Conservative estimate of memory used so
-                        far in MB, or -1 if not computable (needs
-                        both InitialFreeRAM_MB and MaxRowWidth). }
+    ARowsRead       - Data rows read so far (header excluded).
+    AElapsedSeconds - Elapsed seconds since load started.
 
+    Memory accounting is the caller's job. The GUI reads free RAM
+    itself and computes the estimated usage from ARowsRead and the
+    MaxRowWidth returned by the pre-scan. }
   TCSVLoadProgressEvent = procedure(
     ARowsRead: Int64;
-    ABytesRead: Int64;
-    AElapsedSeconds: Double;
-    AFreeRAMMB: Int64;
-    AEstimatedUsageMB: Int64) of object;
+    AElapsedSeconds: Double) of object;
 
-type
+
   TCSVFastDataset = class;
 
   TCSVFastCellRef = record
@@ -84,181 +79,161 @@ type
   { ------------------------------------------------------------------
     TCSVFastPacketReader
     ------------------------------------------------------------------ }
-  TCSVFastPacketReader = class(TDataPacketReader)
-  private
-  FOptions: TCSVOptions;
-  FOwnsOptions: Boolean;
+    TCSVFastPacketReader = class(TDataPacketReader)
+    private
+      FOptions: TCSVOptions;
+      FOwnsOptions: Boolean;
 
-  FBuffer: TBytes;
-  FBufferSize: Int64;
-  FBlockSize: Integer;
-  FBufStart: PChar;
-  FBufPos: PChar;
-  FBufEnd: PChar;
-  FRowStartOffset: Integer;
+      FBuffer: TBytes;
+      FBufferSize: Int64;
+      FBlockSize: Integer;
+      FBufStart: PChar;
+      FBufPos: PChar;
+      FBufEnd: PChar;
+      FRowStartOffset: Integer;
 
-  FCells: TCSVFastCellArray;
-  FCellCount: Integer;
-  FCellCapacity: Integer;
-  FInitialCellCapacity: Integer;
+      FCells: TCSVFastCellArray;
+      FCellCount: Integer;
+      FCellCapacity: Integer;
+      FInitialCellCapacity: Integer;
 
-  FCreateFieldDefs: TFieldDefs;
+      FCreateFieldDefs: TFieldDefs;
 
-  FReaderState: TCSVFastReaderState;
-  FFirstLineAsFieldNames: Boolean;
-  FDefaultFieldLength: Integer;
+      FReaderState: TCSVFastReaderState;
+      FFirstLineAsFieldNames: Boolean;
+      FDefaultFieldLength: Integer;
 
-  FStreamStartPosition: Int64;
+      FQuoteChar: Char;
+      FDelimiter: Char;
+      FLineEnding: string;
+      FIgnoreOuterWhitespace: Boolean;
 
-  FQuoteChar: Char;
-  FDelimiter: Char;
-  FLineEnding: string;
-  FIgnoreOuterWhitespace: Boolean;
+      FBOMChecked: Boolean;
+      FPendingLF: Boolean;
 
-  FBOMChecked: Boolean;
-  FPendingLF: Boolean;
+      FScannedRowCount: Int64;
+      FSkipFirstRows: Int64;
+      FStopAfterRow: Int64;
 
-  FScannedRowCount: Int64;
-  FSkipFirstRows: Int64;
-  FStopAfterRow: Int64;
+      FOnProgress: TCSVLoadProgressEvent;
+      FTotalRowsForProgress: Int64;
+      FProgressUpdatePercent: Integer;
+      FLastProgressPercent: Integer;
+      FStartTime: TDateTime;
+      FProgressFiredOnce: Boolean;
 
-  FOnProgress: TCSVLoadProgressEvent;
-  FTotalRowsForProgress: Int64;
-  FProgressUpdatePercent: Integer;
-  FLastProgressPercent: Integer;
-  FStartTime: TDateTime;
-  FProgressFiredOnce: Boolean;
+      FCancelFlag: PBoolean;
+      FAborted: Boolean;
 
-  FInitialFreeRAM_MB: Int64;
-  FMaxRowWidth: Int64;
+      procedure InitBuffer;
+      procedure RefillBuffer;
+      procedure SkipBOMIfNeeded;
+      procedure ScanRow;
+      function  ScanRowWithRefill(out ARowComplete: Boolean): Boolean;
+      procedure AppendCell(Start: PChar; Len: Int64);
+      procedure EnsureCellCapacity;
+      function  CellToStr(const C: TCSVFastCellRef): string;
+      procedure SetBufferSize(AValue: Int64);
+      procedure SetInitialCellCapacity(AValue: Integer);
+      procedure CheckCancellation;
+      procedure FireProgress(AForce: Boolean);
+      procedure ResetProgress;
+      function  ComputeRowDisposition: Boolean;
+    protected
+      property CreateFieldDefs: TFieldDefs
+        read FCreateFieldDefs write FCreateFieldDefs;
+    public
+      constructor Create(ADataSet: TCustomBufDataset; AStream: TStream); override;
+      constructor Create(ADataSet: TCustomBufDataset; AStream: TStream;
+        AOptions: TCSVOptions);
+      destructor  Destroy; override;
 
-  FCancelFlag: PBoolean;
-  FAborted: Boolean;
+      procedure   LoadFieldDefs(var AnAutoIncValue: Integer); override;
+      procedure   StoreFieldDefs(AnAutoIncValue: Integer); override;
+      procedure   InitLoadRecords; override;
+      function    GetCurrentRecord: Boolean; override;
+      function    GetRecordRowState(out AUpdOrder: Integer): TRowState; override;
+      procedure   RestoreRecord; override;
+      procedure   GotoNextRecord; override;
+      procedure   StoreRecord(ARowState: TRowState;
+                    AUpdOrder: Integer = 0); override;
+      procedure   FinalizeStoreRecords; override;
+      class function RecognizeStream(AStream: TStream): Boolean; override;
 
-procedure InitBuffer;
-procedure RefillBuffer;
-procedure SkipBOMIfNeeded;
-procedure ScanRow;
-function  ScanRowWithRefill(out ARowComplete: Boolean): Boolean;
-procedure AppendCell(Start: PChar; Len: Int64);
-procedure EnsureCellCapacity;
-function  CellToStr(const C: TCSVFastCellRef): string;
-procedure SetBufferSize(AValue: Int64);
-procedure SetInitialCellCapacity(AValue: Integer);
-procedure CheckCancellation;      // sets FAborted and raises EAbort
-procedure FireProgress(AForce: Boolean);
-procedure ResetProgress;
-function  ComputeEstimatedUsageMB: Int64;
-function  ComputeRowDisposition: Boolean;
-protected
-property CreateFieldDefs: TFieldDefs
-read FCreateFieldDefs write FCreateFieldDefs;
-public
-constructor Create(ADataSet: TCustomBufDataset; AStream: TStream); override;
-constructor Create(ADataSet: TCustomBufDataset; AStream: TStream;
-                   AOptions: TCSVOptions);
-destructor  Destroy; override;
+      property Options: TCSVOptions read FOptions;
+      property BlockSize: Integer read FBlockSize write FBlockSize;
+      property BufferSize: Int64 read FBufferSize write SetBufferSize;
+      property InitialCellCapacity: Integer read FInitialCellCapacity
+        write SetInitialCellCapacity;
 
-procedure   LoadFieldDefs(var AnAutoIncValue: Integer); override;
-procedure   StoreFieldDefs(AnAutoIncValue: Integer); override;
-procedure   InitLoadRecords; override;
-function    GetCurrentRecord: Boolean; override;
-function    GetRecordRowState(out AUpdOrder: Integer): TRowState; override;
-procedure   RestoreRecord; override;
-procedure   GotoNextRecord; override;
-procedure   StoreRecord(ARowState: TRowState;
-                        AUpdOrder: Integer = 0); override;
-procedure   FinalizeStoreRecords; override;
-class function RecognizeStream(AStream: TStream): Boolean; override;
+      property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
+      property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
+      property ScannedRowCount: Int64 read FScannedRowCount;
 
-property Options: TCSVOptions read FOptions;
-property BlockSize: Integer read FBlockSize write FBlockSize;
-property BufferSize: Int64 read FBufferSize write SetBufferSize;
-property InitialCellCapacity: Integer read FInitialCellCapacity
-write SetInitialCellCapacity;
+      property OnProgress: TCSVLoadProgressEvent
+        read FOnProgress write FOnProgress;
+      property TotalRowsForProgress: Int64
+        read FTotalRowsForProgress write FTotalRowsForProgress;
+      property ProgressUpdatePercent: Integer
+        read FProgressUpdatePercent write FProgressUpdatePercent;
 
-property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
-property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
-property ScannedRowCount: Int64 read FScannedRowCount;
-
-property OnProgress: TCSVLoadProgressEvent
-read FOnProgress write FOnProgress;
-property TotalRowsForProgress: Int64
-read FTotalRowsForProgress write FTotalRowsForProgress;
-property ProgressUpdatePercent: Integer
-read FProgressUpdatePercent write FProgressUpdatePercent;
-
-property InitialFreeRAM_MB: Int64
-read FInitialFreeRAM_MB write FInitialFreeRAM_MB;
-property MaxRowWidth: Int64
-read FMaxRowWidth write FMaxRowWidth;
-
-property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
-property Aborted: Boolean read FAborted;
-end;
+      property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
+      property Aborted: Boolean read FAborted;
+    end;
 
   { ------------------------------------------------------------------
     TCSVFastDataset
     ------------------------------------------------------------------ }
-TCSVFastDataset = class(TCSVDataset)
-private
-FBlockSizeBytes: Integer;
-FBufferSizeBytes: Int64;
-FInitialCellCapacity: Integer;
-FSkipFirstRows: Int64;
-FStopAfterRow: Int64;
-FOnProgress: TCSVLoadProgressEvent;
-FTotalRowsForProgress: Int64;
-FProgressUpdatePercent: Integer;
-FInitialFreeRAM_MB: Int64;
-FMaxRowWidth: Int64;
-FCancelFlag: PBoolean;
-FAborted: Boolean;
-protected
-class function DefaultPacketClass: TDataPacketReaderClass; override;
-function  CreateDefaultPacketReader(aStream: TStream): TDataPacketReader; override;
-procedure ApplyConfigToReader(R: TCSVFastPacketReader);
-public
-constructor Create(AOwner: TComponent); override;
+    TCSVFastDataset = class(TCSVDataset)
+    private
+      FBlockSizeBytes: Integer;
+      FBufferSizeBytes: Int64;
+      FInitialCellCapacity: Integer;
+      FSkipFirstRows: Int64;
+      FStopAfterRow: Int64;
+      FOnProgress: TCSVLoadProgressEvent;
+      FTotalRowsForProgress: Int64;
+      FProgressUpdatePercent: Integer;
+      FCancelFlag: PBoolean;
+      FAborted: Boolean;
+    protected
+      class function DefaultPacketClass: TDataPacketReaderClass; override;
+      function  CreateDefaultPacketReader(aStream: TStream): TDataPacketReader; override;
+      procedure ApplyConfigToReader(R: TCSVFastPacketReader);
+    public
+      constructor Create(AOwner: TComponent); override;
 
-procedure LoadFromCSVFile(const AFileName: string); reintroduce;
-procedure LoadFromCSVStream(AStream: TStream); reintroduce;
-procedure SaveToCSVFile(AFileName: string = ''); reintroduce;
+      procedure LoadFromCSVFile(const AFileName: string); reintroduce;
+      procedure LoadFromCSVStream(AStream: TStream); reintroduce;
+      procedure SaveToCSVFile(AFileName: string = ''); reintroduce;
 
-property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
-property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
-property TotalRowsForProgress: Int64
-read FTotalRowsForProgress write FTotalRowsForProgress;
-property InitialFreeRAM_MB: Int64
-read FInitialFreeRAM_MB write FInitialFreeRAM_MB;
-property MaxRowWidth: Int64
-read FMaxRowWidth write FMaxRowWidth;
-property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
+      property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
+      property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
+      property TotalRowsForProgress: Int64
+        read FTotalRowsForProgress write FTotalRowsForProgress;
+      property CancelFlag: PBoolean read FCancelFlag write FCancelFlag;
 
-    { True after the last LoadFromCSVFile / LoadFromCSVStream if the
-      load was cancelled via CancelFlag. Reset to False at the start
-      of every new load. }
-property Aborted: Boolean read FAborted;
+      { True after the last LoadFromCSVFile / LoadFromCSVStream if the
+        load was cancelled via CancelFlag. Reset to False at the start
+        of every new load. }
+      property Aborted: Boolean read FAborted;
 
-published
-property BlockSize: Integer
-read FBlockSizeBytes write FBlockSizeBytes default 1048576;
-property BufferSize: Int64
-read FBufferSizeBytes write FBufferSizeBytes default 2097152;
-property InitialCellCapacity: Integer
-read FInitialCellCapacity write FInitialCellCapacity default 64;
-property OnProgress: TCSVLoadProgressEvent
-read FOnProgress write FOnProgress;
-property ProgressUpdatePercent: Integer
-read FProgressUpdatePercent write FProgressUpdatePercent default 1;
-end;
+    published
+      property BlockSize: Integer
+        read FBlockSizeBytes write FBlockSizeBytes default 1048576;
+      property BufferSize: Int64
+        read FBufferSizeBytes write FBufferSizeBytes default 2097152;
+      property InitialCellCapacity: Integer
+        read FInitialCellCapacity write FInitialCellCapacity default 64;
+      property OnProgress: TCSVLoadProgressEvent
+        read FOnProgress write FOnProgress;
+      property ProgressUpdatePercent: Integer
+        read FProgressUpdatePercent write FProgressUpdatePercent default 1;
+    end;
 
 function PCharToInt64Def(P: PChar; Len: Int64; Def: Int64): Int64; inline;
 function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double): Double; inline;
 function PCharEqualsIgnoreCase(P: PChar; Len: Int64; const S: string): Boolean; inline;
-
-function GetFreeMemoryMB: Int64;
-function GetTotalMemoryMB: Int64;
 
 procedure Register;
 
@@ -287,114 +262,8 @@ const
   ROW_OVERHEAD_ESTIMATE = 64;   // conservative bytes/row for the estimator
 
 { ==================================================================
-  RAM utilities (callable by the GUI; never called by the reader)
-  ================================================================== }
-
-  {$IFDEF LINUX}
-function ReadMemInfoValue(const AKey: string): Int64;
-var
-  SL: TStringList;
-  I: Integer;
-  Line, ValStr: string;
-  MemKB: Int64;
-begin
-  Result := -1;
-  if not FileExists('/proc/meminfo') then Exit;
-  SL := TStringList.Create;
-  try
-  SL.LoadFromFile('/proc/meminfo');
-  for I := 0 to SL.Count - 1 do
-  begin
-    Line := SL[I];
-    if Pos(AKey + ':', Line) = 1 then
-    begin
-      ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
-      ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
-      if TryStrToInt64(ValStr, MemKB) then
-        Result := MemKB div 1024;
-      Break;
-    end;
-  end;
-  finally
-  SL.Free;
-end;
-end;
-{$ENDIF}
-
-{$IFDEF WINDOWS}
-type
-  TMemoryStatusEx = record
-    dwLength: DWORD; dwMemoryLoad: DWORD;
-    ullTotalPhys, ullAvailPhys: QWord;
-    ullTotalPageFile, ullAvailPageFile: QWord;
-    ullTotalVirtual, ullAvailVirtual: QWord;
-    ullAvailExtendedVirtual: QWord;
-  end;
-function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL;
-stdcall; external 'kernel32.dll' name 'GlobalMemoryStatusEx';
-{$ENDIF}
-
-function GetFreeMemoryMB: Int64;
-{$IFDEF LINUX}
-begin
-  Result := ReadMemInfoValue('MemAvailable');
-  if Result < 0 then Result := ReadMemInfoValue('MemFree');
-end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-var M: TMemoryStatusEx;
-begin
-  Result := -1;
-  FillChar(M, SizeOf(M), 0);
-  M.dwLength := SizeOf(M);
-  if GlobalMemoryStatusEx(M) then Result := M.ullAvailPhys div (1024*1024);
-end;
-{$ENDIF}
-{$IFDEF DARWIN}
-begin
-  Result := GetTotalMemoryMB div 10;
-end;
-{$ENDIF}
-
-function GetTotalMemoryMB: Int64;
-{$IFDEF LINUX}
-begin
-  Result := ReadMemInfoValue('MemTotal');
-end;
-{$ENDIF}
-{$IFDEF WINDOWS}
-var M: TMemoryStatusEx;
-begin
-  Result := -1;
-  FillChar(M, SizeOf(M), 0);
-  M.dwLength := SizeOf(M);
-  if GlobalMemoryStatusEx(M) then Result := M.ullTotalPhys div (1024*1024);
-end;
-{$ENDIF}
-{$IFDEF DARWIN}
-var P: TProcess; SL: TStringList;
-begin
-  Result := -1;
-  P := TProcess.Create(nil);
-  SL := TStringList.Create;
-  try
-  P.Executable := '/usr/sbin/sysctl';
-  P.Parameters.Add('-n'); P.Parameters.Add('hw.memsize');
-  P.Options := [poUsePipes, poWaitOnExit];
-  P.Execute;
-  SL.LoadFromStream(P.Output);
-  if SL.Count > 0 then
-    Result := StrToInt64Def(Trim(SL[0]), 0) div (1024*1024);
-  finally
-  SL.Free; P.Free;
-end;
-end;
-{$ENDIF}
-
-{ ==================================================================
   PChar helpers
   ================================================================== }
-
 function PCharToInt64Def(P: PChar; Len: Int64; Def: Int64): Int64;
 var I: Integer; Neg: Boolean; V: Int64; C: Char;
 begin
@@ -476,10 +345,11 @@ end;
 { ==================================================================
   TCSVFastPacketReader
   ================================================================== }
-constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset; AStream: TStream);
+constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
+  AStream: TStream);
 begin
-  FStreamStartPosition := AStream.Position;
   inherited Create(ADataSet, AStream);
+
   FOptions               := nil;
   FOwnsOptions           := True;
   FBufferSize            := DEFAULT_BUFFER_SIZE;
@@ -506,10 +376,9 @@ begin
   FLastProgressPercent   := -1;
   FStartTime             := 0;
   FProgressFiredOnce     := False;
-  FInitialFreeRAM_MB     := 0;
-  FMaxRowWidth           := 0;
   FCancelFlag            := nil;
   FAborted               := False;
+
   InitBuffer;
 end;
 
@@ -642,18 +511,9 @@ begin
   FProgressFiredOnce   := False;
 end;
 
-function TCSVFastPacketReader.ComputeEstimatedUsageMB: Int64;
-var Bytes: Int64;
-begin
-  if (FInitialFreeRAM_MB <= 0) or (FMaxRowWidth <= 0) then Exit(-1);
-  Bytes := FScannedRowCount * (FMaxRowWidth + ROW_OVERHEAD_ESTIMATE);
-  Result := Bytes div (1024 * 1024);
-end;
-
 procedure TCSVFastPacketReader.FireProgress(AForce: Boolean);
 var
   NewPercent: Integer;
-  FreeRAM, Estimated, BytesRead: Int64;
 begin
   if not Assigned(FOnProgress) then Exit;
 
@@ -670,21 +530,9 @@ begin
 
   if FStartTime = 0 then FStartTime := Now;
 
-  if FInitialFreeRAM_MB > 0 then FreeRAM := FInitialFreeRAM_MB
-  else FreeRAM := -1;
-
-  Estimated := ComputeEstimatedUsageMB;
-
-  // Echte gelesene Bytes seit Load-Start.
-  BytesRead := Stream.Position - FStreamStartPosition;
-  if BytesRead < 0 then BytesRead := 0;
-
   FProgressFiredOnce := True;
   FOnProgress(FScannedRowCount,
-              BytesRead,
-              (Now - FStartTime) * SecsPerDay,
-              FreeRAM,
-              Estimated);
+              (Now - FStartTime) * SecsPerDay);
 end;
 
 procedure TCSVFastPacketReader.ScanRow;
@@ -1043,20 +891,19 @@ end;
 { ==================================================================
   TCSVFastDataset
   ================================================================== }
-
 constructor TCSVFastDataset.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+
   FBlockSizeBytes        := DEFAULT_BLOCK_SIZE;
   FBufferSizeBytes       := DEFAULT_BUFFER_SIZE;
   FInitialCellCapacity   := DEFAULT_CELL_CAPACITY;
   FProgressUpdatePercent := 1;
+
   FSkipFirstRows         := 0;
   FStopAfterRow          := 0;
   FOnProgress            := nil;
   FTotalRowsForProgress  := 0;
-  FInitialFreeRAM_MB     := 0;
-  FMaxRowWidth           := 0;
   FCancelFlag            := nil;
   FAborted               := False;
 end;
@@ -1077,8 +924,6 @@ begin
   R.OnProgress            := FOnProgress;
   R.TotalRowsForProgress  := FTotalRowsForProgress;
   R.ProgressUpdatePercent := FProgressUpdatePercent;
-  R.InitialFreeRAM_MB     := FInitialFreeRAM_MB;
-  R.MaxRowWidth           := FMaxRowWidth;
   R.CancelFlag            := FCancelFlag;
 end;
 

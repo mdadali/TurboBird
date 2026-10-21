@@ -15,7 +15,9 @@ type
     CPUModel: string;
     CPUCores: Integer;
     RAMTotalMB: Int64;
-    RAMFreeMB: Int64;          //verfügbarer RAM
+    RAMFreeMB: Int64;          // verfügbarer RAM (MemAvailable)
+    SwapTotalMB: Int64;        // NEU
+    SwapFreeMB: Int64;         // NEU
     DiskFreeMB: Int64;
     DiskTotalMB: Int64;
     DiskPath: string;
@@ -23,11 +25,23 @@ type
     OSName: string;
   end;
 
+  TRAMInfo = record
+    TotalMB:     Int64;
+    FreeMB:      Int64;    // MemAvailable
+    SwapTotalMB: Int64;
+    SwapFreeMB:  Int64;
+    SwapUsedMB:  Int64;
+  end;
+
+function GetRAMInfo: TRAMInfo;
+function GetSwapTotalMB: Int64;
+function GetSwapFreeMB: Int64;
+function GetSwapUsedMB: Int64;
+
 function GetSystemInfo(const APath: string = ''): TSystemInfo;
 function GetRAMTotalMB: Int64;
-function GetRAMFreeMB: Int64;   // nur der freie RAM
+function GetRAMFreeMB: Int64;   // MemAvailable
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
-
 
 implementation
 
@@ -90,7 +104,6 @@ begin
   else                                     // MB
     Result := IntToStr(AMegabytes) + ' MB';
 end;
-
 
 // ---------------------------------------------------------------------------
 // CPU-Modell
@@ -176,7 +189,7 @@ var
   SL: TStringList;
   i, Count: Integer;
 begin
-  Result := System.CpuCount;   // Fallback
+  Result := System.CpuCount;
   if not FileExists('/proc/cpuinfo') then Exit;
 
   SL := TStringList.Create;
@@ -315,7 +328,6 @@ begin
         if TryStrToInt64(ValStr, MemKB) then
           Result := MemKB div 1024;
 
-        // Wenn MemAvailable gefunden wurde, sind wir fertig.
         if Pos('MemAvailable:', Line) = 1 then
           Break;
       end;
@@ -342,11 +354,7 @@ end;
 var
   P: TProcess;
   SL: TStringList;
-  ValStr: string;
 begin
-  // macOS: vm_stat liefert Seitenzahlen. Wir nutzen sysctl für
-  // einen groben Überblick — die genaue Berechnung erfordert
-  // host_statistics64, das in FPC nicht direkt verfügbar ist.
   Result := 0;
   P := TProcess.Create(nil);
   SL := TStringList.Create;
@@ -355,8 +363,6 @@ begin
     P.Options := [poUsePipes, poWaitOnExit];
     P.Execute;
     SL.LoadFromStream(P.Output);
-    // Wir nehmen einen konservativen Schätzwert: 10% des Gesamt-RAM
-    // falls vm_stat nicht auswertbar ist.
     if SL.Count > 0 then
       Result := GetRAMTotalMB div 10;
   finally
@@ -365,6 +371,139 @@ begin
   end;
 end;
 {$ENDIF}
+
+// ---------------------------------------------------------------------------
+// Swap-Gesamt
+// ---------------------------------------------------------------------------
+function GetSwapTotalMB: Int64;
+{$IFDEF LINUX}
+var
+  SL: TStringList;
+  i: Integer;
+  Line, ValStr: string;
+  SwapKB: Int64;
+begin
+  Result := 0;
+  if not FileExists('/proc/meminfo') then Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile('/proc/meminfo');
+    for i := 0 to SL.Count - 1 do
+    begin
+      Line := SL[i];
+      if Pos('SwapTotal:', Line) = 1 then
+      begin
+        ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
+        ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
+        if TryStrToInt64(ValStr, SwapKB) then
+          Result := SwapKB div 1024;
+        Break;
+      end;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+var
+  MemStatus: TMemoryStatusEx;
+begin
+  Result := 0;
+  FillChar(MemStatus, SizeOf(MemStatus), 0);
+  MemStatus.dwLength := SizeOf(MemStatus);
+  if GlobalMemoryStatusEx(MemStatus) then
+    Result := MemStatus.ullTotalPageFile div (1024 * 1024);
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+begin
+  Result := 0;
+end;
+{$ENDIF}
+
+// ---------------------------------------------------------------------------
+// Swap-Frei
+// ---------------------------------------------------------------------------
+function GetSwapFreeMB: Int64;
+{$IFDEF LINUX}
+var
+  SL: TStringList;
+  i: Integer;
+  Line, ValStr: string;
+  SwapKB: Int64;
+begin
+  Result := 0;
+  if not FileExists('/proc/meminfo') then Exit;
+
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile('/proc/meminfo');
+    for i := 0 to SL.Count - 1 do
+    begin
+      Line := SL[i];
+      if Pos('SwapFree:', Line) = 1 then
+      begin
+        ValStr := Trim(Copy(Line, Pos(':', Line) + 1, MaxInt));
+        ValStr := Copy(ValStr, 1, Pos(' ', ValStr) - 1);
+        if TryStrToInt64(ValStr, SwapKB) then
+          Result := SwapKB div 1024;
+        Break;
+      end;
+    end;
+  finally
+    SL.Free;
+  end;
+end;
+{$ENDIF}
+
+{$IFDEF WINDOWS}
+var
+  MemStatus: TMemoryStatusEx;
+begin
+  Result := 0;
+  FillChar(MemStatus, SizeOf(MemStatus), 0);
+  MemStatus.dwLength := SizeOf(MemStatus);
+  if GlobalMemoryStatusEx(MemStatus) then
+    Result := MemStatus.ullAvailPageFile div (1024 * 1024);
+end;
+{$ENDIF}
+
+{$IFDEF DARWIN}
+begin
+  Result := 0;
+end;
+{$ENDIF}
+
+// ---------------------------------------------------------------------------
+// Swap-Belegt (berechnet)
+// ---------------------------------------------------------------------------
+function GetSwapUsedMB: Int64;
+var
+  T, F: Int64;
+begin
+  T := GetSwapTotalMB;
+  F := GetSwapFreeMB;
+  if (T > 0) and (F >= 0) then
+    Result := T - F
+  else
+    Result := 0;
+end;
+
+// ---------------------------------------------------------------------------
+// Komfort: alle RAM/Swap-Werte auf einmal
+// ---------------------------------------------------------------------------
+function GetRAMInfo: TRAMInfo;
+begin
+  Result.TotalMB     := GetRAMTotalMB;
+  Result.FreeMB      := GetRAMFreeMB;
+  Result.SwapTotalMB := GetSwapTotalMB;
+  Result.SwapFreeMB  := GetSwapFreeMB;
+  Result.SwapUsedMB  := GetSwapUsedMB;
+end;
 
 // ---------------------------------------------------------------------------
 // OS-Name
@@ -423,7 +562,6 @@ begin
   Result := '';
   if APath = '' then Exit;
 
-  // Bekannte Block-Devices durchsuchen
   if FileExists('/sys/block/nvme0n1/queue/rotational') then
     DeviceName := 'nvme0n1'
   else if FileExists('/sys/block/sda/queue/rotational') then
@@ -475,11 +613,13 @@ var
   Drv: Byte;
   {$ENDIF}
 begin
-  Result.CPUModel := GetCPUModel;
-  Result.CPUCores := GetCPUCores;
-  Result.RAMTotalMB := GetRAMTotalMB;
-  Result.RAMFreeMB := GetRAMFreeMB;      // ← NEU
-  Result.OSName := GetOSName;
+  Result.CPUModel    := GetCPUModel;
+  Result.CPUCores    := GetCPUCores;
+  Result.RAMTotalMB  := GetRAMTotalMB;
+  Result.RAMFreeMB   := GetRAMFreeMB;
+  Result.SwapTotalMB := GetSwapTotalMB;   // NEU
+  Result.SwapFreeMB  := GetSwapFreeMB;    // NEU
+  Result.OSName      := GetOSName;
 
   Result.DiskPath := APath;
   Result.DiskFreeMB := 0;
@@ -503,7 +643,6 @@ begin
       {$ENDIF}
       Result.DiskType := GetDiskType(PathToCheck);
     except
-      // Ignorieren – manche Pfade lassen sich nicht auflösen
     end;
   end;
 end;
@@ -514,6 +653,7 @@ end;
 function FormatSystemInfo(const AInfo: TSystemInfo): string;
 var
   SL: TStringList;
+  SwapUsedMB: Int64;
 begin
   SL := TStringList.Create;
   try
@@ -523,6 +663,13 @@ begin
     SL.Add('  Cores:     ' + IntToStr(AInfo.CPUCores));
     SL.Add('  RAM:       ' + FormatMB(AInfo.RAMTotalMB));
     SL.Add('  RAM free:  ' + FormatMB(AInfo.RAMFreeMB));
+
+    if AInfo.SwapTotalMB > 0 then
+    begin
+      SwapUsedMB := AInfo.SwapTotalMB - AInfo.SwapFreeMB;
+      SL.Add('  Swap:      ' + FormatMB(AInfo.SwapTotalMB) + ' total / ' +
+                            FormatMB(SwapUsedMB) + ' used');
+    end;
 
     if AInfo.DiskPath <> '' then
     begin
