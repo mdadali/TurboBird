@@ -395,6 +395,10 @@ type
     FieldsCount: Integer;
     ElapsedSeconds: Double;
 
+    // === MEMORY ===
+    PeakRAMUsageMB:    Int64;    // höchster gemessener Systemverbrauch
+    PeakEstimatedMB:   Int64;    // höchste Dataset-Schätzung
+
     // === ENVIRONMENT ===
     ClientLibVersion: string;
     SystemInfo: TSystemInfo;
@@ -2109,6 +2113,17 @@ begin
       SL.Add('  Speed:         ' + FormatFloat('#,##0', RowsPerSec, FS) + ' rows/sec');
     if Stats.BytesPerSecond > 0 then
       SL.Add('  Data Rate:     ' + FormatBytesSmart(Round(Stats.BytesPerSecond)) + '/sec');
+
+    if Stats.BytesPerSecond > 0 then
+      SL.Add('  Data Rate:     ' + FormatBytesSmart(Round(Stats.BytesPerSecond)) + '/sec');
+
+    // === MEMORY ===
+    if Stats.PeakRAMUsageMB > 0 then
+      SL.Add('  Peak RAM:      ' + FormatBytesSmart(Stats.PeakRAMUsageMB * 1024 * 1024));
+    if Stats.PeakEstimatedMB > 0 then
+      SL.Add('  Dataset Peak:  ' + FormatBytesSmart(Stats.PeakEstimatedMB * 1024 * 1024) +
+             ' (estimated)');
+
     SL.Add('');
 
     if Stats.CreateTableSQL <> '' then
