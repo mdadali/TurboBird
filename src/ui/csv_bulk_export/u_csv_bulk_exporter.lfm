@@ -1,16 +1,16 @@
 object frmCSVBulkExporter: TfrmCSVBulkExporter
-  Left = 601
+  Left = 1291
   Height = 831
-  Top = 137
+  Top = 218
   Width = 1166
   Caption = 'CSV Bulk Exporter'
   ClientHeight = 831
   ClientWidth = 1166
-  Position = poMainFormCenter
-  LCLVersion = '4.8.0.0'
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.6.0'
   object pnlTop: TPanel
     Left = 0
     Height = 304
@@ -44,9 +44,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 104
         Width = 320
         ItemHeight = 0
+        OnChange = comboxSourceTablesChange
         Style = csDropDownList
         TabOrder = 0
-        OnChange = comboxSourceTablesChange
       end
       object comboxSourceServer: TComboBox
         Left = 120
@@ -54,9 +54,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 8
         Width = 320
         ItemHeight = 0
+        OnChange = comboxSourceServerChange
         Style = csDropDownList
         TabOrder = 1
-        OnChange = comboxSourceServerChange
       end
       object comboxSourceDB: TComboBox
         Left = 120
@@ -64,9 +64,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 58
         Width = 320
         ItemHeight = 0
+        OnChange = comboxSourceDBChange
         Style = csDropDownList
         TabOrder = 2
-        OnChange = comboxSourceDBChange
       end
       object Label6: TLabel
         Left = 17
@@ -111,9 +111,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
           Width = 496
           Align = alTop
           ItemHeight = 0
+          OnClickCheck = chkLstFieldsClickCheck
           TabOrder = 0
           TopIndex = -1
-          OnClickCheck = chkLstFieldsClickCheck
         end
         object btnSelectAll: TButton
           Left = 40
@@ -121,8 +121,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
           Top = 232
           Width = 111
           Caption = 'Select All'
-          TabOrder = 1
           OnClick = btnSelectAllClick
+          TabOrder = 1
         end
         object btnDeselectAll: TButton
           Left = 168
@@ -130,8 +130,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
           Top = 232
           Width = 112
           Caption = 'Deselect All'
-          TabOrder = 2
           OnClick = btnDeselectAllClick
+          TabOrder = 2
         end
       end
     end
@@ -165,8 +165,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Top = 0
       Width = 500
       Align = alRight
-      Font.Height = -13
-      Font.Name = 'Courier New'
+      Font.Height = 13
+      Font.Name = 'DejaVu Sans Mono'
       Font.Pitch = fpFixed
       Font.Quality = fqNonAntialiased
       ParentColor = False
@@ -176,6 +176,7 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Gutter.MouseActions = <>
       RightGutter.Width = 0
       RightGutter.MouseActions = <>
+      Highlighter = MainForm.SynSQLSyn1
       Keystrokes = <      
         item
           Command = ecUp
@@ -623,10 +624,6 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         object SynGutterMarks1: TSynGutterMarks
           Width = 24
           MouseActions = <>
-          MaxExtraMarksColums = 0
-          Options = [sgmoDeDuplicateMarksOnOverflow]
-          MarkupInfo.Background = clBtnFace
-          MarkupInfo.Foreground = clNone
         end
         object SynGutterLineNumber1: TSynGutterLineNumber
           Width = 17
@@ -643,9 +640,6 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
           MouseActions = <>
           ModifiedColor = 59900
           SavedColor = clGreen
-          MarkupInfo.Background = clNone
-          MarkupInfo.Foreground = clGreen
-          MarkupInfo.FrameColor = 59900
         end
         object SynGutterSeparator1: TSynGutterSeparator
           Width = 2
@@ -680,9 +674,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Width = 74
       Caption = 'All Rows'
       Checked = True
+      OnChange = rbAllRowsChange
       TabOrder = 0
       TabStop = True
-      OnChange = rbAllRowsChange
     end
     object rbRange: TRadioButton
       Left = 114
@@ -752,9 +746,9 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 8
         Width = 223
         ItemHeight = 0
+        OnChange = cbFormulaPresetChange
         Style = csDropDownList
         TabOrder = 0
-        OnChange = cbFormulaPresetChange
       end
       object btnRefreshPresets: TButton
         Left = 256
@@ -762,8 +756,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 7
         Width = 120
         Caption = 'Refresh Presets'
-        TabOrder = 1
         OnClick = btnRefreshPresetsClick
+        TabOrder = 1
       end
       object btnEditCurrentPreset: TButton
         Left = 256
@@ -772,10 +766,10 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
         Top = 56
         Width = 120
         Caption = 'Edit Preset'
+        OnClick = btnEditCurrentPresetClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
-        OnClick = btnEditCurrentPresetClick
       end
     end
     object Label1: TLabel
@@ -799,8 +793,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Top = 8
       Width = 32
       Caption = '...'
-      TabOrder = 7
       OnClick = btnExportFileNameClick
+      TabOrder = 7
     end
     object edtLineBuffer: TEdit
       Left = 304
@@ -859,8 +853,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Width = 104
       Caption = 'Execute'
       Enabled = False
-      TabOrder = 0
       OnClick = btnExecuteClick
+      TabOrder = 0
     end
     object btnClose: TButton
       Left = 960
@@ -869,8 +863,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Width = 104
       Caption = 'Close'
       ModalResult = 1
-      TabOrder = 1
       OnClick = btnCloseClick
+      TabOrder = 1
     end
     object btnPreviewSQL: TButton
       Left = 576
@@ -878,8 +872,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Top = 7
       Width = 104
       Caption = 'Preview SQL'
-      TabOrder = 2
       OnClick = btnPreviewSQLClick
+      TabOrder = 2
     end
     object btnAddToQueue: TButton
       Left = 696
@@ -887,8 +881,8 @@ object frmCSVBulkExporter: TfrmCSVBulkExporter
       Top = 7
       Width = 104
       Caption = 'Add to Queue'
-      TabOrder = 3
       OnClick = btnAddToQueueClick
+      TabOrder = 3
     end
   end
   object SynSQLSyn1: TSynSQLSyn

@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 577
+  Left = 375
   Height = 668
-  Top = 452
+  Top = 622
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 668
+  ClientHeight = 639
   ClientWidth = 1486
   Color = clForm
   DragMode = dmAutomatic
@@ -5572,17 +5572,17 @@ object fmMain: TfmMain
     0045FFF00F4EFF000034FFFC7F33FF
   }
   Menu = MainMenu1
-  Position = poScreenCenter
-  ShowHint = True
-  LCLVersion = '4.8.0.0'
-  WindowState = wsMaximized
   OnActivate = FormActivate
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
+  Position = poScreenCenter
+  ShowHint = True
+  LCLVersion = '2.2.6.0'
+  WindowState = wsMaximized
   object Splitter1: TSplitter
     Left = 360
-    Height = 613
+    Height = 584
     Top = 34
     Width = 14
     Beveled = True
@@ -5590,7 +5590,7 @@ object fmMain: TfmMain
   object StatusBar1: TStatusBar
     Left = 0
     Height = 21
-    Top = 647
+    Top = 618
     Width = 1486
     Panels = <    
       item
@@ -5667,8 +5667,8 @@ object fmMain: TfmMain
       Caption = 'tbCheckDBIntegrity'
       Enabled = False
       ImageIndex = 1
-      Visible = False
       OnClick = tbCheckDBIntegrityClick
+      Visible = False
     end
     object tbSQLMonitor: TToolButton
       Left = 145
@@ -5678,10 +5678,16 @@ object fmMain: TfmMain
       ImageIndex = 13
       OnClick = tbSQLMonitorClick
     end
+    object tbServerInventoryAsText: TToolButton
+      Left = 261
+      Top = 2
+      Caption = 'tbServerInventoryAsText'
+      OnClick = tbServerInventoryAsTextClick
+    end
   end
   object PageControl1: TPageControl
     Left = 377
-    Height = 606
+    Height = 577
     Top = 37
     Width = 1106
     ActivePage = tsMain
@@ -5694,7 +5700,6 @@ object fmMain: TfmMain
     BorderSpacing.InnerBorder = 1
     Font.Name = 'Sans'
     Images = ImageList1
-    Options = [nboShowCloseButtons, nboHidePageListPopup]
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -5704,17 +5709,18 @@ object fmMain: TfmMain
     OnMouseDown = PageControl1MouseDown
     OnMouseMove = PageControl1MouseMove
     OnMouseUp = PageControl1MouseUp
+    Options = [nboShowCloseButtons, nboHidePageListPopup]
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 574
+      ClientHeight = 545
       ClientWidth = 1096
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
       object HtmlViewer1: THtmlViewer
         Left = 0
-        Height = 574
+        Height = 545
         Top = 0
         Width = 1096
         BorderStyle = htFocused
@@ -5733,27 +5739,27 @@ object fmMain: TfmMain
   end
   object Button1: TButton
     Left = 0
-    Height = 613
+    Height = 584
     Top = 34
     Width = 27
     Align = alLeft
     Caption = '<>'
-    TabOrder = 4
     OnClick = Button1Click
+    TabOrder = 4
   end
   object pnlLeft: TPanel
     Left = 27
-    Height = 613
+    Height = 584
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 613
+    ClientHeight = 584
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 5
     object tvMain: TTreeView
       Left = 1
-      Height = 548
+      Height = 519
       Top = 64
       Width = 331
       Align = alClient
@@ -5770,7 +5776,6 @@ object fmMain: TfmMain
       RightClickSelect = True
       ShowLines = False
       TabOrder = 0
-      Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
       OnAddition = tvMainAddition
       OnChange = tvMainChange
       OnClick = tvMainClick
@@ -5778,6 +5783,7 @@ object fmMain: TfmMain
       OnDeletion = tvMainDeletion
       OnExpanding = tvMainExpanding
       OnKeyDown = tvMainKeyDown
+      Options = [tvoAutoItemHeight, tvoKeepCollapsedNodes, tvoReadOnly, tvoRightClickSelect, tvoShowButtons, tvoShowRoot, tvoToolTips]
     end
     object grBoxObjectFilter: TGroupBox
       Left = 1
@@ -5795,8 +5801,8 @@ object fmMain: TfmMain
         Height = 31
         Top = 2
         Width = 285
-        TabOrder = 0
         OnChange = edtFilterChange
+        TabOrder = 0
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
@@ -5804,9 +5810,9 @@ object fmMain: TfmMain
         Top = 5
         Width = 21
         Checked = True
+        OnChange = CheckBoxFilterChange
         State = cbChecked
         TabOrder = 1
-        OnChange = CheckBoxFilterChange
       end
     end
     object Label1: TLabel

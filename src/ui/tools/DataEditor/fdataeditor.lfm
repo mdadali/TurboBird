@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 184
+  Left = 532
   Height = 894
-  Top = 67
+  Top = 130
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894
@@ -109,9 +109,9 @@ object frmDataEditor: TfrmDataEditor
     Height = 844
     Top = 50
     Width = 1496
-    ActivePage = tsGrid
+    ActivePage = tsCommonSettings
     Align = alClient
-    TabIndex = 0
+    TabIndex = 4
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -886,7 +886,7 @@ object frmDataEditor: TfrmDataEditor
         Top = 24
         Width = 512
         Caption = 'CSV - File Read'
-        ClientHeight = 590
+        ClientHeight = 572
         ClientWidth = 510
         TabOrder = 0
         object lbBlockSize: TLabel
@@ -940,7 +940,7 @@ object frmDataEditor: TfrmDataEditor
         object lblActivePerformanceSettings: TLabel
           Left = 32
           Height = 19
-          Top = 456
+          Top = 504
           Width = 176
           Caption = 'Active Performance Settings'
           ParentColor = False
@@ -948,10 +948,10 @@ object frmDataEditor: TfrmDataEditor
         object grboxRangeOptions: TGroupBox
           Left = 32
           Height = 150
-          Top = 240
+          Top = 280
           Width = 320
           Caption = 'Load Range'
-          ClientHeight = 148
+          ClientHeight = 130
           ClientWidth = 318
           TabOrder = 3
           object rbAllRows: TRadioButton
@@ -1022,18 +1022,27 @@ object frmDataEditor: TfrmDataEditor
         object Label5: TLabel
           Left = 32
           Height = 19
-          Top = 416
+          Top = 456
           Width = 154
           Caption = 'Progress Update Percent'
           ParentColor = False
         end
         object edtProgressUpdatePercent: TEdit
-          Left = 240
+          Left = 232
           Height = 31
-          Top = 408
+          Top = 444
           Width = 80
           TabOrder = 5
           Text = '10'
+        end
+        object chkBoxAutoTuneCSVBuffer: TCheckBox
+          Left = 32
+          Height = 21
+          Top = 240
+          Width = 154
+          Caption = 'Auto Tune CSVBuffer'
+          OnChange = chkBoxAutoTuneCSVBufferChange
+          TabOrder = 6
         end
       end
     end
@@ -1170,8 +1179,6 @@ object frmDataEditor: TfrmDataEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    InitialCellCapacity = 64
-    ProgressUpdatePercent = 1
     Left = 936
     Top = 80
   end

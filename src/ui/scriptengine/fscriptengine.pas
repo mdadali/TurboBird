@@ -74,6 +74,7 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    function  FormatDBNameForCaption: string;
     procedure FormShow(Sender: TObject);
     procedure IBDatabase1BeforeConnect(Sender: TObject);
     procedure IBXScript1GetParamValue(Sender: TObject; ParamName: string;
@@ -93,6 +94,7 @@ type
     procedure DoOpen(Data: PtrInt);
     procedure ReadScripterSettings;
   public
+    DisplayAlias: string;   // gesetzt von lmScriptEngineClick
     procedure Init(dbIndex: integer; AodeInfos: TPNodeInfos=nil);
   end;
 
@@ -149,6 +151,25 @@ begin
   IBXScript1.ShowPerformanceStats := ShowPerformanceStats;
 end;
 
+{ ============================================================
+  FormatDBNameForCaption: Baut den Anzeige-String für das
+  DBName-Label.
+
+  Bevorzugt DisplayAlias (gesetzt von lmScriptEngineClick aus
+  main.pas). Fallback: echter Servername aus IBDatabase1.
+
+  Format:
+    Mit Alias:  <Alias>: <DB-Pfad>
+    Ohne Alias: <IBDatabase1.DatabaseName>  (echter ConnStr)
+  ============================================================ }
+function TfrmScriptEngine.FormatDBNameForCaption: string;
+begin
+  if Trim(DisplayAlias) <> '' then
+    Result := DisplayAlias + ': ' + IBDatabase1.DatabaseName
+  else
+    Result := IBDatabase1.DatabaseName;
+end;
+
 procedure TfrmScriptEngine.FormShow(Sender: TObject);
 var BasePath, SqlPath: string;
 begin
@@ -158,14 +179,15 @@ begin
   SqlPath  := BasePath + 'data' + PathDelim + 'sql_scripts' + PathDelim;
   OpenDialog1.InitialDir := SqlPath;
 
-  ReadScripterSettings; //from inifile
+  ReadScripterSettings;
 
   ResultsLog.Lines.Clear;
-  //ed.Lines.Clear;
-  DBName.Caption := IBDatabase1.DatabaseName;
+
+  // NEU: Alias statt echtem Servernamen anzeigen
+  DBName.Caption := FormatDBNameForCaption;
+
   chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
   chkBoxEchoInput.Checked :=  IBXScript1.Echo;
-//  Application.QueueAsyncCall(@DoOpen,0);
 end;
 
 procedure TfrmScriptEngine.IBDatabase1BeforeConnect(Sender: TObject);
@@ -307,11 +329,9 @@ end;
 
 procedure TfrmScriptEngine.RunScriptExecute(Sender: TObject);
 begin
-  //ReadScripterSettings; //from inifile
   if not IBDatabase1.Connected then
     IBDatabase1.Connected := true;
 
-  // Sicherstellen, dass eine Transaktion läuft
   if not IBTransaction1.InTransaction then
     IBTransaction1.StartTransaction;
 
@@ -320,7 +340,9 @@ begin
   Timer1.Interval := 1000;
   chkBoxEchoInput.Checked := IBXScript1.Echo;
   chkBoxStopOnError.Checked := IBXScript1.StopOnFirstError;
-  DBName.Caption := IBDatabase1.DatabaseName;
+
+  // NEU: Alias statt echtem Servernamen anzeigen
+  DBName.Caption := FormatDBNameForCaption;
 end;
 
 procedure TfrmScriptEngine.RunScriptUpdate(Sender: TObject);

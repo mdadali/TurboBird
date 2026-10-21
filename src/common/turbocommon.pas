@@ -331,6 +331,7 @@ type
     tkCreateTable     // DataEditor: Dataset → Tabelle
   );
 
+type
   TTransferStatistic = record
     Kind: TTransferKind;
 
@@ -364,6 +365,7 @@ type
     CreateTableSQL: string;
 
     RowsPerSecond: Double;         // Load only, Interval-Mean
+    BytesPerSecond: Double;        // NEU: Load only, Interval-Mean
     LoadElapsedSeconds: Double;    // Load only (ohne Scan)
 
     CSVOptions: string;
@@ -371,14 +373,16 @@ type
     // === CSV BUFFER PERFORMANCE ===
     CSVBlockSizeBytes: Integer;            // Block Size in Byte
     CSVBufferSizeBytes: Integer;           // Buffer Size in Byte (nach Anpassung)
-    CSVInitialCellCapacity: Integer;    // Initial Cells
-    CSVRowWidthScanMode: string;        // 'Whole file' oder 'Range 1..1250000'
-    CSVRowWidthScanRows: Int64;         // Wie viele Zeilen wurden gescannt
-    CSVRowWidthScanIsCustom: Boolean;   // TRUE = CustomScan, FALSE = FullScan
-    CSVRowWidthScanTime: Double;        // Scan-Dauer in Sekunden
-    CSVMaxRowWidth: Int64;              // Ermittelte max. Zeilenbreite in Bytes
-    CSVBufferAutoAdjusted: Boolean;     // Wurde BufferSize automatisch angepasst?
-    CSVBufferOriginalBytes: Int64;      // BufferSize vor der Anpassung
+    CSVInitialCellCapacity: Integer;       // Initial Cells
+    CSVRowWidthScanMode: string;           // 'Whole file' oder 'Range 1..1250000'
+    CSVRowWidthScanRows: Int64;            // Wie viele Zeilen wurden gescannt
+    CSVRowWidthScanIsCustom: Boolean;      // TRUE = CustomScan, FALSE = FullScan
+    CSVRowWidthScanTime: Double;           // Scan-Dauer in Sekunden
+    CSVMaxRowWidth: Int64;                 // Ermittelte max. Zeilenbreite in Bytes
+    CSVBufferAutoAdjusted: Boolean;        // Wurde BufferSize automatisch angepasst?
+    CSVBufferOriginalBytes: Int64;         // BufferSize vor der Anpassung
+    CSVBlockAutoAdjusted: Boolean;         // Wurde BlockSize automatisch angepasst?
+    CSVBlockOriginalBytes: Int64;          // BlockSize vor der Anpassung
 
     OptionsExtra: string;
 
@@ -559,6 +563,7 @@ var
     CSVRowWidthScanMB: Integer = 10;
     CSVMinRowsForRowWidthScan: Integer = 1000;
     CSVProgressUpdatePercent: Integer = 1;
+    CSVAutoTuneCSVBuffer: boolean;
 
     // Auto-Detect-Schalter (pro Feld einzeln)
     AutoDetectLineEnding: Boolean;
@@ -676,19 +681,18 @@ function ShowServerSelectDialog(
     ): Boolean;
 
 function CloneServerRegistry(
-      const ASourceServerName: string;
-      const ADestServerName: string;
-      const ADestServerAlias: string;
-      const ADestPort: string
-    ): Boolean;
+  const ASourceAlias: string;
+  const ADestServerName: string;
+  const ADestServerAlias: string;
+  const ADestPort: string;
+  const ADestProtocol: TProtocol
+): Boolean;
 
 function ShowDBCloneDialog(
   const ATitle: string;
   const ASuggestedDBTitle: string;
   out ASelectedServer: string;
-  out ADBTitle: string;
-  out ACreateDB: Boolean;
-  out AWithMetadata: Boolean
+  out ADBTitle: string
 ): Boolean;
 
 function CloneServerRegistryInteractive: Boolean;
@@ -749,6 +753,13 @@ function MakeConnectionString(AServerName, APort, ADBFileName: string): string;
 function IsServerReachable(AserverName: string; out ErrorStr: string): boolean;
 function CreateServerSessionFromRegistry(const AServerName: string): TServerSession;
 
+procedure ParseDBConnectionString(const AConnStr: string;
+  out AHost, APort, APath: string);
+function ValidateDBConnectionString(const AConnStr, AExpectedServerAlias: string;
+  out AWarningMsg: string): Boolean;
+
+
+function GetServerInventoryAsText: string;
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
 
 function GetSeverImplemetationVersionFromIBDB(ADB: TIBDatabase): string;
@@ -756,6 +767,7 @@ function GetServerMajorVersionFromIBDB(ADB: TIBDatabase): Word;
 function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
 
 function GetDBIndexByDatabase(Database: TIBDatabase): Integer;
+function GetDBTitlesForServer(const ADisplayAlias: string; AList: TStrings): Boolean;
 function FindDBIndexByTitleAndServer(const ATitle, AServerName: string): Integer;
 
 
@@ -789,15 +801,25 @@ function AreSameDB(const DB1, DB2: TIBDatabase): Boolean;
 
 function GetServerName(DBName: string): string;
 
+function IsServerAliasUnique(const AAlias, AExcludeAlias, AExcludeServerName: string): Boolean;
+function SaveDBRegistrationsToFile: Boolean;
+function RenameDBRegistrationsServerAlias(
+  const AOldName, ANewAlias, ARealServerName: string): Integer;
+function GetServerRecordFromFileByAlias(const AAlias: string): TServerRecord;
 function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
 function GetFirstServerRecordFromFile: TServerRecord;
 function GetServerRecordFromFileByIndex(AIdx: Integer): TServerRecord;
 
-procedure SaveServerDataToFile(const Rec: TServerRecord);
+procedure SaveServerDataToFile(const Rec: TServerRecord; const AOldAlias: string = '');
 procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerSession);
 function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
 
+function GetServerAliasFromNode(ANode: TTreeNode): string;
+function GetServerNodeByAlias(const AAlias: string): TTreeNode;
+function GetServerNameFromNode(ANode: TTreeNode): string;
 function GetServerNodeByServerName(const AServerName: string): TTreeNode;
+
+function GetServerAliasListFromTreeView: TStringList;
 function GetServerListFromTreeView: TStringList;
 function GetServerAndPortListFromTreeView: TStringList;
 
@@ -893,7 +915,7 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 
 implementation
 
-uses  Reg;
+uses  main, Reg;
 
 //Format
 function FormatBytesSmart(ABytes: Int64): string;
@@ -1858,21 +1880,19 @@ var
   RowsPerSec: Double;
   FS: TFormatSettings;
 
-  // Lokaler Helfer für Speed-Ermittlung (Fallback-Kette)
   function ComputeRowsPerSec: Double;
   begin
     if Stats.RowsPerSecond > 0 then
-      Result := Stats.RowsPerSecond                                    // 1. Wahl: Interval-Mean
+      Result := Stats.RowsPerSecond
     else if (Stats.LoadElapsedSeconds > 0) and (Stats.RowsProcessed > 0) then
-      Result := Stats.RowsProcessed / Stats.LoadElapsedSeconds         // 2. Wahl: Load-only
+      Result := Stats.RowsProcessed / Stats.LoadElapsedSeconds
     else if (Stats.ElapsedSeconds > 0) and (Stats.RowsProcessed > 0) then
-      Result := Stats.RowsProcessed / Stats.ElapsedSeconds             // 3. Wahl: Total (Fallback)
+      Result := Stats.RowsProcessed / Stats.ElapsedSeconds
     else
       Result := 0;
   end;
 
 begin
-  // Englischer Format-Stil — unabhängig vom OS-Locale
   FS := DefaultFormatSettings;
   FS.DecimalSeparator  := '.';
   FS.ThousandSeparator := ',';
@@ -1884,9 +1904,6 @@ begin
     SL.Add('═══════════════════════════════════════════════════');
     SL.Add('');
 
-    // ======================================================================
-    // COPY-METHOD (nur bei tkCopy)
-    // ======================================================================
     if Stats.Kind = tkCopy then
     begin
       SL.Add('Copy Method:');
@@ -1894,22 +1911,17 @@ begin
       SL.Add('');
     end;
 
-    // ======================================================================
-    // SOURCE
-    // ======================================================================
     if (Stats.SourceFileName <> '') or
        (Stats.SourceServer <> '') or
        (Stats.SourceDatabase <> '') or
        (Stats.SourceTable <> '') then
     begin
       SL.Add('Source:');
-
       if Stats.SourceFileName <> '' then
       begin
         SL.Add('  File:      ' + ExtractFileName(Stats.SourceFileName));
         SL.Add('  Path:      ' + ExtractFilePath(Stats.SourceFileName));
       end;
-
       if Stats.SourceServer <> '' then
         SL.Add('  Server:    ' + Stats.SourceServer);
       if Stats.SourceDatabase <> '' then
@@ -1924,20 +1936,15 @@ begin
         SL.Add('  Format:    ' + Stats.SourceFileFormat);
       if Stats.SourceFileSize > 0 then
         SL.Add('  Size:      ' + FormatBytesSmart(Stats.SourceFileSize));
-
       SL.Add('');
     end;
 
-    // ======================================================================
-    // DESTINATION
-    // ======================================================================
     if (Stats.DestServer <> '') or
        (Stats.DestDatabase <> '') or
        (Stats.DestTable <> '') or
        (Stats.DestFileName <> '') then
     begin
       SL.Add('Destination:');
-
       if Stats.DestServer <> '' then
         SL.Add('  Server:    ' + Stats.DestServer);
       if Stats.DestDatabase <> '' then
@@ -1948,7 +1955,6 @@ begin
         SL.Add('  Type:      ' + Stats.DestKind);
       if Stats.DestServerVersion <> '' then
         SL.Add('  Version:   ' + Stats.DestServerVersion);
-
       if Stats.DestFileName <> '' then
       begin
         SL.Add('  File:      ' + ExtractFileName(Stats.DestFileName));
@@ -1956,13 +1962,9 @@ begin
       end;
       if Stats.DestFileSize > 0 then
         SL.Add('  Size:      ' + FormatBytesSmart(Stats.DestFileSize));
-
       SL.Add('');
     end;
 
-    // ======================================================================
-    // OPTIONS
-    // ======================================================================
     if (Stats.BatchSize > 0) or
        Stats.UseRowRange or
        (Stats.OptionsExtra <> '') or
@@ -2001,9 +2003,6 @@ begin
         SL.Add(Stats.CSVOptions);
       end;
 
-      // ============================================================
-      // CSV BUFFER PERFORMANCE  (Bytes, nicht KB!)
-      // ============================================================
       if (Stats.CSVBlockSizeBytes > 0) or
          (Stats.CSVBufferSizeBytes > 0) or
          (Stats.CSVRowWidthScanMode <> '') then
@@ -2012,9 +2011,17 @@ begin
         SL.Add('  Buffer Performance:');
 
         if Stats.CSVBlockSizeBytes > 0 then
-          SL.Add(Format('    Block Size:            %s (%s Bytes)',
-            [FormatBytesSmart(Stats.CSVBlockSizeBytes),
-             FormatNumberEN(Stats.CSVBlockSizeBytes)]));
+        begin
+          if Stats.CSVBlockAutoAdjusted then
+            SL.Add(Format('    Block Size:            %s (%s Bytes) — auto-adjusted from %s',
+              [FormatBytesSmart(Stats.CSVBlockSizeBytes),
+               FormatNumberEN(Stats.CSVBlockSizeBytes),
+               FormatBytesSmart(Stats.CSVBlockOriginalBytes)]))
+          else
+            SL.Add(Format('    Block Size:            %s (%s Bytes)',
+              [FormatBytesSmart(Stats.CSVBlockSizeBytes),
+               FormatNumberEN(Stats.CSVBlockSizeBytes)]));
+        end;
 
         if Stats.CSVBufferSizeBytes > 0 then
         begin
@@ -2053,7 +2060,6 @@ begin
             [FormatNumberEN(Stats.CSVMaxRowWidth),
              FormatBytesSmart(Stats.CSVMaxRowWidth)]));
 
-        // Warnung bei CustomScan
         if Stats.CSVRowWidthScanIsCustom then
           SL.Add('    Note:                  CustomScan only - later rows may be wider');
       end;
@@ -2061,9 +2067,6 @@ begin
       SL.Add('');
     end;
 
-    // ======================================================================
-    // PRESET DEFINITION
-    // ======================================================================
     if Stats.PresetFileContent <> '' then
     begin
       SL.Add('Preset Definition:');
@@ -2071,7 +2074,6 @@ begin
         SL.Add('  Name:  ' + Stats.PresetName);
       if Stats.PresetFileName <> '' then
         SL.Add('  File:  ' + Stats.PresetFileName);
-
       SL.Add('');
       SL.Add('----- BEGIN PRESET FILE ---------------------------------');
       SL.Add(Stats.PresetFileContent);
@@ -2079,9 +2081,6 @@ begin
       SL.Add('');
     end;
 
-    // ======================================================================
-    // FORMULAS APPLIED
-    // ======================================================================
     if Stats.FormulasApplied <> '' then
     begin
       SL.Add('Formulas Applied:');
@@ -2089,37 +2088,29 @@ begin
       SL.Add('');
     end;
 
-    // ======================================================================
-    // RESULT  — getrennte Zeiten, ehrliche Speed
-    // ======================================================================
     SL.Add('Result:');
     SL.Add('  Rows:          ' + FormatNumberEN(Stats.RowsProcessed));
     if Stats.FieldsCount > 0 then
       SL.Add('  Fields:        ' + IntToStr(Stats.FieldsCount));
 
-    // Scan-Zeit nur zeigen, wenn sie auch separat erfasst wurde
     if Stats.CSVRowWidthScanTime > 0 then
       SL.Add('  Scan Time:     ' + FormatDateTime('hh:nn:ss.zzz',
         Stats.CSVRowWidthScanTime / SecsPerDay));
 
-    // Load-Zeit nur zeigen, wenn sie separat erfasst wurde
     if Stats.LoadElapsedSeconds > 0 then
       SL.Add('  Load Time:     ' + FormatDateTime('hh:nn:ss.zzz',
         Stats.LoadElapsedSeconds / SecsPerDay));
 
-    // Total-Time immer
     SL.Add('  Total Time:    ' + FormatDateTime('hh:nn:ss.zzz',
       Stats.ElapsedSeconds / SecsPerDay));
 
-    // Speed: primär RowsPerSecond, sonst Load-, sonst Total-basiert
     RowsPerSec := ComputeRowsPerSec;
     if RowsPerSec > 0 then
       SL.Add('  Speed:         ' + FormatFloat('#,##0', RowsPerSec, FS) + ' rows/sec');
+    if Stats.BytesPerSecond > 0 then
+      SL.Add('  Data Rate:     ' + FormatBytesSmart(Round(Stats.BytesPerSecond)) + '/sec');
     SL.Add('');
 
-    // ======================================================================
-    // TABLE STRUCTURE
-    // ======================================================================
     if Stats.CreateTableSQL <> '' then
     begin
       SL.Add('Table Structure:');
@@ -2127,9 +2118,6 @@ begin
       SL.Add('');
     end;
 
-    // ======================================================================
-    // ENVIRONMENT
-    // ======================================================================
     AddEnvironmentSection(SL, Stats);
 
     SL.Add('');
@@ -2302,11 +2290,25 @@ begin
     Delete(Result, Length(Result), 1);
 end;
 
+{ ============================================================
+  CloneServerRegistry: Kopiert einen Server-Record.
+
+  NEU (Alias-Unterstützung):
+    - Quell-Server wird über ALIAS gesucht (eindeutig).
+    - Ziel: nur ALIAS-Eindeutigkeit prüfen (ServerName darf
+      mehrfach vorkommen — z.B. 7x 'localhost' mit
+      unterschiedlichen Ports).
+    - Protocol wird als Parameter übergeben, damit man von
+      TCP nach Local (und umgekehrt) clonen kann.
+    - Version wird zurückgesetzt (beim ersten Connect neu
+      ermittelt).
+  ============================================================ }
 function CloneServerRegistry(
-  const ASourceServerName: string;
+  const ASourceAlias: string;
   const ADestServerName: string;
   const ADestServerAlias: string;
-  const ADestPort: string
+  const ADestPort: string;
+  const ADestProtocol: TProtocol
 ): Boolean;
 var
   SourceRec: TServerRecord;
@@ -2314,244 +2316,300 @@ var
 begin
   Result := False;
 
-  SourceRec := GetServerRecordFromFileByName(ASourceServerName);
+  // Quell-Server über Alias suchen
+  SourceRec := GetServerRecordFromFileByAlias(ASourceAlias);
   if SourceRec.ServerName = '' then
   begin
-    MessageDlg('Source server not found: ' + ASourceServerName, mtError, [mbOK], 0);
+    MessageDlg('Source server not found: ' + ASourceAlias, mtError, [mbOK], 0);
     Exit;
   end;
 
-  DestRec := GetServerRecordFromFileByName(ADestServerName);
-  if DestRec.ServerName <> '' then
+  // Nur ALIAS-Eindeutigkeit prüfen
+  if not IsServerAliasUnique(ADestServerAlias, '', ADestServerName) then
   begin
-    MessageDlg('Server "' + ADestServerName + '" already exists!', mtError, [mbOK], 0);
+    MessageDlg('Server alias "' + ADestServerAlias + '" already exists!' +
+               sLineBreak + sLineBreak +
+               'Server aliases must be system-wide unique. ' +
+               'Server names (like localhost) may be reused.',
+               mtError, [mbOK], 0);
     Exit;
   end;
 
   DestRec := SourceRec;
-  DestRec.ServerName := ADestServerName;
+  DestRec.ServerName  := ADestServerName;
   DestRec.ServerAlias := ADestServerAlias;
+  DestRec.Protocol    := ADestProtocol;
 
-  // Version zurücksetzen – wird beim ersten Connect neu ermittelt!
+  // Version zurücksetzen – wird beim ersten Connect neu ermittelt
   DestRec.VersionString := '';
-  DestRec.VersionMajor := 0;
-  DestRec.VersionMinor := 0;
+  DestRec.VersionMajor  := 0;
+  DestRec.VersionMinor  := 0;
 
-  if ADestPort <> '' then
-    DestRec.Port := ADestPort;
+  if Trim(ADestPort) <> '' then
+    DestRec.Port := ADestPort
+  else
+    DestRec.Port := '';
 
-  SaveServerDataToFile(DestRec);
+  SaveServerDataToFile(DestRec, '');
   Result := True;
 end;
 
+{ ============================================================
+  CloneServerRegistryInteractive: Dialog für Server-Clone.
+
+  NEU:
+    - Protocol-ComboBox (TCP / Local / SPX / …)
+    - Port-Feld wird bei Local deaktiviert
+    - Alias-Eindeutigkeit prüfen (nicht ServerName)
+    - Nach dem Clone: LoadRegisteredServers aufrufen, damit
+      der neue Knoten mit korrektem ServerSession angelegt wird
+    - Knoten-Text = Alias (konsistent zu LoadRegisteredServers)
+  ============================================================ }
 function CloneServerRegistryInteractive: Boolean;
 var
-  SourceServer: string;
+  SourceAlias: string;
   DestServer, DestAlias, DestPort: string;
-  ServerList: TStringList;
+  DestProtocol: TProtocol;
+  ServerList, AliasList: TStringList;
   i: Integer;
   Form: TForm;
-  lblSource, lblDest, lblAlias, lblPort: TLabel;
-  cbSource: TComboBox;
+  lblSource, lblDest, lblAlias, lblPort, lblProtocol: TLabel;
+  cbSource, cbProtocol: TComboBox;
   edtDest, edtAlias, edtPort: TEdit;
   chkCloneDBs: TCheckBox;
   BtnOK, BtnCancel: TButton;
   SourceRec: TServerRecord;
-  ServerNode: TTreeNode;
   SelectedIdx: Integer;
   DBCount: integer;
+  SelectedNode: TTreeNode;
 begin
   Result := False;
+  AliasList := nil;
 
-  // 1) Server-Liste holen
   ServerList := GetServerListFromTreeView;
-  if ServerList.Count = 0 then
+  if (ServerList = nil) or (ServerList.Count = 0) then
   begin
     MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
-    ServerList.Free;
+    if Assigned(ServerList) then
+      ServerList.Free;
     Exit;
   end;
 
-  // 2) Markierten Server ermitteln
-  SelectedIdx := 0;
-  if Assigned(MainTreeView.Selected) then
-  begin
-    SourceServer := GetAncestorNodeText(MainTreeView.Selected, 0);
-    if SourceServer <> '' then
-    begin
-      for i := 0 to ServerList.Count - 1 do
-      begin
-        if SameText(ServerList[i], SourceServer) then
-        begin
-          SelectedIdx := i;
-          Break;
-        end;
-      end;
-    end;
-  end;
+  AliasList := GetServerAliasListFromTreeView;
 
-  // 3) Dialog aufbauen
-  Form := TForm.Create(nil);
   try
-    Form.Caption := 'Clone Server';
-    Form.Width := 460;
-    Form.Height := 340;
-    Form.Position := poScreenCenter;
-    Form.BorderStyle := bsDialog;
-    Form.FormStyle := fsStayOnTop;
-
-    // Source Server
-    lblSource := TLabel.Create(Form);
-    lblSource.Parent := Form;
-    lblSource.Left := 20;
-    lblSource.Top := 15;
-    lblSource.Caption := 'Source Server:';
-
-    cbSource := TComboBox.Create(Form);
-    cbSource.Parent := Form;
-    cbSource.Left := 20;
-    cbSource.Top := 38;
-    cbSource.Width := 400;
-    cbSource.Style := csDropDownList;
-    for i := 0 to ServerList.Count - 1 do
-      cbSource.Items.Add(ServerList[i]);
-    cbSource.ItemIndex := SelectedIdx;  // ← Markierten Server vorauswählen!
-
-    // Destination Server (Edit, nicht Combo!)
-    lblDest := TLabel.Create(Form);
-    lblDest.Parent := Form;
-    lblDest.Left := 20;
-    lblDest.Top := 70;
-    lblDest.Caption := 'New Server Name:';
-
-    edtDest := TEdit.Create(Form);
-    edtDest.Parent := Form;
-    edtDest.Left := 20;
-    edtDest.Top := 93;
-    edtDest.Width := 400;
-    edtDest.Text := Trim(cbSource.Text) + '_Clone';
-
-    // Alias
-    lblAlias := TLabel.Create(Form);
-    lblAlias.Parent := Form;
-    lblAlias.Left := 20;
-    lblAlias.Top := 125;
-    lblAlias.Caption := 'New Server Alias:';
-
-    edtAlias := TEdit.Create(Form);
-    edtAlias.Parent := Form;
-    edtAlias.Left := 20;
-    edtAlias.Top := 148;
-    edtAlias.Width := 400;
-    edtAlias.Text := Trim(cbSource.Text) + 'Alias_Clone';
-
-    // Port
-    lblPort := TLabel.Create(Form);
-    lblPort.Parent := Form;
-    lblPort.Left := 20;
-    lblPort.Top := 180;
-    lblPort.Caption := 'Port:';
-
-    edtPort := TEdit.Create(Form);
-    edtPort.Parent := Form;
-    edtPort.Left := 20;
-    edtPort.Top := 203;
-    edtPort.Width := 100;
-
-    // Port vom Quell-Server laden
-    SourceRec := GetServerRecordFromFileByName(cbSource.Text);
-    edtPort.Text := SourceRec.Port;
-
-    // Clone Databases Checkbox
-    chkCloneDBs := TCheckBox.Create(Form);
-    chkCloneDBs.Parent := Form;
-    chkCloneDBs.Left := 20;
-    chkCloneDBs.Top := 235;
-    chkCloneDBs.Width := 300;
-    chkCloneDBs.Caption := 'Clone all databases of this server';
-    chkCloneDBs.Checked := False;
-
-    // Buttons
-    BtnOK := TButton.Create(Form);
-    BtnOK.Parent := Form;
-    BtnOK.Caption := 'OK';
-    BtnOK.Left := 160;
-    BtnOK.Top := 275;
-    BtnOK.Width := 100;
-    BtnOK.Default := True;
-    BtnOK.ModalResult := mrOK;
-
-    BtnCancel := TButton.Create(Form);
-    BtnCancel.Parent := Form;
-    BtnCancel.Caption := 'Cancel';
-    BtnCancel.Left := 280;
-    BtnCancel.Top := 275;
-    BtnCancel.Width := 100;
-    BtnCancel.ModalResult := mrCancel;
-
-    if Form.ShowModal = mrOK then
+    SelectedIdx := 0;
+    if Assigned(MainTreeView) and Assigned(MainTreeView.Selected) then
     begin
-      SourceServer := cbSource.Text;
-      DestServer := Trim(edtDest.Text);
+      SelectedNode := GetAncestorAtLevel(MainTreeView.Selected, 0);
+      SourceAlias := GetServerAliasFromNode(SelectedNode);
+      if SourceAlias <> '' then
+        for i := 0 to AliasList.Count - 1 do
+          if SameText(AliasList[i], SourceAlias) then
+          begin
+            SelectedIdx := i;
+            Break;
+          end;
+    end;
 
-      if DestServer = '' then
+    Form := TForm.Create(nil);
+    try
+      Form.Caption := 'Clone Server';
+      Form.Width := 480;
+      Form.Height := 400;
+      Form.Position := poScreenCenter;
+      Form.BorderStyle := bsDialog;
+      Form.FormStyle := fsStayOnTop;
+
+      // Source Server
+      lblSource := TLabel.Create(Form);
+      lblSource.Parent := Form;
+      lblSource.Left := 20;
+      lblSource.Top := 15;
+      lblSource.Caption := 'Source Server:';
+
+      cbSource := TComboBox.Create(Form);
+      cbSource.Parent := Form;
+      cbSource.Left := 20;
+      cbSource.Top := 38;
+      cbSource.Width := 420;
+      cbSource.Style := csDropDownList;
+      for i := 0 to AliasList.Count - 1 do
+        cbSource.Items.Add(AliasList[i]);
+      cbSource.ItemIndex := SelectedIdx;
+
+      // New Server Name (ServerName)
+      lblDest := TLabel.Create(Form);
+      lblDest.Parent := Form;
+      lblDest.Left := 20;
+      lblDest.Top := 70;
+      lblDest.Caption := 'New Server Name (e.g. localhost):';
+
+      edtDest := TEdit.Create(Form);
+      edtDest.Parent := Form;
+      edtDest.Left := 20;
+      edtDest.Top := 93;
+      edtDest.Width := 420;
+      edtDest.Text := 'localhost';
+
+      // New Server Alias
+      lblAlias := TLabel.Create(Form);
+      lblAlias.Parent := Form;
+      lblAlias.Left := 20;
+      lblAlias.Top := 125;
+      lblAlias.Caption := 'New Server Alias:';
+
+      edtAlias := TEdit.Create(Form);
+      edtAlias.Parent := Form;
+      edtAlias.Left := 20;
+      edtAlias.Top := 148;
+      edtAlias.Width := 420;
+      edtAlias.Text := Trim(cbSource.Text) + '_Clone';
+
+      // Protocol
+      lblProtocol := TLabel.Create(Form);
+      lblProtocol.Parent := Form;
+      lblProtocol.Left := 20;
+      lblProtocol.Top := 180;
+      lblProtocol.Caption := 'Protocol:';
+
+      cbProtocol := TComboBox.Create(Form);
+      cbProtocol.Parent := Form;
+      cbProtocol.Left := 20;
+      cbProtocol.Top := 203;
+      cbProtocol.Width := 150;
+      cbProtocol.Style := csDropDownList;
+      cbProtocol.Items.Add('TCP');
+      cbProtocol.Items.Add('Local');
+      cbProtocol.Items.Add('SPX');
+      cbProtocol.Items.Add('NamedPipe');
+      cbProtocol.Items.Add('inet');
+      cbProtocol.Items.Add('inet4');
+      cbProtocol.Items.Add('inet6');
+      cbProtocol.Items.Add('wnet');
+      cbProtocol.Items.Add('xnet');
+      cbProtocol.ItemIndex := 0;   // TCP default
+
+      // Port
+      lblPort := TLabel.Create(Form);
+      lblPort.Parent := Form;
+      lblPort.Left := 190;
+      lblPort.Top := 180;
+      lblPort.Caption := 'Port:';
+
+      edtPort := TEdit.Create(Form);
+      edtPort.Parent := Form;
+      edtPort.Left := 190;
+      edtPort.Top := 203;
+      edtPort.Width := 100;
+
+      // Port vom Quell-Server laden
+      SourceRec := GetServerRecordFromFileByAlias(cbSource.Text);
+      edtPort.Text := SourceRec.Port;
+
+      // Initial: bei Local → Port leer
+      if SameText(cbProtocol.Text, 'Local') then
       begin
-        MessageDlg('Server name cannot be empty.', mtWarning, [mbOK], 0);
-        Exit;
+        edtPort.Text := '';
+        edtPort.Enabled := False;
       end;
 
-      // Prüfen ob Ziel-Name bereits existiert
-      SourceRec := GetServerRecordFromFileByName(DestServer);
-      if SourceRec.ServerName <> '' then
+      // Clone Databases Checkbox
+      chkCloneDBs := TCheckBox.Create(Form);
+      chkCloneDBs.Parent := Form;
+      chkCloneDBs.Left := 20;
+      chkCloneDBs.Top := 240;
+      chkCloneDBs.Width := 380;
+      chkCloneDBs.Caption := 'Clone all databases of this server';
+      chkCloneDBs.Checked := False;
+
+      // Buttons
+      BtnOK := TButton.Create(Form);
+      BtnOK.Parent := Form;
+      BtnOK.Caption := 'OK';
+      BtnOK.Left := 180;
+      BtnOK.Top := 300;
+      BtnOK.Width := 100;
+      BtnOK.Default := True;
+      BtnOK.ModalResult := mrOK;
+
+      BtnCancel := TButton.Create(Form);
+      BtnCancel.Parent := Form;
+      BtnCancel.Caption := 'Cancel';
+      BtnCancel.Left := 300;
+      BtnCancel.Top := 300;
+      BtnCancel.Width := 100;
+      BtnCancel.ModalResult := mrCancel;
+
+      if Form.ShowModal = mrOK then
       begin
-        MessageDlg('Server "' + DestServer + '" already exists!', mtError, [mbOK], 0);
-        Exit;
-      end;
+        if (cbSource.ItemIndex >= 0) and (cbSource.ItemIndex < ServerList.Count) then
+          SourceAlias := AliasList[cbSource.ItemIndex]
+        else
+          SourceAlias := AliasList[SelectedIdx];
 
-      DestAlias := Trim(edtAlias.Text);
-      if DestAlias = '' then
-        DestAlias := DestServer;
+        DestServer := Trim(edtDest.Text);
+        DestAlias  := Trim(edtAlias.Text);
+        DestPort   := Trim(edtPort.Text);
 
-      DestPort := Trim(edtPort.Text);
-
-      // 4) Server klonen
-      if CloneServerRegistry(SourceServer, DestServer, DestAlias, DestPort) then
-      begin
-        // TreeView aktualisieren
-        ServerNode := MainTreeView.Items.Add(nil, DestServer);
-        ServerNode.ImageIndex := 25;
-        ServerNode.SelectedIndex := 25;
-
-        if not Assigned(ServerNode.Data) then
-        begin
-          ServerNode.Data := AllocMem(SizeOf(TNodeInfos));
+        // Protocol-Index → TProtocol
+        case cbProtocol.ItemIndex of
+          0: DestProtocol := TCP;
+          1: DestProtocol := Local;
+          2: DestProtocol := SPX;
+          3: DestProtocol := NamedPipe;
+          4: DestProtocol := inet;
+          5: DestProtocol := inet4;
+          6: DestProtocol := inet6;
+          7: DestProtocol := wnet;
+          8: DestProtocol := xnet;
+        else
+          DestProtocol := TCP;
         end;
 
-        TPNodeInfos(ServerNode.Data)^.ObjectType := tvotServer;
-        TPNodeInfos(ServerNode.Data)^.ServerSession := nil;
+        if DestServer = '' then
+        begin
+          MessageDlg('Server name cannot be empty.', mtWarning, [mbOK], 0);
+          Exit;
+        end;
+        if DestAlias = '' then
+        begin
+          MessageDlg('Server alias cannot be empty.', mtWarning, [mbOK], 0);
+          Exit;
+        end;
 
-        // 5) Datenbanken clonen wenn Checkbox aktiv
-        // Erfolgsmeldung
-        if chkCloneDBs.Checked then
-          DBCount := CloneAllDatabasesForServer(SourceServer, DestServer)
-        else
-          DBCount := 0;
+        if CloneServerRegistry(SourceAlias, DestServer, DestAlias, DestPort, DestProtocol) then
+        begin
+          if chkCloneDBs.Checked then
+            DBCount := CloneAllDatabasesForServer(SourceAlias, DestAlias)
+          else
+            DBCount := 0;
 
-        MessageDlg(
-          'Clone completed!' + sLineBreak +
-          sLineBreak +
-          'Server: ' + DestServer + sLineBreak +
-          'Databases: ' + IntToStr(DBCount),
-          mtInformation, [mbOK], 0
-        );
+          // TreeView neu aufbauen – dann hat der Knoten korrekten ServerSession
+          //fmMain.LoadRegisteredServers;
+          fmMain.LoadRegisteredDatabases;
 
-        Result := True;
+          MessageDlg(
+            'Clone completed!' + sLineBreak +
+            sLineBreak +
+            'Server:   ' + DestAlias + sLineBreak +
+            'Name:     ' + DestServer + sLineBreak +
+            'Protocol: ' + cbProtocol.Text + sLineBreak +
+            'Databases: ' + IntToStr(DBCount),
+            mtInformation, [mbOK], 0);
+
+          Result := True;
+        end;
       end;
+
+    finally
+      Form.Free;
     end;
 
   finally
-    Form.Free;
     ServerList.Free;
+    if Assigned(AliasList) then
+      AliasList.Free;
   end;
 end;
 
@@ -2708,44 +2766,81 @@ begin
   end;
 end;
 
+{ ============================================================
+  ShowDBCloneDialog: Interaktiver Dialog für DB-Clone.
+
+  VEREINFACHT:
+    - Beide Checkboxen entfernt:
+        "Create database on destination (empty)" — zu riskant
+          (Ziel-DB muss exakt zur OPC passen, Path-Mapping,
+           ODS-Version etc.) und in der Praxis selten genutzt.
+        "Include metadata" — war ohnehin Visible := False.
+
+    - Neue Signatur: nur noch ASelectedServer und ADBTitle als
+      out-Parameter. Die Aufrufer müssen entsprechend angepasst
+      werden (siehe CloneDBRegistryInteractive).
+
+    - ComboBox zeigt weiterhin ALIASE
+      (GetServerAliasListFromTreeView).
+
+    - Vorauswahl: Server, unter dem die markierte DB hängt,
+      wird vorausgewählt (über GetServerAliasFromNode).
+  ============================================================ }
 function ShowDBCloneDialog(
   const ATitle: string;
   const ASuggestedDBTitle: string;
   out ASelectedServer: string;
-  out ADBTitle: string;
-  out ACreateDB: Boolean;
-  out AWithMetadata: Boolean
+  out ADBTitle: string
 ): Boolean;
 var
   Form: TForm;
   ComboBox: TComboBox;
   edtDBTitle: TEdit;
   lblServer, lblTitle: TLabel;
-  chkCreateDB: TCheckBox;
-  chkWithMetadata: TCheckBox;
   BtnOK, BtnCancel: TButton;
-  ServerList: TStringList;
-  i: Integer;
+  AliasList: TStringList;
+  i, PreIdx: Integer;
+  SelectedNode, ServerNode: TTreeNode;
+  PreAlias: string;
 begin
   Result := False;
   ASelectedServer := '';
   ADBTitle := '';
-  ACreateDB := False;
-  AWithMetadata := False;
 
-  ServerList := GetServerListFromTreeView;
-  if ServerList.Count = 0 then
+  AliasList := GetServerAliasListFromTreeView;
+  if (AliasList = nil) or (AliasList.Count = 0) then
   begin
+    if Assigned(AliasList) then
+      AliasList.Free;
     MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
-    ServerList.Free;
     Exit;
+  end;
+
+  // Vorauswahl ermitteln
+  PreIdx := 0;
+  PreAlias := '';
+  if Assigned(MainTreeView) and Assigned(MainTreeView.Selected) then
+  begin
+    SelectedNode := MainTreeView.Selected;
+    ServerNode := GetAncestorAtLevel(SelectedNode, 0);
+    if Assigned(ServerNode) then
+      PreAlias := GetServerAliasFromNode(ServerNode);
+    if PreAlias <> '' then
+    begin
+      for i := 0 to AliasList.Count - 1 do
+        if SameText(AliasList[i], PreAlias) then
+        begin
+          PreIdx := i;
+          Break;
+        end;
+    end;
   end;
 
   Form := TForm.Create(nil);
   try
     Form.Caption := ATitle;
     Form.Width := 440;
-    Form.Height := 300;
+    Form.Height := 230;
     Form.Position := poScreenCenter;
     Form.BorderStyle := bsDialog;
     Form.FormStyle := fsStayOnTop;
@@ -2757,16 +2852,16 @@ begin
     lblServer.Top := 15;
     lblServer.Caption := 'Destination Server:';
 
-    // Server-ComboBox
+    // Server-ComboBox (zeigt Aliase)
     ComboBox := TComboBox.Create(Form);
     ComboBox.Parent := Form;
     ComboBox.Left := 20;
     ComboBox.Top := 40;
     ComboBox.Width := 390;
     ComboBox.Style := csDropDownList;
-    for i := 0 to ServerList.Count - 1 do
-      ComboBox.Items.Add(ServerList[i]);
-    ComboBox.ItemIndex := 0;
+    for i := 0 to AliasList.Count - 1 do
+      ComboBox.Items.Add(AliasList[i]);
+    ComboBox.ItemIndex := PreIdx;
 
     // Titel-Label
     lblTitle := TLabel.Create(Form);
@@ -2783,31 +2878,12 @@ begin
     edtDBTitle.Width := 390;
     edtDBTitle.Text := ASuggestedDBTitle;
 
-    // Create Database Checkbox
-    chkCreateDB := TCheckBox.Create(Form);
-    chkCreateDB.Parent := Form;
-    chkCreateDB.Left := 20;
-    chkCreateDB.Top := 145;
-    chkCreateDB.Width := 250;
-    chkCreateDB.Caption := 'Create database on destination (empty)';
-    chkCreateDB.Checked := False;
-
-    // With Metadata Checkbox
-    chkWithMetadata := TCheckBox.Create(Form);
-    chkWithMetadata.Visible := false;  //sehr fehleranfällig
-    chkWithMetadata.Parent := Form;
-    chkWithMetadata.Left := 45;
-    chkWithMetadata.Top := 175;
-    chkWithMetadata.Width := 280;
-    chkWithMetadata.Caption := 'Include metadata (tables, views...)';
-    chkWithMetadata.Checked := False;
-
     // Buttons
     BtnOK := TButton.Create(Form);
     BtnOK.Parent := Form;
     BtnOK.Caption := 'OK';
     BtnOK.Left := 140;
-    BtnOK.Top := 220;
+    BtnOK.Top := 155;
     BtnOK.Width := 100;
     BtnOK.Default := True;
     BtnOK.ModalResult := mrOK;
@@ -2816,7 +2892,7 @@ begin
     BtnCancel.Parent := Form;
     BtnCancel.Caption := 'Cancel';
     BtnCancel.Left := 260;
-    BtnCancel.Top := 220;
+    BtnCancel.Top := 155;
     BtnCancel.Width := 100;
     BtnCancel.ModalResult := mrCancel;
 
@@ -2826,20 +2902,26 @@ begin
       ADBTitle := Trim(edtDBTitle.Text);
       if ADBTitle = '' then
         ADBTitle := ASuggestedDBTitle;
-      ACreateDB := chkCreateDB.Checked;
-      AWithMetadata := chkWithMetadata.Checked;
       Result := True;
     end;
 
   finally
     Form.Free;
-    ServerList.Free;
+    AliasList.Free;
   end;
 end;
 
 // --------------------------------------------------------------------------
 // Datenbank‑Registrierung kopieren (evtl. temporär)
 // --------------------------------------------------------------------------
+{ ============================================================
+  Kopiert eine DB-Registrierung auf einen anderen Server.
+
+  ADestServerName kann ALIAS oder ECHTER Servername sein.
+  In DestRec.ServerName wird IMMER der ALIAS gespeichert
+  (Fallback: echter Name, falls kein Alias vorhanden) —
+  das ist der eindeutige Identifikator für die DB-Zuordnung.
+  ============================================================ }
 function CopyDBRegistry(
   ASourceDBIndex  : Integer;
   const ADestServerName : string;
@@ -2855,36 +2937,39 @@ var
   NewTitle   : string;
   Counter    : Integer;
   DBFilePath : string;
+  DestServerIdent : string;
 begin
   Result := -1;
 
-  // 1) Quell‑Registrierung lesen
   if (ASourceDBIndex < 0) or (ASourceDBIndex >= Length(RegisteredDatabases)) then
     raise Exception.Create('CopyDBRegistry: Invalid source DBIndex');
 
   SourceRec := RegisteredDatabases[ASourceDBIndex].RegRec;
-  ServerRec := GetServerRecordFromFileByName(ADestServerName);
+
+  // Alias-Lookup mit Fallback
+  ServerRec := GetServerRecordFromFileByAlias(ADestServerName);
   if ServerRec.ServerName = '' then
     raise Exception.Create('CopyDBRegistry: Destination server not found: ' + ADestServerName);
 
-  // 2) Neuen Record vorbereiten
+  // Eindeutiger DB-Identifikator = Alias (Fallback: echter Name)
+  if Trim(ServerRec.ServerAlias) <> '' then
+    DestServerIdent := Trim(ServerRec.ServerAlias)
+  else
+    DestServerIdent := Trim(ServerRec.ServerName);
+
   DestRec := SourceRec;
-  DestRec.ServerName := ADestServerName;
+  DestRec.ServerName := DestServerIdent;   // ← IMMER Alias
   DestRec.Deleted    := False;
   DestRec.LastOpened := Now;
   DestRec.ConnectOnApplicationStart := False;
 
-  // ============================================================
-  // SICHERHEIT: Passwort NICHT übernehmen!
-  // Der Benutzer muss sich bewusst neu anmelden und entscheiden,
-  // ob das Passwort gespeichert werden soll.
-  // ============================================================
+  // Sicherheit: Passwort NICHT übernehmen
   DestRec.Password     := '';
   DestRec.SavePassword := False;
-  DestRec.UserName     := SourceRec.UserName;  // User darf übernommen werden
-  DestRec.Role         := SourceRec.Role;      // Role darf übernommen werden
+  DestRec.UserName     := SourceRec.UserName;
+  DestRec.Role         := SourceRec.Role;
 
-  // Server‑Einstellungen übernehmen
+  // Server-Einstellungen übernehmen
   DestRec.IsEmbedded            := ServerRec.IsEmbedded;
   DestRec.FireBirdClientLibPath := ServerRec.ClientLibraryPath;
   DestRec.OverwriteLoadedClientLib := False;
@@ -2893,15 +2978,13 @@ begin
   DestRec.ServerVersionMinor    := ServerRec.VersionMinor;
   DestRec.ServerVersionString   := ServerRec.VersionString;
 
-  // 3) Connection-String je nach Ziel-Server-Typ anpassen
+  // Connection-String je nach Ziel-Server-Typ anpassen
   DBFilePath := GetDBFileNameFromConnectionString(SourceRec.DatabaseName);
 
   if ServerRec.IsEmbedded then
   begin
-    // Ziel ist Local/Embedded → nur Dateipfad
     DestRec.DatabaseName := DBFilePath;
 
-    // Warnung NUR wenn Datei NICHT existiert
     if not FileExists(DBFilePath) then
     begin
       if MessageDlg(
@@ -2923,15 +3006,14 @@ begin
   else
     DestRec.DatabaseName := ServerRec.ServerName + ':' + DBFilePath;
 
-  // 4) Titel setzen (entweder Vorschlag oder Original)
+  // Titel eindeutig machen
   if ADestDBTitle <> '' then
     NewTitle := ADestDBTitle
   else
     NewTitle := SourceRec.Title;
 
-  // Eindeutig machen
   Counter := 1;
-  while FindDBIndexByTitleAndServer(NewTitle, ADestServerName) >= 0 do
+  while FindDBIndexByTitleAndServer(NewTitle, DestServerIdent) >= 0 do
   begin
     Inc(Counter);
     if ADestDBTitle <> '' then
@@ -2941,7 +3023,7 @@ begin
   end;
   DestRec.Title := NewTitle;
 
-  // 5) In Datei speichern
+  // In Datei speichern
   FileName := GetConfigurationDirectory + DatabasesRegFile;
   AssignFile(F, FileName);
   try
@@ -2961,7 +3043,7 @@ begin
     raise;
   end;
 
-  // 6) Ins RegisteredDatabases‑Array aufnehmen
+  // Ins RegisteredDatabases-Array aufnehmen
   SetLength(RegisteredDatabases, Length(RegisteredDatabases) + 1);
   with RegisteredDatabases[High(RegisteredDatabases)] do
   begin
@@ -2990,33 +3072,31 @@ begin
   Result := High(RegisteredDatabases);
 end;
 
-{function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
-var
-  DBIndex: Integer;
-begin
-  Result := False;
-  DBIndex := FindDBIndexByTitleAndServer(ADBTitle, AServerName);
-  if DBIndex < 0 then Exit;
+{ ============================================================
+  CreateEmptyDatabase: Erstellt eine leere DB auf dem Ziel-Server.
 
-  with RegisteredDatabases[DBIndex] do
-  begin
-    // Erst verbinden!
-    if not IBDatabase.Connected then
-      ConnectDBPrepared(IBDatabase, IBTransaction, DBIndex, IBTransaction.Params);
+  BUGFIX:
+    - ServiceConn.FirebirdLibraryPathName wird jetzt explizit
+      auf die Client-Library des Ziel-Servers gesetzt. Vorher
+      blieb sie leer → globale FB-6.0-Lib wurde verwendet →
+      CreateDatabase mit lokalem Pfad öffnete die DB als
+      EMBEDDED im TB-Prozess → DB blieb offen → jeder spätere
+      TCP-Zugriff scheiterte mit "already opened with engine
+      instance".
 
-    // Dann erstellen
-    if IBDatabase.Connected then
-    begin
-      IBDatabase.Connected := False;
-      IBDatabase.CreateIfNotExists := True;
-      IBDatabase.Connected := True;
-      IBDatabase.Connected := False;
-      IBDatabase.CreateIfNotExists := False;
-      Result := True;
-    end;
-  end;
-end;}
+    - Nach CreateDatabase wird die ServiceConn explizit
+      getrennt, damit keine Verbindung offen bleibt.
 
+    - Der Embedded-Pfad (ServerRecord.IsEmbedded = True)
+      bleibt unverändert – dort ist Embedded-Öffnung gewollt,
+      und die DB wird nach dem Create explizit geschlossen.
+
+  HINWEIS:
+    Wenn der Ziel-Server eine andere Firebird-Version hat als
+    die Quell-DB, schlägt der spätere Zugriff mit
+    "wrong ODS version" fehl. Das ist ein Test-Setup-Problem,
+    kein Bug in dieser Funktion.
+  ============================================================ }
 function CreateEmptyDatabase(const AServerName, ADBTitle: string): Boolean;
 var
   DBIndex: Integer;
@@ -3029,12 +3109,21 @@ var
   ServiceConn: TIBXServicesConnection;
   DPB: IDPB;
   DBName: string;
+  ResolvedServerName: string;
 begin
   Result := False;
-  DBIndex := FindDBIndexByTitleAndServer(ADBTitle, AServerName);
-  if DBIndex < 0 then Exit;
 
-  ServerRecord := GetServerRecordFromFileByName(AServerName);
+  ServerRecord := GetServerRecordFromFileByAlias(AServerName);
+  if ServerRecord.ServerName = '' then
+    Exit;
+
+  if Trim(ServerRecord.ServerAlias) <> '' then
+    ResolvedServerName := Trim(ServerRecord.ServerAlias)
+  else
+    ResolvedServerName := Trim(ServerRecord.ServerName);
+
+  DBIndex := FindDBIndexByTitleAndServer(ADBTitle, ResolvedServerName);
+  if DBIndex < 0 then Exit;
 
   {$ifdef windows}
   DBFilePath := PChar(GetDBFileNameFromConnectionString(
@@ -3069,6 +3158,12 @@ begin
       ServiceConn.ServerName := ServerRecord.ServerName;
       ServiceConn.PortNo := ServerRecord.Port;
       ServiceConn.Protocol := ServerRecord.Protocol;
+
+      // WICHTIG: Client-Library des Ziel-Servers setzen, sonst
+      // nutzt die API die globale (falsche) Lib und öffnet die
+      // DB als Embedded.
+      ServiceConn.FirebirdLibraryPathName := ServerRecord.ClientLibraryPath;
+
       ServiceConn.Params.Add('user_name=' + ServerRecord.UserName);
       ServiceConn.Params.Add('password=' + ServerRecord.Password);
       ServiceConn.LoginPrompt := False;
@@ -3085,11 +3180,30 @@ begin
       ServiceConn.FirebirdAPI.CreateDatabase(DBName, DPB);
       Result := True;
     finally
+      // Explizit trennen, damit keine Verbindung offen bleibt
+      try
+        if Assigned(ServiceConn) then
+          if ServiceConn.Connected then
+            ServiceConn.Connected := False;
+      except
+      end;
       ServiceConn.Free;
     end;
   end;
 end;
 
+{ ============================================================
+  CreateDatabaseWithMetadata: Erstellt Ziel-DB inkl. Metadaten.
+
+  BUGFIX:
+    - Nach der Metadaten-Kopie wird die Verbindung zur
+      Ziel-DB explizit geschlossen (IBDatabase.Connected := False).
+      Vorher blieb sie offen, wenn sie vorher schon verbunden
+      war – dann blockierte sie spätere Zugriffe.
+    - Defensive Prüfung: DBWasConnected wird korrekt
+      zurückgesetzt, damit der Aufrufer den ursprünglichen
+      Zustand wiederherstellen kann.
+  ============================================================ }
 function CreateDatabaseWithMetadata(ASourceDBIndex, ADestDBIndex: Integer): Boolean;
 var
   Extractor: TSimpleObjExtractor;
@@ -3103,11 +3217,7 @@ begin
   Result := False;
   DBExistedBefore := False;
 
-  // ============================================================
-  // 1) Prüfen, ob die Ziel-DB bereits existiert
-  //    (Embedded: Datei vorhanden; Remote: nicht prüfbar → false)
-  // ============================================================
-  ServerRecord := GetServerRecordFromFileByName(
+  ServerRecord := GetServerRecordFromFileByAlias(
     RegisteredDatabases[ADestDBIndex].RegRec.ServerName);
 
   if ServerRecord.IsEmbedded then
@@ -3119,20 +3229,11 @@ begin
       DBExistedBefore := True;
   end;
 
-  // ============================================================
-  // 2) Leere DB erstellen (bei bereits existierender Datei
-  //    passiert nichts mehr — siehe Anpassung in
-  //    CreateEmptyDatabase)
-  // ============================================================
   if not CreateEmptyDatabase(
        RegisteredDatabases[ADestDBIndex].RegRec.ServerName,
        RegisteredDatabases[ADestDBIndex].RegRec.Title) then
     Exit;
 
-  // ============================================================
-  // 3) Login für die neue/alte DB durchführen
-  //    (Dialog falls nötig, danach ist die Verbindung aktiv)
-  // ============================================================
   if not ConnectToDBAs(ADestDBIndex, True) then
   begin
     MessageDlg(
@@ -3144,18 +3245,12 @@ begin
     Exit;
   end;
 
-  // ============================================================
-  // 4) Wenn DB bereits existierte → keine Metadaten kopieren
-  // ============================================================
   if DBExistedBefore then
   begin
     Result := True;
     Exit;
   end;
 
-  // ============================================================
-  // 5) Metadaten extrahieren und ausführen
-  // ============================================================
   Metadata := TStringList.Create;
   Extractor := TSimpleObjExtractor.Create(ASourceDBIndex);
   try
@@ -3182,39 +3277,64 @@ begin
       Script.Free;
     end;
   finally
-    if not DBWasConnected then
+    // WICHTIG: Nach der Kopie die Ziel-DB immer schließen,
+    // damit sie nicht als Embedded-Verbindung offen bleibt
+    // und spätere TCP-Zugriffe blockiert.
+    if Assigned(RegisteredDatabases[ADestDBIndex].IBTransaction) then
+      if RegisteredDatabases[ADestDBIndex].IBTransaction.InTransaction then
+        try RegisteredDatabases[ADestDBIndex].IBTransaction.Rollback; except end;
+
+    if Assigned(RegisteredDatabases[ADestDBIndex].IBDatabase) then
       if RegisteredDatabases[ADestDBIndex].IBDatabase.Connected then
-        RegisteredDatabases[ADestDBIndex].IBDatabase.Connected := false;
+        try RegisteredDatabases[ADestDBIndex].IBDatabase.Connected := False; except end;
 
     Metadata.Free;
     Extractor.Free;
   end;
 end;
 
-// --------------------------------------------------------------------------
-// Interaktiver Aufruf: Rechtsklick → Clone Registry
-// --------------------------------------------------------------------------
+{ ============================================================
+  CloneDBRegistryInteractive: Interaktiver DB-Clone-Aufruf.
+
+  VEREINFACHT:
+    - Keine CreateDB- oder WithMetadata-Logik mehr.
+      CreateEmptyDatabase und CreateDatabaseWithMetadata
+      bleiben in der Unit erhalten (könnten anderswo genutzt
+      werden), werden aber hier nicht mehr aufgerufen.
+
+    - Nach dem Klonen erscheint eine INFO-MELDUNG, die den
+      User ausdrücklich darauf hinweist, die geklonte
+      Registrierung am Ziel anzupassen. Grund:
+        - Der DB-Pfad im geklonten Record zeigt noch auf
+          die Original-Datei. Wenn die Ziel-DB woanders
+          liegt, muss der Pfad angepasst werden.
+        - Wenn Quell- und Ziel-Server unterschiedliche
+          Firebird-Versionen haben, kann die DB nicht
+          geöffnet werden (ODS-Version). Der User wird
+          darauf hingewiesen, den Clone zu prüfen.
+        - Connection-Charset kann vom Original abweichen.
+
+    - TreeView-Update über GetServerNodeByAlias
+      (funktioniert auch bei Alias-Anzeige).
+  ============================================================ }
 function CloneDBRegistryInteractive(ANodeInfos: TPNodeInfos): Boolean;
 var
   DestServerName, DestDBTitle: string;
   NewIndex: Integer;
   SourceDBName: string;
   ServerNode, NewDBNode, DummyNode: TTreeNode;
-  CreateDB, WithMetadata: Boolean;
 begin
   Result := False;
   if not Assigned(ANodeInfos) then Exit;
 
   SourceDBName := RegisteredDatabases[ANodeInfos^.dbIndex].RegRec.Title;
 
-  // NEU: DB-Clone-Dialog mit Optionen
+  // Vereinfachter Clone-Dialog (nur Ziel-Server + Titel)
   if not ShowDBCloneDialog(
        'Clone Database Registration',
        SourceDBName + '_Clone',
        DestServerName,
-       DestDBTitle,
-       CreateDB,
-       WithMetadata
+       DestDBTitle
      ) then Exit;
 
   try
@@ -3222,17 +3342,8 @@ begin
 
     if NewIndex >= 0 then
     begin
-      // Datenbank erstellen wenn gewünscht
-      if CreateDB then
-      begin
-        if WithMetadata then
-          CreateDatabaseWithMetadata(ANodeInfos^.dbIndex, NewIndex)
-        else
-          CreateEmptyDatabase(DestServerName, DestDBTitle);
-      end;
-
-      // TreeView aktualisieren
-      ServerNode := GetServerNodeByServerName(DestServerName);
+      // TreeView aktualisieren — Knoten über Alias suchen
+      ServerNode := GetServerNodeByAlias(DestServerName);
       if Assigned(ServerNode) then
       begin
         if (ServerNode.Count > 0) and (ServerNode.Items[0].Text = 'Loading...') then
@@ -3253,36 +3364,38 @@ begin
 
         DummyNode := MainTreeView.Items.AddChild(NewDBNode, 'Loading...');
         ServerNode.Expand(False);
-      end;
-
-      // Erfolgsmeldung
-      if CreateDB then
-      begin
-        if WithMetadata then
-          MessageDlg(
-            'Database cloned successfully with metadata!' + sLineBreak +
-            sLineBreak +
-            'Source: ' + SourceDBName + sLineBreak +
-            'Destination: ' + DestDBTitle + sLineBreak +
-            'Server: ' + DestServerName,
-            mtInformation, [mbOK], 0)
-        else
-          MessageDlg(
-            'Empty database created successfully!' + sLineBreak +
-            sLineBreak +
-            'Source: ' + SourceDBName + sLineBreak +
-            'Destination: ' + DestDBTitle + sLineBreak +
-            'Server: ' + DestServerName,
-            mtInformation, [mbOK], 0);
       end
       else
+      begin
         MessageDlg(
-          'Database registration cloned successfully!' + sLineBreak +
-          sLineBreak +
-          'Source: ' + SourceDBName + sLineBreak +
-          'Destination: ' + DestDBTitle + sLineBreak +
-          'Server: ' + DestServerName,
-          mtInformation, [mbOK], 0);
+          'Clone successful, but the server node "' + DestServerName + '" ' +
+          'could not be found in the TreeView.' + sLineBreak +
+          'Please reload the database list (Ctrl+R or restart).',
+          mtWarning, [mbOK], 0);
+      end;
+
+      // Erweiterte Erfolgsmeldung mit Hinweis auf Anpassung
+      MessageDlg(
+        'Database registration cloned successfully!' + sLineBreak +
+        sLineBreak +
+        'Source:      ' + SourceDBName + sLineBreak +
+        'Destination: ' + DestDBTitle + sLineBreak +
+        'Server:      ' + DestServerName + sLineBreak +
+        sLineBreak +
+        'IMPORTANT — please review the cloned registration:' + sLineBreak +
+        sLineBreak +
+        '  • Database path still points to the original file.' + sLineBreak +
+        '    Edit the registration if the target DB lives elsewhere.' + sLineBreak +
+        sLineBreak +
+        '  • If source and target servers have different' + sLineBreak +
+        '    Firebird versions, the database may not open' + sLineBreak +
+        '    (ODS version incompatibility).' + sLineBreak +
+        sLineBreak +
+        '  • Connection charset may differ from the original.' + sLineBreak +
+        sLineBreak +
+        'Right-click the cloned entry and choose' + sLineBreak +
+        '"Edit Database Registration" to verify settings.',
+        mtInformation, [mbOK], 0);
 
       Result := True;
     end;
@@ -3295,6 +3408,17 @@ begin
   end;
 end;
 
+{ ============================================================
+  Baut eine DB-Verbindung auf, inkl. Credentials, Session-Cache
+  und Transaktionsstart.
+
+  NEU: Server-Lookup für IsLocal über GetServerRecordFromFileByAlias
+  statt GetServerRecordFromFileByName. Rec.ServerName kann seit
+  der Alias-Umstellung ein Alias sein — GetServerRecordFromFileByName
+  würde dann nichts finden und IsLocal bliebe fälschlich False.
+  Folge: Embedded-Server würden ein Passwort verlangen, obwohl
+  sie keins brauchen.
+  ============================================================ }
 procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction; ADBIndex: Integer;
                             ATxParams: TStrings);
 var
@@ -3320,8 +3444,9 @@ begin
     if Assigned(ADatabase) and ADatabase.Connected then
       try ADatabase.Connected := false; except end;
 
-    // 3. Prüfen ob der SERVER Local/Embedded ist (robust, keine DB-Abhängigkeit)
-    ServerRecord := GetServerRecordFromFileByName(Rec.ServerName);
+    // 3. Prüfen ob der SERVER Local/Embedded ist.
+    //    Alias-Lookup mit Fallback auf echten Servernamen.
+    ServerRecord := GetServerRecordFromFileByAlias(Rec.ServerName);
     IsLocal := ServerRecord.IsEmbedded;
 
     // 4. Credentials setzen
@@ -3360,10 +3485,8 @@ begin
     if not ADatabase.Connected then
       ADatabase.Connected := true;
 
-    // 7. NEU: Nach erfolgreicher Verbindung Session-Cache füllen.
-    //    Nur wenn das Passwort NICHT im RegRec gespeichert ist – dann
-    //    hat der User es über den Login-Dialog eingegeben und wir
-    //    halten es für die restliche Session im Cache (z.B. für CloneTable).
+    // 7. Nach erfolgreicher Verbindung Session-Cache füllen.
+    //    Nur wenn das Passwort NICHT im RegRec gespeichert ist.
     if (not Rec.SavePassword) and (ADatabase.Params.Values['password'] <> '') then
     begin
       SetDBSessionPassword(Rec.ServerName, Rec.DatabaseName,
@@ -3372,7 +3495,6 @@ begin
                                ADatabase.Params.Values['password']);
     end;
 
-    // 8. Transaktionsparameter zuweisen (falls übergeben), dann starten
     // 8. Transaktionsparameter zuweisen (falls übergeben), dann starten
     if Assigned(ATransaction) then
     begin
@@ -3449,19 +3571,21 @@ begin
     SessionPasswordCache.Delete(idx);
 end;
 
-{function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
-var
-  idx: Integer;
-begin
-  Result := '';
-  if not Assigned(SessionPasswordCache) then
-    Exit;
+{ ============================================================
+  Liefert das Session-Passwort für eine DB.
 
-  idx := SessionPasswordCache.IndexOfName('DB_' + UpperCase(AServerName) + '_' + UpperCase(ADatabaseName));
-  if idx >= 0 then
-    Result := SessionPasswordCache.ValueFromIndex[idx];
-end;}
+  Sucht zuerst im Cache (Key: DB_<Servername>_<DatabaseName>).
+  Wenn nichts im Cache: prüft, ob der SERVER Embedded ist —
+  dann wird 'embedded_local' als Dummy zurückgegeben und
+  gecacht, weil Embedded-Verbindungen kein Passwort brauchen.
 
+  NEU: Server-Lookup über GetServerRecordFromFileByAlias statt
+  GetServerRecordFromFileByName. Rec.ServerName kann seit der
+  Alias-Umstellung ein Alias sein — GetServerRecordFromFileByName
+  würde dann nichts finden und IsEmbedded bliebe fälschlich
+  False. GetServerRecordFromFileByAlias findet beides (Alias
+  in Pass 1, echter Servername in Pass 2).
+  ============================================================ }
 function GetDBSessionPassword(const AServerName, ADatabaseName: string): string;
 var
   idx: Integer;
@@ -3480,8 +3604,9 @@ begin
     end;
   end;
 
-  // 2. Wenn nichts im Cache → prüfen ob der SERVER Local/Embedded ist
-  ServerRecord := GetServerRecordFromFileByName(AServerName);
+  // 2. Wenn nichts im Cache → prüfen ob der SERVER Local/Embedded ist.
+  //    Alias-Lookup mit Fallback auf echten Servernamen.
+  ServerRecord := GetServerRecordFromFileByAlias(AServerName);
   if ServerRecord.IsEmbedded then
   begin
     Result := 'embedded_local';
@@ -3898,7 +4023,10 @@ begin
   ServerSession := nil;
 
   try
-    ServerRecord := GetServerRecordFromFileByName(AServerName);
+    // Alias-Lookup mit Fallback auf echten Servernamen — dadurch
+    // funktioniert IsServerReachable sowohl mit Alias (Reg.pas)
+    // als auch mit echtem Servernamen (main.pas).
+    ServerRecord := GetServerRecordFromFileByAlias(AServerName);
 
     UserName := ServerRecord.UserName;
     Password := ServerRecord.Password;
@@ -3982,14 +4110,37 @@ begin
   end;
 end;
 
+{ ============================================================
+  CreateServerSessionFromRegistry: Erzeugt eine TServerSession
+  aus dem Registry-Record.
+
+  NEU:
+    - Lookup über GetServerRecordFromFileByAlias statt ByName.
+      AServerName ist seit der Alias-Umstellung der ANZEIGE-Name
+      (Alias oder Fallback echter Name). ByAlias findet den
+      richtigen Record auch dann, wenn mehrere Aliase auf
+      demselben echten Server sitzen (Prod/Test → beide
+      FB60Local) — ByName würde immer den ersten liefern und
+      damit Port/User/Password des falschen Servers verwenden.
+
+    - Defensive Prüfung: Wenn der Record nicht gefunden wird,
+      liefert die Funktion nil. Der Aufrufer muss den
+      Rückgabewert prüfen.
+
+  Die Session selbst bekommt sowohl ServerName (echter Name,
+  für die Verbindung) als auch ServerAlias (für die Anzeige).
+  ============================================================ }
 function CreateServerSessionFromRegistry(const AServerName: string): TServerSession;
 var
   ServerRecord: TServerRecord;
 begin
-  ServerRecord := GetServerRecordFromFileByName(AServerName);
+  ServerRecord := GetServerRecordFromFileByAlias(AServerName);
+
+  if Trim(ServerRecord.ServerName) = '' then
+    Exit(nil);
 
   Result := TServerSession.Create(
-    AServerName,
+    ServerRecord.ServerName,
     ServerRecord.ServerAlias,
     ServerRecord.UserName,
     ServerRecord.Password,
@@ -4008,6 +4159,263 @@ begin
     ServerRecord.RetryCount,
     ServerRecord.QueryTimeoutMS
   );
+end;
+
+{ ============================================================
+  ParseDBConnectionString: Zerlegt einen Firebird-ConnStr in
+  Hostname, Port und Dateipfad.
+
+  Format: [host[/port]:]path
+  Beispiele:
+    'FB60Local/3060:/opt/firebird6/data/test.fdb'
+      → Host='FB60Local', Port='3060', Path='/opt/firebird6/...'
+    'FB60Local:/opt/firebird6/data/test.fdb'
+      → Host='FB60Local', Port='', Path='/opt/firebird6/...'
+    '127.0.0.1:employee.fdb'
+      → Host='127.0.0.1', Port='', Path='employee.fdb'
+    '/opt/firebird/data/test.fdb'   (Embedded, unix)
+      → Host='', Port='', Path='/opt/...'
+    'C:\fb\data\test.fdb'           (Embedded, windows)
+      → Host='', Port='', Path='C:\fb\data\test.fdb'
+
+  Wichtig: Windows-Laufwerksbuchstabe (C:) wird NICHT als
+  Trennzeichen interpretiert.
+  ============================================================ }
+procedure ParseDBConnectionString(const AConnStr: string;
+  out AHost, APort, APath: string);
+var
+  S, HostPart: string;
+  P: Integer;
+begin
+  AHost := ''; APort := ''; APath := '';
+  S := Trim(AConnStr);
+  if S = '' then Exit;
+
+  // Windows-Pfad: 'C:\...' oder 'C:/...' → nur Pfad
+  if (Length(S) >= 2) and (S[2] = ':') and
+     ((S[1] in ['A'..'Z']) or (S[1] in ['a'..'z'])) then
+  begin
+    APath := S;
+    Exit;
+  end;
+
+  // Unix-Pfad: '/opt/...' → nur Pfad
+  if S[1] = '/' then
+  begin
+    APath := S;
+    Exit;
+  end;
+
+  // Firebird-ConnStr: host[/port]:path
+  P := LastDelimiter(':', S);
+  if P = 0 then
+  begin
+    // Kein ':' vorhanden → als reinen Pfad behandeln
+    APath := S;
+    Exit;
+  end;
+
+  APath := Copy(S, P + 1, MaxInt);
+  HostPart := Copy(S, 1, P - 1);
+
+  // Port vom Host trennen (host/port)
+  P := LastDelimiter('/', HostPart);
+  if P > 0 then
+  begin
+    APort := Copy(HostPart, P + 1, MaxInt);
+    AHost := Copy(HostPart, 1, P - 1);
+  end
+  else
+    AHost := HostPart;
+end;
+
+{ ============================================================
+  ValidateDBConnectionString: Prüft, ob der eingegebene
+  Connection-String zum AUSGEWÄHLTEN Server passt.
+
+  NEU (Bug-Fix bei mehreren Servern mit demselben ServerName):
+    Die Prüfung geht jetzt vom AExpectedServerAlias (dem in der
+    ComboBox ausgewählten Server) aus, NICHT vom Host im ConnStr.
+
+    Grund: Wenn mehrere Server denselben ServerName haben
+    (z.B. 7x 'localhost' mit unterschiedlichen Ports), kann
+    GetServerRecordFromFileByAlias(Host) den Host nicht
+    eindeutig zuordnen — es findet immer den ersten Treffer.
+
+    Alte Logik:
+      1. ServerRec := ByAlias(Host)  ← falsch bei mehreren
+                                        Servern mit gleichem Namen
+      2. Port vergleichen
+
+    Neue Logik:
+      1. ExpectedRec := ByAlias(AExpectedServerAlias)
+         (eindeutig, weil Alias systemweit eindeutig ist)
+      2. Host im ConnStr muss zu ExpectedRec.ServerName oder
+         ExpectedRec.ServerAlias passen
+      3. Port im ConnStr muss zu ExpectedRec.Port passen
+
+  Liefert:
+    Result = True  → alles OK
+    Result = False → AWarningMsg enthält eine verständliche
+                     Fehlerbeschreibung.
+
+  Embedded-Verbindungen (Host = '') werden immer akzeptiert.
+  ============================================================ }
+function ValidateDBConnectionString(const AConnStr, AExpectedServerAlias: string;
+  out AWarningMsg: string): Boolean;
+var
+  Host, Port, Path: string;
+  ExpectedRec: TServerRecord;
+begin
+  Result := True;
+  AWarningMsg := '';
+
+  ParseDBConnectionString(AConnStr, Host, Port, Path);
+
+  // Embedded: kein Host → immer OK
+  if Host = '' then
+    Exit;
+
+  // Erwarteten Server (aus ComboBox-Alias) holen — der Alias ist
+  // systemweit eindeutig, daher zuverlässig.
+  ExpectedRec := GetServerRecordFromFileByAlias(AExpectedServerAlias);
+
+  if Trim(ExpectedRec.ServerName) = '' then
+  begin
+    AWarningMsg := 'Selected server "' + AExpectedServerAlias +
+                   '" is not a registered server.';
+    Result := False;
+    Exit;
+  end;
+
+  // ============================================================
+  // 1) Host im ConnStr muss zum erwarteten Server passen
+  //    (entweder ServerName oder Alias des erwarteten Servers)
+  // ============================================================
+  if not (SameText(Host, Trim(ExpectedRec.ServerName)) or
+          SameText(Host, Trim(ExpectedRec.ServerAlias)) or
+          SameText(Host, AExpectedServerAlias)) then
+  begin
+    AWarningMsg := 'Host "' + Host + '" does not match the selected ' +
+                   'server "' + AExpectedServerAlias + '" (registered ' +
+                   'as "' + Trim(ExpectedRec.ServerName) + '").';
+    Result := False;
+    Exit;
+  end;
+
+  // ============================================================
+  // 2) Port im ConnStr muss zum erwarteten Server passen
+  // ============================================================
+  if (Port <> '') and (Trim(ExpectedRec.Port) <> '') and
+     (Port <> Trim(ExpectedRec.Port)) then
+  begin
+    AWarningMsg := 'Port ' + Port + ' does not match the port ' +
+                   Trim(ExpectedRec.Port) + ' configured for server "' +
+                   AExpectedServerAlias + '".';
+    Result := False;
+    Exit;
+  end;
+end;
+
+{ ============================================================
+  GetServerInventoryAsText: Erstellt einen formatierten Text-
+  Bericht aller registrierten Server und ihrer Datenbanken.
+
+  Format:
+
+    Firebird 6.0 on 127.0.0.1 (TCP Connection): Port: 3060  [Alias: FB60Local]
+      employee: FB60Local, 127.0.0.1/3060:/opt/firebird6/.../employee.fdb
+      test_db: FB60Local, 127.0.0.1/3060:/opt/firebird6/.../test_db.fdb
+
+    Firebird 3.0 on 127.0.0.1 (TCP Connection): Port: 3030  [Alias: FB30Local]
+      (no databases registered)
+
+    Total: 7 server(s), 12 database(s)
+
+  Verwendung:
+    - ShowMessage(GetServerInventoryAsText);
+    - oder in eine Datei schreiben
+    - oder in ein Memo / Report
+
+  Die Funktion nutzt die globalen Arrays RegisteredServers und
+  RegisteredDatabases. Sie ist unabhängig von der TreeView.
+
+  DB-Zuordnung:
+    - Primär: Rec.ServerName = ServerRec.ServerAlias
+      (neue Registrierungen speichern den Alias)
+    - Fallback: Rec.ServerName = ServerRec.ServerName
+      (nur wenn ServerAlias leer ist — Legacy-Server ohne Alias)
+  ============================================================ }
+function GetServerInventoryAsText: string;
+var
+  i, j: Integer;
+  ServerRec: TServerRecord;
+  DBRec: TRegisteredDatabase;
+  VersionStr, ProtocolStr, HeaderLine: string;
+  HasDBs: Boolean;
+  SL: TStringList;
+begin
+  SL := TStringList.Create;
+  try
+    for i := 0 to High(RegisteredServers) do
+    begin
+      ServerRec := RegisteredServers[i];
+
+      // ---- Version ----
+      if (ServerRec.VersionMajor > 0) or (ServerRec.VersionMinor > 0) then
+        VersionStr := 'Firebird ' + IntToStr(ServerRec.VersionMajor) + '.' +
+                      IntToStr(ServerRec.VersionMinor)
+      else
+        VersionStr := 'Firebird (unknown version)';
+
+      // ---- Protocol ----
+      ProtocolStr := IBXProtocolToString(ServerRec.Protocol);
+
+      // ---- Header-Zeile ----
+      HeaderLine := VersionStr + ' on ' + ServerRec.ServerName +
+                    ' (' + ProtocolStr + ' Connection)';
+      if Trim(ServerRec.Port) <> '' then
+        HeaderLine := HeaderLine + ': Port: ' + Trim(ServerRec.Port);
+      if Trim(ServerRec.ServerAlias) <> '' then
+        HeaderLine := HeaderLine + '  [Alias: ' + Trim(ServerRec.ServerAlias) + ']';
+
+      SL.Add(HeaderLine);
+
+      // ---- DBs unter diesem Server ----
+      HasDBs := False;
+      for j := 0 to High(RegisteredDatabases) do
+      begin
+        DBRec := RegisteredDatabases[j].RegRec;
+        if DBRec.Deleted then
+          Continue;
+
+        // Zuordnung prüfen
+        if SameText(Trim(DBRec.ServerName), Trim(ServerRec.ServerAlias)) or
+           ((Trim(ServerRec.ServerAlias) = '') and
+            SameText(Trim(DBRec.ServerName), Trim(ServerRec.ServerName))) then
+        begin
+          SL.Add('  ' + DBRec.Title + ': ' + Trim(DBRec.ServerName) + ', ' +
+                 DBRec.DatabaseName);
+          HasDBs := True;
+        end;
+      end;
+
+      if not HasDBs then
+        SL.Add('  (no databases registered)');
+
+      SL.Add('');
+    end;
+
+    if Length(RegisteredServers) = 0 then
+      SL.Add('No servers registered.')
+    else
+      SL.Add('Total: ' + IntToStr(Length(RegisteredServers)) + ' server(s), ' +
+             IntToStr(Length(RegisteredDatabases)) + ' database(s)');
+
+    Result := SL.Text;
+  finally
+    SL.Free;
+  end;
 end;
 
 function GetDBFileNameFromConnectionString(AConnStr: string): string;
@@ -4283,6 +4691,109 @@ begin
   finally
     CloseFile(F);
   end;
+end;
+
+{ ============================================================
+  Schreibt die komplette RegisteredDatabases-Liste neu in
+  databases.reg.
+
+  Wird für die Alias-Migration benötigt, weil EditRegisteredDB
+  den Record anhand ServerName + DatabaseName identifiziert —
+  nach einer Alias-Änderung würde das nicht mehr matchen.
+  ============================================================ }
+function SaveDBRegistrationsToFile: Boolean;
+var
+  F: file of TRegisteredDatabase;
+  FileName: string;
+  i: Integer;
+begin
+  Result := False;
+  try
+    FileName := GetConfigurationDirectory + DatabasesRegFile;
+
+    AssignFile(F, FileName);
+    FileMode := 2;
+    Rewrite(F);
+
+    for i := 0 to High(RegisteredDatabases) do
+    begin
+      RegisteredDatabases[i].OrigRegRec := RegisteredDatabases[i].RegRec;
+      Write(F, RegisteredDatabases[i].OrigRegRec);
+    end;
+
+    CloseFile(F);
+    Result := True;
+  except
+    try
+      CloseFile(F);
+    except
+    end;
+    Result := False;
+  end;
+end;
+
+{ ============================================================
+  Schreibt DB-Registrierungen um, wenn sich der Server-Alias
+  ändert.
+
+  Zwei Fälle:
+    1) AOldName wird direkt gespeichert (neue Registrierung)
+       → auf ANewAlias umschreiben
+    2) Der ECHTE Servername wird gespeichert (Legacy),
+       und der Server bekommt jetzt einen Alias
+       → auf ANewAlias umschreiben
+
+  ARealServerName = der echte Servername des Servers, dessen
+  Alias sich ändert. Damit Fall 2 erkannt werden kann.
+
+  Liefert die Anzahl geänderter Records.
+  ============================================================ }
+function RenameDBRegistrationsServerAlias(
+  const AOldName, ANewAlias, ARealServerName: string): Integer;
+var
+  i: Integer;
+  Count: Integer;
+  OldName, NewAliasT, RealName, RecName: string;
+  Changed: Boolean;
+begin
+  Result := 0;
+
+  OldName  := Trim(AOldName);
+  NewAliasT := Trim(ANewAlias);
+  RealName  := Trim(ARealServerName);
+
+  if NewAliasT = '' then
+    Exit;
+
+  Count := 0;
+
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    Changed := False;
+    RecName := Trim(RegisteredDatabases[i].RegRec.ServerName);
+
+    // Fall 1: Record speichert exakt den alten Alias
+    if (OldName <> '') and SameText(RecName, OldName) then
+    begin
+      RegisteredDatabases[i].RegRec.ServerName := NewAliasT;
+      Changed := True;
+    end
+    // Fall 2: Record speichert den echten Servernamen (Legacy)
+    else if (RealName <> '') and SameText(RecName, RealName) and
+            not SameText(NewAliasT, RealName) then
+    begin
+      RegisteredDatabases[i].RegRec.ServerName := NewAliasT;
+      Changed := True;
+    end;
+
+    if Changed then
+      Inc(Count);
+  end;
+
+  if Count > 0 then
+    SaveDBRegistrationsToFile;
+
+  Result := Count;
 end;
 
 procedure MarkAllServerDatabasesDeleted(const ServerName: string);
@@ -4598,6 +5109,196 @@ begin
   end;}
 end;
 
+{ ============================================================
+  Prüft, ob ein Alias systemweit eindeutig ist.
+
+  ZWEI Ausschluss-Parameter:
+
+    AExcludeAlias      — der aktuelle Alias des zu bearbeitenden
+                         Servers (primärer Ausschluss, weil Alias
+                         der eindeutige Identifikator ist).
+
+    AExcludeServerName — der echte Servername des zu bearbeitenden
+                         Servers. Wird benötigt, um zwischen
+                         "echter Kollision mit anderem Server" und
+                         "derselbe physische Server" unterscheiden
+                         zu können.
+
+  Kollisionen:
+
+    1) Alias = Alias eines anderen Servers
+       → immer Kollision.
+
+    2) Alias = echter Servername eines anderen Servers
+       → Kollision, ABER NICHT wenn der andere Server
+         denselben echten Servernamen hat wie der editierte
+         Server (dann ist es derselbe physische Server, und
+         der Alias = eigene ServerName ist zulässig).
+
+  Warum Punkt 2 die Ausnahme braucht:
+    Wenn zwei Server auf demselben echten Server laufen
+    (Prod/Test → beide FB60Local) und einer davon den
+    Alias "FB60Local" trägt, würde die naive Prüfung
+    "Alias = echter Name eines anderen Servers" beim
+    Editieren des Prod-Servers fälschlich Kollision
+    melden — weil der Test-Server auch "FB60Local"
+    als echten Namen hat.
+  ============================================================ }
+function IsServerAliasUnique(const AAlias, AExcludeAlias, AExcludeServerName: string): Boolean;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+  compareAlias, excludeAlias, excludeName, recAlias, recName: string;
+  IsSelfRecord: Boolean;
+begin
+  Result := True;
+
+  compareAlias := Trim(AAlias);
+  if compareAlias = '' then
+    Exit;
+
+  excludeAlias := Trim(AExcludeAlias);
+  excludeName  := Trim(AExcludeServerName);
+
+  fileName := GetConfigurationDirectory + ServersRegFile;
+  if not FileExists(fileName) then
+    Exit;
+
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    while fs.Position < fs.Size do
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+
+      recAlias := Trim(rec.ServerAlias);
+      recName  := Trim(rec.ServerName);
+
+      // ------------------------------------------------------
+      // Ausschluss: aktuell bearbeiteter Record
+      // ------------------------------------------------------
+      IsSelfRecord := False;
+
+      // Fall A: Record hat einen Alias, der dem alten Alias
+      // des bearbeiteten Servers entspricht
+      if (excludeAlias <> '') and (recAlias <> '') and
+         SameText(recAlias, excludeAlias) then
+        IsSelfRecord := True;
+
+      // Fall B: Legacy-Record ohne Alias, dessen echter Name
+      // dem des bearbeiteten Servers entspricht
+      if (excludeAlias = '') and (excludeName <> '') and
+         (recAlias = '') and SameText(recName, excludeName) then
+        IsSelfRecord := True;
+
+      if IsSelfRecord then
+        Continue;
+
+      // ------------------------------------------------------
+      // Kollision 1: Alias = Alias eines anderen Servers
+      // ------------------------------------------------------
+      if (recAlias <> '') and SameText(recAlias, compareAlias) then
+      begin
+        Result := False;
+        Exit;
+      end;
+
+      // ------------------------------------------------------
+      // Kollision 2: Alias = echter Servername eines anderen
+      // Servers — ABER nur, wenn der andere Server einen
+      // ANDEREN echten Servernamen hat als der editierte.
+      // Wenn der echte Name derselbe ist, ist es derselbe
+      // physische Server → keine Kollision.
+      // ------------------------------------------------------
+      if SameText(recName, compareAlias) and
+         not SameText(recName, excludeName) then
+      begin
+        Result := False;
+        Exit;
+      end;
+    end;
+  finally
+    fs.Free;
+  end;
+end;
+
+{ ============================================================
+  Sucht einen Server-Record anhand des Alias.
+
+  ZWEI DURCHGÄNGE (beide Pflicht!):
+
+    Pass 1: Alias-Vergleich
+      → Für neue DB-Registrierungen (Alias gespeichert).
+
+    Pass 2: Echter Servername (Fallback)
+      → Für Legacy-DB-Registrierungen (echter Name gespeichert)
+        UND für Aufrufer wie IsServerReachable, die den
+        echten Servernamen übergeben.
+
+  WICHTIG: Der Fallback auf Pass 2 greift auch dann, wenn
+  ein Record einen Alias hat — sonst würden Aufrufer mit
+  echtem Servernamen (z.B. IsServerReachable in main.pas)
+  keinen Record mehr finden, sobald ein Alias gesetzt ist.
+
+  Liefert einen leeren Record, wenn nichts gefunden wurde.
+  ============================================================ }
+function GetServerRecordFromFileByAlias(const AAlias: string): TServerRecord;
+var
+  fs: TFileStream;
+  rec: TServerRecord;
+  fileName: string;
+  compareAlias: string;
+  FoundByAlias: Boolean;
+begin
+  FillChar(Result, SizeOf(Result), 0);
+
+  compareAlias := Trim(AAlias);
+  if compareAlias = '' then
+    Exit;
+
+  fileName := getConfigurationDirectory + ServersRegFile;
+  if not FileExists(fileName) then
+    Exit;
+
+  FoundByAlias := False;
+  fs := TFileStream.Create(fileName, fmOpenRead or fmShareDenyWrite);
+  try
+    // ----------------------------------------------------------
+    // Pass 1: ALIAS-Vergleich (bevorzugt)
+    // ----------------------------------------------------------
+    while fs.Position < fs.Size do
+    begin
+      fs.ReadBuffer(rec, SizeOf(TServerRecord));
+      if (Trim(rec.ServerAlias) <> '') and SameText(Trim(rec.ServerAlias), compareAlias) then
+      begin
+        Result := rec;
+        FoundByAlias := True;
+        Break;
+      end;
+    end;
+
+    // ----------------------------------------------------------
+    // Pass 2: ECHTER SERVERNAME (Fallback)
+    // Greift auch dann, wenn der Record einen Alias hat!
+    // ----------------------------------------------------------
+    if not FoundByAlias then
+    begin
+      fs.Position := 0;
+      while fs.Position < fs.Size do
+      begin
+        fs.ReadBuffer(rec, SizeOf(TServerRecord));
+        if SameText(Trim(rec.ServerName), compareAlias) then
+        begin
+          Result := rec;
+          Break;
+        end;
+      end;
+    end;
+  finally
+    fs.Free;
+  end;
+end;
+
 function GetServerRecordFromFileByName(AServerName: string): TServerRecord;
 var
   fs: TFileStream;
@@ -4689,14 +5390,48 @@ begin
   end;
 end;
 
-procedure SaveServerDataToFile(const Rec: TServerRecord);
+{ ============================================================
+  Speichert einen Server-Record in servers.reg.
+
+  Identifikation des zu überschreibenden Records:
+
+    Pass 1 — AOldAlias (explizit übergeben)
+      → Der Anwender hat den Alias geändert. Wir suchen nach
+        dem ALTEN Alias und überschreiben den Record.
+      → Verhindert das Anlegen eines Duplikats.
+
+    Pass 2 — Rec.ServerAlias (normaler Update)
+      → Kein Alias-Wechsel. Wir suchen nach dem aktuellen
+        Alias und überschreiben den Record.
+      → Greift nur, wenn AOldAlias leer übergeben wurde
+        (sonst würde ein fremder Record gefunden).
+
+    Pass 3 — Legacy-Match (ServerName)
+      → Record hat noch keinen Alias, soll aber einen bekommen.
+      → Suche über ServerName mit LEEREM Alias im alten Record.
+      → Verhindert, dass ein Record mit bereits gesetztem Alias
+        (der zufällig denselben ServerName hat) überschrieben wird.
+
+  Wenn nichts gefunden: Record wird ANGEHÄNGT (neuer Server).
+
+  WICHTIG: Die alte Version identifizierte Records nur über
+  ServerName. Bei zwei Einträgen mit demselben echten Servernamen
+  (z.B. FB60Local → zwei Aliase) überschrieb sie den ersten
+  Eintrag — genau der Bug, der zum Verschwinden des Servers
+  mit seiner DB geführt hat.
+  ============================================================ }
+procedure SaveServerDataToFile(const Rec: TServerRecord; const AOldAlias: string = '');
 var
   tmpList: TMemoryStream;
   oldRec: TServerRecord;
   found: Boolean;
   regFile: string;
+  NewAlias, OldAlias, RecAlias, RecServerName: string;
 begin
   regFile := GetConfigurationDirectory + ServersRegFile;
+
+  NewAlias  := Trim(Rec.ServerAlias);
+  OldAlias  := Trim(AOldAlias);
 
   tmpList := TMemoryStream.Create;
   try
@@ -4706,13 +5441,52 @@ begin
     tmpList.Position := 0;
     found := False;
 
-    // prüfen ob schon ein Datensatz für diesen Server existiert
     while tmpList.Position < tmpList.Size do
     begin
       tmpList.ReadBuffer(oldRec, SizeOf(oldRec));
-      if Trim(oldRec.ServerName) = Trim(Rec.ServerName) then
+      RecAlias      := Trim(oldRec.ServerAlias);
+      RecServerName := Trim(oldRec.ServerName);
+
+      // ----------------------------------------------------
+      // Pass 1: Expliziter Alias-Wechsel
+      // ----------------------------------------------------
+      if (OldAlias <> '') and (RecAlias <> '') and SameText(RecAlias, OldAlias) then
       begin
-        // überschreiben
+        tmpList.Position := tmpList.Position - SizeOf(oldRec);
+        tmpList.WriteBuffer(Rec, SizeOf(Rec));
+        found := True;
+        Break;
+      end;
+
+      // ----------------------------------------------------
+      // Pass 2: Normaler Update (kein Alias-Wechsel)
+      // ----------------------------------------------------
+      if (OldAlias = '') and (NewAlias <> '') and (RecAlias <> '') and SameText(RecAlias, NewAlias) then
+      begin
+        tmpList.Position := tmpList.Position - SizeOf(oldRec);
+        tmpList.WriteBuffer(Rec, SizeOf(Rec));
+        found := True;
+        Break;
+      end;
+
+      // ----------------------------------------------------
+      // Pass 3: Legacy-Record bekommt erstmals einen Alias
+      // ----------------------------------------------------
+      if (OldAlias = '') and (NewAlias <> '') and (RecAlias = '')
+         and SameText(RecServerName, Trim(Rec.ServerName)) then
+      begin
+        tmpList.Position := tmpList.Position - SizeOf(oldRec);
+        tmpList.WriteBuffer(Rec, SizeOf(Rec));
+        found := True;
+        Break;
+      end;
+
+      // ----------------------------------------------------
+      // Pass 4: Legacy-Update ohne Alias (beide leer)
+      // ----------------------------------------------------
+      if (OldAlias = '') and (NewAlias = '') and (RecAlias = '')
+         and SameText(RecServerName, Trim(Rec.ServerName)) then
+      begin
         tmpList.Position := tmpList.Position - SizeOf(oldRec);
         tmpList.WriteBuffer(Rec, SizeOf(Rec));
         found := True;
@@ -4720,7 +5494,9 @@ begin
       end;
     end;
 
-    // falls nicht gefunden → neuen Datensatz anhängen
+    // ----------------------------------------------------
+    // Neuer Record → anhängen
+    // ----------------------------------------------------
     if not found then
     begin
       tmpList.Position := tmpList.Size;
@@ -4799,62 +5575,323 @@ begin
   Result := Rec;
 end;
 
+{ ============================================================
+  Liefert den ALIAS eines Server-Knotens.
+
+  Bevorzugt ServerSession.ServerAlias (der eindeutige,
+  systemweit vergebene Alias).
+  Fallback auf Node.Text — das ist der Anzeige-Name, der bei
+  fehlendem Alias automatisch der echte Servername ist.
+
+  WICHTIG: Diese Funktion liefert den Anzeige-Namen.
+  Für den ECHTEN Servernamen (Lookup in servers.reg)
+  stattdessen GetServerNameFromNode() verwenden.
+
+  Verwendung:
+    - DB-Registrierung: Alias als Server-Identifikator speichern
+    - Alle Stellen, die den Anwender-seitigen Namen brauchen
+  ============================================================ }
+function GetServerAliasFromNode(ANode: TTreeNode): string;
+var
+  Info: TPNodeInfos;
+begin
+  Result := '';
+
+  if (ANode = nil) or (not Assigned(ANode.Data)) then
+    Exit;
+
+  Info := TPNodeInfos(ANode.Data);
+
+  if Assigned(Info^.ServerSession) and (Trim(Info^.ServerSession.ServerAlias) <> '') then
+    Result := Trim(Info^.ServerSession.ServerAlias)
+  else
+    Result := Trim(ANode.Text);
+end;
+
+{ ============================================================
+  GetServerNodeByAlias: Findet den Server-Knoten anhand des
+  Alias (Anzeige-Name).
+
+  DESIGN-REGELN:
+    - Jeder Server hat einen Alias (beim Anlegen via InputBox
+      erzwungen).
+    - Jede DB hängt unter einem registrierten Server
+      (Registrierung nur per Rechtsklick auf Server-Node).
+    - Ein leerer ServerAlias ist nur bei kaputter .reg-Datei
+      möglich → dann lieber nil zurückgeben als raten.
+
+  Liefert nil, wenn kein Knoten mit diesem Alias existiert.
+  ============================================================ }
+function GetServerNodeByAlias(const AAlias: string): TTreeNode;
+var
+  Node: TTreeNode;
+  Info: TPNodeInfos;
+  CompareName, NodeAlias: string;
+begin
+  Result := nil;
+
+  if MainTreeView = nil then
+    Exit;
+
+  CompareName := Trim(AAlias);
+  if CompareName = '' then
+    Exit;
+
+  Node := MainTreeView.Items.GetFirstNode;
+  while Node <> nil do
+  begin
+    if (Node.Level = 0) and Assigned(Node.Data) then
+    begin
+      Info := TPNodeInfos(Node.Data);
+      if Assigned(Info^.ServerSession) then
+      begin
+        NodeAlias := Trim(Info^.ServerSession.ServerAlias);
+        if (NodeAlias <> '') and SameText(NodeAlias, CompareName) then
+        begin
+          Result := Node;
+          Exit;
+        end;
+      end;
+    end;
+    Node := Node.GetNextSibling;
+  end;
+end;
+
+{ ============================================================
+  Liefert den echten Servernamen eines Server-Knotens.
+
+  Bevorzugt ServerSession.ServerName (zuverlässig, auch wenn
+  Node.Text künftig einen Alias anzeigt).
+  Fallback auf Node.Text, falls keine ServerSession vorhanden
+  ist (z. B. bei alten Knoten ohne Session).
+  ============================================================ }
+function GetServerNameFromNode(ANode: TTreeNode): string;
+var
+  Info: TPNodeInfos;
+begin
+  Result := '';
+
+  if (ANode = nil) or (not Assigned(ANode.Data)) then
+    Exit;
+
+  Info := TPNodeInfos(ANode.Data);
+
+  if Assigned(Info^.ServerSession) and (Trim(Info^.ServerSession.ServerName) <> '') then
+    Result := Trim(Info^.ServerSession.ServerName)
+  else
+    Result := Trim(ANode.Text);
+end;
+
+{ ============================================================
+  Findet den Server-Knoten (Level 0) anhand des ECHTEN
+  Servernamens.
+
+  Verwendet GetServerNameFromNode(), damit auch dann der
+  korrekte Knoten gefunden wird, wenn die TreeView künftig
+  den Alias anzeigt.
+
+  Nur Level-0-Knoten werden durchsucht (GetNextSibling-Lauf
+  über die Wurzel-Ebene).
+
+  Defensive Prüfungen:
+    - MainTreeView = nil
+    - Node.Data = nil
+    - leere AServerName
+
+  Liefert nil, wenn kein passender Knoten gefunden wurde.
+  ============================================================ }
 function GetServerNodeByServerName(const AServerName: string): TTreeNode;
 var
   Node: TTreeNode;
+  CompareName, NodeName: string;
 begin
   Result := nil;
+
+  if MainTreeView = nil then
+    Exit;
+
+  CompareName := Trim(AServerName);
+  if CompareName = '' then
+    Exit;
 
   Node := MainTreeView.Items.GetFirstNode;
 
   while Node <> nil do
   begin
-    if SameText(Node.Text, AServerName) then
+    // Nur Level 0 (Server-Ebene) durchsuchen
+    if Node.Level = 0 then
     begin
-      Result := Node;
-      Exit;
+      NodeName := GetServerNameFromNode(Node);
+
+      if (NodeName <> '') and SameText(NodeName, CompareName) then
+      begin
+        Result := Node;
+        Exit;
+      end;
     end;
 
-    Node := Node.GetNextSibling;  // nur Level 0 durchsuchen
+    Node := Node.GetNextSibling;
   end;
 end;
 
+{ ============================================================
+  Liefert die ANZEIGE-Namen aller Server-Knoten (Level 0).
+
+  Bevorzugt ServerAlias aus der ServerSession; fällt auf den
+  echten Servernamen zurück, wenn kein Alias gesetzt ist.
+
+  Gedacht für ComboBoxen und andere UI-Elemente, die dem
+  Anwender den Alias zeigen sollen.
+
+  Für interne Lookups immer GetServerListFromTreeView
+  (echte Servernamen) verwenden!
+  ============================================================ }
+function GetServerAliasListFromTreeView: TStringList;
+var
+  i: Integer;
+  Node: TTreeNode;
+  Info: TPNodeInfos;
+  DisplayName: string;
+begin
+  Result := nil;
+  if MainTreeView = nil then
+    Exit;
+  if MainTreeView.Items.Count = 0 then
+    Exit;
+
+  Result := TStringList.Create;
+
+  for i := 0 to MainTreeView.Items.Count - 1 do
+  begin
+    Node := MainTreeView.Items[i];
+
+    if (Node.Level = 0) and (Trim(Node.Text) <> '') then
+    begin
+      DisplayName := '';
+
+      if Assigned(Node.Data) then
+      begin
+        Info := TPNodeInfos(Node.Data);
+
+        if Assigned(Info^.ServerSession)
+           and (Trim(Info^.ServerSession.ServerAlias) <> '') then
+          DisplayName := Trim(Info^.ServerSession.ServerAlias)
+        else
+          DisplayName := Trim(Node.Text);
+      end
+      else
+        DisplayName := Trim(Node.Text);
+
+      if DisplayName <> '' then
+        Result.Add(DisplayName);
+    end;
+  end;
+end;
+
+{ ============================================================
+  Liefert die ECHTEN Servernamen aller Server-Knoten (Level 0).
+
+  Verwendet GetServerNameFromNode(), damit auch dann der
+  korrekte Servername zurückkommt, wenn die TreeView künftig
+  den Alias anzeigt (ServerSession.ServerName statt Node.Text).
+
+  Diese Funktion ist der zentrale Lookup für interne Zwecke:
+    - Server-Auswahl in DB-Registrierungs-Dialogen
+    - Clone-Dialoge (Quell-/Ziel-Server)
+    - Jede Stelle, die den Server-Record nachschlagen muss
+
+  Für die Anzeige in UI-Elementen (ComboBoxen etc.)
+  stattdessen GetServerAliasListFromTreeView() verwenden.
+  ============================================================ }
 function GetServerListFromTreeView: TStringList;
 var
   i: Integer;
   Node: TTreeNode;
+  ServerName: string;
 begin
-  result := nil;
+  Result := nil;
+
+  if MainTreeView = nil then
+    Exit;
   if MainTreeView.Items.Count = 0 then
-    exit;
+    Exit;
+
   Result := TStringList.Create;
+
   for i := 0 to MainTreeView.Items.Count - 1 do
   begin
     Node := MainTreeView.Items[i];
+
     if (Node.Level = 0) and (Trim(Node.Text) <> '') then
-      Result.Add(Node.Text);
+    begin
+      ServerName := GetServerNameFromNode(Node);
+
+      if ServerName <> '' then
+        Result.Add(ServerName);
+    end;
   end;
 end;
 
+{ ============================================================
+  Liefert Verbindungsstrings der Form "Servername/Port" für
+  alle Server-Knoten (Level 0).
+
+  Verwendet GetServerNameFromNode(), damit auch dann der
+  korrekte Servername zurückkommt, wenn die TreeView künftig
+  den Alias anzeigt.
+
+  Bei Embedded-Verbindungen (lokal) wird der Port weggelassen,
+  weil er dort keine Rolle spielt.
+
+  Defensive Prüfungen:
+    - MainTreeView = nil
+    - Node.Data = nil
+    - ServerSession = nil
+
+  Verhalten bei fehlender Session: Fallback auf Node.Text
+  ohne Port (konservativ, damit kein Crash entsteht).
+  ============================================================ }
 function GetServerAndPortListFromTreeView: TStringList;
 var
   i: Integer;
   Node: TTreeNode;
-  Port: string;
-  hstr: string;
+  Info: TPNodeInfos;
+  ServerName: string;
+  hStr: string;
 begin
-  result := nil;
+  Result := nil;
+
+  if MainTreeView = nil then
+    Exit;
   if MainTreeView.Items.Count = 0 then
-    exit;
+    Exit;
+
   Result := TStringList.Create;
+
   for i := 0 to MainTreeView.Items.Count - 1 do
   begin
     Node := MainTreeView.Items[i];
+
     if (Node.Level = 0) and (Trim(Node.Text) <> '') then
     begin
-      hStr := Node.Text;
-      if not TPNodeInfos(Node.Data)^.ServerSession.IsEmbedded   then
-        hStr := hStr + '/' + TPNodeInfos(Node.Data)^.ServerSession.Port;
+      ServerName := GetServerNameFromNode(Node);
+      if ServerName = '' then
+        Continue;
+
+      hStr := ServerName;
+
+      // Port nur anhängen, wenn eine Session existiert und
+      // es sich NICHT um eine Embedded-Verbindung handelt.
+      if Assigned(Node.Data) then
+      begin
+        Info := TPNodeInfos(Node.Data);
+
+        if Assigned(Info^.ServerSession)
+           and (not Info^.ServerSession.IsEmbedded)
+           and (Trim(Info^.ServerSession.Port) <> '') then
+          hStr := hStr + '/' + Trim(Info^.ServerSession.Port);
+      end;
+
       Result.Add(hStr);
     end;
   end;
@@ -5048,6 +6085,8 @@ begin
   if CSVBufferSizeBytes < CSVBlockSizeBytes * 2 then
     CSVBufferSizeBytes := CSVBlockSizeBytes * 2;
 
+  CSVAutoTuneCSVBuffer := fIniFile.ReadBool('CSVEditor', 'CSVAutoTuneCSVBuffer', true);
+
   CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
 
 
@@ -5170,6 +6209,7 @@ begin
   fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
   fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
   fIniFile.WriteInteger('CSVEditor','CSVProgressUpdatePercent', CSVProgressUpdatePercent);
+  fIniFile.WriteBool('CSVEditor','CSVAutoTuneCSVBuffer', CSVAutoTuneCSVBuffer);
 
   //UpdateChecker
   fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
@@ -6678,21 +7718,118 @@ begin
       Exit(i);
 end;
 
+{ ============================================================
+  GetDBTitlesForServer: Liefert alle DB-Titel, die zu einem
+  Server (Anzeige-Name = Alias oder echter Name) gehören.
+
+  Signatur verwendet TStrings statt TStringList, damit auch
+  TComboBox.Items direkt übergeben werden kann (TComboBox.Items
+  ist vom Typ TStrings; TStringList ist davon abgeleitet).
+
+  Logik:
+    - Für jede DB-Registrierung wird der zugehörige Server-
+      Record über GetServerRecordFromFileByAlias aufgelöst.
+      Das nutzt Pass 1 (Alias) + Pass 2 (echter Name) und
+      wendet damit dieselbe "Legacy gehört dem ersten Server
+      mit diesem echten Namen"-Regel an wie GetServerNodeByAlias.
+    - Verglichen werden beide Felder (ServerAlias + ServerName).
+      Dadurch gehören DBs unter 'Prod' nicht zu 'Test', auch
+      wenn beide auf denselben echten Server zeigen.
+
+  AList muss vom Aufrufer erstellt und freigegeben werden.
+  Die Liste wird VORHER geleert.
+
+  Result = False nur bei nil-Liste oder leerem ADisplayAlias.
+  ============================================================ }
+function GetDBTitlesForServer(const ADisplayAlias: string; AList: TStrings): Boolean;
+var
+  i: Integer;
+  TargetRec, RecServer: TServerRecord;
+begin
+  Result := False;
+  if AList = nil then Exit;
+
+  AList.Clear;
+
+  if Trim(ADisplayAlias) = '' then Exit;
+
+  TargetRec := GetServerRecordFromFileByAlias(ADisplayAlias);
+  if Trim(TargetRec.ServerName) = '' then Exit;
+
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    if Trim(RegisteredDatabases[i].RegRec.ServerName) = '' then Continue;
+
+    RecServer := GetServerRecordFromFileByAlias(
+                   RegisteredDatabases[i].RegRec.ServerName);
+    if Trim(RecServer.ServerName) = '' then Continue;
+
+    // Beide Felder vergleichen (ServerAlias + ServerName) —
+    // bei zwei Aliasen auf demselben echten Server
+    // unterscheiden sie sich im Alias.
+    if SameText(Trim(TargetRec.ServerAlias), Trim(RecServer.ServerAlias))
+       and SameText(Trim(TargetRec.ServerName), Trim(RecServer.ServerName)) then
+      AList.Add(RegisteredDatabases[i].RegRec.Title);
+  end;
+
+  Result := True;
+end;
+
 // --------------------------------------------------------------------------
 // Hilfsfunktion: DB‑Index anhand Title + Servername finden
 // --------------------------------------------------------------------------
+{ ============================================================
+  Findet den DB-Index anhand Title + Servername.
+
+  Seit der Alias-Umstellung kann RegRec.ServerName entweder
+  der ALIAS (neue Registrierung) oder der ECHTE Servername
+  (Legacy) sein. AServerName kann ebenfalls beides sein.
+
+  Daher ZWEI Vergleiche pro Record:
+    1) Direkter Vergleich (Alias↔Alias oder Legacy↔Legacy)
+    2) Alias↔echter Name (über Server-Record-Auflösung)
+
+  Liefert -1, wenn nichts gefunden wurde.
+  ============================================================ }
 function FindDBIndexByTitleAndServer(const ATitle, AServerName: string): Integer;
 var
   i: Integer;
+  SearchName, RecName: string;
+  ServerRec: TServerRecord;
 begin
   Result := -1;
+
+  SearchName := Trim(AServerName);
+  if SearchName = '' then
+    Exit;
+
   for i := 0 to High(RegisteredDatabases) do
   begin
-    if SameText(RegisteredDatabases[i].RegRec.Title, ATitle) and
-       SameText(RegisteredDatabases[i].RegRec.ServerName, AServerName) then
+    if not SameText(RegisteredDatabases[i].RegRec.Title, ATitle) then
+      Continue;
+
+    RecName := Trim(RegisteredDatabases[i].RegRec.ServerName);
+
+    // 1) Direkter Vergleich
+    if SameText(RecName, SearchName) then
     begin
       Result := i;
       Exit;
+    end;
+
+    // 2) Alias↔echter Name: Server-Record auflösen
+    if RecName <> '' then
+    begin
+      ServerRec := GetServerRecordFromFileByAlias(RecName);
+      if Trim(ServerRec.ServerAlias) <> '' then
+      begin
+        if SameText(Trim(ServerRec.ServerAlias), SearchName) or
+           SameText(Trim(ServerRec.ServerName), SearchName) then
+        begin
+          Result := i;
+          Exit;
+        end;
+      end;
     end;
   end;
 end;

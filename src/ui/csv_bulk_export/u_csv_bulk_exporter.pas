@@ -9,7 +9,7 @@ uses
   Math, DateUtils, Dialogs,
   Graphics, StdCtrls, ExtCtrls,
   SynEdit, SynHighlighterSQL, Grids, CheckLst, ComCtrls, DB, BufStream,
-  IBDatabase, IBQuery, IBSQL, IBXScript, IBDataOutput,
+  IBDatabase, IBQuery, IBSQL, IBXScript, IBDataOutput, ATSynEdit,
 
   SysTables,
   turbocommon,
@@ -234,13 +234,16 @@ end;
 
 procedure TfrmCSVBulkExporter.LoadServerListFillOnly;
 var
-  List: TStringList;
+  AliasList: TStringList;
 begin
-  List := GetServerListFromTreeView;
+  // ComboBox mit ALIASEN füllen (konsistent zu TreeView und
+  // allen anderen Masken).
+  AliasList := GetServerAliasListFromTreeView;
+  if AliasList = nil then Exit;
   try
-    comboxSourceServer.Items.Assign(List);
+    comboxSourceServer.Items.Assign(AliasList);
   finally
-    List.Free;
+    AliasList.Free;
   end;
 end;
 
@@ -249,9 +252,22 @@ begin
   ApplyInitialSelection;
 end;
 
+{ ============================================================
+  ApplyInitialSelection: Setzt die Vorauswahl in den ComboBoxen
+  basierend auf FInitialDBIndex.
+
+  NEU:
+    - Server-Auswahl über den ALIAS des Servers (nicht mehr
+      über Rec.ServerName, das bei Legacy-Records der echte
+      Name ist und nicht in der Alias-ComboBox erscheint).
+    - Bei Legacy-Records (Rec.ServerName = echter Name, kein
+      Alias im Record) wird der Alias aus dem Server-Record
+      geholt (GetServerRecordFromFileByAlias).
+  ============================================================ }
 procedure TfrmCSVBulkExporter.ApplyInitialSelection;
 var
-  ServerName, DBTitle: string;
+  ServerRec: TServerRecord;
+  DBTitle, DisplayAlias: string;
   Idx: Integer;
 begin
   FUpdatingCombos := True;
@@ -260,8 +276,15 @@ begin
 
     if (FInitialDBIndex >= 0) and (FInitialDBIndex < Length(RegisteredDatabases)) then
     begin
-      ServerName := RegisteredDatabases[FInitialDBIndex].RegRec.ServerName;
-      Idx := comboxSourceServer.Items.IndexOf(ServerName);
+      // Alias ermitteln (Fallback: echter Name bei Legacy-Records)
+      ServerRec := GetServerRecordFromFileByAlias(
+                     RegisteredDatabases[FInitialDBIndex].RegRec.ServerName);
+      if Trim(ServerRec.ServerAlias) <> '' then
+        DisplayAlias := Trim(ServerRec.ServerAlias)
+      else
+        DisplayAlias := Trim(ServerRec.ServerName);
+
+      Idx := comboxSourceServer.Items.IndexOf(DisplayAlias);
       if Idx >= 0 then
         comboxSourceServer.ItemIndex := Idx;
     end
@@ -575,14 +598,20 @@ begin
   LoadDBList;
 end;
 
+{ ============================================================
+  LoadDBList: Füllt die DB-ComboBox basierend auf dem
+  gewählten Server.
+
+  NEU:
+    - GetDBTitlesForServer (aus turbocommon.pas) liefert nur
+      die DB-Titel, die zum Anzeige-Alias des Servers gehören.
+      Dadurch gehören DBs unter 'Prod' nicht zu 'Test', auch
+      wenn beide auf denselben echten Server zeigen.
+  ============================================================ }
 procedure TfrmCSVBulkExporter.LoadDBList;
-var
-  i: Integer;
 begin
-  comboxSourceDB.Items.Clear;
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(RegisteredDatabases[i].RegRec.ServerName, comboxSourceServer.Text) then
-      comboxSourceDB.Items.Add(RegisteredDatabases[i].RegRec.Title);
+  GetDBTitlesForServer(comboxSourceServer.Text, comboxSourceDB.Items);
+
   if comboxSourceDB.Items.Count > 0 then
   begin
     comboxSourceDB.ItemIndex := 0;
@@ -590,21 +619,23 @@ begin
   end;
 end;
 
+{ ============================================================
+  comboxSourceDBChange: Reagiert auf DB-Wechsel in der
+  Source-ComboBox.
+
+  NEU:
+    - FSourceDBIndex wird über FindDBIndexByTitleAndServer
+      aufgelöst (Alias↔echter-Name-Auflösung).
+    - Der manuelle Loop über RegisteredDatabases entfällt.
+  ============================================================ }
 procedure TfrmCSVBulkExporter.comboxSourceDBChange(Sender: TObject);
-var
-  i: Integer;
 begin
   if FUpdatingCombos then Exit;
 
-  // FSourceDBIndex frisch ermitteln
-  FSourceDBIndex := -1;
-  for i := 0 to High(RegisteredDatabases) do
-    if SameText(Trim(RegisteredDatabases[i].RegRec.ServerName), Trim(comboxSourceServer.Text)) and
-       SameText(Trim(RegisteredDatabases[i].RegRec.Title), Trim(comboxSourceDB.Text)) then
-    begin
-      FSourceDBIndex := i;
-      Break;
-    end;
+  // Alias-Lookup mit Fallback auf echten Namen
+  FSourceDBIndex := FindDBIndexByTitleAndServer(
+                      Trim(comboxSourceDB.Text),
+                      Trim(comboxSourceServer.Text));
 
   if FSourceDBIndex < 0 then Exit;
 
@@ -614,9 +645,7 @@ begin
      (not RegisteredDatabases[FSourceDBIndex].IBDatabase.Connected) then
     ConnectToDBAs(FSourceDBIndex);
 
-  // Jetzt die Form-eigene DB aufbauen — AssignIBDatabase kopiert die
-  // frisch gesetzten Credentials mit, CachePasswordAfterConnect ist damit
-  // ein No-Op (Passwort ist schon in Params)
+  // Form-eigene DB aufbauen + Tabellenliste laden
   LoadTableList;
 end;
 

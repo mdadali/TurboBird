@@ -92,7 +92,7 @@ type
     procedure DoServerRestore(Data: PtrInt);
   public
     { public declarations }
-    procedure Init(AServerName, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
+    procedure Init(AServerAlias, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
     function ShowModal(DefaultPageSize, DefaultNumBuffers: integer): TModalResult;
  end;
 
@@ -143,32 +143,73 @@ begin
   end;
 end;
 
-procedure TRestoreDlg.Init(AServerName, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
-var ServerList: TStringList;
-    ServerRec: TServerRecord;
+{ ============================================================
+  Init: Wird von mnRestoreClick mit dem ALIAS des Ziel-Servers
+  aufgerufen (nicht mehr mit dem echten Servernamen).
+
+  NEU:
+    - ComboBox zeigt ALIASE (GetServerAliasListFromTreeView).
+    - ComboBox wird deaktiviert. Die Original-Version hatte
+      keinen OnChange-Handler — Änderungen in der ComboBox
+      waren bereits wirkungslos (die Verbindung wurde in Init
+      festgelegt). Durch Enabled := False wird das jetzt
+      sichtbar und konsistent zu anderen Masken (Reg, CreateDB).
+
+    - Server-Lookup über GetServerRecordFromFileByAlias statt
+      GetServerRecordFromFileByName. Bei zwei Aliasen auf
+      demselben echten Server (Prod/Test → beide FB60Local)
+      würde ByName immer den ersten Record liefern — mit
+      falschem Port, User und Password für die
+      Restore-Verbindung.
+
+    - Defensive Prüfung: Wenn der Server-Record nicht gefunden
+      wird, wird die Verbindung nicht aufgebaut. Der Aufrufer
+      (mnRestoreClick) hat zuvor bereits IsServerReachable
+      geprüft, daher sollte der Fall nicht eintreten — aber
+      besser frühzeitig raus als mit leerem Record.
+
+  FServerName-Feld: enthält jetzt den Alias, nicht mehr den
+  echten Servernamen. Wird nur innerhalb dieser Unit
+  gespeichert, aber nicht weiter verwendet.
+  ============================================================ }
+procedure TRestoreDlg.Init(AServerAlias, ADatabaseName: string; ADefaultPageSize, ADefaultNumBuffers: Integer);
+var
+  AliasList: TStringList;
+  ServerRec: TServerRecord;
 begin
-  FServerName        := AServerName;
+  FServerName        := AServerAlias;
   FDatabaseName      := ADatabaseName;
   FDefaultPageSize   := ADefaultPageSize;
   FDefaultNumBuffers := ADefaultNumBuffers;
 
-  ServerList := GetServerListFromTreeView;
-  cmbBoxServers.Items.Assign(ServerList);
+  // ComboBox mit ALIASEN füllen
+  AliasList := GetServerAliasListFromTreeView;
+  try
+    cmbBoxServers.Items.Assign(AliasList);
+  finally
+    AliasList.Free;
+  end;
 
   if cmbBoxServers.Items.Count > 0 then
     cmbBoxServers.ItemIndex := cmbBoxServers.Items.IndexOf(FServerName);
 
-  __DBName.Text      := FDatabaseName;
+  // ComboBox deaktivieren — Server ist durch TreeView-Auswahl
+  // bereits fixiert. Konsistent zu Reg/CreateDB.
+  cmbBoxServers.Enabled := False;
+
+  __DBName.Text    := FDatabaseName;
   PageSize.Text    := IntToStr(FDefaultPageSize);
   PageBuffers.Text := IntToStr(FDefaultNumBuffers);
 
-  if  LowerCase(DefaultSegmentUnit) = 'mb' then
+  if LowerCase(DefaultSegmentUnit) = 'mb' then
     rbMBs.Checked := true
   else
     rbPages.Checked := true;
 
-
-  ServerRec := GetServerRecordFromFileByName(FServerName);
+  // Server-Record über ALIAS suchen
+  ServerRec := GetServerRecordFromFileByAlias(FServerName);
+  if Trim(ServerRec.ServerName) = '' then
+    Exit;
 
   if IBXServicesConnection1.Connected then
     IBXServicesConnection1.Connected := False;
@@ -182,8 +223,6 @@ begin
   IBXServicesConnection1.Params.Add('password=' + ServerRec.Password);
   IBXServicesConnection1.LoginPrompt := False;
   IBXServicesConnection1.Connected := True;
-
-  ServerList.Free;
 end;
 
 procedure TRestoreDlg.DoClientRestore(Data: PtrInt);

@@ -68,6 +68,7 @@ type
     procedure DoServerBackup(Data: PtrInt);
   public
     { public declarations }
+    DisplayAlias: string;
  end;
 
 var
@@ -137,15 +138,45 @@ begin
   end;
 end;
 
+{ ============================================================
+  FormShow: Zeigt die Verbindungs- und Datei-Infos an.
+
+  NEU:
+    - ServerName-Feld zeigt den ALIAS (falls gesetzt), sonst
+      Fallback auf den echten Servernamen aus der
+      ServicesConnection.
+      Der ServerName-TEdit ist reines Anzeige-Feld und wird
+      nirgends ausgelesen — gefahrlose Umstellung.
+
+    - Caption zeigt zusätzlich den Alias (falls gesetzt),
+      damit der User auch bei minimiertem Fenster sieht,
+      welcher Server gemeint ist.
+
+  DisplayAlias wird von lmBackupNewClick in main.pas gesetzt,
+  bevor ShowModal aufgerufen wird. Ist es leer (z.B. bei
+  Aufruf aus einem anderen Kontext), bleibt alles beim
+  bisherigen Verhalten.
+  ============================================================ }
 procedure TBackupDlg.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
 
   PageControl1.ActivePage := SelectTab;
-  ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;
+
+  // ServerName-Feld: Alias bevorzugen, Fallback echter Name
+  if Trim(DisplayAlias) <> '' then
+    ServerName.Text := DisplayAlias
+  else
+    ServerName.Text := IBXClientSideBackupService1.ServicesConnection.ServerName;
+
   DBName.Text := IBXClientSideBackupService1.DatabaseName;
-  //BackupFileName.Text := '';
-  Caption := 'Backup Database: ' + IBXClientSideBackupService1.DatabaseName;
+
+  // Caption mit Alias, falls gesetzt
+  if Trim(DisplayAlias) <> '' then
+    Caption := 'Backup Database: ' + IBXClientSideBackupService1.DatabaseName +
+               ' on ' + DisplayAlias
+  else
+    Caption := 'Backup Database: ' + IBXClientSideBackupService1.DatabaseName;
 end;
 
 procedure TBackupDlg.IBXClientSideBackupService1GetNextLine(Sender: TObject;

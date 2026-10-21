@@ -1,7 +1,7 @@
 object fmReg: TfmReg
-  Left = 745
+  Left = 769
   Height = 695
-  Top = 143
+  Top = 224
   Width = 683
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'
@@ -70900,13 +70900,12 @@ object fmReg: TfmReg
     ClientHeight = 404
     ClientWidth = 478
     TabOrder = 1
-    OnClick = GroupBox1Click
     object Label1: TLabel
-      Left = 16
+      Left = 13
       Height = 19
       Top = 160
-      Width = 58
-      Caption = 'Database'
+      Width = 280
+      Caption = 'Server/Port:/DatabaseFile (ConnectionString)'
       ParentColor = False
     end
     object Label4: TLabel
@@ -70926,7 +70925,7 @@ object fmReg: TfmReg
       ParentColor = False
     end
     object edDatabaseName: TEdit
-      Left = 16
+      Left = 13
       Height = 31
       Top = 184
       Width = 411
@@ -71139,10 +71138,11 @@ object fmReg: TfmReg
       TabOrder = 0
     end
     object edtPort: TEdit
-      Left = 56
+      Left = 312
       Height = 31
-      Top = 64
+      Top = 60
       Width = 64
+      Enabled = False
       TabOrder = 1
       Text = '3050'
     end
@@ -71155,15 +71155,15 @@ object fmReg: TfmReg
       TabOrder = 2
     end
     object Label8: TLabel
-      Left = 8
+      Left = 271
       Height = 19
-      Top = 64
+      Top = 66
       Width = 27
       Caption = 'Port'
       ParentColor = False
     end
     object chkboxOverwriteServerClientLib: TCheckBox
-      Left = 144
+      Left = 8
       Height = 21
       Top = 64
       Width = 155

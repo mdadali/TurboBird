@@ -54,7 +54,10 @@ type
     // Recalculates index statistics for all fields in database
     // Useful when a large amount of inserts/deletes may have changed the statistics
     // and indexes are not as efficient as they could be.
-    function RecalculateIndexStatistics(dbIndex: integer): boolean;
+    function RecalculateIndexStatistics(
+      dbIndex: integer;
+      out AProcessedCount, AFailedCount: Integer;
+      out AFirstErrorMessage: string): boolean;
 
     // Returns object list (list of object names, i.e. tables, views) sorted by dependency
     // Limits sorting within one category (e.g. views)
@@ -353,57 +356,36 @@ begin
   sqQuery.Close;
 end;
 
-{function TdmSysTables.RecalculateIndexStatistics(dbIndex: integer): boolean;
-var
-  i: integer;
-  Indices, Tables: TStringList;
-  TransActive: boolean;
-begin
-  result:= false;
-  Init(dbIndex);
-  sqQuery.Close;
-  Indices:= TStringList.Create;
-  Tables:= TStringList.Create;
-  try
-    if not(GetAllIndices(dbIndex, Indices, Tables)) then
-    begin
-      {$IFDEF DEBUG}
-      SendDebug('RecalculateIndexStatistics: GetAllIndices call failed.');
-      {$ENDIF}
-      exit(false);
-    end;
+{ ============================================================
+  RecalculateIndexStatistics: Setzt SET STATISTICS INDEX für
+  alle Indizes der DB.
 
-    // Loop through all indices and reset statistics
-    TransActive:= stTrans.Active;
-    if (TransActive) then
-      stTrans.Commit;
-    for i:= 0 to Indices.Count-1 do
-    begin
-      sqQuery.SQL.Text:= format('SET statistics INDEX %s',[Indices[i]]);
-      if not stTrans.InTransaction then
-        stTrans.StartTransaction;
-      sqQuery.ExecSQL;
-      { Commit after each index; no need to batch it all up in one
-      big atomic transaction...}
-      stTrans.Commit;
-    end;
-    if TransActive then
-      if not stTrans.InTransaction then
-        stTrans.StartTransaction; //leave transaction the way we found it
-  finally
-    Indices.Free;
-    Tables.Free;
-  end;
-  result:= true;
-end;}
+  NEU (Fehlerbehandlung):
+    - Zählt erfolgreiche und fehlgeschlagene Operationen.
+    - Liefert im out-Parameter die erste Fehlermeldung.
+    - Result = True nur, wenn ALLE Indizes erfolgreich waren.
+    - Nutzt MakeCaseSensitiveAuto statt hartem Quoting
+      (verhindert SQL-Fehler bei bereits gequoteten Namen).
+    - Leere Index-Liste → sofortiger Fehlschlag mit Meldung
+      statt stillem "complete".
 
-function TdmSysTables.RecalculateIndexStatistics(dbIndex: integer): boolean;
+  Interface-Anpassung nötig (Aufrufer lmRecalculateStatisticsClick
+  muss mit out-Parametern aufgerufen werden).
+  ============================================================ }
+function TdmSysTables.RecalculateIndexStatistics(
+  dbIndex: integer;
+  out AProcessedCount, AFailedCount: Integer;
+  out AFirstErrorMessage: string): boolean;
 var
   i: integer;
   Indices, Tables: TStringList;
   WasActive: boolean;
+  IndexName: string;
 begin
   Result := False;
+  AProcessedCount := 0;
+  AFailedCount := 0;
+  AFirstErrorMessage := '';
 
   Init(dbIndex);
 
@@ -411,46 +393,62 @@ begin
   Tables := TStringList.Create;
 
   try
-    if not GetAllIndices(dbIndex, Indices, Tables) then
-      Exit(False);
+    if not GetAllIndices(dbIndex, Indices, Tables) and (Indices.Count > 0) then
+    begin
+      AFirstErrorMessage := 'Could not load index list from database';
+      Exit;
+    end;
+
+    if Indices.Count = 0 then
+    begin
+      AFirstErrorMessage := 'No indices found to recalculate';
+      Exit;
+    end;
 
     WasActive := stTrans.InTransaction;
-
     if WasActive then
       stTrans.Commit;
 
     for i := 0 to Indices.Count - 1 do
     begin
+      IndexName := Trim(Indices[i]);
+      if IndexName = '' then
+        Continue;
+
       try
         sqQuery.Close;
-
-        sqQuery.SQL.Text :=
-          'SET STATISTICS INDEX "' + Indices[i] + '"';
+        sqQuery.SQL.Text := 'SET STATISTICS INDEX ' +
+                            MakeCaseSensitiveAuto(IndexName);
 
         stTrans.StartTransaction;
-
         sqQuery.ExecSQL;
-
         stTrans.Commit;
+
+        Inc(AProcessedCount);
 
       except
         on E: Exception do
         begin
+          Inc(AFailedCount);
+
+          if AFirstErrorMessage = '' then
+            AFirstErrorMessage := 'Index ' + IndexName + ': ' + E.Message;
+
           if stTrans.InTransaction then
-            stTrans.Rollback;
+            try stTrans.Rollback; except end;
 
           {$IFDEF DEBUG}
           SendDebug('SET STATISTICS failed for index ' +
-                    Indices[i] + ': ' + E.Message);
+                    IndexName + ': ' + E.Message);
           {$ENDIF}
         end;
       end;
     end;
 
     if WasActive then
-      stTrans.StartTransaction;
+      try stTrans.StartTransaction; except end;
 
-    Result := True;
+    Result := (AFailedCount = 0) and (AProcessedCount > 0);
 
   finally
     Indices.Free;

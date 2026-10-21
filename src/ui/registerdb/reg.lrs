@@ -1,10 +1,10 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmReg','FORMDATA',[
-  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3#233#2#6'Height'#3#183#2#3'Top'#3#143#0#5
-  +'Width'#3#171#2#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#26'Register Fireb'
-  +'ird Database'#12'ClientHeight'#3#183#2#11'ClientWidth'#3#171#2#5'Color'#7#6
-  +'clForm'#9'Icon.Data'#10#127'O"'#0'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0
+  'TPF0'#6'TfmReg'#5'fmReg'#4'Left'#3#1#3#6'Height'#3#183#2#3'Top'#3#224#0#5'Wi'
+  +'dth'#3#171#2#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#26'Register Firebir'
+  +'d Database'#12'ClientHeight'#3#183#2#11'ClientWidth'#3#171#2#5'Color'#7#6'c'
+  +'lForm'#9'Icon.Data'#10#127'O"'#0'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0
   +#22#0#0#0#137'PNG'#13#10#26#10#0#0#0#13'IHDR'#0#0#4#0#0#0#4#0#8#6#0#0#0#127
   +#29'+'#131#0'"O,IDATx'#156#236#189#135#155#149#245#181'='#190#167#247#206#20
   +#166'0'#195#244#198#244'>'#131#130#128' '#8#210'Q'#154#136't'#169#210#171#244
@@ -96389,13 +96389,13 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#0#0#0#2#0#0#0#4#0#0#0#2#255#255#255#0#255#255#255#0#7'OnClick'#7#10'bbRegCl'
   +'ick'#8'TabOrder'#2#2#0#0#0#9'TGroupBox'#9'GroupBox1'#4'Left'#2#16#6'Height'
   +#3#168#1#3'Top'#2#16#5'Width'#3#224#1#7'Caption'#6#8'Database'#12'ClientHeig'
-  +'ht'#3#148#1#11'ClientWidth'#3#222#1#8'TabOrder'#2#1#7'OnClick'#7#14'GroupBo'
-  +'x1Click'#0#6'TLabel'#6'Label1'#4'Left'#2#16#6'Height'#2#19#3'Top'#3#160#0#5
-  +'Width'#2':'#7'Caption'#6#8'Database'#11'ParentColor'#8#0#0#6'TLabel'#6'Labe'
-  +'l4'#4'Left'#2#16#6'Height'#2#19#3'Top'#2'X'#5'Width'#2#26#7'Caption'#6#5'Ti'
-  +'tle'#11'ParentColor'#8#0#0#6'TLabel'#6'Label5'#4'Left'#3#192#0#6'Height'#2
+  +'ht'#3#148#1#11'ClientWidth'#3#222#1#8'TabOrder'#2#1#0#6'TLabel'#6'Label1'#4
+  +'Left'#2#13#6'Height'#2#19#3'Top'#3#160#0#5'Width'#3#24#1#7'Caption'#6',Serv'
+  +'er/Port:/DatabaseFile (ConnectionString)'#11'ParentColor'#8#0#0#6'TLabel'#6
+  +'Label4'#4'Left'#2#16#6'Height'#2#19#3'Top'#2'X'#5'Width'#2#26#7'Caption'#6#5
+  +'Title'#11'ParentColor'#8#0#0#6'TLabel'#6'Label5'#4'Left'#3#192#0#6'Height'#2
   +#19#3'Top'#3#227#0#5'Width'#2'0'#7'Caption'#6#7'Charset'#11'ParentColor'#8#0
-  +#0#5'TEdit'#14'edDatabaseName'#4'Left'#2#16#6'Height'#2#31#3'Top'#3#184#0#5
+  +#0#5'TEdit'#14'edDatabaseName'#4'Left'#2#13#6'Height'#2#31#3'Top'#3#184#0#5
   +'Width'#3#155#1#8'TabOrder'#2#0#0#0#7'TButton'#10'btBrowseDB'#4'Left'#3#176#1
   +#6'Height'#2#25#3'Top'#3#184#0#5'Width'#2#27#7'Caption'#6#4'....'#7'OnClick'
   +#7#15'btBrowseDBClick'#8'TabOrder'#2#1#0#0#5'TEdit'#7'edTitle'#4'Left'#2#16#6
@@ -96439,18 +96439,18 @@ LazarusResources.Add('TfmReg','FORMDATA',[
   +#2'l'#11'ClientWidth'#3#222#1#8'TabOrder'#2#2#0#7'TButton'#15'btnBrowseClien'
   +'t'#4'Left'#3#171#1#6'Height'#2#25#3'Top'#2#16#5'Width'#2#27#7'Caption'#6#4
   +'....'#7'OnClick'#7#20'btnBrowseClientClick'#8'TabOrder'#2#0#0#0#5'TEdit'#7
-  +'edtPort'#4'Left'#2'8'#6'Height'#2#31#3'Top'#2'@'#5'Width'#2'@'#8'TabOrder'#2
-  +#1#4'Text'#6#4'3050'#0#0#5'TEdit'#11'edtFBClient'#4'Left'#2#8#6'Height'#2#31
-  +#3'Top'#2#16#5'Width'#3#152#1#8'ReadOnly'#9#8'TabOrder'#2#2#0#0#6'TLabel'#6
-  +'Label8'#4'Left'#2#8#6'Height'#2#19#3'Top'#2'@'#5'Width'#2#27#7'Caption'#6#4
-  +'Port'#11'ParentColor'#8#0#0#9'TCheckBox'#30'chkboxOverwriteServerClientLib'
-  +#4'Left'#3#144#0#6'Height'#2#21#3'Top'#2'@'#5'Width'#3#155#0#7'Caption'#6#22
-  +'Use own client library'#8'TabOrder'#2#3#0#0#0#11'TOpenDialog'#11'OpenDialog'
-  +'1'#10'DefaultExt'#6#4'.fdb'#6'Filter'#6'%Firebird Database|*.fdb|All Files|'
-  +'*.*'#4'Left'#3'('#2#3'Top'#3#176#0#0#0#11'TOpenDialog'#16'OpenDialogClient'
-  +#4'Left'#3'('#2#3'Top'#3#248#0#0#0#11'TIBDatabase'#13'IBConnection1'#9'Conne'
-  ,'cted'#8#17'CreateIfNotExists'#8#22'AllowStreamedConnected'#8#9'IdleTimer'#2
-  +#0#10'TraceFlags'#11#0#24'UseDefaultSystemCodePage'#8#4'Left'#3'('#2#3'Top'#3
-  +#192#1#0#0#15'TIBDatabaseInfo'#15'IBDatabaseInfo1'#8'Database'#7#13'IBConnec'
-  +'tion1'#4'Left'#3'('#2#3'Top'#3'X'#1#0#0#0
+  +'edtPort'#4'Left'#3'8'#1#6'Height'#2#31#3'Top'#2'<'#5'Width'#2'@'#7'Enabled'
+  +#8#8'TabOrder'#2#1#4'Text'#6#4'3050'#0#0#5'TEdit'#11'edtFBClient'#4'Left'#2#8
+  +#6'Height'#2#31#3'Top'#2#16#5'Width'#3#152#1#8'ReadOnly'#9#8'TabOrder'#2#2#0
+  +#0#6'TLabel'#6'Label8'#4'Left'#3#15#1#6'Height'#2#19#3'Top'#2'B'#5'Width'#2
+  +#27#7'Caption'#6#4'Port'#11'ParentColor'#8#0#0#9'TCheckBox'#30'chkboxOverwri'
+  +'teServerClientLib'#4'Left'#2#8#6'Height'#2#21#3'Top'#2'@'#5'Width'#3#155#0#7
+  +'Caption'#6#22'Use own client library'#8'TabOrder'#2#3#0#0#0#11'TOpenDialog'
+  +#11'OpenDialog1'#10'DefaultExt'#6#4'.fdb'#6'Filter'#6'%Firebird Database|*.f'
+  +'db|All Files|*.*'#4'Left'#3'('#2#3'Top'#3#176#0#0#0#11'TOpenDialog'#16'Open'
+  +'DialogClient'#4'Left'#3'('#2#3'Top'#3#248#0#0#0#11'TIBDatabase'#13'IBConnec'
+  ,'tion1'#9'Connected'#8#17'CreateIfNotExists'#8#22'AllowStreamedConnected'#8#9
+  +'IdleTimer'#2#0#10'TraceFlags'#11#0#24'UseDefaultSystemCodePage'#8#4'Left'#3
+  +'('#2#3'Top'#3#192#1#0#0#15'TIBDatabaseInfo'#15'IBDatabaseInfo1'#8'Database'
+  +#7#13'IBConnection1'#4'Left'#3'('#2#3'Top'#3'X'#1#0#0#0
 ]);
