@@ -210,6 +210,14 @@ type
     FLoadMaxRowWidth:    Int64;    // vom Scan, für die Schätzung
     FCancelRequested: boolean;
 
+    // Live-Swap-State (NEU)
+    FInitialSwapTotalMB: Int64;    // Swap-Gesamt beim Start
+    FCurrentSwapUsedMB:  Int64;    // aktueller Swap-Verbrauch
+    FLastSwapUsedMB:     Int64;    // für Delta-Erkennung
+    FPeakSwapUsedMB:     Int64;    // höchster gemessener Swap-Verbrauch
+    FThrashingDetected:  Boolean;  // Swap-Wachstum > 500 MB erkannt
+
+
     // Interval-Sampling für Load-Speed
     FProgressSamples: array of Double;    // rows/sec pro Intervall
     FLastProgressRows: Int64;
@@ -436,6 +444,11 @@ var
   UsedRAMMB: Int64;
   UsedPercent: Integer;
   EstimatedMB: Int64;
+  SwapUsedMB: Int64;
+  SwapDeltaMB: Int64;
+  SwapTotalMB: Int64;
+  StatusText: string;
+  StatusColor: TColor;
 begin
   // ============================================================
   // Interval-Sample für Report (rows/sec)
@@ -500,7 +513,6 @@ begin
 
   // ============================================================
   // Live-RAM — bei jedem Progress-Event
-  // (Intervall durch ProgressUpdatePercent gesteuert)
   // ============================================================
   FCurrentFreeRAMMB := GetRAMFreeMB;
   if FCurrentFreeRAMMB < 0 then
@@ -513,7 +525,7 @@ begin
     FPeakUsedRAMMB := UsedRAMMB;
 
   // ------------------------------------------------------------
-  // Dataset-Schätzung — aus ARowsRead und MaxRowWidth
+  // Dataset-Schätzung
   // ------------------------------------------------------------
   if (FLoadMaxRowWidth > 0) and (ARowsRead > 0) then
     EstimatedMB := (ARowsRead * (FLoadMaxRowWidth + 64)) div (1024 * 1024)
@@ -522,6 +534,23 @@ begin
 
   if EstimatedMB > FPeakEstimatedMB then
     FPeakEstimatedMB := EstimatedMB;
+
+  // ============================================================
+  // Swap — bei jedem Progress-Event
+  // ============================================================
+  SwapTotalMB := GetSwapTotalMB;
+  SwapUsedMB  := GetSwapUsedMB;
+  if SwapUsedMB < 0 then SwapUsedMB := 0;
+
+  if SwapUsedMB > FPeakSwapUsedMB then
+    FPeakSwapUsedMB := SwapUsedMB;
+
+  // Thrashing-Erkennung: Swap-Wachstum > 500 MB seit letztem Event
+  SwapDeltaMB := SwapUsedMB - FLastSwapUsedMB;
+  if (SwapDeltaMB > 500) and (FLastSwapUsedMB >= 0) then
+    FThrashingDetected := True;
+  FLastSwapUsedMB     := SwapUsedMB;
+  FCurrentSwapUsedMB  := SwapUsedMB;
 
   // ------------------------------------------------------------
   // Prozent für die Bar (System-RAM)
@@ -535,37 +564,64 @@ begin
   FProgRAMBar.Position := UsedPercent;
 
   // ------------------------------------------------------------
-  // Anzeige — zwei Zeilen
+  // Anzeige — drei Zeilen
   // ------------------------------------------------------------
-  FProgRAMInfoLbl.Caption := Format(
-    'System RAM: %s used / %s total   (%d%%)' + sLineBreak +
-    'Dataset:    %s used (estimated)',
-    [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
-     FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
-     UsedPercent,
-     FormatBytesSmart(EstimatedMB * 1024 * 1024)]);
+  if SwapTotalMB > 0 then
+    FProgRAMInfoLbl.Caption := Format(
+      'System RAM: %s used / %s total   (%d%%)' + sLineBreak +
+      'Dataset:    %s used (estimated)' + sLineBreak +
+      'Swap:       %s used / %s total',
+      [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
+       FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
+       UsedPercent,
+       FormatBytesSmart(EstimatedMB * 1024 * 1024),
+       FormatBytesSmart(SwapUsedMB * 1024 * 1024),
+       FormatBytesSmart(SwapTotalMB * 1024 * 1024)])
+  else
+    FProgRAMInfoLbl.Caption := Format(
+      'System RAM: %s used / %s total   (%d%%)' + sLineBreak +
+      'Dataset:    %s used (estimated)',
+      [FormatBytesSmart(UsedRAMMB * 1024 * 1024),
+       FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024),
+       UsedPercent,
+       FormatBytesSmart(EstimatedMB * 1024 * 1024)]);
 
   // ------------------------------------------------------------
   // Status + Farbe
+  //
+  // Prioritäten:
+  //   1. Thrashing aktiv           → WARNING (gelb) — Load ist langsam
+  //   2. System-RAM >= 85 %        → CRITICAL (rot)
+  //   3. System-RAM >= 70 %        → WARNING (gelb)
+  //   4. sonst                     → OK (grün)
   // ------------------------------------------------------------
-  if UsedPercent >= 85 then
+  if FThrashingDetected and (UsedPercent < 85) then
   begin
-    FProgRAMStatusLbl.Caption := 'Status:   CRITICAL - low memory!';
-    FProgRAMStatusLbl.Font.Color := clRed;
-    FProgRAMStatusLbl.Font.Style := [fsBold];
+    StatusText  := 'Status:   WARNING - swapping (load is slower)';
+    StatusColor := clMaroon;
+  end
+  else if UsedPercent >= 85 then
+  begin
+    StatusText  := 'Status:   CRITICAL - low memory!';
+    StatusColor := clRed;
   end
   else if UsedPercent >= 70 then
   begin
-    FProgRAMStatusLbl.Caption := 'Status:   WARNING - memory getting tight';
-    FProgRAMStatusLbl.Font.Color := clMaroon;
-    FProgRAMStatusLbl.Font.Style := [fsBold];
+    StatusText  := 'Status:   WARNING - memory getting tight';
+    StatusColor := clMaroon;
   end
   else
   begin
-    FProgRAMStatusLbl.Caption := 'Status:   OK';
-    FProgRAMStatusLbl.Font.Color := clGreen;
-    FProgRAMStatusLbl.Font.Style := [];
+    StatusText  := 'Status:   OK';
+    StatusColor := clGreen;
   end;
+
+  FProgRAMStatusLbl.Caption    := StatusText;
+  FProgRAMStatusLbl.Font.Color := StatusColor;
+  if StatusColor <> clGreen then
+    FProgRAMStatusLbl.Font.Style := [fsBold]
+  else
+    FProgRAMStatusLbl.Font.Style := [];
 
   // ------------------------------------------------------------
   // Warnung bei kritischem RAM (einmal pro Load)
@@ -580,6 +636,8 @@ begin
                        ' used / ' + FormatBytesSmart(FProgTotalRAMMB * 1024 * 1024) + ' total' + sLineBreak +
       'Dataset:     ' + FormatBytesSmart(EstimatedMB * 1024 * 1024) +
                        ' used (estimated)' + sLineBreak +
+      'Swap:        ' + FormatBytesSmart(SwapUsedMB * 1024 * 1024) +
+                       ' used / ' + FormatBytesSmart(SwapTotalMB * 1024 * 1024) + ' total' + sLineBreak +
       sLineBreak +
       'The system may become unresponsive or kill the application.' + sLineBreak +
       sLineBreak +
@@ -1461,6 +1519,12 @@ begin
   FLoadProgressCounter := 0;
   FCancelRequested     := False;
 
+  FInitialSwapTotalMB := GetSwapTotalMB;
+  FCurrentSwapUsedMB  := GetSwapUsedMB;
+  FLastSwapUsedMB     := FCurrentSwapUsedMB;
+  FPeakSwapUsedMB     := 0;
+  FThrashingDetected  := False;
+
   FScanStartTick        := 0;
   FLastProgressBytes    := 0;
   SetLength(FProgressBytesSamples, 0);
@@ -1796,6 +1860,11 @@ begin
   // Memory
   Stats.PeakRAMUsageMB  := FPeakUsedRAMMB;
   Stats.PeakEstimatedMB := FPeakEstimatedMB;
+
+  // Swap
+  Stats.PeakSwapUsedMB   := FPeakSwapUsedMB;
+  Stats.SwapTotalMB      := FInitialSwapTotalMB;
+  Stats.ThrashingDetected := FThrashingDetected;
 
   Stats.SystemInfo := GetSystemInfo(FFileName);
 
