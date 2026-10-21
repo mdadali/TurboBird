@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 375
+  Left = 1203
   Height = 668
-  Top = 622
+  Top = 258
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 639
@@ -7362,7 +7362,6 @@ object fmMain: TfmMain
       object lmDBAdmin: TMenuItem
         Caption = 'MWA DBAdmin'
         ImageIndex = 36
-        Visible = False
         OnClick = lmDBAdminClick
       end
       object lmScriptEngine: TMenuItem

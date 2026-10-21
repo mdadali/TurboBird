@@ -4,6 +4,11 @@ Neuigkeiten für TurboBird
 *: behoben
 -: entfernt
 
+neu ist:
+
+--FastCSVImport/Export
+-- Server aliase
+
 
 TurboBird v1.2.1.1288
 
