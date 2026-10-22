@@ -249,7 +249,10 @@ type
     procedure WriteIni;
     function AskUseDetected(const AFileName: string; const ACurLE, ADetLE: string; const ACurDel, ADetDel: Char; const ACurQC, ADetQC: Char): TDetectChoice;
     procedure HandleScanProgress(ABytesRead, ATotalBytes: Int64);
-    procedure HandleLoadProgress(ARowsRead: Int64; AElapsedSeconds: Double);
+    procedure HandleLoadProgress(
+      ARowsRead: Int64;
+      ABytesRead: Int64;
+      AElapsedSeconds: Double);
     procedure ProgCancelClick(Sender: TObject);
     procedure BuildProgressForm;
   public
@@ -265,11 +268,12 @@ implementation
 procedure TfrmDataEditor.BuildProgressForm;
 var
   PnlInfo, PnlProgress, PnlRAM, PnlCancel: TPanel;
+  Separator: TLabel;
 begin
   FProgressForm := TForm.Create(nil);
   FProgressForm.Caption     := 'Loading...';
   FProgressForm.Width       := 560;
-  FProgressForm.Height      := 440;
+  FProgressForm.Height      := 480;    // was 440 — mehr Platz für PnlRAM
   FProgressForm.Position    := poScreenCenter;
   FProgressForm.BorderStyle := bsDialog;
   FProgressForm.FormStyle   := fsNormal;
@@ -342,41 +346,43 @@ begin
   PnlRAM := TPanel.Create(FProgressForm);
   PnlRAM.Parent := FProgressForm;
   PnlRAM.Align := alTop;
-  PnlRAM.Height := 105;
+  PnlRAM.Height := 145;                // was 105 — mehr Platz
   PnlRAM.BevelOuter := bvNone;
 
   // Trennlinie
-  with TLabel.Create(FProgressForm) do
-  begin
-    Parent := PnlRAM;
-    Left := 16;
-    Top := 0;
-    Width := 520;
-    Caption := '──────────────────────────────────────────';
-    Font.Color := clGray;
-  end;
+  Separator := TLabel.Create(FProgressForm);
+  Separator.Parent := PnlRAM;
+  Separator.Left := 16;
+  Separator.Top := 0;
+  Separator.Width := 520;
+  Separator.Caption := '──────────────────────────────────────────';
+  Separator.Font.Color := clGray;
 
+  // RAM-Info: 3 Zeilen (System RAM / Dataset / Swap)
   FProgRAMInfoLbl := TLabel.Create(FProgressForm);
   FProgRAMInfoLbl.Parent := PnlRAM;
   FProgRAMInfoLbl.Left := 16;
-  FProgRAMInfoLbl.Top := 20;
+  FProgRAMInfoLbl.Top := 22;           // was 20 — leicht nach unten
   FProgRAMInfoLbl.Width := 520;
+  FProgRAMInfoLbl.AutoSize := True;    // wächst mit 3-zeiligem Text
   FProgRAMInfoLbl.Caption := 'RAM:      ...';
 
+  // RAM-Bar: unterhalb der 3-zeiligen Info (AutoSize-Höhe ~48 px)
   FProgRAMBar := TProgressBar.Create(FProgressForm);
   FProgRAMBar.Parent := PnlRAM;
   FProgRAMBar.Left := 16;
-  FProgRAMBar.Top := 45;
+  FProgRAMBar.Top := 80;               // was 45 — unter die 3-Zeilen-Info
   FProgRAMBar.Width := 520;
   FProgRAMBar.Height := 20;
   FProgRAMBar.Min := 0;
   FProgRAMBar.Max := 100;
   FProgRAMBar.Position := 0;
 
+  // Status-Zeile: unterhalb der Bar
   FProgRAMStatusLbl := TLabel.Create(FProgressForm);
   FProgRAMStatusLbl.Parent := PnlRAM;
   FProgRAMStatusLbl.Left := 16;
-  FProgRAMStatusLbl.Top := 70;
+  FProgRAMStatusLbl.Top := 108;        // was 70 — unter die Bar
   FProgRAMStatusLbl.Width := 520;
   FProgRAMStatusLbl.Caption := '';
 
@@ -436,11 +442,12 @@ end;
 
 procedure TfrmDataEditor.HandleLoadProgress(
   ARowsRead: Int64;
+  ABytesRead: Int64;
   AElapsedSeconds: Double);
 var
   Percent: Integer;
-  RowsPerSec, ETASeconds: Double;
-  IntervalRows: Double;
+  RowsPerSec, BytesPerSec, ETASeconds: Double;
+  IntervalRows, IntervalBytes: Double;
   UsedRAMMB: Int64;
   UsedPercent: Integer;
   EstimatedMB: Int64;
@@ -451,20 +458,26 @@ var
   StatusColor: TColor;
 begin
   // ============================================================
-  // Interval-Sample für Report (rows/sec)
+  // Interval-Sample für Report (rows/sec UND bytes/sec)
   // ============================================================
   if (FLastProgressSeconds > 0) and
      (AElapsedSeconds > FLastProgressSeconds) then
   begin
     IntervalRows := (ARowsRead - FLastProgressRows) /
                     (AElapsedSeconds - FLastProgressSeconds);
+    IntervalBytes := (ABytesRead - FLastProgressBytes) /
+                     (AElapsedSeconds - FLastProgressSeconds);
     if IntervalRows > 0 then
     begin
       SetLength(FProgressSamples, Length(FProgressSamples) + 1);
       FProgressSamples[High(FProgressSamples)] := IntervalRows;
+
+      SetLength(FProgressBytesSamples, Length(FProgressBytesSamples) + 1);
+      FProgressBytesSamples[High(FProgressBytesSamples)] := IntervalBytes;
     end;
   end;
   FLastProgressRows    := ARowsRead;
+  FLastProgressBytes   := ABytesRead;
   FLastProgressSeconds := AElapsedSeconds;
 
   // ============================================================
@@ -485,13 +498,16 @@ begin
      Percent]);
 
   // ============================================================
-  // Speed-Zeile
+  // Speed-Zeile: rows/sec | bytes/sec
   // ============================================================
   if AElapsedSeconds > 0.5 then
   begin
-    RowsPerSec := ARowsRead / AElapsedSeconds;
-    FProgSpeedLbl.Caption := Format('Speed:  %s rows/sec',
-      [FormatFloat('#,##0', RowsPerSec)]);
+    RowsPerSec  := ARowsRead / AElapsedSeconds;
+    BytesPerSec := ABytesRead / AElapsedSeconds;
+
+    FProgSpeedLbl.Caption := Format('Speed:  %s rows/sec  |  %s/sec',
+      [FormatFloat('#,##0', RowsPerSec),
+       FormatBytesSmart(Round(BytesPerSec))]);
 
     if (FProgTotalRows > ARowsRead) and (RowsPerSec > 0) then
     begin
@@ -508,11 +524,12 @@ begin
     FProgETALbl.Caption   := '';
   end;
 
-  FProgElapsedLbl.Caption := Format('Elapsed: %s',
-    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay)]);
+  FProgElapsedLbl.Caption := Format('Elapsed: %s  |  Loaded: %s',
+    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay),
+     FormatBytesSmart(ABytesRead)]);
 
   // ============================================================
-  // Live-RAM — bei jedem Progress-Event
+  // Live-RAM
   // ============================================================
   FCurrentFreeRAMMB := GetRAMFreeMB;
   if FCurrentFreeRAMMB < 0 then
@@ -524,9 +541,6 @@ begin
   if UsedRAMMB > FPeakUsedRAMMB then
     FPeakUsedRAMMB := UsedRAMMB;
 
-  // ------------------------------------------------------------
-  // Dataset-Schätzung
-  // ------------------------------------------------------------
   if (FLoadMaxRowWidth > 0) and (ARowsRead > 0) then
     EstimatedMB := (ARowsRead * (FLoadMaxRowWidth + 64)) div (1024 * 1024)
   else
@@ -536,7 +550,7 @@ begin
     FPeakEstimatedMB := EstimatedMB;
 
   // ============================================================
-  // Swap — bei jedem Progress-Event
+  // Swap
   // ============================================================
   SwapTotalMB := GetSwapTotalMB;
   SwapUsedMB  := GetSwapUsedMB;
@@ -545,16 +559,15 @@ begin
   if SwapUsedMB > FPeakSwapUsedMB then
     FPeakSwapUsedMB := SwapUsedMB;
 
-  // Thrashing-Erkennung: Swap-Wachstum > 500 MB seit letztem Event
   SwapDeltaMB := SwapUsedMB - FLastSwapUsedMB;
   if (SwapDeltaMB > 500) and (FLastSwapUsedMB >= 0) then
     FThrashingDetected := True;
   FLastSwapUsedMB     := SwapUsedMB;
   FCurrentSwapUsedMB  := SwapUsedMB;
 
-  // ------------------------------------------------------------
-  // Prozent für die Bar (System-RAM)
-  // ------------------------------------------------------------
+  // ============================================================
+  // Prozent für die Bar
+  // ============================================================
   if FProgTotalRAMMB > 0 then
     UsedPercent := (UsedRAMMB * 100) div FProgTotalRAMMB
   else
@@ -588,12 +601,6 @@ begin
 
   // ------------------------------------------------------------
   // Status + Farbe
-  //
-  // Prioritäten:
-  //   1. Thrashing aktiv           → WARNING (gelb) — Load ist langsam
-  //   2. System-RAM >= 85 %        → CRITICAL (rot)
-  //   3. System-RAM >= 70 %        → WARNING (gelb)
-  //   4. sonst                     → OK (grün)
   // ------------------------------------------------------------
   if FThrashingDetected and (UsedPercent < 85) then
   begin
@@ -1403,6 +1410,7 @@ var
   TotalRowsInRange: Int64;
   Cancelled: Boolean;
   LoadSpeedAvg: Double;
+  LoadBytesPerSecAvg: Double;
   Sum: Double;
   I: Integer;
 
@@ -1425,6 +1433,7 @@ begin
   ScanRows                := 0;
   Cancelled               := False;
   LoadSpeedAvg            := 0;
+  LoadBytesPerSecAvg      := 0;
 
   BlockSizeOriginalBytes  := CSVBlockSizeBytes;
   BufferSizeOriginalBytes := CSVBufferSizeBytes;
@@ -1480,6 +1489,7 @@ begin
 
   // ============================================================
   // Vorab-Warnung bei knappem RAM
+  // (GetRAMFreeMB liefert MemAvailable — inkl. reclaimable Cache)
   // ============================================================
   if FileSize > 0 then
   begin
@@ -1509,6 +1519,7 @@ begin
   FProgInfoLbl.Caption := Format('File: %s   (%s)',
     [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
 
+  // ---- RAM/Swap-Basiswerte (für Progress-Fenster während Scan) ----
   FProgTotalRAMMB      := GetRAMTotalMB;
   FInitialFreeRAMMB    := GetRAMFreeMB;
   FCurrentFreeRAMMB    := FInitialFreeRAMMB;
@@ -1519,14 +1530,15 @@ begin
   FLoadProgressCounter := 0;
   FCancelRequested     := False;
 
-  FInitialSwapTotalMB := GetSwapTotalMB;
-  FCurrentSwapUsedMB  := GetSwapUsedMB;
-  FLastSwapUsedMB     := FCurrentSwapUsedMB;
-  FPeakSwapUsedMB     := 0;
-  FThrashingDetected  := False;
+  FInitialSwapTotalMB  := GetSwapTotalMB;
+  FCurrentSwapUsedMB   := GetSwapUsedMB;
+  FLastSwapUsedMB      := FCurrentSwapUsedMB;
+  FPeakSwapUsedMB      := 0;
+  FThrashingDetected   := False;
 
   FScanStartTick        := 0;
   FLastProgressBytes    := 0;
+  SetLength(FProgressSamples, 0);
   SetLength(FProgressBytesSamples, 0);
   ResetAutoTuneProgressNote;
 
@@ -1616,7 +1628,7 @@ begin
 
                 dcKeepCurrent:
                   begin
-                    // Nichts ändern
+                    // Nichts ändern — weiter mit aktuellen Werten
                   end;
 
                 dcCancel:
@@ -1669,14 +1681,28 @@ begin
     else
       FProgTotalRows := 0;
 
-    // GUI-Felder für die RAM-Schätzung setzen
-    FInitialFreeRAMMB := GetRAMFreeMB;
-    FCurrentFreeRAMMB := FInitialFreeRAMMB;
-    FPeakUsedRAMMB    := 0;
-    FPeakEstimatedMB  := 0;
-    FLoadMaxRowWidth  := MaxLineWidth;
-    FRAMWarningShown  := False;
+    // ---- RAM/Swap-Basiswerte für die LOAD-Phase zurücksetzen ----
+    FInitialFreeRAMMB    := GetRAMFreeMB;
+    FCurrentFreeRAMMB    := FInitialFreeRAMMB;
+    FPeakUsedRAMMB       := 0;
+    FPeakEstimatedMB     := 0;
+    FLoadMaxRowWidth     := MaxLineWidth;
+    FRAMWarningShown     := False;
 
+    FInitialSwapTotalMB  := GetSwapTotalMB;
+    FCurrentSwapUsedMB   := GetSwapUsedMB;
+    FLastSwapUsedMB      := FCurrentSwapUsedMB;
+    FPeakSwapUsedMB      := 0;
+    FThrashingDetected   := False;
+
+    // ---- Progress-Samples zurücksetzen ----
+    SetLength(FProgressSamples, 0);
+    SetLength(FProgressBytesSamples, 0);
+    FLastProgressRows    := 0;
+    FLastProgressBytes   := 0;
+    FLastProgressSeconds := 0;
+
+    // ---- Dataset konfigurieren ----
     TCSVFastDataset(CSVFastDataset1).OnProgress := @HandleLoadProgress;
     TCSVFastDataset(CSVFastDataset1).TotalRowsForProgress := FProgTotalRows;
     TCSVFastDataset(CSVFastDataset1).ProgressUpdatePercent :=
@@ -1695,10 +1721,6 @@ begin
 
     FCancelRequested := False;
     TCSVFastDataset(CSVFastDataset1).CancelFlag := @FCancelRequested;
-
-    SetLength(FProgressSamples, 0);
-    FLastProgressRows    := 0;
-    FLastProgressSeconds := 0;
 
     try
       CSVThread := TCSVLoadThread.Create(Self, OpenDialog1.FileName);
@@ -1819,7 +1841,7 @@ begin
 
   // ============================================================
   // End-Statistik als Report
-  // Total Time = Scan + Load (ohne Dialog)
+  // Total Time = Scan + Load (ohne Dialog-Zeit)
   // ============================================================
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
   btnCreateSQL.Enabled := True;
@@ -1839,7 +1861,20 @@ begin
   else if Length(FProgressSamples) = 1 then
     LoadSpeedAvg := FProgressSamples[0];
 
-  // --- Statistik-Record füllen ---
+  LoadBytesPerSecAvg := 0;
+  if Length(FProgressBytesSamples) > 1 then
+  begin
+    Sum := 0;
+    for I := 0 to Length(FProgressBytesSamples) - 2 do
+      Sum := Sum + FProgressBytesSamples[I];
+    LoadBytesPerSecAvg := Sum / (Length(FProgressBytesSamples) - 1);
+  end
+  else if Length(FProgressBytesSamples) = 1 then
+    LoadBytesPerSecAvg := FProgressBytesSamples[0];
+
+  // ============================================================
+  // Statistik-Record füllen
+  // ============================================================
   FillChar(Stats, SizeOf(Stats), 0);
   Stats.Kind             := tkLoadFile;
   Stats.SourceKind       := 'File';
@@ -1855,7 +1890,7 @@ begin
 
   Stats.LoadElapsedSeconds := FLastProgressSeconds;
   Stats.RowsPerSecond      := LoadSpeedAvg;
-  Stats.BytesPerSecond     := 0;
+  Stats.BytesPerSecond     := LoadBytesPerSecAvg;
 
   // Memory
   Stats.PeakRAMUsageMB  := FPeakUsedRAMMB;
@@ -1868,7 +1903,9 @@ begin
 
   Stats.SystemInfo := GetSystemInfo(FFileName);
 
-  // --- CSV-Optionen ---
+  // ============================================================
+  // CSV-Optionen für den Report
+  // ============================================================
   if (UpperCase(Stats.SourceFileFormat) = 'CSV') and
      (DataSource1.DataSet = CSVFastDataset1) then
   begin
@@ -1898,7 +1935,9 @@ begin
         BoolToStr(CSVFastDataset1.CSVOptions.QuoteOuterWhitespace, 'Yes', 'No');
   end;
 
-  // --- CSV Buffer Performance ---
+  // ============================================================
+  // CSV Buffer Performance
+  // ============================================================
   Stats.CSVBlockSizeBytes        := CSVBlockSizeBytes;
   Stats.CSVBufferSizeBytes       := CSVBufferSizeBytes;
   Stats.CSVInitialCellCapacity   := CSVInitialCellCapacity;
@@ -1912,7 +1951,9 @@ begin
   Stats.CSVBlockAutoAdjusted     := BlockAutoAdjusted;
   Stats.CSVBlockOriginalBytes    := BlockSizeOriginalBytes;
 
-  // --- Report anzeigen ---
+  // ============================================================
+  // Report anzeigen
+  // ============================================================
   ReportForm := TfrmReport.Create(nil);
   try
     ReportForm.SetReportText(FormatTransferReport(Stats));
