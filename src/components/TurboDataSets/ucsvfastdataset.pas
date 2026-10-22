@@ -222,7 +222,9 @@ type
         of every new load. }
       property Aborted: Boolean read FAborted;
 
+
     published
+      { --- Reader --- }
       property BlockSize: Integer
         read FBlockSizeBytes write FBlockSizeBytes default 1048576;
       property BufferSize: Int64

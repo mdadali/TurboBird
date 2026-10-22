@@ -398,9 +398,10 @@ type
     // === MEMORY ===
     PeakRAMUsageMB:    Int64;       // höchster gemessener Systemverbrauch
     PeakEstimatedMB:   Int64;       // höchste Dataset-Schätzung
-    PeakSwapUsedMB:    Int64;       // NEU: höchster gemessener Swap-Verbrauch
-    SwapTotalMB:       Int64;       // NEU: Swap-Gesamt beim Start
-    ThrashingDetected: Boolean;     // NEU: Swap-Wachstum > 500 MB
+    PeakSwapUsedMB:    Int64;       // höchster gemessener Swap-Verbrauch
+    SwapTotalMB:       Int64;       // Swap-Gesamt beim Start
+    SwapStartUsedMB:   Int64;       // Swap-Verbrauch beim Load-Start
+    ThrashingDetected: Boolean;     // Swap-Wachstum > 500 MB
 
     // === ENVIRONMENT ===
     ClientLibVersion: string;
@@ -1895,6 +1896,7 @@ function FormatTransferReport(const Stats: TTransferStatistic): string;
 var
   SL: TStringList;
   RowsPerSec: Double;
+  SwapDeltaMB: Int64;
   FS: TFormatSettings;
 
   function ComputeRowsPerSec: Double;
@@ -2138,12 +2140,18 @@ begin
              ' (estimated)');
 
     // === SWAP ===
-    if Stats.SwapTotalMB > 0 then
+    if (Stats.SwapTotalMB > 0) and (Stats.PeakSwapUsedMB > 0) then
     begin
-      if Stats.PeakSwapUsedMB > 0 then
+      SwapDeltaMB := Stats.PeakSwapUsedMB - Stats.SwapStartUsedMB;
+      if SwapDeltaMB > 100 then
+        SL.Add('  Peak Swap:     ' + FormatBytesSmart(Stats.PeakSwapUsedMB * 1024 * 1024) +
+               ' / ' + FormatBytesSmart(Stats.SwapTotalMB * 1024 * 1024) +
+               ' (+' + FormatBytesSmart(SwapDeltaMB * 1024 * 1024) + ' during load)')
+      else
         SL.Add('  Peak Swap:     ' + FormatBytesSmart(Stats.PeakSwapUsedMB * 1024 * 1024) +
                ' / ' + FormatBytesSmart(Stats.SwapTotalMB * 1024 * 1024));
     end;
+
 
     if Stats.ThrashingDetected then
       SL.Add('  Note:          Swapping detected — load was slower than RAM-only');

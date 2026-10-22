@@ -212,6 +212,7 @@ type
 
     // Live-Swap-State (NEU)
     FInitialSwapTotalMB: Int64;    // Swap-Gesamt beim Start
+    FInitialSwapUsedMB:  Int64;    // Swap-Verbrauch beim Load-Start
     FCurrentSwapUsedMB:  Int64;    // aktueller Swap-Verbrauch
     FLastSwapUsedMB:     Int64;    // für Delta-Erkennung
     FPeakSwapUsedMB:     Int64;    // höchster gemessener Swap-Verbrauch
@@ -1531,6 +1532,7 @@ begin
   FCancelRequested     := False;
 
   FInitialSwapTotalMB  := GetSwapTotalMB;
+  FInitialSwapUsedMB   := GetSwapUsedMB;
   FCurrentSwapUsedMB   := GetSwapUsedMB;
   FLastSwapUsedMB      := FCurrentSwapUsedMB;
   FPeakSwapUsedMB      := 0;
@@ -1899,6 +1901,7 @@ begin
   // Swap
   Stats.PeakSwapUsedMB   := FPeakSwapUsedMB;
   Stats.SwapTotalMB      := FInitialSwapTotalMB;
+  Stats.SwapStartUsedMB  := FInitialSwapUsedMB;
   Stats.ThrashingDetected := FThrashingDetected;
 
   Stats.SystemInfo := GetSystemInfo(FFileName);
