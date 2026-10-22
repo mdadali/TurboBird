@@ -702,14 +702,10 @@ end;
 
 procedure TfmMain.FormShow(Sender: TObject);
 var
-  frmThemeSelectorLocal: TfrmThemeSelector;
   CheckMsg: string;
 begin
-  frmThemeSelectorLocal := TfrmThemeSelector.Create(self);
-
-  frmThemeSelectorLocal.btnApplyClick(fmMain);
-  frmThemeSelectorLocal.Free;
-  //Repaint;
+  frmThemeSelector.btnApplyClick(self);
+  Repaint;
 
   // Startup consistency check
   CheckMsg := RunStartupCheck;
@@ -10986,51 +10982,51 @@ end;
 { ------------------------------------------------------------------
   Vorbedingungs-Prüfungen für Aktionen der Startseite
   ------------------------------------------------------------------ }
-function TfmMain.EnsureServerRegistered: Boolean;
-begin
-  Result := Length(RegisteredServers) > 0;
-  if not Result then
-    MessageDlg(
-      'Es ist noch kein Server registriert.' + LineEnding + LineEnding +
-      'Bitte registrieren Sie zuerst einen Server (Schritt 1 der Startseite), ' +
-      'bevor Sie Datenbanken anlegen, registrieren oder verwalten können.',
-      mtWarning, [mbOK], 0);
-end;
-
-function TfmMain.EnsureDatabaseSelected: Boolean;
-begin
-  Result := EnsureServerRegistered;
-  if not Result then Exit;
-
-  if (tvMain.Selected = nil) or (tvMain.Selected.Level < 1) then
+  function TfmMain.EnsureServerRegistered: Boolean;
   begin
-    MessageDlg(
-      'Bitte markieren Sie zuerst eine Datenbank im Baum links.' + LineEnding +
-      LineEnding +
-      'Diese Aktion bezieht sich auf eine konkrete Datenbank.',
-      mtWarning, [mbOK], 0);
-    Result := False;
+    Result := Length(RegisteredServers) > 0;
+    if not Result then
+      MessageDlg(
+        'No server has been registered yet.' + LineEnding + LineEnding +
+        'Please register a server first (Step 1 on the home page) before you ' +
+        'can create, register, or manage databases.',
+        mtWarning, [mbOK], 0);
   end;
-end;
 
-function TfmMain.EnsureTableSelected: Boolean;
-var
-  NodeInfo: TPNodeInfos;
-begin
-  Result := EnsureDatabaseSelected;
-  if not Result then Exit;
-
-  NodeInfo := TPNodeInfos(tvMain.Selected.Data);
-  if (NodeInfo = nil) or (NodeInfo^.ObjectType <> tvotTable) then
+  function TfmMain.EnsureDatabaseSelected: Boolean;
   begin
-    MessageDlg(
-      'Bitte markieren Sie zuerst eine Tabelle im Baum links.' + LineEnding +
-      LineEnding +
-      'Diese Aktion bezieht sich auf eine konkrete Tabelle.',
-      mtWarning, [mbOK], 0);
-    Result := False;
+    Result := EnsureServerRegistered;
+    if not Result then Exit;
+
+    if (tvMain.Selected = nil) or (tvMain.Selected.Level < 1) then
+    begin
+      MessageDlg(
+        'Please select a database in the tree on the left first.' + LineEnding +
+        LineEnding +
+        'This action refers to a specific database.',
+        mtWarning, [mbOK], 0);
+      Result := False;
+    end;
   end;
-end;
+
+  function TfmMain.EnsureTableSelected: Boolean;
+  var
+    NodeInfo: TPNodeInfos;
+  begin
+    Result := EnsureDatabaseSelected;
+    if not Result then Exit;
+
+    NodeInfo := TPNodeInfos(tvMain.Selected.Data);
+    if (NodeInfo = nil) or (NodeInfo^.ObjectType <> tvotTable) then
+    begin
+      MessageDlg(
+        'Please select a table in the tree on the left first.' + LineEnding +
+        LineEnding +
+        'This action refers to a specific table.',
+        mtWarning, [mbOK], 0);
+      Result := False;
+    end;
+  end;
 
 initialization
   {$I main.lrs}
