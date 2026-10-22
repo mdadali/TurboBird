@@ -51,6 +51,7 @@ type
   { Progress event.
 
     ARowsRead       - Data rows read so far (header excluded).
+    ABytesRead      - Bytes actually read from the stream so far.
     AElapsedSeconds - Elapsed seconds since load started.
 
     Memory accounting is the caller's job. The GUI reads free RAM
@@ -58,6 +59,7 @@ type
     MaxRowWidth returned by the pre-scan. }
   TCSVLoadProgressEvent = procedure(
     ARowsRead: Int64;
+    ABytesRead: Int64;
     AElapsedSeconds: Double) of object;
 
 
@@ -124,6 +126,8 @@ type
 
       FCancelFlag: PBoolean;
       FAborted: Boolean;
+
+      FStreamStartPosition: Int64;
 
       procedure InitBuffer;
       procedure RefillBuffer;
@@ -345,42 +349,43 @@ end;
 { ==================================================================
   TCSVFastPacketReader
   ================================================================== }
-constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
-  AStream: TStream);
-begin
-  inherited Create(ADataSet, AStream);
+  constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
+    AStream: TStream);
+  begin
+    FStreamStartPosition := AStream.Position;
+    inherited Create(ADataSet, AStream);
 
-  FOptions               := nil;
-  FOwnsOptions           := True;
-  FBufferSize            := DEFAULT_BUFFER_SIZE;
-  FBlockSize             := DEFAULT_BLOCK_SIZE;
-  FInitialCellCapacity   := DEFAULT_CELL_CAPACITY;
-  FCellCapacity          := FInitialCellCapacity;
-  FCellCount             := 0;
-  FRowStartOffset        := 0;
-  FReaderState           := frsIdle;
-  FFirstLineAsFieldNames := True;
-  FDefaultFieldLength    := DEFAULT_FIELD_LENGTH;
-  FQuoteChar             := '"';
-  FDelimiter             := ',';
-  FLineEnding            := sLineBreak;
-  FIgnoreOuterWhitespace := False;
-  FBOMChecked            := False;
-  FPendingLF             := False;
-  FScannedRowCount       := 0;
-  FSkipFirstRows         := 0;
-  FStopAfterRow          := 0;
-  FOnProgress            := nil;
-  FTotalRowsForProgress  := 0;
-  FProgressUpdatePercent := 1;
-  FLastProgressPercent   := -1;
-  FStartTime             := 0;
-  FProgressFiredOnce     := False;
-  FCancelFlag            := nil;
-  FAborted               := False;
+    FOptions               := nil;
+    FOwnsOptions           := True;
+    FBufferSize            := DEFAULT_BUFFER_SIZE;
+    FBlockSize             := DEFAULT_BLOCK_SIZE;
+    FInitialCellCapacity   := DEFAULT_CELL_CAPACITY;
+    FCellCapacity          := FInitialCellCapacity;
+    FCellCount             := 0;
+    FRowStartOffset        := 0;
+    FReaderState           := frsIdle;
+    FFirstLineAsFieldNames := True;
+    FDefaultFieldLength    := DEFAULT_FIELD_LENGTH;
+    FQuoteChar             := '"';
+    FDelimiter             := ',';
+    FLineEnding            := sLineBreak;
+    FIgnoreOuterWhitespace := False;
+    FBOMChecked            := False;
+    FPendingLF             := False;
+    FScannedRowCount       := 0;
+    FSkipFirstRows         := 0;
+    FStopAfterRow          := 0;
+    FOnProgress            := nil;
+    FTotalRowsForProgress  := 0;
+    FProgressUpdatePercent := 1;
+    FLastProgressPercent   := -1;
+    FStartTime             := 0;
+    FProgressFiredOnce     := False;
+    FCancelFlag            := nil;
+    FAborted               := False;
 
-  InitBuffer;
-end;
+    InitBuffer;
+  end;
 
 constructor TCSVFastPacketReader.Create(ADataSet: TCustomBufDataset;
                                         AStream: TStream; AOptions: TCSVOptions);
@@ -514,6 +519,7 @@ end;
 procedure TCSVFastPacketReader.FireProgress(AForce: Boolean);
 var
   NewPercent: Integer;
+  BytesRead: Int64;
 begin
   if not Assigned(FOnProgress) then Exit;
 
@@ -530,8 +536,13 @@ begin
 
   if FStartTime = 0 then FStartTime := Now;
 
+  // Echte gelesene Bytes seit Load-Start
+  BytesRead := Stream.Position - FStreamStartPosition;
+  if BytesRead < 0 then BytesRead := 0;
+
   FProgressFiredOnce := True;
   FOnProgress(FScannedRowCount,
+              BytesRead,
               (Now - FStartTime) * SecsPerDay);
 end;
 
