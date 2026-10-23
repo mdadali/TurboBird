@@ -78,6 +78,7 @@ type
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
     Button1: TButton;
+    btnSaveFileAs: TButton;
     chkBoxAutoTuneCSVBuffer: TCheckBox;
     CheckBoxAutoDedectLineEnding: TCheckBox;
     CheckBoxAutoDedectQuoteChar: TCheckBox;
@@ -152,12 +153,12 @@ type
     procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
+    procedure btnSaveFileAsClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure chkBoxAutoTuneCSVBufferChange(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
     procedure cmbboxQuoteCharChange(Sender: TObject);
-    procedure CSVFastDataset1AfterDelete(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -1259,12 +1260,24 @@ end;
 procedure TfrmDataEditor.SaveFile(const FileName: string);
 var
   P: TPoint;
+  starttime, endtime: TDateTime;
+
 begin
   if not DataSource1.DataSet.Active then Exit;
 
   // Für dateibasierte Datasets: direkt speichern
   if DataSource1.DataSet = CSVFastDataset1 then
-    CSVFastDataset1.SaveToCSVFile(FileName)
+  begin
+    SaveDialog1.FileName := FileName;
+    if SaveDialog1.Execute then
+    begin
+      starttime := Time;
+      CSVFastDataset1.SaveToCSVFile(SaveDialog1.FileName);
+      endtime := Time;
+      ShowMessage('Starttime: ' + DateTimeToStr(starttime) + '   ' + 'endtime: ' + DateTimeToStr(endtime));
+      Application.ProcessMessages;
+    end;
+  end
   else if DataSource1.DataSet = JSONFastDataSet1 then
     SaveJSONToFile(JSONFastDataSet1, FileName)
   else if DataSource1.DataSet = sWorksheetDataset1 then
@@ -2031,11 +2044,6 @@ begin
   frmCreateTable.ShowModal;
 end;
 
-procedure TfrmDataEditor.CSVFastDataset1AfterDelete(DataSet: TDataSet);
-begin
-  SaveFile(FFileName);
-end;
-
 procedure TfrmDataEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
 begin
   if Button = nbRefresh then
@@ -2096,6 +2104,11 @@ begin
   // Popup-Menü unter dem Button anzeigen
   P := btnExportAs.ClientToScreen(Point(0, btnExportAs.Height));
   pmGrid.PopUp(P.X, P.Y);
+end;
+
+procedure TfrmDataEditor.btnSaveFileAsClick(Sender: TObject);
+begin
+    SaveFile(FFileName);
 end;
 
 procedure TfrmDataEditor.Button1Click(Sender: TObject);
