@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 1332
+  Left = 422
   Height = 894
-  Top = 407
+  Top = 113
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894
@@ -21,11 +21,11 @@ object frmDataEditor: TfrmDataEditor
     ClientWidth = 1496
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 583
+      Left = 759
       Height = 48
       Top = 1
-      Width = 912
-      Align = alClient
+      Width = 736
+      Align = alRight
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
       ChildSizing.EnlargeVertical = crsScaleChilds
@@ -34,7 +34,7 @@ object frmDataEditor: TfrmDataEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 912
+      ClientWidth = 736
       DataSource = DataSource1
       OnClick = DBNavigator1Click
       Options = []
@@ -62,7 +62,7 @@ object frmDataEditor: TfrmDataEditor
       TabOrder = 2
     end
     object btnCreateSQL: TButton
-      Left = 201
+      Left = 300
       Height = 48
       Top = 1
       Width = 100
@@ -73,7 +73,7 @@ object frmDataEditor: TfrmDataEditor
       TabOrder = 3
     end
     object btnCopySQL: TButton
-      Left = 301
+      Left = 400
       Height = 48
       Top = 1
       Width = 100
@@ -84,7 +84,7 @@ object frmDataEditor: TfrmDataEditor
       TabOrder = 4
     end
     object btnCreateTable: TButton
-      Left = 401
+      Left = 500
       Height = 48
       Top = 1
       Width = 107
@@ -94,7 +94,7 @@ object frmDataEditor: TfrmDataEditor
       TabOrder = 5
     end
     object Button1: TButton
-      Left = 508
+      Left = 607
       Height = 48
       Top = 1
       Width = 75
@@ -102,6 +102,16 @@ object frmDataEditor: TfrmDataEditor
       Caption = 'Button1'
       OnClick = Button1Click
       TabOrder = 6
+    end
+    object btnSaveFileAs: TButton
+      Left = 201
+      Height = 48
+      Top = 1
+      Width = 99
+      Align = alLeft
+      Caption = 'SaveFile As...'
+      OnClick = btnSaveFileAsClick
+      TabOrder = 7
     end
   end
   object PageControl1: TPageControl
@@ -1171,7 +1181,6 @@ object frmDataEditor: TfrmDataEditor
   end
   object CSVFastDataset1: TCSVFastDataset
     FieldDefs = <>
-    AfterDelete = CSVFastDataset1AfterDelete
     CSVOptions.FirstLineAsFieldNames = False
     CSVOptions.DefaultFieldLength = 255
     CSVOptions.Delimiter = ','
