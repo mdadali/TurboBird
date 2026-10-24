@@ -79,40 +79,42 @@ type
     btnCreateTable: TButton;
     Button1: TButton;
     btnSaveFileAs: TButton;
-    chkBoxAutoTuneCSVBuffer: TCheckBox;
+    CheckBoxAutoDedectDelimiter: TCheckBox;
     CheckBoxAutoDedectLineEnding: TCheckBox;
     CheckBoxAutoDedectQuoteChar: TCheckBox;
-    CheckBoxAutoDedectDelimiter: TCheckBox;
-    chkBoxIgnoreOuterWhiteSpace: TCheckBox;
+    chkBoxAutoTuneCSVBuffer: TCheckBox;
     chkBoxFirstLineAsFieldName: TCheckBox;
+    chkBoxIgnoreOuterWhiteSpace: TCheckBox;
     chkBoxQuoteOuterWhiteSpace: TCheckBox;
-    cmbboxLineEnding: TComboBox;
     cmbboxDelimiter: TComboBox;
+    cmbboxLineEnding: TComboBox;
     cmbboxQuoteChar: TComboBox;
     CSVFastDataset1: TCSVFastDataset;
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
+    edtDefaultFieldLength: TEdit;
     edtProgressUpdatePercent: TEdit;
     edtRowWidthScanRows: TEdit;
     edtFrom: TEdit;
     edtBlockSize: TEdit;
     edtBufferSize: TEdit;
-    edtDefaultFieldLength: TEdit;
     edtInitialCellCapacity: TEdit;
     edtTo: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
     grboxCSVFileRead: TGroupBox;
     grboxRangeOptions: TGroupBox;
+    grboxCSVFileWrite: TGroupBox;
+    grboxCSVOptions: TGroupBox;
     JSONFastDataSet1: TJSONFastDataSet;
     Label1: TLabel;
     Label10: TLabel;
-    Label5: TLabel;
-    lblRowWidthScanRows: TLabel;
-    lblActivePerformanceSettings: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
+    lblRowWidthScanRows: TLabel;
+    lblActivePerformanceSettings: TLabel;
     Label6: TLabel;
     Label7: TLabel;
     lbBlockSize: TLabel;
@@ -145,7 +147,6 @@ type
     SynSQLSyn1: TSynSQLSyn;
     tsCommonSettings: TTabSheet;
     tsSQL: TTabSheet;
-    tsCSVSettings: TTabSheet;
     tsGrid: TTabSheet;
     tsDetail: TTabSheet;
     procedure btnCopySQLClick(Sender: TObject);
@@ -230,6 +231,9 @@ type
     FProgressBytesSamples: array of Double;
 
     FProgressAutoTuneNote: string;
+
+
+
     function CheckCSVConfiguration(
       AMaxRowWidth: Int64;
       ACurrentBlockSize: Int64;
@@ -241,7 +245,7 @@ type
     procedure LoadTimerTick(Sender: TObject);
     procedure ResetAllDatasets;
     procedure LoadFile(const FileName: string);
-    procedure SaveFile(const FileName: string);
+    procedure SaveFile(const FileName: string; AskForFileName: Boolean = False);
     procedure SetCSVSettingsFromForm;
     function  SelectDataSetByFileName(const AFileName: string): Boolean;
     procedure SyncLineEndingCombo;
@@ -1257,41 +1261,85 @@ begin
   end;
 end;
 
-procedure TfrmDataEditor.SaveFile(const FileName: string);
+procedure TfrmDataEditor.SaveFile(const FileName: string; AskForFileName: Boolean = False);
 var
   P: TPoint;
-  starttime, endtime: TDateTime;
-
+  TargetFileName: string;
+  StartTime, EndTime: TDateTime;
+  SaveErr: string;
 begin
+  if not Assigned(DataSource1.DataSet) then Exit;
   if not DataSource1.DataSet.Active then Exit;
 
-  // Für dateibasierte Datasets: direkt speichern
+  // ============================================================
+  // Ziel-Dateiname bestimmen
+  // ============================================================
+  if AskForFileName then
+  begin
+    if FileName <> '' then
+      SaveDialog1.FileName := FileName;
+    if not SaveDialog1.Execute then
+      Exit;
+    TargetFileName := SaveDialog1.FileName;
+  end
+  else
+  begin
+    TargetFileName := FileName;
+  end;
+
+  if TargetFileName = '' then
+  begin
+    MessageDlg('No target file name.', mtError, [mbOK], 0);
+    Exit;
+  end;
+
+  // ============================================================
+  // Speichern — je nach Dataset-Typ
+  // ============================================================
   if DataSource1.DataSet = CSVFastDataset1 then
   begin
-    SaveDialog1.FileName := FileName;
-    if SaveDialog1.Execute then
-    begin
-      starttime := Time;
-      CSVFastDataset1.SaveToCSVFile(SaveDialog1.FileName);
-      endtime := Time;
-      ShowMessage('Starttime: ' + DateTimeToStr(starttime) + '   ' + 'endtime: ' + DateTimeToStr(endtime));
-      Application.ProcessMessages;
+    StartTime := Now;
+    SaveErr := '';
+    try
+      CSVFastDataset1.SaveToCSVFile(TargetFileName);
+    except
+      on E: Exception do
+        SaveErr := E.ClassName + ': ' + E.Message;
     end;
+    EndTime := Now;
+
+    if SaveErr <> '' then
+    begin
+      MessageDlg(
+        'Could not save file:' + sLineBreak + sLineBreak +
+        'File: ' + TargetFileName + sLineBreak +
+        sLineBreak +
+        'Error:' + sLineBreak + SaveErr,
+        mtError, [mbOK], 0);
+      Exit;
+    end;
+
+    // Optional: Erfolgsmeldung (nur bei Save As, nicht bei Post)
+    if AskForFileName then
+      ShowMessage(Format(
+        'Saved: %s' + sLineBreak +
+        'Time:  %.3f s',
+        [TargetFileName, (EndTime - StartTime) * SecsPerDay]));
   end
   else if DataSource1.DataSet = JSONFastDataSet1 then
-    SaveJSONToFile(JSONFastDataSet1, FileName)
+    SaveJSONToFile(JSONFastDataSet1, TargetFileName)
   else if DataSource1.DataSet = sWorksheetDataset1 then
     sWorksheetDataset1.Flush
   else if DataSource1.DataSet = Dbf1 then
   begin
-    Dbf1.FilePathFull := FileName;
+    Dbf1.FilePathFull := TargetFileName;
     Dbf1.Close;
     Dbf1.Open;
   end
   else if DataSource1.DataSet = SdfDataSet1 then
-    SdfDataSet1.SaveFileAs(FileName)
+    SdfDataSet1.SaveFileAs(TargetFileName)
   else if DataSource1.DataSet = FixedFormatDataSet1 then
-    FixedFormatDataSet1.SaveFileAs(FileName)
+    FixedFormatDataSet1.SaveFileAs(TargetFileName)
   else
   begin
     // Für DB-Datasets: Export-Popup zeigen
@@ -1849,6 +1897,10 @@ begin
     Application.ProcessMessages;
     Sleep(500);
 
+    FFileName := OpenDialog1.FileName;
+    Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
+
+
   finally
     if Assigned(FProgressForm) then
       FreeAndNil(FProgressForm);
@@ -2052,11 +2104,36 @@ begin
 
   else if Button = nbPost then
     if FFileName <> '' then
-      SaveFile(FFileName)
+      SaveFile(FFileName, False)   // ← False: kein Dialog, in Originaldatei
+
+  else if Button = nbDelete then
+    if FFileName <> '' then
+      SaveFile(FFileName, False);  // ← False: kein Dialog, in Originaldatei
 end;
 
 procedure TfrmDataEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  // Falls das Dataset geändert wurde, speichern
+  if Assigned(CSVFastDataset1) and CSVFastDataset1.Active then
+  begin
+    try
+      if CSVFastDataset1.Modified then
+        SaveFile(FFileName, False);
+    except
+      on E: Exception do
+      begin
+        if MessageDlg(
+          'Could not save changes:' + sLineBreak + E.Message + sLineBreak +
+          'Close anyway?',
+          mtWarning, [mbYes, mbNo], 0) = mrNo then
+        begin
+          CloseAction := caNone;
+          Exit;
+        end;
+      end;
+    end;
+  end;
+
   WriteIni;
   CloseAction := caFree;
 end;

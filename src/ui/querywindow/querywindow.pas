@@ -5,26 +5,22 @@ unit QueryWindow;
 interface
 
 uses
-  Classes, SysUtils, db, fpstdexports, FileUtil,   LMessages,
-  LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls, PairSplitter,
+  Classes, SysUtils, db, fpstdexports, FileUtil,
+  LResources, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   StdCtrls, Buttons, DBGrids, Menus, ComCtrls, SynEdit, SynHighlighterSQL, Reg,
   SynEditTypes, SynCompletion, Clipbrd, grids, DbCtrls, types, LCLType,
-  dbugintf, turbocommon, variants, strutils, IniFiles, fpdataexporter, LR_Class,
+  dbugintf, turbocommon, variants,  IniFiles,  LR_Class,
   QBuilder, QBEIBX,  {, QBESqlDb, QBEZEOS, ZConnection, ZCompatibility, ZDatasetUtils; }
-  LR_DSet,
 
   typinfo,
 
-  IBDynamicGrid, IBQuery, IBSQL, IBDatabase, IBTable, IB, RxDBGrid, RxDBGridExportPdf,
+  IBDynamicGrid, IBQuery, IBSQL, IBDatabase, IB, RxDBGrid, RxDBGridExportPdf,
   RxDBGridPrintGrid, RxDBGridExportSpreadSheet, ibxscript,
-
-  selectsqlresultsunit_ext,  // for IBScripter.OnSelect
 
   SysTables,
   fdataexportersintrf,
   //fblobedit,
   uthemeselector,
-  fsimpleobjextractor,
   cUnIntelliSenseCache,
   cSelectSQLParserExt,
 
