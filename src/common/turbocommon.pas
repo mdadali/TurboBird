@@ -565,13 +565,20 @@ var
     CSVQuoteOuterWhitespace: boolean;
 
     //CSV FileRead Options
-    CSVBlockSizeBytes: Integer = 1048576;      // 1 MB
-    CSVBufferSizeBytes: Int64 = 2097152;       // 2 MB
+    CSVBlockSizeBytes: Integer = 1048576;
+    CSVBufferSizeBytes: Int64 = 2097152;
     CSVInitialCellCapacity: Int64 = 64;
     CSVRowWidthScanMB: Integer = 10;
     CSVMinRowsForRowWidthScan: Integer = 1000;
     CSVProgressUpdatePercent: Integer = 1;
     CSVAutoTuneCSVBuffer: boolean;
+
+    //CSV FileWriter Options
+    CSVSaveBufferSizeBytes: Int64 = 4194304;
+    CSVSaveProgressUpdatePercent: Integer = 1;
+    CSVSaveWriteBOM: Boolean = False;
+    CSVSaveUseRange: Boolean = False;
+    CSVSaveStopAfterRow: Int64 = 0;
 
     // Auto-Detect-Schalter (pro Feld einzeln)
     AutoDetectLineEnding: Boolean;
@@ -6121,7 +6128,7 @@ begin
   AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
   AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
 
-  // Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
+  // CSVRead Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
   CSVBlockSizeBytes           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
   CSVBufferSizeBytes          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
   CSVInitialCellCapacity   := fIniFile.ReadInteger('CSVEditor','CSVInitialCellCapacity', 64);
@@ -6133,9 +6140,14 @@ begin
     CSVBufferSizeBytes := CSVBlockSizeBytes * 2;
 
   CSVAutoTuneCSVBuffer := fIniFile.ReadBool('CSVEditor', 'CSVAutoTuneCSVBuffer', true);
-
   CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
 
+  //CSV FileWriter Options
+  CSVSaveBufferSizeBytes:= fIniFile.ReadInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
+  CSVSaveProgressUpdatePercent:= fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
+  CSVSaveWriteBOM := fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
+  CSVSaveUseRange:= fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  True);
+  CSVSaveStopAfterRow:= fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
 
   //UpdateChecker
   AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
@@ -6257,6 +6269,15 @@ begin
   fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
   fIniFile.WriteInteger('CSVEditor','CSVProgressUpdatePercent', CSVProgressUpdatePercent);
   fIniFile.WriteBool('CSVEditor','CSVAutoTuneCSVBuffer', CSVAutoTuneCSVBuffer);
+
+
+  //CSV FileWriter Options
+  fIniFile.WriteInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
+  fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
+  fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
+  fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  False);
+  fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
+
 
   //UpdateChecker
   fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);

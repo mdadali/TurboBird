@@ -79,6 +79,7 @@ uses
   uExternalTable,
   clone_table_to_external_table_dialog,
   u_csv_bulk_exporter,
+  uCrossRDBMSMain,
 
   uthemeselector,
   fsimpleobjextractor,
@@ -154,6 +155,8 @@ type
     lmCloneServer: TMenuItem;
     lmCloneTable: TMenuItem;
     lmCSVBulkExporter: TMenuItem;
+    Separator13: TMenuItem;
+    mnCrossRDBMSTransfer: TMenuItem;
     Separator12: TMenuItem;
     mnSQLMonitor: TMenuItem;
     mnSQLParser: TMenuItem;
@@ -446,6 +449,7 @@ type
     procedure lmRecalculateStatisticsClick(Sender: TObject);
     procedure mnBulkCloneClick(Sender: TObject);
     procedure mnCheckForUpdateClick(Sender: TObject);
+    procedure mnCrossRDBMSTransferClick(Sender: TObject);
     procedure mnDataEditorClick(Sender: TObject);
     procedure mnDBReaderClick(Sender: TObject);
     procedure mnEditorFontClick(Sender: TObject);
@@ -8289,6 +8293,18 @@ end;
 procedure TfmMain.mnCheckForUpdateClick(Sender: TObject);
 begin
    frmUpdateChecker.ShowModal;
+end;
+
+procedure TfmMain.mnCrossRDBMSTransferClick(Sender: TObject);
+var
+  frm: TfrmCrossRDBMSMain;
+begin
+  frm := TfrmCrossRDBMSMain.Create(Self);
+  try
+    frm.ShowModal;
+  finally
+    frm.Free;
+  end;
 end;
 
 procedure TfmMain.mnDataEditorClick(Sender: TObject);

@@ -62,8 +62,10 @@ uses
   u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
   UniqueConstraints, CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, ServerDBFieldSelector, About, uSystemInfo,
-  uProblemFieldsDialog, uCopyTableDataFBIntf;
+  uCreateTableFromDataSet, uCrossRDBMSMain, ServerDBFieldSelector, About,
+  uSystemInfo, uProblemFieldsDialog, uCopyTableDataFBIntf, uCrossRDBMSProgress,
+  uCrossRDBMSConnection;
+
 
 const
   Major = 1;

@@ -1049,7 +1049,6 @@ end;
 // ============================================================================
 // UNUSED (bleibt für Kompatibilität drin)
 // ============================================================================
-
 procedure TfrmCreateTableFromDataSet.AssignParamFromField(
   Param: TParam; SourceField: TField);
 begin

@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 422
+  Left = 997
   Height = 894
-  Top = 116
+  Top = 77
   Width = 1496
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 894
@@ -103,14 +103,15 @@ object frmDataEditor: TfrmDataEditor
       OnClick = Button1Click
       TabOrder = 6
     end
-    object btnSaveFileAs: TButton
+    object btnSaveFile: TButton
       Left = 201
       Height = 48
       Top = 1
       Width = 99
       Align = alLeft
-      Caption = 'SaveFile As...'
-      OnClick = btnSaveFileAsClick
+      Caption = 'SaveFile'
+      Enabled = False
+      OnClick = btnSaveFileClick
       TabOrder = 7
     end
   end
@@ -510,6 +511,10 @@ object frmDataEditor: TfrmDataEditor
             ShortCut = 24625
           end        
           item
+            Command = ecSetMarker5
+            ShortCut = 24629
+          end        
+          item
             Command = ecSetMarker2
             ShortCut = 24626
           end        
@@ -520,10 +525,6 @@ object frmDataEditor: TfrmDataEditor
           item
             Command = ecSetMarker4
             ShortCut = 24628
-          end        
-          item
-            Command = ecSetMarker5
-            ShortCut = 24629
           end        
           item
             Command = ecSetMarker6
@@ -756,7 +757,7 @@ object frmDataEditor: TfrmDataEditor
         object edtBlockSize: TEdit
           Left = 240
           Height = 31
-          Top = 16
+          Top = 24
           Width = 112
           TabOrder = 0
           Text = '1024'
@@ -772,7 +773,7 @@ object frmDataEditor: TfrmDataEditor
         object edtBufferSize: TEdit
           Left = 240
           Height = 31
-          Top = 68
+          Top = 76
           Width = 112
           TabOrder = 1
           Text = '2048'
@@ -788,7 +789,7 @@ object frmDataEditor: TfrmDataEditor
         object edtInitialCellCapacity: TEdit
           Left = 240
           Height = 31
-          Top = 120
+          Top = 124
           Width = 112
           TabOrder = 2
           Text = '128'
@@ -801,7 +802,7 @@ object frmDataEditor: TfrmDataEditor
           Caption = 'Active Performance Settings'
           ParentColor = False
         end
-        object grboxRangeOptions: TGroupBox
+        object grboxLoadRangeOptions: TGroupBox
           Left = 32
           Height = 150
           Top = 280
@@ -810,7 +811,7 @@ object frmDataEditor: TfrmDataEditor
           ClientHeight = 130
           ClientWidth = 318
           TabOrder = 3
-          object rbAllRows: TRadioButton
+          object rbLoadAllRows: TRadioButton
             Left = 16
             Height = 21
             Top = 24
@@ -870,7 +871,7 @@ object frmDataEditor: TfrmDataEditor
         object edtRowWidthScanRows: TEdit
           Left = 240
           Height = 31
-          Top = 192
+          Top = 186
           Width = 112
           TabOrder = 4
           Text = '0'
@@ -907,7 +908,115 @@ object frmDataEditor: TfrmDataEditor
         Top = 24
         Width = 449
         Caption = 'CSV File Write'
+        ClientHeight = 572
+        ClientWidth = 447
         TabOrder = 1
+        object edtSaveBufferSize: TEdit
+          Left = 240
+          Height = 31
+          Top = 24
+          Width = 80
+          TabOrder = 0
+          Text = '8196'
+        end
+        object Label8: TLabel
+          Left = 24
+          Height = 19
+          Top = 32
+          Width = 67
+          Caption = 'Buffer Size'
+          ParentColor = False
+        end
+        object edtSaveProgressUpdatePercent: TEdit
+          Left = 240
+          Height = 31
+          Top = 76
+          Width = 80
+          TabOrder = 1
+          Text = '5'
+        end
+        object Label9: TLabel
+          Left = 24
+          Height = 19
+          Top = 80
+          Width = 186
+          Caption = 'Save Progress Update Percent'
+          ParentColor = False
+        end
+        object chkBoxSaveWriteBOM: TCheckBox
+          Left = 24
+          Height = 21
+          Top = 128
+          Width = 121
+          Caption = 'Save WriteBOM'
+          TabOrder = 2
+        end
+        object grboxSaveRangeOptions: TGroupBox
+          Left = 24
+          Height = 150
+          Top = 280
+          Width = 320
+          Caption = 'Save Range'
+          ClientHeight = 130
+          ClientWidth = 318
+          TabOrder = 3
+          object rbSaveAllRows: TRadioButton
+            Left = 16
+            Height = 21
+            Top = 24
+            Width = 74
+            Caption = 'All Rows'
+            Checked = True
+            OnChange = rbRangeChange
+            TabOrder = 0
+            TabStop = True
+          end
+          object rbSaveRange: TRadioButton
+            Left = 16
+            Height = 21
+            Top = 56
+            Width = 63
+            Caption = 'Range'
+            OnChange = rbRangeChange
+            TabOrder = 1
+          end
+          object edtSaveFrom: TEdit
+            Left = 96
+            Height = 31
+            Top = 56
+            Width = 88
+            Enabled = False
+            TabOrder = 2
+            Text = '1'
+          end
+          object Label11: TLabel
+            Left = 192
+            Height = 19
+            Top = 58
+            Width = 4
+            Caption = '-'
+            Font.Style = [fsBold]
+            ParentColor = False
+            ParentFont = False
+          end
+          object edtSaveTo: TEdit
+            Left = 208
+            Height = 31
+            Top = 56
+            Width = 98
+            Enabled = False
+            TabOrder = 3
+            Text = '1000'
+          end
+        end
+        object lblSaveActiveSettings: TLabel
+          Left = 26
+          Height = 19
+          Top = 504
+          Width = 123
+          Caption = 'Save Active Settings'
+          ParentColor = False
+        end
       end
       object grboxCSVOptions: TGroupBox
         Left = 920
@@ -1194,6 +1303,8 @@ object frmDataEditor: TfrmDataEditor
   end
   object CSVFastDataset1: TCSVFastDataset
     FieldDefs = <>
+    AfterDelete = CSVFastDataset1AfterDelete
+    AfterPost = CSVFastDataset1AfterPost
     CSVOptions.FirstLineAsFieldNames = False
     CSVOptions.DefaultFieldLength = 255
     CSVOptions.Delimiter = ','

@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 432
+  Left = 422
   Height = 668
-  Top = 261
+  Top = 489
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 639
@@ -5900,6 +5900,13 @@ object fmMain: TfmMain
       object mnDBReader: TMenuItem
         Caption = 'DBReader'
         OnClick = mnDBReaderClick
+      end
+      object mnCrossRDBMSTransfer: TMenuItem
+        Caption = 'Cross-RDBMS Transfer'
+        OnClick = mnCrossRDBMSTransferClick
+      end
+      object Separator13: TMenuItem
+        Caption = '-'
       end
       object mnSQLParser: TMenuItem
         Caption = 'SQL Select Parser'

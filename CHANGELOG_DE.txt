@@ -4,12 +4,28 @@ Neuigkeiten für TurboBird
 *: behoben
 -: entfernt
 
-neu ist:
+TurboBird v1.2.1.1290
 
---FastCSVImport/Export
--- Server aliase
+Build-Datum & -Zeit:
+
++ Alias Unterterstützung für Servernamen
+  Ein Server kann in eine TurboBird Instanz mit unterschiedliche Aliase mehrfach registriert werden.
+
++ DataEditor schnelle CSVBulk Import/Export zwischen DataSets und CSVFiles
+  Während in test wurde eine 59.4 GB Datei mit fullscan option in 14 Minuten eingelesen.
+
++ Cross-RDBMS Data Transfer (Beta)
+   Vollständig neues, eigenständiges Modul für Datentransfer zwischen unterschiedlichen Datenbank-Systemen
+   Unterstützte Datenbanken:
+     Firebird, SQLite, MySQL/MariaDB, PostgreSQL, MSSQL, Oracle, Sybase, ODBC.
+  Getestete Transfer-Routen:
+     Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL.
 
 
+
+
+
+---------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1288
 
 Build-Datum & -Zeit: 10.10.2026, 15:00

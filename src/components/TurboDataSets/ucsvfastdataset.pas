@@ -569,12 +569,57 @@ begin
 end;
 
 function TCSVFastPacketReader.CellToStr(const ACell: TCSVFastCellRef): string;
+var
+  ContentLen: Int64;
+  Src, Dst, DstStart: PChar;
 begin
-  if ACell.Len <= 0 then Result := ''
-  else if ACell.Len > High(Integer) then
-    raise Exception.CreateFmt('CSV cell too large: %d bytes', [ACell.Len])
+  Result := '';
+  if ACell.Len <= 0 then Exit;
+
+  // ------------------------------------------------------------
+  // Fall 1: Zelle beginnt UND endet mit QuoteChar
+  //         → äußere Quotes entfernen, doppelte Quotes auflösen
+  // ------------------------------------------------------------
+  if (ACell.Len >= 2) and
+     (ACell.Start^ = FQuoteChar) and
+     ((ACell.Start + ACell.Len - 1)^ = FQuoteChar) then
+  begin
+    ContentLen := ACell.Len - 2;
+    SetLength(Result, ContentLen);
+    if ContentLen > 0 then
+    begin
+      Src := ACell.Start + 1;
+      DstStart := PChar(Result);
+      Dst := DstStart;
+
+      while ContentLen > 0 do
+      begin
+        if (ContentLen >= 2) and
+           (Src^ = FQuoteChar) and
+           ((Src + 1)^ = FQuoteChar) then
+        begin
+          Dst^ := FQuoteChar;
+          Inc(Src, 2);
+          Inc(Dst);
+          Dec(ContentLen, 2);
+        end
+        else
+        begin
+          Dst^ := Src^;
+          Inc(Src);
+          Inc(Dst);
+          Dec(ContentLen);
+        end;
+      end;
+
+      SetLength(Result, Dst - DstStart);
+    end;
+  end
   else
   begin
+    // ----------------------------------------------------------
+    // Fall 2: Keine Quotes aussen — Rohdaten übernehmen
+    // ----------------------------------------------------------
     SetLength(Result, ACell.Len);
     Move(ACell.Start^, Result[1], ACell.Len);
   end;

@@ -78,7 +78,8 @@ type
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
     Button1: TButton;
-    btnSaveFileAs: TButton;
+    btnSaveFile: TButton;
+    chkBoxSaveWriteBOM: TCheckBox;
     CheckBoxAutoDedectDelimiter: TCheckBox;
     CheckBoxAutoDedectLineEnding: TCheckBox;
     CheckBoxAutoDedectQuoteChar: TCheckBox;
@@ -93,6 +94,9 @@ type
     DataSource1: TDataSource;
     Dbf1: TDbf;
     DBNavigator1: TDBNavigator;
+    edtSaveFrom: TEdit;
+    edtSaveProgressUpdatePercent: TEdit;
+    edtSaveBufferSize: TEdit;
     edtDefaultFieldLength: TEdit;
     edtProgressUpdatePercent: TEdit;
     edtRowWidthScanRows: TEdit;
@@ -101,18 +105,24 @@ type
     edtBufferSize: TEdit;
     edtInitialCellCapacity: TEdit;
     edtTo: TEdit;
+    edtSaveTo: TEdit;
     FixedFormatDataSet1: TFixedFormatDataSet;
     grboxCSVFileRead: TGroupBox;
-    grboxRangeOptions: TGroupBox;
+    grboxLoadRangeOptions: TGroupBox;
     grboxCSVFileWrite: TGroupBox;
     grboxCSVOptions: TGroupBox;
+    grboxSaveRangeOptions: TGroupBox;
     JSONFastDataSet1: TJSONFastDataSet;
     Label1: TLabel;
     Label10: TLabel;
+    Label11: TLabel;
+    lblSaveActiveSettings: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
     lblRowWidthScanRows: TLabel;
     lblActivePerformanceSettings: TLabel;
     Label6: TLabel;
@@ -129,8 +139,10 @@ type
     OpenDialog1: TOpenDialog;
     Panel2: TPanel;
     pmGrid: TPopupMenu;
-    rbAllRows: TRadioButton;
+    rbLoadAllRows: TRadioButton;
+    rbSaveAllRows: TRadioButton;
     rbRange: TRadioButton;
+    rbSaveRange: TRadioButton;
     RxDBGridExportPDF1: TRxDBGridExportPDF;
     RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet;
     RxDBGridPrint1: TRxDBGridPrint;
@@ -154,12 +166,14 @@ type
     procedure btnCreateTableClick(Sender: TObject);
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
-    procedure btnSaveFileAsClick(Sender: TObject);
+    procedure btnSaveFileClick(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure chkBoxAutoTuneCSVBufferChange(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
     procedure cmbboxQuoteCharChange(Sender: TObject);
+    procedure CSVFastDataset1AfterDelete(DataSet: TDataSet);
+    procedure CSVFastDataset1AfterPost(DataSet: TDataSet);
     procedure DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -233,6 +247,25 @@ type
     FProgressAutoTuneNote: string;
 
 
+     // Writer-Progress-Fenster
+    FSaveProgressForm: TForm;
+    FSavePhaseLbl: TLabel;
+    FSaveInfoLbl: TLabel;
+    FSaveBar: TProgressBar;
+    FSaveSpeedLbl: TLabel;
+    FSaveElapsedLbl: TLabel;
+    FSaveETALbl: TLabel;
+    FSaveCancelBtn: TButton;
+
+    // Writer-Progress-State
+    FSaveTotalRows: Int64;
+    FSaveStartTime: TDateTime;
+    FSaveLastRows: Int64;
+    FSaveLastSeconds: Double;
+    FSaveSpeedSamples: array of Double;
+    FSaveCancelRequested: Boolean;
+
+    FDataSetChanged: Boolean;
 
     function CheckCSVConfiguration(
       AMaxRowWidth: Int64;
@@ -261,6 +294,22 @@ type
       AElapsedSeconds: Double);
     procedure ProgCancelClick(Sender: TObject);
     procedure BuildProgressForm;
+
+    //Save
+    procedure rbSaveRangeChange(Sender: TObject);
+    procedure SetSaveSettingsFromForm;
+    procedure ReadIniSaveSettings;
+    procedure WriteIniSaveSettings;
+
+    procedure BuildSaveProgressForm;
+    procedure FreeSaveProgressForm;
+    procedure HandleSaveProgress(ARowsWritten: Int64; ABytesWritten: Int64;
+      AElapsedSeconds: Double);
+    procedure SaveCancelClick(Sender: TObject);
+
+    procedure UpdateSaveButton;
+    procedure MarkDataSetChanged;
+    procedure ClearDataSetChanged;
   public
   end;
 
@@ -890,6 +939,8 @@ begin
      FormatBytesSmart(CSVBufferSizeBytes),
      CSVInitialCellCapacity,
      StrToInt64Def(edtRowWidthScanRows.Text, 0)]);
+
+  SetSaveSettingsFromForm;
 end;
 
 procedure TfrmDataEditor.ReadIni;
@@ -904,14 +955,14 @@ begin
   CheckBoxAutoDedectDelimiter.Checked  := AutoDetectDelimiter;
   CheckBoxAutoDedectQuoteChar.Checked  := AutoDetectQuoteChar;
 
-  //CSVFastDataSet Performance-Parameter aus grboxCSVFileRead
+  //Read CSVFastDataSet Performance-Parameter aus grboxCSVFileRead
   edtBlockSize.Text  := IntToStr(CSVBlockSizeBytes);
   edtBufferSize.Text := IntToStr(CSVBufferSizeBytes);
   edtInitialCellCapacity.Text := IntToStr(CSVInitialCellCapacity);
-
   edtProgressUpdatePercent.Text := IntToStr(CSVProgressUpdatePercent);
-
   chkBoxAutoTuneCSVBuffer.Checked := CSVAutoTuneCSVBuffer;
+
+  ReadIniSaveSettings;
 
   // Combos synchronisieren — sie zeigen die globalen Werte an
   SyncLineEndingCombo;
@@ -942,6 +993,9 @@ begin
   CSVInitialCellCapacity := StrToIntDef(edtInitialCellCapacity.Text, 64);
   CSVProgressUpdatePercent := StrToIntDef(edtProgressUpdatePercent.Text, 1);
   CSVAutoTuneCSVBuffer :=  chkBoxAutoTuneCSVBuffer.Checked;
+
+  WriteIniSaveSettings;
+
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -1114,51 +1168,6 @@ begin
   end;
 end;
 
-{procedure TfrmDataEditor.LoadFile(const FileName: string);
-begin
-  if DataSource1.DataSet.Active then
-  begin
-    DataSource1.DataSet.Close;
-    DataSource1.DataSet.Fields.Clear;
-  end;
-
-  RxDBGrid1.BeginUpdate;
-
-  if DataSource1.DataSet = CSVFastDataset1 then
-    CSVFastDataset1.LoadFromCSVFile(FileName)
-
-  else if DataSource1.DataSet = JSONFastDataSe1 then
-    JSONFastDataSe1.LoadFromFile(FileName)
-
-  else if DataSource1.DataSet = sWorksheetDataset1 then
-  begin
-    sWorksheetDataset1.FileName := FileName;
-    sWorksheetDataset1.SheetName := ChangeFileExt(ExtractFileName(FileName), '');;
-    sWorksheetDataset1.Open;
-  end
-
-  else if DataSource1.DataSet = Dbf1 then
-  begin
-    Dbf1.FilePathFull := FileName;
-    Dbf1.Open;
-  end
-
-  else if DataSource1.DataSet = SdfDataSet1 then
-  begin
-    SdfDataSet1.FileName := FileName;
-    SdfDataSet1.Open;
-  end
-
-  else if DataSource1.DataSet = FixedFormatDataSet1 then
-  begin
-    FixedFormatDataSet1.FileName := FileName;
-    FixedFormatDataSet1.Open;
-  end;
-
-  //RxDBGrid1.OptimizeColumnsWidthAll;
-  RxDBGrid1.EndUpdate(True);
-end;}
-
 procedure TfrmDataEditor.LoadFile(const FileName: string);
 var
   DS: TDataSet;
@@ -1166,10 +1175,6 @@ begin
   DS := DataSource1.DataSet;
   if not Assigned(DS) then Exit;
 
-  // ============================================================
-  // 1. Alten Zustand sauber abräumen — Grid + Navigator abklemmen,
-  //    Dataset-Steuerelemente deaktivieren
-  // ============================================================
   RxDBGrid1.BeginUpdate;
   RxDBGrid1.DataSource := nil;
   DBNavigator1.DataSource := nil;
@@ -1182,11 +1187,6 @@ begin
       DS.Fields.Clear;
     end;
 
-    // ============================================================
-    // 2. Datei laden — je nach Dataset-Typ
-    //    Alles innerhalb der DisableControls-Klammer, damit
-    //    kein einziges DataChange-Event ans Grid geht.
-    // ============================================================
     if DS = CSVFastDataset1 then
       CSVFastDataset1.LoadFromCSVFile(FileName)
 
@@ -1218,9 +1218,6 @@ begin
       FixedFormatDataSet1.Open;
     end;
 
-    // ============================================================
-    // 3. Cursor auf den Anfang — noch innerhalb der Sperre
-    // ============================================================
     if DS.Active and (not DS.IsEmpty) then
       DS.First;
 
@@ -1228,17 +1225,11 @@ begin
     DS.EnableControls;
   end;
 
-  // ============================================================
-  // 4. Grid + Navigator wieder verbinden
-  //    Erst JETZT, nach dem EnableControls, damit das Grid
-  //    genau EINEN Refresh bekommt statt n.
-  // ============================================================
   RxDBGrid1.DataSource := DataSource1;
   DBNavigator1.DataSource := DataSource1;
 
-  // ============================================================
-  // 5. Spaltenbreiten — sample-basiert, nicht über alle Rows
-  // ============================================================
+  // Modified-Flag zurücksetzen — nach dem Laden ist nichts geändert
+  ClearDataSetChanged;
 
   RxDBGrid1.EndUpdate(True);
 end;
@@ -1265,21 +1256,32 @@ procedure TfrmDataEditor.SaveFile(const FileName: string; AskForFileName: Boolea
 var
   P: TPoint;
   TargetFileName: string;
-  StartTime, EndTime: TDateTime;
   SaveErr: string;
+  SaveStartTime, SaveEndTime: TDateTime;
+  SaveElapsed: Double;
+  LoadSpeedAvg: Double;
+  Sum: Double;
+  I: Integer;
 begin
+  // ============================================================
+  // Guards
+  // ============================================================
   if not Assigned(DataSource1.DataSet) then Exit;
   if not DataSource1.DataSet.Active then Exit;
 
   // ============================================================
   // Ziel-Dateiname bestimmen
+  //
+  // Dialog wird geöffnet wenn:
+  //   - AskForFileName = True (Save-Button geklickt)
+  //   - FDataSetChanged = True (es gibt ungespeicherte Änderungen)
   // ============================================================
-  if AskForFileName then
+  if AskForFileName or FDataSetChanged then
   begin
     if FileName <> '' then
       SaveDialog1.FileName := FileName;
     if not SaveDialog1.Execute then
-      Exit;
+      Exit;   // abgebrochen → Flag bleibt gesetzt
     TargetFileName := SaveDialog1.FileName;
   end
   else
@@ -1294,20 +1296,102 @@ begin
   end;
 
   // ============================================================
-  // Speichern — je nach Dataset-Typ
+  // CSVFastDataset — mit Progress-Fenster
   // ============================================================
   if DataSource1.DataSet = CSVFastDataset1 then
   begin
-    StartTime := Now;
     SaveErr := '';
-    try
-      CSVFastDataset1.SaveToCSVFile(TargetFileName);
-    except
-      on E: Exception do
-        SaveErr := E.ClassName + ': ' + E.Message;
-    end;
-    EndTime := Now;
+    FSaveCancelRequested := False;
+    FSaveStartTime := Now;
+    FSaveLastRows := 0;
+    FSaveLastSeconds := 0;
+    SetLength(FSaveSpeedSamples, 0);
 
+    // ------------------------------------------------------------
+    // 1. CSV-Format-Optionen aus dem Formular übernehmen
+    //    (Delimiter, QuoteChar, LineEnding, FirstLineAsFieldNames,
+    //     QuoteOuterWhitespace, IgnoreOuterWhitespace, ...)
+    //
+    //    Wichtig: VOR SaveToCSVFile, damit der Writer die
+    //    aktuellen Werte sieht.
+    // ------------------------------------------------------------
+    SetCSVSettingsFromForm;
+
+    // ------------------------------------------------------------
+    // 2. Writer-spezifische Optionen aus dem Formular übernehmen
+    //    (SaveBufferSize, SaveProgressUpdatePercent, SaveWriteBOM,
+    //     SaveSkipFirstRows, SaveStopAfterRow)
+    // ------------------------------------------------------------
+    SetSaveSettingsFromForm;
+
+    // ------------------------------------------------------------
+    // 3. FSaveTotalRows berechnen — JETZT, nachdem
+    //    SetSaveSettingsFromForm die SaveStopAfterRow gesetzt hat
+    // ------------------------------------------------------------
+    if TCSVFastDataset(CSVFastDataset1).SaveStopAfterRow > 0 then
+      FSaveTotalRows := TCSVFastDataset(CSVFastDataset1).SaveStopAfterRow
+    else
+    begin
+      FSaveTotalRows := CSVFastDataset1.RecordCount;
+      if FSaveTotalRows > 0 then
+        Dec(FSaveTotalRows, TCSVFastDataset(CSVFastDataset1).SaveSkipFirstRows);
+    end;
+    if FSaveTotalRows < 0 then
+      FSaveTotalRows := 0;
+
+    // ------------------------------------------------------------
+    // 4. Progress-Fenster aufbauen
+    // ------------------------------------------------------------
+    BuildSaveProgressForm;
+    FSavePhaseLbl.Caption := 'Saving CSV...';
+    FSaveInfoLbl.Caption := Format('File: %s   (%s rows)',
+      [ExtractFileName(TargetFileName),
+       FormatFloat('#,##0', FSaveTotalRows)]);
+    FSaveProgressForm.Show;
+    FSaveProgressForm.BringToFront;
+    Application.ProcessMessages;
+
+    try
+      // ----------------------------------------------------------
+      // 5. OnSaveProgress und CancelFlag setzen
+      // ----------------------------------------------------------
+      TCSVFastDataset(CSVFastDataset1).OnSaveProgress := @HandleSaveProgress;
+      TCSVFastDataset(CSVFastDataset1).SaveCancelFlag := @FSaveCancelRequested;
+
+      try
+        CSVFastDataset1.SaveToCSVFile(TargetFileName);
+      except
+        on E: EAbort do
+          SaveErr := 'Cancelled by user';
+        on E: Exception do
+          SaveErr := E.ClassName + ': ' + E.Message;
+      end;
+
+      TCSVFastDataset(CSVFastDataset1).OnSaveProgress := nil;
+      TCSVFastDataset(CSVFastDataset1).SaveCancelFlag := nil;
+
+      SaveEndTime := Now;
+      SaveElapsed := (SaveEndTime - FSaveStartTime) * SecsPerDay;
+
+      // ----------------------------------------------------------
+      // 6. Abschluss-Anzeige
+      // ----------------------------------------------------------
+      FSaveBar.Position := 100;
+      if FSaveCancelRequested then
+        FSavePhaseLbl.Caption := 'Cancelled by user'
+      else
+        FSavePhaseLbl.Caption := Format('Finished: %s rows',
+          [FormatFloat('#,##0', CSVFastDataset1.RecordCount)]);
+      Application.ProcessMessages;
+      Sleep(500);
+
+    finally
+      FreeSaveProgressForm;
+    end;
+
+    // ------------------------------------------------------------
+    // 7. Fehlerprüfung
+    // ------------------------------------------------------------
     if SaveErr <> '' then
     begin
       MessageDlg(
@@ -1316,33 +1400,103 @@ begin
         sLineBreak +
         'Error:' + sLineBreak + SaveErr,
         mtError, [mbOK], 0);
-      Exit;
+      Exit;   // Flag bleibt gesetzt → Button bleibt aktiv
     end;
 
-    // Optional: Erfolgsmeldung (nur bei Save As, nicht bei Post)
-    if AskForFileName then
-      ShowMessage(Format(
-        'Saved: %s' + sLineBreak +
-        'Time:  %.3f s',
-        [TargetFileName, (EndTime - StartTime) * SecsPerDay]));
+    // ------------------------------------------------------------
+    // 8. Erfolg — Flag zurücksetzen, FFileName aktualisieren
+    // ------------------------------------------------------------
+    if not FSaveCancelRequested then
+    begin
+      LoadSpeedAvg := 0;
+      if Length(FSaveSpeedSamples) > 1 then
+      begin
+        Sum := 0;
+        for I := 0 to Length(FSaveSpeedSamples) - 2 do
+          Sum := Sum + FSaveSpeedSamples[I];
+        LoadSpeedAvg := Sum / (Length(FSaveSpeedSamples) - 1);
+      end
+      else if Length(FSaveSpeedSamples) = 1 then
+        LoadSpeedAvg := FSaveSpeedSamples[0];
+
+      // FFileName auf neuen Pfad umstellen (nach Save As)
+      FFileName := TargetFileName;
+      Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
+
+      // Modified-Flag zurücksetzen — erfolgreich gespeichert
+      ClearDataSetChanged;
+
+      // Erfolgsmeldung nur bei Save As (nicht bei Post/Delete)
+      if AskForFileName then
+        ShowMessage(Format(
+          'Saved: %s' + sLineBreak +
+          'Rows:  %s' + sLineBreak +
+          'Time:  %.3f s' + sLineBreak +
+          'Speed: %s rows/sec',
+          [TargetFileName,
+           FormatFloat('#,##0', CSVFastDataset1.RecordCount),
+           SaveElapsed,
+           FormatFloat('#,##0', LoadSpeedAvg)]));
+    end;
   end
+
+  // ============================================================
+  // JSONFastDataSet
+  // ============================================================
   else if DataSource1.DataSet = JSONFastDataSet1 then
-    SaveJSONToFile(JSONFastDataSet1, TargetFileName)
+  begin
+    SaveJSONToFile(JSONFastDataSet1, TargetFileName);
+    FFileName := TargetFileName;
+    Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
+    ClearDataSetChanged;
+  end
+
+  // ============================================================
+  // sWorksheetDataset
+  // ============================================================
   else if DataSource1.DataSet = sWorksheetDataset1 then
-    sWorksheetDataset1.Flush
+  begin
+    sWorksheetDataset1.Flush;
+    ClearDataSetChanged;
+  end
+
+  // ============================================================
+  // DBF
+  // ============================================================
   else if DataSource1.DataSet = Dbf1 then
   begin
     Dbf1.FilePathFull := TargetFileName;
     Dbf1.Close;
     Dbf1.Open;
+    FFileName := TargetFileName;
+    ClearDataSetChanged;
   end
+
+  // ============================================================
+  // SDF
+  // ============================================================
   else if DataSource1.DataSet = SdfDataSet1 then
-    SdfDataSet1.SaveFileAs(TargetFileName)
+  begin
+    SdfDataSet1.SaveFileAs(TargetFileName);
+    FFileName := TargetFileName;
+    ClearDataSetChanged;
+  end
+
+  // ============================================================
+  // FixedFormat
+  // ============================================================
   else if DataSource1.DataSet = FixedFormatDataSet1 then
-    FixedFormatDataSet1.SaveFileAs(TargetFileName)
+  begin
+    FixedFormatDataSet1.SaveFileAs(TargetFileName);
+    FFileName := TargetFileName;
+    ClearDataSetChanged;
+  end
+
+  // ============================================================
+  // Alle anderen — Export-Popup zeigen
+  // ============================================================
   else
   begin
-    // Für DB-Datasets: Export-Popup zeigen
     P := btnExportAs.ClientToScreen(Point(0, btnExportAs.Height));
     pmGrid.PopUp(P.X, P.Y);
   end;
@@ -1514,6 +1668,7 @@ begin
   end;
 
   SynEditSQL.Lines.Clear;
+  SetSaveSettingsFromForm;
   SetCSVSettingsFromForm;
 
   // ============================================================
@@ -2099,16 +2254,12 @@ end;
 procedure TfrmDataEditor.DBNavigator1Click(Sender: TObject; Button: TDBNavButtonType);
 begin
   if Button = nbRefresh then
+  begin
     if FFileName <> '' then
-      LoadFile(FFileName)
-
-  else if Button = nbPost then
-    if FFileName <> '' then
-      SaveFile(FFileName, False)   // ← False: kein Dialog, in Originaldatei
-
-  else if Button = nbDelete then
-    if FFileName <> '' then
-      SaveFile(FFileName, False);  // ← False: kein Dialog, in Originaldatei
+      LoadFile(FFileName);
+  end;
+  // nbPost und nbDelete: kein SaveFile mehr —
+  // die AfterPost/AfterDelete-Handler setzen das Flag
 end;
 
 procedure TfrmDataEditor.FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -2135,11 +2286,14 @@ begin
   end;
 
   WriteIni;
+  FreeSaveProgressForm;
   CloseAction := caFree;
 end;
 
 procedure TfrmDataEditor.FormCreate(Sender: TObject);
 begin
+  FDataSetChanged := False;
+
   chkBoxAutoTuneCSVBuffer.Checked :=  CSVAutoTuneCSVBuffer;
 
   ReadIni;
@@ -2183,9 +2337,9 @@ begin
   pmGrid.PopUp(P.X, P.Y);
 end;
 
-procedure TfrmDataEditor.btnSaveFileAsClick(Sender: TObject);
+procedure TfrmDataEditor.btnSaveFileClick(Sender: TObject);
 begin
-    SaveFile(FFileName);
+    SaveFile(FFileName, True);
 end;
 
 procedure TfrmDataEditor.Button1Click(Sender: TObject);
@@ -2269,6 +2423,16 @@ begin
   end;
 
   SetCSVSettingsFromForm;
+end;
+
+procedure TfrmDataEditor.CSVFastDataset1AfterDelete(DataSet: TDataSet);
+begin
+  MarkDataSetChanged;
+end;
+
+procedure TfrmDataEditor.CSVFastDataset1AfterPost(DataSet: TDataSet);
+begin
+  MarkDataSetChanged;
 end;
 
 procedure TfrmDataEditor.lmStdExportFormatsClick(Sender: TObject);
@@ -2906,6 +3070,293 @@ end;
 procedure TfrmDataEditor.ResetAutoTuneProgressNote;
 begin
   FProgressAutoTuneNote := '';
+end;
+
+
+//Save
+procedure TfrmDataEditor.rbSaveRangeChange(Sender: TObject);
+begin
+  edtSaveFrom.Enabled := rbSaveRange.Checked;
+  edtSaveTo.Enabled   := rbSaveRange.Checked;
+end;
+
+procedure TfrmDataEditor.SetSaveSettingsFromForm;
+var
+  SaveBufferSize: Int64;
+  SaveProgressPercent: Integer;
+begin
+  // ============================================================
+  // Writer-Einstellungen: GUI → Dataset
+  // ============================================================
+  SaveBufferSize := StrToInt64Def(edtSaveBufferSize.Text, 4194304);
+  if SaveBufferSize < 65536 then
+    SaveBufferSize := 65536;
+
+  SaveProgressPercent := StrToIntDef(edtSaveProgressUpdatePercent.Text, 1);
+  if SaveProgressPercent < 1 then
+    SaveProgressPercent := 1;
+
+  TCSVFastDataset(CSVFastDataset1).SaveBufferSize := SaveBufferSize;
+  TCSVFastDataset(CSVFastDataset1).SaveProgressUpdatePercent := SaveProgressPercent;
+  TCSVFastDataset(CSVFastDataset1).SaveWriteBOM := chkBoxSaveWriteBOM.Checked;
+
+  // Range
+  if rbSaveRange.Checked then
+  begin
+    TCSVFastDataset(CSVFastDataset1).SaveSkipFirstRows :=
+      StrToInt64Def(edtSaveFrom.Text, 0);
+    TCSVFastDataset(CSVFastDataset1).SaveStopAfterRow :=
+      StrToInt64Def(edtSaveTo.Text, 0);
+  end
+  else
+  begin
+    TCSVFastDataset(CSVFastDataset1).SaveSkipFirstRows := 0;
+    TCSVFastDataset(CSVFastDataset1).SaveStopAfterRow := 0;
+  end;
+
+  // ============================================================
+  // Rückspiegelung in die GUI
+  // ============================================================
+  edtSaveBufferSize.Text := IntToStr(SaveBufferSize);
+  edtSaveProgressUpdatePercent.Text := IntToStr(SaveProgressPercent);
+
+  // Info-Label
+  lblSaveActiveSettings.Caption := Format(
+    'Active: SaveBuffer=%s, SaveProgress=%d%%, BOM=%s, Range=%s',
+    [FormatBytesSmart(SaveBufferSize),
+     SaveProgressPercent,
+     BoolToStr(chkBoxSaveWriteBOM.Checked, 'Yes', 'No'),
+     BoolToStr(rbSaveRange.Checked, 'Range', 'All')]);
+end;
+
+procedure TfrmDataEditor.ReadIniSaveSettings;
+begin
+  // Aus INI lesen (neue Keys)
+  edtSaveBufferSize.Text := IntToStr(CSVSaveBufferSizeBytes);
+  edtSaveProgressUpdatePercent.Text := IntToStr(CSVSaveProgressUpdatePercent);
+  chkBoxSaveWriteBOM.Checked := CSVSaveWriteBOM;
+
+  // Range-Modus
+  rbSaveAllRows.Checked := not CSVSaveUseRange;
+  rbSaveRange.Checked   := CSVSaveUseRange;
+  edtSaveFrom.Enabled   := CSVSaveUseRange;
+  edtSaveTo.Enabled     := CSVSaveUseRange;
+  edtSaveTo.Text        := IntToStr(CSVSaveStopAfterRow);
+end;
+
+procedure TfrmDataEditor.WriteIniSaveSettings;
+begin
+  CSVSaveBufferSizeBytes := StrToInt64Def(edtSaveBufferSize.Text, 4194304);
+  CSVSaveProgressUpdatePercent := StrToIntDef(edtSaveProgressUpdatePercent.Text, 1);
+  CSVSaveWriteBOM := chkBoxSaveWriteBOM.Checked;
+
+  CSVSaveUseRange := rbSaveRange.Checked;
+  if CSVSaveUseRange then
+  begin
+    CSVSaveStopAfterRow  := StrToInt64Def(edtSaveTo.Text, 0);
+  end
+  else
+  begin
+    CSVSaveStopAfterRow  := 0;
+  end;
+end;
+
+procedure TfrmDataEditor.BuildSaveProgressForm;
+var
+  PnlInfo, PnlProgress, PnlCancel: TPanel;
+begin
+  FSaveProgressForm := TForm.Create(nil);
+  FSaveProgressForm.Caption     := 'Saving CSV...';
+  FSaveProgressForm.Width       := 560;
+  FSaveProgressForm.Height      := 340;
+  FSaveProgressForm.Position    := poScreenCenter;
+  FSaveProgressForm.BorderStyle := bsDialog;
+  FSaveProgressForm.FormStyle   := fsNormal;
+
+  // ============================================================
+  // Info-Panel (oben)
+  // ============================================================
+  PnlInfo := TPanel.Create(FSaveProgressForm);
+  PnlInfo.Parent := FSaveProgressForm;
+  PnlInfo.Align := alTop;
+  PnlInfo.Height := 90;
+  PnlInfo.BevelOuter := bvNone;
+
+  FSavePhaseLbl := TLabel.Create(FSaveProgressForm);
+  FSavePhaseLbl.Parent := PnlInfo;
+  FSavePhaseLbl.Left := 16;
+  FSavePhaseLbl.Top := 12;
+  FSavePhaseLbl.Width := 520;
+  FSavePhaseLbl.Caption := 'Preparing...';
+  FSavePhaseLbl.Font.Size := 12;
+  FSavePhaseLbl.Font.Style := [fsBold];
+
+  FSaveInfoLbl := TLabel.Create(FSaveProgressForm);
+  FSaveInfoLbl.Parent := PnlInfo;
+  FSaveInfoLbl.Left := 16;
+  FSaveInfoLbl.Top := 45;
+  FSaveInfoLbl.Width := 520;
+  FSaveInfoLbl.Caption := '';
+
+  // ============================================================
+  // Progress-Panel (Mitte)
+  // ============================================================
+  PnlProgress := TPanel.Create(FSaveProgressForm);
+  PnlProgress.Parent := FSaveProgressForm;
+  PnlProgress.Align := alTop;
+  PnlProgress.Height := 105;
+  PnlProgress.BevelOuter := bvNone;
+
+  FSaveBar := TProgressBar.Create(FSaveProgressForm);
+  FSaveBar.Parent := PnlProgress;
+  FSaveBar.Left := 16;
+  FSaveBar.Top := 10;
+  FSaveBar.Width := 520;
+  FSaveBar.Height := 24;
+  FSaveBar.Min := 0;
+  FSaveBar.Max := 100;
+  FSaveBar.Position := 0;
+
+  FSaveElapsedLbl := TLabel.Create(FSaveProgressForm);
+  FSaveElapsedLbl.Parent := PnlProgress;
+  FSaveElapsedLbl.Left := 16;
+  FSaveElapsedLbl.Top := 45;
+  FSaveElapsedLbl.Width := 250;
+
+  FSaveSpeedLbl := TLabel.Create(FSaveProgressForm);
+  FSaveSpeedLbl.Parent := PnlProgress;
+  FSaveSpeedLbl.Left := 280;
+  FSaveSpeedLbl.Top := 45;
+  FSaveSpeedLbl.Width := 256;
+
+  FSaveETALbl := TLabel.Create(FSaveProgressForm);
+  FSaveETALbl.Parent := PnlProgress;
+  FSaveETALbl.Left := 16;
+  FSaveETALbl.Top := 68;
+  FSaveETALbl.Width := 520;
+
+  // ============================================================
+  // Cancel-Panel (unten)
+  // ============================================================
+  PnlCancel := TPanel.Create(FSaveProgressForm);
+  PnlCancel.Parent := FSaveProgressForm;
+  PnlCancel.Align := alClient;
+  PnlCancel.BevelOuter := bvNone;
+
+  FSaveCancelBtn := TButton.Create(FSaveProgressForm);
+  FSaveCancelBtn.Parent := PnlCancel;
+  FSaveCancelBtn.Caption := 'Cancel';
+  FSaveCancelBtn.Width := 100;
+  FSaveCancelBtn.Height := 30;
+  FSaveCancelBtn.Left := (FSaveProgressForm.ClientWidth - 100) div 2;
+  FSaveCancelBtn.Top := 15;
+  FSaveCancelBtn.OnClick := @SaveCancelClick;
+end;
+
+procedure TfrmDataEditor.FreeSaveProgressForm;
+begin
+  if Assigned(FSaveProgressForm) then
+    FreeAndNil(FSaveProgressForm);
+end;
+
+procedure TfrmDataEditor.HandleSaveProgress(ARowsWritten: Int64;
+  ABytesWritten: Int64; AElapsedSeconds: Double);
+var
+  Percent: Integer;
+  RowsPerSec, BytesPerSec, ETASeconds: Double;
+  IntervalRows: Double;
+begin
+  // ============================================================
+  // Interval-Sample für Report
+  // ============================================================
+  if (FSaveLastSeconds > 0) and (AElapsedSeconds > FSaveLastSeconds) then
+  begin
+    IntervalRows := (ARowsWritten - FSaveLastRows) /
+                    (AElapsedSeconds - FSaveLastSeconds);
+    if IntervalRows > 0 then
+    begin
+      SetLength(FSaveSpeedSamples, Length(FSaveSpeedSamples) + 1);
+      FSaveSpeedSamples[High(FSaveSpeedSamples)] := IntervalRows;
+    end;
+  end;
+  FSaveLastRows    := ARowsWritten;
+  FSaveLastSeconds := AElapsedSeconds;
+
+  // ============================================================
+  // Progress-Bar
+  // ============================================================
+  if FSaveTotalRows > 0 then
+  begin
+    Percent := (ARowsWritten * 100) div FSaveTotalRows;
+    if Percent > 100 then Percent := 100;
+  end
+  else
+    Percent := 0;
+
+  FSaveBar.Position := Percent;
+  FSaveInfoLbl.Caption := Format('Rows:   %s / %s   (%d%%)',
+    [FormatFloat('#,##0', ARowsWritten),
+     FormatFloat('#,##0', FSaveTotalRows),
+     Percent]);
+
+  // ============================================================
+  // Speed + ETA
+  // ============================================================
+  if AElapsedSeconds > 0.5 then
+  begin
+    RowsPerSec  := ARowsWritten / AElapsedSeconds;
+    BytesPerSec := ABytesWritten / AElapsedSeconds;
+
+    FSaveSpeedLbl.Caption := Format('Speed:  %s rows/sec  |  %s/sec',
+      [FormatFloat('#,##0', RowsPerSec),
+       FormatBytesSmart(Round(BytesPerSec))]);
+
+    if (FSaveTotalRows > ARowsWritten) and (RowsPerSec > 0) then
+    begin
+      ETASeconds := (FSaveTotalRows - ARowsWritten) / RowsPerSec;
+      FSaveETALbl.Caption := Format('ETA:    %s',
+        [FormatDateTime('hh:nn:ss', ETASeconds / SecsPerDay)]);
+    end
+    else
+      FSaveETALbl.Caption := '';
+  end
+  else
+  begin
+    FSaveSpeedLbl.Caption := '';
+    FSaveETALbl.Caption   := '';
+  end;
+
+  FSaveElapsedLbl.Caption := Format('Elapsed: %s  |  Written: %s',
+    [FormatDateTime('hh:nn:ss', AElapsedSeconds / SecsPerDay),
+     FormatBytesSmart(ABytesWritten)]);
+
+  Application.ProcessMessages;
+end;
+
+procedure TfrmDataEditor.SaveCancelClick(Sender: TObject);
+begin
+  FSaveCancelRequested := True;
+  FSaveCancelBtn.Enabled := False;
+  FSaveCancelBtn.Caption := 'Cancelling...';
+end;
+
+
+procedure TfrmDataEditor.UpdateSaveButton;
+begin
+  if Assigned(btnSaveFile) then
+    btnSaveFile.Enabled := FDataSetChanged;
+end;
+
+procedure TfrmDataEditor.MarkDataSetChanged;
+begin
+  FDataSetChanged := True;
+  UpdateSaveButton;
+end;
+
+procedure TfrmDataEditor.ClearDataSetChanged;
+begin
+  FDataSetChanged := False;
+  UpdateSaveButton;
 end;
 
 end.
