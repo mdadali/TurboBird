@@ -445,6 +445,7 @@ begin
       if CancelFlag then FCancelled := True;
     end;
 
+
     if FCancelled then Break;
 
     SourceNext;
