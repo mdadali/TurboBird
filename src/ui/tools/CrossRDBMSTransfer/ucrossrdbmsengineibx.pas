@@ -5,7 +5,7 @@ unit uCrossRDBMSEngineIBX;
 interface
 
 uses
-  Classes, SysUtils, DB, SQLDB, IB, IBQuery,  Dialogs,
+  Classes, SysUtils, DB, SQLDB, IB, IBQuery,  Dialogs, TypInfo,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSEngineBase;
@@ -21,6 +21,7 @@ type
   { ------------------------------------------------------------------ }
   TCrossEngineIBX = class(TCrossEngineBase)
   protected
+    procedure DebugDumpEverything(AList: TStringList);
     procedure InternalExecute; override;
 
     procedure EnsureSourceTrans; override;
@@ -194,6 +195,203 @@ begin
   end;
 end;
 
+procedure TCrossEngineIBX.DebugDumpEverything(AList: TStringList);
+var
+  i, SelCnt: Integer;
+  Field: TField;
+  Param: TParam;
+  MetaIBX: TIBQuery;
+  s: string;
+
+  procedure L(const Msg: string);
+  begin
+    AList.Add(Msg);
+  end;
+
+begin
+  if not Assigned(AList) then Exit;
+  AList.Clear;
+
+  L('========== CROSS ENGINE DEBUG DUMP (IBX) ==========');
+  L(FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
+  L('');
+
+  // ------------------------------------------------------------------
+  // 1. Basis-Infos
+  // ------------------------------------------------------------------
+  L('--- OPTIONS ---');
+  L(Format('SourceTable      : %s', [FOptions.SourceTable]));
+  L(Format('DestTable        : %s', [FOptions.DestTable]));
+  L(Format('FromRow / ToRow  : %d / %d', [FOptions.FromRow, FOptions.ToRow]));
+  L(Format('CommitInterval   : %d', [FOptions.CommitInterval]));
+  L(Format('Fields.Count     : %d', [Length(FOptions.Fields)]));
+  L('');
+
+  // ------------------------------------------------------------------
+  // 2. Source
+  // ------------------------------------------------------------------
+  L('--- SOURCE (IBX) ---');
+  L(Format('Active            : %s', [BoolToStr(FOptions.SourceIBXQuery.Active, True)]));
+  L(Format('SQL.Text          : %s', [FOptions.SourceIBXQuery.SQL.Text]));
+  if Assigned(FOptions.SourceIBXQuery.Transaction) then
+  begin
+    L(Format('Transaction.Active: %s', [BoolToStr(FOptions.SourceIBXQuery.Transaction.Active, True)]));
+    L(Format('Transaction.Name  : %s', [FOptions.SourceIBXQuery.Transaction.Name]));
+  end
+  else
+    L('Transaction       : NIL !!!');
+
+  if FOptions.SourceIBXQuery.Active then
+  begin
+    L(Format('FieldCount        : %d', [FOptions.SourceIBXQuery.FieldCount]));
+    L('Source Fields:');
+    for i := 0 to FOptions.SourceIBXQuery.FieldCount - 1 do
+    begin
+      Field := FOptions.SourceIBXQuery.Fields[i];
+      L(Format('  [%2d] %-30s  DataType=%-15s  Size=%5d  IsNull=%s',
+        [i, Field.FieldName,
+         GetEnumName(TypeInfo(TFieldType), Ord(Field.DataType)),
+         Field.DataSize, BoolToStr(Field.IsNull, True)]));
+    end;
+  end
+  else
+    L('!!! SOURCE QUERY NICHT AKTIV !!!');
+  L('');
+
+  // ------------------------------------------------------------------
+  // 3. Destination
+  // ------------------------------------------------------------------
+  L('--- DESTINATION (IBX) ---');
+  L(Format('Active            : %s', [BoolToStr(FOptions.DestIBXQuery.Active, True)]));
+  L(Format('Prepared          : %s', [BoolToStr(FOptions.DestIBXQuery.Prepared, True)]));
+  L(Format('SQL.Text          : %s', [FOptions.DestIBXQuery.SQL.Text]));
+  L(Format('InsertSQL (Stats) : %s', [FStats.InsertSQL]));
+
+  if Assigned(FOptions.DestIBXQuery.Transaction) then
+  begin
+    L(Format('Transaction.Active: %s', [BoolToStr(FOptions.DestIBXQuery.Transaction.Active, True)]));
+    L(Format('Transaction.Name  : %s', [FOptions.DestIBXQuery.Transaction.Name]));
+  end
+  else
+    L('Transaction       : NIL !!!');
+  L('');
+
+  // ------------------------------------------------------------------
+  // 4. Parameter
+  // ------------------------------------------------------------------
+  L('--- PARAMETER ---');
+  SelCnt := 0;
+  for i := 0 to High(FOptions.Fields) do
+    if FOptions.Fields[i].Selected then Inc(SelCnt);
+
+  L(Format('Selected fields   : %d', [SelCnt]));
+  L(Format('Params.Count      : %d', [FOptions.DestIBXQuery.Params.Count]));
+
+  if FOptions.DestIBXQuery.Params.Count <> SelCnt then
+    L(Format('!!! PARAM COUNT MISMATCH: Params=%d  vs Selected=%d !!!',
+      [FOptions.DestIBXQuery.Params.Count, SelCnt]));
+
+  for i := 0 to FOptions.DestIBXQuery.Params.Count - 1 do
+  begin
+    Param := FOptions.DestIBXQuery.Params[i];
+    L(Format('  Param[%d] Name="%-12s"  DataType=%-15s  IsNull=%s',
+      [i, Param.Name,
+       GetEnumName(TypeInfo(TFieldType), Ord(Param.DataType)),
+       BoolToStr(Param.IsNull, True)]));
+  end;
+  L('');
+
+  // ------------------------------------------------------------------
+  // 5. Mapping aus FOptions.Fields
+  // ------------------------------------------------------------------
+  L('--- FIELD MAPPING ---');
+  for i := 0 to High(FOptions.Fields) do
+  begin
+    with FOptions.Fields[i] do
+      L(Format('  [%2d] Sel=%-5s  Source="%-25s"  Dest="%-25s"',
+        [i, BoolToStr(Selected, True), SourceName, DestName]));
+  end;
+  L('');
+
+  // ------------------------------------------------------------------
+  // 6. Echte Spalten der Zieltabelle (das ist der wichtigste Teil!)
+  // ------------------------------------------------------------------
+  L('--- REAL DEST TABLE COLUMNS (RDB$RELATION_FIELDS) ---');
+  try
+    MetaIBX := TIBQuery.Create(nil);
+    try
+      MetaIBX.Database := FOptions.DestIBXQuery.Database;
+      MetaIBX.Transaction := FOptions.DestIBXQuery.Transaction;
+      MetaIBX.SQL.Text :=
+        'SELECT TRIM(RDB$FIELD_NAME) AS FNAME, RDB$FIELD_POSITION AS FPOS ' +
+        'FROM RDB$RELATION_FIELDS ' +
+        'WHERE RDB$RELATION_NAME = ' + QuotedStr(UpperCase(FOptions.DestTable)) +
+        ' ORDER BY RDB$FIELD_POSITION';
+      MetaIBX.Open;
+
+      if MetaIBX.IsEmpty then
+        L('!!! Tabelle existiert nicht oder hat keine Spalten !!!')
+      else
+      begin
+        while not MetaIBX.Eof do
+        begin
+          L(Format('  Pos %2d : "%s"',
+            [MetaIBX.FieldByName('FPOS').AsInteger,
+             MetaIBX.FieldByName('FNAME').AsString]));
+          MetaIBX.Next;
+        end;
+      end;
+    finally
+      MetaIBX.Free;
+    end;
+  except
+    on E: Exception do
+      L('!!! FEHLER beim Meta-Abruf: ' + E.ClassName + ' - ' + E.Message);
+  end;
+  L('');
+
+  // ------------------------------------------------------------------
+  // 7. Extra-Check: Existieren die DestNames wirklich?
+  // ------------------------------------------------------------------
+  L('--- DESTNAME vs REAL COLUMNS CHECK ---');
+  try
+    MetaIBX := TIBQuery.Create(nil);
+    try
+      MetaIBX.Database := FOptions.DestIBXQuery.Database;
+      MetaIBX.Transaction := FOptions.DestIBXQuery.Transaction;
+      MetaIBX.SQL.Text :=
+        'SELECT TRIM(RDB$FIELD_NAME) AS FNAME ' +
+        'FROM RDB$RELATION_FIELDS ' +
+        'WHERE RDB$RELATION_NAME = ' + QuotedStr(UpperCase(FOptions.DestTable));
+      MetaIBX.Open;
+
+      for i := 0 to High(FOptions.Fields) do
+      begin
+        if not FOptions.Fields[i].Selected then Continue;
+
+        s := UpperCase(FOptions.Fields[i].DestName);
+        // Quotes entfernen falls vorhanden
+        if (Length(s) >= 2) and (s[1] = '"') and (s[Length(s)] = '"') then
+          s := Copy(s, 2, Length(s)-2);
+
+        if not MetaIBX.Locate('FNAME', s, []) then
+          L(Format('!!! FEHLT IN ZIELTABELLE: DestName="%s" (gesucht als "%s")',
+            [FOptions.Fields[i].DestName, s]))
+        else
+          L(Format('OK: "%s"', [FOptions.Fields[i].DestName]));
+      end;
+    finally
+      MetaIBX.Free;
+    end;
+  except
+    on E: Exception do
+      L('!!! FEHLER beim Name-Check: ' + E.Message);
+  end;
+
+  L('');
+  L('========== ENDE DEBUG DUMP ==========');
+end;
+
 // ============================================================================
 // Hauptausführung (Row-by-Row)
 // ============================================================================
@@ -215,6 +413,7 @@ var
   DestIBX: TIBQuery;
   DestSQLDB: TSQLQuery;
 
+  // ---------- Source-Hilfsroutinen ----------
   procedure SourceNext;
   begin
     if FOptions.SourceIsIBX then
@@ -239,22 +438,20 @@ var
       SourceSQLDB.First;
   end;
 
-  function SourceFieldByIndex(AIndex: Integer): TField;
+  function SourceFieldByName(const AName: string): TField;
   begin
     if FOptions.SourceIsIBX then
-      Result := SourceIBX.Fields[AIndex]
+      Result := SourceIBX.FieldByName(AName)
     else
-      Result := SourceSQLDB.Fields[AIndex];
+      Result := SourceSQLDB.FieldByName(AName);
   end;
 
 begin
   { ---- Vorbereitung ---- }
   FStats.RowsTotal := CountSourceRows;
-
   FromRow := FOptions.FromRow;
   if FromRow < 1 then FromRow := 1;
   ToRow := FOptions.ToRow;
-
   if (ToRow > 0) and (ToRow < FStats.RowsTotal) then
     FStats.RowsTotal := ToRow - FromRow + 1
   else if FromRow > 1 then
@@ -290,6 +487,7 @@ begin
   DestFields := '';
   Placeholders := '';
   FirstField := True;
+
   for i := 0 to High(FOptions.Fields) do
   begin
     if not FOptions.Fields[i].Selected then Continue;
@@ -301,8 +499,7 @@ begin
     end;
     FirstField := False;
 
-    DestFields := DestFields +
-      QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS);
+    DestFields := DestFields + QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS);
     Placeholders := Placeholders + ':P' + IntToStr(SelectedCount);
     Inc(SelectedCount);
   end;
@@ -316,6 +513,7 @@ begin
   InsertSQL := 'INSERT INTO ' +
     QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
     ' (' + DestFields + ') VALUES (' + Placeholders + ')';
+
   FStats.InsertSQL := InsertSQL;
 
   DestIBX := nil;
@@ -338,7 +536,7 @@ begin
     DestSQLDB.Prepare;
   end;
 
-  { ---- Parameter ---- }
+  { ---- Parameter / Intervalle ---- }
   CommitInterval := FOptions.CommitInterval;
   if CommitInterval <= 0 then CommitInterval := 10000;
 
@@ -364,31 +562,69 @@ begin
   begin
     if FCancelled then Break;
 
+    // ---------------------------------------------------------------
+    // Parameter sicher setzen
+    // ---------------------------------------------------------------
     ParamIndex := 0;
     for i := 0 to High(FOptions.Fields) do
     begin
       if not FOptions.Fields[i].Selected then Continue;
 
-      Field := SourceFieldByIndex(ParamIndex);
+      Field := SourceFieldByName(FOptions.Fields[i].SourceName);
 
       if FOptions.DestIsIBX then
       begin
+        // ---------- IBX Ziel (explizit & sicher) ----------
         if Field.IsNull then
           DestIBX.Params[ParamIndex].Clear
         else
-          DestIBX.Params[ParamIndex].Assign(Field);
+        begin
+          case Field.DataType of
+            ftString, ftFixedChar, ftWideString:
+              DestIBX.Params[ParamIndex].AsString := Field.AsString;
+
+            ftMemo, ftWideMemo:
+              DestIBX.Params[ParamIndex].AsString := Field.AsString;
+
+            ftSmallint, ftInteger, ftWord, ftAutoInc:
+              DestIBX.Params[ParamIndex].AsInteger := Field.AsInteger;
+
+            ftLargeint:
+              DestIBX.Params[ParamIndex].AsLargeInt := Field.AsLargeInt;
+
+            ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+              DestIBX.Params[ParamIndex].AsFloat := Field.AsFloat;
+
+            ftDate:
+              DestIBX.Params[ParamIndex].AsDate := Field.AsDateTime;
+
+            ftTime:
+              DestIBX.Params[ParamIndex].AsTime := Field.AsDateTime;
+
+            ftDateTime, ftTimeStamp:
+              DestIBX.Params[ParamIndex].AsDateTime := Field.AsDateTime;
+
+            ftBoolean:
+              DestIBX.Params[ParamIndex].AsBoolean := Field.AsBoolean;
+
+            ftBlob, ftGraphic:
+              DestIBX.Params[ParamIndex].Assign(Field);
+
+          else
+            DestIBX.Params[ParamIndex].Value := Field.Value;
+          end;
+        end;
       end
       else
       begin
+        // ---------- SQLDB Ziel (klassisch) ----------
         if Field.IsNull then
           DestSQLDB.Params[ParamIndex].Clear
         else
           DestSQLDB.Params[ParamIndex].Assign(Field);
       end;
 
-      { Bytes zählen — erweitert für TMemoField/TWideStringField.
-        SQLite/PostgreSQL liefern TEXT-Felder als TMemoField,
-        dort ist Field.DataSize = 0. }
+      // Bytes zählen
       if not Field.IsNull then
       begin
         case Field.DataType of
@@ -402,6 +638,9 @@ begin
       Inc(ParamIndex);
     end;
 
+    // ---------------------------------------------------------------
+    // INSERT ausführen
+    // ---------------------------------------------------------------
     if FOptions.DestIsIBX then
       DestIBX.ExecSQL
     else
@@ -414,10 +653,10 @@ begin
     if (ToRow > 0) and (FStats.RowsProcessed >= (ToRow - FromRow + 1)) then
       Break;
 
+    // Commit-Interval
     if RowsSinceCommit >= CommitInterval then
     begin
       CommitDest;
-
       try
         if FOptions.DestIsIBX then
         begin
@@ -430,13 +669,13 @@ begin
           DestSQLDB.Prepare;
         end;
       except
+        // absichtlich leer
       end;
-
       RowsSinceCommit := 0;
     end;
 
-    if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or
-       SourceEOF then
+    // Fortschritt
+    if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or SourceEOF then
     begin
       LastProgressTime := Now;
       Elapsed := FormatDateTime('hh:nn:ss', Now - FStats.StartTime);
@@ -444,7 +683,6 @@ begin
       DoProgress(FStats.RowsProcessed, FStats.RowsTotal, Elapsed, CancelFlag);
       if CancelFlag then FCancelled := True;
     end;
-
 
     if FCancelled then Break;
 
@@ -459,9 +697,6 @@ begin
     RollbackDest;
     FStats.Cancelled := True;
   end;
-
-  ShowMessage(FOptions.SourceIBXConn.DatabaseName);
-  ShowMessage(FOptions.DestIBXConn.DatabaseName);
 
   Elapsed := FormatDateTime('hh:nn:ss', Now - FStats.StartTime);
   CancelFlag := FCancelled;

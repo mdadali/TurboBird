@@ -127,6 +127,11 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
     TransactionName = '{9D1866CA-4B97-48A7-9D43-9D264A4B5687}'
     Active = False
     DefaultDatabase = IBDatabase1
+    Params.Strings = (
+      'read_committed'
+      'rec_version'
+      'nowait'
+    )
     Left = 232
     Top = 168
   end
