@@ -78,13 +78,17 @@ begin
     else
       FOptions.DestQuery.Params[ParamIndex].Assign(Field);
 
-    // Bytes zählen (grob)
+    { Bytes zählen — erweitert für TMemoField/TWideStringField.
+      PostgreSQL/SQLite liefern TEXT-Felder als TMemoField; dort ist
+      Field.DataSize = 0, daher müssen wir Length(AsString) verwenden. }
     if not Field.IsNull then
     begin
-      if Field is TStringField then
-        Inc(FStats.BytesProcessed, Length(Field.AsString))
+      case Field.DataType of
+        ftString, ftFixedChar, ftWideString, ftMemo, ftWideMemo:
+          Inc(FStats.BytesProcessed, Length(Field.AsString));
       else
         Inc(FStats.BytesProcessed, Field.DataSize);
+      end;
     end;
 
     Inc(ParamIndex);

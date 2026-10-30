@@ -1,26 +1,26 @@
 object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
-  Left = 451
-  Height = 267
-  Top = 243
+  Left = 411
+  Height = 236
+  Top = 116
   Width = 414
   Caption = 'frmCrossRDBMSConnection'
-  ClientHeight = 267
+  ClientHeight = 236
   ClientWidth = 414
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '2.2.6.0'
   object GroupBoxConnection: TGroupBox
     Left = 0
-    Height = 267
+    Height = 236
     Top = 0
     Width = 414
     Align = alClient
-    ClientHeight = 265
+    ClientHeight = 234
     ClientWidth = 412
     TabOrder = 0
     object cmbboxConnection: TComboBox
       Left = 0
-      Height = 31
+      Height = 35
       Top = 0
       Width = 412
       Align = alTop
@@ -31,16 +31,16 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
     end
     object pnlInspector: TPanel
       Left = 0
-      Height = 234
-      Top = 31
+      Height = 199
+      Top = 35
       Width = 412
       Align = alClient
-      ClientHeight = 234
+      ClientHeight = 199
       ClientWidth = 412
       TabOrder = 1
       object InspectorGrid: TTIPropertyGrid
         Left = 1
-        Height = 232
+        Height = 197
         Top = 1
         Width = 410
         Align = alClient
@@ -79,6 +79,7 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
   end
   object SQLTransaction: TSQLTransaction
     Active = False
+    Database = MySQL80Conn
     Left = 208
     Top = 48
   end
@@ -90,5 +91,43 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
     SkipLibraryVersionCheck = True
     Left = 304
     Top = 104
+  end
+  object IBDatabase1: TIBDatabase
+    Connected = False
+    CreateIfNotExists = False
+    AllowStreamedConnected = False
+    DefaultTransaction = IBTransaction1
+    IdleTimer = 0
+    TraceFlags = []
+    UseDefaultSystemCodePage = False
+    Left = 47
+    Top = 168
+  end
+  object IBQuery1: TIBQuery
+    AllowAutoActivateTransaction = True
+    Database = IBDatabase1
+    Transaction = IBTransaction1
+    BufferChunks = 1000
+    BufferChunksInFirstBlock = 50
+    CachedUpdates = False
+    CaseSensitiveParameterNames = False
+    EnableStatistics = False
+    GenerateParamNames = False
+    GeneratorField.ApplyOnEvent = gaeOnNewRecord
+    MasterDetailDelay = 0
+    Params = <>
+    SQLFiltered = False
+    DataSetCloseAction = dcDiscardChanges
+    TZTextOption = tzOffset
+    DefaultTZDate = 43831
+    Left = 136
+    Top = 168
+  end
+  object IBTransaction1: TIBTransaction
+    TransactionName = '{9D1866CA-4B97-48A7-9D43-9D264A4B5687}'
+    Active = False
+    DefaultDatabase = IBDatabase1
+    Left = 232
+    Top = 168
   end
 end

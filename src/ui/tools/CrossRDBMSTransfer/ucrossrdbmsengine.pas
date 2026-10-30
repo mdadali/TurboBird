@@ -5,14 +5,15 @@ unit uCrossRDBMSEngine;
 interface
 
 uses
-  Classes, SysUtils, DB, SQLDB,
+  Classes, SysUtils, DB, SQLDB, IB,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSStrategies,
   uCrossRDBMSEngineBase,
   uCrossRDBMSEngineRowByRow,
   uCrossRDBMSEngineBatched,
-  uCrossRDBMSEngineInsertSelect;
+  uCrossRDBMSEngineInsertSelect,
+  uCrossRDBMSEngineIBX;
 
 type
   { ------------------------------------------------------------------ }
@@ -34,18 +35,25 @@ type
     procedure ExecuteCreatePhase;
     procedure DropTable(const ATableName: string);
     procedure CreateTable;
+
+    procedure InternalProgress(ARowsDone, ARowsTotal: Int64;
+      const AElapsed: string; var ACancel: Boolean);
+    procedure SyncStatsFromWorker;
+
+    function  IsAnyIBX: Boolean;
+    function  HasSameConnection: Boolean;
+
+    function  IsSamePhysicalDatabase: Boolean;
   public
     constructor Create(const AOptions: TCrossTransferOptions);
     destructor Destroy; override;
 
-    // SQL-Vorschau (CREATE + logisches INSERT)
     function PreviewSQL: string;
     function BuildCreateSQL: string;
 
-    // Tabellen-Existenz prüfen
     function DestTableExists: Boolean;
+    function  IsSameTableInSameDatabase: Boolean;
 
-    // Hauptausführung
     procedure Execute;
     procedure Cancel;
 
@@ -66,17 +74,40 @@ begin
   FStats := Default(TCrossTransferStats);
   FStats.Warnings := TStringList.Create;
 
-  // Basis-Infos
-  if Assigned(FOptions.SourceConn) then
+  { ---- Source-Info ---- }
+  if FOptions.SourceIsIBX then
   begin
-    FStats.SourceDBMS := DBMSFromConnection(FOptions.SourceConn);
+    FStats.SourceDBMS := cdFirebird;
+    FStats.SourceConnectorType := 'IBX';
+    if Assigned(FOptions.SourceIBXConn) then
+      FStats.SourceDatabase := FOptions.SourceIBXConn.DatabaseName;
+  end
+  else if Assigned(FOptions.SourceConn) then
+  begin
+    if FOptions.SourceBackend <> cdUnknown then
+      FStats.SourceDBMS := FOptions.SourceBackend
+    else
+      FStats.SourceDBMS := DBMSFromConnection(FOptions.SourceConn);
+    FStats.SourceConnectorType := FOptions.SourceConn.ClassName;
     FStats.SourceDatabase := FOptions.SourceConn.DatabaseName;
   end;
   FStats.SourceTable := FOptions.SourceTable;
 
-  if Assigned(FOptions.DestConn) then
+  { ---- Dest-Info ---- }
+  if FOptions.DestIsIBX then
   begin
-    FStats.DestDBMS := DBMSFromConnection(FOptions.DestConn);
+    FStats.DestDBMS := cdFirebird;
+    FStats.DestConnectorType := 'IBX';
+    if Assigned(FOptions.DestIBXConn) then
+      FStats.DestDatabase := FOptions.DestIBXConn.DatabaseName;
+  end
+  else if Assigned(FOptions.DestConn) then
+  begin
+    if FOptions.DestBackend <> cdUnknown then
+      FStats.DestDBMS := FOptions.DestBackend
+    else
+      FStats.DestDBMS := DBMSFromConnection(FOptions.DestConn);
+    FStats.DestConnectorType := FOptions.DestConn.ClassName;
     FStats.DestDatabase := FOptions.DestConn.DatabaseName;
   end;
   FStats.DestTable := FOptions.DestTable;
@@ -97,20 +128,56 @@ begin
     FOnLog(AMsg);
 end;
 
+procedure TCrossTransferEngine.InternalProgress(ARowsDone, ARowsTotal: Int64;
+  const AElapsed: string; var ACancel: Boolean);
+begin
+  SyncStatsFromWorker;
+  if Assigned(FOnProgress) then
+    FOnProgress(ARowsDone, ARowsTotal, AElapsed, ACancel);
+end;
+
+// ============================================================================
+// Hilfsfunktionen
+// ============================================================================
+
+function TCrossTransferEngine.IsAnyIBX: Boolean;
+begin
+  Result := FOptions.SourceIsIBX or FOptions.DestIsIBX;
+end;
+
+function TCrossTransferEngine.HasSameConnection: Boolean;
+begin
+  { Beide SQLDB und dieselbe Connection? }
+  if (not FOptions.SourceIsIBX) and (not FOptions.DestIsIBX) then
+    Exit((FOptions.SourceConn <> nil) and
+         (FOptions.SourceConn = FOptions.DestConn));
+
+  { Beide IBX und dieselbe Connection? }
+  if FOptions.SourceIsIBX and FOptions.DestIsIBX then
+    Exit((FOptions.SourceIBXConn <> nil) and
+         (FOptions.SourceIBXConn = FOptions.DestIBXConn));
+
+  { Gemischt — nie "same connection" }
+  Result := False;
+end;
+
+// ============================================================================
+// Engine-Auswahl
+// ============================================================================
+
 function TCrossTransferEngine.CreateEngine: TCrossEngineBase;
 var
   Strategy: TCrossStrategy;
   SameConn: Boolean;
 begin
-  SameConn := (FOptions.SourceConn = FOptions.DestConn);
+  SameConn := HasSameConnection;
 
-  // Strategie bestimmen
-  if FOptions.Strategy <> csRowByRow then  // manuell gewählt?
+  { ---- Strategie bestimmen ---- }
+  if FOptions.Strategy <> csRowByRow then
     Strategy := FOptions.Strategy
   else
     Strategy := RecommendStrategy(FStats.SourceDBMS, FStats.DestDBMS, SameConn);
 
-  // Verfügbarkeit prüfen und ggf. Fallback
   if not IsStrategyAvailable(Strategy, FStats.SourceDBMS, FStats.DestDBMS, SameConn) then
   begin
     Log('Requested strategy not available – falling back to Row-by-Row.');
@@ -119,6 +186,19 @@ begin
 
   FStats.StrategyUsed := Strategy;
 
+  { ---- IBX-Beteiligung? ----
+    Sobald Source oder Dest IBX ist, verwenden wir die IBX-Engine.
+    Sie beherrscht Row-by-Row in allen Kombinationen (IBX/SQLDB). }
+  if IsAnyIBX then
+  begin
+    Log('Using engine: IBX (Row-by-Row)');
+    Result := TCrossEngineIBX.Create(FOptions);
+    Result.OnProgress := @InternalProgress;
+    Result.OnLog := FOnLog;
+    Exit;
+  end;
+
+  { ---- Reiner SQLDB-Pfad ---- }
   case Strategy of
     csInsertSelect:
       begin
@@ -137,10 +217,13 @@ begin
     end;
   end;
 
-  // Events durchreichen
-  Result.OnProgress := FOnProgress;
+  Result.OnProgress := @InternalProgress;
   Result.OnLog := FOnLog;
 end;
+
+// ============================================================================
+// CREATE TABLE (Vorschau)
+// ============================================================================
 
 function TCrossTransferEngine.BuildCreateSQL: string;
 var
@@ -185,7 +268,6 @@ var
 begin
   CreateSQL := BuildCreateSQL;
 
-  // Logisches INSERT … SELECT als Vorschau
   SelectList := '';
   DestList := '';
   First := True;
@@ -229,149 +311,180 @@ begin
   end;
 end;
 
+// ============================================================================
+// DestTableExists (IBX-fähig)
+// ============================================================================
+
 function TCrossTransferEngine.DestTableExists: Boolean;
 var
-  Q: TSQLQuery;
+  SQL: string;
 begin
   Result := False;
-  if not Assigned(FOptions.DestQuery) then Exit;
 
-  Q := FOptions.DestQuery;
-  Q.Close;
-
+  { ---- SQL je nach Backend ---- }
   case FStats.DestDBMS of
     cdFirebird:
-      Q.SQL.Text := 'SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ' +
-                    QuotedStr(UpperCase(FOptions.DestTable)) + ' AND RDB$VIEW_BLR IS NULL';
+      SQL := 'SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ' +
+             QuotedStr(UpperCase(FOptions.DestTable)) +
+             ' AND RDB$VIEW_BLR IS NULL';
     cdPostgreSQL:
-      Q.SQL.Text := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
-                    QuotedStr(LowerCase(FOptions.DestTable)) + ' AND table_schema = current_schema()';
+      SQL := 'SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = LOWER(' +
+             QuotedStr(FOptions.DestTable) + ')' +
+             ' AND table_schema = current_schema()';
     cdMySQL:
-      Q.SQL.Text := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
-                    QuotedStr(FOptions.DestTable) + ' AND table_schema = DATABASE()';
+      SQL := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
+             QuotedStr(FOptions.DestTable) + ' AND table_schema = DATABASE()';
     cdSQLite:
-      Q.SQL.Text := 'SELECT 1 FROM sqlite_master WHERE type = ''table'' AND name = ' +
-                    QuotedStr(FOptions.DestTable);
+      SQL := 'SELECT 1 FROM sqlite_master WHERE type = ''table'' AND name = ' +
+             QuotedStr(FOptions.DestTable);
     cdMSSQL:
-      Q.SQL.Text := 'SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ' +
-                    QuotedStr(FOptions.DestTable);
+      SQL := 'SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ' +
+             QuotedStr(FOptions.DestTable);
     cdOracle:
-      Q.SQL.Text := 'SELECT 1 FROM USER_TABLES WHERE TABLE_NAME = ' +
-                    QuotedStr(UpperCase(FOptions.DestTable));
+      SQL := 'SELECT 1 FROM USER_TABLES WHERE TABLE_NAME = ' +
+             QuotedStr(UpperCase(FOptions.DestTable));
+    cdSybase:
+      SQL := 'SELECT 1 FROM sysobjects WHERE name = ' +
+             QuotedStr(FOptions.DestTable) + ' AND type = ''U''';
   else
-    // Generischer Fallback
-    Q.SQL.Text := 'SELECT 1 FROM ' + QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) + ' WHERE 1=0';
+    { ODBC / Unknown — generischer Fallback }
+    SQL := 'SELECT 1 FROM ' + QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
+           ' WHERE 1=0';
+  end;
+
+  { ---- Ausführen — IBX oder SQLDB ---- }
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then Exit;
+
+    if Assigned(FOptions.DestIBXTrans) and not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+
     try
-      if not FOptions.DestTrans.Active then FOptions.DestTrans.StartTransaction;
-      Q.Open;
-      Result := True;
-      Q.Close;
+      FOptions.DestIBXQuery.Close;
+      FOptions.DestIBXQuery.SQL.Text := SQL;
+      FOptions.DestIBXQuery.Open;
+      Result := not FOptions.DestIBXQuery.EOF;
+      FOptions.DestIBXQuery.Close;
     except
       Result := False;
-    end;
-    Exit;
-  end;
-
-  try
-    if not FOptions.DestTrans.Active then FOptions.DestTrans.StartTransaction;
-    Q.Open;
-    Result := not Q.EOF;
-    Q.Close;
-  except
-    Result := False;
-  end;
-end;
-
-procedure TCrossTransferEngine.Execute;
-var
-  OldWarnings: TStringList;
-begin
-  FCancelled := False;
-
-  if Assigned(FEngine) then
-    FreeAndNil(FEngine);
-
-  // Zuerst Tabellen-Struktur behandeln
-  ExecuteCreatePhase;
-
-  if FOptions.CopyData then
-  begin
-    FEngine := CreateEngine;
-    try
-      FEngine.Execute;
-
-      // Statistik übernehmen – Warnings-Liste korrekt behandeln
-      OldWarnings := FStats.Warnings;          // unsere bisherige Liste merken
-      FStats := FEngine.Stats;                 // Record kopieren
-      FStats.Warnings := OldWarnings;          // unsere Liste wieder einsetzen
-
-      // Inhalt von der Engine-Liste übernehmen
-      if Assigned(FEngine.Stats.Warnings) then
-        FStats.Warnings.Assign(FEngine.Stats.Warnings);
-
-    finally
-      // FEngine wird im Destructor freigegeben
+      try FOptions.DestIBXQuery.Close; except end;
     end;
   end
   else
-    Log('Copy Data unchecked – only table structure processed.');
+  begin
+    if not Assigned(FOptions.DestQuery) then Exit;
+
+    if Assigned(FOptions.DestTrans) and not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    try
+      FOptions.DestQuery.Close;
+      FOptions.DestQuery.SQL.Text := SQL;
+      FOptions.DestQuery.Open;
+      Result := not FOptions.DestQuery.EOF;
+      FOptions.DestQuery.Close;
+    except
+      Result := False;
+      try FOptions.DestQuery.Close; except end;
+    end;
+  end;
 end;
 
-procedure TCrossTransferEngine.Cancel;
-begin
-  FCancelled := True;
-  if Assigned(FEngine) then
-    FEngine.Cancel;
-end;
+// ============================================================================
+// DropTable (IBX-fähig)
+// ============================================================================
 
 procedure TCrossTransferEngine.DropTable(const ATableName: string);
+var
+  SQL: string;
 begin
-  if not Assigned(FOptions.DestQuery) then
-    raise Exception.Create('DestQuery not assigned.');
+  SQL := 'DROP TABLE ' + QuoteIdentifier(ATableName, FStats.DestDBMS);
 
-  if not FOptions.DestTrans.Active then
-    FOptions.DestTrans.StartTransaction;
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then
+      raise Exception.Create('DestIBXQuery not assigned.');
 
-  FOptions.DestQuery.Close;
-  FOptions.DestQuery.SQL.Text := 'DROP TABLE ' + QuoteIdentifier(ATableName, FStats.DestDBMS);
-  FOptions.DestQuery.ExecSQL;
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
 
-  // Commit nach DDL
-  try
-    FOptions.DestTrans.Commit;
-  except
+    FOptions.DestIBXQuery.Close;
+    FOptions.DestIBXQuery.SQL.Text := SQL;
+    FOptions.DestIBXQuery.ExecSQL;
+
+    try FOptions.DestIBXTrans.Commit; except end;
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+  end
+  else
+  begin
+    if not Assigned(FOptions.DestQuery) then
+      raise Exception.Create('DestQuery not assigned.');
+
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    FOptions.DestQuery.Close;
+    FOptions.DestQuery.SQL.Text := SQL;
+    FOptions.DestQuery.ExecSQL;
+
+    try FOptions.DestTrans.Commit; except end;
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
   end;
-  if not FOptions.DestTrans.Active then
-    FOptions.DestTrans.StartTransaction;
 end;
+
+// ============================================================================
+// CreateTable (IBX-fähig)
+// ============================================================================
 
 procedure TCrossTransferEngine.CreateTable;
 var
   SQL: string;
 begin
-  if not Assigned(FOptions.DestQuery) then
-    raise Exception.Create('DestQuery not assigned.');
-
   SQL := BuildCreateSQL;
   if Trim(SQL) = '' then Exit;
 
-  if not FOptions.DestTrans.Active then
-    FOptions.DestTrans.StartTransaction;
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then
+      raise Exception.Create('DestIBXQuery not assigned.');
 
-  FOptions.DestQuery.Close;
-  FOptions.DestQuery.SQL.Text := SQL;
-  FOptions.DestQuery.ExecSQL;
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
 
-  // Commit nach DDL
-  try
-    FOptions.DestTrans.Commit;
-  except
+    FOptions.DestIBXQuery.Close;
+    FOptions.DestIBXQuery.SQL.Text := SQL;
+    FOptions.DestIBXQuery.ExecSQL;
+
+    try FOptions.DestIBXTrans.Commit; except end;
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+  end
+  else
+  begin
+    if not Assigned(FOptions.DestQuery) then
+      raise Exception.Create('DestQuery not assigned.');
+
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    FOptions.DestQuery.Close;
+    FOptions.DestQuery.SQL.Text := SQL;
+    FOptions.DestQuery.ExecSQL;
+
+    try FOptions.DestTrans.Commit; except end;
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
   end;
-  if not FOptions.DestTrans.Active then
-    FOptions.DestTrans.StartTransaction;
 
   FStats.CreateSQL := SQL;
 end;
+
+// ============================================================================
+// CREATE-Phase
+// ============================================================================
 
 procedure TCrossTransferEngine.ExecuteCreatePhase;
 var
@@ -405,11 +518,143 @@ begin
       end;
 
     ieaAbort:
-      raise Exception.Create('Destination table "' + FOptions.DestTable + '" already exists. Aborted.');
+      raise Exception.Create('Destination table "' + FOptions.DestTable +
+        '" already exists. Aborted.');
 
     ieaAsk:
       raise Exception.Create('IfExists = Ask must be resolved before Execute.');
   end;
+end;
+
+// ============================================================================
+// Sicherheitschecks — Source = Dest verhindern
+// ============================================================================
+
+function TCrossTransferEngine.IsSamePhysicalDatabase: Boolean;
+begin
+  Result := False;
+
+  { ---- Beide SQLDB ---- }
+  if (not FOptions.SourceIsIBX) and (not FOptions.DestIsIBX) then
+  begin
+    if (FOptions.SourceConn = nil) or (FOptions.DestConn = nil) then
+      Exit;
+
+    { 1. Gleiche Connection-Instanz }
+    if FOptions.SourceConn = FOptions.DestConn then
+      Exit(True);
+
+    { 2. Gleicher HostName + DatabaseName → gleiche physische DB }
+    if SameText(Trim(FOptions.SourceConn.HostName),
+                Trim(FOptions.DestConn.HostName)) and
+       SameText(Trim(FOptions.SourceConn.DatabaseName),
+                Trim(FOptions.DestConn.DatabaseName)) then
+      Exit(True);
+
+    Exit;
+  end;
+
+  { ---- Beide IBX ---- }
+  if FOptions.SourceIsIBX and FOptions.DestIsIBX then
+  begin
+    if (FOptions.SourceIBXConn = nil) or (FOptions.DestIBXConn = nil) then
+      Exit;
+
+    { 1. Gleiche Connection-Instanz }
+    if FOptions.SourceIBXConn = FOptions.DestIBXConn then
+      Exit(True);
+
+    { 2. Gleicher DatabaseName → gleiche physische DB }
+    if SameText(Trim(FOptions.SourceIBXConn.DatabaseName),
+                Trim(FOptions.DestIBXConn.DatabaseName)) then
+      Exit(True);
+
+    Exit;
+  end;
+
+  { ---- Gemischt (IBX ↔ SQLDB) — physisch nie dieselbe DB ---- }
+  Result := False;
+end;
+
+function TCrossTransferEngine.IsSameTableInSameDatabase: Boolean;
+begin
+  Result := IsSamePhysicalDatabase and
+            SameText(Trim(FOptions.SourceTable), Trim(FOptions.DestTable));
+end;
+
+// ============================================================================
+// Execute
+// ============================================================================
+
+procedure TCrossTransferEngine.Execute;
+var
+  OldWarnings: TStringList;
+  OldTableCreated, OldTableRecreated, OldTableExisted: Boolean;
+begin
+  FCancelled := False;
+
+  if Assigned(FEngine) then
+    FreeAndNil(FEngine);
+
+  { ---- Sicherheitscheck: Source = Dest (gleiche Tabelle, gleiche DB) ---- }
+  if FOptions.CopyData and IsSameTableInSameDatabase then
+    raise Exception.Create(
+      'Source and Destination are the same table in the same database:' +
+      sLineBreak + sLineBreak +
+      '  Table:    ' + FOptions.SourceTable + sLineBreak +
+      '  Database: ' + FStats.SourceDatabase + sLineBreak + sLineBreak +
+      'This would cause data duplication or a database lock.' + sLineBreak +
+      'Please choose a different destination table name.');
+
+  ExecuteCreatePhase;
+
+  if FOptions.CopyData then
+  begin
+    FEngine := CreateEngine;
+    try
+      FEngine.Execute;
+
+      { ---- Tabellen-Status-Flags retten — der Worker kennt sie nicht ---- }
+      OldWarnings       := FStats.Warnings;
+      OldTableCreated   := FStats.TableCreated;
+      OldTableRecreated := FStats.TableRecreated;
+      OldTableExisted   := FStats.TableExisted;
+
+      FStats := FEngine.Stats;
+
+      FStats.Warnings       := OldWarnings;
+      FStats.TableCreated   := OldTableCreated;
+      FStats.TableRecreated := OldTableRecreated;
+      FStats.TableExisted   := OldTableExisted;
+
+      if Assigned(FEngine.Stats.Warnings) then
+        FStats.Warnings.Assign(FEngine.Stats.Warnings);
+    finally
+      { FEngine wird im Destructor freigegeben }
+    end;
+  end
+  else
+    Log('Copy Data unchecked – only table structure processed.');
+end;
+
+procedure TCrossTransferEngine.Cancel;
+begin
+  FCancelled := True;
+  if Assigned(FEngine) then
+    FEngine.Cancel;
+end;
+
+procedure TCrossTransferEngine.SyncStatsFromWorker;
+begin
+  if not Assigned(FEngine) then Exit;
+
+  FStats.RowsProcessed  := FEngine.Stats.RowsProcessed;
+  FStats.RowsTotal      := FEngine.Stats.RowsTotal;
+  FStats.BytesProcessed := FEngine.Stats.BytesProcessed;
+  FStats.CommitsDone    := FEngine.Stats.CommitsDone;
+  FStats.StartTime      := FEngine.Stats.StartTime;
+  FStats.StrategyUsed   := FEngine.Stats.StrategyUsed;
+  FStats.Cancelled      := FEngine.Stats.Cancelled;
 end;
 
 end.

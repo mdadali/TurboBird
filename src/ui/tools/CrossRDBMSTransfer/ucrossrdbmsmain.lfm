@@ -1,11 +1,11 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 378
+  Left = 526
   Height = 856
-  Top = 116
-  Width = 1374
+  Top = 511
+  Width = 1376
   Caption = 'CrossRDBMS - Transfer'
   ClientHeight = 856
-  ClientWidth = 1374
+  ClientWidth = 1376
   OnClose = FormClose
   OnCreate = FormCreate
   Position = poMainFormCenter
@@ -14,7 +14,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
     Left = 0
     Height = 32
     Top = 0
-    Width = 1374
+    Width = 1376
     Align = alTop
     TabOrder = 0
   end
@@ -22,13 +22,13 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
     Left = 0
     Height = 50
     Top = 806
-    Width = 1374
+    Width = 1376
     Align = alBottom
     ClientHeight = 50
-    ClientWidth = 1374
+    ClientWidth = 1376
     TabOrder = 1
     object btnPreviewSQL: TButton
-      Left = 752
+      Left = 960
       Height = 25
       Top = 8
       Width = 123
@@ -37,7 +37,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       TabOrder = 0
     end
     object btnExecute: TButton
-      Left = 904
+      Left = 1096
       Height = 25
       Top = 8
       Width = 112
@@ -55,20 +55,56 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       TabOrder = 2
     end
     object btnAutoMapTypes: TButton
-      Left = 562
+      Left = 824
       Height = 25
-      Top = 10
+      Top = 8
       Width = 126
       Caption = 'AutoMap Types'
       OnClick = btnAutoMapTypesClick
       TabOrder = 3
+    end
+    object btnLoadSourceConnection: TButton
+      Left = 8
+      Height = 25
+      Top = 10
+      Width = 192
+      Caption = 'Load Source Connection'
+      OnClick = btnLoadSourceConnectionClick
+      TabOrder = 4
+    end
+    object btnLoadDestConnection: TButton
+      Left = 424
+      Height = 25
+      Top = 10
+      Width = 195
+      Caption = 'Load Dest Connection'
+      OnClick = btnLoadDestConnectionClick
+      TabOrder = 5
+    end
+    object btnSaveDestConnection: TButton
+      Left = 624
+      Height = 25
+      Top = 10
+      Width = 184
+      Caption = 'Save Dest Connection'
+      OnClick = btnSaveDestConnectionClick
+      TabOrder = 6
+    end
+    object btnSaveSourceConnection: TButton
+      Left = 208
+      Height = 25
+      Top = 10
+      Width = 200
+      Caption = 'Save SourceConnection'
+      OnClick = btnSaveSourceConnectionClick
+      TabOrder = 7
     end
   end
   object PageControl1: TPageControl
     Left = 0
     Height = 774
     Top = 32
-    Width = 1374
+    Width = 1376
     ActivePage = tsZeosToZeos
     Align = alClient
     TabIndex = 0
@@ -76,16 +112,16 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
     object tsZeosToZeos: TTabSheet
       Caption = 'Zeos <-> Zeos'
       ClientHeight = 743
-      ClientWidth = 1364
+      ClientWidth = 1366
       object grboxConnections: TGroupBox
         Left = 0
         Height = 293
         Top = 0
-        Width = 1364
+        Width = 1366
         Align = alTop
         Caption = 'Connections'
         ClientHeight = 273
-        ClientWidth = 1362
+        ClientWidth = 1364
         TabOrder = 0
         object GroupBoxSource: TGroupBox
           Left = 0
@@ -100,7 +136,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Left = 858
           Height = 273
           Top = 0
-          Width = 504
+          Width = 506
           Align = alClient
           Caption = 'Dest'
           TabOrder = 1
@@ -170,7 +206,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         Left = 0
         Height = 5
         Top = 293
-        Width = 1364
+        Width = 1366
         Align = alTop
         ResizeAnchor = akTop
       end
@@ -178,20 +214,20 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         Left = 0
         Height = 264
         Top = 298
-        Width = 1364
+        Width = 1366
         Align = alClient
         ClientHeight = 264
-        ClientWidth = 1364
+        ClientWidth = 1366
         TabOrder = 2
         object GroupBoxFormulas: TGroupBox
           Left = 1
           Height = 262
           Top = 1
-          Width = 1362
+          Width = 1364
           Align = alClient
           Caption = 'Formulas'
           ClientHeight = 242
-          ClientWidth = 1360
+          ClientWidth = 1362
           TabOrder = 0
           object sgFormulas: TStringGrid
             Left = 0
@@ -206,17 +242,17 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
             Left = 840
             Height = 242
             Top = 0
-            Width = 520
+            Width = 522
             Align = alClient
             Caption = 'SQL'
             ClientHeight = 222
-            ClientWidth = 518
+            ClientWidth = 520
             TabOrder = 1
             inline SynEdit1: TSynEdit
               Left = 0
               Height = 222
               Top = 0
-              Width = 518
+              Width = 520
               Align = alClient
               Font.Height = 13
               Font.Name = 'DejaVu Sans Mono'
@@ -722,11 +758,11 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         Left = 0
         Height = 181
         Top = 562
-        Width = 1364
+        Width = 1366
         Align = alBottom
         Caption = 'Options'
         ClientHeight = 161
-        ClientWidth = 1362
+        ClientWidth = 1364
         TabOrder = 3
         object chkboxCopyData: TCheckBox
           Left = 16
@@ -750,26 +786,26 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           TabStop = True
         end
         object rbRange: TRadioButton
-          Left = 120
+          Left = 168
           Height = 21
-          Top = 56
+          Top = 51
           Width = 63
           Caption = 'Range'
           TabOrder = 2
         end
         object edtFrom: TEdit
-          Left = 208
+          Left = 256
           Height = 31
-          Top = 51
+          Top = 48
           Width = 88
           Enabled = False
           TabOrder = 3
           Text = '1'
         end
         object edtTo: TEdit
-          Left = 320
+          Left = 368
           Height = 31
-          Top = 51
+          Top = 48
           Width = 96
           Enabled = False
           TabOrder = 4
@@ -784,7 +820,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           ParentColor = False
         end
         object edtCommitInterval: TEdit
-          Left = 136
+          Left = 168
           Height = 31
           Top = 96
           Width = 88
@@ -832,7 +868,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Text = 'Recreate'
         end
         object lblRefreshInterval: TLabel
-          Left = 256
+          Left = 312
           Height = 19
           Top = 104
           Width = 183
@@ -840,7 +876,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           ParentColor = False
         end
         object edtRefreshInterval: TEdit
-          Left = 456
+          Left = 515
           Height = 31
           Top = 96
           Width = 96
@@ -853,7 +889,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Top = 48
           Width = 112
           TabOrder = 10
-          Text = 'edtBatchSize'
+          Text = '10000'
         end
         object cmbStrategy: TComboBox
           Left = 1128

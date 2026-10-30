@@ -15,28 +15,27 @@ type
   { ------------------------------------------------------------------ }
   TCrossEngineBase = class
   private
-
     FOnProgress: TCrossProgressEvent;
     FOnLog     : TCrossLogEvent;
-
   protected
-    FCancelled : Boolean;
     FOptions   : TCrossTransferOptions;
     FStats     : TCrossTransferStats;
+    FCancelled : Boolean;
 
     procedure DoLog(const AMsg: string);
     procedure DoProgress(ARowsDone, ARowsTotal: Int64; const AElapsed: string; var ACancel: Boolean);
     procedure AddWarning(const AMsg: string);
 
-    procedure EnsureSourceTrans;
-    procedure EnsureDestTrans;
-    procedure CommitDest;
-    procedure RollbackDest;
+    procedure EnsureSourceTrans;  virtual;
+    procedure EnsureDestTrans;    virtual;
+    procedure CommitDest;         virtual;
+    procedure RollbackDest;       virtual;
+    procedure CleanupQueries;     virtual;
 
-    function  CountSourceRows: Int64;
-    function  BuildSelectList: string;           // Spalten + Formeln
-    function  BuildDestFieldList: string;        // Ziel-Spaltennamen
-    function  ExpandFormula(const AFormula, AOwnFieldName: string): string;
+    function  CountSourceRows: Int64;  virtual;
+    function  BuildSelectList: string; virtual;
+    function  BuildDestFieldList: string; virtual;
+    function  ExpandFormula(const AFormula, AOwnFieldName: string): string; virtual;
 
     // Von den konkreten Engines zu überschreiben
     procedure InternalExecute; virtual; abstract;
@@ -65,20 +64,41 @@ begin
   FStats := Default(TCrossTransferStats);
   FStats.Warnings := TStringList.Create;
 
-  // Basis-Infos füllen
-  if Assigned(FOptions.SourceConn) then
+  { ---- Source-Info ---- }
+  if FOptions.SourceIsIBX then
   begin
-    FStats.SourceDBMS          := DBMSFromConnection(FOptions.SourceConn);
+    FStats.SourceDBMS := cdFirebird;
+    FStats.SourceConnectorType := 'IBX';
+    if Assigned(FOptions.SourceIBXConn) then
+      FStats.SourceDatabase := FOptions.SourceIBXConn.DatabaseName;
+  end
+  else if Assigned(FOptions.SourceConn) then
+  begin
+    if FOptions.SourceBackend <> cdUnknown then
+      FStats.SourceDBMS := FOptions.SourceBackend
+    else
+      FStats.SourceDBMS := DBMSFromConnection(FOptions.SourceConn);
     FStats.SourceConnectorType := FOptions.SourceConn.ClassName;
-    FStats.SourceDatabase      := FOptions.SourceConn.DatabaseName;
+    FStats.SourceDatabase := FOptions.SourceConn.DatabaseName;
   end;
   FStats.SourceTable := FOptions.SourceTable;
 
-  if Assigned(FOptions.DestConn) then
+  { ---- Dest-Info ---- }
+  if FOptions.DestIsIBX then
   begin
-    FStats.DestDBMS          := DBMSFromConnection(FOptions.DestConn);
+    FStats.DestDBMS := cdFirebird;
+    FStats.DestConnectorType := 'IBX';
+    if Assigned(FOptions.DestIBXConn) then
+      FStats.DestDatabase := FOptions.DestIBXConn.DatabaseName;
+  end
+  else if Assigned(FOptions.DestConn) then
+  begin
+    if FOptions.DestBackend <> cdUnknown then
+      FStats.DestDBMS := FOptions.DestBackend
+    else
+      FStats.DestDBMS := DBMSFromConnection(FOptions.DestConn);
     FStats.DestConnectorType := FOptions.DestConn.ClassName;
-    FStats.DestDatabase      := FOptions.DestConn.DatabaseName;
+    FStats.DestDatabase := FOptions.DestConn.DatabaseName;
   end;
   FStats.DestTable := FOptions.DestTable;
 
@@ -87,8 +107,11 @@ end;
 
 destructor TCrossEngineBase.Destroy;
 begin
+  CleanupQueries;
+
   if Assigned(FStats.Warnings) then
     FStats.Warnings.Free;
+
   inherited Destroy;
 end;
 
@@ -131,10 +154,33 @@ begin
     FOptions.DestTrans.StartTransaction;
 end;
 
+procedure TCrossEngineBase.CleanupQueries;
+begin
+  try
+    if Assigned(FOptions.SourceQuery) and FOptions.SourceQuery.Active then
+      FOptions.SourceQuery.Close;
+  except
+  end;
+
+  try
+    if Assigned(FOptions.DestQuery) then
+    begin
+      if FOptions.DestQuery.Active then
+        FOptions.DestQuery.Close;
+      try
+        FOptions.DestQuery.UnPrepare;
+      except
+      end;
+    end;
+  except
+  end;
+end;
+
 procedure TCrossEngineBase.CommitDest;
 begin
   if not Assigned(FOptions.DestTrans) then Exit;
 
+  { Query vor Commit schließen }
   try
     if Assigned(FOptions.DestQuery) and FOptions.DestQuery.Active then
       FOptions.DestQuery.Close;
@@ -145,6 +191,11 @@ begin
     if FOptions.DestTrans.Active then
       FOptions.DestTrans.Commit;
   except
+    on E: Exception do
+    begin
+      DoLog('WARNING: Commit failed: ' + E.Message);
+      AddWarning('Commit failed: ' + E.Message);
+    end;
   end;
 
   EnsureDestTrans;
@@ -153,13 +204,9 @@ end;
 
 procedure TCrossEngineBase.RollbackDest;
 begin
-  if not Assigned(FOptions.DestTrans) then Exit;
+  CleanupQueries;
 
-  try
-    if Assigned(FOptions.DestQuery) and FOptions.DestQuery.Active then
-      FOptions.DestQuery.Close;
-  except
-  end;
+  if not Assigned(FOptions.DestTrans) then Exit;
 
   try
     if FOptions.DestTrans.Active then
@@ -251,35 +298,65 @@ begin
   FStats.StartTime := Now;
 
   try
-    if not Assigned(FOptions.SourceConn) then
-      raise Exception.Create('Source connection not assigned.');
-    if not Assigned(FOptions.DestConn) then
-      raise Exception.Create('Destination connection not assigned.');
-    if not Assigned(FOptions.SourceQuery) then
-      raise Exception.Create('Source query not assigned.');
-    if not Assigned(FOptions.DestQuery) then
-      raise Exception.Create('Destination query not assigned.');
+    { ---- Quelle prüfen und öffnen ---- }
+    if FOptions.SourceIsIBX then
+    begin
+      if not Assigned(FOptions.SourceIBXConn) then
+        raise Exception.Create('Source IBX connection not assigned.');
+      if not FOptions.SourceIBXConn.Connected then
+        FOptions.SourceIBXConn.Open;
+      if not Assigned(FOptions.SourceIBXQuery) then
+        raise Exception.Create('Source IBX query not assigned.');
+    end
+    else
+    begin
+      if not Assigned(FOptions.SourceConn) then
+        raise Exception.Create('Source connection not assigned.');
+      if not FOptions.SourceConn.Connected then
+        FOptions.SourceConn.Open;
+      if not Assigned(FOptions.SourceQuery) then
+        raise Exception.Create('Source query not assigned.');
+    end;
 
-    if not FOptions.SourceConn.Connected then
-      FOptions.SourceConn.Open;
-    if not FOptions.DestConn.Connected then
-      FOptions.DestConn.Open;
+    { ---- Ziel prüfen und öffnen ---- }
+    if FOptions.DestIsIBX then
+    begin
+      if not Assigned(FOptions.DestIBXConn) then
+        raise Exception.Create('Destination IBX connection not assigned.');
+      if not FOptions.DestIBXConn.Connected then
+        FOptions.DestIBXConn.Open;
+      if not Assigned(FOptions.DestIBXQuery) then
+        raise Exception.Create('Destination IBX query not assigned.');
+    end
+    else
+    begin
+      if not Assigned(FOptions.DestConn) then
+        raise Exception.Create('Destination connection not assigned.');
+      if not FOptions.DestConn.Connected then
+        FOptions.DestConn.Open;
+      if not Assigned(FOptions.DestQuery) then
+        raise Exception.Create('Destination query not assigned.');
+    end;
 
     EnsureSourceTrans;
     EnsureDestTrans;
 
-    // Die eigentliche Arbeit machen die abgeleiteten Klassen
-    InternalExecute;
+    try
+      InternalExecute;
+    finally
+      CleanupQueries;
+    end;
 
   except
     on E: Exception do
     begin
       DoLog('Error: ' + E.Message);
+      CleanupQueries;
       raise;
     end;
   end;
 
-  // Endstatistik
+  { Endstatistik }
   FStats.ElapsedSeconds := (Now - FStats.StartTime) * 86400.0;
   if FStats.ElapsedSeconds > 0.001 then
   begin

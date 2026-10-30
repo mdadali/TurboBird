@@ -77,10 +77,15 @@ begin
     SL.Add(Format('  Commits         : %d', [AStats.CommitsDone]));
     SL.Add('');
 
-    SL.Add('--- TABLE STATUS ---------------------------------------------');
-    SL.Add('  Created         : ' + BoolToStr(AStats.TableCreated, 'YES', 'NO'));
-    SL.Add('  Recreated       : ' + BoolToStr(AStats.TableRecreated, 'YES', 'NO'));
-    SL.Add('  Existed before  : ' + BoolToStr(AStats.TableExisted, 'YES', 'NO'));
+    SL.Add('--- TABLE ACTION ---------------------------------------------');
+    if AStats.TableRecreated then
+      SL.Add('  Recreated       : destination table was dropped and re-created')
+    else if AStats.TableCreated then
+      SL.Add('  Created         : new destination table was created')
+    else if AStats.TableExisted then
+      SL.Add('  Appended        : data was added to an existing table')
+    else
+      SL.Add('  No action       : destination table was not touched');
     SL.Add('');
 
     if Assigned(AStats.Warnings) and (AStats.Warnings.Count > 0) then

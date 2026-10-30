@@ -14,6 +14,7 @@ function GetFieldTypeString(AField: TField): string;
 function QuoteIdentifier(const AName: string; ADBMS: TCrossDBMS): string;
 function GetTypeListForDBMS(ADBMS: TCrossDBMS): TStringList;
 function AutoMapType(const ASourceType: string; ADestDBMS: TCrossDBMS): string;
+function DetectBackendDBMS(AQuery: TSQLQuery; ATrans: TSQLTransaction): TCrossDBMS;
 
 implementation
 
@@ -475,6 +476,97 @@ begin
 
   if Trim(Result) = '' then
     Result := 'VARCHAR(255)';
+end;
+
+// ============================================================================
+// ODBC-Backend-Erkennung
+// ============================================================================
+
+function DetectBackendDBMS(AQuery: TSQLQuery; ATrans: TSQLTransaction): TCrossDBMS;
+var
+  V: string;
+begin
+  Result := cdUnknown;
+  if not Assigned(AQuery) then Exit;
+
+  { Test 1: VERSION() — MySQL, MariaDB, PostgreSQL }
+  try
+    AQuery.Close;
+    AQuery.SQL.Text := 'SELECT VERSION()';
+    if Assigned(ATrans) and not ATrans.Active then
+      ATrans.StartTransaction;
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := UpperCase(AQuery.Fields[0].AsString);
+    AQuery.Close;
+
+    if Pos('MARIADB', V) > 0 then Exit(cdMySQL);
+    if Pos('MYSQL', V) > 0 then Exit(cdMySQL);
+    if Pos('POSTGRESQL', V) > 0 then Exit(cdPostgreSQL);
+  except
+    try AQuery.Close; except end;
+  end;
+
+  { Test 2: SQLite — sqlite_version() }
+  try
+    AQuery.SQL.Text := 'SELECT sqlite_version()';
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := Trim(AQuery.Fields[0].AsString);
+    AQuery.Close;
+    if V <> '' then Exit(cdSQLite);
+  except
+    try AQuery.Close; except end;
+  end;
+
+  { Test 3: Firebird — rdb$get_context }
+  try
+    AQuery.SQL.Text :=
+      'SELECT rdb$get_context(''SYSTEM'', ''ENGINE_VERSION'') FROM rdb$database';
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := Trim(AQuery.Fields[0].AsString);
+    AQuery.Close;
+    if V <> '' then Exit(cdFirebird);
+  except
+    try AQuery.Close; except end;
+  end;
+
+  { Test 4: MSSQL — @@VERSION }
+  try
+    AQuery.SQL.Text := 'SELECT @@VERSION';
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := UpperCase(AQuery.Fields[0].AsString);
+    AQuery.Close;
+    if Pos('MICROSOFT', V) > 0 then Exit(cdMSSQL);
+  except
+    try AQuery.Close; except end;
+  end;
+
+  { Test 5: Oracle — v$version }
+  try
+    AQuery.SQL.Text := 'SELECT banner FROM v$version WHERE ROWNUM = 1';
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := UpperCase(AQuery.Fields[0].AsString);
+    AQuery.Close;
+    if Pos('ORACLE', V) > 0 then Exit(cdOracle);
+  except
+    try AQuery.Close; except end;
+  end;
+
+  { Test 6: Sybase — @@version }
+  try
+    AQuery.SQL.Text := 'SELECT @@version';
+    AQuery.Open;
+    if not AQuery.EOF then
+      V := UpperCase(AQuery.Fields[0].AsString);
+    AQuery.Close;
+    if Pos('SYBASE', V) > 0 then Exit(cdSybase);
+  except
+    try AQuery.Close; except end;
+  end;
 end;
 
 end.

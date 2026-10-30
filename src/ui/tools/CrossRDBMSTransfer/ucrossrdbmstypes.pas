@@ -5,7 +5,8 @@ unit uCrossRDBMSTypes;
 interface
 
 uses
-  Classes, SysUtils, DB, SQLDB;
+  Classes, SysUtils, DB, SQLDB,
+  IB, IBDatabase, IBQuery;
 
 type
   { ------------------------------------------------------------------ }
@@ -60,7 +61,7 @@ type
   { Transfer-Optionen (werden an die Engine übergeben)                 }
   { ------------------------------------------------------------------ }
   TCrossTransferOptions = record
-    // Verbindungen
+    // Verbindungen (SQLDB-Pfad)
     SourceConn   : TSQLConnection;
     SourceTrans  : TSQLTransaction;
     SourceQuery  : TSQLQuery;
@@ -68,6 +69,21 @@ type
     DestConn     : TSQLConnection;
     DestTrans    : TSQLTransaction;
     DestQuery    : TSQLQuery;
+
+    // Verbindungen (IBX-Pfad — nur wenn IsIBX = True)
+    SourceIsIBX   : Boolean;
+    SourceIBXConn : TIBDatabase;
+    SourceIBXTrans: TIBTransaction;
+    SourceIBXQuery: TIBQuery;
+
+    DestIsIBX     : Boolean;
+    DestIBXConn   : TIBDatabase;
+    DestIBXTrans  : TIBTransaction;
+    DestIBXQuery  : TIBQuery;
+
+    // Erkanntes Backend (bei ODBC wichtig)
+    SourceBackend : TCrossDBMS;
+    DestBackend   : TCrossDBMS;
 
     // Tabellen
     SourceTable  : string;
@@ -80,16 +96,16 @@ type
     // Verhalten
     CopyData     : Boolean;
     IfExists     : TIfExistsAction;
-    Strategy     : TCrossStrategy;     // gewählte / erzwungene Strategie
+    Strategy     : TCrossStrategy;
 
     // Bereiche
     FromRow      : Int64;
     ToRow        : Int64;              // 0 = bis Ende
 
     // Performance / Kontrolle
-    CommitInterval    : Integer;       // Zeilen pro Commit
-    BatchSize         : Integer;       // für Strategie B und C
-    RefreshIntervalMs : Integer;       // Progress-Aktualisierung
+    CommitInterval    : Integer;
+    BatchSize         : Integer;
+    RefreshIntervalMs : Integer;
   end;
 
   { ------------------------------------------------------------------ }

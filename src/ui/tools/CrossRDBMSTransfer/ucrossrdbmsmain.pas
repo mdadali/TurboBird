@@ -6,7 +6,9 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, ComCtrls,
-  ExtCtrls, Grids, SQLDB,
+  ExtCtrls, Grids,
+  SQLDB,
+  IBQuery,
   SynEdit, SynHighlighterSQL,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
@@ -24,6 +26,10 @@ type
     btnPreviewSQL: TButton;
     btnExecute: TButton;
     btnClose: TButton;
+    btnLoadSourceConnection: TButton;
+    btnLoadDestConnection: TButton;
+    btnSaveDestConnection: TButton;
+    btnSaveSourceConnection: TButton;
     chkboxUseFormulas: TCheckBox;
     CheckGroupSourceFields: TCheckGroup;
     chkboxCopyData: TCheckBox;
@@ -70,7 +76,11 @@ type
     procedure btnAutoMapTypesClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
+    procedure btnLoadDestConnectionClick(Sender: TObject);
+    procedure btnLoadSourceConnectionClick(Sender: TObject);
     procedure btnPreviewSQLClick(Sender: TObject);
+    procedure btnSaveDestConnectionClick(Sender: TObject);
+    procedure btnSaveSourceConnectionClick(Sender: TObject);
     procedure CheckGroupSourceFieldsItemClick(Sender: TObject; Index: Integer);
     procedure comboboxSourceTablesChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -176,7 +186,9 @@ begin
       if FSourceConnForm.Trans.Active then FSourceConnForm.Trans.Rollback;
     except end;
     try
-      if FSourceConnForm.Conn.Connected then FSourceConnForm.Conn.Close;
+      if Assigned(FSourceConnForm) then
+        if Assigned(FSourceConnForm.Conn)  then
+          if FSourceConnForm.Conn.Connected then FSourceConnForm.Conn.Close;
     except end;
   end;
 
@@ -186,9 +198,13 @@ begin
       if FDestConnForm.Trans.Active then FDestConnForm.Trans.Rollback;
     except end;
     try
-      if FDestConnForm.Conn.Connected then FDestConnForm.Conn.Close;
+      if Assigned(FDestConnForm) then
+        if Assigned(FDestConnForm.Conn) then
+          if FDestConnForm.Conn.Connected then FDestConnForm.Conn.Close;
     except end;
   end;
+
+  CloseAction := caFree;
 end;
 
 procedure TfrmCrossRDBMSMain.rbAllRowsChange(Sender: TObject);
@@ -211,10 +227,11 @@ begin
   SynEdit1.Lines.Clear;
 end;
 
-procedure TfrmCrossRDBMSMain.LoadSourceTables;
+{procedure TfrmCrossRDBMSMain.LoadSourceTables;
 var
   DBMS: TCrossDBMS;
   Q: TSQLQuery;
+  QueryOK: Boolean;
 begin
   comboboxSourceTables.Items.Clear;
   if not Assigned(FSourceConnForm) or not FSourceConnForm.Conn.Connected then Exit;
@@ -223,32 +240,223 @@ begin
   Q := FSourceConnForm.Query;
   Q.Close;
 
+  if not FSourceConnForm.Trans.Active then
+    FSourceConnForm.Trans.StartTransaction;
+
+  QueryOK := True;
+
   case DBMS of
     cdFirebird:
       Q.SQL.Text := 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
-                    'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ORDER BY RDB$RELATION_NAME';
+                    'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ' +
+                    'ORDER BY RDB$RELATION_NAME';
+
     cdPostgreSQL:
       Q.SQL.Text := 'SELECT table_name FROM information_schema.tables ' +
-                    'WHERE table_schema = current_schema() AND table_type = ''BASE TABLE'' ORDER BY table_name';
+                    'WHERE table_schema = current_schema() ' +
+                    'AND table_type = ''BASE TABLE'' ORDER BY table_name';
+
     cdMySQL:
       Q.SQL.Text := 'SELECT table_name FROM information_schema.tables ' +
-                    'WHERE table_schema = DATABASE() AND table_type = ''BASE TABLE'' ORDER BY table_name';
+                    'WHERE table_schema = DATABASE() ' +
+                    'AND table_type = ''BASE TABLE'' ORDER BY table_name';
+
     cdSQLite:
-      Q.SQL.Text := 'SELECT name FROM sqlite_master WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ORDER BY name';
+      Q.SQL.Text := 'SELECT name FROM sqlite_master ' +
+                    'WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ' +
+                    'ORDER BY name';
+
+    cdMSSQL:
+      Q.SQL.Text := 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ' +
+                    'WHERE TABLE_TYPE = ''BASE TABLE'' ORDER BY TABLE_NAME';
+
+    cdOracle:
+      Q.SQL.Text := 'SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME';
+
+    cdSybase:
+      Q.SQL.Text := 'SELECT name FROM sysobjects ' +
+                    'WHERE type = ''U'' ORDER BY name';
+
+    cdODBC, cdUnknown:
+      begin
+        { ODBC: Backend unbekannt — Kaskade mit Fallback.
+          1. information_schema (MariaDB, PostgreSQL, MSSQL)
+          2. sqlite_master (SQLite)
+          3. RDB$RELATIONS (Firebird) }
+        QueryOK := False;
+
+        Q.SQL.Text :=
+          'SELECT table_name FROM information_schema.tables ' +
+          'WHERE table_type = ''BASE TABLE'' ORDER BY table_name';
+        try
+          Q.Open;
+          QueryOK := True;
+        except
+          try Q.Close; except end;
+        end;
+
+        if not QueryOK then
+        begin
+          Q.SQL.Text :=
+            'SELECT name FROM sqlite_master ' +
+            'WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ' +
+            'ORDER BY name';
+          try
+            Q.Open;
+            QueryOK := True;
+          except
+            try Q.Close; except end;
+          end;
+        end;
+
+        if not QueryOK then
+        begin
+          Q.SQL.Text :=
+            'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+            'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ' +
+            'ORDER BY RDB$RELATION_NAME';
+          try
+            Q.Open;
+            QueryOK := True;
+          except
+            try Q.Close; except end;
+          end;
+        end;
+      end;
   else
     Exit;
   end;
 
-  if not FSourceConnForm.Trans.Active then
-    FSourceConnForm.Trans.StartTransaction;
-
-  Q.Open;
-  while not Q.EOF do
+  if not QueryOK then
   begin
-    comboboxSourceTables.Items.Add(Trim(Q.Fields[0].AsString));
-    Q.Next;
+    MessageDlg('Could not load tables — no supported query for this backend.',
+      mtWarning, [mbOK], 0);
+    Exit;
   end;
-  Q.Close;
+
+  try
+    while not Q.EOF do
+    begin
+      comboboxSourceTables.Items.Add(Trim(Q.Fields[0].AsString));
+      Q.Next;
+    end;
+  finally
+    Q.Close;
+  end;
+
+  if comboboxSourceTables.Items.Count > 0 then
+  begin
+    comboboxSourceTables.ItemIndex := 0;
+    comboboxSourceTablesChange(nil);
+  end;
+end; }
+
+procedure TfrmCrossRDBMSMain.LoadSourceTables;
+var
+  DBMS: TCrossDBMS;
+  SQL: string;
+  Q: TSQLQuery;
+  IBQ: TIBQuery;
+begin
+  comboboxSourceTables.Items.Clear;
+  if not Assigned(FSourceConnForm) then Exit;
+
+  { Verbindung prüfen — IBX oder SQLDB }
+  if FSourceConnForm.IsIBX then
+  begin
+    if not FSourceConnForm.IBXConn.Connected then Exit;
+  end
+  else
+  begin
+    if not FSourceConnForm.Conn.Connected then Exit;
+  end;
+
+  { DBMS bestimmen }
+  DBMS := FSourceConnForm.ConnDBMS;
+  if DBMS = cdUnknown then
+  begin
+    if FSourceConnForm.IsIBX then
+      DBMS := cdFirebird
+    else
+      DBMS := DBMSFromConnection(FSourceConnForm.Conn);
+  end;
+
+  { SQL je nach DBMS }
+  case DBMS of
+    cdFirebird:
+      SQL := 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
+             'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ' +
+             'ORDER BY RDB$RELATION_NAME';
+    cdPostgreSQL:
+      SQL := 'SELECT table_name FROM information_schema.tables ' +
+             'WHERE table_schema = current_schema() ' +
+             'AND table_type = ''BASE TABLE'' ORDER BY table_name';
+    cdMySQL:
+      SQL := 'SELECT table_name FROM information_schema.tables ' +
+             'WHERE table_schema = DATABASE() ' +
+             'AND table_type = ''BASE TABLE'' ORDER BY table_name';
+    cdSQLite:
+      SQL := 'SELECT name FROM sqlite_master ' +
+             'WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ' +
+             'ORDER BY name';
+    cdMSSQL:
+      SQL := 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ' +
+             'WHERE TABLE_TYPE = ''BASE TABLE'' ORDER BY TABLE_NAME';
+    cdOracle:
+      SQL := 'SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME';
+    cdSybase:
+      SQL := 'SELECT name FROM sysobjects ' +
+             'WHERE type = ''U'' ORDER BY name';
+  else
+    SQL := 'SELECT table_name FROM information_schema.tables ' +
+           'WHERE table_type = ''BASE TABLE'' ORDER BY table_name';
+  end;
+
+  { Query ausführen — IBX oder SQLDB }
+  try
+    if FSourceConnForm.IsIBX then
+    begin
+      IBQ := FSourceConnForm.IBXQuery;
+      IBQ.Close;
+      IBQ.SQL.Text := SQL;
+      if not FSourceConnForm.IBXTrans.Active then
+        FSourceConnForm.IBXTrans.StartTransaction;
+      IBQ.Open;
+      try
+        while not IBQ.EOF do
+        begin
+          comboboxSourceTables.Items.Add(Trim(IBQ.Fields[0].AsString));
+          IBQ.Next;
+        end;
+      finally
+        IBQ.Close;
+      end;
+    end
+    else
+    begin
+      Q := FSourceConnForm.Query;
+      Q.Close;
+      Q.SQL.Text := SQL;
+      if not FSourceConnForm.Trans.Active then
+        FSourceConnForm.Trans.StartTransaction;
+      Q.Open;
+      try
+        while not Q.EOF do
+        begin
+          comboboxSourceTables.Items.Add(Trim(Q.Fields[0].AsString));
+          Q.Next;
+        end;
+      finally
+        Q.Close;
+      end;
+    end;
+  except
+    on E: Exception do
+    begin
+      MessageDlg('Could not load tables: ' + E.Message, mtWarning, [mbOK], 0);
+      Exit;
+    end;
+  end;
 
   if comboboxSourceTables.Items.Count > 0 then
   begin
@@ -272,48 +480,118 @@ var
   i: Integer;
   FieldName, SourceType, AutoType: string;
   Q: TSQLQuery;
+  IBQ: TIBQuery;
+  FieldCount: Integer;
 begin
   SetLength(FFields, 0);
   CheckGroupSourceFields.Items.Clear;
   sgFormulas.RowCount := 1;
 
   if Trim(comboboxSourceTables.Text) = '' then Exit;
-  if not Assigned(FSourceConnForm) or not FSourceConnForm.Conn.Connected then Exit;
+  if not Assigned(FSourceConnForm) then Exit;
 
-  if Assigned(FDestConnForm) and FDestConnForm.Conn.Connected then
-    DestDBMS := DBMSFromConnection(FDestConnForm.Conn)
+  { Verbindung prüfen }
+  if FSourceConnForm.IsIBX then
+  begin
+    if not FSourceConnForm.IBXConn.Connected then Exit;
+    SourceDBMS := cdFirebird;
+  end
+  else
+  begin
+    if not FSourceConnForm.Conn.Connected then Exit;
+    SourceDBMS := FSourceConnForm.ConnDBMS;
+    if SourceDBMS = cdUnknown then
+      SourceDBMS := DBMSFromConnection(FSourceConnForm.Conn);
+  end;
+
+  { Dest-DBMS }
+  if Assigned(FDestConnForm) then
+  begin
+    if FDestConnForm.IsIBX then
+    begin
+      if FDestConnForm.IBXConn.Connected then
+        DestDBMS := cdFirebird
+      else
+        DestDBMS := cdUnknown;
+    end
+    else if FDestConnForm.Conn.Connected then
+    begin
+      DestDBMS := FDestConnForm.ConnDBMS;
+      if DestDBMS = cdUnknown then
+        DestDBMS := DBMSFromConnection(FDestConnForm.Conn);
+    end
+    else
+      DestDBMS := cdUnknown;
+  end
   else
     DestDBMS := cdUnknown;
 
-  SourceDBMS := DBMSFromConnection(FSourceConnForm.Conn);
-
-  Q := FSourceConnForm.Query;
-  Q.Close;
-  Q.SQL.Text := 'SELECT * FROM ' + QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) + ' WHERE 1=0';
-
-  if not FSourceConnForm.Trans.Active then
-    FSourceConnForm.Trans.StartTransaction;
-
-  Q.Open;
-
+  { Felder laden — IBX oder SQLDB }
   FUpdatingUI := True;
   try
-    for i := 0 to Q.FieldCount - 1 do
+    if FSourceConnForm.IsIBX then
     begin
-      FieldName := Q.Fields[i].FieldName;
-      SourceType := GetFieldTypeString(Q.Fields[i]);
-      AutoType := AutoMapType(SourceType, DestDBMS);
+      IBQ := FSourceConnForm.IBXQuery;
+      IBQ.Close;
+      IBQ.SQL.Text := 'SELECT * FROM ' +
+        QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) + ' WHERE 1=0';
+      if not FSourceConnForm.IBXTrans.Active then
+        FSourceConnForm.IBXTrans.StartTransaction;
+      IBQ.Open;
+      try
+        FieldCount := IBQ.FieldCount;
+        for i := 0 to FieldCount - 1 do
+        begin
+          FieldName := IBQ.Fields[i].FieldName;
+          SourceType := GetFieldTypeString(IBQ.Fields[i]);
+          AutoType := AutoMapType(SourceType, DestDBMS);
 
-      SetLength(FFields, Length(FFields) + 1);
-      FFields[High(FFields)].SourceName := FieldName;
-      FFields[High(FFields)].SourceType := SourceType;
-      FFields[High(FFields)].DestName   := FieldName;
-      FFields[High(FFields)].DestType   := AutoType;
-      FFields[High(FFields)].Formula    := '';
-      FFields[High(FFields)].Selected   := True;
+          SetLength(FFields, Length(FFields) + 1);
+          FFields[High(FFields)].SourceName := FieldName;
+          FFields[High(FFields)].SourceType := SourceType;
+          FFields[High(FFields)].DestName   := FieldName;
+          FFields[High(FFields)].DestType   := AutoType;
+          FFields[High(FFields)].Formula    := '';
+          FFields[High(FFields)].Selected   := True;
 
-      CheckGroupSourceFields.Items.Add(FieldName);
-      CheckGroupSourceFields.Checked[i] := True;
+          CheckGroupSourceFields.Items.Add(FieldName);
+          CheckGroupSourceFields.Checked[i] := True;
+        end;
+      finally
+        IBQ.Close;
+      end;
+    end
+    else
+    begin
+      Q := FSourceConnForm.Query;
+      Q.Close;
+      Q.SQL.Text := 'SELECT * FROM ' +
+        QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) + ' WHERE 1=0';
+      if not FSourceConnForm.Trans.Active then
+        FSourceConnForm.Trans.StartTransaction;
+      Q.Open;
+      try
+        FieldCount := Q.FieldCount;
+        for i := 0 to FieldCount - 1 do
+        begin
+          FieldName := Q.Fields[i].FieldName;
+          SourceType := GetFieldTypeString(Q.Fields[i]);
+          AutoType := AutoMapType(SourceType, DestDBMS);
+
+          SetLength(FFields, Length(FFields) + 1);
+          FFields[High(FFields)].SourceName := FieldName;
+          FFields[High(FFields)].SourceType := SourceType;
+          FFields[High(FFields)].DestName   := FieldName;
+          FFields[High(FFields)].DestType   := AutoType;
+          FFields[High(FFields)].Formula    := '';
+          FFields[High(FFields)].Selected   := True;
+
+          CheckGroupSourceFields.Items.Add(FieldName);
+          CheckGroupSourceFields.Checked[i] := True;
+        end;
+      finally
+        Q.Close;
+      end;
     end;
 
     UpdateGrid;
@@ -321,8 +599,6 @@ begin
   finally
     FUpdatingUI := False;
   end;
-
-  Q.Close;
 end;
 
 procedure TfrmCrossRDBMSMain.UpdateGrid;
@@ -342,11 +618,29 @@ begin
       sgFormulas.Cells[3, i + 1] := FFields[i].Formula;
     end;
 
-    if Assigned(FDestConnForm) and FDestConnForm.Conn.Connected then
-      DestDBMS := DBMSFromConnection(FDestConnForm.Conn)
+    { Dest-DBMS bestimmen — IBX oder SQLDB }
+    if Assigned(FDestConnForm) then
+    begin
+      if FDestConnForm.IsIBX then
+      begin
+        if FDestConnForm.IBXConn.Connected then
+          DestDBMS := cdFirebird
+        else
+          DestDBMS := cdUnknown;
+      end
+      else if Assigned(FDestConnForm.Conn) and FDestConnForm.Conn.Connected then
+      begin
+        DestDBMS := FDestConnForm.ConnDBMS;
+        if DestDBMS = cdUnknown then
+          DestDBMS := DBMSFromConnection(FDestConnForm.Conn);
+      end
+      else
+        DestDBMS := cdUnknown;
+    end
     else
       DestDBMS := cdUnknown;
 
+    { PickList für Zieltyp-Spalte }
     PickList := GetTypeListForDBMS(DestDBMS);
     try
       sgFormulas.Columns[2].PickList.Assign(PickList);
@@ -412,8 +706,25 @@ var
   DestDBMS: TCrossDBMS;
   i: Integer;
 begin
-  if Assigned(FDestConnForm) and FDestConnForm.Conn.Connected then
-    DestDBMS := DBMSFromConnection(FDestConnForm.Conn)
+  { Dest-DBMS bestimmen — IBX oder SQLDB }
+  if Assigned(FDestConnForm) then
+  begin
+    if FDestConnForm.IsIBX then
+    begin
+      if FDestConnForm.IBXConn.Connected then
+        DestDBMS := cdFirebird
+      else
+        DestDBMS := cdUnknown;
+    end
+    else if Assigned(FDestConnForm.Conn) and FDestConnForm.Conn.Connected then
+    begin
+      DestDBMS := FDestConnForm.ConnDBMS;
+      if DestDBMS = cdUnknown then
+        DestDBMS := DBMSFromConnection(FDestConnForm.Conn);
+    end
+    else
+      DestDBMS := cdUnknown;
+  end
   else
     DestDBMS := cdUnknown;
 
@@ -435,20 +746,66 @@ begin
 
   Result := Default(TCrossTransferOptions);
 
+  { ---- Source ---- }
   if Assigned(FSourceConnForm) then
   begin
-    Result.SourceConn  := FSourceConnForm.Conn;
-    Result.SourceTrans := FSourceConnForm.Trans;
-    Result.SourceQuery := FSourceConnForm.Query;
+    if FSourceConnForm.IsIBX then
+    begin
+      Result.SourceIsIBX  := True;
+      Result.SourceIBXConn  := FSourceConnForm.IBXConn;
+      Result.SourceIBXTrans := FSourceConnForm.IBXTrans;
+      Result.SourceIBXQuery := FSourceConnForm.IBXQuery;
+
+      { SQLDB-Felder bleiben nil }
+      Result.SourceConn  := nil;
+      Result.SourceTrans := nil;
+      Result.SourceQuery := nil;
+    end
+    else
+    begin
+      Result.SourceIsIBX  := False;
+      Result.SourceConn   := FSourceConnForm.Conn;
+      Result.SourceTrans  := FSourceConnForm.Trans;
+      Result.SourceQuery  := FSourceConnForm.Query;
+
+      Result.SourceIBXConn  := nil;
+      Result.SourceIBXTrans := nil;
+      Result.SourceIBXQuery := nil;
+    end;
+
+    Result.SourceBackend := FSourceConnForm.ConnDBMS;
   end;
 
+  { ---- Dest ---- }
   if Assigned(FDestConnForm) then
   begin
-    Result.DestConn  := FDestConnForm.Conn;
-    Result.DestTrans := FDestConnForm.Trans;
-    Result.DestQuery := FDestConnForm.Query;
+    if FDestConnForm.IsIBX then
+    begin
+      Result.DestIsIBX  := True;
+      Result.DestIBXConn  := FDestConnForm.IBXConn;
+      Result.DestIBXTrans := FDestConnForm.IBXTrans;
+      Result.DestIBXQuery := FDestConnForm.IBXQuery;
+
+      Result.DestConn  := nil;
+      Result.DestTrans := nil;
+      Result.DestQuery := nil;
+    end
+    else
+    begin
+      Result.DestIsIBX  := False;
+      Result.DestConn   := FDestConnForm.Conn;
+      Result.DestTrans  := FDestConnForm.Trans;
+      Result.DestQuery  := FDestConnForm.Query;
+
+      Result.DestIBXConn  := nil;
+      Result.DestIBXTrans := nil;
+      Result.DestIBXQuery := nil;
+    end;
+
+    Result.DestBackend := FDestConnForm.ConnDBMS;
   end;
 
+  { ---- Tabellen / Felder / Optionen ---- }
   Result.SourceTable       := Trim(comboboxSourceTables.Text);
   Result.DestTable         := Trim(edtDestTable.Text);
   Result.Fields            := FFields;
@@ -459,24 +816,25 @@ begin
   Result.BatchSize         := StrToIntDef(edtBatchSize.Text, 500);
   Result.RefreshIntervalMs := StrToIntDef(edtRefreshInterval.Text, 500);
 
-  // Strategy
+  { ---- Strategie ---- }
   case cmbStrategy.ItemIndex of
     1: Result.Strategy := csRowByRow;
     2: Result.Strategy := csBatched;
     3: Result.Strategy := csInsertSelect;
   else
-    Result.Strategy := csRowByRow; // Auto wird in der Engine entschieden
+    Result.Strategy := csRowByRow;   { Auto wird in der Engine entschieden }
   end;
 
+  { ---- Range ---- }
   if rbAllRows.Checked then
   begin
     Result.FromRow := 1;
-    Result.ToRow := 0;
+    Result.ToRow   := 0;
   end
   else
   begin
     Result.FromRow := StrToIntDef(edtFrom.Text, 1);
-    Result.ToRow := StrToIntDef(edtTo.Text, 0);
+    Result.ToRow   := StrToIntDef(edtTo.Text, 0);
   end;
 end;
 
@@ -538,6 +896,7 @@ var
   LocalAction: TIfExistsAction;
   Dlg: TCrossProgressDialog;
   ReportDlg: TCrossReportDialog;
+  SrcOK, DstOK: Boolean;
 begin
   if Trim(comboboxSourceTables.Text) = '' then
   begin
@@ -549,12 +908,34 @@ begin
     MessageDlg('Please enter a destination table name.', mtWarning, [mbOK], 0);
     Exit;
   end;
-  if not Assigned(FSourceConnForm) or not FSourceConnForm.Conn.Connected then
+
+  { Source-Verbindung prüfen — IBX oder SQLDB }
+  SrcOK := False;
+  if Assigned(FSourceConnForm) then
+  begin
+    if FSourceConnForm.IsIBX then
+      SrcOK := Assigned(FSourceConnForm.IBXConn) and FSourceConnForm.IBXConn.Connected
+    else
+      SrcOK := Assigned(FSourceConnForm.Conn) and FSourceConnForm.Conn.Connected;
+  end;
+
+  if not SrcOK then
   begin
     MessageDlg('Source connection is not active.', mtWarning, [mbOK], 0);
     Exit;
   end;
-  if not Assigned(FDestConnForm) or not FDestConnForm.Conn.Connected then
+
+  { Dest-Verbindung prüfen — IBX oder SQLDB }
+  DstOK := False;
+  if Assigned(FDestConnForm) then
+  begin
+    if FDestConnForm.IsIBX then
+      DstOK := Assigned(FDestConnForm.IBXConn) and FDestConnForm.IBXConn.Connected
+    else
+      DstOK := Assigned(FDestConnForm.Conn) and FDestConnForm.Conn.Connected;
+  end;
+
+  if not DstOK then
   begin
     MessageDlg('Destination connection is not active.', mtWarning, [mbOK], 0);
     Exit;
@@ -562,7 +943,30 @@ begin
 
   Options := BuildOptions;
 
-  // IfExists = Ask auflösen
+  { ---- Pre-Check: Source = Dest (VOR Progress-Fenster) ---- }
+  if Options.CopyData then
+  begin
+    Engine := TCrossTransferEngine.Create(Options);
+    try
+      if Engine.IsSameTableInSameDatabase then
+      begin
+        MessageDlg(
+          'Source and Destination are the same table in the same database:' +
+          sLineBreak + sLineBreak +
+          '  Table:    ' + Options.SourceTable + sLineBreak +
+          '  Database: ' + Engine.Stats.SourceDatabase + sLineBreak + sLineBreak +
+          'This would cause data duplication or a database lock.' + sLineBreak +
+          'Please choose a different destination table name.',
+          mtError, [mbOK], 0);
+        Exit;
+      end;
+    finally
+      Engine.Free;
+    end;
+  end;
+
+
+  { IfExists = Ask auflösen }
   if Options.IfExists = ieaAsk then
   begin
     Engine := TCrossTransferEngine.Create(Options);
@@ -591,7 +995,7 @@ begin
       Dlg.Free;
     end;
 
-    // Report anzeigen
+    { Report anzeigen }
     ReportDlg := TCrossReportDialog.Create('CrossRDBMS – Transfer Report',
       FormatCrossTransferReport(Engine.Stats));
     try
@@ -603,6 +1007,34 @@ begin
   finally
     Engine.Free;
   end;
+end;
+
+procedure TfrmCrossRDBMSMain.btnLoadSourceConnectionClick(Sender: TObject);
+begin
+  if Assigned(FSourceConnForm) then
+  begin
+    FSourceConnForm.ExecuteLoadDialog;
+    FSourceConnForm.InspectorGrid.Refresh;
+    FSourceConnForm.InspectorGrid.Repaint;
+  end;
+end;
+
+procedure TfrmCrossRDBMSMain.btnLoadDestConnectionClick(Sender: TObject);
+begin
+  if Assigned(FDestConnForm) then
+    FDestConnForm.ExecuteLoadDialog;
+end;
+
+procedure TfrmCrossRDBMSMain.btnSaveSourceConnectionClick(Sender: TObject);
+begin
+  if Assigned(FSourceConnForm) then
+    FSourceConnForm.ExecuteSaveDialog;
+end;
+
+procedure TfrmCrossRDBMSMain.btnSaveDestConnectionClick(Sender: TObject);
+begin
+  if Assigned(FDestConnForm) then
+    FDestConnForm.ExecuteSaveDialog;
 end;
 
 procedure TfrmCrossRDBMSMain.btnCloseClick(Sender: TObject);

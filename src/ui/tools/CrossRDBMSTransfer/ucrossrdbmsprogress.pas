@@ -155,32 +155,38 @@ begin
   FLblInfo.Caption := Format('Rows: %s of %s',
     [FormatFloat('#,##0', ARowsDone), FormatFloat('#,##0', ARowsTotal)]);
   FLblElapsed.Caption := 'Elapsed: ' + AElapsed;
-  FLblCommits.Caption := Format('Commits: %d', [FEngine.Stats.CommitsDone]);
 
-  if FEngine.Stats.StartTime > 0 then
-    ElapsedSec := (Now - FEngine.Stats.StartTime) * 86400.0
-  else
-    ElapsedSec := 0;
-
-  if ElapsedSec > 0.001 then
+  // Diese Werte kommen aus der Engine-Statistik
+  if Assigned(FEngine) then
   begin
-    RowsPerSec := ARowsDone / ElapsedSec;
-    MbPerSec := (FEngine.Stats.BytesProcessed / 1024 / 1024) / ElapsedSec;
-  end
-  else
-  begin
-    RowsPerSec := 0;
-    MbPerSec := 0;
-  end;
+    FLblCommits.Caption := Format('Commits: %d', [FEngine.Stats.CommitsDone]);
 
-  FLblRowsPerSec.Caption := Format('Rows/sec: %s', [FormatFloat('#,##0', RowsPerSec)]);
-  FLblMbPerSec.Caption := Format('MB/sec: %.2f', [MbPerSec]);
+    if FEngine.Stats.StartTime > 0 then
+      ElapsedSec := (Now - FEngine.Stats.StartTime) * 86400.0
+    else
+      ElapsedSec := 0;
 
-  // Strategy anzeigen (falls schon bekannt)
-  case FEngine.Stats.StrategyUsed of
-    csRowByRow:     FLblStrategy.Caption := 'Strategy: Row-by-Row';
-    csBatched:      FLblStrategy.Caption := 'Strategy: Batched Inserts';
-    csInsertSelect: FLblStrategy.Caption := 'Strategy: INSERT … SELECT (batched)';
+    if ElapsedSec > 0.001 then
+    begin
+      RowsPerSec := ARowsDone / ElapsedSec;
+      MbPerSec := (FEngine.Stats.BytesProcessed / 1024 / 1024) / ElapsedSec;
+    end
+    else
+    begin
+      RowsPerSec := 0;
+      MbPerSec := 0;
+    end;
+
+    FLblRowsPerSec.Caption := Format('Rows/sec: %s', [FormatFloat('#,##0', RowsPerSec)]);
+    FLblMbPerSec.Caption := Format('MB/sec: %.2f', [MbPerSec]);
+
+    case FEngine.Stats.StrategyUsed of
+      csRowByRow:     FLblStrategy.Caption := 'Strategy: Row-by-Row';
+      csBatched:      FLblStrategy.Caption := 'Strategy: Batched Inserts';
+      csInsertSelect: FLblStrategy.Caption := 'Strategy: INSERT … SELECT (batched)';
+    else
+      FLblStrategy.Caption := 'Strategy: –';
+    end;
   end;
 
   Application.ProcessMessages;

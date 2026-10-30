@@ -118,6 +118,8 @@ type
     procedure Execute;
     procedure Cancel;
 
+    procedure SyncStatsFromWorker;
+
     property Stats: TCrossTransferStats read FStats;
     property OnProgress: TProgressEvent read FOnProgress write FOnProgress;
     property OnLog: TLogEvent read FOnLog write FOnLog;
@@ -969,6 +971,20 @@ begin
       DoLog('Error: ' + E.Message);
       raise;
     end;
+  end;
+end;
+
+procedure TCrossTransferEngine.SyncStatsFromWorker;
+begin
+  if Assigned(FEngine) then
+  begin
+    FStats.RowsProcessed  := FEngine.Stats.RowsProcessed;
+    FStats.RowsTotal      := FEngine.Stats.RowsTotal;
+    FStats.BytesProcessed := FEngine.Stats.BytesProcessed;
+    FStats.CommitsDone    := FEngine.Stats.CommitsDone;
+    FStats.StartTime      := FEngine.Stats.StartTime;
+    FStats.StrategyUsed   := FEngine.Stats.StrategyUsed;
+    FStats.Cancelled      := FEngine.Stats.Cancelled;
   end;
 end;
 

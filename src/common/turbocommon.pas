@@ -602,6 +602,11 @@ var
 
 //end-Ini.File////////////////////////////////////////////////////////////////
 
+
+//Firebird Clientlibrary
+function GetTurboBirdFirebirdClientLib: string;
+
+
 //Format
 function FormatBytesSmart(ABytes: Int64): string;
 
@@ -931,6 +936,12 @@ function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATr
 implementation
 
 uses  main, Reg;
+
+
+function GetTurboBirdFirebirdClientLib: string;
+begin
+  Result := Trim(fIniFile.ReadString('FireBird', 'InitialFBClientLib', ''));
+end;
 
 //Format
 function FormatBytesSmart(ABytes: Int64): string;

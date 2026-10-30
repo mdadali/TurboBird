@@ -23,7 +23,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1342"/>
+      <BuildNr Value="1407"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -932,7 +932,7 @@
         <PackageName Value="LCL"/>
       </Item33>
     </RequiredPackages>
-    <Units Count="136">
+    <Units Count="137">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1759,6 +1759,11 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="uCrossRDBMSConnection"/>
       </Unit135>
+      <Unit136>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsengineibx.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineIBX"/>
+      </Unit136>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1813,7 +1818,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="14">
+    <Exceptions Count="15">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -1856,6 +1861,9 @@
       <Item14>
         <Name Value="RunError(215)"/>
       </Item14>
+      <Item15>
+        <Name Value="EDatabaseError"/>
+      </Item15>
     </Exceptions>
   </Debugging>
 </CONFIG>
