@@ -340,8 +340,6 @@ procedure TfrmCrossRDBMSConnection.SaveConnectionToIni(const AFileName: string);
 var
   Ini: TIniFile;
   LocalConn: TSQLConnection;
-  DBName, Host: string;
-  P: Integer;
 begin
   ForceDirectories(ExtractFilePath(AFileName));
 
@@ -351,23 +349,13 @@ begin
 
     if FIBXActive then
     begin
-      { IBX: Host aus DatabaseName extrahieren (falls 'host:pfad' Format) }
-      DBName := IBDatabase1.DatabaseName;
-      P := Pos(':', DBName);
-      if (P > 1) and (P < Length(DBName)) and (DBName[P + 1] = '/') then
-      begin
-        Host := Copy(DBName, 1, P - 1);
-        DBName := Copy(DBName, P + 1, Length(DBName) - P);
-      end
-      else
-        Host := '';
+      if not Assigned(FCurrentWrapper) then Exit;
 
-      Ini.WriteString('Connection', 'HostName', Host);
-      Ini.WriteString('Connection', 'DatabaseName', DBName);
-      Ini.WriteString('Connection', 'UserName',
-        IBDatabase1.Params.Values['user_name']);
-      Ini.WriteString('Connection', 'Password',
-        IBDatabase1.Params.Values['password']);
+      Ini.WriteString('Connection', 'HostName',     FCurrentWrapper.HostName);
+      Ini.WriteString('Connection', 'Port',         IntToStr(FCurrentWrapper.Port));
+      Ini.WriteString('Connection', 'DatabaseName', FCurrentWrapper.DatabaseName);
+      Ini.WriteString('Connection', 'UserName',     FCurrentWrapper.UserName);
+      Ini.WriteString('Connection', 'Password',     FCurrentWrapper.Password);
       Ini.WriteString('Connection', 'LibraryLocation', '');
     end
     else
@@ -375,10 +363,23 @@ begin
       LocalConn := GetActiveConnection;
       if not Assigned(LocalConn) then Exit;
 
-      Ini.WriteString('Connection', 'HostName', LocalConn.HostName);
-      Ini.WriteString('Connection', 'DatabaseName', LocalConn.DatabaseName);
-      Ini.WriteString('Connection', 'UserName', LocalConn.UserName);
-      Ini.WriteString('Connection', 'Password', LocalConn.Password);
+      if Assigned(FCurrentWrapper) then
+      begin
+        Ini.WriteString('Connection', 'HostName',     FCurrentWrapper.HostName);
+        Ini.WriteString('Connection', 'Port',         IntToStr(FCurrentWrapper.Port));
+        Ini.WriteString('Connection', 'DatabaseName', FCurrentWrapper.DatabaseName);
+        Ini.WriteString('Connection', 'UserName',     FCurrentWrapper.UserName);
+        Ini.WriteString('Connection', 'Password',     FCurrentWrapper.Password);
+      end
+      else
+      begin
+        Ini.WriteString('Connection', 'HostName',     LocalConn.HostName);
+        Ini.WriteString('Connection', 'Port',         '0');
+        Ini.WriteString('Connection', 'DatabaseName', LocalConn.DatabaseName);
+        Ini.WriteString('Connection', 'UserName',     LocalConn.UserName);
+        Ini.WriteString('Connection', 'Password',     LocalConn.Password);
+      end;
+
       Ini.WriteString('Connection', 'LibraryLocation', SQLDBLibraryLoader.LibraryName);
     end;
   finally
@@ -389,7 +390,8 @@ end;
 procedure TfrmCrossRDBMSConnection.LoadConnectionFromIni(const AFileName: string);
 var
   Ini: TIniFile;
-  Driver, Host, DBName, User, Pwd, Lib: string;
+  Driver, Host, PortStr, DBName, User, Pwd, Lib: string;
+  PortNum: Integer;
   i: Integer;
   LocalConn: TSQLConnection;
 begin
@@ -398,17 +400,21 @@ begin
 
   Ini := TIniFile.Create(AFileName);
   try
-    Driver := Ini.ReadString('Connection', 'Driver', '');
-    Host   := Ini.ReadString('Connection', 'HostName', '');
-    DBName := Ini.ReadString('Connection', 'DatabaseName', '');
-    User   := Ini.ReadString('Connection', 'UserName', '');
-    Pwd    := Ini.ReadString('Connection', 'Password', '');
-    Lib    := Ini.ReadString('Connection', 'LibraryLocation', '');
+    Driver  := Ini.ReadString('Connection', 'Driver', '');
+    Host    := Ini.ReadString('Connection', 'HostName', '');
+    PortStr := Ini.ReadString('Connection', 'Port', '0');
+    DBName  := Ini.ReadString('Connection', 'DatabaseName', '');
+    User    := Ini.ReadString('Connection', 'UserName', '');
+    Pwd     := Ini.ReadString('Connection', 'Password', '');
+    Lib     := Ini.ReadString('Connection', 'LibraryLocation', '');
   finally
     Ini.Free;
   end;
 
-  { Treiber setzen → triggert cmbboxConnectionChange, das FIBXActive setzt }
+  PortNum := StrToIntDef(PortStr, 0);
+
+  { Treiber setzen → triggert cmbboxConnectionChange, das FIBXActive setzt
+    und den Wrapper erstellt. }
   if Driver <> '' then
   begin
     i := cmbboxConnection.Items.IndexOf(Driver);
@@ -422,23 +428,20 @@ begin
   { ---- IBX-Modus (Firebird) ---- }
   if FIBXActive then
   begin
+    if not Assigned(FCurrentWrapper) then Exit;
+
     if IBDatabase1.Connected then
       IBDatabase1.Close;
 
-    { Host + DatabaseName bei IBX: 'host:pfad' oder 'pfad' }
-    if Host <> '' then
-      IBDatabase1.DatabaseName := Host + ':' + DBName
-    else
-      IBDatabase1.DatabaseName := DBName;
+    { Alle Werte über den Wrapper setzen — er baut den Connection-String
+      beim Verbinden (HostName/Port/DatabaseName → 'host/port:path'). }
+    FCurrentWrapper.HostName     := Host;
+    FCurrentWrapper.Port         := PortNum;
+    FCurrentWrapper.DatabaseName := DBName;
+    FCurrentWrapper.UserName     := User;
+    FCurrentWrapper.Password     := Pwd;
 
-    IBDatabase1.Params.Values['user_name'] := User;
-    IBDatabase1.Params.Values['password']  := Pwd;
-
-    if Assigned(FCurrentWrapper) then
-      InspectorGrid.TIObject := FCurrentWrapper
-    else
-      InspectorGrid.TIObject := nil;
-
+    InspectorGrid.TIObject := FCurrentWrapper;
     Exit;
   end;
 
@@ -449,16 +452,31 @@ begin
   if LocalConn.Connected then
     LocalConn.Close;
 
-  LocalConn.HostName := Host;
-  LocalConn.DatabaseName := DBName;
-  LocalConn.UserName := User;
-  LocalConn.Password := Pwd;
+  { Über den Wrapper setzen — er kennt die RDBMS-spezifische
+    Port-Anwendung (ApplyPortToSQLDB, wird beim Verbinden ausgeführt) }
+  if Assigned(FCurrentWrapper) then
+  begin
+    FCurrentWrapper.HostName     := Host;
+    FCurrentWrapper.Port         := PortNum;
+    FCurrentWrapper.DatabaseName := DBName;
+    FCurrentWrapper.UserName     := User;
+    FCurrentWrapper.Password     := Pwd;
+
+    InspectorGrid.TIObject := FCurrentWrapper;
+  end
+  else
+  begin
+    { Fallback ohne Wrapper }
+    LocalConn.HostName     := Host;
+    LocalConn.DatabaseName := DBName;
+    LocalConn.UserName     := User;
+    LocalConn.Password     := Pwd;
+    if PortNum > 0 then
+      LocalConn.Params.Values['Port'] := IntToStr(PortNum);
+  end;
 
   if Lib <> '' then
     SQLDBLibraryLoader.LibraryName := Lib;
-
-  if Assigned(FCurrentWrapper) then
-    InspectorGrid.TIObject := FCurrentWrapper;
 end;
 
 function TfrmCrossRDBMSConnection.ExecuteLoadDialog: Boolean;

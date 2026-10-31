@@ -4,6 +4,8 @@ Neuigkeiten für TurboBird
 *: behoben
 -: entfernt
 
+
+
 TurboBird v1.2.1.1290
 
 Build-Datum & -Zeit:
@@ -14,14 +16,12 @@ Build-Datum & -Zeit:
 + DataEditor schnelle CSVBulk Import/Export zwischen DataSets und CSVFiles
   Während in test wurde eine 59.4 GB Datei mit fullscan option in 14 Minuten eingelesen.
 
-+ Cross-RDBMS Data Transfer (Beta)
++ Cross-RDBMS Data Transfer
    Vollständig neues, eigenständiges Modul für Datentransfer zwischen unterschiedlichen Datenbank-Systemen
    Unterstützte Datenbanken:
      Firebird, SQLite, MySQL/MariaDB, PostgreSQL, MSSQL, Oracle, Sybase, ODBC.
   Getestete Transfer-Routen:
      Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL.
-
-
 
 
 

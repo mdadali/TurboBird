@@ -5,7 +5,7 @@ unit uCrossRDBMSEngineIBX;
 interface
 
 uses
-  Classes, SysUtils, DB, SQLDB, IB, IBQuery,  Dialogs, TypInfo,
+  Forms, Classes, SysUtils, DB, SQLDB, IB, IBQuery,  Dialogs, TypInfo,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSEngineBase;
@@ -29,6 +29,7 @@ type
     procedure EnsureSourceTrans; override;
     procedure EnsureDestTrans; override;
     procedure CommitDest; override;
+    procedure CommitDestRetaining;
     procedure RollbackDest; override;
     procedure CleanupQueries; override;
 
@@ -71,6 +72,7 @@ begin
   begin
     if Assigned(FOptions.DestIBXTrans) then
     begin
+      { Query schließen — gibt Prepared Statement frei }
       try
         if Assigned(FOptions.DestIBXQuery) and
            FOptions.DestIBXQuery.Active then
@@ -78,14 +80,52 @@ begin
       except
       end;
 
+      { Echtes Commit }
       try
         if FOptions.DestIBXTrans.Active then
           FOptions.DestIBXTrans.Commit;
       except
+        on E: Exception do
+        begin
+          DoLog('WARNING: Commit failed: ' + E.Message);
+          AddWarning('Commit failed: ' + E.Message);
+        end;
       end;
 
       if not FOptions.DestIBXTrans.Active then
         FOptions.DestIBXTrans.StartTransaction;
+
+      { UI durchatmen lassen }
+      Application.ProcessMessages;
+    end;
+    Inc(FStats.CommitsDone);
+  end
+  else
+    inherited CommitDest;
+end;
+
+procedure TCrossEngineIBX.CommitDestRetaining;
+begin
+  if FOptions.DestIsIBX then
+  begin
+    if Assigned(FOptions.DestIBXTrans) and
+       FOptions.DestIBXTrans.Active then
+    begin
+      { CommitRetaining — Transaktion bleibt offen, Prepared Statement
+        bleibt gültig, kein Re-Prepare nötig. }
+      try
+        FOptions.DestIBXTrans.CommitRetaining;
+      except
+        on E: Exception do
+        begin
+          DoLog('WARNING: CommitRetaining failed: ' + E.Message);
+          AddWarning('CommitRetaining failed: ' + E.Message);
+        end;
+      end;
+
+      { UI durchatmen lassen — verhindert, dass die App während
+        sehr schneller Transfers einfriert }
+      Application.ProcessMessages;
     end;
     Inc(FStats.CommitsDone);
   end
@@ -582,9 +622,6 @@ begin
   begin
     if FCancelled then Break;
 
-    // ---------------------------------------------------------------
-    // Parameter sicher setzen
-    // ---------------------------------------------------------------
     ParamIndex := 0;
     for i := 0 to High(FOptions.Fields) do
     begin
@@ -595,7 +632,6 @@ begin
 
       if FOptions.DestIsIBX then
       begin
-        // ---------- IBX Ziel (explizit & sicher) ----------
         if Field.IsNull then
           DestIBX.Params[ParamIndex].Clear
         else
@@ -603,34 +639,24 @@ begin
           case Field.DataType of
             ftString, ftFixedChar, ftWideString:
               DestIBX.Params[ParamIndex].AsString := Field.AsString;
-
             ftMemo, ftWideMemo:
               DestIBX.Params[ParamIndex].AsString := Field.AsString;
-
             ftSmallint, ftInteger, ftWord, ftAutoInc:
               DestIBX.Params[ParamIndex].AsInteger := Field.AsInteger;
-
             ftLargeint:
               DestIBX.Params[ParamIndex].AsLargeInt := Field.AsLargeInt;
-
             ftFloat, ftCurrency, ftBCD, ftFMTBcd:
               DestIBX.Params[ParamIndex].AsFloat := Field.AsFloat;
-
             ftDate:
               DestIBX.Params[ParamIndex].AsDate := Field.AsDateTime;
-
             ftTime:
               DestIBX.Params[ParamIndex].AsTime := Field.AsDateTime;
-
             ftDateTime, ftTimeStamp:
               DestIBX.Params[ParamIndex].AsDateTime := Field.AsDateTime;
-
             ftBoolean:
               DestIBX.Params[ParamIndex].AsBoolean := Field.AsBoolean;
-
             ftBlob, ftGraphic:
               DestIBX.Params[ParamIndex].Assign(Field);
-
           else
             DestIBX.Params[ParamIndex].Value := Field.Value;
           end;
@@ -638,14 +664,12 @@ begin
       end
       else
       begin
-        // ---------- SQLDB Ziel (klassisch) ----------
         if Field.IsNull then
           DestSQLDB.Params[ParamIndex].Clear
         else
           DestSQLDB.Params[ParamIndex].Assign(Field);
       end;
 
-      // Bytes zählen
       if not Field.IsNull then
       begin
         case Field.DataType of
@@ -659,9 +683,6 @@ begin
       Inc(ParamIndex);
     end;
 
-    // ---------------------------------------------------------------
-    // INSERT ausführen
-    // ---------------------------------------------------------------
     if FOptions.DestIsIBX then
       DestIBX.ExecSQL
     else
@@ -674,29 +695,28 @@ begin
     if (ToRow > 0) and (FStats.RowsProcessed >= (ToRow - FromRow + 1)) then
       Break;
 
-    // Commit-Interval
+    { ---- Commit-Interval: IBX mit CommitRetaining, SQLDB mit Commit ---- }
     if RowsSinceCommit >= CommitInterval then
     begin
-      CommitDest;
-      try
-        if FOptions.DestIsIBX then
-        begin
-          DestIBX.SQL.Text := InsertSQL;
-          DestIBX.Prepare;
-        end
-        else
-        begin
+      if FOptions.DestIsIBX then
+        { IBX: CommitRetaining — Transaktion bleibt offen,
+          Prepared Statement bleibt gültig, kein Re-Prepare nötig }
+        CommitDestRetaining
+      else
+      begin
+        { SQLDB: normales Commit + Re-Prepare }
+        CommitDest;
+        try
           DestSQLDB.SQL.Text := InsertSQL;
           DestSQLDB.Prepare;
+        except
         end;
-      except
-        // absichtlich leer
       end;
       RowsSinceCommit := 0;
     end;
 
-    // Fortschritt
-    if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or SourceEOF then
+    if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or
+       SourceEOF then
     begin
       LastProgressTime := Now;
       Elapsed := FormatDateTime('hh:nn:ss', Now - FStats.StartTime);
@@ -710,7 +730,7 @@ begin
     SourceNext;
   end;
 
-  { ---- Abschluss ---- }
+  { ---- Abschluss: finaler Commit ---- }
   if not FCancelled then
     CommitDest
   else
@@ -773,18 +793,16 @@ begin
   if not Assigned(FOptions.DestIBXQuery) then
     raise Exception.Create('DestIBXQuery not assigned.');
 
-  { EXECUTE BLOCK: Firebird-Limit ~250 Statements pro Block }
   BatchSize := FOptions.BatchSize;
-  if BatchSize <= 0 then BatchSize := 100;
-  if BatchSize > 250 then BatchSize := 250;
+  if BatchSize < 256 then BatchSize := 256;
+  if BatchSize > 256 then BatchSize := 256;
 
   CommitInterval := FOptions.CommitInterval;
   if CommitInterval <= 0 then CommitInterval := 10000;
 
   RefreshMs := FOptions.RefreshIntervalMs;
-  if RefreshMs < 100 then RefreshMs := 100;
+  if RefreshMs < 100 then RefreshMs := 1000;
 
-  { ---- Gesamt ---- }
   FStats.RowsTotal := CountSourceRows;
 
   FromRow := FOptions.FromRow;
@@ -797,7 +815,6 @@ begin
     FStats.RowsTotal := FStats.RowsTotal - FromRow + 1;
   if FStats.RowsTotal < 0 then FStats.RowsTotal := 0;
 
-  { ---- SELECT auf SQLDB ---- }
   SelectSQL := 'SELECT ' + BuildSelectList +
                ' FROM ' + QuoteIdentifier(FOptions.SourceTable, FStats.SourceDBMS);
 
@@ -807,7 +824,6 @@ begin
   SQLSource.SQL.Text := SelectSQL;
   SQLSource.Open;
 
-  { ---- Zieltabelle: Feldliste ---- }
   DestFields := '';
   SelectedCount := 0;
   FirstField := True;
@@ -846,7 +862,6 @@ begin
     LastProgressTime := Now;
     CancelFlag := False;
 
-    { ---- Vorspulen ---- }
     SQLSource.First;
     while (not SQLSource.EOF) and (RowCounter < FromRow - 1) do
     begin
@@ -858,7 +873,6 @@ begin
     begin
       if FCancelled then Break;
 
-      { ---- Eine INSERT-Zeile bauen ---- }
       ParamIndex := 0;
       OneInsert := '  INSERT INTO ' +
         QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
@@ -895,7 +909,6 @@ begin
       if (ToRow > 0) and (FStats.RowsProcessed >= (ToRow - FromRow + 1)) then
         Break;
 
-      { ---- Batch voll → EXECUTE BLOCK ausführen ---- }
       if Inserts.Count >= BatchSize then
       begin
         BlockSQL := 'EXECUTE BLOCK AS' + sLineBreak +
@@ -909,14 +922,14 @@ begin
 
         Inserts.Clear;
 
+        { IBX-Ziel: CommitRetaining für Zwischencommits }
         if RowsSinceCommit >= CommitInterval then
         begin
-          CommitDest;
+          CommitDestRetaining;
           RowsSinceCommit := 0;
         end;
       end;
 
-      { ---- Progress ---- }
       if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or
          SQLSource.EOF then
       begin
@@ -931,7 +944,6 @@ begin
       SQLSource.Next;
     end;
 
-    { ---- Restlicher Batch ---- }
     if (Inserts.Count > 0) and (not FCancelled) then
     begin
       BlockSQL := 'EXECUTE BLOCK AS' + sLineBreak +
@@ -944,6 +956,7 @@ begin
       IBXDest.ExecSQL;
     end;
 
+    { ---- Abschluss: finaler Commit ---- }
     if not FCancelled then
       CommitDest
     else

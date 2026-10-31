@@ -5,14 +5,12 @@ unit uCrossRDBMSConnectionWrapper;
 interface
 
 uses
-  Classes, SysUtils, SQLDB, SQLDBLib, IB, IBDatabase, Dialogs;
+  Classes, SysUtils, Dialogs,
+
+  SQLDB, SQLDBLib, IB, IBDatabase;
+
 
 type
-  { ------------------------------------------------------------------ }
-  { Führt Properties von TSQLConnection + TSQLDBLibraryLoader          }
-  { (SQLDB) oder von TIBDatabase (IBX) in einer Klasse zusammen,       }
-  { damit das TTIPropertyGrid sie einheitlich anzeigen kann.          }
-  { ------------------------------------------------------------------ }
   TConnectionWrapper = class(TPersistent)
   private
     FConn    : TSQLConnection;
@@ -20,10 +18,23 @@ type
     FIBXConn : TIBDatabase;
     FOnBeforeDisconnect: TNotifyEvent;
 
+    { IBX-Zwischenspeicher }
+    FIBXHostName: string;
+    FIBXPort    : Integer;
+    FIBXPath    : string;
+
+    { SQLDB-Zwischenspeicher }
+    FSQLDBPort  : Integer;
+
     function  IsIBX: Boolean;
+    function  GetConnectorType: string;
+    function  BuildIBXConnStr: string;
+    procedure ApplyPortToSQLDB;
 
     function  GetHostName: string;
     procedure SetHostName(const AValue: string);
+    function  GetPort: Integer;
+    procedure SetPort(AValue: Integer);
     function  GetDatabaseName: string;
     procedure SetDatabaseName(const AValue: string);
     function  GetUserName: string;
@@ -52,6 +63,7 @@ type
   published
     property Connected: Boolean read GetConnected write SetConnected;
     property HostName: string read GetHostName write SetHostName;
+    property Port: Integer read GetPort write SetPort;
     property DatabaseName: string read GetDatabaseName write SetDatabaseName;
     property UserName: string read GetUserName write SetUserName;
     property Password: string read GetPassword write SetPassword;
@@ -70,6 +82,14 @@ begin
   FLoader := ALoader;
   FIBXConn := AIBXConn;
   FOnBeforeDisconnect := nil;
+
+  FIBXHostName := '';
+  FIBXPort := 0;
+  FIBXPath := '';
+  FSQLDBPort := 0;
+
+  if IsIBX and Assigned(FIBXConn) then
+    FIBXPath := FIBXConn.DatabaseName;
 end;
 
 function TConnectionWrapper.IsIBX: Boolean;
@@ -77,10 +97,113 @@ begin
   Result := Assigned(FIBXConn);
 end;
 
+function TConnectionWrapper.GetConnectorType: string;
+begin
+  if FConn is TSQLConnector then
+    Result := TSQLConnector(FConn).ConnectorType
+  else
+  begin
+    Result := FConn.ClassName;
+    if (Length(Result) > 1) and (Result[1] = 'T') then
+      Delete(Result, 1, 1);
+  end;
+
+  if Trim(Result) = '' then
+    Result := FConn.ClassName;
+end;
+
+{ ---- IBX-Connection-String bauen ---- }
+
+function TConnectionWrapper.BuildIBXConnStr: string;
+var
+  HostPart, PortPart: string;
+begin
+  Result := '';
+  if Trim(FIBXPath) = '' then
+    Exit;
+
+  HostPart := Trim(FIBXHostName);
+  PortPart := '';
+  if FIBXPort > 0 then
+    PortPart := IntToStr(FIBXPort);
+
+  if HostPart = '' then
+    Result := FIBXPath
+  else if PortPart = '' then
+    Result := HostPart + ':' + FIBXPath
+  else
+    Result := HostPart + '/' + PortPart + ':' + FIBXPath;
+end;
+
+{ ---- SQLDB: Port je nach RDBMS anwenden ---- }
+
+procedure TConnectionWrapper.ApplyPortToSQLDB;
+var
+  CT: string;
+  H: string;
+begin
+  if FSQLDBPort <= 0 then Exit;
+  if not Assigned(FConn) then Exit;
+
+  CT := UpperCase(GetConnectorType);
+
+  { PostgreSQL: Params 'port' }
+  if Pos('POSTGRESQL', CT) > 0 then
+  begin
+    FConn.Params.Values['port'] := IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { MySQL: Params 'Port' (published property greift auf denselben Wert zu) }
+  if Pos('MYSQL', CT) > 0 then
+  begin
+    FConn.Params.Values['Port'] := IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { Firebird (SQLDB): Port an HostName anhängen }
+  if Pos('FIREBIRD', CT) > 0 then
+  begin
+    H := Trim(FConn.HostName);
+    if (H <> '') and (Pos('/' + IntToStr(FSQLDBPort), H) = 0) then
+      FConn.HostName := H + '/' + IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { MSSQL: Port an HostName anhängen (Host,Port) }
+  if Pos('MSSQL', CT) > 0 then
+  begin
+    H := Trim(FConn.HostName);
+    if (H <> '') and (Pos(',' + IntToStr(FSQLDBPort), H) = 0) then
+      FConn.HostName := H + ',' + IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { Oracle: Port an HostName anhängen (Host:Port) }
+  if Pos('ORACLE', CT) > 0 then
+  begin
+    H := Trim(FConn.HostName);
+    if (H <> '') and (Pos(':' + IntToStr(FSQLDBPort), H) = 0) then
+      FConn.HostName := H + ':' + IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { Sybase: Params 'Port' }
+  if Pos('SYBASE', CT) > 0 then
+  begin
+    FConn.Params.Values['Port'] := IntToStr(FSQLDBPort);
+    Exit;
+  end;
+
+  { ODBC und Unknown: ignorieren — Port steckt im DSN }
+end;
+
+{ ---- HostName ---- }
+
 function TConnectionWrapper.GetHostName: string;
 begin
   if IsIBX then
-    Result := ''
+    Result := FIBXHostName
   else if Assigned(FConn) then
     Result := FConn.HostName
   else
@@ -90,15 +213,36 @@ end;
 procedure TConnectionWrapper.SetHostName(const AValue: string);
 begin
   if IsIBX then
-    { IBX: HostName wird ignoriert — steht in DatabaseName }
+    FIBXHostName := Trim(AValue)
   else if Assigned(FConn) then
     FConn.HostName := AValue;
 end;
 
+{ ---- Port ---- }
+
+function TConnectionWrapper.GetPort: Integer;
+begin
+  if IsIBX then
+    Result := FIBXPort
+  else
+    Result := FSQLDBPort;
+end;
+
+procedure TConnectionWrapper.SetPort(AValue: Integer);
+begin
+  if AValue < 0 then AValue := 0;
+  if IsIBX then
+    FIBXPort := AValue
+  else
+    FSQLDBPort := AValue;
+end;
+
+{ ---- DatabaseName ---- }
+
 function TConnectionWrapper.GetDatabaseName: string;
 begin
   if IsIBX then
-    Result := FIBXConn.DatabaseName
+    Result := FIBXPath
   else if Assigned(FConn) then
     Result := FConn.DatabaseName
   else
@@ -108,10 +252,12 @@ end;
 procedure TConnectionWrapper.SetDatabaseName(const AValue: string);
 begin
   if IsIBX then
-    FIBXConn.DatabaseName := AValue
+    FIBXPath := Trim(AValue)
   else if Assigned(FConn) then
     FConn.DatabaseName := AValue;
 end;
+
+{ ---- UserName / Password ---- }
 
 function TConnectionWrapper.GetUserName: string;
 begin
@@ -149,6 +295,8 @@ begin
     FConn.Password := AValue;
 end;
 
+{ ---- Params ---- }
+
 function TConnectionWrapper.GetParams: TStrings;
 begin
   if IsIBX then
@@ -169,6 +317,8 @@ begin
     FConn.Params.Assign(AValue);
 end;
 
+{ ---- Connected ---- }
+
 function TConnectionWrapper.GetConnected: Boolean;
 begin
   if IsIBX then
@@ -185,17 +335,14 @@ begin
   begin
     if FIBXConn.Connected = AValue then Exit;
     if AValue then
-      FIBXConn.Open
+    begin
+      FIBXConn.DatabaseName := BuildIBXConnStr;
+      FIBXConn.Open;
+    end
     else
     begin
-      { Vor dem Schließen aufräumen — Query schließen, Transaktion rollback }
       if Assigned(FOnBeforeDisconnect) then
-      begin
-        try
-          FOnBeforeDisconnect(Self);
-        except
-        end;
-      end;
+      try FOnBeforeDisconnect(Self); except end;
       FIBXConn.Close;
     end;
   end
@@ -207,6 +354,9 @@ begin
     try
       if AValue then
       begin
+        { Port je nach RDBMS anwenden, BEVOR verbunden wird }
+        ApplyPortToSQLDB;
+
         if Assigned(FLoader) and (Trim(FLoader.ConnectionType) <> '') and
            (not FLoader.Enabled) then
           FLoader.Enabled := True;
@@ -214,16 +364,8 @@ begin
       end
       else
       begin
-        { Vor dem Schließen aufräumen — gilt für ALLE SQLDB-Treiber.
-          Besonders wichtig für SQLite (verweigert Close bei offenen
-          Statements), aber auch für PostgreSQL/MySQL/MSSQL/Oracle. }
         if Assigned(FOnBeforeDisconnect) then
-        begin
-          try
-            FOnBeforeDisconnect(Self);
-          except
-          end;
-        end;
+        try FOnBeforeDisconnect(Self); except end;
         FConn.Close;
         if Assigned(FLoader) then
           FLoader.Enabled := False;
@@ -234,10 +376,17 @@ begin
   end;
 end;
 
+{ ---- LibraryLocation ---- }
 function TConnectionWrapper.GetLibLocation: string;
 begin
   if IsIBX then
-    Result := ''
+  begin
+    { IBX: Pfad zur Client-Bibliothek aus FirebirdLibraryPathName }
+    if Assigned(FIBXConn) then
+      Result := FIBXConn.FirebirdLibraryPathName
+    else
+      Result := '';
+  end
   else if Assigned(FLoader) then
     Result := FLoader.LibraryName
   else
@@ -247,7 +396,22 @@ end;
 procedure TConnectionWrapper.SetLibLocation(const AValue: string);
 begin
   if IsIBX then
-    { IBX verwaltet die Bibliothek selbst — LibraryLocation ignorieren }
+  begin
+    { IBX: FirebirdLibraryPathName darf nur gesetzt werden,
+      solange die Datenbank NICHT verbunden ist. }
+    if not Assigned(FIBXConn) then
+      raise Exception.Create(
+        'Cannot set Firebird library path: IBX database is not assigned.');
+
+    if FIBXConn.Connected then
+      raise Exception.Create(
+        'Cannot change the Firebird client library path while the ' +
+        'connection is active.' + sLineBreak + sLineBreak +
+        'Please disconnect first (Connected := False), change the ' +
+        'library path, then reconnect.');
+
+    FIBXConn.FirebirdLibraryPathName := Trim(AValue);
+  end
   else if Assigned(FLoader) then
     FLoader.LibraryName := AValue;
 end;
