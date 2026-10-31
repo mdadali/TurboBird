@@ -1039,19 +1039,72 @@ end;
 
 function TfrmCrossRDBMSMain.AskIfExistsAction: TIfExistsAction;
 var
-  R: Integer;
+  Dlg: TForm;
+  Lbl: TLabel;
+  BtnRecreate, BtnAppend, BtnAbort: TButton;
+  BtnWidth, BtnGap, BtnLeft: Integer;
 begin
-  R := MessageDlg(
-    'Destination table "' + Trim(edtDestTable.Text) + '" already exists.' + sLineBreak + sLineBreak +
-    'Recreate / Append / Abort ?',
-    mtConfirmation, [mbYes, mbNo, mbAbort], 0);
+  Result := ieaAbort;
 
-  case R of
-    mrYes:   Result := ieaRecreate;
-    mrNo:    Result := ieaAppend;
-    mrAbort: Result := ieaAbort;
-  else
-    Result := ieaAbort;
+  Dlg := TForm.CreateNew(nil);
+  try
+    Dlg.Caption := 'Destination Table Exists';
+    Dlg.Width := 520;
+    Dlg.Height := 180;
+    Dlg.Position := poScreenCenter;
+    Dlg.BorderStyle := bsDialog;
+
+    Lbl := TLabel.Create(Dlg);
+    Lbl.Parent := Dlg;
+    Lbl.Left := 16;
+    Lbl.Top := 16;
+    Lbl.Width := 480;
+    Lbl.AutoSize := False;
+    Lbl.WordWrap := True;
+    Lbl.Height := 60;
+    Lbl.Caption :=
+      'Destination table "' + Trim(edtDestTable.Text) + '" already exists.' +
+      sLineBreak + sLineBreak +
+      'What do you want to do?';
+
+    BtnWidth := 140;
+    BtnGap := 12;
+    { 3 Buttons nebeneinander, zentriert in 520px }
+    BtnLeft := (Dlg.Width - (BtnWidth * 3 + BtnGap * 2)) div 2;
+
+    BtnRecreate := TButton.Create(Dlg);
+    BtnRecreate.Parent := Dlg;
+    BtnRecreate.Caption := 'Recreate';
+    BtnRecreate.Left := BtnLeft;
+    BtnRecreate.Top := 100;
+    BtnRecreate.Width := BtnWidth;
+    BtnRecreate.ModalResult := mrYes;
+
+    BtnAppend := TButton.Create(Dlg);
+    BtnAppend.Parent := Dlg;
+    BtnAppend.Caption := 'Append';
+    BtnAppend.Left := BtnLeft + BtnWidth + BtnGap;
+    BtnAppend.Top := 100;
+    BtnAppend.Width := BtnWidth;
+    BtnAppend.ModalResult := mrNo;
+
+    BtnAbort := TButton.Create(Dlg);
+    BtnAbort.Parent := Dlg;
+    BtnAbort.Caption := 'Abort';
+    BtnAbort.Left := BtnLeft + (BtnWidth + BtnGap) * 2;
+    BtnAbort.Top := 100;
+    BtnAbort.Width := BtnWidth;
+    BtnAbort.ModalResult := mrAbort;
+
+    case Dlg.ShowModal of
+      mrYes:   Result := ieaRecreate;
+      mrNo:    Result := ieaAppend;
+      mrAbort: Result := ieaAbort;
+    else
+      Result := ieaAbort;
+    end;
+  finally
+    Dlg.Free;
   end;
 end;
 
