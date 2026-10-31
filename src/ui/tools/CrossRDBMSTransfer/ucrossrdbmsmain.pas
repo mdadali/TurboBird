@@ -33,10 +33,6 @@ type
     btnPreviewSQL: TButton;
     btnExecute: TButton;
     btnClose: TButton;
-    btnLoadSourceConnection: TButton;
-    btnLoadDestConnection: TButton;
-    btnSaveDestConnection: TButton;
-    btnSaveSourceConnection: TButton;
     chkboxUseFormulas: TCheckBox;
     CheckGroupSourceFields: TCheckGroup;
     chkboxCopyData: TCheckBox;
@@ -59,6 +55,7 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Label4: TLabel;
+    Label5: TLabel;
     lblRefreshInterval: TLabel;
     Label3: TLabel;
     lblIfExists: TLabel;
@@ -70,24 +67,18 @@ type
     rbAllRows: TRadioButton;
     rbRange: TRadioButton;
     Splitter1: TSplitter;
-    Splitter2: TSplitter;
     Splitter3: TSplitter;
-    Splitter5: TSplitter;
     Splitter6: TSplitter;
     SynEdit1: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
     tsMain: TTabSheet;
     sgFormulas: TStringGrid;
     lblStrategy: TLabel;
-    tsZeosToZeos: TTabSheet;
+    tsTransfer: TTabSheet;
     procedure btnAutoMapTypesClick(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
     procedure btnExecuteClick(Sender: TObject);
-    procedure btnLoadDestConnectionClick(Sender: TObject);
-    procedure btnLoadSourceConnectionClick(Sender: TObject);
     procedure btnPreviewSQLClick(Sender: TObject);
-    procedure btnSaveDestConnectionClick(Sender: TObject);
-    procedure btnSaveSourceConnectionClick(Sender: TObject);
     procedure CheckGroupSourceFieldsItemClick(Sender: TObject; Index: Integer);
     procedure comboboxSourceTablesChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
@@ -242,130 +233,6 @@ begin
   SynEdit1.Lines.Clear;
 end;
 
-{procedure TfrmCrossRDBMSMain.LoadSourceTables;
-var
-  DBMS: TCrossDBMS;
-  Q: TSQLQuery;
-  QueryOK: Boolean;
-begin
-  comboboxSourceTables.Items.Clear;
-  if not Assigned(FSourceConnForm) or not FSourceConnForm.Conn.Connected then Exit;
-
-  DBMS := DBMSFromConnection(FSourceConnForm.Conn);
-  Q := FSourceConnForm.Query;
-  Q.Close;
-
-  if not FSourceConnForm.Trans.Active then
-    FSourceConnForm.Trans.StartTransaction;
-
-  QueryOK := True;
-
-  case DBMS of
-    cdFirebird:
-      Q.SQL.Text := 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
-                    'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ' +
-                    'ORDER BY RDB$RELATION_NAME';
-
-    cdPostgreSQL:
-      Q.SQL.Text := 'SELECT table_name FROM information_schema.tables ' +
-                    'WHERE table_schema = current_schema() ' +
-                    'AND table_type = ''BASE TABLE'' ORDER BY table_name';
-
-    cdMySQL:
-      Q.SQL.Text := 'SELECT table_name FROM information_schema.tables ' +
-                    'WHERE table_schema = DATABASE() ' +
-                    'AND table_type = ''BASE TABLE'' ORDER BY table_name';
-
-    cdSQLite:
-      Q.SQL.Text := 'SELECT name FROM sqlite_master ' +
-                    'WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ' +
-                    'ORDER BY name';
-
-    cdMSSQL:
-      Q.SQL.Text := 'SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES ' +
-                    'WHERE TABLE_TYPE = ''BASE TABLE'' ORDER BY TABLE_NAME';
-
-    cdOracle:
-      Q.SQL.Text := 'SELECT TABLE_NAME FROM USER_TABLES ORDER BY TABLE_NAME';
-
-    cdSybase:
-      Q.SQL.Text := 'SELECT name FROM sysobjects ' +
-                    'WHERE type = ''U'' ORDER BY name';
-
-    cdODBC, cdUnknown:
-      begin
-        { ODBC: Backend unbekannt — Kaskade mit Fallback.
-          1. information_schema (MariaDB, PostgreSQL, MSSQL)
-          2. sqlite_master (SQLite)
-          3. RDB$RELATIONS (Firebird) }
-        QueryOK := False;
-
-        Q.SQL.Text :=
-          'SELECT table_name FROM information_schema.tables ' +
-          'WHERE table_type = ''BASE TABLE'' ORDER BY table_name';
-        try
-          Q.Open;
-          QueryOK := True;
-        except
-          try Q.Close; except end;
-        end;
-
-        if not QueryOK then
-        begin
-          Q.SQL.Text :=
-            'SELECT name FROM sqlite_master ' +
-            'WHERE type = ''table'' AND name NOT LIKE ''sqlite_%'' ' +
-            'ORDER BY name';
-          try
-            Q.Open;
-            QueryOK := True;
-          except
-            try Q.Close; except end;
-          end;
-        end;
-
-        if not QueryOK then
-        begin
-          Q.SQL.Text :=
-            'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS ' +
-            'WHERE RDB$VIEW_BLR IS NULL AND RDB$SYSTEM_FLAG = 0 ' +
-            'ORDER BY RDB$RELATION_NAME';
-          try
-            Q.Open;
-            QueryOK := True;
-          except
-            try Q.Close; except end;
-          end;
-        end;
-      end;
-  else
-    Exit;
-  end;
-
-  if not QueryOK then
-  begin
-    MessageDlg('Could not load tables — no supported query for this backend.',
-      mtWarning, [mbOK], 0);
-    Exit;
-  end;
-
-  try
-    while not Q.EOF do
-    begin
-      comboboxSourceTables.Items.Add(Trim(Q.Fields[0].AsString));
-      Q.Next;
-    end;
-  finally
-    Q.Close;
-  end;
-
-  if comboboxSourceTables.Items.Count > 0 then
-  begin
-    comboboxSourceTables.ItemIndex := 0;
-    comboboxSourceTablesChange(nil);
-  end;
-end; }
-
 procedure TfrmCrossRDBMSMain.LoadSourceTables;
 var
   DBMS: TCrossDBMS;
@@ -488,313 +355,6 @@ begin
   edtDestTable.Text := Trim(comboboxSourceTables.Text);
   LoadFieldsFromSource;
 end;
-
-{procedure TfrmCrossRDBMSMain.LoadFieldsFromSource;
-var
-  DestDBMS, SourceDBMS: TCrossDBMS;
-  i: Integer;
-  FieldName, SourceType, AutoType: string;
-  Q: TSQLQuery;
-  IBQ: TIBQuery;
-  FieldCount: Integer;
-  IsArr, IsComputed, IsBinaryBlob, IsProblem: Boolean;
-  ComputedExprs: TStringList;
-  MetaIBQ: TIBQuery;
-  MetaSQLQ: TSQLQuery;
-  MetaTrans: TIBTransaction;
-begin
-  SetLength(FFields, 0);
-  CheckGroupSourceFields.Items.Clear;
-  sgFormulas.RowCount := 1;
-  FProblemFieldsDeselected.Clear;
-
-  if Trim(comboboxSourceTables.Text) = '' then Exit;
-  if not Assigned(FSourceConnForm) then Exit;
-
-  if FSourceConnForm.IsIBX then
-  begin
-    if not Assigned(FSourceConnForm.IBXConn) or
-       not FSourceConnForm.IBXConn.Connected then Exit;
-    SourceDBMS := cdFirebird;
-  end
-  else
-  begin
-    if not Assigned(FSourceConnForm.Conn) or
-       not FSourceConnForm.Conn.Connected then Exit;
-    SourceDBMS := FSourceConnForm.ConnDBMS;
-    if SourceDBMS = cdUnknown then
-      SourceDBMS := DBMSFromConnection(FSourceConnForm.Conn);
-  end;
-
-  if Assigned(FDestConnForm) then
-  begin
-    if FDestConnForm.IsIBX then
-    begin
-      if Assigned(FDestConnForm.IBXConn) and FDestConnForm.IBXConn.Connected then
-        DestDBMS := cdFirebird
-      else
-        DestDBMS := cdUnknown;
-    end
-    else if Assigned(FDestConnForm.Conn) and FDestConnForm.Conn.Connected then
-    begin
-      DestDBMS := FDestConnForm.ConnDBMS;
-      if DestDBMS = cdUnknown then
-        DestDBMS := DBMSFromConnection(FDestConnForm.Conn);
-    end
-    else
-      DestDBMS := cdUnknown;
-  end
-  else
-    DestDBMS := cdUnknown;
-
-  { ---- Computed-Felder ermitteln ---- }
-  ComputedExprs := TStringList.Create;
-  ComputedExprs.CaseSensitive := False;
-  try
-    try
-      if SourceDBMS = cdFirebird then
-      begin
-        if FSourceConnForm.IsIBX then
-        begin
-          MetaTrans := TIBTransaction.Create(nil);
-          MetaIBQ := TIBQuery.Create(nil);
-          try
-            MetaTrans.DefaultDatabase := FSourceConnForm.IBXConn;
-            MetaTrans.Params.Clear;
-            MetaTrans.Params.Add('read_committed');
-            MetaTrans.Params.Add('rec_version');
-            MetaTrans.Params.Add('nowait');
-            MetaTrans.StartTransaction;
-
-            MetaIBQ.Database := FSourceConnForm.IBXConn;
-            MetaIBQ.Transaction := MetaTrans;
-            MetaIBQ.SQL.Text :=
-              'SELECT TRIM(RDB$FIELD_NAME), CAST(RDB$COMPUTED_SOURCE AS VARCHAR(8192)) ' +
-              'FROM RDB$RELATION_FIELDS ' +
-              'WHERE RDB$RELATION_NAME = ' +
-              QuotedStr(Trim(comboboxSourceTables.Text)) +
-              ' AND RDB$COMPUTED_BLR IS NOT NULL';
-            MetaIBQ.Open;
-            while not MetaIBQ.EOF do
-            begin
-              ComputedExprs.Values[Trim(MetaIBQ.Fields[0].AsString)] :=
-                Trim(MetaIBQ.Fields[1].AsString);
-              MetaIBQ.Next;
-            end;
-            MetaIBQ.Close;
-            MetaTrans.Commit;
-          finally
-            MetaIBQ.Free;
-            MetaTrans.Free;
-          end;
-        end
-        else if Assigned(FSourceConnForm.Conn) then
-        begin
-          MetaSQLQ := TSQLQuery.Create(nil);
-          try
-            MetaSQLQ.Database := FSourceConnForm.Conn;
-            MetaSQLQ.Transaction := FSourceConnForm.Trans;
-            if not FSourceConnForm.Trans.Active then
-              FSourceConnForm.Trans.StartTransaction;
-            MetaSQLQ.SQL.Text :=
-              'SELECT TRIM(RDB$FIELD_NAME), CAST(RDB$COMPUTED_SOURCE AS VARCHAR(8192)) ' +
-              'FROM RDB$RELATION_FIELDS ' +
-              'WHERE RDB$RELATION_NAME = ' +
-              QuotedStr(Trim(comboboxSourceTables.Text)) +
-              ' AND RDB$COMPUTED_BLR IS NOT NULL';
-            MetaSQLQ.Open;
-            while not MetaSQLQ.EOF do
-            begin
-              ComputedExprs.Values[Trim(MetaSQLQ.Fields[0].AsString)] :=
-                Trim(MetaSQLQ.Fields[1].AsString);
-              MetaSQLQ.Next;
-            end;
-            MetaSQLQ.Close;
-          finally
-            MetaSQLQ.Free;
-          end;
-        end;
-      end
-      else if (not FSourceConnForm.IsIBX) and
-              (SourceDBMS in [cdPostgreSQL, cdMySQL, cdMSSQL]) then
-      begin
-        MetaSQLQ := TSQLQuery.Create(nil);
-        try
-          MetaSQLQ.Database := FSourceConnForm.Conn;
-          MetaSQLQ.Transaction := FSourceConnForm.Trans;
-          if not FSourceConnForm.Trans.Active then
-            FSourceConnForm.Trans.StartTransaction;
-
-          case SourceDBMS of
-            cdPostgreSQL:
-              MetaSQLQ.SQL.Text :=
-                'SELECT column_name, COALESCE(generation_expression, '''') ' +
-                'FROM information_schema.columns ' +
-                'WHERE table_name = ' +
-                QuotedStr(Trim(comboboxSourceTables.Text)) +
-                ' AND is_generated = ''ALWAYS''';
-            cdMySQL:
-              MetaSQLQ.SQL.Text :=
-                'SELECT column_name, COALESCE(generation_expression, '''') ' +
-                'FROM information_schema.columns ' +
-                'WHERE table_schema = DATABASE() ' +
-                'AND table_name = ' +
-                QuotedStr(Trim(comboboxSourceTables.Text)) +
-                ' AND extra LIKE ''%GENERATED%''';
-            cdMSSQL:
-              MetaSQLQ.SQL.Text :=
-                'SELECT name, COALESCE(definition, '''') ' +
-                'FROM sys.computed_columns ' +
-                'WHERE object_id = OBJECT_ID(' +
-                QuotedStr(Trim(comboboxSourceTables.Text)) + ')';
-          else
-            MetaSQLQ.SQL.Text := 'SELECT 1 WHERE 1=0';
-          end;
-
-          MetaSQLQ.Open;
-          while not MetaSQLQ.EOF do
-          begin
-            ComputedExprs.Values[Trim(MetaSQLQ.Fields[0].AsString)] :=
-              Trim(MetaSQLQ.Fields[1].AsString);
-            MetaSQLQ.Next;
-          end;
-          MetaSQLQ.Close;
-        finally
-          MetaSQLQ.Free;
-        end;
-      end;
-    except
-      { Metadata-Erkennung fehlgeschlagen — ignorieren }
-    end;
-
-    { ---- Felder laden ---- }
-    FUpdatingUI := True;
-    try
-      if FSourceConnForm.IsIBX then
-      begin
-        IBQ := FSourceConnForm.IBXQuery;
-        IBQ.Close;
-        IBQ.SQL.Text := 'SELECT * FROM ' +
-          QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) +
-          ' WHERE 1=0';
-        if not FSourceConnForm.IBXTrans.Active then
-          FSourceConnForm.IBXTrans.StartTransaction;
-        IBQ.Open;
-        try
-          FieldCount := IBQ.FieldCount;
-          for i := 0 to FieldCount - 1 do
-          begin
-            FieldName := IBQ.Fields[i].FieldName;
-
-            FieldName := MakeCaseSensitiveAuto(FieldName);
-
-            SourceType := GetFieldTypeString(IBQ.Fields[i]);
-            AutoType := AutoMapType(SourceType, DestDBMS);
-
-            IsArr := (IBQ.Fields[i].DataType = ftArray) or
-                     (IBQ.Fields[i] is TIBArrayField) or
-                     (Pos('[', SourceType) > 0);
-            IsComputed := ComputedExprs.IndexOfName(FieldName) >= 0;
-            IsBinaryBlob := (IBQ.Fields[i].DataType = ftBlob);
-            IsProblem := IsArr or IsBinaryBlob;
-
-            SetLength(FFields, Length(FFields) + 1);
-            FFields[High(FFields)].SourceName     := FieldName;
-            FFields[High(FFields)].SourceType     := SourceType;
-            FFields[High(FFields)].DestName       := FieldName;
-            FFields[High(FFields)].DestType       := AutoType;
-            FFields[High(FFields)].Formula        := '';
-            FFields[High(FFields)].IsProblemField := IsProblem;
-            FFields[High(FFields)].IsComputed     := IsComputed;
-            if IsComputed then
-              FFields[High(FFields)].ComputedExpr := ComputedExprs.Values[FieldName]
-            else
-              FFields[High(FFields)].ComputedExpr := '';
-            FFields[High(FFields)].Selected       := not IsProblem;
-
-            CheckGroupSourceFields.Items.Add(FieldName);
-            CheckGroupSourceFields.Checked[i] := not IsProblem;
-          end;
-        finally
-          IBQ.Close;
-        end;
-      end
-      else
-      begin
-        Q := FSourceConnForm.Query;
-        Q.Close;
-        Q.SQL.Text := 'SELECT * FROM ' +
-          QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) +
-          ' WHERE 1=0';
-        if not FSourceConnForm.Trans.Active then
-          FSourceConnForm.Trans.StartTransaction;
-        Q.Open;
-        try
-          FieldCount := Q.FieldCount;
-          for i := 0 to FieldCount - 1 do
-          begin
-            FieldName := Q.Fields[i].FieldName;
-            SourceType := GetFieldTypeString(Q.Fields[i]);
-            AutoType := AutoMapType(SourceType, DestDBMS);
-
-            IsArr := (Q.Fields[i].DataType = ftArray) or
-                     (Pos('[', SourceType) > 0);
-            IsComputed := ComputedExprs.IndexOfName(FieldName) >= 0;
-            IsBinaryBlob := (Q.Fields[i].DataType = ftBlob);
-            IsProblem := IsArr or IsBinaryBlob;
-
-            SetLength(FFields, Length(FFields) + 1);
-            FFields[High(FFields)].SourceName     := FieldName;
-            FFields[High(FFields)].SourceType     := SourceType;
-            FFields[High(FFields)].DestName       := FieldName;
-            FFields[High(FFields)].DestType       := AutoType;
-            FFields[High(FFields)].Formula        := '';
-            FFields[High(FFields)].IsProblemField := IsProblem;
-            FFields[High(FFields)].IsComputed     := IsComputed;
-            if IsComputed then
-              FFields[High(FFields)].ComputedExpr := ComputedExprs.Values[FieldName]
-            else
-              FFields[High(FFields)].ComputedExpr := '';
-            FFields[High(FFields)].Selected       := not IsProblem;
-
-            CheckGroupSourceFields.Items.Add(FieldName);
-            CheckGroupSourceFields.Checked[i] := not IsProblem;
-          end;
-        finally
-          Q.Close;
-        end;
-      end;
-    finally
-      FUpdatingUI := False;
-    end;
-  finally
-    ComputedExprs.Free;
-  end;
-
-  { ---- Feld-Analyse-Dialog ---- }
-  if Length(FFields) = 0 then Exit;
-
-  if not ShowFieldAnalysisDialog(FFields) then
-  begin
-    { Cancel → alles leeren, User muss Tabelle neu wählen }
-    SetLength(FFields, 0);
-    CheckGroupSourceFields.Items.Clear;
-    sgFormulas.RowCount := 1;
-    SynEdit1.Lines.Clear;
-    Exit;
-  end;
-
-  { ---- OK: GUI aktualisieren ---- }
-  FUpdatingUI := True;
-  try
-    SyncFieldsToCheckGroup;
-    UpdateGrid;
-  finally
-    FUpdatingUI := False;
-  end;
-
-  UpdatePreviewSQL;
-end;}
 
 procedure TfrmCrossRDBMSMain.LoadFieldsFromSource;
 var
@@ -1627,34 +1187,6 @@ begin
   finally
     Engine.Free;
   end;
-end;
-
-procedure TfrmCrossRDBMSMain.btnLoadSourceConnectionClick(Sender: TObject);
-begin
-  if Assigned(FSourceConnForm) then
-  begin
-    FSourceConnForm.ExecuteLoadDialog;
-    FSourceConnForm.InspectorGrid.Refresh;
-    FSourceConnForm.InspectorGrid.Repaint;
-  end;
-end;
-
-procedure TfrmCrossRDBMSMain.btnLoadDestConnectionClick(Sender: TObject);
-begin
-  if Assigned(FDestConnForm) then
-    FDestConnForm.ExecuteLoadDialog;
-end;
-
-procedure TfrmCrossRDBMSMain.btnSaveSourceConnectionClick(Sender: TObject);
-begin
-  if Assigned(FSourceConnForm) then
-    FSourceConnForm.ExecuteSaveDialog;
-end;
-
-procedure TfrmCrossRDBMSMain.btnSaveDestConnectionClick(Sender: TObject);
-begin
-  if Assigned(FDestConnForm) then
-    FDestConnForm.ExecuteSaveDialog;
 end;
 
 procedure TfrmCrossRDBMSMain.btnCloseClick(Sender: TObject);

@@ -196,9 +196,7 @@ begin
   Result := LoadCache;
 end;
 
-{ ---------------- Lazy Access ---------------- }
-
-function TUnIntelliSenseCache.FieldsForTable(
+{function TUnIntelliSenseCache.FieldsForTable(
   const TableName: string): TStringList;
 var
   Index: Integer;
@@ -208,6 +206,48 @@ begin
   Index := FTableCache.IndexOf(TableName);
   if Index < 0 then Exit;
 
+  if not FFieldsLoaded[Index] then
+    LoadFieldCache(Index);
+
+  Result := FFieldCacheArray[Index];
+end;}
+
+function TUnIntelliSenseCache.FieldsForTable(const TableName: string): TStringList;
+var
+  Index, i: Integer;
+  SearchName: string;
+begin
+  Result := nil;
+
+  SearchName := TableName;
+
+  // Anführungszeichen entfernen, falls vorhanden
+  if (Length(SearchName) >= 2) and
+     (SearchName[1] = '"') and
+     (SearchName[Length(SearchName)] = '"') then
+  begin
+    SearchName := Copy(SearchName, 2, Length(SearchName) - 2);
+  end;
+
+  // 1. Exakte Suche
+  Index := FTableCache.IndexOf(SearchName);
+
+  // 2. Case-insensitive Suche als Fallback
+  if Index < 0 then
+  begin
+    for i := 0 to FTableCache.Count - 1 do
+    begin
+      if SameText(FTableCache[i], SearchName) then
+      begin
+        Index := i;
+        Break;
+      end;
+    end;
+  end;
+
+  if Index < 0 then Exit;
+
+  // Felder lazy laden, falls noch nicht geschehen
   if not FFieldsLoaded[Index] then
     LoadFieldCache(Index);
 

@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, SQLDB, PQConnection, IBConnection, SQLDBLib, mysql40conn,
   mysql41conn, mysql50conn, mysql51conn, mysql55conn, mysql56conn, mysql57conn,
   mysql80conn, odbcconn, oracleconnection, MSSQLConn, SQLite3Conn, Forms,
-  Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, IBQuery, IBDatabase,
+  Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Buttons, IBQuery, IBDatabase,
   RTTIGrids, PropEdits, IniFiles,
 
   turbocommon,
@@ -20,11 +20,14 @@ type
   { TfrmCrossRDBMSConnection }
 
   TfrmCrossRDBMSConnection = class(TForm)
+    bbtnSaveConnection: TBitBtn;
+    bbtnLoadConnection: TBitBtn;
     cmbboxConnection: TComboBox;
     GroupBoxConnection: TGroupBox;
     IBDatabase1: TIBDatabase;
     IBQuery1: TIBQuery;
     IBTransaction1: TIBTransaction;
+    Panel1: TPanel;
     pnlInspector: TPanel;
     InspectorGrid: TTIPropertyGrid;
     SQLConnector: TSQLConnector;
@@ -32,6 +35,8 @@ type
     SQLDBLibraryLoader: TSQLDBLibraryLoader;
     SQLQuery: TSQLQuery;
     SQLTransaction: TSQLTransaction;
+    procedure bbtnLoadConnectionClick(Sender: TObject);
+    procedure bbtnSaveConnectionClick(Sender: TObject);
     procedure cmbboxConnectionChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -218,6 +223,16 @@ begin
     FCurrentWrapper.OnBeforeDisconnect := @WrapperBeforeDisconnect;
     InspectorGrid.TIObject := FCurrentWrapper;
   end;
+end;
+
+procedure TfrmCrossRDBMSConnection.bbtnLoadConnectionClick(Sender: TObject);
+begin
+  ExecuteLoadDialog;
+end;
+
+procedure TfrmCrossRDBMSConnection.bbtnSaveConnectionClick(Sender: TObject);
+begin
+  ExecuteLoadDialog;
 end;
 
 procedure TfrmCrossRDBMSConnection.SQLConnectorAfterConnect(Sender: TObject);

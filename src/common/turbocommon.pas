@@ -953,14 +953,25 @@ begin
   Line := ASynEdit.Lines[ASynEdit.CaretY - 1];
   X := ASynEdit.LogicalCaretXY.X;
 
-  // Stehen wir direkt hinter dem Punkt? → ein Zeichen zurück
-  if (X > 1) and (X <= Length(Line) + 1) then
+  // Hinter dem Punkt → ein Zeichen zurück
+  if (X > 1) and (X <= Length(Line) + 1) and (Line[X - 1] = '.') then
+    Dec(X);
+
+  if X <= 1 then Exit;
+
+  // Quoted Identifier?  "Applications".
+  if Line[X - 1] = '"' then
   begin
-    if Line[X - 1] = '.' then
-      Dec(X);
+    StartX := X - 2;
+    while (StartX >= 1) and (Line[StartX] <> '"') do
+      Dec(StartX);
+
+    if (StartX >= 1) and (Line[StartX] = '"') then
+      Result := Copy(Line, StartX, X - StartX);  // inkl. Anführungszeichen
+    Exit;
   end;
 
-  // Nach links bis zum Anfang des Identifiers laufen
+  // Normaler Identifier
   StartX := X;
   while (StartX > 1) and (Line[StartX - 1] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) do
     Dec(StartX);

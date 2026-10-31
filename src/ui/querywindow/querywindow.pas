@@ -2583,7 +2583,7 @@ end;
 { Run query by pressing Ctrl + Enter }
 
 
-procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
+{procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
   P: TPoint;
@@ -2662,6 +2662,93 @@ begin
     pmUnIntelliSense.Popup(P.X, P.Y);
 
     // Wichtig: Key NICHT auf 0 setzen, damit der Punkt trotzdem eingefügt wird
+  end;
+end;}
+
+procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  P: TPoint;
+  WordBefore: string;
+  DBNode: TTreeNode;
+  IntelliCache: TUnIntelliSenseCache;
+  Fields: TStringList;
+  Parser: TSelectSQLParserExt;
+  i: Integer;
+  TableItem, FieldItem: TMenuItem;
+begin
+  // Ctrl + Enter → Query ausführen
+  if (ssCtrl in Shift) and (Key = VK_RETURN) then
+  begin
+    CallExecuteQuery;
+    Key := 0;
+    Exit;
+  end;
+
+  // Ctrl + Space → normales IntelliSense (alle Tabellen)
+  if (Key = VK_SPACE) and (ssCtrl in Shift) then
+  begin
+    LoadpmUnIntelliSense;
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+    Key := 0;
+    Exit;
+  end;
+
+  // Punkt → Felder der Tabelle / des Alias anbieten
+  if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then
+  begin
+    WordBefore := GetWordBeforeCursor(meQuery);
+    if WordBefore = '' then Exit;
+
+    DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+    if (DBNode = nil) or (DBNode.Data = nil) then Exit;
+
+    IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+    if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
+
+    // Alias-Auflösung versuchen
+    Fields := nil;
+    Parser := TSelectSQLParserExt.CreateFromString(meQuery.Text);
+    try
+      Parser.BuildAliasMap;
+      Fields := IntelliCache.FieldsForAlias(WordBefore, Parser);
+    finally
+      Parser.Free;
+    end;
+
+    // Fallback: als normalen Tabellennamen behandeln
+    if (Fields = nil) or (Fields.Count <= 1) then
+      Fields := IntelliCache.FieldsForTable(WordBefore);
+
+    if (Fields = nil) or (Fields.Count <= 1) then Exit;
+
+    // Popup mit den Feldern befüllen
+    pmUnIntelliSense.Items.Clear;
+
+    // Tabellenname als ersten Eintrag
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := Fields[0];
+    TableItem.OnClick := @pmUnIntelliSenseSubItemClick;
+    pmUnIntelliSense.Items.Add(TableItem);
+
+    // Trennlinie
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := '-';
+    pmUnIntelliSense.Items.Add(TableItem);
+
+    // Felder
+    for i := 1 to Fields.Count - 1 do
+    begin
+      FieldItem := TMenuItem.Create(pmUnIntelliSense);
+      FieldItem.Caption := Fields[i];
+      FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
+      pmUnIntelliSense.Items.Add(FieldItem);
+    end;
+
+    // Popup anzeigen
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
   end;
 end;
 
