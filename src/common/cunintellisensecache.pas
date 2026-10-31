@@ -220,7 +220,11 @@ function TUnIntelliSenseCache.FieldsForAlias(
 var
   TableName: string;
 begin
-  TableName := Parser.ResolveAlias(AliasName);
+  if Assigned(Parser) then
+    TableName := Parser.ResolveAlias(AliasName)
+  else
+    TableName := AliasName;   // kein Parser → Alias als Tabellenname behandeln
+
   Result := FieldsForTable(TableName);
 end;
 

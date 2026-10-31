@@ -93,8 +93,10 @@ function TSelectSQLParserExt.ResolveAlias(const AliasName: string): string;
 var
   idx: Integer;
 begin
-  Result := AliasName; // Default: kein Alias, direkt Tabellenname
-  if FAliasMap.Count = 0 then Exit;
+  Result := AliasName; // Default: kein Alias → Tabellenname
+
+  if (FAliasMap = nil) or (FAliasMap.Count = 0) then
+    Exit;
 
   idx := FAliasMap.IndexOf(AliasName);
   if idx >= 0 then

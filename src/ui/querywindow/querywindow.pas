@@ -152,6 +152,7 @@ type
     procedure lmFindAgainClick(Sender: TObject);
     procedure meQueryChangeUpdating(ASender: TObject; AnUpdating: Boolean);
     procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure meQueryKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure meQueryMouseEnter(Sender: TObject);
     procedure Panel1MouseEnter(Sender: TObject);
     procedure Panel1MouseLeave(Sender: TObject);
@@ -2520,27 +2521,141 @@ var P: TPoint;
     Node: TTreeNode;
     NodeInfo: TPNodeInfos;
 begin
-  // Execute query by pressing Ctrl + Enter
-  if (ssCtrl in shift) and (key = VK_RETURN) then
+  {if (Key = VK_SPACE) and (ssCtrl in Shift) then
   begin
-    CallExecuteQuery;
-    key:= 0;
-  end;
-
-  if (Key = VK_SPACE) and (ssCtrl in Shift) then
-  begin
+    LoadpmUnIntelliSense;
     P := GetSynEditCaretScreenPos(meQuery);
     pmUnIntelliSense.Popup(P.X, P.Y);
-    Key := 0; // Event verbrauchen
+    Key := 0;
+  end;}
+end;
+
+procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  P: TPoint;
+  WordBefore: string;
+  DBNode: TTreeNode;
+  IntelliCache: TUnIntelliSenseCache;
+  Fields: TStringList;
+  i: Integer;
+  TableItem, FieldItem: TMenuItem;
+begin
+  // Execute query by pressing Ctrl + Enter
+  if (ssCtrl in Shift) and (Key = VK_RETURN) then
+  begin
+    CallExecuteQuery;
+    Key := 0;
+    Exit;
+  end;
+
+  // Bestehendes Ctrl+Space
+  if (Key = VK_SPACE) and (ssCtrl in Shift) then
+  begin
+    LoadpmUnIntelliSense;
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+    Key := 0;
+    Exit;
+  end;
+
+  // Neu: Punkt → Felder anbieten
+  if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then  // VK_OEM_PERIOD = 190
+  begin
+    // Den Punkt zuerst normal einfügen lassen
+    // (Key nicht auf 0 setzen!)
+
+    WordBefore := GetWordBeforeCursor(meQuery);
+    if WordBefore = '' then Exit;
+
+    DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+    if (DBNode = nil) or (DBNode.Data = nil) then Exit;
+
+    IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+    if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
+
+    // Felder holen (zuerst versuchen als Alias, sonst als Tabellenname)
+    Fields := IntelliCache.FieldsForAlias(WordBefore, nil); // Parser ggf. später
+    if Fields = nil then
+      Fields := IntelliCache.FieldsForTable(WordBefore);
+
+    if (Fields = nil) or (Fields.Count <= 1) then Exit;
+
+    // Popup dynamisch mit den Feldern befüllen
+    pmUnIntelliSense.Items.Clear;
+
+    // Optional: Tabellenname als ersten Eintrag
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := Fields[0]; // Tabellenname
+    TableItem.OnClick := @pmUnIntelliSenseSubItemClick;
+    pmUnIntelliSense.Items.Add(TableItem);
+
+    // Trennlinie
+    TableItem := TMenuItem.Create(pmUnIntelliSense);
+    TableItem.Caption := '-';
+    pmUnIntelliSense.Items.Add(TableItem);
+
+    // Felder ab Index 1
+    for i := 1 to Fields.Count - 1 do
+    begin
+      FieldItem := TMenuItem.Create(pmUnIntelliSense);
+      FieldItem.Caption := Fields[i];
+      FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
+      pmUnIntelliSense.Items.Add(FieldItem);
+    end;
+
+    // Popup anzeigen
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+
+    // Wichtig: Key NICHT auf 0 setzen, damit der Punkt trotzdem eingefügt wird
   end;
 end;
 
-procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
+{procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  P: TPoint;
+begin
+  // Ctrl + Enter → Query ausführen
+  if (ssCtrl in Shift) and (Key = VK_RETURN) then
+  begin
+    CallExecuteQuery;
+    Key := 0;
+    Exit;
+  end;
+
+  // Ctrl + Space → normales IntelliSense (alle Tabellen)
+  if (Key = VK_SPACE) and (ssCtrl in Shift) then
+  begin
+    LoadpmUnIntelliSense;   // wichtig: Menü neu aufbauen!
+
+    P := GetSynEditCaretScreenPos(meQuery);
+    pmUnIntelliSense.Popup(P.X, P.Y);
+    Key := 0;
+  end;
+end;}
+
+{procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
 begin
   if (TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption)) then
     meQuery.SelText := TMenuItem(Sender).Caption
   else
     meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
+end;}
+
+procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
+var
+  InsertText: string;
+begin
+  InsertText := TMenuItem(Sender).Caption;
+
+  // Quoted Identifier behandeln (wie bisher bei dir)
+  if InsertText <> UpperCase(InsertText) then
+    InsertText := MakeObjectNameQuoted(InsertText);
+
+  // Text an der aktuellen Cursor-Position einfügen
+  meQuery.SelText := InsertText;
 end;
 
 function TfmQueryWindow.GetFieldsForAlias(const AliasName: string;
@@ -2680,6 +2795,7 @@ begin
     pmUnIntelliSense.Items.Add(TableItem);
   end;
 end;
+
 
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 var DBNode: TTreeNode;

@@ -47,12 +47,15 @@ type
   { Feld-Definition                                                    }
   { ------------------------------------------------------------------ }
   TCrossField = record
-    SourceName   : string;      // Original-Spaltenname in der Quelle
-    SourceType   : string;      // Datentyp der Quelle (Anzeige)
-    DestName     : string;      // Ziel-Spaltenname (meist = SourceName)
-    DestType     : string;      // Ziel-Datentyp (nach Mapping / manuell)
-    Formula      : string;      // SQL-Ausdruck mit $1 als Platzhalter
-    Selected     : Boolean;     // Wird dieses Feld übertragen?
+    SourceName     : string;
+    SourceType     : string;
+    DestName       : string;
+    DestType       : string;
+    Formula        : string;
+    Selected       : Boolean;
+    IsProblemField : Boolean;   // Array oder Binary BLOB — wird abgewählt
+    IsComputed     : Boolean;   // Computed/Generated Field
+    ComputedExpr   : string;    // Expression (Firebird-Syntax) — leer wenn unbekannt
   end;
 
   TCrossFieldArray = array of TCrossField;

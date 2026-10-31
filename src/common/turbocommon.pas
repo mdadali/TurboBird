@@ -9,7 +9,7 @@ interface
 uses
 
   Forms,Graphics,  Types, Classes, StdCtrls, ComCtrls, SysUtils, StrUtils, DateUtils, IniFiles, Dialogs, {$IFDEF WINDOWS} Windows, {$ENDIF}
-  Controls,
+  Controls,   SynEdit,
   AbUnzper,   AbZBrows, AbArcTyp, AbZipTyp,
   LCLType, LCLVersion, versiontypes, versionresource,
   interfaces, LCLPlatformDef,
@@ -603,6 +603,9 @@ var
 //end-Ini.File////////////////////////////////////////////////////////////////
 
 
+//intellisense
+function GetWordBeforeCursor(ASynEdit: TSynEdit): string;
+
 //Firebird Clientlibrary
 function GetTurboBirdFirebirdClientLib: string;
 
@@ -937,6 +940,34 @@ implementation
 
 uses  main, Reg;
 
+
+function GetWordBeforeCursor(ASynEdit: TSynEdit): string;
+var
+  Line: string;
+  X, StartX: Integer;
+begin
+  Result := '';
+  if (ASynEdit = nil) or (ASynEdit.CaretY < 1) or (ASynEdit.CaretY > ASynEdit.Lines.Count) then
+    Exit;
+
+  Line := ASynEdit.Lines[ASynEdit.CaretY - 1];
+  X := ASynEdit.LogicalCaretXY.X;
+
+  // Stehen wir direkt hinter dem Punkt? → ein Zeichen zurück
+  if (X > 1) and (X <= Length(Line) + 1) then
+  begin
+    if Line[X - 1] = '.' then
+      Dec(X);
+  end;
+
+  // Nach links bis zum Anfang des Identifiers laufen
+  StartX := X;
+  while (StartX > 1) and (Line[StartX - 1] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) do
+    Dec(StartX);
+
+  if StartX < X then
+    Result := Copy(Line, StartX, X - StartX);
+end;
 
 function GetTurboBirdFirebirdClientLib: string;
 begin
