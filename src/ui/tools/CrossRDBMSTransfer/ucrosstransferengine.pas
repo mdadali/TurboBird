@@ -607,8 +607,91 @@ begin
 end;
 
 function TCrossTransferEngine.DestTableExists: Boolean;
+var
+  SQL: string;
+  CleanName: string;
 begin
-  Result := TableExistsViaDestQuery(FOptions.DestTable);
+  Result := False;
+
+  { Identifier unverändert lassen — nur äußere Quotes entfernen,
+    falls der User den Namen selbst gequotet hat. }
+  CleanName := StripIdentifierQuotes(Trim(FOptions.DestTable));
+  if CleanName = '' then
+    Exit;
+
+  case FStats.DestDBMS of
+    cdFirebird:
+      SQL := 'SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ' +
+             QuotedStr(CleanName) +
+             ' AND RDB$VIEW_BLR IS NULL';
+
+    cdPostgreSQL:
+      SQL := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
+             QuotedStr(CleanName) +
+             ' AND table_schema = current_schema()';
+
+    cdMySQL:
+      SQL := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
+             QuotedStr(CleanName) + ' AND table_schema = DATABASE()';
+
+    cdSQLite:
+      SQL := 'SELECT 1 FROM sqlite_master WHERE type = ''table'' AND name = ' +
+             QuotedStr(CleanName);
+
+    cdMSSQL:
+      SQL := 'SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ' +
+             QuotedStr(CleanName);
+
+    cdOracle:
+      SQL := 'SELECT 1 FROM USER_TABLES WHERE TABLE_NAME = ' +
+             QuotedStr(CleanName);
+
+    cdSybase:
+      SQL := 'SELECT 1 FROM sysobjects WHERE name = ' +
+             QuotedStr(CleanName) + ' AND type = ''U''';
+  else
+    { ODBC / Unknown — generischer Fallback }
+    SQL := 'SELECT 1 FROM ' + QuoteIdentifier(CleanName, FStats.DestDBMS) +
+           ' WHERE 1=0';
+  end;
+
+  { ---- Ausführen — IBX oder SQLDB ---- }
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then Exit;
+
+    if Assigned(FOptions.DestIBXTrans) and not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+
+    try
+      FOptions.DestIBXQuery.Close;
+      FOptions.DestIBXQuery.SQL.Text := SQL;
+      FOptions.DestIBXQuery.Open;
+      Result := not FOptions.DestIBXQuery.EOF;
+      FOptions.DestIBXQuery.Close;
+    except
+      Result := False;
+      try FOptions.DestIBXQuery.Close; except end;
+    end;
+  end
+  else
+  begin
+    if not Assigned(FOptions.DestQuery) then Exit;
+
+    if Assigned(FOptions.DestTrans) and not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    try
+      FOptions.DestQuery.Close;
+      FOptions.DestQuery.SQL.Text := SQL;
+      FOptions.DestQuery.Open;
+      Result := not FOptions.DestQuery.EOF;
+      FOptions.DestQuery.Close;
+    except
+      Result := False;
+      try FOptions.DestQuery.Close; except end;
+    end;
+  end;
 end;
 
 // ============================================================================

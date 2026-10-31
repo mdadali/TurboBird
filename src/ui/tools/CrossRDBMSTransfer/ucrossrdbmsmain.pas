@@ -14,6 +14,8 @@ uses
   IBQuery,
   IBCustomDataset,
 
+  turbocommon,
+
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSStrategies,
@@ -487,7 +489,7 @@ begin
   LoadFieldsFromSource;
 end;
 
-procedure TfrmCrossRDBMSMain.LoadFieldsFromSource;
+{procedure TfrmCrossRDBMSMain.LoadFieldsFromSource;
 var
   DestDBMS, SourceDBMS: TCrossDBMS;
   i: Integer;
@@ -683,6 +685,9 @@ begin
           for i := 0 to FieldCount - 1 do
           begin
             FieldName := IBQ.Fields[i].FieldName;
+
+            FieldName := MakeCaseSensitiveAuto(FieldName);
+
             SourceType := GetFieldTypeString(IBQ.Fields[i]);
             AutoType := AutoMapType(SourceType, DestDBMS);
 
@@ -789,6 +794,369 @@ begin
   end;
 
   UpdatePreviewSQL;
+end;}
+
+procedure TfrmCrossRDBMSMain.LoadFieldsFromSource;
+var
+  DestDBMS, SourceDBMS: TCrossDBMS;
+  i: Integer;
+  FieldName, RealName, SourceType, AutoType: string;
+  Q: TSQLQuery;
+  IBQ: TIBQuery;
+  FieldCount: Integer;
+  IsArr, IsComputed, IsBinaryBlob, IsProblem: Boolean;
+  ComputedExprs: TStringList;
+  FieldNamesOrdered: TStringList;
+  MetaIBQ: TIBQuery;
+  MetaSQLQ: TSQLQuery;
+  MetaTrans: TIBTransaction;
+  S: string;
+begin
+  SetLength(FFields, 0);
+  CheckGroupSourceFields.Items.Clear;
+  sgFormulas.RowCount := 1;
+  FProblemFieldsDeselected.Clear;
+
+  if Trim(comboboxSourceTables.Text) = '' then Exit;
+  if not Assigned(FSourceConnForm) then Exit;
+
+  if FSourceConnForm.IsIBX then
+  begin
+    if not Assigned(FSourceConnForm.IBXConn) or
+       not FSourceConnForm.IBXConn.Connected then Exit;
+    SourceDBMS := cdFirebird;
+  end
+  else
+  begin
+    if not Assigned(FSourceConnForm.Conn) or
+       not FSourceConnForm.Conn.Connected then Exit;
+    SourceDBMS := FSourceConnForm.ConnDBMS;
+    if SourceDBMS = cdUnknown then
+      SourceDBMS := DBMSFromConnection(FSourceConnForm.Conn);
+  end;
+
+  if Assigned(FDestConnForm) then
+  begin
+    if FDestConnForm.IsIBX then
+    begin
+      if Assigned(FDestConnForm.IBXConn) and FDestConnForm.IBXConn.Connected then
+        DestDBMS := cdFirebird
+      else
+        DestDBMS := cdUnknown;
+    end
+    else if Assigned(FDestConnForm.Conn) and FDestConnForm.Conn.Connected then
+    begin
+      DestDBMS := FDestConnForm.ConnDBMS;
+      if DestDBMS = cdUnknown then
+        DestDBMS := DBMSFromConnection(FDestConnForm.Conn);
+    end
+    else
+      DestDBMS := cdUnknown;
+  end
+  else
+    DestDBMS := cdUnknown;
+
+  { ---- Metadata: echte Feldnamen (in Reihenfolge) + Computed (optional) ---- }
+  ComputedExprs := TStringList.Create;
+  ComputedExprs.CaseSensitive := False;
+  FieldNamesOrdered := TStringList.Create;
+  try
+    try
+      if SourceDBMS = cdFirebird then
+      begin
+        if FSourceConnForm.IsIBX then
+        begin
+          MetaTrans := TIBTransaction.Create(nil);
+          MetaIBQ := TIBQuery.Create(nil);
+          try
+            MetaTrans.DefaultDatabase := FSourceConnForm.IBXConn;
+            MetaTrans.Params.Clear;
+            MetaTrans.Params.Add('read_committed');
+            MetaTrans.Params.Add('rec_version');
+            MetaTrans.Params.Add('nowait');
+            MetaTrans.StartTransaction;
+
+            MetaIBQ.Database := FSourceConnForm.IBXConn;
+            MetaIBQ.Transaction := MetaTrans;
+
+            { Query 1: Feldnamen — immer, robust }
+            MetaIBQ.SQL.Text :=
+              'SELECT TRIM(RDB$FIELD_NAME) FROM RDB$RELATION_FIELDS ' +
+              'WHERE RDB$RELATION_NAME = ' + QuotedStr(Trim(comboboxSourceTables.Text)) +
+              ' ORDER BY RDB$FIELD_POSITION';
+            MetaIBQ.Open;
+            while not MetaIBQ.EOF do
+            begin
+              FieldNamesOrdered.Add(Trim(MetaIBQ.Fields[0].AsString));
+              MetaIBQ.Next;
+            end;
+            MetaIBQ.Close;
+
+            { Query 2: Computed — optional, in eigenem try }
+            try
+              MetaIBQ.SQL.Text :=
+                'SELECT TRIM(RDB$FIELD_NAME), CAST(RDB$COMPUTED_SOURCE AS VARCHAR(8192)) ' +
+                'FROM RDB$RELATION_FIELDS ' +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(Trim(comboboxSourceTables.Text)) +
+                ' AND RDB$COMPUTED_BLR IS NOT NULL';
+              MetaIBQ.Open;
+              while not MetaIBQ.EOF do
+              begin
+                ComputedExprs.Values[Trim(MetaIBQ.Fields[0].AsString)] :=
+                  Trim(MetaIBQ.Fields[1].AsString);
+                MetaIBQ.Next;
+              end;
+              MetaIBQ.Close;
+            except
+              try MetaIBQ.Close; except end;
+            end;
+
+            MetaTrans.Commit;
+          finally
+            MetaIBQ.Free;
+            MetaTrans.Free;
+          end;
+        end
+        else if Assigned(FSourceConnForm.Conn) then
+        begin
+          MetaSQLQ := TSQLQuery.Create(nil);
+          try
+            MetaSQLQ.Database := FSourceConnForm.Conn;
+            MetaSQLQ.Transaction := FSourceConnForm.Trans;
+            if not FSourceConnForm.Trans.Active then
+              FSourceConnForm.Trans.StartTransaction;
+
+            MetaSQLQ.SQL.Text :=
+              'SELECT TRIM(RDB$FIELD_NAME) FROM RDB$RELATION_FIELDS ' +
+              'WHERE RDB$RELATION_NAME = ' + QuotedStr(Trim(comboboxSourceTables.Text)) +
+              ' ORDER BY RDB$FIELD_POSITION';
+            MetaSQLQ.Open;
+            while not MetaSQLQ.EOF do
+            begin
+              FieldNamesOrdered.Add(Trim(MetaSQLQ.Fields[0].AsString));
+              MetaSQLQ.Next;
+            end;
+            MetaSQLQ.Close;
+
+            try
+              MetaSQLQ.SQL.Text :=
+                'SELECT TRIM(RDB$FIELD_NAME), CAST(RDB$COMPUTED_SOURCE AS VARCHAR(8192)) ' +
+                'FROM RDB$RELATION_FIELDS ' +
+                'WHERE RDB$RELATION_NAME = ' + QuotedStr(Trim(comboboxSourceTables.Text)) +
+                ' AND RDB$COMPUTED_BLR IS NOT NULL';
+              MetaSQLQ.Open;
+              while not MetaSQLQ.EOF do
+              begin
+                ComputedExprs.Values[Trim(MetaSQLQ.Fields[0].AsString)] :=
+                  Trim(MetaSQLQ.Fields[1].AsString);
+                MetaSQLQ.Next;
+              end;
+              MetaSQLQ.Close;
+            except
+              try MetaSQLQ.Close; except end;
+            end;
+          finally
+            MetaSQLQ.Free;
+          end;
+        end;
+      end
+      else if (not FSourceConnForm.IsIBX) and
+              (SourceDBMS in [cdPostgreSQL, cdMySQL, cdMSSQL]) then
+      begin
+        MetaSQLQ := TSQLQuery.Create(nil);
+        try
+          MetaSQLQ.Database := FSourceConnForm.Conn;
+          MetaSQLQ.Transaction := FSourceConnForm.Trans;
+          if not FSourceConnForm.Trans.Active then
+            FSourceConnForm.Trans.StartTransaction;
+
+          case SourceDBMS of
+            cdPostgreSQL:
+              MetaSQLQ.SQL.Text :=
+                'SELECT column_name, ' +
+                '  CASE WHEN is_generated = ''ALWAYS'' THEN 1 ELSE 0 END, ' +
+                '  COALESCE(generation_expression, '''') ' +
+                'FROM information_schema.columns ' +
+                'WHERE table_name = ' +
+                QuotedStr(Trim(comboboxSourceTables.Text)) +
+                ' ORDER BY ordinal_position';
+            cdMySQL:
+              MetaSQLQ.SQL.Text :=
+                'SELECT column_name, ' +
+                '  CASE WHEN extra LIKE ''%GENERATED%'' THEN 1 ELSE 0 END, ' +
+                '  COALESCE(generation_expression, '''') ' +
+                'FROM information_schema.columns ' +
+                'WHERE table_schema = DATABASE() ' +
+                'AND table_name = ' +
+                QuotedStr(Trim(comboboxSourceTables.Text)) +
+                ' ORDER BY ordinal_position';
+            cdMSSQL:
+              MetaSQLQ.SQL.Text :=
+                'SELECT c.name, ' +
+                '  CASE WHEN cc.object_id IS NULL THEN 0 ELSE 1 END, ' +
+                '  COALESCE(cc.definition, '''') ' +
+                'FROM sys.columns c ' +
+                'LEFT JOIN sys.computed_columns cc ' +
+                '  ON cc.object_id = c.object_id AND cc.column_id = c.column_id ' +
+                'WHERE c.object_id = OBJECT_ID(' +
+                QuotedStr(Trim(comboboxSourceTables.Text)) + ') ' +
+                'ORDER BY c.column_id';
+          else
+            MetaSQLQ.SQL.Text := 'SELECT 1 WHERE 1=0';
+          end;
+
+          MetaSQLQ.Open;
+          while not MetaSQLQ.EOF do
+          begin
+            S := Trim(MetaSQLQ.Fields[0].AsString);
+            FieldNamesOrdered.Add(S);
+            if MetaSQLQ.Fields[1].AsInteger = 1 then
+              ComputedExprs.Values[S] := Trim(MetaSQLQ.Fields[2].AsString);
+            MetaSQLQ.Next;
+          end;
+          MetaSQLQ.Close;
+        finally
+          MetaSQLQ.Free;
+        end;
+      end;
+    except
+      { Metadata-Erkennung fehlgeschlagen — Fallback auf IBQ-FieldName }
+    end;
+
+    { ---- Felder laden ---- }
+    FUpdatingUI := True;
+    try
+      if FSourceConnForm.IsIBX then
+      begin
+        IBQ := FSourceConnForm.IBXQuery;
+        IBQ.Close;
+        IBQ.SQL.Text := 'SELECT * FROM ' +
+          QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) +
+          ' WHERE 1=0';
+        if not FSourceConnForm.IBXTrans.Active then
+          FSourceConnForm.IBXTrans.StartTransaction;
+        IBQ.Open;
+        try
+          FieldCount := IBQ.FieldCount;
+          for i := 0 to FieldCount - 1 do
+          begin
+            FieldName := IBQ.Fields[i].FieldName;
+
+            { Echter Name: aus Reihenfolge, nicht aus Lookup }
+            if i < FieldNamesOrdered.Count then
+              RealName := FieldNamesOrdered[i]
+            else
+              RealName := FieldName;
+
+            SourceType := GetFieldTypeString(IBQ.Fields[i]);
+            AutoType := AutoMapType(SourceType, DestDBMS);
+
+            IsArr := (IBQ.Fields[i].DataType = ftArray) or
+                     (IBQ.Fields[i] is TIBArrayField) or
+                     (Pos('[', SourceType) > 0);
+            IsComputed := Trim(ComputedExprs.Values[RealName]) <> '';
+            IsBinaryBlob := (IBQ.Fields[i].DataType = ftBlob);
+            IsProblem := IsArr or IsBinaryBlob;
+
+            SetLength(FFields, Length(FFields) + 1);
+            FFields[High(FFields)].SourceName     := RealName;
+            FFields[High(FFields)].SourceType     := SourceType;
+            FFields[High(FFields)].DestName       := RealName;
+            FFields[High(FFields)].DestType       := AutoType;
+            FFields[High(FFields)].Formula        := '';
+            FFields[High(FFields)].IsProblemField := IsProblem;
+            FFields[High(FFields)].IsComputed     := IsComputed;
+            if IsComputed then
+              FFields[High(FFields)].ComputedExpr := ComputedExprs.Values[RealName]
+            else
+              FFields[High(FFields)].ComputedExpr := '';
+            FFields[High(FFields)].Selected       := not IsProblem;
+
+            CheckGroupSourceFields.Items.Add(RealName);
+            CheckGroupSourceFields.Checked[i] := not IsProblem;
+          end;
+        finally
+          IBQ.Close;
+        end;
+      end
+      else
+      begin
+        Q := FSourceConnForm.Query;
+        Q.Close;
+        Q.SQL.Text := 'SELECT * FROM ' +
+          QuoteIdentifier(Trim(comboboxSourceTables.Text), SourceDBMS) +
+          ' WHERE 1=0';
+        if not FSourceConnForm.Trans.Active then
+          FSourceConnForm.Trans.StartTransaction;
+        Q.Open;
+        try
+          FieldCount := Q.FieldCount;
+          for i := 0 to FieldCount - 1 do
+          begin
+            FieldName := Q.Fields[i].FieldName;
+
+            if i < FieldNamesOrdered.Count then
+              RealName := FieldNamesOrdered[i]
+            else
+              RealName := FieldName;
+
+            SourceType := GetFieldTypeString(Q.Fields[i]);
+            AutoType := AutoMapType(SourceType, DestDBMS);
+
+            IsArr := (Q.Fields[i].DataType = ftArray) or
+                     (Pos('[', SourceType) > 0);
+            IsComputed := Trim(ComputedExprs.Values[RealName]) <> '';
+            IsBinaryBlob := (Q.Fields[i].DataType = ftBlob);
+            IsProblem := IsArr or IsBinaryBlob;
+
+            SetLength(FFields, Length(FFields) + 1);
+            FFields[High(FFields)].SourceName     := RealName;
+            FFields[High(FFields)].SourceType     := SourceType;
+            FFields[High(FFields)].DestName       := RealName;
+            FFields[High(FFields)].DestType       := AutoType;
+            FFields[High(FFields)].Formula        := '';
+            FFields[High(FFields)].IsProblemField := IsProblem;
+            FFields[High(FFields)].IsComputed     := IsComputed;
+            if IsComputed then
+              FFields[High(FFields)].ComputedExpr := ComputedExprs.Values[RealName]
+            else
+              FFields[High(FFields)].ComputedExpr := '';
+            FFields[High(FFields)].Selected       := not IsProblem;
+
+            CheckGroupSourceFields.Items.Add(RealName);
+            CheckGroupSourceFields.Checked[i] := not IsProblem;
+          end;
+        finally
+          Q.Close;
+        end;
+      end;
+
+      UpdateGrid;
+      UpdatePreviewSQL;
+    finally
+      FUpdatingUI := False;
+    end;
+  finally
+    FieldNamesOrdered.Free;
+    ComputedExprs.Free;
+  end;
+
+  if FProblemFieldsDeselected.Count > 0 then
+  begin
+    S := '';
+    for i := 0 to FProblemFieldsDeselected.Count - 1 do
+      S := S + '  • ' + FProblemFieldsDeselected[i] + sLineBreak;
+
+    MessageDlg(
+      'The following fields were detected and automatically deselected:' +
+      sLineBreak + sLineBreak + S + sLineBreak +
+      'Array fields and binary BLOBs cannot be reliably transferred.' +
+      sLineBreak + sLineBreak +
+      'Computed fields stay selected but no values are inserted.' +
+      sLineBreak +
+      'All other fields are ready for transfer.',
+      mtInformation, [mbOK], 0);
+  end;
 end;
 
 procedure TfrmCrossRDBMSMain.UpdateGrid;
