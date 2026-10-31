@@ -699,31 +699,92 @@ end;
 // ============================================================================
 
 procedure TCrossTransferEngine.DropTable(const ATableName: string);
+var
+  SQL: string;
 begin
-  if not Assigned(FOptions.DestQuery) then
-    raise Exception.Create('DestQuery not assigned.');
+  SQL := 'DROP TABLE ' + QuoteIdentifier(ATableName, FStats.DestDBMS);
 
-  EnsureDestTrans;
-  FOptions.DestQuery.Close;
-  FOptions.DestQuery.SQL.Text := 'DROP TABLE ' +
-    QuoteIdentifier(ATableName, FStats.DestDBMS);
-  FOptions.DestQuery.ExecSQL;
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then
+      raise Exception.Create('DestIBXQuery not assigned.');
+
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+
+    FOptions.DestIBXQuery.Close;
+    FOptions.DestIBXQuery.SQL.Text := SQL;
+    FOptions.DestIBXQuery.ExecSQL;
+
+    try
+      if FOptions.DestIBXTrans.Active then
+        FOptions.DestIBXTrans.Active := False;
+    except
+    end;
+    FOptions.DestIBXTrans.StartTransaction;
+  end
+  else
+  begin
+    if not Assigned(FOptions.DestQuery) then
+      raise Exception.Create('DestQuery not assigned.');
+
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    FOptions.DestQuery.Close;
+    FOptions.DestQuery.SQL.Text := SQL;
+    FOptions.DestQuery.ExecSQL;
+
+    try FOptions.DestTrans.Commit; except end;
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+  end;
 end;
 
 procedure TCrossTransferEngine.CreateTable;
 var
   SQL: string;
 begin
-  if not Assigned(FOptions.DestQuery) then
-    raise Exception.Create('DestQuery not assigned.');
-
   SQL := BuildCreateSQL;
-  if SQL = '' then Exit;
+  if Trim(SQL) = '' then Exit;
 
-  EnsureDestTrans;
-  FOptions.DestQuery.Close;
-  FOptions.DestQuery.SQL.Text := SQL;
-  FOptions.DestQuery.ExecSQL;
+  if FOptions.DestIsIBX then
+  begin
+    if not Assigned(FOptions.DestIBXQuery) then
+      raise Exception.Create('DestIBXQuery not assigned.');
+
+    if not FOptions.DestIBXTrans.Active then
+      FOptions.DestIBXTrans.StartTransaction;
+
+    FOptions.DestIBXQuery.Close;
+    FOptions.DestIBXQuery.SQL.Text := SQL;
+    FOptions.DestIBXQuery.ExecSQL;
+
+    try
+      if FOptions.DestIBXTrans.Active then
+        FOptions.DestIBXTrans.Active := False;
+    except
+    end;
+    FOptions.DestIBXTrans.StartTransaction;
+  end
+  else
+  begin
+    if not Assigned(FOptions.DestQuery) then
+      raise Exception.Create('DestQuery not assigned.');
+
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+
+    FOptions.DestQuery.Close;
+    FOptions.DestQuery.SQL.Text := SQL;
+    FOptions.DestQuery.ExecSQL;
+
+    try FOptions.DestTrans.Commit; except end;
+    if not FOptions.DestTrans.Active then
+      FOptions.DestTrans.StartTransaction;
+  end;
+
+  FStats.CreateSQL := SQL;
 end;
 
 // ============================================================================
