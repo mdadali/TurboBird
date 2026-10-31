@@ -49,6 +49,9 @@ type
     function  GetLibLocation: string;
     procedure SetLibLocation(const AValue: string);
 
+    function  GetLoginPrompt: Boolean;
+    procedure SetLoginPrompt(AValue: Boolean);
+
   public
     constructor Create(AConn: TSQLConnection; ALoader: TSQLDBLibraryLoader;
       AIBXConn: TIBDatabase = nil);
@@ -62,6 +65,7 @@ type
 
   published
     property Connected: Boolean read GetConnected write SetConnected;
+    property LoginPrompt: Boolean read GetLoginPrompt write SetLoginPrompt;
     property HostName: string read GetHostName write SetHostName;
     property Port: Integer read GetPort write SetPort;
     property DatabaseName: string read GetDatabaseName write SetDatabaseName;
@@ -414,6 +418,32 @@ begin
   end
   else if Assigned(FLoader) then
     FLoader.LibraryName := AValue;
+end;
+
+function TConnectionWrapper.GetLoginPrompt: Boolean;
+begin
+  if IsIBX then
+  begin
+    if Assigned(FIBXConn) then
+      Result := FIBXConn.LoginPrompt
+    else
+      Result := False;
+  end
+  else if Assigned(FConn) then
+    Result := FConn.LoginPrompt
+  else
+    Result := False;
+end;
+
+procedure TConnectionWrapper.SetLoginPrompt(AValue: Boolean);
+begin
+  if IsIBX then
+  begin
+    if Assigned(FIBXConn) then
+      FIBXConn.LoginPrompt := AValue;
+  end
+  else if Assigned(FConn) then
+    FConn.LoginPrompt := AValue;
 end;
 
 end.

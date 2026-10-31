@@ -340,10 +340,14 @@ procedure TfrmCrossRDBMSConnection.SaveConnectionToIni(const AFileName: string);
 var
   Ini: TIniFile;
   LocalConn: TSQLConnection;
+  Params: TStringList;
+  i: Integer;
+  PName: string;
 begin
   ForceDirectories(ExtractFilePath(AFileName));
 
   Ini := TIniFile.Create(AFileName);
+  Params := TStringList.Create;
   try
     Ini.WriteString('Connection', 'Driver', cmbboxConnection.Text);
 
@@ -356,7 +360,10 @@ begin
       Ini.WriteString('Connection', 'DatabaseName', FCurrentWrapper.DatabaseName);
       Ini.WriteString('Connection', 'UserName',     FCurrentWrapper.UserName);
       Ini.WriteString('Connection', 'Password',     FCurrentWrapper.Password);
-      Ini.WriteString('Connection', 'LibraryLocation', '');
+      Ini.WriteString('Connection', 'LibraryLocation', FCurrentWrapper.LibraryLocation);
+      Ini.WriteBool  ('Connection', 'LoginPrompt',  FCurrentWrapper.LoginPrompt);
+
+      Params.Assign(FCurrentWrapper.Params);
     end
     else
     begin
@@ -370,6 +377,8 @@ begin
         Ini.WriteString('Connection', 'DatabaseName', FCurrentWrapper.DatabaseName);
         Ini.WriteString('Connection', 'UserName',     FCurrentWrapper.UserName);
         Ini.WriteString('Connection', 'Password',     FCurrentWrapper.Password);
+        Ini.WriteBool  ('Connection', 'LoginPrompt',  FCurrentWrapper.LoginPrompt);
+        Params.Assign(FCurrentWrapper.Params);
       end
       else
       begin
@@ -378,11 +387,25 @@ begin
         Ini.WriteString('Connection', 'DatabaseName', LocalConn.DatabaseName);
         Ini.WriteString('Connection', 'UserName',     LocalConn.UserName);
         Ini.WriteString('Connection', 'Password',     LocalConn.Password);
+        Ini.WriteBool  ('Connection', 'LoginPrompt',  LocalConn.LoginPrompt);
+        Params.Assign(LocalConn.Params);
       end;
 
       Ini.WriteString('Connection', 'LibraryLocation', SQLDBLibraryLoader.LibraryName);
     end;
+
+    Ini.EraseSection('Params');
+    for i := 0 to Params.Count - 1 do
+    begin
+      PName := Params.Names[i];
+      if SameText(PName, 'user_name') then Continue;
+      if SameText(PName, 'password') then Continue;
+      if SameText(PName, 'port') then Continue;
+
+      Ini.WriteString('Params', PName, Params.ValueFromIndex[i]);
+    end;
   finally
+    Params.Free;
     Ini.Free;
   end;
 end;
@@ -392,8 +415,11 @@ var
   Ini: TIniFile;
   Driver, Host, PortStr, DBName, User, Pwd, Lib: string;
   PortNum: Integer;
+  LoginPromptValue: Boolean;
   i: Integer;
   LocalConn: TSQLConnection;
+  ParamsFromIni: TStringList;
+  TargetParams: TStrings;
 begin
   if not FileExists(AFileName) then
     raise Exception.Create('Connection file not found: ' + AFileName);
@@ -407,14 +433,13 @@ begin
     User    := Ini.ReadString('Connection', 'UserName', '');
     Pwd     := Ini.ReadString('Connection', 'Password', '');
     Lib     := Ini.ReadString('Connection', 'LibraryLocation', '');
+    LoginPromptValue := Ini.ReadBool('Connection', 'LoginPrompt', False);
   finally
     Ini.Free;
   end;
 
   PortNum := StrToIntDef(PortStr, 0);
 
-  { Treiber setzen → triggert cmbboxConnectionChange, das FIBXActive setzt
-    und den Wrapper erstellt. }
   if Driver <> '' then
   begin
     i := cmbboxConnection.Items.IndexOf(Driver);
@@ -433,50 +458,73 @@ begin
     if IBDatabase1.Connected then
       IBDatabase1.Close;
 
-    { Alle Werte über den Wrapper setzen — er baut den Connection-String
-      beim Verbinden (HostName/Port/DatabaseName → 'host/port:path'). }
     FCurrentWrapper.HostName     := Host;
     FCurrentWrapper.Port         := PortNum;
     FCurrentWrapper.DatabaseName := DBName;
     FCurrentWrapper.UserName     := User;
     FCurrentWrapper.Password     := Pwd;
+    FCurrentWrapper.LibraryLocation := Lib;
+    FCurrentWrapper.LoginPrompt  := LoginPromptValue;
 
-    InspectorGrid.TIObject := FCurrentWrapper;
-    Exit;
-  end;
-
-  { ---- SQLDB-Modus ---- }
-  LocalConn := GetActiveConnection;
-  if not Assigned(LocalConn) then Exit;
-
-  if LocalConn.Connected then
-    LocalConn.Close;
-
-  { Über den Wrapper setzen — er kennt die RDBMS-spezifische
-    Port-Anwendung (ApplyPortToSQLDB, wird beim Verbinden ausgeführt) }
-  if Assigned(FCurrentWrapper) then
-  begin
-    FCurrentWrapper.HostName     := Host;
-    FCurrentWrapper.Port         := PortNum;
-    FCurrentWrapper.DatabaseName := DBName;
-    FCurrentWrapper.UserName     := User;
-    FCurrentWrapper.Password     := Pwd;
-
-    InspectorGrid.TIObject := FCurrentWrapper;
+    TargetParams := FCurrentWrapper.Params;
   end
   else
+  { ---- SQLDB-Modus ---- }
   begin
-    { Fallback ohne Wrapper }
-    LocalConn.HostName     := Host;
-    LocalConn.DatabaseName := DBName;
-    LocalConn.UserName     := User;
-    LocalConn.Password     := Pwd;
-    if PortNum > 0 then
-      LocalConn.Params.Values['Port'] := IntToStr(PortNum);
+    LocalConn := GetActiveConnection;
+    if not Assigned(LocalConn) then Exit;
+
+    if LocalConn.Connected then
+      LocalConn.Close;
+
+    if Assigned(FCurrentWrapper) then
+    begin
+      FCurrentWrapper.HostName     := Host;
+      FCurrentWrapper.Port         := PortNum;
+      FCurrentWrapper.DatabaseName := DBName;
+      FCurrentWrapper.UserName     := User;
+      FCurrentWrapper.Password     := Pwd;
+      FCurrentWrapper.LoginPrompt  := LoginPromptValue;
+      TargetParams := FCurrentWrapper.Params;
+    end
+    else
+    begin
+      LocalConn.HostName     := Host;
+      LocalConn.DatabaseName := DBName;
+      LocalConn.UserName     := User;
+      LocalConn.Password     := Pwd;
+      LocalConn.LoginPrompt  := LoginPromptValue;
+      if PortNum > 0 then
+        LocalConn.Params.Values['Port'] := IntToStr(PortNum);
+      TargetParams := LocalConn.Params;
+    end;
+
+    if Lib <> '' then
+      SQLDBLibraryLoader.LibraryName := Lib;
   end;
 
-  if Lib <> '' then
-    SQLDBLibraryLoader.LibraryName := Lib;
+  { ---- Params aus [Params] laden (nach [Connection]) ---- }
+  if Assigned(TargetParams) then
+  begin
+    ParamsFromIni := TStringList.Create;
+    try
+      Ini := TIniFile.Create(AFileName);
+      try
+        Ini.ReadSectionValues('Params', ParamsFromIni);
+      finally
+        Ini.Free;
+      end;
+
+      for i := 0 to ParamsFromIni.Count - 1 do
+        TargetParams.Values[ParamsFromIni.Names[i]] :=
+          ParamsFromIni.ValueFromIndex[i];
+    finally
+      ParamsFromIni.Free;
+    end;
+  end;
+
+  if Assigned(FCurrentWrapper) then
+    InspectorGrid.TIObject := FCurrentWrapper;
 end;
 
 function TfrmCrossRDBMSConnection.ExecuteLoadDialog: Boolean;
