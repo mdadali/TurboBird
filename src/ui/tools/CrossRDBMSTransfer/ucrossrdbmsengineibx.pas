@@ -23,6 +23,7 @@ type
   protected
     procedure DebugDumpEverything(AList: TStringList);
     procedure InternalExecute; override;
+    procedure ExecuteSQLDBToIBXExecuteBlock;
     procedure ExecuteIBXToSQLDBBatched;
 
     procedure EnsureSourceTrans; override;
@@ -414,7 +415,6 @@ var
   DestIBX: TIBQuery;
   DestSQLDB: TSQLQuery;
 
-  // ---------- Source-Hilfsroutinen ----------
   procedure SourceNext;
   begin
     if FOptions.SourceIsIBX then
@@ -448,7 +448,7 @@ var
   end;
 
 begin
-  { ---- Batch-Pfad: nur IBX-Source → SQLDB-Dest ---- }
+  { ---- Batch-Pfad: IBX-Source → SQLDB-Dest ---- }
   if (FOptions.Strategy = csBatched) and
      FOptions.SourceIsIBX and (not FOptions.DestIsIBX) then
   begin
@@ -456,11 +456,21 @@ begin
     Exit;
   end;
 
+  { ---- Batch-Pfad: SQLDB-Source → IBX-Dest ---- }
+  if (FOptions.Strategy = csBatched) and
+     (not FOptions.SourceIsIBX) and FOptions.DestIsIBX then
+  begin
+    ExecuteSQLDBToIBXExecuteBlock;
+    Exit;
+  end;
+
   { ---- Vorbereitung ---- }
   FStats.RowsTotal := CountSourceRows;
+
   FromRow := FOptions.FromRow;
   if FromRow < 1 then FromRow := 1;
   ToRow := FOptions.ToRow;
+
   if (ToRow > 0) and (ToRow < FStats.RowsTotal) then
     FStats.RowsTotal := ToRow - FromRow + 1
   else if FromRow > 1 then
@@ -500,6 +510,7 @@ begin
   for i := 0 to High(FOptions.Fields) do
   begin
     if not FOptions.Fields[i].Selected then Continue;
+    if IsComputedStaysComputed(i) then Continue;
 
     if not FirstField then
     begin
@@ -578,6 +589,7 @@ begin
     for i := 0 to High(FOptions.Fields) do
     begin
       if not FOptions.Fields[i].Selected then Continue;
+      if IsComputedStaysComputed(i) then Continue;
 
       Field := SourceFieldByName(FOptions.Fields[i].SourceName);
 
@@ -713,6 +725,252 @@ begin
 end;
 
 // ============================================================================
+// SQLDB-Source → IBX-Dest: EXECUTE BLOCK-Batch
+// ============================================================================
+procedure TCrossEngineIBX.ExecuteSQLDBToIBXExecuteBlock;
+var
+  SQLSource: TSQLQuery;
+  IBXDest: TIBQuery;
+  SelectSQL, BlockSQL: string;
+  Inserts: TStringList;
+  DestFields, OneInsert: string;
+  Field: TField;
+  i, ParamIndex, SelectedCount: Integer;
+  FirstField: Boolean;
+  FromRow, ToRow, RowCounter: Int64;
+  RowsSinceCommit, CommitInterval, RefreshMs, BatchSize: Integer;
+  LastProgressTime: TDateTime;
+  CancelFlag: Boolean;
+  Elapsed: string;
+  OldDecimalSep: Char;
+
+  function FieldToLiteral(F: TField): string;
+  begin
+    if F.IsNull then
+      Exit('NULL');
+
+    case F.DataType of
+      ftSmallint, ftInteger, ftWord, ftLargeint, ftAutoInc:
+        Result := F.AsString;
+      ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+        Result := StringReplace(F.AsString, ',', '.', [rfReplaceAll]);
+      ftBoolean:
+        if F.AsBoolean then Result := 'TRUE' else Result := 'FALSE';
+      ftDate:
+        Result := QuotedStr(FormatDateTime('yyyy-mm-dd', F.AsDateTime));
+      ftTime:
+        Result := QuotedStr(FormatDateTime('hh:nn:ss.zzzz', F.AsDateTime));
+      ftDateTime, ftTimeStamp:
+        Result := QuotedStr(FormatDateTime('yyyy-mm-dd hh:nn:ss.zzzz', F.AsDateTime));
+    else
+      Result := QuotedStr(F.AsString);
+    end;
+  end;
+
+begin
+  if not Assigned(FOptions.SourceQuery) then
+    raise Exception.Create('SourceQuery not assigned.');
+  if not Assigned(FOptions.DestIBXQuery) then
+    raise Exception.Create('DestIBXQuery not assigned.');
+
+  { EXECUTE BLOCK: Firebird-Limit ~250 Statements pro Block }
+  BatchSize := FOptions.BatchSize;
+  if BatchSize <= 0 then BatchSize := 100;
+  if BatchSize > 250 then BatchSize := 250;
+
+  CommitInterval := FOptions.CommitInterval;
+  if CommitInterval <= 0 then CommitInterval := 10000;
+
+  RefreshMs := FOptions.RefreshIntervalMs;
+  if RefreshMs < 100 then RefreshMs := 100;
+
+  { ---- Gesamt ---- }
+  FStats.RowsTotal := CountSourceRows;
+
+  FromRow := FOptions.FromRow;
+  if FromRow < 1 then FromRow := 1;
+  ToRow := FOptions.ToRow;
+
+  if (ToRow > 0) and (ToRow < FStats.RowsTotal) then
+    FStats.RowsTotal := ToRow - FromRow + 1
+  else if FromRow > 1 then
+    FStats.RowsTotal := FStats.RowsTotal - FromRow + 1;
+  if FStats.RowsTotal < 0 then FStats.RowsTotal := 0;
+
+  { ---- SELECT auf SQLDB ---- }
+  SelectSQL := 'SELECT ' + BuildSelectList +
+               ' FROM ' + QuoteIdentifier(FOptions.SourceTable, FStats.SourceDBMS);
+
+  SQLSource := FOptions.SourceQuery;
+  EnsureSourceTrans;
+  SQLSource.Close;
+  SQLSource.SQL.Text := SelectSQL;
+  SQLSource.Open;
+
+  { ---- Zieltabelle: Feldliste ---- }
+  DestFields := '';
+  SelectedCount := 0;
+  FirstField := True;
+  for i := 0 to High(FOptions.Fields) do
+  begin
+    if not FOptions.Fields[i].Selected then Continue;
+    if IsComputedStaysComputed(i) then Continue;
+
+    if not FirstField then DestFields := DestFields + ', ';
+    FirstField := False;
+    DestFields := DestFields +
+      QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS);
+    Inc(SelectedCount);
+  end;
+
+  if SelectedCount = 0 then
+  begin
+    AddWarning('No fields selected - nothing to copy.');
+    SQLSource.Close;
+    Exit;
+  end;
+
+  FStats.InsertSQL := 'EXECUTE BLOCK AS BEGIN ... END (batches of up to ' +
+    IntToStr(BatchSize) + ' INSERTs)';
+
+  IBXDest := FOptions.DestIBXQuery;
+  EnsureDestTrans;
+
+  Inserts := TStringList.Create;
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  try
+    DefaultFormatSettings.DecimalSeparator := '.';
+
+    RowsSinceCommit := 0;
+    RowCounter := 0;
+    LastProgressTime := Now;
+    CancelFlag := False;
+
+    { ---- Vorspulen ---- }
+    SQLSource.First;
+    while (not SQLSource.EOF) and (RowCounter < FromRow - 1) do
+    begin
+      Inc(RowCounter);
+      SQLSource.Next;
+    end;
+
+    while not SQLSource.EOF do
+    begin
+      if FCancelled then Break;
+
+      { ---- Eine INSERT-Zeile bauen ---- }
+      ParamIndex := 0;
+      OneInsert := '  INSERT INTO ' +
+        QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
+        ' (' + DestFields + ') VALUES (';
+      FirstField := True;
+      for i := 0 to High(FOptions.Fields) do
+      begin
+        if not FOptions.Fields[i].Selected then Continue;
+        if IsComputedStaysComputed(i) then Continue;
+
+        if not FirstField then OneInsert := OneInsert + ', ';
+        FirstField := False;
+        Field := SQLSource.Fields[ParamIndex];
+        OneInsert := OneInsert + FieldToLiteral(Field);
+
+        if not Field.IsNull then
+        begin
+          case Field.DataType of
+            ftString, ftFixedChar, ftWideString, ftMemo, ftWideMemo:
+              Inc(FStats.BytesProcessed, Length(Field.AsString));
+          else
+            Inc(FStats.BytesProcessed, Field.DataSize);
+          end;
+        end;
+        Inc(ParamIndex);
+      end;
+      OneInsert := OneInsert + ');';
+      Inserts.Add(OneInsert);
+
+      Inc(FStats.RowsProcessed);
+      Inc(RowsSinceCommit);
+      Inc(RowCounter);
+
+      if (ToRow > 0) and (FStats.RowsProcessed >= (ToRow - FromRow + 1)) then
+        Break;
+
+      { ---- Batch voll → EXECUTE BLOCK ausführen ---- }
+      if Inserts.Count >= BatchSize then
+      begin
+        BlockSQL := 'EXECUTE BLOCK AS' + sLineBreak +
+                    'BEGIN' + sLineBreak +
+                    String.Join(sLineBreak, Inserts.ToStringArray) + sLineBreak +
+                    'END';
+
+        IBXDest.Close;
+        IBXDest.SQL.Text := BlockSQL;
+        IBXDest.ExecSQL;
+
+        Inserts.Clear;
+
+        if RowsSinceCommit >= CommitInterval then
+        begin
+          CommitDest;
+          RowsSinceCommit := 0;
+        end;
+      end;
+
+      { ---- Progress ---- }
+      if (Round((Now - LastProgressTime) * 86400 * 1000) >= RefreshMs) or
+         SQLSource.EOF then
+      begin
+        LastProgressTime := Now;
+        Elapsed := FormatDateTime('hh:nn:ss', Now - FStats.StartTime);
+        CancelFlag := FCancelled;
+        DoProgress(FStats.RowsProcessed, FStats.RowsTotal, Elapsed, CancelFlag);
+        if CancelFlag then FCancelled := True;
+      end;
+
+      if FCancelled then Break;
+      SQLSource.Next;
+    end;
+
+    { ---- Restlicher Batch ---- }
+    if (Inserts.Count > 0) and (not FCancelled) then
+    begin
+      BlockSQL := 'EXECUTE BLOCK AS' + sLineBreak +
+                  'BEGIN' + sLineBreak +
+                  String.Join(sLineBreak, Inserts.ToStringArray) + sLineBreak +
+                  'END';
+
+      IBXDest.Close;
+      IBXDest.SQL.Text := BlockSQL;
+      IBXDest.ExecSQL;
+    end;
+
+    if not FCancelled then
+      CommitDest
+    else
+    begin
+      RollbackDest;
+      FStats.Cancelled := True;
+    end;
+
+    Elapsed := FormatDateTime('hh:nn:ss', Now - FStats.StartTime);
+    CancelFlag := FCancelled;
+    DoProgress(FStats.RowsProcessed, FStats.RowsTotal, Elapsed, CancelFlag);
+
+  finally
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+    Inserts.Free;
+    try
+      if SQLSource.Active then SQLSource.Close;
+    except
+    end;
+    try
+      if IBXDest.Active then IBXDest.Close;
+    except
+    end;
+  end;
+end;
+
+// ============================================================================
 // IBX-Source → SQLDB-Dest: Multi-Value-Batch
 // ============================================================================
 procedure TCrossEngineIBX.ExecuteIBXToSQLDBBatched;
@@ -768,13 +1026,15 @@ begin
   IBQ.SQL.Text := SelectSQL;
   IBQ.Open;
 
-  { ---- Zieltabelle: Feldliste + Template ---- }
+  { ---- Zieltabelle: Feldliste ---- }
   DestFields := '';
   SelectedCount := 0;
   FirstField := True;
   for i := 0 to High(FOptions.Fields) do
   begin
     if not FOptions.Fields[i].Selected then Continue;
+    if IsComputedStaysComputed(i) then Continue;
+
     if not FirstField then DestFields := DestFields + ', ';
     FirstField := False;
     DestFields := DestFields +
@@ -824,6 +1084,7 @@ begin
       for i := 0 to High(FOptions.Fields) do
       begin
         if not FOptions.Fields[i].Selected then Continue;
+        if IsComputedStaysComputed(i) then Continue;
 
         Field := IBQ.Fields[ParamIndex];
 
@@ -845,10 +1106,13 @@ begin
             ValueLine := ValueLine + QuotedStr(Field.AsString);
           end;
 
-          if Field is TStringField then
-            Inc(FStats.BytesProcessed, Length(Field.AsString))
+          { Bytes zählen — erweitert für TMemoField/TWideStringField }
+          case Field.DataType of
+            ftString, ftFixedChar, ftWideString, ftMemo, ftWideMemo:
+              Inc(FStats.BytesProcessed, Length(Field.AsString));
           else
             Inc(FStats.BytesProcessed, Field.DataSize);
+          end;
         end;
 
         Inc(ParamIndex);

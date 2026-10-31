@@ -1,7 +1,7 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 526
+  Left = 555
   Height = 856
-  Top = 151
+  Top = 444
   Width = 1376
   Caption = 'CrossRDBMS - Transfer'
   ClientHeight = 856

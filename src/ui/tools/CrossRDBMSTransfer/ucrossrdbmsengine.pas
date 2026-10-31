@@ -164,7 +164,6 @@ end;
 // ============================================================================
 // Engine-Auswahl
 // ============================================================================
-
 function TCrossTransferEngine.CreateEngine: TCrossEngineBase;
 var
   Strategy: TCrossStrategy;
@@ -172,11 +171,10 @@ var
 begin
   SameConn := HasSameConnection;
 
-  { ---- Strategie bestimmen ---- }
-  if FOptions.Strategy <> csRowByRow then
-    Strategy := FOptions.Strategy
+  if FOptions.Strategy = csAuto then
+    Strategy := RecommendStrategy(FStats.SourceDBMS, FStats.DestDBMS, SameConn)
   else
-    Strategy := RecommendStrategy(FStats.SourceDBMS, FStats.DestDBMS, SameConn);
+    Strategy := FOptions.Strategy;
 
   if not IsStrategyAvailable(Strategy, FStats.SourceDBMS, FStats.DestDBMS, SameConn) then
   begin
@@ -184,14 +182,32 @@ begin
     Strategy := csRowByRow;
   end;
 
-  FStats.StrategyUsed := Strategy;
-
-  { ---- IBX-Beteiligung? ----
-    Sobald Source oder Dest IBX ist, verwenden wir die IBX-Engine.
-    Sie beherrscht Row-by-Row in allen Kombinationen (IBX/SQLDB). }
+  { ---- IBX-Beteiligung ---- }
   if IsAnyIBX then
   begin
-    Log('Using engine: IBX (Row-by-Row)');
+    { IBX-Source → SQLDB-Dest: Batched (Multi-Value) erlaubt }
+    if FOptions.SourceIsIBX and (not FOptions.DestIsIBX) and
+       (Strategy = csBatched) then
+    begin
+      FStats.StrategyUsed := csBatched;
+      FOptions.Strategy := csBatched;
+      Log('Using engine: IBX (Batched → SQLDB)');
+    end
+    { SQLDB-Source → IBX-Dest: Batched (EXECUTE BLOCK) erlaubt }
+    else if (not FOptions.SourceIsIBX) and FOptions.DestIsIBX and
+            (Strategy = csBatched) then
+    begin
+      FStats.StrategyUsed := csBatched;
+      FOptions.Strategy := csBatched;
+      Log('Using engine: IBX (Batched ← SQLDB via EXECUTE BLOCK)');
+    end
+    else
+    begin
+      FStats.StrategyUsed := csRowByRow;
+      FOptions.Strategy := csRowByRow;
+      Log('Using engine: IBX (Row-by-Row)');
+    end;
+
     Result := TCrossEngineIBX.Create(FOptions);
     Result.OnProgress := @InternalProgress;
     Result.OnLog := FOnLog;
@@ -199,6 +215,9 @@ begin
   end;
 
   { ---- Reiner SQLDB-Pfad ---- }
+  FStats.StrategyUsed := Strategy;
+  FOptions.Strategy := Strategy;
+
   case Strategy of
     csInsertSelect:
       begin
@@ -230,6 +249,7 @@ var
   i: Integer;
   SL: TStringList;
   FieldLine: string;
+  IsComputedFB: Boolean;
 begin
   Result := '';
   SL := TStringList.Create;
@@ -238,8 +258,18 @@ begin
     begin
       if not FOptions.Fields[i].Selected then Continue;
 
-      FieldLine := QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS) +
-                   ' ' + Trim(FOptions.Fields[i].DestType);
+      IsComputedFB := FOptions.Fields[i].IsComputed and
+                      (FStats.SourceDBMS = cdFirebird) and
+                      (FStats.DestDBMS = cdFirebird) and
+                      (Trim(FOptions.Fields[i].ComputedExpr) <> '');
+
+      if IsComputedFB then
+        FieldLine := QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS) +
+                     ' COMPUTED BY (' + FOptions.Fields[i].ComputedExpr + ')'
+      else
+        FieldLine := QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS) +
+                     ' ' + Trim(FOptions.Fields[i].DestType);
+
       SL.Add('  ' + FieldLine);
     end;
 
@@ -265,6 +295,7 @@ var
   i: Integer;
   SelectList, DestList: string;
   First: Boolean;
+  IsComputedFB: Boolean;
 begin
   CreateSQL := BuildCreateSQL;
 
@@ -275,6 +306,13 @@ begin
   for i := 0 to High(FOptions.Fields) do
   begin
     if not FOptions.Fields[i].Selected then Continue;
+
+    { FB→FB computed: erscheint in CREATE, aber nicht in INSERT/SELECT }
+    IsComputedFB := FOptions.Fields[i].IsComputed and
+                    (FStats.SourceDBMS = cdFirebird) and
+                    (FStats.DestDBMS = cdFirebird) and
+                    (Trim(FOptions.Fields[i].ComputedExpr) <> '');
+    if IsComputedFB then Continue;
 
     if not First then
     begin
@@ -293,10 +331,13 @@ begin
       SelectList := SelectList + QuoteIdentifier(FOptions.Fields[i].SourceName, FStats.SourceDBMS);
   end;
 
-  InsertSQL := 'INSERT INTO ' + QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
-               ' (' + DestList + ')' + sLineBreak +
-               'SELECT ' + SelectList + sLineBreak +
-               'FROM ' + QuoteIdentifier(FOptions.SourceTable, FStats.SourceDBMS);
+  if (DestList <> '') and (SelectList <> '') then
+    InsertSQL := 'INSERT INTO ' + QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
+                 ' (' + DestList + ')' + sLineBreak +
+                 'SELECT ' + SelectList + sLineBreak +
+                 'FROM ' + QuoteIdentifier(FOptions.SourceTable, FStats.SourceDBMS)
+  else
+    InsertSQL := '';
 
   FStats.CreateSQL := CreateSQL;
   FStats.InsertSQL := InsertSQL;

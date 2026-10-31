@@ -30,7 +30,8 @@ type
   TCrossStrategy = (
     csRowByRow,          // A – parametrisiertes Row-by-Row
     csBatched,           // B – Batched Parameter Inserts
-    csInsertSelect       // C – batchweises INSERT … SELECT
+    csInsertSelect,      // C – batchweises INSERT … SELECT
+    csAuto
   );
 
   { ------------------------------------------------------------------ }

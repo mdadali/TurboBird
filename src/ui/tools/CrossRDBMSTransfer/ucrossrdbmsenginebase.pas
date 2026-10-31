@@ -40,6 +40,8 @@ type
     // Von den konkreten Engines zu überschreiben
     procedure InternalExecute; virtual; abstract;
 
+    function  IsComputedStaysComputed(AFieldIndex: Integer): Boolean;
+
   public
     constructor Create(const AOptions: TCrossTransferOptions);
     destructor Destroy; override;
@@ -244,6 +246,15 @@ begin
     Result := StringReplace(Result, '$1', AOwnFieldName, [rfReplaceAll]);
 end;
 
+function TCrossEngineBase.IsComputedStaysComputed(AFieldIndex: Integer): Boolean;
+begin
+  { Computed-Feld bleibt nur bei Firebird→Firebird als COMPUTED erhalten
+    und wird dann NICHT in SELECT/INSERT aufgenommen. }
+  Result := FOptions.Fields[AFieldIndex].IsComputed and
+            (FStats.SourceDBMS = cdFirebird) and
+            (FStats.DestDBMS = cdFirebird);
+end;
+
 function TCrossEngineBase.BuildSelectList: string;
 var
   i: Integer;
@@ -255,6 +266,7 @@ begin
     for i := 0 to High(FOptions.Fields) do
     begin
       if not FOptions.Fields[i].Selected then Continue;
+      if IsComputedStaysComputed(i) then Continue;
 
       QuotedName := QuoteIdentifier(FOptions.Fields[i].SourceName, FStats.SourceDBMS);
 
@@ -281,6 +293,7 @@ begin
     for i := 0 to High(FOptions.Fields) do
     begin
       if not FOptions.Fields[i].Selected then Continue;
+      if IsComputedStaysComputed(i) then Continue;
       SL.Add(QuoteIdentifier(FOptions.Fields[i].DestName, FStats.DestDBMS));
     end;
     Result := String.Join(', ', SL.ToStringArray);

@@ -20,7 +20,8 @@ uses
   uCrossRDBMSEngine,
   uCrossRDBMSConnection,
   uCrossRDBMSProgress,
-  uCrossRDBMSReport;
+  uCrossRDBMSReport,
+  uCrossRDBMSFieldAnalysis;
 
 type
   { TfrmCrossRDBMSMain }
@@ -98,10 +99,12 @@ type
     FDestConnForm: TfrmCrossRDBMSConnection;
     FProblemFieldsDeselected: TStringList;
 
+
     procedure SourceAfterConnect(Sender: TObject);
     procedure SourceAfterDisconnect(Sender: TObject);
     procedure LoadSourceTables;
     procedure LoadFieldsFromSource;
+    procedure SyncFieldsToCheckGroup;
     procedure SyncCheckGroupToFields;
     procedure SyncGridToFields;
     procedure UpdateGrid;
@@ -497,7 +500,6 @@ var
   MetaIBQ: TIBQuery;
   MetaSQLQ: TSQLQuery;
   MetaTrans: TIBTransaction;
-  S: string;
 begin
   SetLength(FFields, 0);
   CheckGroupSourceFields.Items.Clear;
@@ -543,7 +545,7 @@ begin
   else
     DestDBMS := cdUnknown;
 
-  { ---- Computed-Felder ermitteln (alle Quellen) ---- }
+  { ---- Computed-Felder ermitteln ---- }
   ComputedExprs := TStringList.Create;
   ComputedExprs.CaseSensitive := False;
   try
@@ -552,7 +554,6 @@ begin
       begin
         if FSourceConnForm.IsIBX then
         begin
-          { Eigene Transaktion nur für Metadata — schützt die Haupt-Transaktion }
           MetaTrans := TIBTransaction.Create(nil);
           MetaIBQ := TIBQuery.Create(nil);
           try
@@ -587,7 +588,6 @@ begin
         end
         else if Assigned(FSourceConnForm.Conn) then
         begin
-          { Firebird via SQLDB }
           MetaSQLQ := TSQLQuery.Create(nil);
           try
             MetaSQLQ.Database := FSourceConnForm.Conn;
@@ -662,7 +662,7 @@ begin
         end;
       end;
     except
-      { Metadata-Erkennung fehlgeschlagen — ignorieren, keine Computed-Info }
+      { Metadata-Erkennung fehlgeschlagen — ignorieren }
     end;
 
     { ---- Felder laden ---- }
@@ -709,14 +709,6 @@ begin
 
             CheckGroupSourceFields.Items.Add(FieldName);
             CheckGroupSourceFields.Checked[i] := not IsProblem;
-
-            if IsProblem then
-            begin
-              if IsArr then
-                FProblemFieldsDeselected.Add(FieldName + ' (' + SourceType + ') [ARRAY]')
-              else if IsBinaryBlob then
-                FProblemFieldsDeselected.Add(FieldName + ' (' + SourceType + ') [BINARY BLOB]');
-            end;
           end;
         finally
           IBQ.Close;
@@ -762,22 +754,11 @@ begin
 
             CheckGroupSourceFields.Items.Add(FieldName);
             CheckGroupSourceFields.Checked[i] := not IsProblem;
-
-            if IsProblem then
-            begin
-              if IsArr then
-                FProblemFieldsDeselected.Add(FieldName + ' (' + SourceType + ') [ARRAY]')
-              else if IsBinaryBlob then
-                FProblemFieldsDeselected.Add(FieldName + ' (' + SourceType + ') [BINARY BLOB]');
-            end;
           end;
         finally
           Q.Close;
         end;
       end;
-
-      UpdateGrid;
-      UpdatePreviewSQL;
     finally
       FUpdatingUI := False;
     end;
@@ -785,22 +766,29 @@ begin
     ComputedExprs.Free;
   end;
 
-  if FProblemFieldsDeselected.Count > 0 then
-  begin
-    S := '';
-    for i := 0 to FProblemFieldsDeselected.Count - 1 do
-      S := S + '  • ' + FProblemFieldsDeselected[i] + sLineBreak;
+  { ---- Feld-Analyse-Dialog ---- }
+  if Length(FFields) = 0 then Exit;
 
-    MessageDlg(
-      'The following fields were detected and automatically deselected:' +
-      sLineBreak + sLineBreak + S + sLineBreak +
-      'Array fields and binary BLOBs cannot be reliably transferred.' +
-      sLineBreak + sLineBreak +
-      'Computed fields stay selected but no values are inserted.' +
-      sLineBreak +
-      'All other fields are ready for transfer.',
-      mtInformation, [mbOK], 0);
+  if not ShowFieldAnalysisDialog(FFields) then
+  begin
+    { Cancel → alles leeren, User muss Tabelle neu wählen }
+    SetLength(FFields, 0);
+    CheckGroupSourceFields.Items.Clear;
+    sgFormulas.RowCount := 1;
+    SynEdit1.Lines.Clear;
+    Exit;
   end;
+
+  { ---- OK: GUI aktualisieren ---- }
+  FUpdatingUI := True;
+  try
+    SyncFieldsToCheckGroup;
+    UpdateGrid;
+  finally
+    FUpdatingUI := False;
+  end;
+
+  UpdatePreviewSQL;
 end;
 
 procedure TfrmCrossRDBMSMain.UpdateGrid;
@@ -864,6 +852,15 @@ begin
     FFields[i].DestType := sgFormulas.Cells[2, i + 1];
     FFields[i].Formula  := sgFormulas.Cells[3, i + 1];
   end;
+end;
+
+procedure TfrmCrossRDBMSMain.SyncFieldsToCheckGroup;
+var
+  i: Integer;
+begin
+  for i := 0 to High(FFields) do
+    if i < CheckGroupSourceFields.Items.Count then
+      CheckGroupSourceFields.Checked[i] := FFields[i].Selected;
 end;
 
 procedure TfrmCrossRDBMSMain.SyncCheckGroupToFields;

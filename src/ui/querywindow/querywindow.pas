@@ -25,7 +25,11 @@ uses
   cSelectSQLParserExt,
 
   ibsqleditor,
-  fSQLParser;
+  fSQLParser,
+
+  //AI
+  fphttpclient, fpjson, jsonparser,
+  fmAIPrompt;
 
 type
 
@@ -112,6 +116,7 @@ type
     ToolButton5: TToolButton;
     tbIBSQL: TToolButton;
     ToolButton6: TToolButton;
+    ToolButton7: TToolButton;
     procedure bbRunClick(Sender: TObject);
     procedure cxAutoCommitChange(Sender: TObject);
     procedure cxAutoCommitMouseEnter(Sender: TObject);
@@ -151,7 +156,6 @@ type
     procedure lmFindClick(Sender: TObject);
     procedure lmFindAgainClick(Sender: TObject);
     procedure meQueryChangeUpdating(ASender: TObject; AnUpdating: Boolean);
-    procedure meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure meQueryKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure meQueryMouseEnter(Sender: TObject);
     procedure Panel1MouseEnter(Sender: TObject);
@@ -195,6 +199,8 @@ type
     procedure ToolBar1MouseLeave(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
     procedure tbIBSQLClick(Sender: TObject);
+    procedure ToolButton6Click(Sender: TObject);
+    procedure ToolButton7Click(Sender: TObject);
   private
     { private declarations }
     FLastStatementWasSelect: Boolean;
@@ -1002,6 +1008,67 @@ begin
     IBSQL.Free;
   end;
 end;
+
+procedure TfmQueryWindow.ToolButton6Click(Sender: TObject);
+var Antwort: string;
+function AskOllama(const Prompt: string): string;
+var
+  Client: TFPHTTPClient;
+  ReqStream, RespStream: TStringStream;
+  Req: TJSONObject;
+  RespJSON: TJSONData;
+begin
+  Client     := TFPHTTPClient.Create(nil);
+  ReqStream  := TStringStream.Create('');
+  RespStream := TStringStream.Create('');
+  try
+    Req := TJSONObject.Create;
+    try
+      Req.Add('model',  'qwen2.5-coder:7b');
+      Req.Add('prompt', Prompt);
+      Req.Add('stream', False);
+      ReqStream.WriteString(Req.AsJSON);
+
+      Client.AddHeader('Content-Type', 'application/json');
+      Client.RequestBody := ReqStream;
+      Client.Post('http://localhost:11434/api/generate', RespStream);
+
+      RespJSON := GetJSON(RespStream.DataString);
+      try
+        Result := RespJSON.FindPath('response').AsString;
+      finally
+        RespJSON.Free;
+      end;
+    finally
+      Req.Free;
+    end;
+  finally
+    RespStream.Free;
+    ReqStream.Free;
+    Client.Free;
+  end;
+end;
+
+begin
+Screen.Cursor := crHourGlass;
+  try
+    Antwort := AskOllama(
+      'Erkläre diese Firebird-SQL kurz und auf Deutsch:' + LineEnding +
+      meQuery.Lines.Text);
+    ShowMessage(Antwort); // besser: eigenes Memo im Output-Panel
+  finally
+    Screen.Cursor := crDefault;
+  end;
+end;
+
+procedure TfmQueryWindow.ToolButton7Click(Sender: TObject);
+begin
+  ShowAIPromptForm(
+    'Erkläre diese Firebird-SQL kurz und auf Deutsch:' +
+    LineEnding + LineEnding + '---SQL---' + LineEnding +
+    meQuery.Lines.Text);
+end;
+
 
 //SQLDb Query Designer
 {procedure TfmQueryWindow.tbQueryDesignClick(Sender: TObject);
@@ -2515,20 +2582,6 @@ end;
 
 { Run query by pressing Ctrl + Enter }
 
-procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-var P: TPoint;
-    Node: TTreeNode;
-    NodeInfo: TPNodeInfos;
-begin
-  {if (Key = VK_SPACE) and (ssCtrl in Shift) then
-  begin
-    LoadpmUnIntelliSense;
-    P := GetSynEditCaretScreenPos(meQuery);
-    pmUnIntelliSense.Popup(P.X, P.Y);
-    Key := 0;
-  end;}
-end;
 
 procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
@@ -2611,38 +2664,6 @@ begin
     // Wichtig: Key NICHT auf 0 setzen, damit der Punkt trotzdem eingefügt wird
   end;
 end;
-
-{procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-var
-  P: TPoint;
-begin
-  // Ctrl + Enter → Query ausführen
-  if (ssCtrl in Shift) and (Key = VK_RETURN) then
-  begin
-    CallExecuteQuery;
-    Key := 0;
-    Exit;
-  end;
-
-  // Ctrl + Space → normales IntelliSense (alle Tabellen)
-  if (Key = VK_SPACE) and (ssCtrl in Shift) then
-  begin
-    LoadpmUnIntelliSense;   // wichtig: Menü neu aufbauen!
-
-    P := GetSynEditCaretScreenPos(meQuery);
-    pmUnIntelliSense.Popup(P.X, P.Y);
-    Key := 0;
-  end;
-end;}
-
-{procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
-begin
-  if (TMenuItem(Sender).Caption = UpperCase(TMenuItem(Sender).Caption)) then
-    meQuery.SelText := TMenuItem(Sender).Caption
-  else
-    meQuery.SelText := MakeObjectNameQuoted(TMenuItem(Sender).Caption);
-end;}
 
 procedure TfmQueryWindow.pmUnIntelliSenseSubItemClick(Sender: TObject);
 var

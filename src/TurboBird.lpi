@@ -23,7 +23,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1425"/>
+      <BuildNr Value="1434"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -932,7 +932,7 @@
         <PackageName Value="LCL"/>
       </Item33>
     </RequiredPackages>
-    <Units Count="137">
+    <Units Count="139">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1764,6 +1764,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="uCrossRDBMSEngineIBX"/>
       </Unit136>
+      <Unit137>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsfieldanalysis.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSFieldAnalysis"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="common/fmaiprompt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fmAIPrompt"/>
+      </Unit138>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1818,7 +1828,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="15">
+    <Exceptions Count="16">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -1864,6 +1874,9 @@
       <Item15>
         <Name Value="EDatabaseError"/>
       </Item15>
+      <Item16>
+        <Name Value="EHTTPClient"/>
+      </Item16>
     </Exceptions>
   </Debugging>
 </CONFIG>
