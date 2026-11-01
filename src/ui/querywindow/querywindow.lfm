@@ -70315,7 +70315,6 @@ object fmQueryWindow: TfmQueryWindow
       Align = alClient
       Images = imTabs
       TabOrder = 0
-      OnChange = pgOutputPageCtlChange
     end
   end
   object ToolBar1: TToolBar

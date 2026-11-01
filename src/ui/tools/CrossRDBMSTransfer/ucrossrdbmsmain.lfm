@@ -1,12 +1,12 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 461
-  Height = 856
-  Top = 130
+  Left = 434
+  Height = 893
+  Top = 61
   Width = 1376
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'CrossRDBMS - Transfer'
-  ClientHeight = 856
+  ClientHeight = 893
   ClientWidth = 1376
   OnClose = FormClose
   OnCreate = FormCreate
@@ -23,7 +23,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
   object pnlBottom: TPanel
     Left = 0
     Height = 50
-    Top = 806
+    Top = 843
     Width = 1376
     Align = alBottom
     ClientHeight = 50
@@ -48,7 +48,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       TabOrder = 1
     end
     object btnClose: TButton
-      Left = 1232
+      Left = 1240
       Height = 25
       Top = 8
       Width = 112
@@ -68,7 +68,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 774
+    Height = 811
     Top = 32
     Width = 1376
     ActivePage = tsTransfer
@@ -77,7 +77,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
     TabOrder = 2
     object tsTransfer: TTabSheet
       Caption = 'Transfer'
-      ClientHeight = 743
+      ClientHeight = 780
       ClientWidth = 1366
       object grboxConnections: TGroupBox
         Left = 0
@@ -167,26 +167,26 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       end
       object pnlCenter: TPanel
         Left = 0
-        Height = 264
+        Height = 295
         Top = 298
         Width = 1366
         Align = alClient
-        ClientHeight = 264
+        ClientHeight = 295
         ClientWidth = 1366
         TabOrder = 2
         object GroupBoxFormulas: TGroupBox
           Left = 1
-          Height = 262
+          Height = 293
           Top = 1
           Width = 1364
           Align = alClient
           Caption = 'Formulas'
-          ClientHeight = 242
+          ClientHeight = 273
           ClientWidth = 1362
           TabOrder = 0
           object sgFormulas: TStringGrid
             Left = 0
-            Height = 242
+            Height = 273
             Top = 0
             Width = 835
             Align = alLeft
@@ -195,17 +195,17 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object GroupBoxSQL: TGroupBox
             Left = 840
-            Height = 242
+            Height = 273
             Top = 0
             Width = 522
             Align = alClient
-            Caption = 'SQL'
-            ClientHeight = 222
+            Caption = 'Generated SQL'
+            ClientHeight = 253
             ClientWidth = 520
             TabOrder = 1
             inline SynEdit1: TSynEdit
               Left = 0
-              Height = 222
+              Height = 253
               Top = 0
               Width = 520
               Align = alClient
@@ -704,7 +704,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object Splitter3: TSplitter
             Left = 835
-            Height = 242
+            Height = 273
             Top = 0
             Width = 5
           end
@@ -712,181 +712,221 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       end
       object GroupBoxOptions: TGroupBox
         Left = 0
-        Height = 181
-        Top = 562
+        Height = 187
+        Top = 593
         Width = 1366
         Align = alBottom
         Caption = 'Options'
-        ClientHeight = 161
+        ClientHeight = 167
         ClientWidth = 1364
         TabOrder = 3
-        object chkboxCopyData: TCheckBox
-          Left = 16
-          Height = 21
+        object grBoxRows: TGroupBox
+          Left = 14
+          Height = 144
           Top = 8
-          Width = 87
-          Caption = 'Copy Data'
-          Checked = True
-          State = cbChecked
+          Width = 410
+          Caption = 'Rows'
+          ClientHeight = 124
+          ClientWidth = 408
           TabOrder = 0
+          object chkboxCopyData: TCheckBox
+            Left = 16
+            Height = 21
+            Top = 8
+            Width = 87
+            Caption = 'Copy Data'
+            Checked = True
+            State = cbChecked
+            TabOrder = 0
+          end
+          object rbAllRows: TRadioButton
+            Left = 16
+            Height = 21
+            Top = 51
+            Width = 74
+            Caption = 'All Rows'
+            Checked = True
+            OnChange = rbAllRowsChange
+            TabOrder = 1
+            TabStop = True
+          end
+          object rbRange: TRadioButton
+            Left = 112
+            Height = 21
+            Top = 51
+            Width = 63
+            Caption = 'Range'
+            TabOrder = 2
+          end
+          object edtFrom: TEdit
+            Left = 184
+            Height = 31
+            Top = 48
+            Width = 88
+            Enabled = False
+            TabOrder = 3
+            Text = '1'
+          end
+          object Label5: TLabel
+            Left = 280
+            Height = 19
+            Top = 51
+            Width = 14
+            Caption = ' - -'
+            ParentColor = False
+          end
+          object edtTo: TEdit
+            Left = 304
+            Height = 31
+            Top = 51
+            Width = 96
+            Enabled = False
+            TabOrder = 4
+            Text = '1000'
+          end
         end
-        object rbAllRows: TRadioButton
-          Left = 16
-          Height = 21
-          Top = 56
-          Width = 74
-          Caption = 'All Rows'
-          Checked = True
-          OnChange = rbAllRowsChange
-          TabOrder = 1
-          TabStop = True
-        end
-        object rbRange: TRadioButton
-          Left = 168
-          Height = 21
-          Top = 51
-          Width = 63
-          Caption = 'Range'
-          TabOrder = 2
-        end
-        object edtFrom: TEdit
-          Left = 256
-          Height = 31
-          Top = 48
-          Width = 88
-          Enabled = False
-          TabOrder = 3
-          Text = '1'
-        end
-        object edtTo: TEdit
-          Left = 376
-          Height = 31
-          Top = 48
-          Width = 96
-          Enabled = False
-          TabOrder = 4
-          Text = '1000'
-        end
-        object Label3: TLabel
-          Left = 584
-          Height = 19
-          Top = 116
-          Width = 143
-          Caption = 'Commit Interval (Rows)'
-          ParentColor = False
-        end
-        object edtCommitInterval: TEdit
-          Left = 736
-          Height = 31
-          Top = 112
-          Width = 88
-          TabOrder = 5
-          Text = '25600'
-        end
-        object chkboxUseFormulas: TCheckBox
-          Left = 168
-          Height = 21
+        object grBoxDestTable: TGroupBox
+          Left = 1040
+          Height = 144
           Top = 8
-          Width = 108
-          Caption = 'Use Formulas'
-          TabOrder = 6
+          Width = 304
+          Caption = 'Dest Table'
+          ClientHeight = 124
+          ClientWidth = 302
+          TabOrder = 1
+          object Label1: TLabel
+            Left = 16
+            Height = 19
+            Top = 8
+            Width = 67
+            Caption = 'Tablename'
+            ParentColor = False
+          end
+          object edtDestTable: TEdit
+            Left = 112
+            Height = 31
+            Top = 8
+            Width = 168
+            TabOrder = 0
+            Text = 'edtDestTable'
+          end
+          object lblIfExists: TLabel
+            Left = 16
+            Height = 19
+            Top = 56
+            Width = 81
+            Caption = 'If table exists'
+            ParentColor = False
+          end
+          object cmbIfExists: TComboBox
+            Left = 112
+            Height = 31
+            Top = 48
+            Width = 168
+            ItemHeight = 0
+            ItemIndex = 0
+            Items.Strings = (
+              'Recreate'
+              'Append'
+              'Abort'
+            )
+            Style = csDropDownList
+            TabOrder = 1
+            Text = 'Recreate'
+          end
         end
-        object edtDestTable: TEdit
-          Left = 736
-          Height = 31
-          Top = 6
-          Width = 243
-          TabOrder = 7
-          Text = 'edtDestTable'
-        end
-        object lblIfExists: TLabel
-          Left = 591
-          Height = 19
-          Top = 58
-          Width = 113
-          Caption = 'If Dest table exists'
-          ParentColor = False
-        end
-        object cmbIfExists: TComboBox
-          Left = 736
-          Height = 31
-          Top = 51
-          Width = 136
-          ItemHeight = 0
-          ItemIndex = 0
-          Items.Strings = (
-            'Recreate'
-            'Append'
-            'Abort'
-          )
-          Style = csDropDownList
-          TabOrder = 8
-          Text = 'Recreate'
-        end
-        object lblRefreshInterval: TLabel
-          Left = 904
-          Height = 19
-          Top = 116
-          Width = 183
-          Caption = 'Progress RefreshInterval (ms)'
-          ParentColor = False
-        end
-        object edtRefreshInterval: TEdit
-          Left = 1096
-          Height = 31
-          Top = 112
-          Width = 96
-          TabOrder = 9
-          Text = '2000'
-        end
-        object edtBatchSize: TEdit
+        object grBoxCopyEngine: TGroupBox
           Left = 432
-          Height = 31
-          Top = 112
-          Width = 112
-          TabOrder = 10
-          Text = '10000'
+          Height = 144
+          Top = 8
+          Width = 296
+          Caption = 'Copy Engine'
+          ClientHeight = 124
+          ClientWidth = 294
+          TabOrder = 2
+          object Label2: TLabel
+            Left = 16
+            Height = 19
+            Top = 8
+            Width = 50
+            Caption = 'Enginee'
+            ParentColor = False
+          end
+          object cmbStrategy: TComboBox
+            Left = 128
+            Height = 31
+            Top = 8
+            Width = 160
+            ItemHeight = 0
+            TabOrder = 0
+            Text = 'cmbStrategy'
+          end
+          object Label4: TLabel
+            Left = 16
+            Height = 19
+            Top = 56
+            Width = 105
+            Caption = 'Batch Size (Rows)'
+            ParentColor = False
+          end
+          object edtBatchSize: TEdit
+            Left = 128
+            Height = 31
+            Top = 53
+            Width = 160
+            TabOrder = 1
+            Text = '10000'
+          end
+          object chkboxUseFormulas: TCheckBox
+            Left = 16
+            Height = 21
+            Top = 96
+            Width = 108
+            Caption = 'Use Formulas'
+            TabOrder = 2
+          end
         end
-        object cmbStrategy: TComboBox
-          Left = 112
-          Height = 31
-          Top = 112
-          Width = 184
-          ItemHeight = 0
-          TabOrder = 11
-          Text = 'cmbStrategy'
-        end
-        object Label1: TLabel
-          Left = 591
-          Height = 19
-          Top = 12
-          Width = 61
-          Caption = 'DestTable'
-          ParentColor = False
-        end
-        object Label2: TLabel
-          Left = 16
-          Height = 19
-          Top = 116
-          Width = 84
-          Caption = 'Copy Enginee'
-          ParentColor = False
-        end
-        object Label4: TLabel
-          Left = 320
-          Height = 19
-          Top = 116
-          Width = 105
-          Caption = 'Batch Size (Rows)'
-          ParentColor = False
-        end
-        object Label5: TLabel
-          Left = 352
-          Height = 19
-          Top = 53
-          Width = 14
-          Caption = ' - -'
-          ParentColor = False
+        object grBoxIntervals: TGroupBox
+          Left = 744
+          Height = 144
+          Top = 8
+          Width = 289
+          Caption = 'Intervals'
+          ClientHeight = 124
+          ClientWidth = 287
+          TabOrder = 3
+          object lblRefreshInterval: TLabel
+            Left = 16
+            Height = 19
+            Top = 10
+            Width = 183
+            Caption = 'Progress RefreshInterval (ms)'
+            ParentColor = False
+          end
+          object edtRefreshInterval: TEdit
+            Left = 224
+            Height = 31
+            Top = 8
+            Width = 55
+            TabOrder = 0
+            Text = '2000'
+          end
+          object Label3: TLabel
+            Left = 16
+            Height = 19
+            Top = 48
+            Width = 143
+            Caption = 'Commit Interval (Rows)'
+            ParentColor = False
+          end
+          object edtCommitInterval: TEdit
+            Left = 224
+            Height = 31
+            Top = 48
+            Width = 55
+            TabOrder = 1
+            Text = '10000'
+          end
         end
       end
     end

@@ -160,7 +160,6 @@ type
     procedure meQueryMouseEnter(Sender: TObject);
     procedure Panel1MouseEnter(Sender: TObject);
     procedure Panel1MouseLeave(Sender: TObject);
-    procedure pgOutputPageCtlChange(Sender: TObject);
     procedure pmGridPopup(Sender: TObject);
     procedure pmUnIntelliSensePopup(Sender: TObject);
     procedure rgScreenModesClick(Sender: TObject);
@@ -2514,47 +2513,6 @@ procedure TfmQueryWindow.Panel1MouseLeave(Sender: TObject);
 begin
   Application.OnShowHint := @fmMain.AppShowHint;
 end;
-
-procedure TfmQueryWindow.pgOutputPageCtlChange(Sender: TObject);
-begin
-
-end;
-
-//mit parser
-{procedure TfmQueryWindow.meQueryKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  P: TPoint;
-  CursorPos: Integer;
-  TextBeforeCursor: string;
-  SQLParser: TSelectSQLParserExt;
-begin
-  if (ssCtrl in Shift) and (Key = VK_RETURN) then
-  begin
-    CallExecuteQuery(qtUnknown);
-    Key := 0;
-    Exit;
-  end;
-
-  if (ssCtrl in Shift) and (Key = VK_SPACE) then
-  begin
-    P := GetSynEditCaretScreenPos(meQuery);
-    CursorPos := CaretPosToOffset(meQuery);
-    TextBeforeCursor := Copy(meQuery.Text, 1, CursorPos);
-
-    //SQLParser := TSelectSQLParserExt.Create(TextBeforeCursor);
-    SQLParser := TSelectSQLParserExt.CreateFromString(TextBeforeCursor);
-
-    try
-      SQLParser.BuildAliasMap;
-      ShowIntelliSensePopup(SQLParser); // Jetzt passend
-      pmUnIntelliSense.Popup(P.X, P.Y);
-    finally
-      SQLParser.Free;
-    end;
-
-    Key := 0;
-  end;
-end; }
 
 function CaretPosToOffset(ASynEdit: TSynEdit): Integer;
 var

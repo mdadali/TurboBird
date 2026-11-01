@@ -33,20 +33,24 @@ type
     btnPreviewSQL: TButton;
     btnExecute: TButton;
     btnClose: TButton;
-    chkboxUseFormulas: TCheckBox;
-    CheckGroupSourceFields: TCheckGroup;
     chkboxCopyData: TCheckBox;
+    CheckGroupSourceFields: TCheckGroup;
+    chkboxUseFormulas: TCheckBox;
     cmbIfExists: TComboBox;
     cmbStrategy: TComboBox;
     comboboxSourceTables: TComboBox;
-    edtRefreshInterval: TEdit;
-    edtDestTable: TEdit;
-    edtCommitInterval: TEdit;
-    edtFrom: TEdit;
-    edtTo: TEdit;
     edtBatchSize: TEdit;
+    edtCommitInterval: TEdit;
+    edtDestTable: TEdit;
+    edtFrom: TEdit;
+    edtRefreshInterval: TEdit;
+    edtTo: TEdit;
     grboxConnections: TGroupBox;
     grboxSourceTableAndFields: TGroupBox;
+    grBoxRows: TGroupBox;
+    grBoxDestTable: TGroupBox;
+    grBoxCopyEngine: TGroupBox;
+    grBoxIntervals: TGroupBox;
     GroupBoxSQL: TGroupBox;
     GroupBoxFormulas: TGroupBox;
     GroupBoxDest: TGroupBox;
@@ -54,12 +58,12 @@ type
     GroupBoxOptions: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    lblRefreshInterval: TLabel;
-    Label3: TLabel;
     lblIfExists: TLabel;
     lblBatchSize: TLabel;
+    lblRefreshInterval: TLabel;
     PageControl1: TPageControl;
     pnlTitle: TPanel;
     pnlBottom: TPanel;
@@ -155,10 +159,8 @@ begin
 
   // Defaults
   edtCommitInterval.Text := '10000';
-  edtBatchSize.Text := '500';
   edtFrom.Text := '1';
   edtTo.Text := '0';
-  edtRefreshInterval.Text := '500';
   edtDestTable.Text := '';
   chkboxCopyData.Checked := True;
 
@@ -1078,6 +1080,8 @@ var
   ReportDlg: TCrossReportDialog;
   SrcOK, DstOK: Boolean;
 begin
+  UpdatePreviewSQL;
+
   if Trim(comboboxSourceTables.Text) = '' then
   begin
     MessageDlg('Please select a source table.', mtWarning, [mbOK], 0);
