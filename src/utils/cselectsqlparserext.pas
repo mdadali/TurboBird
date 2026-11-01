@@ -43,52 +43,6 @@ begin
   inherited Destroy;
 end;
 
-{procedure TSelectSQLParserExt.BuildAliasMap;
-var
-  Parts: TStringList;
-  i: Integer;
-  TableName, AliasName: string;
-  Tokens: TStringList;
-begin
-  FAliasMap.Clear;
-  FAliasMap.Sorted := True;
-  FAliasMap.Duplicates := dupError;
-
-  Parts := TStringList.Create;
-  try
-    ExtractStrings([','], [' '], PChar(FromClause), Parts);
-
-    for i := 0 to Parts.Count - 1 do
-    begin
-      // Prüfen auf "AS"
-      if Pos(' AS ', UpperCase(Parts[i])) > 0 then
-      begin
-        TableName := Trim(Copy(Parts[i], 1, Pos(' AS ', UpperCase(Parts[i])) -1 ));
-        AliasName := Trim(Copy(Parts[i], Pos(' AS ', UpperCase(Parts[i])) + 4, Length(Parts[i])));
-      end
-      else
-      begin
-        Tokens := TStringList.Create;
-        try
-          ExtractStrings([' '], [], PChar(Parts[i]), Tokens);
-          TableName := Tokens[0];
-          if Tokens.Count > 1 then
-            AliasName := Tokens[1]
-          else
-            AliasName := TableName;
-        finally
-          Tokens.Free;
-        end;
-      end;
-
-      FAliasMap.AddObject(AliasName, TObject(Pointer(AnsiString(TableName))));
-    end;
-    //ShowMessage(FAliasMap.Text);
-  finally
-    Parts.Free;
-  end;
-end;}
-
 procedure TSelectSQLParserExt.BuildAliasMap;
 var
   FromText, Part, TableName, AliasName, UpperPart: string;

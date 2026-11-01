@@ -196,22 +196,6 @@ begin
   Result := LoadCache;
 end;
 
-{function TUnIntelliSenseCache.FieldsForTable(
-  const TableName: string): TStringList;
-var
-  Index: Integer;
-begin
-  Result := nil;
-
-  Index := FTableCache.IndexOf(TableName);
-  if Index < 0 then Exit;
-
-  if not FFieldsLoaded[Index] then
-    LoadFieldCache(Index);
-
-  Result := FFieldCacheArray[Index];
-end;}
-
 function TUnIntelliSenseCache.FieldsForTable(const TableName: string): TStringList;
 var
   Index, i: Integer;

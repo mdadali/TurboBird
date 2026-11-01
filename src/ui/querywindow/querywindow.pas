@@ -2580,91 +2580,7 @@ begin
   Result := ASynEdit.ClientToScreen(P);
 end;
 
-{ Run query by pressing Ctrl + Enter }
-
-
-{procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-var
-  P: TPoint;
-  WordBefore: string;
-  DBNode: TTreeNode;
-  IntelliCache: TUnIntelliSenseCache;
-  Fields: TStringList;
-  i: Integer;
-  TableItem, FieldItem: TMenuItem;
-begin
-  // Execute query by pressing Ctrl + Enter
-  if (ssCtrl in Shift) and (Key = VK_RETURN) then
-  begin
-    CallExecuteQuery;
-    Key := 0;
-    Exit;
-  end;
-
-  // Bestehendes Ctrl+Space
-  if (Key = VK_SPACE) and (ssCtrl in Shift) then
-  begin
-    LoadpmUnIntelliSense;
-    P := GetSynEditCaretScreenPos(meQuery);
-    pmUnIntelliSense.Popup(P.X, P.Y);
-    Key := 0;
-    Exit;
-  end;
-
-  // Neu: Punkt → Felder anbieten
-  if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then  // VK_OEM_PERIOD = 190
-  begin
-    // Den Punkt zuerst normal einfügen lassen
-    // (Key nicht auf 0 setzen!)
-
-    WordBefore := GetWordBeforeCursor(meQuery);
-    if WordBefore = '' then Exit;
-
-    DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
-    if (DBNode = nil) or (DBNode.Data = nil) then Exit;
-
-    IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
-    if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
-
-    // Felder holen (zuerst versuchen als Alias, sonst als Tabellenname)
-    Fields := IntelliCache.FieldsForAlias(WordBefore, nil); // Parser ggf. später
-    if Fields = nil then
-      Fields := IntelliCache.FieldsForTable(WordBefore);
-
-    if (Fields = nil) or (Fields.Count <= 1) then Exit;
-
-    // Popup dynamisch mit den Feldern befüllen
-    pmUnIntelliSense.Items.Clear;
-
-    // Optional: Tabellenname als ersten Eintrag
-    TableItem := TMenuItem.Create(pmUnIntelliSense);
-    TableItem.Caption := Fields[0]; // Tabellenname
-    TableItem.OnClick := @pmUnIntelliSenseSubItemClick;
-    pmUnIntelliSense.Items.Add(TableItem);
-
-    // Trennlinie
-    TableItem := TMenuItem.Create(pmUnIntelliSense);
-    TableItem.Caption := '-';
-    pmUnIntelliSense.Items.Add(TableItem);
-
-    // Felder ab Index 1
-    for i := 1 to Fields.Count - 1 do
-    begin
-      FieldItem := TMenuItem.Create(pmUnIntelliSense);
-      FieldItem.Caption := Fields[i];
-      FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
-      pmUnIntelliSense.Items.Add(FieldItem);
-    end;
-
-    // Popup anzeigen
-    P := GetSynEditCaretScreenPos(meQuery);
-    pmUnIntelliSense.Popup(P.X, P.Y);
-
-    // Wichtig: Key NICHT auf 0 setzen, damit der Punkt trotzdem eingefügt wird
-  end;
-end;}
-
+{ Run query by pressing Ctrl + Enter, Autocompl. Ctrl + Blank}
 procedure TfmQueryWindow.meQueryKeyUp(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 var
@@ -2834,7 +2750,7 @@ begin
   end;
 end;
 
-procedure TfmQueryWindow.LoadpmUnIntelliSense;
+{procedure TfmQueryWindow.LoadpmUnIntelliSense;
 var
   TableItem, FieldItem, DummyItem: TMenuItem;
   TableName, FieldName: string;
@@ -2902,8 +2818,77 @@ begin
     }
     pmUnIntelliSense.Items.Add(TableItem);
   end;
-end;
+end; }
 
+procedure TfmQueryWindow.LoadpmUnIntelliSense;
+var
+  Context: TSQLContext;
+  Keywords: TStringList;
+  TableItem, DummyItem, KeyItem: TMenuItem;
+  TableName: string;
+  i: Integer;
+  DBNode: TTreeNode;
+  IntelliCache: TUnIntelliSenseCache;
+begin
+  pmUnIntelliSense.Items.Clear;
+
+  Context := GetSQLContext(meQuery);
+
+  // 1. Keywords je nach Kontext
+  Keywords := TStringList.Create;
+  try
+    FillKeywords(Keywords, Context);
+
+    for i := 0 to Keywords.Count - 1 do
+    begin
+      KeyItem := TMenuItem.Create(pmUnIntelliSense);
+      KeyItem.Caption := Keywords[i];
+      KeyItem.OnClick := @pmUnIntelliSenseSubItemClick;
+      pmUnIntelliSense.Items.Add(KeyItem);
+    end;
+
+    // Trennlinie, wenn Keywords vorhanden sind
+    if Keywords.Count > 0 then
+    begin
+      KeyItem := TMenuItem.Create(pmUnIntelliSense);
+      KeyItem.Caption := '-';
+      pmUnIntelliSense.Items.Add(KeyItem);
+    end;
+  finally
+    Keywords.Free;
+  end;
+
+  // 2. Tabellen nur in sinnvollen Kontexten anzeigen
+  if Context in [ctxEmpty, ctxFrom, ctxWhere, ctxOrderGroup, ctxUnknown, ctxSelectList] then
+  begin
+    DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
+    if (DBNode = nil) or (DBNode.Data = nil) then Exit;
+
+    IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
+    if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
+
+    for i := 0 to IntelliCache.TableCache.Count - 1 do
+    begin
+      TableName := IntelliCache.TableCache[i];
+
+      TableItem := TMenuItem.Create(pmUnIntelliSense);
+      TableItem.Caption := TableName;
+      TableItem.OnClick := @pmUnIntelliSenseMaintemClick;
+
+      // Dummy + Trennlinie für Lazy-Load der Felder
+      DummyItem := TMenuItem.Create(TableItem);
+      DummyItem.Caption := TableName;
+      DummyItem.OnClick := @pmUnIntelliSenseSubItemClick;
+      TableItem.Add(DummyItem);
+
+      DummyItem := TMenuItem.Create(TableItem);
+      DummyItem.Caption := '-';
+      TableItem.Add(DummyItem);
+
+      pmUnIntelliSense.Items.Add(TableItem);
+    end;
+  end;
+end;
 
 procedure TfmQueryWindow.pmUnIntelliSensePopup(Sender: TObject);
 var DBNode: TTreeNode;

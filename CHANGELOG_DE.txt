@@ -10,18 +10,46 @@ TurboBird v1.2.1.1290
 
 Build-Datum & -Zeit:
 
+! Unterstützung alle ODS Versionen innerhalb eine TurboBird Instanz
+! Unterstützung alle Firebird  Versionen innerhalb eine TurboBird Instanz
+  (Dank Tony Wyman's letzte IBX4Lazarus + FBIntf Patch)
+
+
 + Alias Unterterstützung für Servernamen
-  Ein Server kann in eine TurboBird Instanz mit unterschiedliche Aliase mehrfach registriert werden.
+  Ein Server kann innerhalb eine TurboBird Instanz mit unterschiedliche Aliase mehrfach registriert werden.
+
 
 + DataEditor schnelle CSVBulk Import/Export zwischen DataSets und CSVFiles
-  Während in test wurde eine 59.4 GB Datei mit fullscan option in 14 Minuten eingelesen.
+  Während ein test wurde eine 59.4 GB Datei mit fullscan (zuerst wurde ganze Datei nach länste Zeile durchsucht)
+  option in 14 Minuten eingelesen. (Gleiche Datei hat mit eine berühmte CSVlib mein rechner zum Absturtzt gebracht)
+
+  System:
+    Betriebssystem: Debian GNU/Linux 13
+    KDE-Plasma-Version: 6.3.6
+    KDE-Frameworks-Version: 6.13.0
+    Qt-Version: 6.8.2
+    Kernel-Version: 6.12.113+deb13-amd64 (64-bit)
+    Grafik-Plattform: X11
+    Prozessoren: 4 × Intel® Core™ i5-4210H CPU @ 2.90GHz
+    Speicher: 16 GiB of RAM (15,5 GiB usable)
+    Grafikprozessor 1: Intel® HD Graphics 4600
+    Grafikprozessor 2: llvmpipe
+    Hersteller: Micro-Star International Co., Ltd.
+    Produktname: GP70 2PE
+    Systemversion: REV:1.0
+
 
 + Cross-RDBMS Data Transfer
    Vollständig neues, eigenständiges Modul für Datentransfer zwischen unterschiedlichen Datenbank-Systemen
    Unterstützte Datenbanken:
      Firebird, SQLite, MySQL/MariaDB, PostgreSQL, MSSQL, Oracle, Sybase, ODBC.
   Getestete Transfer-Routen:
-     Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL.
+     Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL, ODBC.SQLite, ODBC.PostgreSQL, ODBC.MySQL8.
+
+! simple Intellisense für QueryWindow wurde verbessert.
+    Mit Ctrl + Blank werden tabellen und Felder angezeigt
+    Nach Tabellen/Aliasnamen. werden die felder angezeigt.
+    Unterstützt Casesensitiver bezeichnern (Haupsächlich dafür implementiert)
 
 
 
