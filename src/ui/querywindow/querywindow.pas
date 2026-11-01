@@ -2593,7 +2593,6 @@ var
   i: Integer;
   TableItem, FieldItem: TMenuItem;
 begin
-  // Ctrl + Enter → Query ausführen
   if (ssCtrl in Shift) and (Key = VK_RETURN) then
   begin
     CallExecuteQuery;
@@ -2601,7 +2600,6 @@ begin
     Exit;
   end;
 
-  // Ctrl + Space → normales IntelliSense (alle Tabellen)
   if (Key = VK_SPACE) and (ssCtrl in Shift) then
   begin
     LoadpmUnIntelliSense;
@@ -2611,10 +2609,9 @@ begin
     Exit;
   end;
 
-  // Punkt → Felder der Tabelle / des Alias anbieten
   if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then
   begin
-    WordBefore := GetWordBeforeCursor(meQuery);
+    WordBefore := GetWordBeforeCursor(meQuery.Lines, meQuery.CaretY, meQuery.CaretX);
     if WordBefore = '' then Exit;
 
     DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
@@ -2623,7 +2620,6 @@ begin
     IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
     if (IntelliCache = nil) or not IntelliCache.Initialized then Exit;
 
-    // Alias-Auflösung versuchen
     Fields := nil;
     Parser := TSelectSQLParserExt.CreateFromString(meQuery.Text);
     try
@@ -2633,27 +2629,22 @@ begin
       Parser.Free;
     end;
 
-    // Fallback: als normalen Tabellennamen behandeln
     if (Fields = nil) or (Fields.Count <= 1) then
       Fields := IntelliCache.FieldsForTable(WordBefore);
 
     if (Fields = nil) or (Fields.Count <= 1) then Exit;
 
-    // Popup mit den Feldern befüllen
     pmUnIntelliSense.Items.Clear;
 
-    // Tabellenname als ersten Eintrag
     TableItem := TMenuItem.Create(pmUnIntelliSense);
     TableItem.Caption := Fields[0];
     TableItem.OnClick := @pmUnIntelliSenseSubItemClick;
     pmUnIntelliSense.Items.Add(TableItem);
 
-    // Trennlinie
     TableItem := TMenuItem.Create(pmUnIntelliSense);
     TableItem.Caption := '-';
     pmUnIntelliSense.Items.Add(TableItem);
 
-    // Felder
     for i := 1 to Fields.Count - 1 do
     begin
       FieldItem := TMenuItem.Create(pmUnIntelliSense);
@@ -2662,7 +2653,6 @@ begin
       pmUnIntelliSense.Items.Add(FieldItem);
     end;
 
-    // Popup anzeigen
     P := GetSynEditCaretScreenPos(meQuery);
     pmUnIntelliSense.Popup(P.X, P.Y);
   end;
@@ -2823,6 +2813,7 @@ end; }
 procedure TfmQueryWindow.LoadpmUnIntelliSense;
 var
   Context: TSQLContext;
+  Parser: TSelectSQLParserExt;
   Keywords: TStringList;
   TableItem, DummyItem, KeyItem: TMenuItem;
   TableName: string;
@@ -2832,13 +2823,17 @@ var
 begin
   pmUnIntelliSense.Items.Clear;
 
-  Context := GetSQLContext(meQuery);
+  Parser := TSelectSQLParserExt.CreateFromString(meQuery.Text);
+  try
+    Context := Parser.GetContext;
+  finally
+    Parser.Free;
+  end;
 
-  // 1. Keywords je nach Kontext
+  // Keywords
   Keywords := TStringList.Create;
   try
     FillKeywords(Keywords, Context);
-
     for i := 0 to Keywords.Count - 1 do
     begin
       KeyItem := TMenuItem.Create(pmUnIntelliSense);
@@ -2847,7 +2842,6 @@ begin
       pmUnIntelliSense.Items.Add(KeyItem);
     end;
 
-    // Trennlinie, wenn Keywords vorhanden sind
     if Keywords.Count > 0 then
     begin
       KeyItem := TMenuItem.Create(pmUnIntelliSense);
@@ -2858,8 +2852,8 @@ begin
     Keywords.Free;
   end;
 
-  // 2. Tabellen nur in sinnvollen Kontexten anzeigen
-  if Context in [ctxEmpty, ctxFrom, ctxWhere, ctxOrderGroup, ctxUnknown, ctxSelectList] then
+  // Tabellen in sinnvollen Kontexten
+  if Context in [ctxEmpty, ctxSelectList, ctxFrom, ctxWhere, ctxOrderGroup, ctxUnknown] then
   begin
     DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
     if (DBNode = nil) or (DBNode.Data = nil) then Exit;
@@ -2875,7 +2869,6 @@ begin
       TableItem.Caption := TableName;
       TableItem.OnClick := @pmUnIntelliSenseMaintemClick;
 
-      // Dummy + Trennlinie für Lazy-Load der Felder
       DummyItem := TMenuItem.Create(TableItem);
       DummyItem.Caption := TableName;
       DummyItem.OnClick := @pmUnIntelliSenseSubItemClick;
