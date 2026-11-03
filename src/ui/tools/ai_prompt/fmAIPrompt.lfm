@@ -1,0 +1,264 @@
+object fmAIPromptForm: TfmAIPromptForm
+  Left = 1174
+  Height = 740
+  Top = 283
+  Width = 920
+  Caption = 'KI Prompt (Agent)'
+  ClientHeight = 740
+  ClientWidth = 920
+  FormStyle = fsStayOnTop
+  KeyPreview = True
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object Container: TPanel
+    Left = 0
+    Height = 740
+    Top = 0
+    Width = 920
+    Align = alClient
+    BevelOuter = bvNone
+    ClientHeight = 740
+    ClientWidth = 920
+    TabOrder = 0
+    object FStatusBar: TStatusBar
+      Left = 0
+      Height = 21
+      Top = 719
+      Width = 920
+      Panels = <>
+      SimpleText = 'Bereit.'
+    end
+    object FPageControl: TPageControl
+      Left = 0
+      Height = 719
+      Top = 0
+      Width = 920
+      ActivePage = TabSettings
+      Align = alClient
+      TabIndex = 1
+      TabOrder = 0
+      object TabChat: TTabSheet
+        Caption = 'Chat'
+        ClientHeight = 688
+        ClientWidth = 910
+        object FTopPanel: TPanel
+          Left = 0
+          Height = 40
+          Top = 0
+          Width = 910
+          Align = alTop
+          BevelOuter = bvNone
+          ClientHeight = 40
+          ClientWidth = 910
+          TabOrder = 0
+          object Label1: TLabel
+            Left = 8
+            Height = 19
+            Top = 13
+            Width = 46
+            Caption = 'Modell:'
+            ParentColor = False
+          end
+          object FModelCombo: TComboBox
+            Left = 60
+            Height = 31
+            Top = 8
+            Width = 220
+            ItemHeight = 0
+            OnChange = FModelComboChange
+            TabOrder = 0
+          end
+          object Label2: TLabel
+            Left = 296
+            Height = 19
+            Top = 13
+            Width = 44
+            Caption = 'Preset:'
+            ParentColor = False
+          end
+          object FPresetCombo: TComboBox
+            Left = 344
+            Height = 35
+            Top = 8
+            Width = 170
+            ItemHeight = 0
+            Style = csDropDownList
+            TabOrder = 1
+          end
+          object Label3: TLabel
+            Left = 528
+            Height = 19
+            Top = 13
+            Width = 38
+            Caption = 'Temp:'
+            ParentColor = False
+          end
+          object FTempEdit: TSpinEdit
+            Left = 568
+            Height = 29
+            Top = 8
+            Width = 50
+            MaxValue = 20
+            TabOrder = 2
+            Value = 3
+          end
+          object FSendBtn: TBitBtn
+            Left = 636
+            Height = 28
+            Top = 6
+            Width = 110
+            Caption = 'Senden (F9)'
+            OnClick = FSendBtnClick
+            TabOrder = 3
+          end
+          object FCloseBtn: TBitBtn
+            Left = 752
+            Height = 28
+            Top = 6
+            Width = 80
+            Caption = 'Schliessen'
+            OnClick = FCloseBtnClick
+            TabOrder = 4
+          end
+        end
+        object FPromptMemo: TMemo
+          Left = 0
+          Height = 120
+          Top = 40
+          Width = 910
+          Align = alTop
+          ScrollBars = ssVertical
+          TabOrder = 1
+        end
+        object FSplitter: TSplitter
+          Cursor = crVSplit
+          Left = 0
+          Height = 4
+          Top = 160
+          Width = 910
+          Align = alTop
+          ResizeAnchor = akTop
+        end
+        object FResponseMemo: TMemo
+          Left = 0
+          Height = 524
+          Top = 164
+          Width = 910
+          Align = alClient
+          ScrollBars = ssAutoBoth
+          TabOrder = 2
+        end
+      end
+      object TabSettings: TTabSheet
+        Caption = 'Einstellungen'
+        ClientHeight = 688
+        ClientWidth = 910
+        ImageIndex = 1
+        object FProviderLabel: TLabel
+          Left = 16
+          Height = 19
+          Top = 24
+          Width = 57
+          Caption = 'Provider:'
+          ParentColor = False
+        end
+        object FProviderCombo: TComboBox
+          Left = 140
+          Height = 35
+          Top = 20
+          Width = 540
+          ItemHeight = 0
+          OnChange = FProviderComboChange
+          Style = csDropDownList
+          TabOrder = 0
+        end
+        object FBaseURLLabel: TLabel
+          Left = 16
+          Height = 19
+          Top = 64
+          Width = 63
+          Caption = 'Base-URL:'
+          ParentColor = False
+        end
+        object FBaseURLEdit: TEdit
+          Left = 140
+          Height = 31
+          Top = 60
+          Width = 540
+          TabOrder = 1
+        end
+        object FApiKeyLabel: TLabel
+          Left = 16
+          Height = 19
+          Top = 104
+          Width = 52
+          Caption = 'API-Key:'
+          ParentColor = False
+        end
+        object FApiKeyEdit: TEdit
+          Left = 140
+          Height = 31
+          Top = 100
+          Width = 420
+          EchoMode = emPassword
+          PasswordChar = '*'
+          TabOrder = 2
+        end
+        object FShowKeyCheck: TCheckBox
+          Left = 575
+          Height = 21
+          Top = 100
+          Width = 105
+          Caption = 'Key anzeigen'
+          TabOrder = 3
+        end
+        object FSystemLabel: TLabel
+          Left = 16
+          Height = 19
+          Top = 152
+          Width = 99
+          Caption = 'System-Prompt:'
+          ParentColor = False
+        end
+        object FSystemPromptMemo: TMemo
+          Left = 16
+          Height = 180
+          Top = 172
+          Width = 664
+          ScrollBars = ssVertical
+          TabOrder = 4
+        end
+        object FTestBtn: TBitBtn
+          Left = 16
+          Height = 30
+          Top = 372
+          Width = 160
+          Caption = 'Verbindung testen'
+          OnClick = FTestBtnClick
+          TabOrder = 5
+        end
+        object FSaveBtn: TBitBtn
+          Left = 184
+          Height = 30
+          Top = 372
+          Width = 140
+          Caption = 'Speichern'
+          OnClick = FSaveBtnClick
+          TabOrder = 6
+        end
+        object FPriceBtn: TButton
+          Left = 552
+          Height = 25
+          Top = 377
+          Width = 128
+          Caption = 'Price'
+          OnClick = FPriceBtnClick
+          TabOrder = 7
+        end
+      end
+    end
+  end
+end

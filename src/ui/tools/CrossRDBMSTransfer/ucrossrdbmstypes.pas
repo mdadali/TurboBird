@@ -150,6 +150,9 @@ type
     CreateSQL            : string;
     InsertSQL            : string;     // oder Batch-SQL
 
+    // Environment (vorformatiert mit FormatSystemInfo)
+    SystemInfo           : string;
+
     // Status
     Cancelled            : Boolean;
     Warnings             : TStringList;

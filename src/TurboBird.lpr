@@ -63,8 +63,8 @@ uses
   UniqueConstraints, CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, clone_table_dialog,
   uCreateTableFromDataSet, uCrossRDBMSMain, ServerDBFieldSelector, About,
-  uSystemInfo, uProblemFieldsDialog, uCopyTableDataFBIntf, uCrossRDBMSProgress,
-  uCrossRDBMSConnection;
+  uSystemInfo, uProblemFieldsDialog, uCopyTableDataFBIntf,
+  uCrossRDBMSProgress, uCrossRDBMSConnection;
 
 
 const

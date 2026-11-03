@@ -115,8 +115,6 @@ type
     ToolButton4: TToolButton;
     ToolButton5: TToolButton;
     tbIBSQL: TToolButton;
-    ToolButton6: TToolButton;
-    ToolButton7: TToolButton;
     procedure bbRunClick(Sender: TObject);
     procedure cxAutoCommitChange(Sender: TObject);
     procedure cxAutoCommitMouseEnter(Sender: TObject);
@@ -198,8 +196,6 @@ type
     procedure ToolBar1MouseLeave(Sender: TObject);
     procedure ToolButton4Click(Sender: TObject);
     procedure tbIBSQLClick(Sender: TObject);
-    procedure ToolButton6Click(Sender: TObject);
-    procedure ToolButton7Click(Sender: TObject);
   private
     { private declarations }
     FLastStatementWasSelect: Boolean;
@@ -1007,67 +1003,6 @@ begin
     IBSQL.Free;
   end;
 end;
-
-procedure TfmQueryWindow.ToolButton6Click(Sender: TObject);
-var Antwort: string;
-function AskOllama(const Prompt: string): string;
-var
-  Client: TFPHTTPClient;
-  ReqStream, RespStream: TStringStream;
-  Req: TJSONObject;
-  RespJSON: TJSONData;
-begin
-  Client     := TFPHTTPClient.Create(nil);
-  ReqStream  := TStringStream.Create('');
-  RespStream := TStringStream.Create('');
-  try
-    Req := TJSONObject.Create;
-    try
-      Req.Add('model',  'qwen2.5-coder:7b');
-      Req.Add('prompt', Prompt);
-      Req.Add('stream', False);
-      ReqStream.WriteString(Req.AsJSON);
-
-      Client.AddHeader('Content-Type', 'application/json');
-      Client.RequestBody := ReqStream;
-      Client.Post('http://localhost:11434/api/generate', RespStream);
-
-      RespJSON := GetJSON(RespStream.DataString);
-      try
-        Result := RespJSON.FindPath('response').AsString;
-      finally
-        RespJSON.Free;
-      end;
-    finally
-      Req.Free;
-    end;
-  finally
-    RespStream.Free;
-    ReqStream.Free;
-    Client.Free;
-  end;
-end;
-
-begin
-Screen.Cursor := crHourGlass;
-  try
-    Antwort := AskOllama(
-      'Erkläre diese Firebird-SQL kurz und auf Deutsch:' + LineEnding +
-      meQuery.Lines.Text);
-    ShowMessage(Antwort); // besser: eigenes Memo im Output-Panel
-  finally
-    Screen.Cursor := crDefault;
-  end;
-end;
-
-procedure TfmQueryWindow.ToolButton7Click(Sender: TObject);
-begin
-  ShowAIPromptForm(
-    'Erkläre diese Firebird-SQL kurz und auf Deutsch:' +
-    LineEnding + LineEnding + '---SQL---' + LineEnding +
-    meQuery.Lines.Text);
-end;
-
 
 //SQLDb Query Designer
 {procedure TfmQueryWindow.tbQueryDesignClick(Sender: TObject);

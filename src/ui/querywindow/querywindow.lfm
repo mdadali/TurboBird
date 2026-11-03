@@ -1,7 +1,7 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 566
+  Left = 449
   Height = 748
-  Top = 173
+  Top = 133
   Width = 1232
   Caption = 'fmQueryWindow'
   ClientHeight = 742
@@ -70395,7 +70395,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbRollback: TToolButton
-      Left = 290
+      Left = 258
       Hint = 'Rollback Transaction'
       Top = 2
       AutoSize = True
@@ -70407,21 +70407,21 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object ToolButton2: TToolButton
-      Left = 326
+      Left = 294
       Height = 32
       Top = 2
       Caption = 'ToolButton2'
       Style = tbsSeparator
     end
     object ToolButton3: TToolButton
-      Left = 406
+      Left = 374
       Height = 32
       Top = 2
       Caption = 'ToolButton3'
       Style = tbsSeparator
     end
     object tbHistory: TToolButton
-      Left = 334
+      Left = 302
       Hint = 'SQL History'
       Top = 2
       AutoSize = True
@@ -70440,7 +70440,7 @@ object fmQueryWindow: TfmQueryWindow
       Style = tbsDivider
     end
     object tbMenu: TToolButton
-      Left = 494
+      Left = 462
       Hint = 'Menu'
       Top = 2
       AutoSize = True
@@ -70452,7 +70452,7 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object tbRollbackRetaining: TToolButton
-      Left = 254
+      Left = 222
       Hint = 'Rollback Retaining'
       Top = 2
       AutoSize = True
@@ -70464,14 +70464,14 @@ object fmQueryWindow: TfmQueryWindow
       ShowHint = True
     end
     object ToolButton1: TToolButton
-      Left = 486
+      Left = 454
       Height = 32
       Top = 2
       Caption = 'ToolButton1'
       Style = tbsSeparator
     end
     object cxAutoCommit: TCheckBox
-      Left = 849
+      Left = 498
       Height = 21
       Hint = 'Auto Commit ON/OFF'
       Top = 2
@@ -70485,7 +70485,7 @@ object fmQueryWindow: TfmQueryWindow
       TabOrder = 0
     end
     object tbQueryDesign: TToolButton
-      Left = 414
+      Left = 382
       Hint = 'Query Designer'
       Top = 2
       Caption = 'tbQueryDesign'
@@ -70526,7 +70526,7 @@ object fmQueryWindow: TfmQueryWindow
       TabOrder = 1
     end
     object ToolButton4: TToolButton
-      Left = 370
+      Left = 338
       Hint = 'MWA ScriptEngine'
       Top = 2
       Caption = 'ToolButton4'
@@ -70534,19 +70534,12 @@ object fmQueryWindow: TfmQueryWindow
       OnClick = ToolButton4Click
     end
     object tbIBSQL: TToolButton
-      Left = 450
+      Left = 418
       Hint = 'IBX SQLBuilder'
       Top = 2
       Caption = 'tbIBSQL'
       ImageIndex = 14
       OnClick = tbIBSQLClick
-    end
-    object ToolButton6: TToolButton
-      Left = 530
-      Top = 2
-      Caption = 'ToolButton6'
-      Enabled = False
-      OnClick = ToolButton6Click
     end
     object tbCommitRetaining: TToolButton
       Left = 150
@@ -70559,12 +70552,6 @@ object fmQueryWindow: TfmQueryWindow
       OnMouseEnter = tbCommitRetainingMouseEnter
       ParentShowHint = False
       ShowHint = True
-    end
-    object ToolButton7: TToolButton
-      Left = 222
-      Top = 2
-      Caption = 'ToolButton7'
-      OnClick = ToolButton7Click
     end
   end
   inline meQuery: TSynEdit
@@ -71091,8 +71078,8 @@ object fmQueryWindow: TfmQueryWindow
     TableNameAttri.Foreground = clNavy
     TableNameAttri.Style = [fsBold]
     SQLDialect = sqlFirebird30
-    Left = 736
-    Top = 336
+    Left = 712
+    Top = 272
   end
   object pmMemo: TPopupMenu
     Left = 544
@@ -72578,13 +72565,13 @@ object fmQueryWindow: TfmQueryWindow
     EndOfTokenChr = '()[].'
     ShortCut = 16429
     ExecCommandID = ecSynAutoCompletionExecute
-    Left = 539
-    Top = 296
+    Left = 568
+    Top = 256
   end
   object pmUnIntelliSense: TPopupMenu
     OnPopup = pmUnIntelliSensePopup
-    Left = 336
-    Top = 304
+    Left = 312
+    Top = 256
   end
   object RxDBGridPrint1: TRxDBGridPrint
     Caption = 'Print grid'

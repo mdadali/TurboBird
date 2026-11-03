@@ -1,7 +1,7 @@
 object fmMain: TfmMain
-  Left = 422
+  Left = 480
   Height = 668
-  Top = 489
+  Top = 143
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 639
@@ -5905,6 +5905,10 @@ object fmMain: TfmMain
         Caption = 'Cross-RDBMS Transfer'
         OnClick = mnCrossRDBMSTransferClick
       end
+      object mnuPascalScript: TMenuItem
+        Caption = 'PascalScript Studio'
+        OnClick = mnuPascalScriptClick
+      end
       object Separator13: TMenuItem
         Caption = '-'
       end
@@ -5919,9 +5923,9 @@ object fmMain: TfmMain
       object Separator12: TMenuItem
         Caption = '-'
       end
-      object mnuPascalScript: TMenuItem
-        Caption = 'PascalScript Studio'
-        OnClick = mnuPascalScriptClick
+      object mnAIPrompt: TMenuItem
+        Caption = 'AI Interface'
+        OnClick = mnAIPromptClick
       end
     end
   end

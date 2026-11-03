@@ -5,191 +5,180 @@ unit uCrossRDBMSReport;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  Classes, SysUtils,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSStrategies;
 
-type
-  { ------------------------------------------------------------------ }
-  { Report-Dialog mit Copy-Button                                      }
-  { ------------------------------------------------------------------ }
-  TCrossReportDialog = class
-  private
-    FForm     : TForm;
-    FMemo     : TMemo;
-    FBtnCopy  : TButton;
-    FBtnClose : TButton;
+function FormatCrossTransferReport(const AStats: TCrossTransferStats; const AFields: TCrossFieldArray): string;
 
-    procedure HandleCopyClick(Sender: TObject);
-    procedure HandleCloseClick(Sender: TObject);
-  public
-    constructor Create(const ATitle, AReportText: string);
-    destructor Destroy; override;
-    procedure ShowDialog;
-  end;
-
-{ Formatiert die Transfer-Statistik als lesbaren Report-Text }
-function FormatCrossTransferReport(const AStats: TCrossTransferStats): string;
 
 implementation
 
-function FormatCrossTransferReport(const AStats: TCrossTransferStats): string;
+const
+  SEP = '═══════════════════════════════════════════════════';
+
+function FormatNumberEN(AValue: Int64): string;
+var FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+  Result := FormatFloat('#,##0', AValue, FS);
+end;
+
+function FormatBytesSmart(ABytes: Int64): string;
+var FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
+  if ABytes >= (Int64(1024) * 1024 * 1024) then
+    Result := FormatFloat('#,##0.00', ABytes / (1024.0 * 1024 * 1024), FS) + ' GB'
+  else if ABytes >= (Int64(1024) * 1024) then
+    Result := FormatFloat('#,##0.00', ABytes / (1024.0 * 1024), FS) + ' MB'
+  else if ABytes >= 1024 then
+    Result := FormatFloat('#,##0.00', ABytes / 1024.0, FS) + ' KB'
+  else
+    Result := IntToStr(ABytes) + ' Bytes';
+end;
+
+//Helpers for FormatCrossTransferReport
+function PadRight(const S: string; AWidth: Integer): string;
+begin
+  Result := S;
+  while Length(Result) < AWidth do
+    Result := Result + ' ';
+end;
+
+function IsComputedStaysComputedReport(const AField: TCrossField;
+  const AStats: TCrossTransferStats): Boolean;
+begin
+  Result := AField.IsComputed and
+            (AStats.SourceDBMS = cdFirebird) and
+            (AStats.DestDBMS = cdFirebird);
+end;
+
+function FormatCrossTransferReport(const AStats: TCrossTransferStats; const AFields: TCrossFieldArray): string;
 var
   SL: TStringList;
+  FS: TFormatSettings;
+  i: integer;
 begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := ',';
+
   SL := TStringList.Create;
   try
-    SL.Add('===============================================================');
-    SL.Add('  CROSSRDBMS TRANSFER – REPORT');
-    SL.Add('===============================================================');
+    SL.Add(SEP);
+    SL.Add('              CROSSRDBMS TRANSFER REPORT');
+    SL.Add(SEP);
     SL.Add('');
 
-    SL.Add('--- SOURCE ---------------------------------------------------');
-    SL.Add('  DBMS       : ' + DBMSName(AStats.SourceDBMS));
-    SL.Add('  Connector  : ' + AStats.SourceConnectorType);
-    SL.Add('  Database   : ' + AStats.SourceDatabase);
-    SL.Add('  Table      : ' + AStats.SourceTable);
+    SL.Add('Source:');
+    SL.Add('  DBMS:      ' + DBMSName(AStats.SourceDBMS));
+    SL.Add('  Connector: ' + AStats.SourceConnectorType);
+    SL.Add('  Database:  ' + AStats.SourceDatabase);
+    SL.Add('  Table:     ' + AStats.SourceTable);
     SL.Add('');
 
-    SL.Add('--- DESTINATION ----------------------------------------------');
-    SL.Add('  DBMS       : ' + DBMSName(AStats.DestDBMS));
-    SL.Add('  Connector  : ' + AStats.DestConnectorType);
-    SL.Add('  Database   : ' + AStats.DestDatabase);
-    SL.Add('  Table      : ' + AStats.DestTable);
+    SL.Add('Destination:');
+    SL.Add('  DBMS:      ' + DBMSName(AStats.DestDBMS));
+    SL.Add('  Connector: ' + AStats.DestConnectorType);
+    SL.Add('  Database:  ' + AStats.DestDatabase);
+    SL.Add('  Table:     ' + AStats.DestTable);
     SL.Add('');
 
-    SL.Add('--- STATUS ---------------------------------------------------');
-    if AStats.Cancelled then
-      SL.Add('  Result     : CANCELLED')
-    else
-      SL.Add('  Result     : COMPLETED');
-    SL.Add('  Strategy   : ' + StrategyName(AStats.StrategyUsed));
-    SL.Add('');
-
-    SL.Add('--- TRANSFER STATISTICS --------------------------------------');
-    SL.Add(Format('  Rows processed  : %s', [FormatFloat('#,##0', AStats.RowsProcessed)]));
-    SL.Add(Format('  Rows total      : %s', [FormatFloat('#,##0', AStats.RowsTotal)]));
-    SL.Add(Format('  Elapsed         : %.2f sec', [AStats.ElapsedSeconds]));
-    SL.Add(Format('  Rows/sec        : %s', [FormatFloat('#,##0', AStats.RowsPerSec)]));
-    SL.Add(Format('  Bytes processed : %s', [FormatFloat('#,##0', AStats.BytesProcessed)]));
-    SL.Add(Format('  MB/sec          : %.2f', [AStats.MBPerSec]));
-    SL.Add(Format('  Commits         : %d', [AStats.CommitsDone]));
-    SL.Add('');
-
-    SL.Add('--- TABLE ACTION ---------------------------------------------');
+    SL.Add('Table Action:');
     if AStats.TableRecreated then
-      SL.Add('  Recreated       : destination table was dropped and re-created')
+      SL.Add('  Recreated (drop + create)')
     else if AStats.TableCreated then
-      SL.Add('  Created         : new destination table was created')
+      SL.Add('  Created (new table)')
     else if AStats.TableExisted then
-      SL.Add('  Appended        : data was added to an existing table')
+      SL.Add('  Appended (existing table)')
     else
-      SL.Add('  No action       : destination table was not touched');
+      SL.Add('  No action');
+    SL.Add('');
+
+    SL.Add('Result:');
+    if AStats.Cancelled then
+      SL.Add('  Status:        CANCELLED')
+    else
+      SL.Add('  Status:        COMPLETED');
+    SL.Add('  Strategy:      ' + StrategyName(AStats.StrategyUsed));
+    SL.Add('  Rows:          ' + FormatNumberEN(AStats.RowsProcessed));
+    SL.Add('  Rows total:    ' + FormatNumberEN(AStats.RowsTotal));
+    SL.Add('  Total Time:    ' + FormatDateTime('hh:nn:ss.zzz',
+      AStats.ElapsedSeconds / SecsPerDay));
+    if AStats.RowsPerSec > 0 then
+      SL.Add('  Speed:         ' + FormatFloat('#,##0', AStats.RowsPerSec, FS) + ' rows/sec');
+    if AStats.BytesProcessed > 0 then
+      SL.Add('  Bytes:         ' + FormatBytesSmart(AStats.BytesProcessed));
+    if AStats.MBPerSec > 0 then
+      SL.Add('  Data Rate:     ' + FormatFloat('#,##0.00', AStats.MBPerSec, FS) + ' MB/sec');
+    SL.Add('  Commits:       ' + IntToStr(AStats.CommitsDone));
     SL.Add('');
 
     if Assigned(AStats.Warnings) and (AStats.Warnings.Count > 0) then
     begin
-      SL.Add('--- WARNINGS -------------------------------------------------');
+      SL.Add('Warnings:');
       SL.Add(AStats.Warnings.Text);
       SL.Add('');
     end;
 
     if Trim(AStats.CreateSQL) <> '' then
     begin
-      SL.Add('--- CREATE TABLE SQL -----------------------------------------');
+      SL.Add('Table Structure:');
       SL.Add(AStats.CreateSQL);
       SL.Add('');
     end;
 
     if Trim(AStats.InsertSQL) <> '' then
     begin
-      SL.Add('--- INSERT SQL / LAST STATEMENT ------------------------------');
+      SL.Add('Insert SQL (template):');
       SL.Add(AStats.InsertSQL);
       SL.Add('');
     end;
 
-    SL.Add('===============================================================');
+    if Trim(AStats.SystemInfo) <> '' then
+    begin
+      { SystemInfo beginnt mit "Environment:" }
+      SL.Add(AStats.SystemInfo);
+      SL.Add('');
+    end;
+
+    SL.Add(SEP);
+
+    { ---- Source-Feldliste ---- }
+    SL.Add('Source Structure:');
+    SL.Add('  Table: ' + AStats.SourceTable);
+    for i := 0 to High(AFields) do
+    begin
+      if not AFields[i].Selected then Continue;
+      if AFields[i].IsProblemField then Continue;
+      if IsComputedStaysComputedReport(AFields[i], AStats) then Continue;
+      SL.Add('  ' + PadRight(AFields[i].SourceName, 24) + ' ' + AFields[i].SourceType);
+    end;
+    SL.Add('');
+
+    { ---- Destination-Feldliste ---- }
+    SL.Add('Destination Structure:');
+    SL.Add('  Table: ' + AStats.DestTable);
+    for i := 0 to High(AFields) do
+    begin
+      if not AFields[i].Selected then Continue;
+      if AFields[i].IsProblemField then Continue;
+      if IsComputedStaysComputedReport(AFields[i], AStats) then Continue;
+      SL.Add('  ' + PadRight(AFields[i].DestName, 24) + ' ' + AFields[i].DestType);
+    end;
+    SL.Add('');
 
     Result := SL.Text;
   finally
     SL.Free;
   end;
-end;
-
-{ TCrossReportDialog }
-
-constructor TCrossReportDialog.Create(const ATitle, AReportText: string);
-begin
-  inherited Create;
-
-  FForm := TForm.Create(nil);
-  FForm.Caption := ATitle;
-  FForm.Width := 920;
-  FForm.Height := 640;
-  FForm.Position := poScreenCenter;
-  FForm.BorderStyle := bsSizeable;
-
-  FMemo := TMemo.Create(FForm);
-  FMemo.Parent := FForm;
-  FMemo.Left := 8;
-  FMemo.Top := 8;
-  FMemo.Width := 890;
-  FMemo.Height := 550;
-  FMemo.Anchors := [akLeft, akTop, akRight, akBottom];
-  FMemo.ReadOnly := True;
-  FMemo.ScrollBars := ssBoth;
-  FMemo.WordWrap := False;
-  FMemo.Font.Name := 'DejaVu Sans Mono';
-  FMemo.Font.Size := 10;
-  FMemo.Lines.Text := AReportText;
-
-  FBtnCopy := TButton.Create(FForm);
-  FBtnCopy.Parent := FForm;
-  FBtnCopy.Left := 680;
-  FBtnCopy.Top := 570;
-  FBtnCopy.Width := 100;
-  FBtnCopy.Caption := 'Copy';
-  FBtnCopy.Anchors := [akRight, akBottom];
-  FBtnCopy.OnClick := @HandleCopyClick;
-
-  FBtnClose := TButton.Create(FForm);
-  FBtnClose.Parent := FForm;
-  FBtnClose.Left := 790;
-  FBtnClose.Top := 570;
-  FBtnClose.Width := 100;
-  FBtnClose.Caption := 'Close';
-  FBtnClose.Anchors := [akRight, akBottom];
-  FBtnClose.ModalResult := mrOK;
-  FBtnClose.OnClick := @HandleCloseClick;
-end;
-
-destructor TCrossReportDialog.Destroy;
-begin
-  FForm.Free;
-  inherited Destroy;
-end;
-
-procedure TCrossReportDialog.HandleCopyClick(Sender: TObject);
-begin
-  FMemo.SelectAll;
-  FMemo.CopyToClipboard;
-  FMemo.SelStart := 0;
-  FMemo.SelLength := 0;
-  FBtnCopy.Caption := 'Copied!';
-  Application.ProcessMessages;
-  Sleep(30);
-  FBtnCopy.Caption := 'Copy';
-end;
-
-procedure TCrossReportDialog.HandleCloseClick(Sender: TObject);
-begin
-  FForm.ModalResult := mrOK;
-end;
-
-procedure TCrossReportDialog.ShowDialog;
-begin
-  FForm.ShowModal;
 end;
 
 end.

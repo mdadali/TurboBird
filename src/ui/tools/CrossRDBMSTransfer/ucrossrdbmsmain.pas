@@ -22,8 +22,11 @@ uses
   uCrossRDBMSEngine,
   uCrossRDBMSConnection,
   uCrossRDBMSProgress,
+  uCrossRDBMSFieldAnalysis,
+
   uCrossRDBMSReport,
-  uCrossRDBMSFieldAnalysis;
+  uReport,          {TfrmReport }
+  uSystemInfo;      {FormatSystemInfo, GetSystemInfo }
 
 type
   { TfrmCrossRDBMSMain }
@@ -1077,9 +1080,10 @@ var
   DestExists: Boolean;
   LocalAction: TIfExistsAction;
   Dlg: TCrossProgressDialog;
-  ReportDlg: TCrossReportDialog;
+  ReportForm: TfrmReport;
   SrcOK, DstOK: Boolean;
 begin
+  AutoMapAllTypes;
   UpdatePreviewSQL;
 
   if Trim(comboboxSourceTables.Text) = '' then
@@ -1149,7 +1153,6 @@ begin
     end;
   end;
 
-
   { IfExists = Ask auflösen }
   if Options.IfExists = ieaAsk then
   begin
@@ -1179,13 +1182,33 @@ begin
       Dlg.Free;
     end;
 
-    { Report anzeigen }
-    ReportDlg := TCrossReportDialog.Create('CrossRDBMS – Transfer Report',
-      FormatCrossTransferReport(Engine.Stats));
+    { ---- Auto-deselectierte Felder im Report vermerken ---- }
+    if FProblemFieldsDeselected.Count > 0 then
+      Engine.Stats.Warnings.Insert(0,
+        'Fields auto-deselected: ' + FProblemFieldsDeselected.CommaText);
+
+    { ---- System-Info ermitteln ---- }
     try
-      ReportDlg.ShowDialog;
+      if Assigned(FDestConnForm) then
+      begin
+        if FDestConnForm.IsIBX and Assigned(FDestConnForm.IBXConn) then
+          Engine.SetSystemInfo(FormatSystemInfo(
+            GetSystemInfo(FDestConnForm.IBXConn.DatabaseName)))
+        else if Assigned(FDestConnForm.Conn) then
+          Engine.SetSystemInfo(FormatSystemInfo(
+            GetSystemInfo(FDestConnForm.Conn.DatabaseName)));
+      end;
+    except
+      { System-Info ist optional }
+    end;
+
+    { ---- Report anzeigen (TB-Report-Formular) ---- }
+    ReportForm := TfrmReport.Create(nil);
+    try
+      ReportForm.SetReportText(FormatCrossTransferReport(Engine.Stats, FFields));
+      ReportForm.ShowModal;
     finally
-      ReportDlg.Free;
+      ReportForm.Free;
     end;
 
   finally

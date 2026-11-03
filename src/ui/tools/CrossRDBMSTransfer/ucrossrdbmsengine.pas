@@ -52,7 +52,9 @@ type
     function BuildCreateSQL: string;
 
     function DestTableExists: Boolean;
-    function  IsSameTableInSameDatabase: Boolean;
+    function IsSameTableInSameDatabase: Boolean;
+
+    procedure SetSystemInfo(const AValue: string);
 
     procedure Execute;
     procedure Cancel;
@@ -359,47 +361,70 @@ end;
 function TCrossTransferEngine.DestTableExists: Boolean;
 var
   SQL: string;
+  CleanName: string;
+
+  function LocalStripIdentifierQuotes(const AName: string): string;
+  var
+    S: string;
+  begin
+    S := Trim(AName);
+    if Length(S) < 2 then
+      Exit(S);
+
+    if ((S[1] = '"') and (S[Length(S)] = '"')) or
+       ((S[1] = '`') and (S[Length(S)] = '`')) or
+       ((S[1] = '[') and (S[Length(S)] = ']')) then
+      Result := Copy(S, 2, Length(S) - 2)
+    else
+      Result := S;
+  end;
+
 begin
   Result := False;
 
-  { ---- SQL je nach Backend ---- }
+  CleanName := LocalStripIdentifierQuotes(FOptions.DestTable);
+  if CleanName = '' then
+    Exit;
+
   case FStats.DestDBMS of
     cdFirebird:
       SQL := 'SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ' +
-             QuotedStr(UpperCase(FOptions.DestTable)) +
-             ' AND RDB$VIEW_BLR IS NULL';
+             QuotedStr(CleanName) + ' AND RDB$VIEW_BLR IS NULL';
     cdPostgreSQL:
-      SQL := 'SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = LOWER(' +
-             QuotedStr(FOptions.DestTable) + ')' +
-             ' AND table_schema = current_schema()';
+      SQL := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
+             QuotedStr(CleanName) + ' AND table_schema = current_schema()';
     cdMySQL:
       SQL := 'SELECT 1 FROM information_schema.tables WHERE table_name = ' +
-             QuotedStr(FOptions.DestTable) + ' AND table_schema = DATABASE()';
+             QuotedStr(CleanName) + ' AND table_schema = DATABASE()';
     cdSQLite:
-      SQL := 'SELECT 1 FROM sqlite_master WHERE type = ''table'' AND name = ' +
-             QuotedStr(FOptions.DestTable);
+      SQL := 'SELECT 1 FROM sqlite_master WHERE type = ''table'' ' +
+             'AND name = ' + QuotedStr(CleanName) + ' COLLATE NOCASE';
     cdMSSQL:
       SQL := 'SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ' +
-             QuotedStr(FOptions.DestTable);
+             QuotedStr(CleanName);
     cdOracle:
-      SQL := 'SELECT 1 FROM USER_TABLES WHERE TABLE_NAME = ' +
-             QuotedStr(UpperCase(FOptions.DestTable));
+      SQL := 'SELECT 1 FROM USER_TABLES WHERE TABLE_NAME = ' + QuotedStr(CleanName);
     cdSybase:
       SQL := 'SELECT 1 FROM sysobjects WHERE name = ' +
-             QuotedStr(FOptions.DestTable) + ' AND type = ''U''';
+             QuotedStr(CleanName) + ' AND type = ''U''';
   else
-    { ODBC / Unknown — generischer Fallback }
-    SQL := 'SELECT 1 FROM ' + QuoteIdentifier(FOptions.DestTable, FStats.DestDBMS) +
+    SQL := 'SELECT 1 FROM ' + QuoteIdentifier(CleanName, FStats.DestDBMS) +
            ' WHERE 1=0';
   end;
 
-  { ---- Ausführen — IBX oder SQLDB ---- }
   if FOptions.DestIsIBX then
   begin
     if not Assigned(FOptions.DestIBXQuery) then Exit;
 
-    if Assigned(FOptions.DestIBXTrans) and not FOptions.DestIBXTrans.Active then
+    if Assigned(FOptions.DestIBXTrans) then
+    begin
+      try
+        if FOptions.DestIBXTrans.Active then
+          FOptions.DestIBXTrans.Active := False;
+      except
+      end;
       FOptions.DestIBXTrans.StartTransaction;
+    end;
 
     try
       FOptions.DestIBXQuery.Close;
@@ -408,16 +433,28 @@ begin
       Result := not FOptions.DestIBXQuery.EOF;
       FOptions.DestIBXQuery.Close;
     except
-      Result := False;
-      try FOptions.DestIBXQuery.Close; except end;
+      on E: Exception do
+      begin
+        Log('DestTableExists (IBX) failed: ' + E.Message);
+        FStats.Warnings.Add('DestTableExists failed: ' + E.Message);
+        try FOptions.DestIBXQuery.Close; except end;
+      end;
     end;
   end
   else
   begin
     if not Assigned(FOptions.DestQuery) then Exit;
 
-    if Assigned(FOptions.DestTrans) and not FOptions.DestTrans.Active then
-      FOptions.DestTrans.StartTransaction;
+    if Assigned(FOptions.DestTrans) then
+    begin
+      try
+        if FOptions.DestTrans.Active then
+          FOptions.DestTrans.Commit;
+      except
+      end;
+      if not FOptions.DestTrans.Active then
+        FOptions.DestTrans.StartTransaction;
+    end;
 
     try
       FOptions.DestQuery.Close;
@@ -426,8 +463,12 @@ begin
       Result := not FOptions.DestQuery.EOF;
       FOptions.DestQuery.Close;
     except
-      Result := False;
-      try FOptions.DestQuery.Close; except end;
+      on E: Exception do
+      begin
+        Log('DestTableExists (SQLDB) failed: ' + E.Message);
+        FStats.Warnings.Add('DestTableExists failed: ' + E.Message);
+        try FOptions.DestQuery.Close; except end;
+      end;
     end;
   end;
 end;
@@ -621,6 +662,11 @@ function TCrossTransferEngine.IsSameTableInSameDatabase: Boolean;
 begin
   Result := IsSamePhysicalDatabase and
             SameText(Trim(FOptions.SourceTable), Trim(FOptions.DestTable));
+end;
+
+procedure TCrossTransferEngine.SetSystemInfo(const AValue: string);
+begin
+  FStats.SystemInfo := AValue;
 end;
 
 // ============================================================================

@@ -103,6 +103,7 @@ uses
   IBTransactionEdit,  //orig
   fdataeditor,
   db_reader,
+  fmAIPrompt,
 
   u_psstudio,
   u_consoleide,
@@ -155,6 +156,7 @@ type
     lmCloneServer: TMenuItem;
     lmCloneTable: TMenuItem;
     lmCSVBulkExporter: TMenuItem;
+    mnAIPrompt: TMenuItem;
     Separator13: TMenuItem;
     mnCrossRDBMSTransfer: TMenuItem;
     Separator12: TMenuItem;
@@ -447,6 +449,7 @@ type
     procedure lmViewUDFClick(Sender: TObject);
     procedure lmDropTableClick(Sender: TObject);
     procedure lmRecalculateStatisticsClick(Sender: TObject);
+    procedure mnAIPromptClick(Sender: TObject);
     procedure mnBulkCloneClick(Sender: TObject);
     procedure mnCheckForUpdateClick(Sender: TObject);
     procedure mnCrossRDBMSTransferClick(Sender: TObject);
@@ -8278,6 +8281,11 @@ begin
     // äußerer try..finally — Cursor wird IMMER zurückgesetzt
     Screen.Cursor := crDefault;
   end;
+end;
+
+procedure TfmMain.mnAIPromptClick(Sender: TObject);
+begin
+  ShowAIPromptForm;
 end;
 
 procedure TfmMain.mnBulkCloneClick(Sender: TObject);

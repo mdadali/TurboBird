@@ -632,7 +632,7 @@ function EstimateCSVMaxLineWidth(
 
 procedure SetDBInstanceIndex(AInstance: TIBDatabase; ADBIndex: Integer);
 function  GetDBInstanceIndex(AInstance: TIBDatabase): Integer;
-function FindDBIndexByDatabaseInstance(ADatabase: TIBDatabase): Integer;
+function  FindDBIndexByDatabaseInstance(ADatabase: TIBDatabase): Integer;
 
 function RunStartupCheck: string;
 

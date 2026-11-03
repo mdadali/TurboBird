@@ -51,6 +51,8 @@ Build-Datum & -Zeit:
     Nach Tabellen/Aliasnamen. werden die felder angezeigt.
     Unterstützt Casesensitiver bezeichnern (Haupsächlich dafür implementiert)
 
++  Einfache Schnittstelle zu Local AI (Ollama)
+
 
 
 ---------------------------------------------------------------------------------------------
