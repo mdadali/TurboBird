@@ -17,6 +17,21 @@
     </RunParams>
     <RequiredPackages>
       <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+      <Item>
+        <PackageName Value="ibnongui"/>
+      </Item>
+      <Item>
+        <PackageName Value="rxnew"/>
+      </Item>
+      <Item>
+        <PackageName Value="SynEdit"/>
+      </Item>
+      <Item>
+        <PackageName Value="FrameViewer09"/>
+      </Item>
+      <Item>
         <PackageName Value="LCL"/>
       </Item>
     </RequiredPackages>
@@ -25,7 +40,7 @@
         <Filename Value="ai_prompt.lpr"/>
         <IsPartOfProject Value="True"/>
         <CursorPos X="15" Y="10"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -34,10 +49,11 @@
         <ComponentName Value="fmAIPromptForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
-        <TopLine Value="110"/>
-        <CursorPos X="31" Y="135"/>
-        <UsageCount Value="32"/>
+        <TopLine Value="589"/>
+        <CursorPos Y="622"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit>
@@ -47,7 +63,7 @@
         <EditorIndex Value="2"/>
         <TopLine Value="283"/>
         <CursorPos X="100" Y="361"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -69,11 +85,10 @@
         <Filename Value="uaisettings.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="uAiSettings"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <TopLine Value="118"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="29"/>
         <Loaded Value="True"/>
       </Unit>
       <Unit>
@@ -85,98 +100,6 @@
       </Unit>
     </Units>
     <JumpHistory HistoryIndex="29">
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="368" Column="21" TopLine="344"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="8" Column="12"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="80" TopLine="66"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="171" Column="5" TopLine="158"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="79" TopLine="70"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="648" TopLine="615"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="162" TopLine="156"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="644" Column="28" TopLine="627"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="23" Column="23" TopLine="16"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="157" Column="51" TopLine="147"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="167" Column="3" TopLine="163"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="643" TopLine="635"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="690" TopLine="660"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="224" Column="48" TopLine="209"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="35" Column="26" TopLine="19"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="180" Column="28" TopLine="152"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="211" Column="26" TopLine="192"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="356" Column="57" TopLine="345"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="31" Column="9" TopLine="14"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="136" Column="12" TopLine="109"/>
-      </Position>
-      <Position>
-        <Filename Value="fmAIPrompt.pas"/>
-        <Caret Line="135" Column="31" TopLine="110"/>
-      </Position>
-      <Position>
-        <Filename Value="uaisettings.pas"/>
-        <Caret Line="34" Column="21" TopLine="30"/>
-      </Position>
-      <Position>
-        <Filename Value="uaisettings.pas"/>
-        <Caret Line="192" Column="17" TopLine="181"/>
-      </Position>
       <Position>
         <Filename Value="uaisettings.pas"/>
         <Caret Line="33" Column="22" TopLine="16"/>
@@ -204,6 +127,98 @@
       <Position>
         <Filename Value="uaisettings.pas"/>
         <Caret Line="132" TopLine="118"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="135" Column="31" TopLine="110"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="134" Column="31" TopLine="109"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="135" Column="31" TopLine="110"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="136" Column="31" TopLine="111"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="137" Column="31" TopLine="112"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="138" Column="31" TopLine="113"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="139" Column="31" TopLine="114"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="140" Column="31" TopLine="115"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="141" Column="31" TopLine="116"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="142" Column="31" TopLine="117"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="611" Column="3" TopLine="595"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="612" Column="3" TopLine="596"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="613" Column="3" TopLine="597"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="612" Column="3" TopLine="596"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="613" Column="3" TopLine="597"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="614" Column="3" TopLine="598"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="615" Column="3" TopLine="599"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="616" Column="3" TopLine="600"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="617" Column="3" TopLine="601"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="618" Column="3" TopLine="602"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="563" Column="4" TopLine="530"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="618" Column="3" TopLine="601"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="623" Column="16" TopLine="611"/>
       </Position>
     </JumpHistory>
   </ProjectOptions>

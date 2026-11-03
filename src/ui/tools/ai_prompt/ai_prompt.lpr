@@ -4,10 +4,12 @@ program ai_prompt;
 
 uses
   cthreads,
-  Interfaces, Forms,
+  Interfaces, Forms, FrameViewer09, rxnew,
 
   fmAIPrompt,
-  uOllamaAgent;
+  uOllamaAgent,
+  uSystemTools,
+  uWebTools;
 
 var
   Form1: TfmAIPromptForm;

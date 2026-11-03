@@ -5,8 +5,9 @@ unit fmAIPrompt;
 interface
 
 uses
-  LCLIntf, LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Spin,
-  ExtCtrls, ComCtrls, Buttons, fphttpclient, fpjson, jsonparser,
+  LCLIntf, LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
+  StdCtrls, Spin, ExtCtrls, ComCtrls, Buttons, DBCtrls, DBGrids, SynEdit,
+  HtmlView, RxDBGrid, IBQuery, IBDatabase, fphttpclient, fpjson, jsonparser, DB,
   uAiSettings, uOllamaAgent;
 
 type
@@ -14,7 +15,21 @@ type
   { TfmAIPromptForm }
 
   TfmAIPromptForm = class(TForm)
+    DataSource1: TDataSource;
+    DBNavigator1: TDBNavigator;
     FPriceBtn: TButton;
+    FResponseMemo: TMemo;
+    HtmlViewer1: THtmlViewer;
+    IBDatabase1: TIBDatabase;
+    IBQuery1: TIBQuery;
+    IBTransaction1: TIBTransaction;
+    pgResults: TPageControl;
+    RxDBGrid1: TRxDBGrid;
+    seCode: TSynEdit;
+    tsData: TTabSheet;
+    tsWeb: TTabSheet;
+    tsCode: TTabSheet;
+    tsChat: TTabSheet;
     procedure FCloseBtnClick(Sender: TObject);
     procedure FModelComboChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -57,7 +72,6 @@ type
     FCloseBtn: TBitBtn;
     FPromptMemo: TMemo;
     FSplitter: TSplitter;
-    FResponseMemo: TMemo;
 
     { Settings-Tab }
     FProviderLabel: TLabel;
@@ -108,7 +122,7 @@ begin
   FormStyle := fsStayOnTop;
 
   FCheckTimer := TTimer.Create(Self);
-  FCheckTimer.Interval := 200;
+  FCheckTimer.Interval := 100;
   FCheckTimer.Enabled := False;
   FCheckTimer.OnTimer := @CheckAgentDone;
 
@@ -529,6 +543,11 @@ end;
 procedure TfmAIPromptForm.CheckAgentDone(Sender: TObject);
 var
   Agent: TOllamaAgentThread;
+  ResponseText: string;
+  IsCode, IsWeb: Boolean;
+  HtmlText: string;
+  i, j, k: Integer;
+  URL: string;
 begin
   if not Assigned(FAgentThread) then
   begin
@@ -550,10 +569,49 @@ begin
     end
     else
     begin
+      ResponseText := Agent.ResultText;
       FResponseMemo.Font.Color := clWindowText;
-      FResponseMemo.Lines.Text := Agent.ResultText;
-      FStatusBar.SimpleText := Format('Fertig (%s/%s)',
-        [FSettings.Provider, FSettings.Model]);
+      FResponseMemo.Lines.Text := ResponseText;
+
+      IsCode := (Pos('```', ResponseText) > 0) or
+                (Pos('procedure ', ResponseText) > 0) or
+                (Pos('function ', ResponseText) > 0) or
+                (Pos('unit ', ResponseText) > 0) or
+                (Pos('program ', ResponseText) > 0);
+
+      IsWeb := (Pos('http://', ResponseText) > 0) or
+               (Pos('https://', ResponseText) > 0) or
+               (Pos('Search results for', ResponseText) > 0) or
+               (Pos('URL:', ResponseText) > 0);
+
+      if IsCode then
+      begin
+        seCode.Text := ResponseText;
+        pgResults.ActivePage := tsCode;
+      end
+      else if IsWeb then
+      begin
+        { Einfache HTML-Ausgabe ohne URL-Manipulation (verhindert Endlosschleife) }
+        HtmlText := StringReplace(StringReplace(ResponseText, '<', '&lt;', [rfReplaceAll]), '>', '&gt;', [rfReplaceAll]);
+        HtmlText := StringReplace(HtmlText, LineEnding, '<br>', [rfReplaceAll]);
+        HtmlText := '<html><body style="font-family: sans-serif; padding: 15px; line-height: 1.6;">' +
+                    '<div style="white-space: pre-wrap; word-wrap: break-word;">' +
+                    HtmlText +
+                    '</div></body></html>';
+        HtmlViewer1.LoadFromString(HtmlText);
+        pgResults.ActivePage := tsWeb;
+      end
+      else
+      begin
+        pgResults.ActivePage := tsChat;
+      end;
+
+      if Agent.ToolCallCount > 0 then
+        FStatusBar.SimpleText := Format('Fertig (%s/%s) - %d Tool-Call(s)',
+          [FSettings.Provider, FSettings.Model, Agent.ToolCallCount])
+      else
+        FStatusBar.SimpleText := Format('Fertig (%s/%s)',
+          [FSettings.Provider, FSettings.Model]);
     end;
   finally
     Agent.Free;

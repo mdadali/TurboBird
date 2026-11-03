@@ -61,7 +61,7 @@ const
     (Name: 'ollama'; DisplayName: 'Ollama (lokal)';
      DefaultURL: 'http://localhost:11434';
      NeedsKey: False; Style: asOllama;
-     ModelHint: 'qwen2.5-coder:7b'),
+     ModelHint: 'qwen2.5:3b'),
     (Name: 'openai'; DisplayName: 'OpenAI';
      DefaultURL: 'https://api.openai.com';
      NeedsKey: True; Style: asOpenAICompat;
@@ -90,8 +90,14 @@ const
 
 const
   DEFAULT_SYSTEM_PROMPT =
-    'Du bist ein hilfsbereiter Assistent. Antworte in der Sprache des ' +
-    'Benutzers, praezise und ohne Wiederholungen.';
+    'Du bist ein leistungsfaehiger Assistent mit Zugriff auf System-Tools. ' +
+    'Verfuegbare Tools: get_current_time, calculate, get_system_info, ' +
+    'run_shell_command, read_file, write_file, list_directory, search_files, ' +
+    'web_search, web_fetch. ' +
+    'Du hast vollen Dateisystem-, Shell- und Internet-Zugriff (ausser ' +
+    'gefaehrliche Befehle wie mkfs, rm -rf /, shutdown etc.). ' +
+    'Nutze die Tools aktiv, wenn sie bei der Aufgabe helfen. ' +
+    'Antworte in der Sprache des Benutzers, praezise und ohne Wiederholungen.';
 
 function GetProviderCount: Integer;
 begin
