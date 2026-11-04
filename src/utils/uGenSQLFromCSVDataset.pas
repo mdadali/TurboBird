@@ -5,9 +5,15 @@ unit uGenSQLFromCSVDataset;
 interface
 
 uses
-  Classes, SysUtils, DB, csvdataset,
-  fbcommon
-  ;
+  Classes, SysUtils, DB, csvdataset, fbcommon;
+
+// ============================================================
+//  Robuste DateTime-Erkennung (öffentlich, unit-weit nutzbar)
+//
+//  Wird von TGenSQLFromCSVDataset für die Typ-Erkennung UND
+//  von TfrmCreateTableFromDataSet beim INSERT genutzt.
+// ============================================================
+function TryParseDateTimeEx(const S: string; out DT: TDateTime): Boolean;
 
 type
   { Feld-Info für CSV-Dataset-Felder (NICHT Firebird-Metadaten!).
@@ -50,14 +56,92 @@ implementation
 uses
   StrUtils, turbocommon;
 
+// ================================================================
+//  TryParseDateTimeEx
+//
+//  Robust gegen:
+//    - User-Locale (deutsch: "15.01.2024 10:30:00")
+//    - ISO-Format   ("2024-01-15 10:30:00")
+//    - ISO mit ms   ("2024-01-15 10:30:00.000")
+//    - ISO mit 4+ Stellen ms ("2024-01-15 10:30:00.0000")
+//    - ISO mit 1,2 Stellen ms  (wird auf 3 Stellen gepadded)
+//
+//  Reihenfolge:
+//    1) User-Locale versuchen
+//    2) ISO-Format (Punkt als Dezimaltrenner) versuchen
+//    3) Wenn Bruchteil ≠ 3 Stellen hat: Bruchteil manuell abschneiden,
+//       ohne Bruchteil parsen, ms addieren
+// ================================================================
+function TryParseDateTimeEx(const S: string; out DT: TDateTime): Boolean;
+var
+  FS: TFormatSettings;
+  TestStr, MsStr: string;
+  DotPos, ColonPos, MsLen, MsVal: Integer;
+begin
+  Result := False;
+  DT := 0;
+  if Trim(S) = '' then Exit;
+
+  // ---- 1) Standard (User-Locale) ----
+  if TryStrToDateTime(S, DT) then
+    Exit(True);
+
+  // ---- 2) ISO-Format mit Punkt als ms-Trenner ----
+  FS := DefaultFormatSettings;
+  FS.DateSeparator      := '-';
+  FS.ShortDateFormat    := 'yyyy-mm-dd';
+  FS.LongDateFormat     := 'yyyy-mm-dd';
+  FS.TimeSeparator      := ':';
+  FS.LongTimeFormat     := 'hh:nn:ss';
+  FS.DecimalSeparator   := '.';
+  FS.ThousandSeparator  := #0;
+
+  if TryStrToDateTime(S, DT, FS) then
+    Exit(True);
+
+  // ---- 3) Bruchteil mit ≠ 3 Stellen (z.B. '.0000') ----
+  //      Nur wenn der Punkt NACH dem ersten Doppelpunkt steht
+  //      (= ms-Trenner, kein Datumstrenner).
+  ColonPos := Pos(':', S);
+  DotPos   := Pos('.', S);
+
+  if (DotPos > 0) and (ColonPos > 0) and (DotPos > ColonPos) then
+  begin
+    TestStr := Copy(S, 1, DotPos - 1);          // ohne Bruchteil
+    if TryStrToDateTime(TestStr, DT, FS) then
+    begin
+      MsStr := Copy(S, DotPos + 1, MaxInt);     // Bruchteil
+      MsLen := Length(MsStr);
+
+      if MsLen > 0 then
+      begin
+        // Auf 3 Stellen normalisieren (pad/truncate)
+        if MsLen >= 3 then
+          MsStr := Copy(MsStr, 1, 3)
+        else
+          MsStr := MsStr + StringOfChar('0', 3 - MsLen);
+
+        if TryStrToInt(MsStr, MsVal) then
+          DT := DT + MsVal / MSecsPerDay;       // ms addieren
+      end;
+
+      Exit(True);
+    end;
+  end;
+end;
+
+// ================================================================
+//  TGenSQLFromCSVDataset
+// ================================================================
+
 constructor TGenSQLFromCSVDataset.Create(
   ADataSet: TDataSet;
   const ATableName: string;
   ADefaultFieldLength: Integer);
 begin
   inherited Create;
-  FDataSet := ADataSet;
-  FTableName := ATableName;
+  FDataSet            := ADataSet;
+  FTableName          := ATableName;
   FDefaultFieldLength := ADefaultFieldLength;
   GenerateSQL;
 end;
@@ -83,6 +167,7 @@ end;
 
 // ---------------------------------------------------------------
 //  Analysiert MEHRERE Zeilen für bessere Typ-/Längenerkennung
+//
 //  WICHTIG: Keine Bereichsprüfung für SMALLINT/INTEGER/BIGINT.
 //           Alle Ganzzahlen → INTEGER
 // ---------------------------------------------------------------
@@ -90,32 +175,51 @@ procedure TGenSQLFromCSVDataset.DetectFieldTypeAndLength(
   const FieldName: string;
   out FieldType: TFieldType;
   out MaxLen: Integer);
+const
+  FB_INT_MIN = -2147483648;
+  FB_INT_MAX =  2147483647;
+  FB_BIG_MIN = Int64(-9223372036854775807) - 1;
+  FB_BIG_MAX = Int64( 9223372036854775807);
 var
   RowIdx: Integer;
   Value: string;
-  CandidateBool, CandidateInt, CandidateFloat: Boolean;
+  CandidateBool, CandidateInt: Boolean;
+  CandidateIntFits32: Boolean;         // NEU: passt es in Firebird INTEGER?
+  CandidateIntFits64: Boolean;         // NEU: passt es in Firebird BIGINT?
+  CandidateFloat: Boolean;
   CandidateDate, CandidateDateTime, CandidateGuid: Boolean;
   IntVal64: Int64;
   FloatVal: Double;
   DateVal: TDateTime;
   AllEmpty: Boolean;
-  FS: TFormatSettings;         // ← NEU: für Locale-unabhängige Float-Erkennung
+  FSFloat, FSDate: TFormatSettings;
 begin
   FieldType := ftString;
-  MaxLen := 0;
+  MaxLen    := 0;
 
-  CandidateBool      := True;
-  CandidateInt       := True;
-  CandidateFloat     := True;
-  CandidateDate      := True;
-  CandidateDateTime  := True;
-  CandidateGuid      := True;
-  AllEmpty           := True;
+  CandidateBool       := True;
+  CandidateInt        := True;
+  CandidateIntFits32  := True;
+  CandidateIntFits64  := True;
+  CandidateFloat      := True;
+  CandidateDate       := True;
+  CandidateDateTime   := True;
+  CandidateGuid       := True;
+  AllEmpty            := True;
 
-  // Locale-unabhängig: Punkt als Dezimaltrenner
-  FS := DefaultFormatSettings;
-  FS.DecimalSeparator := '.';
-  FS.ThousandSeparator := #0;
+  // FormatSettings wie gehabt
+  FSFloat := DefaultFormatSettings;
+  FSFloat.DecimalSeparator  := '.';
+  FSFloat.ThousandSeparator := #0;
+
+  FSDate := DefaultFormatSettings;
+  FSDate.DateSeparator     := '-';
+  FSDate.ShortDateFormat   := 'yyyy-mm-dd';
+  FSDate.LongDateFormat    := 'yyyy-mm-dd';
+  FSDate.TimeSeparator     := ':';
+  FSDate.LongTimeFormat    := 'hh:nn:ss';
+  FSDate.DecimalSeparator  := '.';
+  FSDate.ThousandSeparator := #0;
 
   FDataSet.DisableControls;
   try
@@ -135,25 +239,31 @@ begin
         // --- Bool ---
         if CandidateBool then
           if not (SameText(Value, 'true') or SameText(Value, 'false')
-               or SameText(Value, 'yes') or SameText(Value, 'no')
+               or SameText(Value, 'yes')  or SameText(Value, 'no')
                or (Value = '0') or (Value = '1')) then
             CandidateBool := False;
 
         // --- Int ---
         if CandidateInt then
-          if not TryStrToInt64(Value, IntVal64) then
+        begin
+          if TryStrToInt64(Value, IntVal64) then
+          begin
+            // NEU: Bereichsprüfung nach Firebird-Zieltyp
+            if (IntVal64 < FB_INT_MIN) or (IntVal64 > FB_INT_MAX) then
+              CandidateIntFits32 := False;
+            if (IntVal64 < FB_BIG_MIN) or (IntVal64 > FB_BIG_MAX) then
+              CandidateIntFits64 := False;
+          end
+          else
             CandidateInt := False;
+        end;
 
-        // --- Float (LOCALE-UNABHÄNGIG) ---
+        // --- Float (Locale-unabhängig) ---
         if CandidateFloat and (not CandidateInt) then
         begin
-          // Versuch 1: Mit Punkt als Dezimaltrenner
-          if not TryStrToFloat(Value, FloatVal, FS) then
-          begin
-            // Versuch 2: Mit System-Locale (falls Komma)
+          if not TryStrToFloat(Value, FloatVal, FSFloat) then
             if not TryStrToFloat(Value, FloatVal) then
               CandidateFloat := False;
-          end;
         end;
 
         // --- Date (kein ':', kein Space) ---
@@ -161,7 +271,8 @@ begin
         begin
           if (Pos(':', Value) > 0) or (Pos(' ', Value) > 0) then
             CandidateDate := False
-          else if not TryStrToDate(Value, DateVal) then
+          else if not (TryStrToDate(Value, DateVal, FSDate)
+                    or TryStrToDate(Value, DateVal)) then
             CandidateDate := False;
         end;
 
@@ -170,7 +281,7 @@ begin
         begin
           if Pos(':', Value) = 0 then
             CandidateDateTime := False
-          else if not TryStrToDateTime(Value, DateVal) then
+          else if not TryParseDateTimeEx(Value, DateVal) then
             CandidateDateTime := False;
         end;
 
@@ -191,15 +302,23 @@ begin
   if AllEmpty then
   begin
     FieldType := ftString;
-    MaxLen := FDefaultFieldLength;
+    MaxLen    := FDefaultFieldLength;
     Exit;
   end;
 
-  // Priorität
+  // ============================================================
+  // Priorität — mit korrekter Integer-Stufung
+  //
+  //   passt in INTEGER (32-bit)  → ftInteger  → 'INTEGER'
+  //   passt nur in BIGINT (64-bit) → ftLargeint → 'BIGINT'
+  //   passt in keins von beiden  → ftFloat (oder ftString)
+  // ============================================================
   if CandidateBool then
     FieldType := ftBoolean
-  else if CandidateInt then
+  else if CandidateInt and CandidateIntFits32 then
     FieldType := ftInteger
+  else if CandidateInt and CandidateIntFits64 then
+    FieldType := ftLargeint
   else if CandidateFloat then
     FieldType := ftFloat
   else if CandidateDateTime then
@@ -223,7 +342,7 @@ function TGenSQLFromCSVDataset.FieldTypeToFirebird(
   MaxLength: Integer): string;
 begin
   case AType of
-    ftSmallint:  Result := 'INTEGER';       // ← vereinfacht
+    ftSmallint:  Result := 'INTEGER';       // vereinfacht
     ftInteger:   Result := 'INTEGER';
     ftLargeint:  Result := 'BIGINT';
     ftFloat:     Result := 'DOUBLE PRECISION';

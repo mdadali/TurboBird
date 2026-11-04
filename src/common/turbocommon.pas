@@ -393,6 +393,8 @@ type
     // === RESULT ===
     RowsProcessed: Int64;
     FieldsCount: Integer;
+    FieldNames: string;
+    FieldTypes: string;
     ElapsedSeconds: Double;
 
     // === MEMORY ===
@@ -931,6 +933,8 @@ procedure ConnectDBPrepared(ADatabase: TIBDatabase; ATransaction: TIBTransaction
 function IsDomain(const ATypeName: string): Boolean;
 function DomainToDataType(const ADomainName: string; ADatabase: TIBDatabase; ATransaction: TIBTransaction): string;
 
+
+function FieldTypeToString(AType: TFieldType): string;
 
 
 implementation
@@ -2132,6 +2136,10 @@ begin
     SL.Add('  Rows:          ' + FormatNumberEN(Stats.RowsProcessed));
     if Stats.FieldsCount > 0 then
       SL.Add('  Fields:        ' + IntToStr(Stats.FieldsCount));
+    if Stats.FieldNames <> '' then
+      SL.Add('  Field Names:   ' + Stats.FieldNames);
+    if Stats.FieldTypes <> '' then
+      SL.Add('  Field Types:   ' + Stats.FieldTypes);
 
     if Stats.CSVRowWidthScanTime > 0 then
       SL.Add('  Scan Time:     ' + FormatDateTime('hh:nn:ss.zzz',
@@ -8389,6 +8397,42 @@ begin
 
   finally
     Qry.Free;
+  end;
+end;
+
+function FieldTypeToString(AType: TFieldType): string;
+begin
+  case AType of
+    ftUnknown:       Result := 'Unknown';
+    ftString:        Result := 'String';
+    ftSmallint:      Result := 'Smallint';
+    ftInteger:       Result := 'Integer';
+    ftWord:          Result := 'Word';
+    ftBoolean:       Result := 'Boolean';
+    ftFloat:         Result := 'Float';
+    ftCurrency:      Result := 'Currency';
+    ftBCD:           Result := 'BCD';
+    ftFMTBcd:        Result := 'FMTBcd';
+    ftDate:          Result := 'Date';
+    ftTime:          Result := 'Time';
+    ftDateTime:      Result := 'DateTime';
+    ftBytes:         Result := 'Bytes';
+    ftVarBytes:      Result := 'VarBytes';
+    ftAutoInc:       Result := 'AutoInc';
+    ftBlob:          Result := 'Blob';
+    ftMemo:          Result := 'Memo';
+    ftGraphic:       Result := 'Graphic';
+    ftFmtMemo:       Result := 'FmtMemo';
+    ftFixedChar:     Result := 'FixedChar';
+    ftFixedWideChar: Result := 'FixedWideChar';
+    ftWideString:    Result := 'WideString';
+    ftWideMemo:      Result := 'WideMemo';
+    ftLargeint:      Result := 'LargeInt';
+    ftGuid:          Result := 'Guid';
+    ftTimeStamp:     Result := 'TimeStamp';
+  else
+    // Fallback: liefert z.B. 'ftCursor', 'ftArray' etc.
+    Result := 'Unknown FieldType';
   end;
 end;
 

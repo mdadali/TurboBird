@@ -84,8 +84,8 @@ type
     function  GetToRow: Int64;
 
     procedure RunFBInsertBatched(ADBIndex: Integer; const ATableName: string);
-    procedure AssignParamFromField(Param: TParam; SourceField: TField);
-    procedure CancelButtonClick(Sender: TObject);
+    procedure AssignParamFromField(Param: TParam; SourceField: TField;
+      const TargetTypeString: string);    procedure CancelButtonClick(Sender: TObject);
     function  TableExists(ADB: TIBDatabase; const ATableName: string): Boolean;
     procedure ParseFieldType(const AType: string; out BaseType: string; out Size: Integer);
     function  GridRowToFieldType(Row: Int64): string;
@@ -124,7 +124,9 @@ begin
   if (FStats.SourceFileFormat <> '') and (FStats.SourceFileFormat[1] = '.') then
     Delete(FStats.SourceFileFormat, 1, 1);
 
+  // --------------------------------------------------------------------
   // Dateigröße ermitteln
+  // --------------------------------------------------------------------
   if FileExists(FFileName) then
   begin
     try
@@ -140,14 +142,18 @@ begin
     end;
   end;
 
+  // --------------------------------------------------------------------
   // Ziel-Datenbank
+  // --------------------------------------------------------------------
   FStats.DestKind          := 'Firebird Table';
   FStats.DestServer        := RegisteredDatabases[ADBIndex].RegRec.ServerName;
   FStats.DestDatabase      := RegisteredDatabases[ADBIndex].RegRec.Title;
   FStats.DestTable         := ATableName;
   FStats.DestServerVersion := RegisteredDatabases[ADBIndex].RegRec.ServerVersionString;
 
+  // --------------------------------------------------------------------
   // Optionen
+  // --------------------------------------------------------------------
   FStats.BatchSize := GetCommitInterval;
   FStats.FromRow   := GetFromRow;
   FStats.ToRow     := GetToRow;
@@ -164,20 +170,50 @@ begin
   else
     FStats.OptionsExtra := 'Create Table Only';
 
-  // Ausgewählte Felder zählen
-  FieldCount := 0;
+  // ====================================================================
+  // FELDSTRUKTUR FÜR DEN REPORT
+  //
+  // Quelle: FFields — exakt dieselbe Liste, die auch btnRunClick für
+  //         die CREATE TABLE SQL verwendet (nachdem SyncFieldsFromGrid
+  //         die User-Eingaben aus dem Grid übernommen hat).
+  //
+  // Nur tatsächlich verwendete (Checked) Felder werden gelistet —
+  // das entspricht 1:1 den Spalten der späteren CREATE TABLE SQL.
+  // ====================================================================
+  FieldCount        := 0;
+  FStats.FieldNames := '';
+  FStats.FieldTypes := '';
+
   for i := 0 to High(FFields) do
-    if FFields[i].Checked then
-      Inc(FieldCount);
+  begin
+    if not FFields[i].Checked then
+      Continue;
+
+    Inc(FieldCount);
+
+    if FStats.FieldNames <> '' then
+    begin
+      FStats.FieldNames := FStats.FieldNames + ', ';
+      FStats.FieldTypes := FStats.FieldTypes + ', ';
+    end;
+
+    FStats.FieldNames := FStats.FieldNames + FFields[i].FieldName;
+    FStats.FieldTypes := FStats.FieldTypes + FFields[i].FieldType;
+  end;
+
   FStats.FieldsCount := FieldCount;
 
+  // --------------------------------------------------------------------
   // Client-Lib-Version
+  // --------------------------------------------------------------------
   if Assigned(RegisteredDatabases[ADBIndex].IBDatabase) and
      Assigned(RegisteredDatabases[ADBIndex].IBDatabase.FirebirdAPI) then
     FStats.ClientLibVersion := 'Firebird ' +
       RegisteredDatabases[ADBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
 
+  // --------------------------------------------------------------------
   // Environment (OS, CPU, RAM, Disk)
+  // --------------------------------------------------------------------
   try
     FStats.SystemInfo := GetSystemInfo(
       GetDBFileNameFromConnectionString(
@@ -806,7 +842,7 @@ begin
     InsertSQL := InsertSQL + ')';
 
     Query.SQL.Text := InsertSQL;
-    Query.Prepare;
+    Query.Prepare;   // ← füllt Param.DataType aus dem Ziel-Schema
 
     // --- ProgressForm ---
     ProgressForm.FormStyle := fsNormal;
@@ -886,42 +922,12 @@ begin
         if FCancelled then
           Break;
 
-        // --- Parameter setzen ---
         for f := 0 to FieldsPerRow - 1 do
         begin
           SourceField := FDataSet.FieldByName(FFields[CheckedFields[f]].FieldName);
-          Param := Query.Params[f];
-
-          if SourceField.IsNull then
-            Param.Clear
-          else
-            case SourceField.DataType of
-              ftSmallint:
-                Param.AsSmallInt := SourceField.AsInteger;
-
-              ftWord:
-                Param.AsInteger := SourceField.AsInteger;
-
-              ftInteger:
-                Param.AsInteger := SourceField.AsInteger;
-
-              ftLargeint:
-                Param.AsLargeInt := SourceField.AsLargeInt;
-
-              ftAutoInc:
-                Param.AsInteger := SourceField.AsInteger;
-
-              ftFloat, ftCurrency, ftBCD, ftFMTBcd:
-                Param.AsFloat := SourceField.AsFloat;
-
-              ftDateTime, ftTimeStamp, ftDate, ftTime:
-                Param.AsDateTime := SourceField.AsDateTime;
-
-              ftBoolean:
-                Param.AsBoolean := SourceField.AsBoolean;
-            else
-              Param.AsString := SourceField.AsString;
-            end;
+          Param       := Query.Params[f];
+          AssignParamFromField(Param, SourceField,
+                               FFields[CheckedFields[f]].FieldType);
         end;
 
         // --- INSERT ---
@@ -963,8 +969,7 @@ begin
         end;
       end;
 
-       Application.ProcessMessages;
-
+      Application.ProcessMessages;
 
       // --- Finaler Commit ---
       if not FCancelled then
@@ -989,7 +994,7 @@ begin
     end;
 
     // =======================================================================
-    // STATISTIK FÜLLEN (statt ShowMessage)
+    // STATISTIK FÜLLEN
     // =======================================================================
     FStats.RowsProcessed := CurrentRow;
 
@@ -1046,11 +1051,17 @@ begin
   end;
 end;
 
-// ============================================================================
-// UNUSED (bleibt für Kompatibilität drin)
-// ============================================================================
 procedure TfrmCreateTableFromDataSet.AssignParamFromField(
-  Param: TParam; SourceField: TField);
+  Param: TParam; SourceField: TField; const TargetTypeString: string);
+var
+  S, TrimmedS, BaseType: string;
+  DT: TDateTime;
+  I64: Int64;
+  FVal: Double;
+  BoolVal: Boolean;
+  FSFloat: TFormatSettings;
+  LParen: Integer;
+  IsStringType, IsIntType, IsFloatType, IsDateType, IsBoolType: Boolean;
 begin
   if SourceField.IsNull then
   begin
@@ -1058,25 +1069,152 @@ begin
     Exit;
   end;
 
-  case SourceField.DataType of
-    ftSmallint, ftWord:
-      Param.AsSmallInt := SourceField.AsInteger;
+  S        := SourceField.AsString;
+  TrimmedS := Trim(S);
 
-    ftInteger, ftLargeint, ftAutoInc:
-      Param.AsInteger := SourceField.AsInteger;
-
-    ftFloat, ftCurrency, ftBCD, ftFMTBcd:
-      Param.AsFloat := SourceField.AsFloat;
-
-    ftDateTime, ftTimeStamp, ftDate, ftTime:
-      Param.AsDateTime := SourceField.AsDateTime;
-
-    ftBoolean:
-      Param.AsBoolean := SourceField.AsBoolean;
-
+  // ------------------------------------------------------------
+  // Zieltyp parsen (z.B. "VARCHAR(50)" → "VARCHAR",
+  //                 "DECIMAL(18,2)" → "DECIMAL")
+  // ------------------------------------------------------------
+  LParen := Pos('(', TargetTypeString);
+  if LParen > 0 then
+    BaseType := UpperCase(Trim(Copy(TargetTypeString, 1, LParen - 1)))
   else
-    Param.AsString := SourceField.AsString;
+    BaseType := UpperCase(Trim(TargetTypeString));
+
+  IsStringType := (BaseType = 'VARCHAR')
+               or (BaseType = 'CHAR')
+               or (BaseType = 'CSTRING')
+               or (BaseType = 'BLOB')
+               or (BaseType = 'TEXT');
+
+  IsIntType    := (BaseType = 'SMALLINT')
+               or (BaseType = 'INTEGER')
+               or (BaseType = 'BIGINT')
+               or (BaseType = 'INT64');
+
+  IsFloatType  := (BaseType = 'DOUBLE PRECISION')
+               or (BaseType = 'DOUBLE')
+               or (BaseType = 'FLOAT')
+               or (BaseType = 'DECIMAL')
+               or (BaseType = 'NUMERIC');
+
+  IsDateType   := (BaseType = 'DATE')
+               or (BaseType = 'TIME')
+               or (BaseType = 'TIMESTAMP');
+
+  IsBoolType   := (BaseType = 'BOOLEAN');
+
+  // ============================================================
+  // String-Zieltypen: 1:1 übernehmen — auch leerer String bleibt ''
+  // ============================================================
+  if IsStringType then
+  begin
+    Param.AsString := S;
+    Exit;
   end;
+
+  // ============================================================
+  // Nicht-String-Zieltypen: leerer Wert → NULL
+  //
+  // Verhindert: Firebird sieht '' → versucht zu konvertieren → Fehler
+  // ============================================================
+  if TrimmedS = '' then
+  begin
+    Param.Clear;
+    Exit;
+  end;
+
+  // FormatSettings für Float (Punkt als Dezimaltrenner)
+  FSFloat := DefaultFormatSettings;
+  FSFloat.DecimalSeparator  := '.';
+  FSFloat.ThousandSeparator := #0;
+
+  // ============================================================
+  // INTEGER-Familie
+  // ============================================================
+  if IsIntType then
+  begin
+    if TryStrToInt64(TrimmedS, I64) then
+      Param.AsLargeInt := I64
+    else if SameText(TrimmedS, 'TRUE') then
+      Param.AsLargeInt := 1
+    else if SameText(TrimmedS, 'FALSE') then
+      Param.AsLargeInt := 0
+    else
+      raise Exception.CreateFmt(
+        'Cannot convert value "%s" of field "%s" to integer.',
+        [S, SourceField.FieldName]);
+    Exit;
+  end;
+
+  // ============================================================
+  // FLOAT-Familie
+  // ============================================================
+  if IsFloatType then
+  begin
+    if not (TryStrToFloat(TrimmedS, FVal, FSFloat)
+         or TryStrToFloat(TrimmedS, FVal)) then
+      raise Exception.CreateFmt(
+        'Cannot convert value "%s" of field "%s" to float.',
+        [S, SourceField.FieldName]);
+
+    // Wenn Param.DataType vom IBX korrekt befüllt ist (ftFloat/etc.),
+    // nutzen wir die typisierte Zuweisung (binäres Wire-Format).
+    // Sonst (typischerweise ftUnknown) schicken wir einen
+    // locale-unabhängigen String — Firebird parst ihn zuverlässig.
+    if Param.DataType in [ftFloat, ftCurrency, ftBCD, ftFMTBcd] then
+      Param.AsFloat := FVal
+    else
+      Param.AsString := FloatToStr(FVal, FSFloat);
+    Exit;
+  end;
+
+  // ============================================================
+  // DATE / TIME / TIMESTAMP
+  // ============================================================
+  if IsDateType then
+  begin
+    if not TryParseDateTimeEx(TrimmedS, DT) then
+      raise Exception.CreateFmt(
+        'Cannot convert value "%s" of field "%s" to date/time.',
+        [S, SourceField.FieldName]);
+
+    if Param.DataType in [ftDate, ftTime, ftDateTime, ftTimeStamp] then
+      Param.AsDateTime := DT
+    else
+      // ftUnknown oder ftString: ISO-String ist locale-unabhängig
+      Param.AsString := FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', DT);
+    Exit;
+  end;
+
+  // ============================================================
+  // BOOLEAN (FB 3+)
+  // ============================================================
+  if IsBoolType then
+  begin
+    if SameText(TrimmedS, 'TRUE') or (TrimmedS = '1') then
+      BoolVal := True
+    else if SameText(TrimmedS, 'FALSE') or (TrimmedS = '0') then
+      BoolVal := False
+    else
+      raise Exception.CreateFmt(
+        'Cannot convert value "%s" of field "%s" to boolean.',
+        [S, SourceField.FieldName]);
+
+    if Param.DataType = ftBoolean then
+      Param.AsBoolean := BoolVal
+    else if BoolVal then
+      Param.AsInteger := 1
+    else
+      Param.AsInteger := 0;
+    Exit;
+  end;
+
+  // ============================================================
+  // Unbekannter Zieltyp — als String durchreichen
+  // ============================================================
+  Param.AsString := S;
 end;
 
 end.

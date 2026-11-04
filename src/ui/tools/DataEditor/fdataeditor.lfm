@@ -1,5 +1,5 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 997
+  Left = 422
   Height = 894
   Top = 77
   Width = 1496

@@ -1636,6 +1636,10 @@ var
   BufferSizeOriginalBytes: Int64;
   BlockAutoAdjusted: Boolean;
   BufferAutoAdjusted: Boolean;
+
+  // NEU: für CSV-Feldtyp-Erkennung im Report
+  Gen: TGenSQLFromCSVDataset;
+  BM: TBookmark;
 begin
   // ============================================================
   // Initialisierung
@@ -1706,7 +1710,6 @@ begin
 
   // ============================================================
   // Vorab-Warnung bei knappem RAM
-  // (GetRAMFreeMB liefert MemAvailable — inkl. reclaimable Cache)
   // ============================================================
   if FileSize > 0 then
   begin
@@ -2055,7 +2058,6 @@ begin
     FFileName := OpenDialog1.FileName;
     Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
 
-
   finally
     if Assigned(FProgressForm) then
       FreeAndNil(FProgressForm);
@@ -2108,6 +2110,88 @@ begin
   Stats.OptionsExtra   := 'Read-Only';
   Stats.RowsProcessed  := RowCount;
   Stats.FieldsCount    := DataSource1.DataSet.FieldCount;
+
+  // ============================================================
+  // FELDSTRUKTUR FÜR REPORT
+  //
+  // CSV (TCSVFastDataset) speichert alle Werte als Text —
+  // Fields[I].DataType ist daher IMMER ftString. Damit der Report
+  // dieselben Typen zeigt wie die spätere Create-Table-Maske,
+  // nutzen wir für CSV die Typ-Erkennung aus
+  // TGenSQLFromCSVDataset (analysiert die ersten Zeilen).
+  //
+  // Für alle anderen Formate ist Fields[I].DataType korrekt und
+  // wird unverändert verwendet.
+  // ============================================================
+  Stats.FieldNames := '';
+  Stats.FieldTypes := '';
+
+  if DataSource1.DataSet = CSVFastDataset1 then
+  begin
+    // Bookmark sichern, weil TGenSQLFromCSVDataset intern
+    // First/Next aufruft (Analyse der ersten Zeilen).
+    BM := DataSource1.DataSet.GetBookmark;
+    try
+      try
+        Gen := TGenSQLFromCSVDataset.Create(DataSource1.DataSet, '', 50);
+        try
+          for I := 0 to High(Gen.Fields) do
+          begin
+            if Stats.FieldNames <> '' then
+            begin
+              Stats.FieldNames := Stats.FieldNames + ', ';
+              Stats.FieldTypes := Stats.FieldTypes + ', ';
+            end;
+            Stats.FieldNames := Stats.FieldNames + Gen.Fields[I].FieldName;
+            Stats.FieldTypes := Stats.FieldTypes + Gen.Fields[I].FieldType;
+          end;
+        finally
+          Gen.Free;
+        end;
+      except
+        // Fallback, falls die Typ-Erkennung scheitert:
+        // dann zeigen wir wenigstens Feldnamen mit tatsächlichem
+        // DataType (String) — besser als ganz leer.
+        Stats.FieldNames := '';
+        Stats.FieldTypes := '';
+        for I := 0 to DataSource1.DataSet.FieldCount - 1 do
+        begin
+          if Stats.FieldNames <> '' then
+          begin
+            Stats.FieldNames := Stats.FieldNames + ', ';
+            Stats.FieldTypes := Stats.FieldTypes + ', ';
+          end;
+          Stats.FieldNames := Stats.FieldNames +
+            DataSource1.DataSet.Fields[I].FieldName;
+          Stats.FieldTypes := Stats.FieldTypes +
+            FieldTypeToString(DataSource1.DataSet.Fields[I].DataType);
+        end;
+      end;
+    finally
+      if Assigned(BM) then
+      begin
+        DataSource1.DataSet.GotoBookmark(BM);
+        DataSource1.DataSet.FreeBookmark(BM);
+      end;
+    end;
+  end
+  else
+  begin
+    // Nicht-CSV: Fields[I].DataType ist aussagekräftig
+    for I := 0 to DataSource1.DataSet.FieldCount - 1 do
+    begin
+      if Stats.FieldNames <> '' then
+      begin
+        Stats.FieldNames := Stats.FieldNames + ', ';
+        Stats.FieldTypes := Stats.FieldTypes + ', ';
+      end;
+      Stats.FieldNames := Stats.FieldNames +
+        DataSource1.DataSet.Fields[I].FieldName;
+      Stats.FieldTypes := Stats.FieldTypes +
+        FieldTypeToString(DataSource1.DataSet.Fields[I].DataType);
+    end;
+  end;
+
   Stats.ElapsedSeconds := ScanElapsed + FLastProgressSeconds;
 
   Stats.LoadElapsedSeconds := FLastProgressSeconds;
