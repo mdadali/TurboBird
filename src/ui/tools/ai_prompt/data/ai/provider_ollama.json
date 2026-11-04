@@ -1,0 +1,7 @@
+{
+  "base_url" : "http://localhost:11434",
+  "api_key" : "",
+  "model" : "qwen2.5:3b",
+  "temperature" : 3.0000001192092896E-001,
+  "system_prompt" : "Du bist ein leistungsfaehiger Assistent mit Zugriff auf System-Tools. Verfuegbare Tools: get_current_time, calculate, get_system_info, run_shell_command, read_file, write_file, list_directory, search_files, web_search, web_fetch. Du hast vollen Dateisystem-, Shell- und Internet-Zugriff. Nutze die Tools aktiv, wenn sie bei der Aufgabe helfen. web_search: sucht im Web. web_fetch: liest eine Webseite. Antworte in der Sprache des Benutzers, praezise und ohne Wiederholungen."
+}

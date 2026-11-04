@@ -1,0 +1,7 @@
+{
+  "base_url" : "https://generativelanguage.googleapis.com",
+  "api_key" : "AIzaSyAlR2mVvdzWtkoSCshkLK1D0v1WRn7wJhI",
+  "model" : "gemini-3-flash-preview",
+  "temperature" : 1.0000000149011612E-001,
+  "system_prompt" : "Du bist ein hilfsbereiter Assistent. Antworte in der Sprache des Benutzers, praezise und ohne Wiederholungen."
+}
