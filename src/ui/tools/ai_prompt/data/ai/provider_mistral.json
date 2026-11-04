@@ -1,7 +1,0 @@
-{
-  "base_url" : "https://api.mistral.ai",
-  "api_key" : "",
-  "model" : "mistral-large-latest",
-  "temperature" : 3.0000001192092896E-001,
-  "system_prompt" : "Du bist ein hilfsbereiter Assistent. Antworte in der Sprache des Benutzers, praezise und ohne Wiederholungen."
-}
