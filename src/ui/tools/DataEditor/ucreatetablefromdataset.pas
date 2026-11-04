@@ -74,6 +74,10 @@ type
     // Statistik für den Transfer-Report
     FStats: TTransferStatistic;
 
+    FMarginApplied:  Boolean;
+    FTotalRows:      Integer;
+    FTotalRowsAnalyzed: Integer;
+
     procedure LoadFieldList;
     procedure FillServerCombo;
     procedure FillDBCombo;
@@ -124,9 +128,6 @@ begin
   if (FStats.SourceFileFormat <> '') and (FStats.SourceFileFormat[1] = '.') then
     Delete(FStats.SourceFileFormat, 1, 1);
 
-  // --------------------------------------------------------------------
-  // Dateigröße ermitteln
-  // --------------------------------------------------------------------
   if FileExists(FFileName) then
   begin
     try
@@ -138,22 +139,15 @@ begin
       end;
       FStats.SourceFileSize := FileSize;
     except
-      // Datei nicht lesbar → Größe bleibt 0
     end;
   end;
 
-  // --------------------------------------------------------------------
-  // Ziel-Datenbank
-  // --------------------------------------------------------------------
   FStats.DestKind          := 'Firebird Table';
   FStats.DestServer        := RegisteredDatabases[ADBIndex].RegRec.ServerName;
   FStats.DestDatabase      := RegisteredDatabases[ADBIndex].RegRec.Title;
   FStats.DestTable         := ATableName;
   FStats.DestServerVersion := RegisteredDatabases[ADBIndex].RegRec.ServerVersionString;
 
-  // --------------------------------------------------------------------
-  // Optionen
-  // --------------------------------------------------------------------
   FStats.BatchSize := GetCommitInterval;
   FStats.FromRow   := GetFromRow;
   FStats.ToRow     := GetToRow;
@@ -170,56 +164,31 @@ begin
   else
     FStats.OptionsExtra := 'Create Table Only';
 
-  // ====================================================================
-  // FELDSTRUKTUR FÜR DEN REPORT
-  //
-  // Quelle: FFields — exakt dieselbe Liste, die auch btnRunClick für
-  //         die CREATE TABLE SQL verwendet (nachdem SyncFieldsFromGrid
-  //         die User-Eingaben aus dem Grid übernommen hat).
-  //
-  // Nur tatsächlich verwendete (Checked) Felder werden gelistet —
-  // das entspricht 1:1 den Spalten der späteren CREATE TABLE SQL.
-  // ====================================================================
-  FieldCount        := 0;
-  FStats.FieldNames := '';
-  FStats.FieldTypes := '';
+  // ============================================================
+  // Sicherheits-Margin-Hinweis im Report
+  // ============================================================
+  if FMarginApplied then
+    FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
+      Format('  Safety margin applied: %d of %s rows analyzed ' +
+             '(INTEGER→BIGINT, VARCHAR(n)→VARCHAR(2n))',
+             [FTotalRowsAnalyzed, FormatFloat('#,##0', FTotalRows)]);
 
+  FieldCount := 0;
   for i := 0 to High(FFields) do
-  begin
-    if not FFields[i].Checked then
-      Continue;
-
-    Inc(FieldCount);
-
-    if FStats.FieldNames <> '' then
-    begin
-      FStats.FieldNames := FStats.FieldNames + ', ';
-      FStats.FieldTypes := FStats.FieldTypes + ', ';
-    end;
-
-    FStats.FieldNames := FStats.FieldNames + FFields[i].FieldName;
-    FStats.FieldTypes := FStats.FieldTypes + FFields[i].FieldType;
-  end;
-
+    if FFields[i].Checked then
+      Inc(FieldCount);
   FStats.FieldsCount := FieldCount;
 
-  // --------------------------------------------------------------------
-  // Client-Lib-Version
-  // --------------------------------------------------------------------
   if Assigned(RegisteredDatabases[ADBIndex].IBDatabase) and
      Assigned(RegisteredDatabases[ADBIndex].IBDatabase.FirebirdAPI) then
     FStats.ClientLibVersion := 'Firebird ' +
       RegisteredDatabases[ADBIndex].IBDatabase.FirebirdAPI.GetImplementationVersion;
 
-  // --------------------------------------------------------------------
-  // Environment (OS, CPU, RAM, Disk)
-  // --------------------------------------------------------------------
   try
     FStats.SystemInfo := GetSystemInfo(
       GetDBFileNameFromConnectionString(
         RegisteredDatabases[ADBIndex].RegRec.DatabaseName));
   except
-    // Umgebungs-Info ist optional
   end;
 end;
 
@@ -447,6 +416,7 @@ var
   i: Integer;
   BaseType: string;
   Size: Integer;
+  HintText: string;
 begin
   Gen := TGenSQLFromCSVDataset.Create(FDataSet,
            UpperCase(ChangeFileExt(ExtractFileName(FFileName), '')),
@@ -460,6 +430,11 @@ begin
       FFields[i].Checked    := True;
       FFields[i].CharLength := 0;
     end;
+
+    // Sampling-Info merken
+    FMarginApplied     := Gen.AnyMarginApplied;
+    FTotalRows         := Gen.TotalRows;
+    FTotalRowsAnalyzed := Gen.TotalRowsAnalyzed;
   finally
     Gen.Free;
   end;
@@ -482,6 +457,27 @@ begin
     else
       sgFields.Cells[3, i + 1] := '';
     sgFields.Cells[4, i + 1] := '0';
+  end;
+
+  // ============================================================
+  // User-Info im Grid-Header
+  // ============================================================
+  if FMarginApplied then
+  begin
+    HintText := Format(
+      'Note: only the first %d of %s rows were analyzed. ' +
+      'Field types were enlarged as a safety margin ' +
+      '(INTEGER→BIGINT, VARCHAR(n)→VARCHAR(2n)). ' +
+      'If you know the exact file structure, edit types in the grid.',
+      [FTotalRowsAnalyzed, FormatFloat('#,##0', FTotalRows)]);
+    lblHint.Caption    := HintText;
+    lblHint.Font.Color := clMaroon;
+  end
+  else
+  begin
+    lblHint.Caption    :=
+      'Edit the fields as needed. Use Clone Table for data transformations.';
+    lblHint.Font.Color := clWindowText;
   end;
 end;
 

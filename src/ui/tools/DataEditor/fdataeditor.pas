@@ -1637,9 +1637,10 @@ var
   BlockAutoAdjusted: Boolean;
   BufferAutoAdjusted: Boolean;
 
-  // NEU: für CSV-Feldtyp-Erkennung im Report
+  // Für CSV-Feldtyp-Erkennung im Report
   Gen: TGenSQLFromCSVDataset;
   BM: TBookmark;
+  MarginInfo: string;
 begin
   // ============================================================
   // Initialisierung
@@ -1654,6 +1655,7 @@ begin
   Cancelled               := False;
   LoadSpeedAvg            := 0;
   LoadBytesPerSecAvg      := 0;
+  MarginInfo              := '';
 
   BlockSizeOriginalBytes  := CSVBlockSizeBytes;
   BufferSizeOriginalBytes := CSVBufferSizeBytes;
@@ -1739,7 +1741,6 @@ begin
   FProgInfoLbl.Caption := Format('File: %s   (%s)',
     [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
 
-  // ---- RAM/Swap-Basiswerte (für Progress-Fenster während Scan) ----
   FProgTotalRAMMB      := GetRAMTotalMB;
   FInitialFreeRAMMB    := GetRAMFreeMB;
   FCurrentFreeRAMMB    := FInitialFreeRAMMB;
@@ -1771,7 +1772,7 @@ begin
 
   try
     // ============================================================
-    // Phase 1: Scan
+    // Phase 1: Scan (nur Zeilenbreite — Original 8-Parameter-API)
     // ============================================================
     if LowerCase(ExtractFileExt(FFileName)) = '.csv' then
     begin
@@ -2065,7 +2066,6 @@ begin
 
   // ============================================================
   // End-Statistik als Report
-  // Total Time = Scan + Load (ohne Dialog-Zeit)
   // ============================================================
   Caption := 'Turbobird - Data Editor (' + ExtractFileName(FFileName) + ')';
   btnCreateSQL.Enabled := True;
@@ -2114,22 +2114,18 @@ begin
   // ============================================================
   // FELDSTRUKTUR FÜR REPORT
   //
-  // CSV (TCSVFastDataset) speichert alle Werte als Text —
-  // Fields[I].DataType ist daher IMMER ftString. Damit der Report
-  // dieselben Typen zeigt wie die spätere Create-Table-Maske,
-  // nutzen wir für CSV die Typ-Erkennung aus
-  // TGenSQLFromCSVDataset (analysiert die ersten Zeilen).
+  // CSV: Typen aus TGenSQLFromCSVDataset — dieselbe Quelle wie
+  //      Create-Table-Grid und CREATE TABLE SQL. Damit zeigen alle
+  //      3 Stellen identische Typen inkl. Sicherheits-Margin.
   //
-  // Für alle anderen Formate ist Fields[I].DataType korrekt und
-  // wird unverändert verwendet.
+  // Sonstige Formate: Fields[I].DataType
   // ============================================================
   Stats.FieldNames := '';
   Stats.FieldTypes := '';
+  MarginInfo       := '';
 
   if DataSource1.DataSet = CSVFastDataset1 then
   begin
-    // Bookmark sichern, weil TGenSQLFromCSVDataset intern
-    // First/Next aufruft (Analyse der ersten Zeilen).
     BM := DataSource1.DataSet.GetBookmark;
     try
       try
@@ -2145,13 +2141,17 @@ begin
             Stats.FieldNames := Stats.FieldNames + Gen.Fields[I].FieldName;
             Stats.FieldTypes := Stats.FieldTypes + Gen.Fields[I].FieldType;
           end;
+
+          // Sampling-Margin-Hinweis
+          if Gen.AnyMarginApplied then
+            MarginInfo := Format(
+              'Sampled: %d of %s rows — types upsized (INTEGER→BIGINT, VARCHAR(n)→VARCHAR(2n))',
+              [Gen.TotalRowsAnalyzed, FormatFloat('#,##0', Gen.TotalRows)]);
         finally
           Gen.Free;
         end;
       except
-        // Fallback, falls die Typ-Erkennung scheitert:
-        // dann zeigen wir wenigstens Feldnamen mit tatsächlichem
-        // DataType (String) — besser als ganz leer.
+        // Fallback: DataType-basiert
         Stats.FieldNames := '';
         Stats.FieldTypes := '';
         for I := 0 to DataSource1.DataSet.FieldCount - 1 do
@@ -2177,7 +2177,6 @@ begin
   end
   else
   begin
-    // Nicht-CSV: Fields[I].DataType ist aussagekräftig
     for I := 0 to DataSource1.DataSet.FieldCount - 1 do
     begin
       if Stats.FieldNames <> '' then
@@ -2191,6 +2190,10 @@ begin
         FieldTypeToString(DataSource1.DataSet.Fields[I].DataType);
     end;
   end;
+
+  // Margin-Info an OptionsExtra anhängen
+  if MarginInfo <> '' then
+    Stats.OptionsExtra := Stats.OptionsExtra + sLineBreak + '  ' + MarginInfo;
 
   Stats.ElapsedSeconds := ScanElapsed + FLastProgressSeconds;
 

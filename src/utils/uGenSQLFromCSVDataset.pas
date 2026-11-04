@@ -7,30 +7,26 @@ interface
 uses
   Classes, SysUtils, DB, csvdataset, fbcommon;
 
-// ============================================================
-//  Robuste DateTime-Erkennung (öffentlich, unit-weit nutzbar)
-//
-//  Wird von TGenSQLFromCSVDataset für die Typ-Erkennung UND
-//  von TfrmCreateTableFromDataSet beim INSERT genutzt.
-// ============================================================
-function TryParseDateTimeEx(const S: string; out DT: TDateTime): Boolean;
+const
+  { Wie viele Zeilen maximal analysiert werden.
+    Bei mehr Zeilen gilt der Scan als "Sampling" → Margin aktiv. }
+  CSV_ANALYZE_ROWS = 100;
+
+  { Max. VARCHAR-Länge in Firebird }
+  CSV_MAX_VARCHAR = 32765;
 
 type
-  { Feld-Info für CSV-Dataset-Felder (NICHT Firebird-Metadaten!).
-    Enthält den fertigen Firebird-Typ-String für die SQL-Generierung. }
   TCSVDataSetField = record
-    FieldName: string;       // Feldname (aus CSV-Header oder ColumnN)
-    FieldType: string;       // Firebird-Typ als String, z.B. 'VARCHAR(50)'
-    Detected: Boolean;       // True = Typ automatisch erkannt, False = Fallback
-    MaxLength: Integer;      // Erkannte max. Länge (für String-Typen)
+    FieldName:     string;
+    FieldType:     string;
+    Detected:      Boolean;
+    MaxLength:     Integer;
+    MarginApplied: Boolean;   // Sicherheits-Margin wurde angewandt
   end;
 
   TCSVDataSetFieldArray = array of TCSVDataSetField;
 
 TGenSQLFromCSVDataset = class
-  private
-    const
-      ANALYZE_ROWS = 100;   // Erste N Zeilen analysieren (schnell)
   private
     FDataSet: TDataSet;
     FTableName: string;
@@ -38,39 +34,39 @@ TGenSQLFromCSVDataset = class
     FSQL: string;
     FFields: TCSVDataSetFieldArray;
 
+    FSamplingPartial:   Boolean;   // nur erste N Zeilen analysiert
+    FAnyMarginApplied:  Boolean;   // mind. 1 Feld wurde vergrößert
+    FTotalRows:         Integer;   // RecordCount des Datasets
+    FTotalRowsAnalyzed: Integer;   // tatsächlich gelesene Zeilen
+
     procedure AnalyzeFields;
     procedure GenerateSQL;
     procedure DetectFieldTypeAndLength(const FieldName: string;
       out FieldType: TFieldType; out MaxLen: Integer);
-    function FieldTypeToFirebird(AType: TFieldType; MaxLength: Integer): string;
-    function RoundUpLength(Len: Integer): Integer;
+    function  FieldTypeToFirebird(AType: TFieldType; MaxLength: Integer): string;
+    function  RoundUpLength(Len: Integer): Integer;
   public
     constructor Create(ADataSet: TDataSet; const ATableName: string;
       ADefaultFieldLength: Integer);
     property SQL: string read FSQL;
     property Fields: TCSVDataSetFieldArray read FFields;
+
+    // NEU: Info über Sampling-Zustand
+    property SamplingPartial:   Boolean read FSamplingPartial;
+    property AnyMarginApplied:  Boolean read FAnyMarginApplied;
+    property TotalRows:         Integer read FTotalRows;
+    property TotalRowsAnalyzed: Integer read FTotalRowsAnalyzed;
   end;
+
+function TryParseDateTimeEx(const S: string; out DT: TDateTime): Boolean;
 
 implementation
 
 uses
-  StrUtils, turbocommon;
+  StrUtils, Math, turbocommon;
 
 // ================================================================
 //  TryParseDateTimeEx
-//
-//  Robust gegen:
-//    - User-Locale (deutsch: "15.01.2024 10:30:00")
-//    - ISO-Format   ("2024-01-15 10:30:00")
-//    - ISO mit ms   ("2024-01-15 10:30:00.000")
-//    - ISO mit 4+ Stellen ms ("2024-01-15 10:30:00.0000")
-//    - ISO mit 1,2 Stellen ms  (wird auf 3 Stellen gepadded)
-//
-//  Reihenfolge:
-//    1) User-Locale versuchen
-//    2) ISO-Format (Punkt als Dezimaltrenner) versuchen
-//    3) Wenn Bruchteil ≠ 3 Stellen hat: Bruchteil manuell abschneiden,
-//       ohne Bruchteil parsen, ms addieren
 // ================================================================
 function TryParseDateTimeEx(const S: string; out DT: TDateTime): Boolean;
 var
@@ -82,11 +78,8 @@ begin
   DT := 0;
   if Trim(S) = '' then Exit;
 
-  // ---- 1) Standard (User-Locale) ----
-  if TryStrToDateTime(S, DT) then
-    Exit(True);
+  if TryStrToDateTime(S, DT) then Exit(True);
 
-  // ---- 2) ISO-Format mit Punkt als ms-Trenner ----
   FS := DefaultFormatSettings;
   FS.DateSeparator      := '-';
   FS.ShortDateFormat    := 'yyyy-mm-dd';
@@ -96,38 +89,68 @@ begin
   FS.DecimalSeparator   := '.';
   FS.ThousandSeparator  := #0;
 
-  if TryStrToDateTime(S, DT, FS) then
-    Exit(True);
+  if TryStrToDateTime(S, DT, FS) then Exit(True);
 
-  // ---- 3) Bruchteil mit ≠ 3 Stellen (z.B. '.0000') ----
-  //      Nur wenn der Punkt NACH dem ersten Doppelpunkt steht
-  //      (= ms-Trenner, kein Datumstrenner).
   ColonPos := Pos(':', S);
   DotPos   := Pos('.', S);
-
   if (DotPos > 0) and (ColonPos > 0) and (DotPos > ColonPos) then
   begin
-    TestStr := Copy(S, 1, DotPos - 1);          // ohne Bruchteil
+    TestStr := Copy(S, 1, DotPos - 1);
     if TryStrToDateTime(TestStr, DT, FS) then
     begin
-      MsStr := Copy(S, DotPos + 1, MaxInt);     // Bruchteil
+      MsStr := Copy(S, DotPos + 1, MaxInt);
       MsLen := Length(MsStr);
-
       if MsLen > 0 then
       begin
-        // Auf 3 Stellen normalisieren (pad/truncate)
         if MsLen >= 3 then
           MsStr := Copy(MsStr, 1, 3)
         else
           MsStr := MsStr + StringOfChar('0', 3 - MsLen);
-
         if TryStrToInt(MsStr, MsVal) then
-          DT := DT + MsVal / MSecsPerDay;       // ms addieren
+          DT := DT + MsVal / MSecsPerDay;
       end;
-
       Exit(True);
     end;
   end;
+end;
+
+// ================================================================
+//  Helper
+// ================================================================
+function QuickIsAllDigits(const S: string): Boolean;
+var
+  I, Start: Integer;
+begin
+  if S = '' then Exit(False);
+  Start := 1;
+  if (S[1] = '+') or (S[1] = '-') then Start := 2;
+  if Start > Length(S) then Exit(False);
+  for I := Start to Length(S) do
+    if not (S[I] in ['0'..'9']) then Exit(False);
+  Result := True;
+end;
+
+function TryStrToFloatSafe(const S: string; out Value: Double): Boolean;
+var
+  FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator  := '.';
+  FS.ThousandSeparator := #0;
+  if TryStrToFloat(S, Value, FS) then Exit(True);
+  Result := TryStrToFloat(S, Value);
+end;
+
+function TryStrToDateSafe(const S: string; out Value: TDateTime): Boolean;
+var
+  FS: TFormatSettings;
+begin
+  FS := DefaultFormatSettings;
+  FS.DateSeparator    := '-';
+  FS.ShortDateFormat  := 'yyyy-mm-dd';
+  FS.LongDateFormat   := 'yyyy-mm-dd';
+  if TryStrToDate(S, Value, FS) then Exit(True);
+  Result := TryStrToDate(S, Value);
 end;
 
 // ================================================================
@@ -143,12 +166,13 @@ begin
   FDataSet            := ADataSet;
   FTableName          := ATableName;
   FDefaultFieldLength := ADefaultFieldLength;
+  FSamplingPartial    := False;
+  FAnyMarginApplied   := False;
+  FTotalRows          := 0;
+  FTotalRowsAnalyzed  := 0;
   GenerateSQL;
 end;
 
-// ---------------------------------------------------------------
-//  Rundet eine Länge auf die nächste sinnvolle VARCHAR-Größe
-// ---------------------------------------------------------------
 function TGenSQLFromCSVDataset.RoundUpLength(Len: Integer): Integer;
 begin
   if Len <= 0 then Result := 10
@@ -162,15 +186,9 @@ begin
   else if Len <= 2000 then Result := 2000
   else if Len <= 4000 then Result := 4000
   else if Len <= 8000 then Result := 8000
-  else Result := 32765;
+  else Result := CSV_MAX_VARCHAR;
 end;
 
-// ---------------------------------------------------------------
-//  Analysiert MEHRERE Zeilen für bessere Typ-/Längenerkennung
-//
-//  WICHTIG: Keine Bereichsprüfung für SMALLINT/INTEGER/BIGINT.
-//           Alle Ganzzahlen → INTEGER
-// ---------------------------------------------------------------
 procedure TGenSQLFromCSVDataset.DetectFieldTypeAndLength(
   const FieldName: string;
   out FieldType: TFieldType;
@@ -178,14 +196,11 @@ procedure TGenSQLFromCSVDataset.DetectFieldTypeAndLength(
 const
   FB_INT_MIN = -2147483648;
   FB_INT_MAX =  2147483647;
-  FB_BIG_MIN = Int64(-9223372036854775807) - 1;
-  FB_BIG_MAX = Int64( 9223372036854775807);
 var
   RowIdx: Integer;
   Value: string;
   CandidateBool, CandidateInt: Boolean;
-  CandidateIntFits32: Boolean;         // NEU: passt es in Firebird INTEGER?
-  CandidateIntFits64: Boolean;         // NEU: passt es in Firebird BIGINT?
+  CandidateIntFits32, CandidateIntFits64, CandidateTooBig: Boolean;
   CandidateFloat: Boolean;
   CandidateDate, CandidateDateTime, CandidateGuid: Boolean;
   IntVal64: Int64;
@@ -197,17 +212,17 @@ begin
   FieldType := ftString;
   MaxLen    := 0;
 
-  CandidateBool       := True;
-  CandidateInt        := True;
-  CandidateIntFits32  := True;
-  CandidateIntFits64  := True;
-  CandidateFloat      := True;
-  CandidateDate       := True;
-  CandidateDateTime   := True;
-  CandidateGuid       := True;
-  AllEmpty            := True;
+  CandidateBool      := True;
+  CandidateInt       := True;
+  CandidateIntFits32 := True;
+  CandidateIntFits64 := True;
+  CandidateTooBig    := False;
+  CandidateFloat     := True;
+  CandidateDate      := True;
+  CandidateDateTime  := True;
+  CandidateGuid      := True;
+  AllEmpty           := True;
 
-  // FormatSettings wie gehabt
   FSFloat := DefaultFormatSettings;
   FSFloat.DecimalSeparator  := '.';
   FSFloat.ThousandSeparator := #0;
@@ -221,62 +236,54 @@ begin
   FSDate.DecimalSeparator  := '.';
   FSDate.ThousandSeparator := #0;
 
+  RowIdx := 0;
   FDataSet.DisableControls;
   try
     FDataSet.First;
-    RowIdx := 0;
-    while (not FDataSet.EOF) and (RowIdx < ANALYZE_ROWS) do
+    while (not FDataSet.EOF) and (RowIdx < CSV_ANALYZE_ROWS) do
     begin
       Value := Trim(FDataSet.FieldByName(FieldName).AsString);
 
       if Value <> '' then
       begin
         AllEmpty := False;
-
         if Length(Value) > MaxLen then
           MaxLen := Length(Value);
 
-        // --- Bool ---
         if CandidateBool then
           if not (SameText(Value, 'true') or SameText(Value, 'false')
                or SameText(Value, 'yes')  or SameText(Value, 'no')
                or (Value = '0') or (Value = '1')) then
             CandidateBool := False;
 
-        // --- Int ---
         if CandidateInt then
         begin
           if TryStrToInt64(Value, IntVal64) then
           begin
-            // NEU: Bereichsprüfung nach Firebird-Zieltyp
             if (IntVal64 < FB_INT_MIN) or (IntVal64 > FB_INT_MAX) then
               CandidateIntFits32 := False;
-            if (IntVal64 < FB_BIG_MIN) or (IntVal64 > FB_BIG_MAX) then
-              CandidateIntFits64 := False;
+          end
+          else if QuickIsAllDigits(Value) then
+          begin
+            CandidateTooBig := True;
+            CandidateIntFits64 := False;
           end
           else
             CandidateInt := False;
         end;
 
-        // --- Float (Locale-unabhängig) ---
         if CandidateFloat and (not CandidateInt) then
-        begin
-          if not TryStrToFloat(Value, FloatVal, FSFloat) then
-            if not TryStrToFloat(Value, FloatVal) then
-              CandidateFloat := False;
-        end;
+          if not TryStrToFloatSafe(Value, FloatVal) then
+            CandidateFloat := False;
 
-        // --- Date (kein ':', kein Space) ---
         if CandidateDate then
         begin
           if (Pos(':', Value) > 0) or (Pos(' ', Value) > 0) then
             CandidateDate := False
-          else if not (TryStrToDate(Value, DateVal, FSDate)
-                    or TryStrToDate(Value, DateVal)) then
+          else if not TryStrToDateSafe(Value, DateVal) then
             CandidateDate := False;
         end;
 
-        // --- DateTime (mit ':') ---
         if CandidateDateTime then
         begin
           if Pos(':', Value) = 0 then
@@ -285,7 +292,6 @@ begin
             CandidateDateTime := False;
         end;
 
-        // --- GUID ---
         if CandidateGuid then
           if not ((Length(Value) = 36) and (Pos('-', Value) > 0)) then
             CandidateGuid := False;
@@ -299,6 +305,8 @@ begin
     FDataSet.EnableControls;
   end;
 
+  FTotalRowsAnalyzed := RowIdx;
+
   if AllEmpty then
   begin
     FieldType := ftString;
@@ -306,19 +314,14 @@ begin
     Exit;
   end;
 
-  // ============================================================
-  // Priorität — mit korrekter Integer-Stufung
-  //
-  //   passt in INTEGER (32-bit)  → ftInteger  → 'INTEGER'
-  //   passt nur in BIGINT (64-bit) → ftLargeint → 'BIGINT'
-  //   passt in keins von beiden  → ftFloat (oder ftString)
-  // ============================================================
   if CandidateBool then
     FieldType := ftBoolean
   else if CandidateInt and CandidateIntFits32 then
     FieldType := ftInteger
   else if CandidateInt and CandidateIntFits64 then
     FieldType := ftLargeint
+  else if CandidateTooBig then
+    FieldType := ftFMTBcd
   else if CandidateFloat then
     FieldType := ftFloat
   else if CandidateDateTime then
@@ -334,19 +337,16 @@ begin
     MaxLen := RoundUpLength(MaxLen);
 end;
 
-// ---------------------------------------------------------------
-//  Firebird-Typ aus TFieldType
-// ---------------------------------------------------------------
 function TGenSQLFromCSVDataset.FieldTypeToFirebird(
-  AType: TFieldType;
-  MaxLength: Integer): string;
+  AType: TFieldType; MaxLength: Integer): string;
 begin
   case AType of
-    ftSmallint:  Result := 'INTEGER';       // vereinfacht
+    ftSmallint:  Result := 'INTEGER';
     ftInteger:   Result := 'INTEGER';
     ftLargeint:  Result := 'BIGINT';
     ftFloat:     Result := 'DOUBLE PRECISION';
     ftCurrency:  Result := 'DECIMAL(18,2)';
+    ftFMTBcd:    Result := 'DECIMAL(38,0)';
     ftBoolean:   Result := 'SMALLINT';
     ftDate:      Result := 'DATE';
     ftDateTime, ftTimeStamp: Result := 'TIMESTAMP';
@@ -360,9 +360,6 @@ begin
   end;
 end;
 
-// ---------------------------------------------------------------
-//  Felder analysieren und FFields befüllen
-// ---------------------------------------------------------------
 procedure TGenSQLFromCSVDataset.AnalyzeFields;
 var
   i: Integer;
@@ -373,7 +370,21 @@ var
   UseHeader: Boolean;
 begin
   SetLength(FFields, 0);
+  FSamplingPartial   := False;
+  FAnyMarginApplied  := False;
+  FTotalRows         := 0;
+  FTotalRowsAnalyzed := 0;
+
   if not FDataSet.Active then Exit;
+
+  // ============================================================
+  // Sampling-Zustand ermitteln
+  // ============================================================
+  FTotalRows := FDataSet.RecordCount;
+  if FTotalRows < 0 then FTotalRows := 0;
+
+  // 0 (unbekannt) oder > 100 → Sampling, Sicherheits-Margin aktiv
+  FSamplingPartial := (FTotalRows = 0) or (FTotalRows > CSV_ANALYZE_ROWS);
 
   UseHeader := (FDataSet is TCSVDataset) and
                TCSVDataset(FDataSet).CSVOptions.FirstLineAsFieldNames;
@@ -392,16 +403,43 @@ begin
     DetectFieldTypeAndLength(fName, DetectedType, DetectedLen);
 
     SetLength(FFields, i + 1);
-    FFields[i].FieldName := fName;
+    FFields[i].FieldName     := fName;
+    FFields[i].MarginApplied := False;
+
+    // ============================================================
+    // Sicherheits-Margin — nur bei Sampling
+    //
+    //  INTEGER (32-bit)  →  BIGINT (64-bit)
+    //  VARCHAR(n)        →  VARCHAR(2n), cap 32765
+    //
+    //  Andere Typen (DATE, TIME, TIMESTAMP, FLOAT, BOOLEAN,
+    //  DECIMAL) sind bereits maximal — kein Margin möglich.
+    // ============================================================
+    if FSamplingPartial then
+    begin
+      if DetectedType = ftInteger then
+      begin
+        DetectedType := ftLargeint;
+        FFields[i].MarginApplied := True;
+        FAnyMarginApplied := True;
+      end;
+
+      if DetectedType in [ftString, ftFixedChar, ftWideString] then
+      begin
+        DetectedLen := DetectedLen * 2;
+        if DetectedLen > CSV_MAX_VARCHAR then
+          DetectedLen := CSV_MAX_VARCHAR;
+        FFields[i].MarginApplied := True;
+        FAnyMarginApplied := True;
+      end;
+    end;
+
     FFields[i].FieldType := FieldTypeToFirebird(DetectedType, DetectedLen);
     FFields[i].Detected  := DetectedType <> ftString;
     FFields[i].MaxLength := DetectedLen;
   end;
 end;
 
-// ---------------------------------------------------------------
-//  SQL generieren
-// ---------------------------------------------------------------
 procedure TGenSQLFromCSVDataset.GenerateSQL;
 var
   i: Integer;
