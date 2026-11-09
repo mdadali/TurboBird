@@ -954,7 +954,7 @@ begin
   Msg.Add('content', FPrompt);
   Msgs.Add(Msg);
   Iter := 0;
-  while Iter < 50 do
+  while Iter < FSettings.MaxIterations do
   begin
     Inc(Iter);
     ReqStream := TStringStream.Create('');

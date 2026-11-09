@@ -1,0 +1,22 @@
+# QBuilder
+# Don't change this file !
+[Options]
+138,377,550,834;
+1,121,1,155;
+[Database]
+127.0.0.1:/opt/FireBird/Firebird-5.0.3.1683-0-linux-x64/examples/empbuild/employee.fdb,0;
+[Tables]
+EMPLOYEE_PROJECT,92,317,0,0,0;
+EMPLOYEE,41,568,0,0,1,1,0,0,0,0,0,0,0,0;
+PROJECT,36,126,0,0,1,0,0,0;
+PROJ_DEPT_BUDGET,172,342,0,0,1,0,0,0;
+[Links]
+PROJECT,1,EMPLOYEE_PROJECT,2,0,0;
+EMPLOYEE,1,EMPLOYEE_PROJECT,1,0,0;
+PROJ_DEPT_BUDGET,2,PROJECT,1,0,0;
+[Columns]
+1,FIRST_NAME,EMPLOYEE,Show,,,;
+2,LAST_NAME,EMPLOYEE,Show,,,;
+3,PROJ_NAME,PROJECT,Show,,,;
+4,PROJ_ID,PROJ_DEPT_BUDGET,Show,,,;
+[End]

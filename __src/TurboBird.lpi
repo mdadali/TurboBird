@@ -1,0 +1,1830 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <Flags>
+        <LRSInOutputDirectory Value="False"/>
+        <CompatibilityMode Value="True"/>
+      </Flags>
+      <SessionStorage Value="InProjectDir"/>
+      <Title Value="TurboBird"/>
+      <Scaled Value="True"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+      <Resources Count="1">
+        <Resource_0 FileName="resources/data.zip" Type="RCDATA" ResourceName="DATA"/>
+      </Resources>
+    </General>
+    <VersionInfo>
+      <UseVersionInfo Value="True"/>
+      <AutoIncrementBuild Value="True"/>
+      <MajorVersionNr Value="1"/>
+      <MinorVersionNr Value="2"/>
+      <RevisionNr Value="1"/>
+      <BuildNr Value="1518"/>
+      <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
+    </VersionInfo>
+    <MacroValues Count="1">
+      <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+    </MacroValues>
+    <BuildModes Count="15">
+      <Item1 Name="x86_64-linux64-gtk2-debug" Default="True"/>
+      <Item2 Name="x86_64-linux64-gtk2-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Compile="False" Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="i386_linux32-gtk-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-O2
+-dDEBUG
+-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item3>
+      <Item4 Name="i386_linux32-gtk2-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="x86_64-win64-win-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1
+-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Build="False" Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="sh /home/maurog/daten/mustafa/entwicklung/linux/lazarus/turbobird/bin/x86_64-win64-win-debug/TurboBird_x86_64-win64-win-debug/start_turbird_win64_debug_wine.sh"/>
+              <CompileReasons Build="False" Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item5>
+      <Item6 Name="x86_64-win64-win-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/PascalScript/Source;components/uib/source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+          <CompileReasons Compile="False"/>
+        </CompilerOptions>
+      </Item6>
+      <Item7 Name="i386_Win32-win-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1
+-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="i386_Win32-win-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+            <Options>
+              <PassLinkerOptions Value="True"/>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item8>
+      <Item9 Name="x86_64-linux64-gtk3-debug">
+        <MacroValues Count="1">
+          <Macro2 Name="LCLWidgetType" Value="gtk3"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="x86_64-linux64-gtk3-release">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item10>
+      <Item11 Name="x86_64-linux64-qt5-debug">
+        <MacroValues Count="1">
+          <Macro4 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG -O-1
+-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item11>
+      <Item12 Name="x86_64-linux64-qt5-release">
+        <MacroValues Count="1">
+          <Macro4 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="4"/>
+            </Optimizations>
+            <SmallerCode Value="True"/>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <DebugInfoType Value="dsDwarf2Set"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item12>
+      <Item13 Name="x86_64-darwin64-cocoa-debug">
+        <MacroValues Count="1">
+          <Macro3 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-O-
+-O1
+-dDEBUG
+-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <OtherDefines Count="7">
+              <Define0 Value="DEBUG"/>
+              <Define1 Value="UseCThreads"/>
+              <Define2 Value="WITH_GTK2_IM"/>
+              <Define3 Value="SCRIPTER_EMBEDDED"/>
+              <Define4 Value="CONSOLE_SCRIPTER"/>
+              <Define5 Value="PS_USESSUPPORT"/>
+              <Define6 Value="-WM10.15"/>
+            </OtherDefines>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item13>
+      <Item14 Name="x86_64-darwin64-cocoa-release">
+        <MacroValues Count="1">
+          <Macro3 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <OtherDefines Count="7">
+              <Define0 Value="DEBUG"/>
+              <Define1 Value="UseCThreads"/>
+              <Define2 Value="WITH_GTK2_IM"/>
+              <Define3 Value="SCRIPTER_EMBEDDED"/>
+              <Define4 Value="CONSOLE_SCRIPTER"/>
+              <Define5 Value="PS_USESSUPPORT"/>
+              <Define6 Value="-WM10.15"/>
+            </OtherDefines>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item14>
+      <Item15 Name="i386-darwin32-carbon-debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <Target>
+            <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+          </SearchPaths>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
+          <CodeGeneration>
+            <Checks>
+              <IOChecks Value="True"/>
+              <RangeChecks Value="True"/>
+              <OverflowChecks Value="True"/>
+              <StackChecks Value="True"/>
+            </Checks>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <DebugInfoType Value="dsDwarf2Set"/>
+              <UseHeaptrc Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-O-
+-O1
+-dDEBUG
+-dUseCThreads
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+            <OtherDefines Count="7">
+              <Define0 Value="DEBUG"/>
+              <Define1 Value="UseCThreads"/>
+              <Define2 Value="WITH_GTK2_IM"/>
+              <Define3 Value="SCRIPTER_EMBEDDED"/>
+              <Define4 Value="CONSOLE_SCRIPTER"/>
+              <Define5 Value="PS_USESSUPPORT"/>
+              <Define6 Value="-WM10.15"/>
+            </OtherDefines>
+            <ExecuteBefore>
+              <Command Value="./gen_versions_scripts.sh"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+            <ExecuteAfter>
+              <Command Value="./choose_target_script.sh $(TargetFile)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteAfter>
+          </Other>
+        </CompilerOptions>
+      </Item15>
+      <SharedMatrixOptions Count="5">
+        <Item1 ID="844124804436" Modes="x86_64-linux64-gtk2-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item2 ID="875199933056" Modes="x86_64-linux64-gtk3-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
+        <Item3 ID="013957187272" Modes="x86_64-darwin64-cocoa-debug,x86_64-darwin64-cocoa-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item4 ID="799143915312" Modes="x86_64-linux64-qt5-debug,x86_64-linux64-qt5-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item5 ID="284256768967" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
+      </SharedMatrixOptions>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <OpenInFileMan Value="True"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default"/>
+      </Modes>
+    </RunParams>
+    <RequiredPackages Count="33">
+      <Item1>
+        <PackageName Value="fbintf"/>
+      </Item1>
+      <Item2>
+        <PackageName Value="atsynedit_package"/>
+      </Item2>
+      <Item3>
+        <PackageName Value="pascalscriptfcl"/>
+      </Item3>
+      <Item4>
+        <PackageName Value="UIBLaz"/>
+      </Item4>
+      <Item5>
+        <PackageName Value="TurboDataSets"/>
+      </Item5>
+      <Item6>
+        <PackageName Value="FrameViewer09"/>
+      </Item6>
+      <Item7>
+        <PackageName Value="pascalscript"/>
+      </Item7>
+      <Item8>
+        <PackageName Value="jvRuntimeDesign"/>
+      </Item8>
+      <Item9>
+        <PackageName Value="DBFLaz"/>
+      </Item9>
+      <Item10>
+        <PackageName Value="SDFLaz"/>
+      </Item10>
+      <Item11>
+        <PackageName Value="laz_fpspreadsheet_dataset"/>
+      </Item11>
+      <Item12>
+        <PackageName Value="ibnongui"/>
+      </Item12>
+      <Item13>
+        <PackageName Value="encconv_package"/>
+      </Item13>
+      <Item14>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+      </Item14>
+      <Item15>
+        <PackageName Value="rxdbgrid_print"/>
+      </Item15>
+      <Item16>
+        <PackageName Value="rxnew"/>
+      </Item16>
+      <Item17>
+        <PackageName Value="indylaz"/>
+      </Item17>
+      <Item18>
+        <PackageName Value="pkg_gifanim"/>
+      </Item18>
+      <Item19>
+        <PackageName Value="atbinhex_package"/>
+      </Item19>
+      <Item20>
+        <PackageName Value="lazreport"/>
+      </Item20>
+      <Item21>
+        <PackageName Value="lazdbexport"/>
+      </Item21>
+      <Item22>
+        <PackageName Value="RunTimeTypeInfoControls"/>
+      </Item22>
+      <Item23>
+        <PackageName Value="DateTimeCtrls"/>
+      </Item23>
+      <Item24>
+        <PackageName Value="ibLegacyServices"/>
+      </Item24>
+      <Item25>
+        <PackageName Value="dclibx"/>
+      </Item25>
+      <Item26>
+        <PackageName Value="iblocaldb"/>
+      </Item26>
+      <Item27>
+        <PackageName Value="ibcontrols"/>
+      </Item27>
+      <Item28>
+        <PackageName Value="ibexpress"/>
+      </Item28>
+      <Item29>
+        <PackageName Value="Abbrevia"/>
+      </Item29>
+      <Item30>
+        <PackageName Value="MemDSLaz"/>
+      </Item30>
+      <Item31>
+        <PackageName Value="SynEdit"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item31>
+      <Item32>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
+      </Item32>
+      <Item33>
+        <PackageName Value="LCL"/>
+      </Item33>
+    </RequiredPackages>
+    <Units Count="139">
+      <Unit0>
+        <Filename Value="TurboBird.lpr"/>
+        <IsPartOfProject Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="turbocommon.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="getdeclarations/udb_udr_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="getdeclarations/udb_firebird_struct_helper.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="getdeclarations/udb_udf_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="getdeclarations/udb_udr_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit5>
+      <Unit6>
+        <Filename Value="getdeclarations/udb_firebird_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="getdeclarations/udb_firebird_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="getdeclarations/udb_package_firebird_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="getdeclarations/udb_package_firebird_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit9>
+      <Unit10>
+        <Filename Value="getdeclarations/udb_package_udr_func_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit10>
+      <Unit11>
+        <Filename Value="getdeclarations/fetch_package.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit11>
+      <Unit12>
+        <Filename Value="getdeclarations/udb_package_udr_proc_fetcher.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="deps/package_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="deps/fb_func_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="deps/udf_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="deps/udr_func_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="deps/udr_proc_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="deps/domain_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="deps/role_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="deps/exception_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="deps/user_deps.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="common/fbcommon.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="ui/newtable/newtable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewTable"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="ui/tablemanage/tablemanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmTableManage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="TableManage"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="ui/main/main.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="ui/createdb/createdb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateDB"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateDb"/>
+      </Unit26>
+      <Unit27>
+        <Filename Value="ui/registerdb/reg.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmReg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Reg"/>
+      </Unit27>
+      <Unit28>
+        <Filename Value="ui/querywindow/querywindow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmQueryWindow"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="QueryWindow"/>
+      </Unit28>
+      <Unit29>
+        <Filename Value="ui/viewview/viewview.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewView"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewView"/>
+      </Unit29>
+      <Unit30>
+        <Filename Value="ui/viewtrigger/viewtrigger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewTrigger"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewTrigger"/>
+      </Unit30>
+      <Unit31>
+        <Filename Value="ui/viewstoredprocedure/viewsproc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewSProc"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewSProc"/>
+      </Unit31>
+      <Unit32>
+        <Filename Value="ui/viewgenerator/viewgen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewGen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewGen"/>
+      </Unit32>
+      <Unit33>
+        <Filename Value="ui/newgenerator/newgen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewGen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewGen"/>
+      </Unit33>
+      <Unit34>
+        <Filename Value="ui/enterpassword/enterpass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmEnterPass"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="EnterPass"/>
+      </Unit34>
+      <Unit35>
+        <Filename Value="ui/createtrigger/createtrigger.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateTrigger"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateTrigger"/>
+      </Unit35>
+      <Unit36>
+        <Filename Value="ui/udfinfo/udfinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmUDFInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UDFInfo"/>
+      </Unit36>
+      <Unit37>
+        <Filename Value="ui/viewdomain/viewdomain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmViewDomain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ViewDomain"/>
+      </Unit37>
+      <Unit38>
+        <Filename Value="ui/newdomain/newdomain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewDomain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewDomain"/>
+      </Unit38>
+      <Unit39>
+        <Filename Value="common/turbocommon.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit39>
+      <Unit40>
+        <Filename Value="libs/topologicalsort.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit40>
+      <Unit41>
+        <Filename Value="ui/newconstraint/newforeignkey.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewForeignKey"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="newForeignKey"/>
+      </Unit41>
+      <Unit42>
+        <Filename Value="ui/neweditfield/neweditfield.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNewEditField"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NewEditField"/>
+      </Unit42>
+      <Unit43>
+        <Filename Value="ui/calender/calen.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCalen"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Calen"/>
+      </Unit43>
+      <Unit44>
+        <Filename Value="ui/userpermissions/userpermissions.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmUserPermissions"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UserPermissions"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="ui/permissionmanage/permissionmanage.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmPermissionManage"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="PermissionManage"/>
+      </Unit45>
+      <Unit46>
+        <Filename Value="ui/sqlhistory/sqlhistory.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmSQLHistory"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="SQLHistory"/>
+      </Unit46>
+      <Unit47>
+        <Filename Value="ui/createuser/createuser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCreateUser"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CreateUser"/>
+      </Unit47>
+      <Unit48>
+        <Filename Value="ui/changepassword/changepass.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmChangePass"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ChangePass"/>
+      </Unit48>
+      <Unit49>
+        <Filename Value="ui/dbinfo/dbinfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmDBInfo"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="dbInfo"/>
+      </Unit49>
+      <Unit50>
+        <Filename Value="ui/comparison/comparison.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmComparison"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="Comparison"/>
+      </Unit50>
+      <Unit51>
+        <Filename Value="utils/scriptdb.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Scriptdb"/>
+      </Unit51>
+      <Unit52>
+        <Filename Value="utils/csvdocument.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CsvDocument"/>
+      </Unit52>
+      <Unit53>
+        <Filename Value="ui/setfirebirdclient/fsetfbclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmSetFBClient"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fSetFBClient"/>
+      </Unit53>
+      <Unit54>
+        <Filename Value="ui/firebirdconfig/ffirebirdconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmFirebirdConfig"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fFirebirdConfig"/>
+      </Unit54>
+      <Unit55>
+        <Filename Value="ui/updatechecker/updatechecker.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmUpdateChecker"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UpdateChecker"/>
+      </Unit55>
+      <Unit56>
+        <Filename Value="ui/executer/ftestfunction.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmTestFunction"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fTestFunction"/>
+      </Unit56>
+      <Unit57>
+        <Filename Value="datamodules/systables.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmSysTables"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+        <UnitName Value="SysTables"/>
+      </Unit57>
+      <Unit58>
+        <Filename Value="ui/openquerybuilder/QBEIBX.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit58>
+      <Unit59>
+        <Filename Value="ui/openquerybuilder/QBuilder.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit59>
+      <Unit60>
+        <Filename Value="ui/openquerybuilder/QBDirFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBDirForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit60>
+      <Unit61>
+        <Filename Value="ui/openquerybuilder/QBLnkFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="OQBLinkForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit61>
+      <Unit62>
+        <Filename Value="common/checkdbintegrity.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CheckDBIntegrity"/>
+      </Unit62>
+      <Unit63>
+        <Filename Value="ui/CheckDBIntegrity/fcheckdbintegrity.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCheckDBIntegrity"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fCheckDBIntegrity"/>
+      </Unit63>
+      <Unit64>
+        <Filename Value="utils/dbcharsetmigrator.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="DBCharsetMigrator"/>
+      </Unit64>
+      <Unit65>
+        <Filename Value="ui/sqlmonitor/fsqlmonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmSQLMonitor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit65>
+      <Unit66>
+        <Filename Value="utils/data_exporters/fdataexportersintrf.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit66>
+      <Unit67>
+        <Filename Value="utils/data_exporters/fmarkdowntableexport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fMarkDownTableExport"/>
+      </Unit67>
+      <Unit68>
+        <Filename Value="utils/data_exporters/fhtmlexport.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit68>
+      <Unit69>
+        <Filename Value="utils/data_exporters/fpcstdexporters.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="utils/ibarrayhelper.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="IBArrayHelper"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="utils/fServerSession.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="utils/fbfeaturechecker.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="ui/loginservicemanager/floginservicemanager.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmLoginServiceManager"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit73>
+      <Unit74>
+        <Filename Value="ui/serverregistry/fserverregistry.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmServerRegistry"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit74>
+      <Unit75>
+        <Filename Value="common/fmetaquerys.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit75>
+      <Unit76>
+        <Filename Value="utils/gtk_theme_selector/uthemeselector.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmThemeSelector"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit76>
+      <Unit77>
+        <Filename Value="utils/tb_netutils.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit77>
+      <Unit78>
+        <Filename Value="ui/DBAdmin/MainFormUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit78>
+      <Unit79>
+        <Filename Value="ui/DBAdmin/DataModule.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBDataModule"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+      </Unit79>
+      <Unit80>
+        <Filename Value="ui/DBAdmin/dlg/DBLoginDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="DBLoginDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit80>
+      <Unit81>
+        <Filename Value="ui/DBAdmin/dlg/BackupDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="BackupDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit81>
+      <Unit82>
+        <Filename Value="ui/DBAdmin/dlg/RestoreDlgUnit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="RestoreDlg"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit82>
+      <Unit83>
+        <Filename Value="ui/scriptengine/fscriptengine.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmScriptEngine"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fScriptEngine"/>
+      </Unit83>
+      <Unit84>
+        <Filename Value="ui/scriptengine/selectsqlresultsunit_ext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="SelectSQLResultsExt"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit84>
+      <Unit85>
+        <Filename Value="utils/data_exporters/fclipboardexport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fClipboardExport"/>
+      </Unit85>
+      <Unit86>
+        <Filename Value="utils/fsimpleobjextractor.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit86>
+      <Unit87>
+        <Filename Value="common/cunintellisensecache.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cUnIntelliSenseCache"/>
+      </Unit87>
+      <Unit88>
+        <Filename Value="utils/cselectsqlparserext.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cSelectSQLParserExt"/>
+      </Unit88>
+      <Unit89>
+        <Filename Value="datamodules/datamodulesystem.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="dmSystem"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="DataModule"/>
+      </Unit89>
+      <Unit90>
+        <Filename Value="ui/servers/fservers.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmServers"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit90>
+      <Unit91>
+        <Filename Value="ui/activitymonitor/factivitymonitor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmActivityMonitor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fActivityMonitor"/>
+      </Unit91>
+      <Unit92>
+        <Filename Value="ui/edit_tabledata_new/edit_tabledata_new.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmEditTableDataNew"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit92>
+      <Unit93>
+        <Filename Value="ui/forign_key_table/foreign_key_table.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmForeignKeyTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit93>
+      <Unit94>
+        <Filename Value="ui/ibx_design/ibsqleditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="IBSQLEditorForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit94>
+      <Unit95>
+        <Filename Value="ui/ibx_design/IBTransactionEdit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="IBTransactionEditForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit95>
+      <Unit96>
+        <Filename Value="ui/tools/DataEditor/fdataeditor.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmDataEditor"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit96>
+      <Unit97>
+        <Filename Value="utils/uGenSQLFromCSVDataset.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit97>
+      <Unit98>
+        <Filename Value="ui/tools/DBReader/DBReader/db_reader.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmDBReader"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit98>
+      <Unit99>
+        <Filename Value="ui/tools/DBReader/DBReader/DbGridForm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <HasResources Value="True"/>
+      </Unit99>
+      <Unit100>
+        <Filename Value="ui/tools/PascalScript_IDE/source/designer/u_psstudio.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmPSStudio"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit100>
+      <Unit101>
+        <Filename Value="ui/tools/PascalScript_IDE/source/editor/u_consoleide.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmConsoleIDE"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit101>
+      <Unit102>
+        <Filename Value="components/PascalScript/Source/ThirdParty/uib/uPSI_uibconst.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit102>
+      <Unit103>
+        <Filename Value="components/uib/source/uib.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit103>
+      <Unit104>
+        <Filename Value="ui/tablemanage/edit_primarykey.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmPrimaryKey"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit104>
+      <Unit105>
+        <Filename Value="ui/tablemanage/uniqueconstraints.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmUniqueConstraints"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="UniqueConstraints"/>
+      </Unit105>
+      <Unit106>
+        <Filename Value="ui/tablemanage/checkconstraints.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCheckConstraints"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="CheckConstraints"/>
+      </Unit106>
+      <Unit107>
+        <Filename Value="ui/tablemanage/notnullconstraints.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmNotNullConstraints"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="NotNullConstraints"/>
+      </Unit107>
+      <Unit108>
+        <Filename Value="components/PascalScript/Source/PascalScript.inc"/>
+        <IsPartOfProject Value="True"/>
+      </Unit108>
+      <Unit109>
+        <Filename Value="common/uexternaltable.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uExternalTable"/>
+      </Unit109>
+      <Unit110>
+        <Filename Value="ui/dialogs/clone_table_to_external_table_dialog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmCloneToExternalTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit110>
+      <Unit111>
+        <Filename Value="ui/tools/sqlparser/fsqlparser.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmSQLParser"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="fSQLParser"/>
+      </Unit111>
+      <Unit112>
+        <Filename Value="common/ucopytabledatalocal.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyTableDataLocal"/>
+      </Unit112>
+      <Unit113>
+        <Filename Value="ui/clone_table/clone_table_dialog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCloneTable"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit113>
+      <Unit114>
+        <Filename Value="common/ucopytabledatacrossexecuteblock.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyTableDataCrossExecuteBlock"/>
+      </Unit114>
+      <Unit115>
+        <Filename Value="common/uformulapresets.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uFormulaPresets"/>
+      </Unit115>
+      <Unit116>
+        <Filename Value="common/ucopytabledatarowbyrow.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit116>
+      <Unit117>
+        <Filename Value="ui/tools/DataEditor/ucreatetablefromdataset.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCreateTableFromDataSet"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uCreateTableFromDataSet"/>
+      </Unit117>
+      <Unit118>
+        <Filename Value="ui/ServerDBFieldSelector/serverdbfieldselector.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmServerDBFieldSelector"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="ServerDBFieldSelector"/>
+      </Unit118>
+      <Unit119>
+        <Filename Value="ui/about/about.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmAbout"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="About"/>
+      </Unit119>
+      <Unit120>
+        <Filename Value="common/ureport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmReport"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uReport"/>
+      </Unit120>
+      <Unit121>
+        <Filename Value="utils/usysteminfo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uSystemInfo"/>
+      </Unit121>
+      <Unit122>
+        <Filename Value="ui/csv_bulk_export/u_csv_bulk_exporter.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCSVBulkExporter"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit122>
+      <Unit123>
+        <Filename Value="ui/clone_table/uproblemfieldsdialog.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uProblemFieldsDialog"/>
+      </Unit123>
+      <Unit124>
+        <Filename Value="common/ucopytabledatafbintf.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCopyTableDataFBIntf"/>
+      </Unit124>
+      <Unit125>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsmain.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCrossRDBMSMain"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uCrossRDBMSMain"/>
+      </Unit125>
+      <Unit126>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmstypes.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSTypes"/>
+      </Unit126>
+      <Unit127>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsstrategies.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSStrategies"/>
+      </Unit127>
+      <Unit128>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsenginebase.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineBase"/>
+      </Unit128>
+      <Unit129>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsenginerowbyrow.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineRowByRow"/>
+      </Unit129>
+      <Unit130>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsenginebatched.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineBatched"/>
+      </Unit130>
+      <Unit131>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsengineinsertselect.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineInsertSelect"/>
+      </Unit131>
+      <Unit132>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsengine.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngine"/>
+      </Unit132>
+      <Unit133>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsprogress.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSProgress"/>
+      </Unit133>
+      <Unit134>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsreport.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSReport"/>
+      </Unit134>
+      <Unit135>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/OI_Connector/ucrossrdbmsconnection.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmCrossRDBMSConnection"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uCrossRDBMSConnection"/>
+      </Unit135>
+      <Unit136>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsengineibx.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSEngineIBX"/>
+      </Unit136>
+      <Unit137>
+        <Filename Value="ui/tools/CrossRDBMSTransfer/ucrossrdbmsfieldanalysis.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uCrossRDBMSFieldAnalysis"/>
+      </Unit137>
+      <Unit138>
+        <Filename Value="ui/tools/ai_prompt/fmAIPrompt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmAIPromptForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit138>
+    </Units>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="../bin/${BuildMode}/TurboBird_${BuildMode}/TurboBird_${BuildMode}"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
+      <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+      <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
+    </SearchPaths>
+    <Parsing>
+      <SyntaxOptions>
+        <IncludeAssertionCode Value="True"/>
+      </SyntaxOptions>
+    </Parsing>
+    <CodeGeneration>
+      <Checks>
+        <IOChecks Value="True"/>
+        <RangeChecks Value="True"/>
+        <OverflowChecks Value="True"/>
+        <StackChecks Value="True"/>
+      </Checks>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="linux"/>
+      <Optimizations>
+        <OptimizationLevel Value="0"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <DebugInfoType Value="dsDwarf2Set"/>
+        <UseHeaptrc Value="True"/>
+      </Debugging>
+    </Linking>
+    <Other>
+      <CustomOptions Value="-O2
+-dDEBUG
+-dUseCThreads
+-dWITH_GTK2_IM
+-dSCRIPTER_EMBEDDED
+-dPS_USESSUPPORT"/>
+      <ExecuteBefore>
+        <Command Value="./gen_versions_scripts.sh"/>
+        <CompileReasons Compile="False" Build="False" Run="False"/>
+      </ExecuteBefore>
+      <ExecuteAfter>
+        <CompileReasons Compile="False" Build="False" Run="False"/>
+      </ExecuteAfter>
+    </Other>
+  </CompilerOptions>
+</CONFIG>

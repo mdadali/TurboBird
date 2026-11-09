@@ -128,6 +128,7 @@ type
     tsGrid: TTabSheet;
     tsDetail: TTabSheet;
 
+    procedure BitBtn1Click(Sender: TObject);
     procedure btnCopySQLClick(Sender: TObject);
     procedure btnCreateSQLClick(Sender: TObject);
     procedure btnCreateTableClick(Sender: TObject);
@@ -2359,6 +2360,15 @@ begin
         'Failed to copy to clipboard:'#13#10 + E.Message,
         mtError, [mbOK], 0);
   end;
+end;
+
+procedure TfrmDataEditor.BitBtn1Click(Sender: TObject);
+begin
+  ShowMessage(
+    'Class: ' + CSVFastDataset1.FieldByName('F_DOUBLE').ClassName + sLineBreak +
+    'AsString: ' + CSVFastDataset1.FieldByName('F_DOUBLE').AsString + sLineBreak +
+    'AsFloat: ' + FloatToStr(CSVFastDataset1.FieldByName('F_DOUBLE').AsFloat)
+  );
 end;
 
 { ==================================================================

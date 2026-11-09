@@ -1,7 +1,7 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 663
+  Left = 561
   Height = 564
-  Top = 285
+  Top = 207
   Width = 1086
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 564
@@ -130,6 +130,7 @@ object frmDataEditor: TfrmDataEditor
       Width = 56
       Align = alLeft
       Caption = 'BitBtn1'
+      OnClick = BitBtn1Click
       TabOrder = 9
     end
     object SpeedButton1: TSpeedButton

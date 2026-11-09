@@ -1,5 +1,9 @@
-{
-  uCSVFastDataset.pas
+unit uCSVFastDataset;
+
+{$mode objfpc}{$H+}
+
+{ ==========================================================================
+  uCSVFastDataset
 
   High-performance CSV dataset for Lazarus / Free Pascal.
   Drop-in replacement for TCSVDataset with a PChar block scanner
@@ -28,14 +32,16 @@
   NAMING CONVENTIONS
   ----------------------------------------------------------------------
 
-  Reader public properties : BlockSize, BufferSize, SkipFirstRows,
-                             StopAfterRow, ProgressUpdatePercent
+  Reader public properties : BlockSize, BufferSize, DecimalSeparator,
+                             AutoDetectTypes, TypeDetectionSampleRows,
+                             SkipFirstRows, StopAfterRow,
+                             ProgressUpdatePercent, TotalRowsForProgress
   Reader public event      : OnProgress
   Reader cancel            : CancelFlag, Aborted
 
   Writer public properties : SaveBufferSize, SaveSkipFirstRows,
                              SaveStopAfterRow, SaveProgressUpdatePercent,
-                             SaveWriteBOM
+                             SaveWriteBOM, DecimalSeparator
   Writer public event      : OnSaveProgress
   Writer cancel            : SaveCancelFlag, SaveAborted
 
@@ -59,24 +65,28 @@
   The dataset exposes Aborted (reader) and SaveAborted (writer).
 
   ----------------------------------------------------------------------
+  TYPE DETECTION (optional)
+  ----------------------------------------------------------------------
+
+  When AutoDetectTypes is True, the reader samples the first N
+  (TypeDetectionSampleRows) data rows and classifies each column as
+  ftLargeint / ftFloat / ftBoolean / ftString. When False, all columns
+  are ftString with DefaultFieldLength.
+
+  ----------------------------------------------------------------------
   LICENSE
   ----------------------------------------------------------------------
 
   Same license as the containing project.
 }
 
-unit uCSVFastDataset;
-
-{$mode objfpc}{$H+}
-
 interface
 
 uses
-  Classes, SysUtils, DB, BufDataset, csvdataset, csvreadwrite;
+  Classes, SysUtils, Math, DB, BufDataset, csvdataset, csvreadwrite;
 
 type
   { Reader progress event.
-
     ARowsRead       - Data rows read so far (header excluded).
     ABytesRead      - Bytes actually read from the stream so far.
     AElapsedSeconds - Elapsed seconds since load started. }
@@ -86,7 +96,6 @@ type
     AElapsedSeconds: Double) of object;
 
   { Writer progress event.
-
     ARowsWritten    - Data rows written so far (header excluded).
     ABytesWritten   - Bytes actually written to the stream so far.
     AElapsedSeconds - Elapsed seconds since save started. }
@@ -110,6 +119,21 @@ type
     frsFinished,
     frsAborted
   );
+
+  TCSVFastColumnType = (
+    fctUnknown,
+    fctBoolean,
+    fctInteger,
+    fctFloat,
+    fctString
+  );
+
+  { Benannte dynamische Array-Typen.
+    Wichtig: NICHT "array of X" direkt als Parameter verwenden,
+    sonst ist es ein Open Array und SetLength funktioniert nicht. }
+  TCSVFastColumnTypeArray = array of TCSVFastColumnType;
+  TCSVFastIntArray        = array of Integer;
+  TCSVFastStringArray     = array of string;
 
   { ------------------------------------------------------------------
     TCSVFastPacketReader — reads CSV data block-wise via PChar scanning.
@@ -144,6 +168,10 @@ type
     FDelimiter: Char;
     FLineEnding: string;
     FIgnoreOuterWhitespace: Boolean;
+    FDecimalSeparator: Char;
+
+    FAutoDetectTypes: Boolean;
+    FTypeDetectionSampleRows: Integer;
 
     FBOMChecked: Boolean;
     FPendingLF: Boolean;
@@ -164,6 +192,7 @@ type
 
     procedure InitBuffer;
     procedure RefillBuffer;
+    procedure ResetToStart;
     procedure SkipBOMIfNeeded;
     procedure ScanRow;
     function  ScanRowWithRefill(out ARowComplete: Boolean): Boolean;
@@ -176,6 +205,17 @@ type
     procedure FireProgress(AForce: Boolean);
     procedure ResetProgress;
     function  ComputeRowDisposition: Boolean;
+
+    function  StripQuotes(const ACell: TCSVFastCellRef): TCSVFastCellRef;
+    function  MinimalTypeOfCell(const ACell: TCSVFastCellRef): TCSVFastColumnType;
+    function  MaxTypeOf(A, B: TCSVFastColumnType): TCSVFastColumnType;
+    function  IsBooleanCell(const ACell: TCSVFastCellRef): Boolean;
+    function  IsIntegerCell(const ACell: TCSVFastCellRef): Boolean;
+    function  IsFloatCell(const ACell: TCSVFastCellRef): Boolean;
+    procedure SampleDataRows(AColumnCount: Integer;
+                             out ATypes: TCSVFastColumnTypeArray;
+                             out AWidths: TCSVFastIntArray);
+
   protected
     property CreateFieldDefs: TFieldDefs
       read FCreateFieldDefs write FCreateFieldDefs;
@@ -202,6 +242,10 @@ type
     property BufferSize: Int64 read FBufferSize write SetBufferSize;
     property InitialCellCapacity: Integer read FInitialCellCapacity
       write SetInitialCellCapacity;
+    property DecimalSeparator: Char read FDecimalSeparator write FDecimalSeparator;
+    property AutoDetectTypes: Boolean read FAutoDetectTypes write FAutoDetectTypes;
+    property TypeDetectionSampleRows: Integer
+      read FTypeDetectionSampleRows write FTypeDetectionSampleRows;
 
     property SkipFirstRows: Int64 read FSkipFirstRows write FSkipFirstRows;
     property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
@@ -220,7 +264,6 @@ type
 
   { ------------------------------------------------------------------
     TCSVFastPacketWriter — writes CSV data block-wise.
-    Inherits from TObject because FPC has no TDataPacketWriter.
     ------------------------------------------------------------------ }
   TCSVFastPacketWriter = class(TObject)
   private
@@ -248,13 +291,14 @@ type
     FAborted: Boolean;
 
     FWriteBOM: Boolean;
+    FDecimalSeparator: Char;
 
     procedure InitBuffer;
     procedure FlushBuffer;
     procedure WriteByteRaw(AByte: Byte);
     procedure WriteStringRaw(const AStr: AnsiString);
     procedure WriteLineEnding;
-    procedure EmitBOMBytes;                     // BOM-Bytes schreiben
+    procedure EmitBOMBytes;
     procedure WriteHeaderRow;
     procedure WriteDataRow;
     procedure WriteFieldValue(const AValue: string);
@@ -273,6 +317,7 @@ type
     property StopAfterRow: Int64 read FStopAfterRow write FStopAfterRow;
     property BufferSize: Integer read FBufferSize write FBufferSize;
     property WriteBOM: Boolean read FWriteBOM write FWriteBOM;
+    property DecimalSeparator: Char read FDecimalSeparator write FDecimalSeparator;
     property ProgressUpdatePercent: Integer
       read FProgressUpdatePercent write FProgressUpdatePercent;
     property OnProgress: TCSVSaveProgressEvent
@@ -294,6 +339,9 @@ type
     FInitialCellCapacity: Integer;
     FSkipFirstRows: Int64;
     FStopAfterRow: Int64;
+    FDecimalSeparator: Char;
+    FAutoDetectTypes: Boolean;
+    FTypeDetectionSampleRows: Integer;
     FOnProgress: TCSVLoadProgressEvent;
     FTotalRowsForProgress: Int64;
     FProgressUpdatePercent: Integer;
@@ -346,6 +394,12 @@ type
       read FBufferSizeBytes write FBufferSizeBytes default 2097152;
     property InitialCellCapacity: Integer
       read FInitialCellCapacity write FInitialCellCapacity default 64;
+    property DecimalSeparator: Char
+      read FDecimalSeparator write FDecimalSeparator default '.';
+    property AutoDetectTypes: Boolean
+      read FAutoDetectTypes write FAutoDetectTypes default False;
+    property TypeDetectionSampleRows: Integer
+      read FTypeDetectionSampleRows write FTypeDetectionSampleRows default 1000;
     property OnProgress: TCSVLoadProgressEvent
       read FOnProgress write FOnProgress;
     property ProgressUpdatePercent: Integer
@@ -364,7 +418,8 @@ type
 
 { Inline PChar helpers (reader) }
 function PCharToInt64Def(P: PChar; Len: Int64; Def: Int64): Int64; inline;
-function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double): Double; inline;
+function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double;
+  DecimalSep: Char): Double; inline;
 function PCharEqualsIgnoreCase(P: PChar; Len: Int64; const S: string): Boolean; inline;
 
 procedure Register;
@@ -382,14 +437,15 @@ const
   UTF8_BOM_2 = $BF;
 
   // Reader defaults
-  DEFAULT_BLOCK_SIZE    = 1048576;   // 1 MB
-  DEFAULT_BUFFER_SIZE   = 2097152;   // 2 MB
+  DEFAULT_BLOCK_SIZE    = 1048576;
+  DEFAULT_BUFFER_SIZE   = 2097152;
   DEFAULT_CELL_CAPACITY = 64;
   DEFAULT_FIELD_LENGTH  = 50;
+  DEFAULT_SAMPLE_ROWS   = 1000;
 
   // Writer defaults
-  DEFAULT_SAVE_BUFFER_SIZE = 4194304;   // 4 MB
-  MIN_SAVE_BUFFER_SIZE     = 65536;     // 64 KB
+  DEFAULT_SAVE_BUFFER_SIZE = 4194304;
+  MIN_SAVE_BUFFER_SIZE     = 65536;
 
 { ==================================================================
   PChar helpers (reader)
@@ -421,16 +477,24 @@ begin
   Result := V;
 end;
 
-function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double): Double;
-var I: Integer; Neg, HasDigits: Boolean; IntPart, FracPart, FracDiv: Double;
+function PCharToDoubleDef(P: PChar; Len: Int64; Def: Double;
+  DecimalSep: Char): Double;
+var
+  I: Integer;
+  Neg, ExpNeg, HasDigits: Boolean;
+  IntPart, FracPart, FracDiv: Double;
+  ExpPart: Integer;
 begin
   Result := Def;
   if (P = nil) or (Len <= 0) then Exit;
+  if DecimalSep = #0 then DecimalSep := '.';
+
   I := 0; Neg := False; HasDigits := False;
   while (I < Len) and (P[I] in [SPACE, TAB]) do Inc(I);
   if I >= Len then Exit;
   if P[I] = '-' then begin Neg := True; Inc(I); end
   else if P[I] = '+' then Inc(I);
+
   IntPart := 0;
   while (I < Len) and (P[I] >= '0') and (P[I] <= '9') do
   begin
@@ -438,8 +502,9 @@ begin
     HasDigits := True;
     Inc(I);
   end;
+
   FracPart := 0; FracDiv := 1;
-  if (I < Len) and (P[I] = '.') then
+  if (I < Len) and (P[I] = DecimalSep) then
   begin
     Inc(I);
     while (I < Len) and (P[I] >= '0') and (P[I] <= '9') do
@@ -450,11 +515,30 @@ begin
       Inc(I);
     end;
   end;
+
   if not HasDigits then Exit;
-  if (I < Len) and ((P[I] = 'e') or (P[I] = 'E')) then Exit;
+  Result := IntPart + (FracPart / FracDiv);
+
+  if (I < Len) and ((P[I] = 'e') or (P[I] = 'E')) then
+  begin
+    Inc(I);
+    ExpNeg := False;
+    if (I < Len) and (P[I] = '-') then begin ExpNeg := True; Inc(I); end
+    else if (I < Len) and (P[I] = '+') then Inc(I);
+    if (I >= Len) or not (P[I] in ['0'..'9']) then Exit;
+    ExpPart := 0;
+    while (I < Len) and (P[I] >= '0') and (P[I] <= '9') do
+    begin
+      ExpPart := ExpPart * 10 + (Ord(P[I])-Ord('0'));
+      if ExpPart > 400 then Exit;
+      Inc(I);
+    end;
+    if ExpNeg then ExpPart := -ExpPart;
+    Result := Result * Power(10.0, ExpPart);
+  end;
+
   while (I < Len) and (P[I] in [SPACE, TAB]) do Inc(I);
   if I <> Len then Exit;
-  Result := IntPart + (FracPart / FracDiv);
   if Neg then Result := -Result;
 end;
 
@@ -498,6 +582,9 @@ begin
   FDelimiter             := ',';
   FLineEnding            := sLineBreak;
   FIgnoreOuterWhitespace := False;
+  FDecimalSeparator      := '.';
+  FAutoDetectTypes       := False;
+  FTypeDetectionSampleRows := DEFAULT_SAMPLE_ROWS;
   FBOMChecked            := False;
   FPendingLF             := False;
   FScannedRowCount       := 0;
@@ -576,10 +663,7 @@ begin
   Result := '';
   if ACell.Len <= 0 then Exit;
 
-  // ------------------------------------------------------------
   // Fall 1: Zelle beginnt UND endet mit QuoteChar
-  //         → äußere Quotes entfernen, doppelte Quotes auflösen
-  // ------------------------------------------------------------
   if (ACell.Len >= 2) and
      (ACell.Start^ = FQuoteChar) and
      ((ACell.Start + ACell.Len - 1)^ = FQuoteChar) then
@@ -591,7 +675,6 @@ begin
       Src := ACell.Start + 1;
       DstStart := PChar(Result);
       Dst := DstStart;
-
       while ContentLen > 0 do
       begin
         if (ContentLen >= 2) and
@@ -599,27 +682,20 @@ begin
            ((Src + 1)^ = FQuoteChar) then
         begin
           Dst^ := FQuoteChar;
-          Inc(Src, 2);
-          Inc(Dst);
-          Dec(ContentLen, 2);
+          Inc(Src, 2); Inc(Dst); Dec(ContentLen, 2);
         end
         else
         begin
           Dst^ := Src^;
-          Inc(Src);
-          Inc(Dst);
-          Dec(ContentLen);
+          Inc(Src); Inc(Dst); Dec(ContentLen);
         end;
       end;
-
       SetLength(Result, Dst - DstStart);
     end;
   end
   else
   begin
-    // ----------------------------------------------------------
     // Fall 2: Keine Quotes aussen — Rohdaten übernehmen
-    // ----------------------------------------------------------
     SetLength(Result, ACell.Len);
     Move(ACell.Start^, Result[1], ACell.Len);
   end;
@@ -672,6 +748,18 @@ begin
   end;
 end;
 
+procedure TCSVFastPacketReader.ResetToStart;
+begin
+  Stream.Position := FStreamStartPosition;
+  FBufStart := Pointer(FBuffer);
+  FBufPos   := FBufStart;
+  FBufEnd   := FBufStart;
+  FBOMChecked := False;
+  FPendingLF := False;
+  FScannedRowCount := 0;
+  FCellCount := 0;
+end;
+
 procedure TCSVFastPacketReader.CheckCancellation;
 begin
   if Assigned(FCancelFlag) and FCancelFlag^ then
@@ -684,9 +772,9 @@ end;
 
 procedure TCSVFastPacketReader.ResetProgress;
 begin
-  FStartTime           := Now;
+  FStartTime := Now;
   FLastProgressPercent := -1;
-  FProgressFiredOnce   := False;
+  FProgressFiredOnce := False;
 end;
 
 procedure TCSVFastPacketReader.FireProgress(AForce: Boolean);
@@ -867,24 +955,181 @@ begin
     Result := (FScannedRowCount - FSkipFirstRows) <= FStopAfterRow;
 end;
 
+function TCSVFastPacketReader.StripQuotes(const ACell: TCSVFastCellRef): TCSVFastCellRef;
+begin
+  if (ACell.Len >= 2) and (ACell.Start <> nil) and
+     (ACell.Start^ = FQuoteChar) and
+     ((ACell.Start + ACell.Len - 1)^ = FQuoteChar) then
+  begin
+    Result.Start := ACell.Start + 1;
+    Result.Len   := ACell.Len - 2;
+  end
+  else
+    Result := ACell;
+end;
+
+function TCSVFastPacketReader.IsBooleanCell(const ACell: TCSVFastCellRef): Boolean;
+begin
+  if ACell.Len = 0 then Exit(False);
+  if PCharEqualsIgnoreCase(ACell.Start, ACell.Len, 'true')  then Exit(True);
+  if PCharEqualsIgnoreCase(ACell.Start, ACell.Len, 'false') then Exit(True);
+  if PCharEqualsIgnoreCase(ACell.Start, ACell.Len, 'yes')   then Exit(True);
+  if PCharEqualsIgnoreCase(ACell.Start, ACell.Len, 'no')    then Exit(True);
+  if (ACell.Len = 1) and (ACell.Start^ in ['0', '1'])       then Exit(True);
+  Result := False;
+end;
+
+function TCSVFastPacketReader.IsIntegerCell(const ACell: TCSVFastCellRef): Boolean;
+var I: Integer; HasDigits, Neg: Boolean; V: Int64; Digit: Integer;
+begin
+  Result := False;
+  if ACell.Len = 0 then Exit;
+  I := 0; Neg := False;
+  if ACell.Start[0] = '-' then begin Neg := True; Inc(I); end
+  else if ACell.Start[0] = '+' then Inc(I);
+  if I >= ACell.Len then Exit;
+  HasDigits := False; V := 0;
+  while I < ACell.Len do
+  begin
+    if not (ACell.Start[I] in ['0'..'9']) then Exit;
+    Digit := Ord(ACell.Start[I]) - Ord('0');
+    if V > (High(Int64) - Digit) div 10 then Exit;
+    V := V * 10 + Digit;
+    HasDigits := True;
+    Inc(I);
+  end;
+  Result := HasDigits;
+end;
+
+function TCSVFastPacketReader.IsFloatCell(const ACell: TCSVFastCellRef): Boolean;
+var
+  I: Integer;
+  HasDigits, HasSep, HasExp: Boolean;
+  C, Sep: Char;
+begin
+  Result := False;
+  if ACell.Len = 0 then Exit;
+  if FDecimalSeparator = #0 then Sep := '.' else Sep := FDecimalSeparator;
+
+  I := 0;
+  if (ACell.Start[0] = '+') or (ACell.Start[0] = '-') then Inc(I);
+  HasDigits := False; HasSep := False; HasExp := False;
+  while I < ACell.Len do
+  begin
+    C := ACell.Start[I];
+    if (C >= '0') and (C <= '9') then begin HasDigits := True; Inc(I); end
+    else if C = Sep then
+    begin
+      if HasSep or HasExp then Exit;
+      HasSep := True;
+      Inc(I);
+    end
+    else if (C = 'e') or (C = 'E') then
+    begin
+      if HasExp then Exit;
+      HasExp := True;
+      Inc(I);
+      if (I < ACell.Len) and ((ACell.Start[I] = '+') or (ACell.Start[I] = '-')) then Inc(I);
+    end
+    else
+      Exit;
+  end;
+  Result := HasDigits;
+end;
+
+function TCSVFastPacketReader.MinimalTypeOfCell(
+  const ACell: TCSVFastCellRef): TCSVFastColumnType;
+var Inner: TCSVFastCellRef;
+begin
+  if ACell.Len = 0 then Exit(fctUnknown);
+  Inner := StripQuotes(ACell);
+  if Inner.Len = 0 then Exit(fctUnknown);
+  if IsBooleanCell(Inner) then Exit(fctBoolean);
+  if IsIntegerCell(Inner) then Exit(fctInteger);
+  if IsFloatCell(Inner)   then Exit(fctFloat);
+  Result := fctString;
+end;
+
+function TCSVFastPacketReader.MaxTypeOf(A, B: TCSVFastColumnType): TCSVFastColumnType;
+begin
+  if A = fctUnknown then Exit(B);
+  if B = fctUnknown then Exit(A);
+  if (A = fctString) or (B = fctString) then Exit(fctString);
+  if (A = fctFloat)  or (B = fctFloat)  then Exit(fctFloat);
+  if (A = fctInteger) or (B = fctInteger) then Exit(fctInteger);
+  Result := fctBoolean;
+end;
+
+procedure TCSVFastPacketReader.SampleDataRows(AColumnCount: Integer;
+  out ATypes: TCSVFastColumnTypeArray;
+  out AWidths: TCSVFastIntArray);
+var
+  I, SampleCount, SkipCount: Integer;
+  RowComplete: Boolean;
+  Inner: TCSVFastCellRef;
+begin
+  SetLength(ATypes, AColumnCount);
+  SetLength(AWidths, AColumnCount);
+  for I := 0 to AColumnCount - 1 do
+  begin
+    ATypes[I]  := fctUnknown;
+    AWidths[I] := 0;
+  end;
+
+  // Skip FSkipFirstRows rows
+  SkipCount := 0;
+  while SkipCount < FSkipFirstRows do
+  begin
+    if not ScanRowWithRefill(RowComplete) then Exit;
+    if FCellCount = 0 then Break;
+    Inc(SkipCount);
+  end;
+
+  // Sample up to FTypeDetectionSampleRows rows
+  SampleCount := 0;
+  while SampleCount < FTypeDetectionSampleRows do
+  begin
+    if not ScanRowWithRefill(RowComplete) then Break;
+    if FCellCount = 0 then Break;
+    for I := 0 to Min(FCellCount, AColumnCount) - 1 do
+    begin
+      Inner := StripQuotes(FCells[I]);
+      ATypes[I] := MaxTypeOf(ATypes[I], MinimalTypeOfCell(FCells[I]));
+      if Inner.Len > AWidths[I] then AWidths[I] := Inner.Len;
+    end;
+    Inc(SampleCount);
+  end;
+
+  for I := 0 to High(ATypes) do
+    if ATypes[I] = fctUnknown then ATypes[I] := fctString;
+end;
+
 procedure TCSVFastPacketReader.LoadFieldDefs(var AnAutoIncValue: Integer);
 var
   I: Integer;
   FN: string;
   RowComplete: Boolean;
   SkipIdx: Int64;
+  DetectedTypes:  TCSVFastColumnTypeArray;
+  DetectedWidths: TCSVFastIntArray;
+  HeaderNames:    TCSVFastStringArray;
+  SavedCellCount: Integer;
 begin
   AnAutoIncValue := 0;
   FReaderState := frsLoading;
-  FBOMChecked  := False;
-  FPendingLF   := False;
-  FAborted     := False;
+  FBOMChecked := False;
+  FPendingLF := False;
+  FAborted := False;
   ResetProgress;
 
   RefillBuffer;
   SkipBOMIfNeeded;
 
   if not ScanRowWithRefill(RowComplete) or (FCellCount = 0) then Exit;
+
+  SetLength(HeaderNames, FCellCount);
+  for I := 0 to FCellCount - 1 do
+    HeaderNames[I] := CellToStr(FCells[I]);
 
   if FCreateFieldDefs <> nil then
   begin
@@ -894,18 +1139,48 @@ begin
         [FCellCount, FCreateFieldDefs.Count], DataSet.FieldDefs.Dataset);
     if FFirstLineAsFieldNames then
       for I := 0 to FCellCount - 1 do
-        if CompareText(CellToStr(FCells[I]), FCreateFieldDefs[I].Name) <> 0 then
+        if CompareText(HeaderNames[I], FCreateFieldDefs[I].Name) <> 0 then
           DatabaseErrorFmt(
             'CSV file field %d: name "%s" does not match dataset field name "%s".',
-            [I, CellToStr(FCells[I]), FCreateFieldDefs[I].Name],
+            [I, HeaderNames[I], FCreateFieldDefs[I].Name],
             DataSet.FieldDefs.Dataset);
     DataSet.FieldDefs.Assign(FCreateFieldDefs);
   end
-  else if FCellCount > 0 then
+  else if FAutoDetectTypes then
+  begin
+    SavedCellCount := FCellCount;
+    if not FFirstLineAsFieldNames then
+    begin
+      ResetToStart;
+      RefillBuffer;
+      SkipBOMIfNeeded;
+    end;
+    SampleDataRows(SavedCellCount, DetectedTypes, DetectedWidths);
+
+    ResetToStart;
+    RefillBuffer;
+    SkipBOMIfNeeded;
+    if not ScanRowWithRefill(RowComplete) then Exit;
+
+    for I := 0 to SavedCellCount - 1 do
+    begin
+      if FFirstLineAsFieldNames then FN := HeaderNames[I]
+      else FN := Format('Column%d', [I + 1]);
+      case DetectedTypes[I] of
+        fctInteger: DataSet.FieldDefs.Add(FN, ftLargeint, 0);
+        fctFloat:   DataSet.FieldDefs.Add(FN, ftFloat, 0);
+        fctBoolean: DataSet.FieldDefs.Add(FN, ftBoolean, 0);
+      else
+        DataSet.FieldDefs.Add(FN, ftString,
+          Max(DetectedWidths[I], FDefaultFieldLength));
+      end;
+    end;
+  end
+  else
   begin
     for I := 0 to FCellCount - 1 do
     begin
-      if FFirstLineAsFieldNames then FN := CellToStr(FCells[I])
+      if FFirstLineAsFieldNames then FN := HeaderNames[I]
       else FN := Format('Column%d', [I + 1]);
       DataSet.FieldDefs.Add(FN, ftString, FDefaultFieldLength);
     end;
@@ -926,8 +1201,7 @@ end;
 procedure TCSVFastPacketReader.StoreFieldDefs(AnAutoIncValue: Integer);
 begin
   raise ENotSupportedException.Create(
-    'TCSVFastPacketReader is read-only. Writing CSV files is not ' +
-    'implemented in this version.');
+    'TCSVFastPacketReader is read-only. Writing CSV files is not implemented.');
 end;
 
 procedure TCSVFastPacketReader.InitLoadRecords;
@@ -972,15 +1246,15 @@ begin
       ftLargeint:
         F.AsLargeInt := PCharToInt64Def(C.Start, C.Len, 0);
       ftFloat, ftCurrency:
-        F.AsFloat := PCharToDoubleDef(C.Start, C.Len, 0.0);
+        F.AsFloat := PCharToDoubleDef(C.Start, C.Len, 0.0, FDecimalSeparator);
       ftBoolean:
         begin
           if PCharEqualsIgnoreCase(C.Start, C.Len, 'true') or
-             PCharEqualsIgnoreCase(C.Start, C.Len, 'yes') or
+             PCharEqualsIgnoreCase(C.Start, C.Len, 'yes')  or
              ((C.Len = 1) and (C.Start^ = '1')) then
             F.AsBoolean := True
           else if PCharEqualsIgnoreCase(C.Start, C.Len, 'false') or
-                  PCharEqualsIgnoreCase(C.Start, C.Len, 'no') or
+                  PCharEqualsIgnoreCase(C.Start, C.Len, 'no')    or
                   ((C.Len = 1) and (C.Start^ = '0')) then
             F.AsBoolean := False
           else
@@ -1099,6 +1373,7 @@ begin
   FCancelFlag            := nil;
   FAborted               := False;
   FWriteBOM              := False;
+  FDecimalSeparator      := '.';
 end;
 
 destructor TCSVFastPacketWriter.Destroy;
@@ -1197,17 +1472,45 @@ procedure TCSVFastPacketWriter.WriteDataRow;
 var
   I: Integer;
   F: TField;
+  FS: TFormatSettings;
+  Sep: Char;
+  FloatStr: string;
 begin
+  Sep := FDecimalSeparator;
+  if Sep = #0 then Sep := '.';
+  FS := DefaultFormatSettings;
+  FS.DecimalSeparator := Sep;
+  FS.ThousandSeparator := #0;
+
   for I := 0 to FDataSet.FieldCount - 1 do
   begin
-    if I > 0 then
-      WriteByteRaw(Ord(FOptions.Delimiter));
+    if I > 0 then WriteByteRaw(Ord(FOptions.Delimiter));
 
     F := FDataSet.Fields[I];
     if not Assigned(F) then Continue;
     if F.IsNull then Continue;
 
-    WriteFieldValue(F.AsString);
+    case F.DataType of
+      ftFloat, ftCurrency, ftBCD:
+        begin
+          // FloatToStrF mit ffGeneral, 15 signifikanten Stellen, 0 Dezimalstellen
+          // → entfernt Rauschen wie 0.30000000000000004 → 0.3
+          // → behält aber genug Präzision für echte Daten
+          FloatStr := FloatToStrF(F.AsFloat, ffGeneral, 15, 0, FS);
+          WriteFieldValue(FloatStr);
+        end;
+      ftDateTime:
+        WriteFieldValue(FormatDateTime('yyyy-mm-dd hh:nn:ss', F.AsDateTime));
+      ftDate:
+        WriteFieldValue(FormatDateTime('yyyy-mm-dd', F.AsDateTime));
+      ftTime:
+        WriteFieldValue(FormatDateTime('hh:nn:ss', F.AsDateTime));
+      ftBoolean:
+        if F.AsBoolean then WriteFieldValue('true')
+        else WriteFieldValue('false');
+    else
+      WriteFieldValue(F.AsString);
+    end;
   end;
   WriteLineEnding;
 end;
@@ -1383,6 +1686,9 @@ begin
   FBufferSizeBytes       := DEFAULT_BUFFER_SIZE;
   FInitialCellCapacity   := DEFAULT_CELL_CAPACITY;
   FProgressUpdatePercent := 1;
+  FDecimalSeparator      := '.';
+  FAutoDetectTypes       := False;
+  FTypeDetectionSampleRows := DEFAULT_SAMPLE_ROWS;
 
   FSkipFirstRows         := 0;
   FStopAfterRow          := 0;
@@ -1413,6 +1719,9 @@ begin
   R.BlockSize             := FBlockSizeBytes;
   R.BufferSize            := FBufferSizeBytes;
   R.InitialCellCapacity   := FInitialCellCapacity;
+  R.DecimalSeparator      := FDecimalSeparator;
+  R.AutoDetectTypes       := FAutoDetectTypes;
+  R.TypeDetectionSampleRows := FTypeDetectionSampleRows;
   R.SkipFirstRows         := FSkipFirstRows;
   R.StopAfterRow          := FStopAfterRow;
   R.OnProgress            := FOnProgress;
@@ -1482,6 +1791,7 @@ begin
       W.StopAfterRow          := FSaveStopAfterRow;
       W.BufferSize            := FSaveBufferSize;
       W.WriteBOM              := FSaveWriteBOM;
+      W.DecimalSeparator      := FDecimalSeparator;
       W.ProgressUpdatePercent := FSaveProgressUpdatePercent;
       W.OnProgress            := FOnSaveProgress;
       W.CancelFlag            := FSaveCancelFlag;

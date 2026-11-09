@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="12"/>
+    <General>
+      <Title Value="ai_prompt"/>
+      <UseAppBundle Value="False"/>
+    </General>
+    <BuildModes Active="Default">
+      <Item Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+    </PublishOptions>
+    <RunParams>
+      <FormatVersion Value="2"/>
+    </RunParams>
+    <RequiredPackages>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+      <Item>
+        <PackageName Value="ibnongui"/>
+      </Item>
+      <Item>
+        <PackageName Value="rxnew"/>
+      </Item>
+      <Item>
+        <PackageName Value="SynEdit"/>
+      </Item>
+      <Item>
+        <PackageName Value="FrameViewer09"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
+    </RequiredPackages>
+    <Units>
+      <Unit>
+        <Filename Value="ai_prompt.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <CursorPos X="15" Y="10"/>
+        <UsageCount Value="33"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="fmAIPrompt.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="fmAIPromptForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="589"/>
+        <CursorPos Y="622"/>
+        <UsageCount Value="33"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uOllamaAgent.pas"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="283"/>
+        <CursorPos X="100" Y="361"/>
+        <UsageCount Value="33"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="fmAIPrompt.lfm"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="27"/>
+        <CursorPos X="4" Y="242"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Programme/Lazarus_2.2.6/lazarus/lcl/interfaces/gtk2/gtk2disableliboverlay.pas"/>
+        <UnitName Value="gtk2DisableLibOverlay"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="48" Y="12"/>
+        <UsageCount Value="10"/>
+      </Unit>
+      <Unit>
+        <Filename Value="uaisettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="uAiSettings"/>
+        <EditorIndex Value="1"/>
+        <TopLine Value="118"/>
+        <CursorPos Y="132"/>
+        <UsageCount Value="29"/>
+        <Loaded Value="True"/>
+      </Unit>
+      <Unit>
+        <Filename Value="../../Programme/Lazarus_2.2.6/fpcsrc/rtl/objpas/sysutils/osutilsh.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="15" Y="44"/>
+        <UsageCount Value="10"/>
+      </Unit>
+    </Units>
+    <JumpHistory HistoryIndex="29">
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="33" Column="22" TopLine="16"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="132" Column="38" TopLine="119"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="31" Column="7" TopLine="14"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="49" Column="47" TopLine="21"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="119" Column="45" TopLine="108"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="38" Column="18" TopLine="28"/>
+      </Position>
+      <Position>
+        <Filename Value="uaisettings.pas"/>
+        <Caret Line="132" TopLine="118"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="135" Column="31" TopLine="110"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="134" Column="31" TopLine="109"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="135" Column="31" TopLine="110"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="136" Column="31" TopLine="111"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="137" Column="31" TopLine="112"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="138" Column="31" TopLine="113"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="139" Column="31" TopLine="114"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="140" Column="31" TopLine="115"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="141" Column="31" TopLine="116"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="142" Column="31" TopLine="117"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="611" Column="3" TopLine="595"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="612" Column="3" TopLine="596"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="613" Column="3" TopLine="597"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="612" Column="3" TopLine="596"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="613" Column="3" TopLine="597"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="614" Column="3" TopLine="598"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="615" Column="3" TopLine="599"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="616" Column="3" TopLine="600"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="617" Column="3" TopLine="601"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="618" Column="3" TopLine="602"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="563" Column="4" TopLine="530"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="618" Column="3" TopLine="601"/>
+      </Position>
+      <Position>
+        <Filename Value="fmAIPrompt.pas"/>
+        <Caret Line="623" Column="16" TopLine="611"/>
+      </Position>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <Target>
+      <Filename Value="ai_prompt"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <UnitOutputDirectory Value="lib"/>
+    </SearchPaths>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+  </CompilerOptions>
+</CONFIG>

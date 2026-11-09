@@ -1,0 +1,582 @@
+What's New for TurboBird
+! : changed
++ : added
+* : fixed
+- : removed
+
+
+TurboBird v1.2.1.1288
+
+Build date & time: 10.10.2026, 15:00
+
++ CloneTable: Two new copy methods
+  - Firebird API Row-by-Row:
+    Copies all data types reliably — including
+    arrays (n dimensions, recursive) and BLOBs
+    (both TEXT and BINARY).
+  - Firebird Batch API:
+    High-performance batch processing for purely scalar fields.
+    (Arrays and BLOBs are not supported.)
+    Available from Firebird 4.0.
+  - The method is selected automatically based on
+    field types and server version. For BLOBs, arrays or
+    Firebird < 4.0, it automatically switches to Row-by-Row.
+  - New option: Row-by-Row can be forced manually.
+  - Problem field detection: Depending on the selected
+    copy method, unsupported field types (BLOBs, arrays, etc.)
+    are automatically detected and marked in the field selection.
+    The user can specifically deselect these fields before
+    the copy process is started.
+
++ CSV Bulk Export (New)
+  - Exports Firebird tables as CSV files
+  - Server-side formatting for maximum speed
+  - Batch processing with configurable size
+  - Buffered stream for optimal write speed
+  - Progress display with timing and statistics
+  - Preset-based configuration with 9 included
+    preset files:
+    CSV Quoted, CSV Unquoted (numeric only), CSV German,
+    CSV Header Quoted, CSV Data Quoted, TSV Quoted,
+    Pipe Quoted, Fixed Format, JSON Export
+  - Configurable per preset:
+    - Separator, decimal point, quote character
+    - Line ending (CRLF, LF, CR or System)
+    - Header on/off, header quoted or raw
+    - Data quoted or raw
+    - Problem fields selectively skipped (arrays, BLOBs)
+    - Boolean representation configurable (TRUE/FALSE)
+    - Formulas per data type (e.g. BLOB truncation via SUBSTRING)
+  - Preset Editor: The current preset can be edited directly
+    from within the exporter and saved.
+    After saving, the presets are automatically reloaded
+    and the preview is updated.
+  - Preset Validator warns about critical configurations:
+    - ERROR if single quote is used as QuoteChar (SQL conflict)
+    - ERROR if Separator = QuoteChar
+    - ERROR if Separator = DecimalPoint
+    - WARNING for unquoted + free text (data loss risk)
+    - WARNING if Separator appears in formulas
+    - WARNING for unbalanced quotes in formulas
+    - WARNING for formulas without $1 placeholder
+  - Export report contains:
+    - Preset name and description in the Options section
+    - Full preset file content with
+      BEGIN/END markers and file name as reference
+    - Client library version, server version
+    - Environment info (OS, CPU, RAM, disk)
+
+! Dialog "Bulk Export" replaced by "CSV Bulk Export"
+
+! Case-sensitive identifiers are handled correctly
+  throughout (mixedCase, CAMEL):
+  - MakeCaseSensitiveAuto() instead of unconditional quoting
+  - Affects CSV Bulk Export, CloneTable and DataEditor
+  - Formulas with $1 placeholder quote field names correctly
+  - Table names are quoted only when necessary
+
+! DataEditor: Extensively revised for CSV roundtrip
+  - Auto-detection when opening CSV files:
+    - Line ending (CRLF/LF/CR) by majority rule
+    - Delimiter (comma, semicolon, tab, pipe)
+    - Quote character (double quote, single quote, none)
+  - Auto-detect can be enabled individually per field via
+    checkboxes in the CSV tab (LineEnding, Delimiter, QuoteChar).
+    Only enabled fields are detected when opening.
+    Settings are stored persistently in the INI.
+  - Dialog "CSV Auto-Detection" with three actions:
+    - Use Detected — apply detected values
+      (only for fields with auto-detect checkbox enabled)
+    - Keep Current — keep current settings
+    - Cancel — do not load the file
+  - Disabled fields are marked as "(auto-off)" in the dialog.
+  - New ComboBoxes for LineEnding, Delimiter and QuoteChar:
+    - LineEnding: CRLF, LF, CR, System
+    - Delimiter: comma, semicolon, tab, pipe, space
+    - QuoteChar: ", ', (none), Custom...
+    - "Custom..." opens an input dialog for
+      arbitrary quote characters
+    - Cancel in the custom dialog restores the previous value
+  - LOAD report reads values directly from the dataset instead
+    of from the form — always shows the actual
+    state including line ending symbol and (none) for QuoteChar.
+
+! Report fixes:
+  - LOAD report shows CSV options from the dataset
+  - EXPORT report shows preset name + description
+  - Preset definition as full INI content with
+    BEGIN/END markers
+  - CANCELLED message is appended to OptionsExtra
+    instead of overwriting it
+
+! INI configuration:
+  - New section [CSVExport] for the CSV Bulk Exporter
+  - New keys in [CSVEditor]:
+    CSVLineEnding, AutoDetectLineEnding, AutoDetectDelimiter,
+    AutoDetectQuoteChar
+
+* Multiple bugs fixed.
+
+
+
+------------------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1286
+Build-Date & -Time: 05.09.2026, 12:30
+
+! IBX4Lazarus updated to version 2.7.12.
+
++ DBReader: Create Firebird table from read data
+  - Directly create a Firebird table from already read/recovered data
+  - Includes appropriate field types and data transfer
+
++ PascalScript-Studio (Runtime Form Designer + PascalScript) reactivated
+  - The existing but inactive FormDesigner has been reactivated
+  - Own "Forms" node in the database tree
+  - Forms can be created per database
+  - Forms are saved as .cfrm + .rops files
+  - "New Form" opens the visual designer
+  - "Edit Form" loads an existing form into the designer
+  - "Execute Form" runs a form directly
+  - Double-click on a form starts execution
+  - Storage location: data/PSStudio/Forms/<Server>/<Database>/
+  - Several example forms (PascalScript-Studio) for the localhost/employee database have been added.
+
+* QueryWindow: Transaction-Config fixed
+  - Transaction parameters (read_committed, rec_version, nowait) are now correctly loaded from the database registration
+  - DDL operations (DROP TABLE etc.) use a separate transaction
+  - nowait is always used – lock conflicts now return an immediate error message
+  - GUI no longer freezes
+
+* DBReader: CSV-Export improved
+  - Quote-Char, Delimiter and other settings are now correctly applied
+
++ EditTableData: Improvements
+  - BOOLEAN fields are now displayed as TDBCheckBox (instead of TDBEdit)
+  - Computed fields are detected and set to read-only
+  - Default values are now correctly loaded from the database
+
+* Several bugs fixed
+
+------------------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1284
+Build-Date & -Time: 16.08.2026, 14:00
+
+* Several bugs fixed
+
+--------------------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1282
+Build-Date & -Time: 08.08.2026, 17:35
+
++ Local SQLMonitor and new Section in Ini File:
+  [SQLMonitor]
+  TraceEnabled=1
+  TraceFlags=tfConnect,tfTransact,tfQPrepare,tfQExecute,tfQFetch,tfService,tfBlob,tfStmt,tfError,tfMisc
+  SlowQueryThreshold=5000
+
++ Tablefilter in Edit Tabledata
+
+* Several bugs fixed
+
+
+
+-----------------------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1280
+Build date & time: 26.07.2026, 22:30
+
++ Clone Table (Universal Copy Tool)
+  - Replaces three old dialogs: ImportTable, CloneToExternal, CopyTable
+  - Copies tables in all directions:
+    FB → FB (local & Cross-Database/Server)
+    FB → External Table (binary format)
+    External Table → FB
+  - Automatic selection of the fastest copy method:
+    INSERT...SELECT (local, up to 220,000 rows/sec)
+    EXECUTE BLOCK (Cross-DB, up to 4,600 rows/sec)
+    Row-by-Row (Cross-DB with all field types)
+  - Formula support with $1 placeholder (e.g. $1 * 1.1, UPPER($1))
+  - Optional data copy (table structure only or including data)
+  - Batch processing with configurable size
+  - Progress display with time measurement and speed
+  - Automatic detection and deselection of problem fields (BLOBs, Arrays)
+    for external target tables
+  - Test formula generator for quick transformations
+
++ Data Editor (significantly enhanced)
+  - Universal interface between Firebird and text files
+  - Direct access to FB tables via right-click:
+    "View in Data Editor" (Read-Only)
+    "Edit in Data Editor" (Read-Write, using TIBTable)
+  - Loading FB tables with progress dialog and statistics
+  - All export formats available (CSV, JSON, HTML, PDF, Spreadsheet, etc.)
+  - Direct editing in the grid (Read-Write mode)
+  - Clean DB encapsulation with own connection and transaction
+  - Session password cache is used automatically
+
++ Create Table from DataSet (New)
+  - Creates a Firebird table directly from CSV/JSON/Excel data
+  - Accessible from Data Editor via "Create Table"
+  - Selection of server, database and table name
+  - Fields selectable via checkbox
+  - Optional data copy (structure only or including data)
+  - Batch processing with progress dialog
+  - Formula support (optional)
+
++ Bulk Export (New)
+  - Exports FB tables as CSV files
+  - Server-side formatting for maximum speed
+  - Batch processing with configurable size
+  - Buffered stream for optimal write speed
+  - Progress display with time measurement and statistics
+  - Formula support for transformed exports
+  - Configurable via INI file
+
+- Removed old dialogs
+  - ImportTable (replaced by Data Editor + CreateTableFromDataSet)
+  - CloneToExternal (replaced by CloneTable)
+  - CopyTable (replaced by CloneTable)
+
++ Session Password Cache
+  - Temporary passwords are stored for the duration of the session
+
+- PascalScript Studio deactivated (currently unstable)
+
+* Several bugs fixed
+
+
+
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1277
+Build Date & Time: 04.06.2026, 14:00
+
++ Several bugs fixed
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1275
+Build Date & Time: 04.06.2026, 11:50
+
++ Automatic update notification
++ SQLSelectParser integrated
++ New switches in the INI file:
+
+[QueryWindow]
+AutoCommit=1
+ExecMultiStatementsAsScript=1
+
+[Database]
+NumBuffers=254
+
+– PascalScriptStudio disabled
+
++ Several bugs fixed
+
+
+
+-------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1273
+Build Date & Time: 19.05.2026, 18:14:12
+
+
++ FormDesigner & PascalScript (PascalScript Studio)
+
+- Dedicated "Forms" node in the database tree
+- Custom forms can now be created per database
+- Forms are stored as .cfrm + .rops files
+- "New Form" opens the visual designer
+- "Edit Form" loads an existing form into the designer
+- "Execute Form" runs a form directly
+- Double-clicking a form starts execution
+- Storage location: data/PSStudio/Forms/<Server>/<Database>/
+
+! Table Management and Constraints (completely reworked)
+
+* All constraint types are now visible as subnodes of each table
+* Primary Key with field list
+* Foreign Keys with reference display
+* Unique Constraints with field list
+* Check Constraints with condition
+* Not Null Constraints with affected fields
+* Indices (user-defined only, excluding system indices)
+* Multi-column keys are grouped clearly (PRIMARY KEY (Field1, Field2))
+* Table management extended with new tabs:
+
+  * Primary Key: select fields via checkbox, changes generate SQL
+  * Foreign Keys: manage existing ones, create new ones with wizard
+  * Unique Constraints: select fields, assign name
+  * Check Constraints: edit expression directly
+  * Not Null Constraints: check fields, changes generated as ALTER statements
+
+! Trigger Support (extended)
+
+* New trigger types in the tree:
+
+  * Database Triggers (ON CONNECT, ON DISCONNECT, ON TRANSACTION...)
+  * DDL Triggers (BEFORE/AFTER CREATE TABLE, DROP TABLE, etc.)
+  * UDR Triggers (EXTERNAL NAME ... ENGINE UDR)
+* "Create new Trigger" now provides the correct template depending on type
+* Trigger view now displays the correct type (Table/DB/DDL)
+* Editing and deleting all trigger types is now supported
+
+! Tree Structure (improved)
+
+* Table fields are now clearly grouped under "Fields"
+* Constraints and indices are directly visible under the table
+* Table triggers are directly visible under the table
+* "References" and "Permissions" under each table
+
+And several bugs fixed.
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1272
+Build date & time: 11.04.2026, 15:16:57
+
++DBReader integrated as a data recovery tool
+   (https://github.com/serbod/DBReader)
+   
++Support for Embedded Connections added.
+  (Please read the file "known_limitations_bugs.txt".)
+  
+!CSVEditor has been renamed to DataEditor, as the tool
+  can now handle and export multiple file formats.
+  
++Known limitations/bugs added as files to the distribution.
+
++New menu entry 'Builtin-Tools' added to the main menu.
+
+!Several bugs fixed.
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1270
+Build date & time: March 18, 2026, 00:32:41
+
++Added transaction configuration
++Added a simple CSV editor
++Added a design-time SQL editor from IBX4Lazarus
+Several bugs have been fixed.
+
+
+----------------------------------------------------------------------------------------
+TurboBird v1.2.1.1268
+Build date & time: 26.02.2026, 16:11:12
+
+Various minor bugs have been fixed.
+
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1267
+Build date & time: 26.02.2026, 16:03:01
+
++Simple Activity Monitor: It is now possible to cancel attachments and statements directly.
+
++Object Filter in TreeView: Objects in the main TreeView can now be filtered selectively. Filter format: Identifier Identifier or identifier.
+
++Multilingual Help – simple interface (HTML pages currently serve as placeholders): Subfolders in the help directory for languages, e.g., eng, ger, fra. Language can be set in the INI file:
+
+[UI]
+Language=eng
+
+The application will then load the respective index.html. This interface can also be used later for GUI language.
+
++Various minor bugs have been fixed.
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1266
+Build date & time: 23.02.2026, 13:48:57
+
+!Several bugs have been fixed.
+
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1265
+Build date & time: 21.02.2026, 06:30:03
+
+!Several bugs have been fixed.
+
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1264
+Build date & time: 2026-02-16, 20:30:03
+
++ Activity Monitor (first version) added
+  Displays Attachments, Transactions, and Statements
+  Attachments can be terminated
+  Statements can also be terminated (remain visible until the related attachment ends)
+  Accessible via: Right-click on database node → DB-Tools → Activity Monitor
+  (This feature is still under development)
+
++ Tree object filter added
+  Simple filter for tree objects
+  Container objects (e.g. Packages) remain visible to preserve structure
+  Filter performance is fast and stable even with very large databases
+
+! TreeView performance significantly improved
+  Faster loading and navigation
+  Tested with extremely large databases:
+    10,000 Packages (each with multiple subnodes)
+    1,000,000 Domains
+    several thousand tables
+  Tree loading and filtering remain responsive and stable
+
++ Multiple-file restore fully implemented
+  Restore from split backup files is now supported
+
+! ToolButton "TT" re-enabled
+  Font name and font size in QueryWindow (Editor) can now be configured via this button
+  Editor background color can be configured via INI file
+  Editor excluded from ThemeManager to ensure stable and consistent rendering
+
+! Internal improvements and optimizations
+
+* Known issue:
+  Server-side restore works reliably and restores large databases completely
+  Client-side restore may silently produce incomplete databases
+  (issue currently under investigation)
+  Recommendation: use server-side restore
+
+
+-------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1263
+
+Build Date: 2025-12-25
+Build Time: 08:56:10
+
+! Complete migration of the application from SQLDB to IBX
+  (SQLDB/FPC is no longer used)
+
++ Support for multiple Firebird server versions within a single TurboBird instance
+  (Firebird 2.5, 3.x, 4.x, 5.x, 6.0)
+
++ Full support for case-sensitive object names
+  (tables and fields with mixed-case identifiers)
+   Correct handling of quoted and unquoted identifiers
+  Context menu in QueryWindow (Ctrl+Space) lists tables and fields correctly
+  Case-sensitive names are automatically inserted using double quotes
+  (Alias and dot-notation detection not yet implemented – currently intentionally simple)
+
+! Script execution with and without terminators improved
+  IBX correctly handles procedure bodies without SET TERM
+  Terminators are still added when loading DB objects into the QueryWindow
+  (for compatibility with other tools)
+
++ Integrated Tony Whyman’s IBX Scripter (MWA Software)
+
+! Backup / Restore fully migrated to Tony Whyman’s IBX-based implementation
+  More options available (server-side / client-side backups and restores)
+
+! TreeView reworked
+  Switched to lazy loading
+  Nodes are loaded from the database only when opened for the first time
+  Optional refresh behavior configurable via INI file
+  Ability to show/hide the TreeView
+  (provides more space for query code)
+
++ QueryWindow improvements
+  Code view or result view can be maximized
+  Navigator can be shown or hidden via INI file
+
+! Export to Clipboard improved
+  Maximum number of exported rows can be limited via INI file
+  Prevents accidental copying of very large tables
+
+! Server registration is now mandatory
+  Server names are no longer derived from connection strings
+  Servers must be resolvable via DNS or the hosts file
+
+! Multi-server handling via IBX
+  Loading/unloading of client libraries fully handled by IBX
+
+- Removed custom component SQLDbExt
+  (no longer required due to IBX migration)
+
+-------------------------------------------------------------------------------------------
+
+TurboBird v1.2.1.1262
+Build date & time: 26.09.2025, 13:26:00
+
+! Query thread re-enabled
+    In Release builds queries are executed in the background
+    In Debug builds synchronously (thread disabled)
+
+! For all routines (except package routines) the double-click action was changed to "Edit".
+
+! Tabs:
+    ! Captions shortened
+    + Tabs are now movable (except Main)
+    + TabReiter.Hint shows full info about Firebird object/operation
+    + TabReiter now contains an image as visual aid
+    An open tab can be reached most easily by double-clicking
+    on the navigation tree (tab is brought to the foreground).
+
+! Routine names in the navigation tree standardized
+    FBFunctions → Functions
+    Stored Procedures → Procedures
+
+Markdown export added
+
+! HTML and Markdown exports improved
+    Array contents are now also written into the document
+
+! User PUBLIC hidden
+
+! View Stored Procedure now delivers the complete code of a SP (not only up to AS)
+
+Simple HTML help system created and integrated into the Main Tab
+    (HTML viewer currently does not support external links)
+
+! Login procedure changed
+    ! First double-click on server node opens login window to connect to the ServiceManager of the Firebird instance
+    ! Server information (e.g. version) is retrieved
+    + Server login dialog registers servers
+    + ServerRegistry dialog for subsequent editing (right-click on server node → ServerRegistry)
+
+! All masks (except simple dialogs and QueryHistory) are now embedded in tabs
+
+! RoutineTester: UDF CSTRINGS are displayed correctly
+
+Firebird version < 3: automatically creates role DUMMYROLE (without rights) and assigns it to new users
+    (avoids additional connection to security2.fdb)
+
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1261
+Build date & time: 28.08.2025, 11:46:54
+
++ Enabled Firebird LoginPrompt
+! Fixed several minor bugs
+
+-------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1260
+Build date & time: 25.08.2025, 07:34:45
+
++ Data export: Data from DataSets/Grids can now be exported to 9 different formats (via right-click on the data).
+
++ OpenQueryBuilder integrated: QueryBuilder → IBX interface fixed. With OpenQueryBuilder, queries can be visually created via drag & drop, tested, and transferred into the QueryWindow. Accessible via the last ToolButton in the QueryWindow.
+! EditTableGrid → EditTableData: Migrated to IBX (with array read/write support). Renamed to EditTableData.
+! EditDataFullRec removed: Re-implemented as a TabSheet within EditTableData. Now contains 2 tabs: Grid view and Form view. Arrays can also    be edited here (1D arrays tested, 2D arrays not yet). Accessible in the main window by right-clicking on a table name in the TreeView → Edit TableData.
+
++ New “CheckDBIntegrity” dialog: Displays field CharSets (currently a placeholder – only CharSet check, but easily extendable). Accessible in the main window via the 4th ToolButton in the toolbar.
+! Source directory restructured: New structure improves overall clarity.
+! Source code revised: Application should now run more stable overall.
+
+---------------------------------------------------------------------------------------------
+TurboBird v1.2.1.1256
+Build date & time: 08.08.2025, 10:40:06
+
+Aug 08, 2025 – 1.2.1.1256
++ Added: Dynamic Firebird data type handling – all Firebird data types are now loaded dynamically at runtime, making TurboBird largely     version-independent.
++ Added: Support for creating and editing Firebird packages directly within TurboBird.
++ Added: UDR (User Defined Routines) support – create, edit, and execute UDRs including parameters and return values.
++ Added: Unified Routine Runner supporting UDFs, UDRs, Stored Procedures, and Functions in a single execution tool.
++ Added: “SetFireBirdClient” dialog to select Firebird client version at any time; automatically detects installed versions.
++ Added: Firebird server configuration management – import, edit, and export server settings directly from TurboBird.
++ Added: Array and DateTimeWithTimeZone support via new TSQLQueryExt component to display unsupported data types in DBGrid.
+! Changed: Relocation of Turbobird.reg and Query History file to src/data/config for multi-instance configurations.
+! Changed: Configuration handling now allows multiple TurboBird instances for different Firebird versions simultaneously, simplifying testing and database migration from older versions.

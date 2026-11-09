@@ -196,7 +196,7 @@ var
   C: Char;
 begin
   Result := False;
-  if (S = '') or (Length(S) < 4) or (Length(S) > 60) then Exit;
+  if (S = '') or (Length(S) < 6) then Exit;  // ← von 4 auf 6
 
   Digits := 0;
   Seps := 0;
@@ -223,11 +223,13 @@ begin
   end;
 
   if Digits < 4 then Exit;
-  if (Seps >= 1) and (Seps <= 2) then
-    Result := True
-  else if HasT then
-    Result := True
-  else if HasColon and (Digits >= 4) then
+
+  // Reine Zahl mit einem Punkt ist KEIN Datum
+  // Datum braucht:
+  //   - mindestens 2 Separatoren (dd.mm.yyyy, yyyy-mm-dd)
+  //   ODER - 'T' (ISO 8601: 2026-10-04T12:34:56)
+  //   ODER - ':' (Zeit: 12:34:56)
+  if (Seps >= 2) or HasT or HasColon then
     Result := True;
 end;
 
@@ -545,10 +547,12 @@ function CountSignificantDigits(const S: string): Integer;
 var
   I, Count: Integer;
   SeenNonZero: Boolean;
+  LastNonZero: Integer;
   C: Char;
 begin
   SeenNonZero := False;
   Count := 0;
+  LastNonZero := 0;
   for I := 1 to Length(S) do
   begin
     C := S[I];
@@ -558,6 +562,8 @@ begin
       begin
         SeenNonZero := True;
         Inc(Count);
+        if C <> '0' then
+          LastNonZero := Count;
       end;
     end
     else if (C = '.') or (C = ',') then
@@ -565,7 +571,7 @@ begin
     else if (C = 'e') or (C = 'E') then
       Break;
   end;
-  Result := Count;
+  Result := LastNonZero;   // ← ignoriert nachfolgende Nullen
 end;
 
 // ================================================================
@@ -774,6 +780,8 @@ var
   Value: string;
   Kind: TValueKind;
   AllEmpty: Boolean;
+  F: TField;
+  FS: TFormatSettings;
 
   CanBool, CanInt, CanBigInt, CanInt128, CanDecimal: Boolean;
   CanFloat: Boolean;
@@ -816,13 +824,44 @@ begin
   AnyInt128        := False;
   AnyDecimal       := False;
 
+  F := FDataSet.FieldByName(FieldName);
+
   RowIdx := 0;
   FDataSet.DisableControls;
   try
     FDataSet.First;
     while (not FDataSet.EOF) and (RowIdx < CSV_ANALYZE_ROWS) do
     begin
-      Value := Trim(FDataSet.FieldByName(FieldName).AsString);
+      // --------------------------------------------------------
+      // Wert invariant aus dem Feld holen (Locale-unabhängig)
+      // --------------------------------------------------------
+      if F.IsNull then
+        Value := ''
+      else
+        case F.DataType of
+          ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+            begin
+              FS := DefaultFormatSettings;
+              FS.DecimalSeparator  := '.';
+              FS.ThousandSeparator := #0;
+              Value := FloatToStrF(F.AsFloat, ffGeneral, 15, 0, FS);
+            end;
+          ftSmallint, ftInteger, ftWord, ftLargeint, ftAutoInc:
+            Value := IntToStr(F.AsLargeInt);
+          ftDate:
+            Value := FormatDateTime('yyyy-mm-dd', F.AsDateTime);
+          ftDateTime:
+            Value := FormatDateTime('yyyy-mm-dd hh:nn:ss', F.AsDateTime);
+          ftTime:
+            Value := FormatDateTime('hh:nn:ss', F.AsDateTime);
+          ftBoolean:
+            if F.AsBoolean then
+              Value := 'true'
+            else
+              Value := 'false';
+        else
+          Value := Trim(F.AsString);
+        end;
 
       if Value <> '' then
       begin

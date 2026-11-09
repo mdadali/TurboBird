@@ -1,7 +1,7 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 337
+  Left = 1100
   Height = 893
-  Top = 564
+  Top = 407
   Width = 1376
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog

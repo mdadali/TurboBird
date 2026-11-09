@@ -23,9 +23,11 @@ type
     IBDatabase1: TIBDatabase;
     IBQuery1: TIBQuery;
     IBTransaction1: TIBTransaction;
+    lbMaxIteration: TLabel;
     pgResults: TPageControl;
     RxDBGrid1: TRxDBGrid;
     seCode: TSynEdit;
+    spMaxIter: TSpinEdit;
     tsData: TTabSheet;
     tsWeb: TTabSheet;
     tsCode: TTabSheet;
@@ -382,8 +384,9 @@ begin
   else
     FSettings.Model := FModelCombo.Text;
 
-  FSettings.Temperature := FTempEdit.Value / 10.0;
-  FSettings.SystemPrompt := FSystemPromptMemo.Text;
+  FSettings.Temperature   := FTempEdit.Value / 10.0;
+  FSettings.MaxIterations := spMaxIter.Value;
+  FSettings.SystemPrompt  := FSystemPromptMemo.Text;
 end;
 
 procedure TfmAIPromptForm.ChatModelChanged(Sender: TObject);

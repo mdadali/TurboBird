@@ -1,0 +1,23 @@
+inherited MainForm: TMainForm
+  Left = 376
+  Top = 199
+  Caption = 'Backup Database'
+  ClientWidth = 570
+  Font.Height = -11
+  inherited Log: TMemo
+    Top = 67
+    Width = 570
+  end
+  object Backup: TUIBBackup[3]
+    UserName = 'SYSDBA'
+    PassWord = 'masterkey'
+    LibraryName = 'libfbclient.so'
+    BackupFiles.Strings = (
+      'd:\backup.gbk'
+    )
+    Database = 'D:\employee.db'
+    OnVerbose = BackupVerbose
+    Left = 8
+    Top = 48
+  end
+end

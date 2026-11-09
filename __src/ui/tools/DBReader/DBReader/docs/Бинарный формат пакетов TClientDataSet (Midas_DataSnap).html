@@ -1,0 +1,249 @@
+<!-- saved from url=(0047)https://alexeevd.narod.ru/papers/cds_format.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Language" content="ru">
+<title>Бинарный формат пакетов TClientDataSet (Midas/DataSnap)</title></head>
+<body><h4><span lang="en-us">Midas/DataSnap packet format</span></h4>
+<table border="1" width="100%" id="table1">
+	<tbody><tr>
+		<td width="94" align="center"><span lang="en-us"><b>Offset</b></span></td>
+		<td align="center" width="115"><b><span lang="en-us">Size</span> (<span lang="en-us">bytes</span>)</b></td>
+		<td align="center"><span lang="en-us"><b>Content</b></span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center">0</td>
+		<td width="115" align="center">4</td>
+		<td><span lang="en-us">Signature = [$96, $19, $E0, $BD] - </span>
+		Сигнатура пакета <span lang="en-us">MIDAS/DataSnap</span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">4</span></td>
+		<td width="115" align="center"><span lang="en-us">4</span></td>
+		<td><span lang="en-us">Int32</span>, обычно равно 1</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">8</td>
+		<td width="115" align="center">4</td>
+		<td><span lang="en-us">Int32</span>, обычно равно 18</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">12</td>
+		<td width="115" align="center">2</td>
+		<td><span lang="en-us">FieldCount: UInt16 - </span>количество полей</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">14</td>
+		<td width="115" align="center">4</td>
+		<td><span lang="en-us">RecordCount: Int32 - </span>количество записей в 
+		пакете</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">18</td>
+		<td width="115" align="center">4</td>
+		<td><span lang="en-us">Int32</span>, обычно равно <span lang="en-us">3</span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">22</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">HeaderSize: UInt16 - </span>вероятно, размер 
+		всего заголовка включая описания полей<span lang="en-us"> </span>и 
+		свойств.</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">24</span></td>
+		<td width="115" align="center"><span lang="en-us">X</span></td>
+		<td><span lang="en-us">FieldList: <a href="https://alexeevd.narod.ru/papers/cds_format.htm#FieldList">FieldList</a>
+		</span>- Структура описания полей.</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">X + 24</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">DSPropCount: UInt16 - </span>количество свойств</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">X + 26</span></td>
+		<td width="115" align="center"><span lang="en-us">Y</span></td>
+		<td><span lang="en-us">DSProps: <a href="https://alexeevd.narod.ru/papers/cds_format.htm#Prop">Prop</a>[DSPropCount] -
+		</span><a href="https://alexeevd.narod.ru/papers/cds_format.htm#DataSetProps">свойства<span lang="en-us"> </span>набора</a>.</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">HeaderSize</span></td>
+		<td width="115" align="center"><span lang="en-us">Varing</span></td>
+		<td><span lang="en-us">RecordList: <a href="https://alexeevd.narod.ru/papers/cds_format.htm#RecordList">RecordList</a> 
+		- </span>данные записей.</td>
+	</tr>
+</tbody></table>
+<h4>Описание полей<span lang="en-us"> </span>(<span lang="en-us"><a name="FieldList">FieldList</a></span>)</h4>
+<p>Последовательный список из одинаковых описателей поля приведенных ниже. 
+Количество в списке задано соответствующим значением заголовка<span lang="en-us">.</span></p>
+<p><span lang="en-us">array [0..FieldCount - 1] of</span></p>
+<table border="1" width="100%" id="table2">
+	<tbody><tr>
+		<td width="94" align="center"><span lang="en-us"><b>Offset</b></span></td>
+		<td align="center" width="115"><b><span lang="en-us">Size</span> (<span lang="en-us">bytes</span>)</b></td>
+		<td align="center"><span lang="en-us"><b>Content</b></span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center">0</td>
+		<td width="115" align="center"><span lang="en-us">1</span></td>
+		<td><span lang="en-us">Len: UInt8 - </span>Длина имени поля</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">1</td>
+		<td width="115" align="center"><span lang="en-us">Len</span></td>
+		<td><span lang="en-us">FieldName: Char[Len] - </span>Имя поля</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 1</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">FieldSize: Int16</span>, для строк - длина 
+		фиксированной части, те размера</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 3</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us"><a href="https://alexeevd.narod.ru/papers/cds_format.htm#FieldType">FieldType</a>: Int16</span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 5</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us"><a href="https://alexeevd.narod.ru/papers/cds_format.htm#FieldAttrs">FieldAttrs</a>: Int16 -
+		</span>атрибуты (флаги) поля.</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 7</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">FieldPropCount: UInt16 - </span>количество 
+		свойств поля</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 9</span></td>
+		<td width="115" align="center"><span lang="en-us">P</span></td>
+		<td><span lang="en-us">FieldProps: <a href="https://alexeevd.narod.ru/papers/cds_format.htm#Prop">Prop</a>[FieldPropCount] 
+		- </span><a href="https://alexeevd.narod.ru/papers/cds_format.htm#FieldProps">свойства<span lang="en-us"> </span>поля</a>.</td>
+	</tr>
+</tbody></table>
+<h4>Описание свойства (<span lang="en-us"><a name="Prop">Prop</a></span>)</h4>
+<table border="1" width="100%" id="table4">
+	<tbody><tr>
+		<td width="94" align="center"><span lang="en-us"><b>Offset</b></span></td>
+		<td align="center" width="115"><b><span lang="en-us">Size</span> (<span lang="en-us">bytes</span>)</b></td>
+		<td align="center"><span lang="en-us"><b>Content</b></span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center">0</td>
+		<td width="115" align="center"><span lang="en-us">1</span></td>
+		<td><span lang="en-us">Len: UInt8 - </span>Длина имени свойства</td>
+	</tr>
+	<tr>
+		<td width="94" align="center">1</td>
+		<td width="115" align="center"><span lang="en-us">Len</span></td>
+		<td><span lang="en-us">PropName: Char[Len] - </span>Имя свойства</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len+1</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">PropSize: Int16</span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len+3</span></td>
+		<td width="115" align="center"><span lang="en-us">2</span></td>
+		<td><span lang="en-us">PropType: Int16 (<a href="https://alexeevd.narod.ru/papers/cds_format.htm#FieldType">FieldType</a>)</span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">Len + 4</span></td>
+		<td width="115" align="center"><span lang="en-us">PropSize</span></td>
+		<td><span lang="en-us">Data: Byte[PropSize] - </span>Данные свойства</td>
+	</tr>
+</tbody></table>
+<h4>Описание записей <span lang="en-us">(<a name="RecordList">RecordList</a>)</span></h4>
+<p>Последовательный список описателей записи, приведенных ниже. Количество в 
+списке задано соответствующим значением заголовка<span lang="en-us">.</span></p>
+<p><span lang="en-us">array [0..RecordCount - 1] of</span></p>
+<table border="1" width="100%" id="table3">
+	<tbody><tr>
+		<td width="94" align="center"><span lang="en-us"><b>Offset</b></span></td>
+		<td align="center" width="115"><b><span lang="en-us">Size</span> (<span lang="en-us">bytes</span>)</b></td>
+		<td align="center"><span lang="en-us"><b>Content</b></span></td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">0</span></td>
+		<td width="115" align="center"><span lang="en-us">1</span></td>
+		<td><span lang="en-us"><a href="https://alexeevd.narod.ru/papers/cds_format.htm#RecordStatus">RecordStatus</a>: UInt</span>8</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">1</span></td>
+		<td width="115" align="center"><span lang="en-us">S</span></td>
+		<td><span lang="en-us">StatusBits: Byte[FieldCount / 4] - </span>на 
+		каждое поле в массиве статусных битов отводится 2 бита<span lang="en-us">
+		</span>от младшего к старшему. Данные полей 
+		содержащих <span lang="en-us">Null</span> или <span lang="en-us">
+		NotChanged </span>в запись не попадают.<br>
+		BLANK_NULL = 1; { 'real' NULL }<br>
+		BLANK_NOTCHANGED = 2; { Not changed , compared to original value }</td>
+	</tr>
+	<tr>
+		<td width="94" align="center"><span lang="en-us">S+1</span></td>
+		<td width="115" align="center"><span lang="en-us">X</span></td>
+		<td><span lang="en-us">FieldData[] - </span>пишутся только
+		<span lang="en-us">not null &amp;</span> <span lang="en-us">changed </span>значения. <br>
+		Для полей фиксированного размера<span lang="en-us">:</span>
+		<span lang="en-us">FixedFieldData = Byte[FieldSize]<br>
+		</span>Для полей переменного размера<span lang="en-us">: VarFieldData = 
+		(DataLen: UInt(of FieldSize)) Byte[DataLen] - </span>те обычно данные 
+		предваряются 1-2 байтами размера.</td>
+	</tr>
+</tbody></table>
+<h4><span lang="en-us"><a name="FieldType">FieldType</a></span></h4>
+<p>dsfldUNKNOWN = 0; { Unknown }<br>
+dsfldINT = 1; { signed integer }<br>
+dsfldUINT = 2; { Unsigned integer }<br>
+dsfldBOOL = 3; { Boolean }<br>
+dsfldFLOATIEEE = 4; { IEEE float }<br>
+dsfldBCD = 5; { BCD }<br>
+dsfldDATE = 6; { Date (32 bit) }<br>
+dsfldTIME = 7; { Time (32 bit) }<br>
+dsfldTIMESTAMP = 8; { Time-stamp (64 bit) }<br>
+dsfldZSTRING = 9; { Multi-byte string }<br>
+dsfldUNICODE = 10; { unicode string }<br>
+dsfldBYTES = 11; { bytes }<br>
+dsfldADT = 12; { ADT (Abstract Data Type) }<br>
+dsfldARRAY = 13; { Array type (not attribute) }<br>
+dsfldEMBEDDEDTBL = 14; { Embedded (nested table type) }<br>
+dsfldREF = 15; { Reference }</p>
+<p><span lang="en-us">MaskFieldType</span> = $3F; { mask to retrieve
+<span lang="en-us">Field </span>Type&nbsp; }<br>
+<span lang="en-us">Mask</span>VaryingFld = $40; { Varying attribute type. }<br>
+<span lang="en-us">Mask</span>ArrayFld = $80; { <a name="Array">Array</a> attribute type. } 
+- Данные массива предваряются длиной <span lang="en-us">Len: Int32</span>, за 
+которой следуют <span lang="en-us">е</span>го элементы <span lang="en-us">
+Data[Len]</span>.<br>
+&nbsp;</p>
+<h4>Атрибуты поля (<span lang="en-us"><a name="FieldAttrs">FieldAttrs</a></span>)</h4>
+<p>fldAttrHIDDEN = $0001; { Field is hidden }<br>
+fldAttrREADONLY = $0002; { Field is readonly }<br>
+fldAttrREQUIRED = $0004; { Field value required }<br>
+fldAttrLINK = $0008; { Linking field }</p>
+<h4>Свойства поля (<span lang="en-us"><a name="FieldProps">FieldProps</a></span>)</h4>
+<ul>
+	<li>WIDTH<span lang="en-us">: UInt16 - </span>для полей переменного размера, 
+	например строк, равно <span lang="en-us">Field.Size.</span> Те это 
+	предельный размер данных, хранимых в поле.</li>
+</ul>
+<h4>Свойства набора (<span lang="en-us"><a name="DataSetProps">DataSetProps</a></span>)</h4>
+<ul>
+	<li>CHANGE_LOG<span lang="en-us">: UInt32[] - </span><a href="https://alexeevd.narod.ru/papers/cds_format.htm#Array">массив</a> 
+	из целых чисел.</li>
+	<li>DATASET_DELT<span lang="en-us">A: UInt32 = 1</span>, если в пакете 
+	передается <span lang="en-us">delta</span>-набор (набор изменений).</li>
+</ul>
+<h4>Статус записи (<span lang="en-us"><a name="RecordStatus">RecordStatus</a></span>)</h4>
+<p>dsRecUnmodified = $0000; { Unmodified record }<br>
+dsRecOrg = $0001; { Original record (was changed) }<br>
+dsRecDeleted = $0002; { Record was deleted }<br>
+dsRecNew = $0004; { Record was inserted }<br>
+dsRecModified = $0008; { Record was changed }<br>
+dsUnused = $0020; { Record not used anymore (hole) }<br>
+dsDetUpd = $0040; { Detail modification Ins/Del/Mod. }{ Can be combined with 
+other status. }</p>
+<style>.ln-install-pwa{position:fixed;top:0;left:0;width:100%;padding:8px 0;z-index:9999;background:#3f51b5;font-family:'Open sans',sans-serif;color:#fff}.ln-install-pwa-wrapper{width:100%;max-width:990px;margin:0 auto;display:flex;align-items:center;position:relative}.ln-install-pwa-wrapper-text{font-size:14px;font-weight:600;text-transform:uppercase}.ln-install-pwa-button{background-color:#ff9800;border-radius:3px;padding:5px 15px;font-weight:bold;display:inline-block;color:#fff;cursor:pointer;transition:background-color .2s ease;margin-left:24px;font-size:12px;letter-spacing:1px;text-transform:uppercase}.ln-install-pwa-button:hover{background-color:#ce6500}.ln-install-pwa-wrapper-span{position:absolute;top:6px;right:0;height:14px;cursor:pointer}.ln-install-pwa-wrapper-span svg{width:14px;height:14px;fill:#060d2f;transition:fill .2s ease}.ln-install-pwa-wrapper-span:hover svg{fill:#ff9800}</style>
+</body></html>

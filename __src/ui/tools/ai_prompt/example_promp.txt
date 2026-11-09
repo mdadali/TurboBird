@@ -1,0 +1,46 @@
+# Beispiel-Prompt für den AI-Agent (Turbobird Integration)
+# Datei: /home/maurog/example_promp.txt
+
+## Aufgabe: MySQL Tabelle nach PostgreSQL klonen
+
+Du hast folgende Verbindungsdaten:
+
+### MySQL (Quelle)
+HostName=127.0.0.1
+DatabaseName=testdb
+UserName=root
+Password=md
+LibraryLocation=/usr/lib/x86_64-linux-gnu/libmariadb.so.3
+
+
+### PostgreSQL (Ziel)
+HostName=127.0.0.1
+DatabaseName=postgres
+UserName=postgres
+Password=pg
+LibraryLocation=libpq.so.5
+
+
+## Deine Aufgaben (Schritt für Schritt):
+
+1. **Verbindung testen**: Prüfe ob MySQL und PostgreSQL erreichbar sind.
+
+2. **Tabellenstruktur auslesen**: 
+
+4. **Zieltabelle erstellen**: Führe das transformierte CREATE TABLE in PostgreSQL aus.
+
+5. **Daten übertragen**: 
+   - Exportiere Daten aus MySQL, Tabelle EIGEN
+   - Importiere in PostgreSQL
+   - Oder nutze ein Python-Skript mit mysql-connector und psycopg2
+
+6. **Verifizieren**:
+   - Zeilen zählen in beiden DBs vergleichen
+   - Stichproben-Daten prüfen
+   - Ausgabe: "X Zeilen erfolgreich übertragen"
+
+## Wichtige Hinweise:
+- Nutze die verfügbaren Tools: run_shell_command, read_file, write_file
+- Bei Fehlern: analysiere die Fehlermeldung und versuche eine Lösung
+- Dokumentiere jeden Schritt im Output
+- Wenn ein Tool nicht verfügbar ist (z.B. mysql Client), installiere es mit apt-get

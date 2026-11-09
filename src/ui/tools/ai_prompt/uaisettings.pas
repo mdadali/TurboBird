@@ -27,6 +27,7 @@ type
     FApiKey: string;
     FModel: string;
     FTemperature: Double;
+    FMaxIterations: integer;
     FSystemPrompt: string;
     FConfigDir: string;
     function GetProviderInfo: TProviderInfo;
@@ -45,6 +46,7 @@ type
     property ApiKey: string read FApiKey write FApiKey;
     property Model: string read FModel write FModel;
     property Temperature: Double read FTemperature write FTemperature;
+    property MaxIterations: integer read FMaxIterations write FMaxIterations default 50;
     property SystemPrompt: string read FSystemPrompt write FSystemPrompt;
     property ConfigDir: string read FConfigDir;
     property ProviderInfo: TProviderInfo read GetProviderInfo;
