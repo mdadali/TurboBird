@@ -6,7 +6,10 @@ uses
   opensslsockets,
   uAiSettings,
   uSystemTools,
-  uWebTools;
+  uWebTools,
+  uAIContext,
+  IBDatabase, IBQuery, IB, DB,
+  turbocommon;
 type
   TOllamaAgentThread = class(TThread)
   private
@@ -167,6 +170,584 @@ begin
   Result := 'OS: ' + {$I %FPCTARGETOS%} + '; CPU: ' + {$I %FPCTARGETCPU%} +
             '; FPC: ' + {$I %FPCVERSION%};
 end;
+
+{ ---------- TurboBird-specific Tools ---------- }
+function ToolRunFirebirdQuery(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  SQL: string;
+  db: TIBDatabase;
+  tr: TIBTransaction;
+  q: TIBQuery;
+  Row, Col: Integer;
+  FieldName, FieldVal: string;
+  Output: TStringList;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  if not Provider.IsConnected then
+  begin
+    Result := 'error: Not connected to a Firebird database';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('sql') <> nil then
+      SQL := Obj.Strings['sql']
+    else
+      SQL := '';
+    Data.Free;
+
+    if Trim(SQL) = '' then
+    begin
+      Result := 'error: missing sql parameter';
+      Exit;
+    end;
+
+    // Safety: Only allow SELECT statements
+    if Pos('SELECT', UpperCase(Trim(SQL))) <> 1 then
+    begin
+      Result := 'error: Only SELECT statements are allowed for safety';
+      Exit;
+    end;
+
+    db := Provider.GetIBDatabase;
+    tr := Provider.GetIBTransaction;
+    if not Assigned(db) or not Assigned(tr) then
+    begin
+      Result := 'error: Database connection not available';
+      Exit;
+    end;
+
+    q := TIBQuery.Create(nil);
+    Output := TStringList.Create;
+    try
+      q.Database := db;
+      q.Transaction := tr;
+      q.Close;
+      q.SQL.Text := SQL;
+      q.Open;
+
+      // Header
+      for Col := 0 to q.FieldCount - 1 do
+      begin
+        if Col > 0 then Output.Add(' | ');
+        Output.Add(q.Fields[Col].FieldName);
+      end;
+      Output.Add(LineEnding + StringOfChar('-', 80));
+
+      // Data rows (limit to 100 rows)
+      Row := 0;
+      while not q.EOF and (Row < 100) do
+      begin
+        for Col := 0 to q.FieldCount - 1 do
+        begin
+          if Col > 0 then Output.Add(' | ');
+          FieldVal := q.Fields[Col].AsString;
+          if Length(FieldVal) > 100 then
+            FieldVal := Copy(FieldVal, 1, 97) + '...';
+          Output.Add(FieldVal);
+        end;
+        Output.Add(LineEnding);
+        q.Next;
+        Inc(Row);
+      end;
+
+      if Row >= 100 then
+        Output.Add('... (truncated at 100 rows)');
+
+      Result := Output.Text;
+    finally
+      q.Free;
+      Output.Free;
+    end;
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolGetTableSchema(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  TableName: string;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('table_name') <> nil then
+      TableName := Obj.Strings['table_name']
+    else
+      TableName := '';
+    Data.Free;
+
+    if Trim(TableName) = '' then
+    begin
+      Result := 'error: missing table_name parameter';
+      Exit;
+    end;
+
+    Result := Provider.GetTableSchema(TableName, True);
+    if Result = '' then
+      Result := 'error: Could not retrieve schema for table ' + TableName;
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolListDatabaseTables(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Tables: TStringList;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  Tables := Provider.GetVisibleTableNames;
+  try
+    if Tables.Count = 0 then
+      Result := 'No user tables found in current database'
+    else
+    begin
+      Result := 'Tables in current database (' + IntToStr(Tables.Count) + '):' + LineEnding;
+      Result := Result + Tables.CommaText;
+    end;
+  finally
+    Tables.Free;
+  end;
+end;
+
+{ ---------- TurboBird System Tools (Full System Access) ---------- }
+
+function ToolListRegisteredServers(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Count, i: Integer;
+  JArr: TJSONArray;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  Count := Provider.GetRegisteredServerCount;
+  JArr := TJSONArray.Create;
+  try
+    for i := 0 to Count - 1 do
+      JArr.Add(GetJSON(Provider.GetServerInfoAsJSON(i)));
+    Result := JArr.AsJSON;
+  finally
+    JArr.Free;
+  end;
+end;
+
+function ToolGetServerInfo(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('name') <> nil then
+      Index := Provider.FindServerIndexByName(Obj.Strings['name'])
+    else if Obj.Find('alias') <> nil then
+      Index := Provider.FindServerIndexByAlias(Obj.Strings['alias'])
+    else
+      Index := -1;
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: server not found (provide index, name, or alias)'
+    else
+      Result := Provider.GetServerInfoAsJSON(Index);
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolListRegisteredDatabases(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Count, i: Integer;
+  JArr: TJSONArray;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  Count := Provider.GetRegisteredDatabaseCount;
+  JArr := TJSONArray.Create;
+  try
+    for i := 0 to Count - 1 do
+      JArr.Add(GetJSON(Provider.GetDatabaseInfoAsJSON(i)));
+    Result := JArr.AsJSON;
+  finally
+    JArr.Free;
+  end;
+end;
+
+function ToolGetDatabaseInfo(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('title') <> nil then
+      Index := Provider.FindDatabaseIndexByTitle(Obj.Strings['title'])
+    else
+      Index := -1;
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: database not found (provide index or title)'
+    else
+      Result := Provider.GetDatabaseInfoAsJSON(Index);
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolGetDatabasesForServer(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  ServerAlias: string;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('server_alias') <> nil then
+      ServerAlias := Obj.Strings['server_alias']
+    else
+      ServerAlias := '';
+    Data.Free;
+
+    if ServerAlias = '' then
+      Result := 'error: missing server_alias parameter'
+    else
+      Result := Provider.GetDatabasesForServer(ServerAlias);
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolConnectDatabase(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+  Success: Boolean;
+  JObj: TJSONObject;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('title') <> nil then
+      Index := Provider.FindDatabaseIndexByTitle(Obj.Strings['title'])
+    else
+      Index := -1;
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: database not found (provide index or title)'
+    else
+    begin
+      Success := Provider.ConnectToDatabase(Index);
+      JObj := TJSONObject.Create;
+      try
+        JObj.Add('success', Success);
+        JObj.Add('database_index', Index);
+        if Success then
+          JObj.Add('message', 'Connected successfully')
+        else
+          JObj.Add('error', 'Failed to connect');
+        Result := JObj.AsJSON;
+      finally
+        JObj.Free;
+      end;
+    end;
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolDisconnectDatabase(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+  Success: Boolean;
+  JObj: TJSONObject;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('title') <> nil then
+      Index := Provider.FindDatabaseIndexByTitle(Obj.Strings['title'])
+    else
+      Index := -1;
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: database not found (provide index or title)'
+    else
+    begin
+      Success := Provider.DisconnectDatabase(Index);
+      JObj := TJSONObject.Create;
+      try
+        JObj.Add('success', Success);
+        JObj.Add('database_index', Index);
+        if Success then
+          JObj.Add('message', 'Disconnected successfully')
+        else
+          JObj.Add('error', 'Failed to disconnect');
+        Result := JObj.AsJSON;
+      finally
+        JObj.Free;
+      end;
+    end;
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolGetDatabaseMetadata(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+  ObjectType: string;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('title') <> nil then
+      Index := Provider.FindDatabaseIndexByTitle(Obj.Strings['title'])
+    else
+      Index := -1;
+
+    if Obj.Find('object_type') <> nil then
+      ObjectType := Obj.Strings['object_type']
+    else
+      ObjectType := 'tables';
+
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: database not found (provide index or title)'
+    else
+      Result := Provider.GetDatabaseMetadata(Index, ObjectType);
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolTestServerConnection(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  Index: Integer;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    if not (Data is TJSONObject) then raise Exception.Create('bad args');
+    Obj := TJSONObject(Data);
+    if Obj.Find('index') <> nil then
+      Index := Obj.Get('index', -1)
+    else if Obj.Find('name') <> nil then
+      Index := Provider.FindServerIndexByName(Obj.Strings['name'])
+    else if Obj.Find('alias') <> nil then
+      Index := Provider.FindServerIndexByAlias(Obj.Strings['alias'])
+    else
+      Index := -1;
+    Data.Free;
+
+    if Index < 0 then
+      Result := 'error: server not found (provide index, name, or alias)'
+    else
+      Result := Provider.TestServerConnection(Index);
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolGetServerInventory(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+  Data: TJSONData;
+  Obj: TJSONObject;
+  AsJSON: Boolean;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  try
+    Data := GetJSON(ArgsJSON);
+    AsJSON := False;
+    if (Data is TJSONObject) then
+    begin
+      Obj := TJSONObject(Data);
+      if Obj.Find('format') <> nil then
+        AsJSON := SameText(Obj.Strings['format'], 'json');
+      Data.Free;
+    end;
+
+    if AsJSON then
+      Result := Provider.GetServerInventoryAsJSON
+    else
+      Result := Provider.GetServerInventoryAsText;
+  except
+    on E: Exception do
+      Result := 'error: ' + E.Message;
+  end;
+end;
+
+function ToolGetFullSystemContext(const ArgsJSON: string): string;
+var
+  Provider: IAIContextProvider;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then
+  begin
+    Result := 'error: No TurboBird context available';
+    Exit;
+  end;
+
+  Result := Provider.BuildFullSystemContextString;
+end;
+
 function ExecuteTool(const Name, ArgsJSON: string): string;
 var
   Data: TJSONData;
@@ -176,6 +757,20 @@ begin
   if Name = 'get_current_time' then Result := ToolGetCurrentTime
   else if Name = 'calculate' then Result := ToolCalculate(ArgsJSON)
   else if Name = 'get_system_info' then Result := ToolGetSystemInfo
+  else if Name = 'run_firebird_query' then Result := ToolRunFirebirdQuery(ArgsJSON)
+  else if Name = 'get_table_schema' then Result := ToolGetTableSchema(ArgsJSON)
+  else if Name = 'list_database_tables' then Result := ToolListDatabaseTables(ArgsJSON)
+  else if Name = 'list_registered_servers' then Result := ToolListRegisteredServers(ArgsJSON)
+  else if Name = 'get_server_info' then Result := ToolGetServerInfo(ArgsJSON)
+  else if Name = 'list_registered_databases' then Result := ToolListRegisteredDatabases(ArgsJSON)
+  else if Name = 'get_database_info' then Result := ToolGetDatabaseInfo(ArgsJSON)
+  else if Name = 'get_databases_for_server' then Result := ToolGetDatabasesForServer(ArgsJSON)
+  else if Name = 'connect_database' then Result := ToolConnectDatabase(ArgsJSON)
+  else if Name = 'disconnect_database' then Result := ToolDisconnectDatabase(ArgsJSON)
+  else if Name = 'get_database_metadata' then Result := ToolGetDatabaseMetadata(ArgsJSON)
+  else if Name = 'test_server_connection' then Result := ToolTestServerConnection(ArgsJSON)
+  else if Name = 'get_server_inventory' then Result := ToolGetServerInventory(ArgsJSON)
+  else if Name = 'get_full_system_context' then Result := ToolGetFullSystemContext(ArgsJSON)
   else if Name = 'run_shell_command' then
   begin
     // Args: command, working_dir (optional)
@@ -306,6 +901,20 @@ begin
     '{"type":"function","function":{"name":"get_current_time","description":"Returns the current date and time on the server.","parameters":{"type":"object","properties":{},"required":[]}}},' +
     '{"type":"function","function":{"name":"calculate","description":"Evaluates a mathematical expression with +,-,*,/, parentheses and decimals.","parameters":{"type":"object","properties":{"expression":{"type":"string","description":"Math expression to evaluate"}},"required":["expression"]}}},' +
     '{"type":"function","function":{"name":"get_system_info","description":"Returns basic system information (OS, CPU, compiler).","parameters":{"type":"object","properties":{},"required":[]}}},' +
+    '{"type":"function","function":{"name":"run_firebird_query","description":"Executes a read-only SELECT query on the current Firebird database connection. Only SELECT statements allowed. Returns up to 100 rows.","parameters":{"type":"object","properties":{"sql":{"type":"string","description":"SELECT query to execute"}},"required":["sql"]}}},' +
+    '{"type":"function","function":{"name":"get_table_schema","description":"Returns the complete CREATE TABLE DDL including indexes for a table in the current database.","parameters":{"type":"object","properties":{"table_name":{"type":"string","description":"Name of the table to get schema for"}},"required":["table_name"]}}},' +
+    '{"type":"function","function":{"name":"list_database_tables","description":"Lists all user tables in the current Firebird database.","parameters":{"type":"object","properties":{},"required":[]}}},' +
+    '{"type":"function","function":{"name":"list_registered_servers","description":"Lists all registered Firebird servers in TurboBird with their details (name, alias, version, protocol, port, etc.).","parameters":{"type":"object","properties":{},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_server_info","description":"Gets detailed information about a specific registered server.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Server index (0-based)"},"name":{"type":"string","description":"Server name"},"alias":{"type":"string","description":"Server alias"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"list_registered_databases","description":"Lists all registered databases in TurboBird with their details (title, server, path, user, charset, etc.).","parameters":{"type":"object","properties":{},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_database_info","description":"Gets detailed information about a specific registered database.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Database index (0-based)"},"title":{"type":"string","description":"Database title"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_databases_for_server","description":"Lists all databases registered under a specific server alias.","parameters":{"type":"object","properties":{"server_alias":{"type":"string","description":"Server alias to filter databases"}},"required":["server_alias"]}}},' +
+    '{"type":"function","function":{"name":"connect_database","description":"Connects to a registered database by index or title.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Database index (0-based)"},"title":{"type":"string","description":"Database title"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"disconnect_database","description":"Disconnects from a registered database by index or title.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Database index (0-based)"},"title":{"type":"string","description":"Database title"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_database_metadata","description":"Gets metadata for a registered database (tables, views, procedures, functions, triggers, generators, domains, roles, users). Requires database to be connected.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Database index (0-based)"},"title":{"type":"string","description":"Database title"},"object_type":{"type":"string","description":"Type: tables, views, procedures, functions, triggers, generators, domains, roles, users (default: tables)"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"test_server_connection","description":"Tests connection to a registered Firebird server.","parameters":{"type":"object","properties":{"index":{"type":"integer","description":"Server index (0-based)"},"name":{"type":"string","description":"Server name"},"alias":{"type":"string","description":"Server alias"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_server_inventory","description":"Gets complete inventory of all registered servers and their databases.","parameters":{"type":"object","properties":{"format":{"type":"string","description":"Output format: text (default) or json"}},"required":[]}}},' +
+    '{"type":"function","function":{"name":"get_full_system_context","description":"Gets complete TurboBird system context including all servers, databases, and connection info.","parameters":{"type":"object","properties":{},"required":[]}}},' +
     '{"type":"function","function":{"name":"run_shell_command","description":"Executes a shell command and returns stdout, stderr, and exit code. Dangerous commands (disk formatting, system file deletion, shutdown, etc.) are blocked. All other commands are allowed without restriction.","parameters":{"type":"object","properties":{"command":{"type":"string","description":"The shell command to execute"},"working_dir":{"type":"string","description":"Optional working directory"}},"required":["command"]}}},' +
     '{"type":"function","function":{"name":"read_file","description":"Reads the content of a file at the given path. No size limits.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"File path to read"}},"required":["path"]}}},' +
     '{"type":"function","function":{"name":"write_file","description":"Writes content to a file at the given path. Creates parent directories if needed. No size limits.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"File path to write"},"content":{"type":"string","description":"Content to write"}},"required":["path","content"]}}},' +
@@ -345,7 +954,7 @@ begin
   Msg.Add('content', FPrompt);
   Msgs.Add(Msg);
   Iter := 0;
-  while Iter < 25 do
+  while Iter < 50 do
   begin
     Inc(Iter);
     ReqStream := TStringStream.Create('');
@@ -501,7 +1110,7 @@ begin
   Msgs.Add(Msg);
   UseTools := True;
   Iter := 0;
-  while Iter < 25 do
+  while Iter < 50 do
   begin
     Inc(Iter);
     ReqStream := TStringStream.Create('');

@@ -1,7 +1,7 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 542
+  Left = 337
   Height = 893
-  Top = 165
+  Top = 564
   Width = 1376
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
@@ -10,6 +10,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
   ClientWidth = 1376
   OnClose = FormClose
   OnCreate = FormCreate
+  OnShow = FormShow
   Position = poMainFormCenter
   LCLVersion = '2.2.6.0'
   object pnlTitle: TPanel

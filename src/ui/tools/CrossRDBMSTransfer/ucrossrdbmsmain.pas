@@ -15,6 +15,7 @@ uses
   IBCustomDataset,
 
   turbocommon,
+  uthemeselector,
 
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
@@ -90,6 +91,7 @@ type
     procedure comboboxSourceTablesChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure rbAllRowsChange(Sender: TObject);
     procedure sgFormulasDblClick(Sender: TObject);
   private
@@ -184,6 +186,11 @@ begin
   FDestConnForm.Align := alClient;
   FDestConnForm.BorderStyle := bsNone;
   FDestConnForm.Show;
+end;
+
+procedure TfrmCrossRDBMSMain.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(Self);
 end;
 
 procedure TfrmCrossRDBMSMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);

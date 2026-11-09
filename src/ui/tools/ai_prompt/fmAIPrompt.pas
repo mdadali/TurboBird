@@ -8,7 +8,7 @@ uses
   LCLIntf, LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Spin, ExtCtrls, ComCtrls, Buttons, DBCtrls, DBGrids, SynEdit,
   HtmlView, RxDBGrid, IBQuery, IBDatabase, fphttpclient, fpjson, jsonparser, DB,
-  uAiSettings, uOllamaAgent;
+  uAiSettings, uOllamaAgent, uAIContext;
 
 type
 
@@ -53,6 +53,8 @@ type
     procedure CheckAgentDone(Sender: TObject);
     procedure ShowKeyCheckChange(Sender: TObject);
     procedure ChatModelChanged(Sender: TObject);
+    function GetSQLFromPrompt: string;
+    function GetContextForPrompt: string;
   published
     Container: TPanel;
     FPageControl: TPageControl;
@@ -138,6 +140,8 @@ begin
   FPresetCombo.Items.Add('SQL erklaeren');
   FPresetCombo.Items.Add('SQL optimieren');
   FPresetCombo.Items.Add('SQL Indizes');
+  FPresetCombo.Items.Add('Migration Firebird -> PostgreSQL');
+  FPresetCombo.Items.Add('Testdaten generieren');
   FPresetCombo.ItemIndex := 0;
 
   FProviderCombo.Items.Clear;
@@ -398,6 +402,7 @@ end;
 procedure TfmAIPromptForm.FSendBtnClick(Sender: TObject);
 var
   Prompt: string;
+  Context: string;
 begin
   if Trim(FPromptMemo.Text) = '' then
   begin
@@ -431,7 +436,12 @@ begin
   Screen.Cursor := crHourGlass;
   Application.ProcessMessages;
 
-  Prompt := FPromptMemo.Text;
+  // Inject TurboBird context automatically
+  Context := GetContextForPrompt;
+  if Context <> '' then
+    Prompt := Context + LineEnding + LineEnding + 'USER REQUEST:' + LineEnding + FPromptMemo.Text
+  else
+    Prompt := FPromptMemo.Text;
 
   FAgentThread := TOllamaAgentThread.Create(True, FSettings);
   try
@@ -620,33 +630,77 @@ begin
   end;
 end;
 
+function TfmAIPromptForm.GetSQLFromPrompt: string;
+var
+  Prefix: string;
+begin
+  Result := '';
+  if FPromptMemo.Text = '' then Exit;
+  Prefix := '---SQL---' + LineEnding;
+  if Pos(Prefix, FPromptMemo.Text) > 0 then
+    Result := Copy(FPromptMemo.Text, Pos(Prefix, FPromptMemo.Text) + Length(Prefix), MaxInt)
+  else
+    Result := FPromptMemo.Text;
+end;
+
+function TfmAIPromptForm.GetContextForPrompt: string;
+var
+  Provider: IAIContextProvider;
+  TableName, QueryText, Schema: string;
+begin
+  Result := '';
+  Provider := GetAIContextProvider;
+  if not Assigned(Provider) then Exit;
+
+  // If user has SQL in prompt, use that
+  QueryText := GetSQLFromPrompt;
+  if QueryText <> '' then
+    Result := Result + 'Current SQL:' + LineEnding + QueryText + LineEnding + LineEnding;
+
+  // If table is selected, get its schema
+  TableName := Provider.GetSelectedTableName;
+  if TableName <> '' then
+  begin
+    Schema := Provider.GetTableSchema(TableName, True);
+    if Schema <> '' then
+      Result := Result + 'Schema for table ' + TableName + ':' + LineEnding + Schema + LineEnding + LineEnding;
+  end;
+
+  // Add full context
+  Result := Result + Provider.BuildContextString;
+end;
+
 procedure TfmAIPromptForm.PresetChange(Sender: TObject);
 var
-  SQLBody, Prefix: string;
+  SQLBody, Context: string;
 begin
-  if FPromptMemo.Text = '' then
-    SQLBody := ''
-  else
-  begin
-    SQLBody := FPromptMemo.Text;
-    Prefix := '---SQL---' + LineEnding;
-    if Pos(Prefix, SQLBody) > 0 then
-      SQLBody := Copy(SQLBody, Pos(Prefix, SQLBody) + Length(Prefix), MaxInt);
-  end;
+  SQLBody := GetSQLFromPrompt;
+  Context := GetContextForPrompt;
+
   case FPresetCombo.ItemIndex of
     1: FPromptMemo.Text :=
          'Erklaere diese Firebird-SQL kurz und auf Deutsch. ' +
          'Antworte in 3-5 Saetzen, ohne den SQL-Text zu wiederholen.' +
-         LineEnding + LineEnding + '---SQL---' + LineEnding + SQLBody;
+         LineEnding + LineEnding + Context;
     2: FPromptMemo.Text :=
          'Optimiere diese Firebird-SQL. Nenne konkrete Vorschlaege ' +
          '(Indizes, Umformulierungen, EXISTS vs. IN usw.). ' +
+         'Beruecksichtige das Tabellen-Schema falls verfuegbar.' +
          'Gib am Ende die optimierte Query aus.' +
-         LineEnding + LineEnding + '---SQL---' + LineEnding + SQLBody;
+         LineEnding + LineEnding + Context;
     3: FPromptMemo.Text :=
          'Welche Indizes wuerden diese Firebird-SQL beschleunigen? ' +
          'Gib die CREATE INDEX-Statements an und begruende kurz.' +
-         LineEnding + LineEnding + '---SQL---' + LineEnding + SQLBody;
+         'Nutze das Tabellen-Schema fuer genaue Empfehlungen.' +
+         LineEnding + LineEnding + Context;
+    4: FPromptMemo.Text :=
+         'Erstelle einen Migrations-Plan von Firebird nach PostgreSQL fuer diese Tabelle. ' +
+         'Beruecksichtige Datentyp-Mapping, Indizes, Constraints, Sequences/Generators.' +
+         LineEnding + LineEnding + Context;
+    5: FPromptMemo.Text :=
+         'Generiere Testdaten (INSERT Statements) fuer diese Tabelle. ' +
+         'Mindestens 10 realistische Datensaetze, alle Constraints erfuellend.' +
+         LineEnding + LineEnding + Context;
   end;
 end;
 

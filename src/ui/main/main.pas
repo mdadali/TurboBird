@@ -109,6 +109,8 @@ uses
   u_consoleide,
 
   UpdateChecker
+  , uAIContext
+  , uAIContextImpl
   , HtmlGlobals;
 
 {$i turbocommon.inc}
@@ -705,6 +707,9 @@ begin
   NoDragTab := 0;
   SetLength(FExcludeTabs, 1);
   FExcludeTabs[0] := 0;
+
+  // Register AI Context Provider
+  SetAIContextProvider(TAIContextProvider.Create(Self));
 end;
 
 procedure TfmMain.FormShow(Sender: TObject);
@@ -11051,6 +11056,11 @@ end;
       Result := False;
     end;
   end;
+
+
+{ ============================================================================
+  Register AI Context Provider at startup
+  ============================================================================ }
 
 initialization
   {$I main.lrs}

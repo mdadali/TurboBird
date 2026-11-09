@@ -1,11 +1,11 @@
 object frmDataEditor: TfrmDataEditor
-  Left = 434
-  Height = 894
-  Top = 570
-  Width = 1496
+  Left = 663
+  Height = 564
+  Top = 285
+  Width = 1086
   Caption = 'Turbobird - Data Editor'
-  ClientHeight = 894
-  ClientWidth = 1496
+  ClientHeight = 564
+  ClientWidth = 1086
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow
@@ -15,16 +15,16 @@ object frmDataEditor: TfrmDataEditor
     Left = 0
     Height = 50
     Top = 0
-    Width = 1496
+    Width = 1086
     Align = alTop
     ClientHeight = 50
-    ClientWidth = 1496
+    ClientWidth = 1086
     TabOrder = 0
     object DBNavigator1: TDBNavigator
-      Left = 759
+      Left = 848
       Height = 48
       Top = 1
-      Width = 736
+      Width = 237
       Align = alRight
       BevelOuter = bvNone
       ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -34,7 +34,7 @@ object frmDataEditor: TfrmDataEditor
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 100
       ClientHeight = 48
-      ClientWidth = 736
+      ClientWidth = 237
       DataSource = DataSource1
       OnClick = DBNavigator1Click
       Options = []
@@ -114,25 +114,51 @@ object frmDataEditor: TfrmDataEditor
       OnClick = btnSaveFileClick
       TabOrder = 7
     end
+    object ToggleBox1: TToggleBox
+      Left = 682
+      Height = 48
+      Top = 1
+      Width = 46
+      Align = alLeft
+      Caption = 'ToggleBox1'
+      TabOrder = 8
+    end
+    object BitBtn1: TBitBtn
+      Left = 728
+      Height = 48
+      Top = 1
+      Width = 56
+      Align = alLeft
+      Caption = 'BitBtn1'
+      TabOrder = 9
+    end
+    object SpeedButton1: TSpeedButton
+      Left = 784
+      Height = 48
+      Top = 1
+      Width = 64
+      Align = alLeft
+      Caption = 'SpeedB'
+    end
   end
   object PageControl1: TPageControl
     Left = 0
-    Height = 844
+    Height = 514
     Top = 50
-    Width = 1496
+    Width = 1086
     ActivePage = tsCommonSettings
     Align = alClient
     TabIndex = 3
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
-      ClientHeight = 813
-      ClientWidth = 1486
+      ClientHeight = 483
+      ClientWidth = 1076
       object RxDBGrid1: TRxDBGrid
         Left = 0
-        Height = 813
+        Height = 483
         Top = 0
-        Width = 1486
+        Width = 1076
         ColumnDefValues.BlobText = '(blob)'
         TitleButtons = True
         AutoSort = True
@@ -209,14 +235,14 @@ object frmDataEditor: TfrmDataEditor
     end
     object tsDetail: TTabSheet
       Caption = 'Detail View'
-      ClientHeight = 813
-      ClientWidth = 1486
+      ClientHeight = 483
+      ClientWidth = 1076
       TabVisible = False
       object ScrollBox1: TScrollBox
         Left = 0
-        Height = 813
+        Height = 483
         Top = 0
-        Width = 1486
+        Width = 1076
         HorzScrollBar.Page = 1
         VertScrollBar.Page = 1
         Align = alClient
@@ -225,13 +251,13 @@ object frmDataEditor: TfrmDataEditor
     end
     object tsSQL: TTabSheet
       Caption = 'SQL'
-      ClientHeight = 813
-      ClientWidth = 1486
+      ClientHeight = 483
+      ClientWidth = 1076
       inline SynEditSQL: TSynEdit
         Left = 0
-        Height = 763
+        Height = 433
         Top = 0
-        Width = 1486
+        Width = 1076
         Align = alClient
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -727,94 +753,95 @@ object frmDataEditor: TfrmDataEditor
       object Panel2: TPanel
         Left = 0
         Height = 50
-        Top = 763
-        Width = 1486
+        Top = 433
+        Width = 1076
         Align = alBottom
         TabOrder = 1
       end
     end
     object tsCommonSettings: TTabSheet
       Caption = 'Common Settings'
-      ClientHeight = 813
-      ClientWidth = 1486
+      ClientHeight = 483
+      ClientWidth = 1076
       object grboxCSVFileRead: TGroupBox
-        Left = 24
-        Height = 592
-        Top = 24
-        Width = 416
+        Left = 0
+        Height = 483
+        Top = 0
+        Width = 360
+        Align = alLeft
         Caption = 'CSV - File Read'
-        ClientHeight = 572
-        ClientWidth = 414
+        ClientHeight = 463
+        ClientWidth = 358
         TabOrder = 0
         object lbBlockSize: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 32
+          Top = 16
           Width = 100
           Caption = 'Block Size (Byte)'
           ParentColor = False
         end
         object edtBlockSize: TEdit
-          Left = 240
+          Left = 184
           Height = 31
-          Top = 24
+          Top = 16
           Width = 112
           TabOrder = 0
           Text = '1024'
         end
         object Label6: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 80
+          Top = 64
           Width = 107
           Caption = 'Buffer Size (Byte)'
           ParentColor = False
         end
         object edtBufferSize: TEdit
-          Left = 240
+          Left = 184
           Height = 31
-          Top = 76
+          Top = 56
           Width = 112
           TabOrder = 1
           Text = '2048'
         end
         object Label7: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 128
+          Top = 112
           Width = 113
           Caption = 'Initial Cell Capacity'
           ParentColor = False
         end
         object edtInitialCellCapacity: TEdit
-          Left = 240
+          Left = 184
           Height = 31
-          Top = 124
+          Top = 104
           Width = 112
           TabOrder = 2
           Text = '128'
         end
         object lblActivePerformanceSettings: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 504
+          Top = 432
           Width = 176
           Caption = 'Active Performance Settings'
           ParentColor = False
         end
         object grboxLoadRangeOptions: TGroupBox
-          Left = 32
-          Height = 150
-          Top = 280
-          Width = 320
+          Left = 24
+          Height = 112
+          Top = 248
+          Width = 304
           Caption = 'Load Range'
-          ClientHeight = 130
-          ClientWidth = 318
+          ClientHeight = 92
+          ClientWidth = 302
           TabOrder = 3
           object rbLoadAllRows: TRadioButton
-            Left = 16
+            Left = 5
             Height = 21
-            Top = 24
+            Top = 16
             Width = 74
             Caption = 'All Rows'
             Checked = True
@@ -823,37 +850,37 @@ object frmDataEditor: TfrmDataEditor
             TabStop = True
           end
           object rbRange: TRadioButton
-            Left = 16
+            Left = 8
             Height = 21
-            Top = 56
+            Top = 48
             Width = 63
             Caption = 'Range'
             OnChange = rbRangeChange
             TabOrder = 1
           end
           object edtFrom: TEdit
-            Left = 96
+            Left = 80
             Height = 31
-            Top = 56
+            Top = 46
             Width = 88
             Enabled = False
             TabOrder = 2
             Text = '1'
           end
           object Label10: TLabel
-            Left = 192
+            Left = 176
             Height = 19
-            Top = 58
-            Width = 4
-            Caption = '-'
+            Top = 53
+            Width = 10
+            Caption = ' - '
             Font.Style = [fsBold]
             ParentColor = False
             ParentFont = False
           end
           object edtTo: TEdit
-            Left = 208
+            Left = 192
             Height = 31
-            Top = 56
+            Top = 46
             Width = 98
             Enabled = False
             TabOrder = 3
@@ -861,41 +888,41 @@ object frmDataEditor: TfrmDataEditor
           end
         end
         object lblRowWidthScanRows: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 192
+          Top = 160
           Width = 135
           Caption = 'Row Width Scan Rows:'
           ParentColor = False
         end
         object edtRowWidthScanRows: TEdit
-          Left = 240
+          Left = 184
           Height = 31
-          Top = 186
+          Top = 152
           Width = 112
           TabOrder = 4
           Text = '0'
         end
         object Label5: TLabel
-          Left = 32
+          Left = 24
           Height = 19
-          Top = 456
+          Top = 384
           Width = 154
           Caption = 'Progress Update Percent'
           ParentColor = False
         end
         object edtProgressUpdatePercent: TEdit
-          Left = 232
+          Left = 192
           Height = 31
-          Top = 444
+          Top = 384
           Width = 80
           TabOrder = 5
-          Text = '10'
+          Text = '5'
         end
         object chkBoxAutoTuneCSVBuffer: TCheckBox
-          Left = 32
+          Left = 24
           Height = 21
-          Top = 240
+          Top = 208
           Width = 154
           Caption = 'Auto Tune CSVBuffer'
           OnChange = chkBoxAutoTuneCSVBufferChange
@@ -903,18 +930,19 @@ object frmDataEditor: TfrmDataEditor
         end
       end
       object grboxCSVFileWrite: TGroupBox
-        Left = 456
-        Height = 592
-        Top = 24
-        Width = 449
+        Left = 360
+        Height = 483
+        Top = 0
+        Width = 345
+        Align = alLeft
         Caption = 'CSV File Write'
-        ClientHeight = 572
-        ClientWidth = 447
+        ClientHeight = 463
+        ClientWidth = 343
         TabOrder = 1
         object edtSaveBufferSize: TEdit
-          Left = 240
+          Left = 112
           Height = 31
-          Top = 24
+          Top = 8
           Width = 80
           TabOrder = 0
           Text = '8196'
@@ -922,7 +950,7 @@ object frmDataEditor: TfrmDataEditor
         object Label8: TLabel
           Left = 24
           Height = 19
-          Top = 32
+          Top = 16
           Width = 67
           Caption = 'Buffer Size'
           ParentColor = False
@@ -930,7 +958,7 @@ object frmDataEditor: TfrmDataEditor
         object edtSaveProgressUpdatePercent: TEdit
           Left = 240
           Height = 31
-          Top = 76
+          Top = 200
           Width = 80
           TabOrder = 1
           Text = '5'
@@ -938,32 +966,24 @@ object frmDataEditor: TfrmDataEditor
         object Label9: TLabel
           Left = 24
           Height = 19
-          Top = 80
+          Top = 210
           Width = 186
           Caption = 'Save Progress Update Percent'
           ParentColor = False
         end
-        object chkBoxSaveWriteBOM: TCheckBox
-          Left = 24
-          Height = 21
-          Top = 128
-          Width = 121
-          Caption = 'Save WriteBOM'
-          TabOrder = 2
-        end
         object grboxSaveRangeOptions: TGroupBox
           Left = 24
-          Height = 150
-          Top = 280
-          Width = 320
+          Height = 115
+          Top = 48
+          Width = 304
           Caption = 'Save Range'
-          ClientHeight = 130
-          ClientWidth = 318
-          TabOrder = 3
+          ClientHeight = 95
+          ClientWidth = 302
+          TabOrder = 2
           object rbSaveAllRows: TRadioButton
-            Left = 16
+            Left = 8
             Height = 21
-            Top = 24
+            Top = 8
             Width = 74
             Caption = 'All Rows'
             Checked = True
@@ -972,37 +992,37 @@ object frmDataEditor: TfrmDataEditor
             TabStop = True
           end
           object rbSaveRange: TRadioButton
-            Left = 16
+            Left = 8
             Height = 21
-            Top = 56
+            Top = 40
             Width = 63
             Caption = 'Range'
             OnChange = rbRangeChange
             TabOrder = 1
           end
           object edtSaveFrom: TEdit
-            Left = 96
+            Left = 80
             Height = 31
-            Top = 56
+            Top = 32
             Width = 88
             Enabled = False
             TabOrder = 2
             Text = '1'
           end
           object Label11: TLabel
-            Left = 192
+            Left = 176
             Height = 19
-            Top = 58
-            Width = 4
-            Caption = '-'
+            Top = 40
+            Width = 10
+            Caption = ' - '
             Font.Style = [fsBold]
             ParentColor = False
             ParentFont = False
           end
           object edtSaveTo: TEdit
-            Left = 208
+            Left = 192
             Height = 31
-            Top = 56
+            Top = 32
             Width = 98
             Enabled = False
             TabOrder = 3
@@ -1010,59 +1030,60 @@ object frmDataEditor: TfrmDataEditor
           end
         end
         object lblSaveActiveSettings: TLabel
-          Left = 26
+          Left = 24
           Height = 19
-          Top = 504
-          Width = 123
-          Caption = 'Save Active Settings'
+          Top = 248
+          Width = 208
+          Caption = 'Save Active Performance Settings'
           ParentColor = False
         end
       end
       object grboxCSVOptions: TGroupBox
-        Left = 920
-        Height = 592
-        Top = 24
-        Width = 497
+        Left = 705
+        Height = 483
+        Top = 0
+        Width = 371
+        Align = alClient
         Caption = 'CSV Options'
-        ClientHeight = 572
-        ClientWidth = 495
+        ClientHeight = 463
+        ClientWidth = 369
         TabOrder = 2
         object Label1: TLabel
-          Left = 56
+          Left = 24
           Height = 19
-          Top = 40
+          Top = 16
           Width = 125
           Caption = 'Default Field Length'
           ParentColor = False
         end
         object chkBoxIgnoreOuterWhiteSpace: TCheckBox
-          Left = 56
+          Left = 24
           Height = 21
-          Top = 294
+          Top = 296
           Width = 180
           Caption = 'Ignore outer Whiteppace'
           TabOrder = 0
         end
         object chkBoxFirstLineAsFieldName: TCheckBox
-          Left = 56
+          Left = 24
           Height = 21
-          Top = 248
+          Top = 256
           Width = 163
           Caption = 'First Line as Fieldname'
           TabOrder = 1
         end
         object chkBoxQuoteOuterWhiteSpace: TCheckBox
-          Left = 56
+          Left = 24
           Height = 21
-          Top = 342
+          Top = 344
           Width = 175
           Caption = 'Quote outer Whitespace'
           TabOrder = 2
         end
         object edtDefaultFieldLength: TEdit
-          Left = 272
+          Left = 160
           Height = 31
-          Top = 40
+          Top = 16
           Width = 80
           MaxLength = 1024
           NumbersOnly = True
@@ -1070,17 +1091,17 @@ object frmDataEditor: TfrmDataEditor
           Text = '255'
         end
         object Label3: TLabel
-          Left = 56
+          Left = 24
           Height = 19
-          Top = 184
+          Top = 160
           Width = 71
           Caption = 'Line Ending'
           ParentColor = False
         end
         object cmbboxLineEnding: TComboBox
-          Left = 272
+          Left = 160
           Height = 31
-          Top = 184
+          Top = 152
           Width = 80
           ItemHeight = 0
           ItemIndex = 0
@@ -1096,9 +1117,9 @@ object frmDataEditor: TfrmDataEditor
           Text = 'CRLF'
         end
         object cmbboxDelimiter: TComboBox
-          Left = 272
+          Left = 160
           Height = 31
-          Top = 88
+          Top = 56
           Width = 80
           ItemHeight = 0
           Items.Strings = (
@@ -1113,17 +1134,17 @@ object frmDataEditor: TfrmDataEditor
           TabOrder = 5
         end
         object Label4: TLabel
-          Left = 56
+          Left = 24
           Height = 19
-          Top = 88
+          Top = 64
           Width = 58
           Caption = 'Delimiter'
           ParentColor = False
         end
         object cmbboxQuoteChar: TComboBox
-          Left = 272
+          Left = 160
           Height = 31
-          Top = 136
+          Top = 104
           Width = 80
           ItemHeight = 0
           ItemIndex = 0
@@ -1139,17 +1160,17 @@ object frmDataEditor: TfrmDataEditor
           Text = '"'
         end
         object Label2: TLabel
-          Left = 56
+          Left = 24
           Height = 19
-          Top = 136
+          Top = 112
           Width = 71
           Caption = 'Quote Char'
           ParentColor = False
         end
         object CheckBoxAutoDedectDelimiter: TCheckBox
-          Left = 368
+          Left = 248
           Height = 21
-          Top = 88
+          Top = 24
           Width = 102
           Caption = 'Auto Dedect'
           Checked = True
@@ -1157,9 +1178,9 @@ object frmDataEditor: TfrmDataEditor
           TabOrder = 7
         end
         object CheckBoxAutoDedectQuoteChar: TCheckBox
-          Left = 368
+          Left = 248
           Height = 21
-          Top = 136
+          Top = 62
           Width = 102
           Caption = 'Auto Dedect'
           Checked = True
@@ -1167,40 +1188,72 @@ object frmDataEditor: TfrmDataEditor
           TabOrder = 8
         end
         object CheckBoxAutoDedectLineEnding: TCheckBox
-          Left = 368
+          Left = 248
           Height = 21
-          Top = 186
+          Top = 104
           Width = 102
           Caption = 'Auto Dedect'
           Checked = True
           State = cbChecked
           TabOrder = 9
         end
+        object lmDecimalseparator: TLabel
+          Left = 24
+          Height = 19
+          Top = 208
+          Width = 112
+          Caption = 'Decimal separator'
+          ParentColor = False
+        end
+        object ComboBox1: TComboBox
+          Left = 160
+          Height = 31
+          Top = 196
+          Width = 80
+          ItemHeight = 0
+          ItemIndex = 0
+          Items.Strings = (
+            '.'
+            ','
+          )
+          TabOrder = 10
+          Text = '.'
+        end
+        object CheckBoxAutoDedecDecimalSeparator: TCheckBox
+          Left = 248
+          Height = 21
+          Top = 152
+          Width = 102
+          Caption = 'Auto Dedect'
+          Checked = True
+          State = cbChecked
+          TabOrder = 11
+        end
       end
     end
   end
   object DataSource1: TDataSource
-    Left = 312
-    Top = 632
+    Left = 504
+    Top = 392
   end
   object OpenDialog1: TOpenDialog
-    Left = 344
-    Top = 800
+    Left = 512
+    Top = 464
   end
   object SaveDialog1: TSaveDialog
-    Left = 648
-    Top = 816
+    Left = 408
+    Top = 384
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'SQL Files (*.sql)|*.sql'
     Enabled = False
     SQLDialect = sqlFirebird40
-    Left = 424
-    Top = 792
+    Left = 480
+    Top = 248
   end
   object pmGrid: TPopupMenu
-    Left = 1136
-    Top = 824
+    Left = 624
+    Top = 384
     object Separator2: TMenuItem
       Caption = '-'
       Visible = False
@@ -1247,8 +1300,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = [rxpoShowTitle, rxpoShowFooter, rxpoShowGridColor, rxpoShowFooterColor, rxpoShowReportTitle]
     ShowProgress = True
-    Left = 488
-    Top = 792
+    Left = 960
+    Top = 472
   end
   object RxDBGridExportSpreadSheet1: TRxDBGridExportSpreadSheet
     RxDBGrid = RxDBGrid1
@@ -1256,8 +1309,8 @@ object frmDataEditor: TfrmDataEditor
     ShowSetupForm = True
     Options = []
     DefaultExt = rdeNone
-    Left = 232
-    Top = 832
+    Left = 600
+    Top = 440
   end
   object RxDBGridExportPDF1: TRxDBGridExportPDF
     Caption = 'Export to PDF file'
@@ -1265,14 +1318,14 @@ object frmDataEditor: TfrmDataEditor
     Options = []
     PdfOptions.Options = []
     AuthorPdf = 'TurboBird'
-    Left = 304
-    Top = 736
+    Left = 800
+    Top = 472
   end
   object sWorksheetDataset1: TsWorksheetDataset
     AutoCalcFields = False
     FieldDefs = <>
-    Left = 1240
-    Top = 832
+    Left = 416
+    Top = 448
   end
   object SdfDataSet1: TSdfDataSet
     FileMustExist = True
@@ -1283,23 +1336,23 @@ object frmDataEditor: TfrmDataEditor
     Delimiter = ','
     FirstLineAsSchema = False
     StripTrailingDelimiters = False
-    Left = 1200
-    Top = 768
+    Left = 408
+    Top = 248
   end
   object FixedFormatDataSet1: TFixedFormatDataSet
     FileMustExist = True
     ReadOnly = False
     FieldDefs = <>
     AutoCalcFields = False
-    Left = 1048
-    Top = 792
+    Left = 968
+    Top = 400
   end
   object Dbf1: TDbf
     IndexDefs = <>
     TableLevel = 4
     FilterOptions = []
-    Left = 944
-    Top = 824
+    Left = 976
+    Top = 296
   end
   object CSVFastDataset1: TCSVFastDataset
     FieldDefs = <>
@@ -1312,12 +1365,12 @@ object frmDataEditor: TfrmDataEditor
     CSVOptions.LineEnding = #10
     CSVOptions.IgnoreOuterWhitespace = False
     CSVOptions.QuoteOuterWhitespace = True
-    Left = 80
-    Top = 736
+    Left = 936
+    Top = 344
   end
   object JSONFastDataSet1: TJSONFastDataSet
     FieldDefs = <>
-    Left = 224
-    Top = 744
+    Left = 560
+    Top = 248
   end
 end

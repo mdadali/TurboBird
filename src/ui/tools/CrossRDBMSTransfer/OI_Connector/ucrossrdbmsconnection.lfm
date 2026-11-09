@@ -8,6 +8,7 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
   ClientWidth = 469
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   LCLVersion = '2.2.6.0'
   object GroupBoxConnection: TGroupBox
     Left = 0

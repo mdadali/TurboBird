@@ -12,6 +12,7 @@ uses
   RTTIGrids, PropEdits, IniFiles,
 
   turbocommon,
+  uthemeselector,
   uCrossRDBMSTypes,
   uCrossRDBMSTypeMapping,
   uCrossRDBMSConnectionWrapper, DB;
@@ -40,6 +41,7 @@ type
     procedure cmbboxConnectionChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     FCurrentWrapper: TConnectionWrapper;
     FDetectedBackend: TCrossDBMS;
@@ -137,6 +139,11 @@ procedure TfrmCrossRDBMSConnection.FormDestroy(Sender: TObject);
 begin
   if Assigned(FCurrentWrapper) then
     FreeAndNil(FCurrentWrapper);
+end;
+
+procedure TfrmCrossRDBMSConnection.FormShow(Sender: TObject);
+begin
+  frmThemeSelector.btnApplyClick(Self);
 end;
 
 function TfrmCrossRDBMSConnection.IsMySQLDriver(const ADriver: string): Boolean;

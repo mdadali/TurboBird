@@ -562,6 +562,7 @@ var
     CSVDelimiter: char;
     CSVLineEnding: string;
     CSVQuoteChar: char;
+    CSVDecimalSeparator: Char = '.';
     CSVFirstLineAsFieldNames,
     CSVIgnoreOuterWhitespace,
     CSVQuoteOuterWhitespace: boolean;
@@ -586,6 +587,7 @@ var
     AutoDetectLineEnding: Boolean;
     AutoDetectDelimiter:  Boolean;
     AutoDetectQuoteChar:  Boolean;
+    AutoDetectDecimalSeparator: boolean;
 
     //UpdateChecker
     AutoSearchOnProgramStart: boolean;
@@ -622,6 +624,7 @@ function CSVLineEndingStrToName(const AValue: string): string;
 function DetectLineEnding(const AFileName: string): string;
 function DetectDelimiter(const AFileName: string): Char;
 function DetectQuoteChar(const AFileName: string; ADelimiter: Char): Char;
+function DetectDecimalSeparator(const AFileName: string; ADelimiter, AQuoteChar: Char): Char;
 function EstimateCSVMaxLineWidth(
   const AFileName: string;
   AFromRow: Int64;
@@ -1308,6 +1311,161 @@ begin
     Result := ''''
   else
     Result := '"';
+end;
+
+function DetectDecimalSeparator(const AFileName: string;
+  ADelimiter, AQuoteChar: Char): Char;
+var
+  Stream: TFileStream;
+  Buffer: array[0..65535] of AnsiChar;
+  BytesRead: Integer;
+  P, BufEnd: PAnsiChar;
+  InQuote: Boolean;
+  CommaCount, DotCount: Integer;
+  CellStart: PAnsiChar;
+  CellLen: Integer;
+
+  procedure AnalyzeCell(AStart: PAnsiChar; ALen: Integer);
+  var
+    J, LastSepPos, SepCount, DigitsAfter: Integer;
+    HasDigit: Boolean;
+    LastSep: Char;
+    C: Char;
+  begin
+    if ALen <= 0 then Exit;
+    HasDigit := False;
+    LastSep := #0;
+    LastSepPos := -1;
+    SepCount := 0;
+
+    for J := 0 to ALen - 1 do
+    begin
+      C := AStart[J];
+      if (C >= '0') and (C <= '9') then
+        HasDigit := True
+      else if (C = '.') or (C = ',') then
+      begin
+        LastSep    := C;
+        LastSepPos := J;
+        Inc(SepCount);
+      end
+      else if (C = 'e') or (C = 'E') or (C = '+') or (C = '-') then
+        // Exponent oder Vorzeichen — ignorieren, gehört zu Zahl
+      else if (C = ' ') or (C = #9) then
+        // Whitespace ignorieren
+      else
+        Exit;   // nicht-numerisches Zeichen → Zelle ist Text
+    end;
+
+    if not HasDigit or (LastSep = #0) then Exit;
+
+    // Ziffern nach dem letzten Trenner zählen
+    DigitsAfter := 0;
+    for J := LastSepPos + 1 to ALen - 1 do
+    begin
+      if (AStart[J] >= '0') and (AStart[J] <= '9') then
+        Inc(DigitsAfter)
+      else
+        Break;
+    end;
+
+    // Nur werten, wenn Trenner tatsächlich zwischen Ziffern liegt
+    if SepCount = 1 then
+    begin
+      if (LastSepPos > 0) and (LastSepPos < ALen - 1) then
+        if (AStart[LastSepPos-1] in ['0'..'9']) and
+           (AStart[LastSepPos+1] in ['0'..'9']) then
+        begin
+          if LastSep = ',' then Inc(CommaCount)
+          else Inc(DotCount);
+        end;
+    end
+    else
+    begin
+      // Mehrere Trenner → nur werten, wenn der letzte genau 2 Ziffern
+      // nach sich hat (typisch für Dezimalstelle). 3 = Tausendergruppe.
+      if DigitsAfter = 2 then
+      begin
+        if LastSep = ',' then Inc(CommaCount)
+        else Inc(DotCount);
+      end;
+    end;
+  end;
+
+begin
+  Result := '.';
+  CommaCount := 0;
+  DotCount := 0;
+
+  if not FileExists(AFileName) then Exit;
+  if ADelimiter = #0 then Exit;
+
+  Stream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  try
+    BytesRead := Stream.Read(Buffer, SizeOf(Buffer));
+    if BytesRead <= 0 then Exit;
+
+    P          := @Buffer[0];
+    BufEnd     := P + BytesRead;
+    InQuote    := False;
+    CellStart  := P;
+
+    while P < BufEnd do
+    begin
+      if InQuote then
+      begin
+        if P^ = AQuoteChar then
+        begin
+          if (P + 1 < BufEnd) and ((P + 1)^ = AQuoteChar) then
+            Inc(P, 2)
+          else
+          begin
+            InQuote := False;
+            Inc(P);
+          end;
+        end
+        else
+          Inc(P);
+      end
+      else if (AQuoteChar <> #0) and (P^ = AQuoteChar) then
+      begin
+        InQuote := True;
+        Inc(P);
+      end
+      else if (P^ = ADelimiter) or (P^ = #10) or (P^ = #13) then
+      begin
+        CellLen := P - CellStart;
+        if CellLen > 0 then
+          AnalyzeCell(CellStart, CellLen);
+        CellStart := P + 1;
+        Inc(P);
+      end
+      else
+        Inc(P);
+    end;
+
+    // Letzte Zelle
+    if CellStart < BufEnd then
+    begin
+      CellLen := BufEnd - CellStart;
+      if CellLen > 0 then
+        AnalyzeCell(CellStart, CellLen);
+    end;
+  finally
+    Stream.Free;
+  end;
+
+  // Entscheidung: 2:1-Heuristik, dann Fallbacks
+  if CommaCount > DotCount * 2 then
+    Result := ','
+  else if DotCount > CommaCount * 2 then
+    Result := '.'
+  else if (CommaCount = 0) and (DotCount = 0) then
+    Result := '.'               // keine Zahlen → Default
+  else if CommaCount > DotCount then
+    Result := ','
+  else
+    Result := '.';
 end;
 
 { ------------------------------------------------------------------
@@ -6146,6 +6304,7 @@ begin
   AutoDetectLineEnding := fIniFile.ReadBool('CSVEditor','AutoDetectLineEnding', True);
   AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
   AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
+  AutoDetectDecimalSeparator  := fIniFile.ReadBool('CSVEditor','AutoDetectDecimalSeparator',  True);
 
   // CSVRead Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
   CSVBlockSizeBytes           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
@@ -6174,10 +6333,8 @@ begin
   RunNewVersionAfterUnzip:= fIniFile.ReadBool('UpdateChecker','RunNewVersionAfterUnzip', false);
   DeleteOldVersions := fIniFile.ReadBool('UpdateChecker','DeleteOldVersions', false);
 
-
   //Database
   NumBuffers := fIniFile.ReadInteger('Database','NumBuffers', 1024);
-
 
   //SQLMonitor
   TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', false);
@@ -6280,6 +6437,8 @@ begin
   fIniFile.WriteBool('CSVEditor','AutoDetectLineEnding', AutoDetectLineEnding);
   fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
   fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
+  fIniFile.WriteBool('CSVEditor','AutoDetectDecimalSeparator',  AutoDetectDecimalSeparator);
+
   // Performance-Parameter
   fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeBytes);
   fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeBytes);
