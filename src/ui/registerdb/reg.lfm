@@ -1,7 +1,7 @@
-object fmReg: TfmReg
-  Left = 1001
+inherited fmReg: TfmReg
+  Left = 468
   Height = 541
-  Top = 377
+  Top = 270
   Width = 1031
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'
@@ -70282,8 +70282,7 @@ object fmReg: TfmReg
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '2.2.6.0'
-  object Panel1: TPanel
+  object Panel1: TPanel[0]
     Left = 0
     Height = 60
     Top = 481
@@ -70403,7 +70402,7 @@ object fmReg: TfmReg
       TabOrder = 2
     end
   end
-  object GroupBox1: TGroupBox
+  object GroupBox1: TGroupBox[1]
     Left = 16
     Height = 448
     Top = 16
@@ -70446,7 +70445,7 @@ object fmReg: TfmReg
     object btBrowseDB: TButton
       Left = 432
       Height = 25
-      Top = 184
+      Top = 187
       Width = 27
       Caption = '....'
       OnClick = btBrowseDBClick
@@ -70631,7 +70630,7 @@ object fmReg: TfmReg
       Visible = False
     end
   end
-  object GroupBox2: TGroupBox
+  object GroupBox2: TGroupBox[2]
     Left = 520
     Height = 128
     Top = 16
@@ -70643,7 +70642,7 @@ object fmReg: TfmReg
     object btnBrowseClient: TButton
       Left = 427
       Height = 25
-      Top = 16
+      Top = 19
       Width = 27
       Caption = '....'
       OnClick = btnBrowseClientClick
@@ -70683,24 +70682,26 @@ object fmReg: TfmReg
       TabOrder = 3
     end
   end
-  object grboxTransaction: TGroupBox
+  object grboxTransaction: TGroupBox[3]
     Left = 519
-    Height = 288
-    Top = 168
+    Height = 298
+    Top = 166
     Width = 481
     TabOrder = 3
   end
-  object OpenDialog1: TOpenDialog
+  inherited JCScaler1: TJCScaler[4]
+  end
+  object OpenDialog1: TOpenDialog[5]
     DefaultExt = '.fdb'
     Filter = 'Firebird Database|*.fdb|All Files|*.*'
     Left = 720
     Top = 232
   end
-  object OpenDialogClient: TOpenDialog
+  object OpenDialogClient: TOpenDialog[6]
     Left = 592
     Top = 256
   end
-  object IBConnection1: TIBDatabase
+  object IBConnection1: TIBDatabase[7]
     Connected = False
     CreateIfNotExists = False
     AllowStreamedConnected = False
@@ -70710,7 +70711,7 @@ object fmReg: TfmReg
     Left = 792
     Top = 336
   end
-  object IBDatabaseInfo1: TIBDatabaseInfo
+  object IBDatabaseInfo1: TIBDatabaseInfo[8]
     Database = IBConnection1
     Left = 600
     Top = 336
