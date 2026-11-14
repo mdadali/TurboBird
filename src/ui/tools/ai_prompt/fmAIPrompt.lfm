@@ -1,7 +1,7 @@
 object fmAIPromptForm: TfmAIPromptForm
-  Left = 510
+  Left = 570
   Height = 740
-  Top = 149
+  Top = 147
   Width = 1120
   Caption = 'KI Prompt (Agent)'
   ClientHeight = 740
@@ -25,15 +25,15 @@ object fmAIPromptForm: TfmAIPromptForm
     TabOrder = 0
     object FStatusBar: TStatusBar
       Left = 0
-      Height = 21
-      Top = 719
+      Height = 23
+      Top = 717
       Width = 1120
       Panels = <>
       SimpleText = 'Bereit.'
     end
     object FPageControl: TPageControl
       Left = 0
-      Height = 719
+      Height = 717
       Top = 0
       Width = 1120
       ActivePage = TabChat
@@ -42,21 +42,21 @@ object fmAIPromptForm: TfmAIPromptForm
       TabOrder = 0
       object TabChat: TTabSheet
         Caption = 'Chat'
-        ClientHeight = 688
-        ClientWidth = 1110
+        ClientHeight = 682
+        ClientWidth = 1116
         object FTopPanel: TPanel
           Left = 0
           Height = 40
           Top = 0
-          Width = 1110
+          Width = 1116
           Align = alTop
           BevelOuter = bvNone
           ClientHeight = 40
-          ClientWidth = 1110
+          ClientWidth = 1116
           TabOrder = 0
           object Label1: TLabel
             Left = 8
-            Height = 19
+            Height = 18
             Top = 13
             Width = 46
             Caption = 'Modell:'
@@ -64,33 +64,33 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object FModelCombo: TComboBox
             Left = 60
-            Height = 31
+            Height = 32
             Top = 8
             Width = 220
-            ItemHeight = 0
+            ItemHeight = 24
             OnChange = FModelComboChange
             TabOrder = 0
           end
           object Label2: TLabel
             Left = 296
-            Height = 19
+            Height = 18
             Top = 13
-            Width = 44
+            Width = 42
             Caption = 'Preset:'
             ParentColor = False
           end
           object FPresetCombo: TComboBox
             Left = 344
-            Height = 35
+            Height = 32
             Top = 8
             Width = 170
-            ItemHeight = 0
+            ItemHeight = 18
             Style = csDropDownList
             TabOrder = 1
           end
           object Label3: TLabel
             Left = 528
-            Height = 19
+            Height = 18
             Top = 13
             Width = 38
             Caption = 'Temp:'
@@ -98,7 +98,7 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object FTempEdit: TSpinEdit
             Left = 568
-            Height = 29
+            Height = 32
             Top = 8
             Width = 50
             MaxValue = 20
@@ -125,15 +125,15 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object lbMaxIteration: TLabel
             Left = 664
-            Height = 19
+            Height = 18
             Top = 13
-            Width = 91
+            Width = 89
             Caption = 'Max. Iteration:'
             ParentColor = False
           end
           object spMaxIter: TSpinEdit
             Left = 760
-            Height = 29
+            Height = 32
             Top = 8
             Width = 80
             MaxValue = 1000
@@ -146,7 +146,7 @@ object fmAIPromptForm: TfmAIPromptForm
           Left = 0
           Height = 120
           Top = 40
-          Width = 1110
+          Width = 1116
           Align = alTop
           ScrollBars = ssVertical
           TabOrder = 1
@@ -156,28 +156,28 @@ object fmAIPromptForm: TfmAIPromptForm
           Left = 0
           Height = 4
           Top = 160
-          Width = 1110
+          Width = 1116
           Align = alTop
           ResizeAnchor = akTop
         end
         object pgResults: TPageControl
           Left = 0
-          Height = 524
+          Height = 518
           Top = 164
-          Width = 1110
+          Width = 1116
           ActivePage = tsChat
           Align = alClient
           TabIndex = 0
           TabOrder = 3
           object tsChat: TTabSheet
             Caption = 'Chat'
-            ClientHeight = 493
-            ClientWidth = 1100
+            ClientHeight = 483
+            ClientWidth = 1112
             object FResponseMemo: TMemo
               Left = 0
-              Height = 493
+              Height = 483
               Top = 0
-              Width = 1100
+              Width = 1112
               Align = alClient
               ScrollBars = ssAutoBoth
               TabOrder = 0
@@ -185,13 +185,13 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object tsCode: TTabSheet
             Caption = 'Code'
-            ClientHeight = 493
-            ClientWidth = 1100
+            ClientHeight = 483
+            ClientWidth = 1112
             inline seCode: TSynEdit
               Left = 0
-              Height = 493
+              Height = 483
               Top = 0
-              Width = 1100
+              Width = 1112
               Align = alClient
               Font.Height = 13
               Font.Name = 'DejaVu Sans Mono'
@@ -686,14 +686,14 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object tsWeb: TTabSheet
             Caption = 'Web'
-            ClientHeight = 493
-            ClientWidth = 1100
+            ClientHeight = 483
+            ClientWidth = 1112
             TabVisible = False
             object HtmlViewer1: THtmlViewer
               Left = 0
-              Height = 493
+              Height = 483
               Top = 0
-              Width = 1100
+              Width = 1112
               BorderStyle = htFocused
               HistoryMaxCount = 0
               NoSelect = False
@@ -708,14 +708,14 @@ object fmAIPromptForm: TfmAIPromptForm
           end
           object tsData: TTabSheet
             Caption = 'Data'
-            ClientHeight = 493
-            ClientWidth = 1100
+            ClientHeight = 483
+            ClientWidth = 1112
             TabVisible = False
             object DBNavigator1: TDBNavigator
               Left = 0
               Height = 37
-              Top = 456
-              Width = 1100
+              Top = 446
+              Width = 1112
               Align = alBottom
               BevelOuter = bvNone
               ChildSizing.EnlargeHorizontal = crsScaleChilds
@@ -725,16 +725,16 @@ object fmAIPromptForm: TfmAIPromptForm
               ChildSizing.Layout = cclLeftToRightThenTopToBottom
               ChildSizing.ControlsPerLine = 100
               ClientHeight = 37
-              ClientWidth = 1100
+              ClientWidth = 1112
               DataSource = DataSource1
               Options = []
               TabOrder = 0
             end
             object RxDBGrid1: TRxDBGrid
               Left = 0
-              Height = 456
+              Height = 446
               Top = 0
-              Width = 1100
+              Width = 1112
               ColumnDefValues.BlobText = '(blob)'
               TitleButtons = False
               AutoSort = True
@@ -812,53 +812,53 @@ object fmAIPromptForm: TfmAIPromptForm
       end
       object TabSettings: TTabSheet
         Caption = 'Einstellungen'
-        ClientHeight = 688
-        ClientWidth = 1110
+        ClientHeight = 682
+        ClientWidth = 1116
         ImageIndex = 1
         object FProviderLabel: TLabel
           Left = 16
-          Height = 19
+          Height = 18
           Top = 24
-          Width = 57
+          Width = 55
           Caption = 'Provider:'
           ParentColor = False
         end
         object FProviderCombo: TComboBox
           Left = 140
-          Height = 35
+          Height = 32
           Top = 20
           Width = 540
-          ItemHeight = 0
+          ItemHeight = 18
           OnChange = FProviderComboChange
           Style = csDropDownList
           TabOrder = 0
         end
         object FBaseURLLabel: TLabel
           Left = 16
-          Height = 19
+          Height = 18
           Top = 64
-          Width = 63
+          Width = 62
           Caption = 'Base-URL:'
           ParentColor = False
         end
         object FBaseURLEdit: TEdit
           Left = 140
-          Height = 31
+          Height = 32
           Top = 60
           Width = 540
           TabOrder = 1
         end
         object FApiKeyLabel: TLabel
           Left = 16
-          Height = 19
+          Height = 18
           Top = 104
-          Width = 52
+          Width = 50
           Caption = 'API-Key:'
           ParentColor = False
         end
         object FApiKeyEdit: TEdit
           Left = 140
-          Height = 31
+          Height = 32
           Top = 100
           Width = 420
           EchoMode = emPassword
@@ -867,7 +867,7 @@ object fmAIPromptForm: TfmAIPromptForm
         end
         object FShowKeyCheck: TCheckBox
           Left = 575
-          Height = 21
+          Height = 22
           Top = 100
           Width = 105
           Caption = 'Key anzeigen'
@@ -875,9 +875,9 @@ object fmAIPromptForm: TfmAIPromptForm
         end
         object FSystemLabel: TLabel
           Left = 16
-          Height = 19
+          Height = 18
           Top = 152
-          Width = 99
+          Width = 98
           Caption = 'System-Prompt:'
           ParentColor = False
         end

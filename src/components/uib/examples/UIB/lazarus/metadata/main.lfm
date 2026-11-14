@@ -1,13 +1,13 @@
 object MainForm: TMainForm
-  Left = 285
+  Left = 468
   Height = 538
-  Top = 309
+  Top = 138
   Width = 1077
   HorzScrollBar.Page = 691
   VertScrollBar.Page = 518
   ActiveControl = TreeView
   Caption = 'Metadata explorer'
-  ClientHeight = 512
+  ClientHeight = 509
   ClientWidth = 1077
   Menu = MainMenu
   OnCreate = FormCreate
@@ -15,7 +15,7 @@ object MainForm: TMainForm
   LCLVersion = '2.2.6.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 512
+    Height = 509
     Top = 0
     Width = 344
     Align = alLeft
@@ -26,7 +26,7 @@ object MainForm: TMainForm
   end
   inline Memo: TSynEdit
     Left = 344
-    Height = 512
+    Height = 509
     Top = 0
     Width = 733
     Align = alClient
@@ -536,16 +536,15 @@ object MainForm: TMainForm
       'sql_dialect=3'
       'lc_ctype=NONE'
       'user_name=SYSDBA'
-      'password=masterkey'
+      'password=fb6'
     )
-    DatabaseName = 'mxLinux/3030:/opt/firebird/examples/empbuild/employee.fdb'
+    DatabaseName = '/opt/firebird3/examples/empbuild/employee.fdb'
     CharacterSet = csNONE
     UserName = 'SYSDBA'
-    PassWord = 'masterkey'
-    LibraryName = '/opt/firebird/lib/libfbclient.so.3.0.13'
-    Connected = True
-    Left = 320
-    Top = 24
+    PassWord = 'fb6'
+    LibraryName = '/opt/firebird6/lib/libfbclient.so.6.0.0'
+    Left = 608
+    Top = 160
   end
   object OpenDialog: TOpenDialog
     Title = 'Ouvrir un fichier existant'
@@ -562,7 +561,7 @@ object MainForm: TMainForm
     DefaultFilter = 'Fichiers SQL (*.sql)|*.sql'
     Enabled = False
     CommentAttri.Foreground = clGreen
-    SQLDialect = sqlInterbase6
+    SQLDialect = sqlFirebird40
     Left = 432
     Top = 160
   end
@@ -574,6 +573,7 @@ object MainForm: TMainForm
   end
   object UIBQuery1: TUIBQuery
     DataBase = DataBase
+    FetchBlobs = True
     QuickScript = True
     Left = 595
     Top = 50

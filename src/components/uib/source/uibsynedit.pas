@@ -126,40 +126,44 @@ type
 
 const
    NodeInfos: array[TMetaNodeType] of TNodeInfo = (
-     (icon: 0;  color : clBlack;   Token: tkUnknown),   // MetaNode,
+     (icon: 0;  color : clBlack;   Token: tkUnknown),   // MetaNode
      (icon: 1;  color : clBlack;   Token: tkUnknown),   // MetaDatabase
-     (icon: 7;  color : clRed;     Token: tkException), // MetaException
-     (icon: 6;  color : clMaroon;  Token: tkGenerator), // MetaGenerator
-     (icon: 15; color : clBlack;   Token: tkUnknown),   // MetaCheck
-     (icon: 14; color : clTeal;    Token: tkTrigger),   // MetaTrigger
-     (icon: 8;  color : clBlue;    Token: tkUDF),       // MetaUDF
-     (icon: 4;  color : clGreen;   Token: tkView),      // MetaView
-     (icon: 5;  color : clTeal;    Token: tkProcedure), // MetaProcedure
-     (icon: 9;  color : clBlack;   Token: tkRole),      // MetaRole
-     (icon: 3;  color : clGreen;   Token: tkTable),     // MetaTable
-     (icon: 10; color : clNavy;    Token: tkUnknown),   // MetaBaseField
-     (icon: 10; color : clNavy;    Token: tkUnknown),   //   MetaUDFField
-     (icon: 10; color : clNavy;    Token: tkUnknown),   //   MetaField
-     (icon: 10; color : clNavy;    Token: tkUnknown),   //     MetaProcInField
-     (icon: 10; color : clNavy;    Token: tkUnknown),   //     MetaProcOutField
-     (icon: 10; color : clNavy;    Token: tkUnknown),   //     MetaTableField
-     (icon: 2;  color : clOlive;   Token: tkDomain),    //       MetaDomain
+     (icon: 7;  color : clRed;   Token: tkException),   // MetaException
+     (icon: 6;  color : clMaroon;   Token: tkGenerator),   // MetaGenerator
+     (icon: 15;  color : clBlack;   Token: tkUnknown),   // MetaCheck
+     (icon: 14;  color : clTeal;   Token: tkTrigger),   // MetaTrigger
+     (icon: 8;  color : clBlue;   Token: tkUDF),   // MetaUDF
+     (icon: 4;  color : clGreen;   Token: tkView),   // MetaView
+     (icon: 5;  color : clTeal;   Token: tkProcedure),   // MetaProcedure
+     (icon: 5;  color : clTeal;   Token: tkUnknown),   // MetaPackage
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaPackageProc
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaPackageFunc
+     (icon: 9;  color : clBlack;   Token: tkRole),   // MetaRole
+     (icon: 3;  color : clGreen;   Token: tkTable),   // MetaTable
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaBaseField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaUDFField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaProcField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaProcInField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaProcOutField
+     (icon: 10;  color : clNavy;   Token: tkUnknown),   // MetaTableField
+     (icon: 2;  color : clOlive;   Token: tkDomain),   // MetaDomain
      (icon: 0;  color : clBlack;   Token: tkUnknown),   // MetaConstraint
-     (icon: 12; color : clBlack;   Token: tkUnknown),   //   MetaForeign
-     (icon: 17;  color : clBlack;  Token: tkUnknown),   //   MetaIndex
-     (icon: 11; color : clBlack;   Token: tkUnknown),   //   MetaPrimary
-     (icon: 16; color : clBlack;   Token: tkUnknown),   //   MetaUnique
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaGrant,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaRoleGrant,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaTableGrant,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaFieldGrant,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaProcedureGrant,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaGrantee,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaUserGrantee,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaRoleGrantee,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaProcedureGrantee,
-     (icon: 9;  color : clBlack;   Token: tkUnknown),   //   MetaTriggerGrantee,
-     (icon: 9;  color : clBlack;   Token: tkUnknown)    //   MetaViewGrantee
+     (icon: 12;  color : clBlack;   Token: tkUnknown),   // MetaForeign
+     (icon: 17;  color : clBlack;   Token: tkUnknown),   // MetaIndex
+     (icon: 11;  color : clBlack;   Token: tkUnknown),   // MetaPrimary
+     (icon: 16;  color : clBlack;   Token: tkUnknown),   // MetaUnique
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaGrant
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaRoleGrant
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaTableGrant
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaFieldGrant
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaProcedureGrant
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaGrantee
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaUserGrantee
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaRoleGrantee
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaProcedureGrantee
+     (icon: 9;  color : clBlack;   Token: tkUnknown),   // MetaTriggerGrantee
+     (icon: 9;  color : clBlack;   Token: tkUnknown)    // MetaViewGrantee
    );
 
   (* See uibkeywords.pas

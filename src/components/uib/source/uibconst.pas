@@ -34,8 +34,8 @@ type
   TServerCommand = (scGetClassObject, scInvokeMethod);
 
   // Metadata Object Identifiers
-  TOIDDatabase = (OIDDomain, OIDTable, OIDView, OIDProcedure, OIDGenerator,
-    OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies);
+  TOIDDatabase = (OIDDomain, OIDTable, OIDView, OIDProcedure, OIDPackage,
+    OIDGenerator, OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies);
   TOIDDatabases = set of TOIDDatabase;
 
   TOIDTable = (OIDTableField, OIDPrimary, OIDForeign, OIDTableTrigger,
@@ -47,6 +47,9 @@ type
 
   TOIDProcedure = (OIDProcFieldIn, OIDProcFieldOut, OIDProcedureGrant);
   TOIDProcedures = set of TOIDProcedure;
+
+  TOIDPackage = (OIDPackageProc, OIDPackageFunc);
+  TOIDPackages = set of TOIDPackage;
 
   TOIDUDF = (OIDUDFField);
   TOIDUDFs = set of TOIDUDF;
@@ -63,12 +66,13 @@ type
   TFieldPrivileges = set of TFieldPrivilege;
 
 const
-  ALLOBjects = [OIDDomain, OIDTable, OIDView, OIDProcedure, OIDGenerator,
-    OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies];
+  ALLOBjects = [OIDDomain, OIDTable, OIDView, OIDProcedure, OIDPackage,
+    OIDGenerator, OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies];
   ALLTables = [OIDTableField, OIDPrimary, OIDForeign, OIDTableTrigger,
     OIDUnique,OIDIndex, OIDCheck, OIDTableGrant, OIDTableFieldGrant];
   ALLViews = [OIDViewField, OIDViewTrigers, OIDViewGrant, OIDViewFieldGrant];
   ALLProcedures = [OIDProcFieldIn, OIDProcFieldOut, OIDProcedureGrant];
+  ALLPackages = [OIDPackageProc, OIDPackageFunc];
   ALLUDFs = [OIDUDFField];
   ALLRoles = [OIDRoleGrant];
   { All Grantable Privileges }
@@ -129,27 +133,27 @@ const
   sUIBFalse = 'Faux';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Version de base de données incorrecte, vérifiez les options de compilation.';
+  EUIB_INVALIDEIBVERSION   = 'Version de base de donnï¿½es incorrecte, vï¿½rifiez les options de compilation.';
   EUIB_CANTLOADLIB         = 'Impossible de charger la DLL: %s.';
-  EUIB_DBHANDLEALREADYSET  = 'Le handle de la base de données est déjà défini, déconnectez d''abord la base de données.';
-  EUIB_TRANSACTIONNOTDEF   = 'La transaction n''est pas définie';
-  EUIB_DATABASENOTDEF      = 'La base de données n''est pas définie.';
-  EUIB_QUERYNOTOPEN        = 'La requête n''est pas encore ouverte.';
+  EUIB_DBHANDLEALREADYSET  = 'Le handle de la base de donnï¿½es est dï¿½jï¿½ dï¿½fini, dï¿½connectez d''abord la base de donnï¿½es.';
+  EUIB_TRANSACTIONNOTDEF   = 'La transaction n''est pas dï¿½finie';
+  EUIB_DATABASENOTDEF      = 'La base de donnï¿½es n''est pas dï¿½finie.';
+  EUIB_QUERYNOTOPEN        = 'La requï¿½te n''est pas encore ouverte.';
   EUIB_CASTERROR           = 'Transtypage incorrect.';
   EUIB_UNEXPECTEDERROR     = 'Erreur inattendue.';
-  EUIB_FIELDNUMNOTFOUND    = 'Le champ numéro: %d n''existe pas.';
+  EUIB_FIELDNUMNOTFOUND    = 'Le champ numï¿½ro: %d n''existe pas.';
   EUIB_FIELDSTRNOTFOUND    = 'Le champ "%s" n''existe pas.';
   EUIB_PARAMSTRNOTFOUND    = 'Le Parametre "%s" n''existe pas.';
-  EUIB_BLOBFIELDNOTFOUND   = 'Le champ Blob numéro: %d n''existe pas.';
-  EUIB_FETCHBLOBNOTSET     = 'La propriété FetchBlob doit être activée pour utiliser cette méthode.';
+  EUIB_BLOBFIELDNOTFOUND   = 'Le champ Blob numï¿½ro: %d n''existe pas.';
+  EUIB_FETCHBLOBNOTSET     = 'La propriï¿½tï¿½ FetchBlob doit ï¿½tre activï¿½e pour utiliser cette mï¿½thode.';
   EUIB_INDEXERROR          = 'Indice de liste hors limites (%d)';
   EUIB_SIZENAME            = 'La taille du nom est trop grande (%s)';
-  EUIB_MUSTBEPREPARED      = 'La requète doit d''abord être préparée.';
-  EUIB_MUSTBEOPEN          = 'La requète doit d''abord être ouverte.';
-  EUIB_EXPLICITTRANS       = 'La transaction doit être démarrée explicitement.';
+  EUIB_MUSTBEPREPARED      = 'La requï¿½te doit d''abord ï¿½tre prï¿½parï¿½e.';
+  EUIB_MUSTBEOPEN          = 'La requï¿½te doit d''abord ï¿½tre ouverte.';
+  EUIB_EXPLICITTRANS       = 'La transaction doit ï¿½tre dï¿½marrï¿½e explicitement.';
   EUIB_EXCEPTIONNOTFOUND   = 'L''exception %s, n''existe pas.';
-  EUIB_EXPTIONREGISTERED   = 'L''exception %d a déjà été enregistrée.';
-  EUIB_NOAUTOSTOP          = 'La transaction doit être fermée explicitement.';
+  EUIB_EXPTIONREGISTERED   = 'L''exception %d a dï¿½jï¿½ ï¿½tï¿½ enregistrï¿½e.';
+  EUIB_NOAUTOSTOP          = 'La transaction doit ï¿½tre fermï¿½e explicitement.';
   EUIB_NOGENERATOR         = 'Generator %s not found.';
   EUIB_NOFIELD             = 'Field not found.';
   EUIB_TABLESTRNOTFOUND    = 'Table "%s" not found.';
@@ -171,22 +175,22 @@ const
   sUIBFalse = 'Ne';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Nekorektní verze databázového serveru, zkontrolujte nastavení kompileru.';
-  EUIB_CANTLOADLIB         = 'Nelze naèíst knihovnu: %s.';
-  EUIB_DBHANDLEALREADYSET  = 'Kanál databáze je již pøipraven, nejdøíve odpojte databázi.';
-  EUIB_TRANSACTIONNOTDEF   = 'Transakce není pøiøazena.';
-  EUIB_DATABASENOTDEF      = 'Databáze není pøiøazena.';
-  EUIB_QUERYNOTOPEN        = 'Dotaz není otevøen.';
-  EUIB_CASTERROR           = 'Chyba bsazení.';
-  EUIB_UNEXPECTEDERROR     = 'Neznámá chyba.';
-  EUIB_FIELDNUMNOTFOUND    = 'Položka èíslo: %d neexistuje.';
-  EUIB_FIELDSTRNOTFOUND    = 'Položka "%s" neexistuje.';
+  EUIB_INVALIDEIBVERSION   = 'Nekorektnï¿½ verze databï¿½zovï¿½ho serveru, zkontrolujte nastavenï¿½ kompileru.';
+  EUIB_CANTLOADLIB         = 'Nelze naï¿½ï¿½st knihovnu: %s.';
+  EUIB_DBHANDLEALREADYSET  = 'Kanï¿½l databï¿½ze je jiï¿½ pï¿½ipraven, nejdï¿½ï¿½ve odpojte databï¿½zi.';
+  EUIB_TRANSACTIONNOTDEF   = 'Transakce nenï¿½ pï¿½iï¿½azena.';
+  EUIB_DATABASENOTDEF      = 'Databï¿½ze nenï¿½ pï¿½iï¿½azena.';
+  EUIB_QUERYNOTOPEN        = 'Dotaz nenï¿½ otevï¿½en.';
+  EUIB_CASTERROR           = 'Chyba bsazenï¿½.';
+  EUIB_UNEXPECTEDERROR     = 'Neznï¿½mï¿½ chyba.';
+  EUIB_FIELDNUMNOTFOUND    = 'Poloï¿½ka ï¿½ï¿½slo: %d neexistuje.';
+  EUIB_FIELDSTRNOTFOUND    = 'Poloï¿½ka "%s" neexistuje.';
   EUIB_PARAMSTRNOTFOUND    = 'Parametr "%s" neexistuje.';
-  EUIB_BLOBFIELDNOTFOUND   = 'Blob záznam èíslo: %d neexistuje.';
-  EUIB_FETCHBLOBNOTSET     = 'Vlastnost FetchBlob musí být nastavena pro použití této metody.';
+  EUIB_BLOBFIELDNOTFOUND   = 'Blob zï¿½znam ï¿½ï¿½slo: %d neexistuje.';
+  EUIB_FETCHBLOBNOTSET     = 'Vlastnost FetchBlob musï¿½ bï¿½t nastavena pro pouï¿½itï¿½ tï¿½to metody.';
   EUIB_INDEXERROR          = 'Index je mimo rozsah (%d)';
-  EUIB_SIZENAME            = 'Velikost názvu je pøíliš velká (%s)';
-  EUIB_MUSTBEPREPARED      = 'Dotaz musí být nejdøíve pøipraven (prepared).';
+  EUIB_SIZENAME            = 'Velikost nï¿½zvu je pï¿½ï¿½liï¿½ velkï¿½ (%s)';
+  EUIB_MUSTBEPREPARED      = 'Dotaz musï¿½ bï¿½t nejdï¿½ï¿½ve pï¿½ipraven (prepared).';
   EUIB_MUSTBEOPEN          = 'The query must be opened first.';
   EUIB_EXPLICITTRANS       = 'Transaction must be started explicitly.';
   EUIB_EXCEPTIONNOTFOUND   = 'Exception name %s, not found.';
@@ -213,12 +217,12 @@ const
   sUIBFalse = 'Falsch';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Falsche Version des Datenbankservers. Bitte ueberprüfen sie die Compileroptionen.';
+  EUIB_INVALIDEIBVERSION   = 'Falsche Version des Datenbankservers. Bitte ueberprï¿½fen sie die Compileroptionen.';
   EUIB_CANTLOADLIB         = 'Kann Bibliothek %s nicht laden.';
   EUIB_DBHANDLEALREADYSET  = 'Datenbank-Handle bereits zugewiesen. Bitte erst Verbindung zur Datenbank trennen.';
   EUIB_TRANSACTIONNOTDEF   = 'Transaktion nicht zugewiesen.';
   EUIB_DATABASENOTDEF      = 'Datenbank nicht zugewiesen.';
-  EUIB_QUERYNOTOPEN        = 'Abfrage nicht geöffnet.';
+  EUIB_QUERYNOTOPEN        = 'Abfrage nicht geï¿½ffnet.';
   EUIB_CASTERROR           = 'Fehler bei Typumwandlung.';
   EUIB_UNEXPECTEDERROR     = 'Unerwarteter Fehler.';
   EUIB_FIELDNUMNOTFOUND    = 'Feld Nummer %d nicht gefunden.';
@@ -226,10 +230,10 @@ const
   EUIB_PARAMSTRNOTFOUND    = 'Parameter "%s" nicht gefunden.';
   EUIB_BLOBFIELDNOTFOUND   = 'Blob-Feld Nummer: %d nicht gefunden.';
   EUIB_FETCHBLOBNOTSET     = 'Die Eigenschaft FetchBlob muss gesetzt sein um diese Methode zu nutzen.';
-  EUIB_INDEXERROR          = 'Index ausserhalb des gültigen Bereichs (%d).';
+  EUIB_INDEXERROR          = 'Index ausserhalb des gï¿½ltigen Bereichs (%d).';
   EUIB_SIZENAME            = 'Name ist zu lang (%s).';
   EUIB_MUSTBEPREPARED      = 'Die Abfrage muss erst vorbereitet werden.';
-  EUIB_MUSTBEOPEN          = 'Die Abfrage muss erst geöffnet werden.';
+  EUIB_MUSTBEOPEN          = 'Die Abfrage muss erst geï¿½ffnet werden.';
   EUIB_EXPLICITTRANS       = 'Die Transaktion muss explizit gestartet werden.';
   EUIB_EXCEPTIONNOTFOUND   = 'Ausnahme "%s" nicht gefunden.';
   EUIB_EXPTIONREGISTERED   = 'Ausnahme %d bereits registriert.';
@@ -237,7 +241,7 @@ const
   EUIB_NOGENERATOR         = 'Generator %s nicht gefunden.';
   EUIB_NOFIELD             = 'Feld nicht gefunden.';
   EUIB_TABLESTRNOTFOUND    = 'Tabelle "%s" nicht gefunden.';
-  EUIB_DOMAINSTRNOTFOUND   = 'Domäne %s nicht gefunden.';
+  EUIB_DOMAINSTRNOTFOUND   = 'Domï¿½ne %s nicht gefunden.';
   EUIB_PROCSTRNOTFOUND     = 'Prozedur %s nicht gefunden.';
   EUIB_CACHEDFETCHNOTSET   = 'CachedFetch property not set to True.';
   EUIB_PARSESQLDIALECT     = 'Parse error: SET SQL DIALECT';
@@ -251,30 +255,30 @@ const
   {$ENDIF UIBLANG_DE}
 
   {$IFDEF UIBLANG_RU}
-  sUIBTrue  = 'Äà';
-  sUIBFalse = 'Íåò';
+  sUIBTrue  = 'ï¿½ï¿½';
+  sUIBFalse = 'ï¿½ï¿½ï¿½';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Íåêîððåêòíàÿ âåðñèÿ ñåðâåðà ÁÄ, ïðîâåðüòå îïöèè êîìïèëÿòîðà.';
-  EUIB_CANTLOADLIB         = 'Íå ìîãó çàãðóçèòü áèáëèîòåêó DLL: %s.';
-  EUIB_DBHANDLEALREADYSET  = 'Äåñêðèïòîð áàçû äàííûõ óæå óñòàíîâëåí, ñíà÷àëà ðàçîðâèòå òåêóùåå ñîåäèíåíèå ñ áàçîé äàííûõ.';
-  EUIB_TRANSACTIONNOTDEF   = 'Ñâîéñòâî Transaction íå óñòàíîâëåíî.';
-  EUIB_DATABASENOTDEF      = 'Ñâîéñòâî Database íå óñòàíîâëåíî.';
-  EUIB_QUERYNOTOPEN        = 'Çàïðîñ íå îòêðûò.';
-  EUIB_CASTERROR           = 'Îøèáêà ïðèâåäåíèÿ òèïà.';
-  EUIB_UNEXPECTEDERROR     = 'Íåèçâåñòíàÿ îøèáêà.';
-  EUIB_FIELDNUMNOTFOUND    = 'Ïîëå íîìåð: %d íå íàéäåíî.';
-  EUIB_FIELDSTRNOTFOUND    = 'Ïîëå "%s" íå íàéäåíî.';
-  EUIB_PARAMSTRNOTFOUND    = 'Ïàðàìåòð "%s" íå íàéäåí.';
-  EUIB_BLOBFIELDNOTFOUND   = 'Blob ïîëå íîìåð: %d íå íàéäåíî.';
-  EUIB_FETCHBLOBNOTSET     = 'Ñâîéñòâî FetchBlob äîëæíî áûòü óñòàíîâëåíî äëÿ âûïîëíåíèÿ ýòîãî ìåòîäà.';
-  EUIB_INDEXERROR          = 'Index çà ïðåäåëàìè äîïóñòèìûõ çíà÷åíèé (%d)';
-  EUIB_SIZENAME            = 'Ñëèøêîì äëèííîå íàçâàíèå (%s)';
-  EUIB_MUSTBEPREPARED      = 'Íåîáõîäèìî ñíà÷àëà ïîäãîòîâèòü (prepare) çàïðîñ.';
-  EUIB_MUSTBEOPEN          = 'Íåîáõîäèìî ñíà÷àëà îòêðûòü çàïðîñ.';
-  EUIB_EXPLICITTRANS       = 'Íå âûïîëíåí ñòàðò òðàíçàêöèè.';
-  EUIB_EXCEPTIONNOTFOUND   = 'Èñêëþ÷åíèå %s íå íàéäåíî.';
-  EUIB_EXPTIONREGISTERED   = 'Èñêëþ÷åíèå: %d óæå çàðåãèñòðèðîâàíî';
+  EUIB_INVALIDEIBVERSION   = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_CANTLOADLIB         = 'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ DLL: %s.';
+  EUIB_DBHANDLEALREADYSET  = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_TRANSACTIONNOTDEF   = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Transaction ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_DATABASENOTDEF      = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Database ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_QUERYNOTOPEN        = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_CASTERROR           = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_UNEXPECTEDERROR     = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_FIELDNUMNOTFOUND    = 'ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½: %d ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_FIELDSTRNOTFOUND    = 'ï¿½ï¿½ï¿½ï¿½ "%s" ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_PARAMSTRNOTFOUND    = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ "%s" ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_BLOBFIELDNOTFOUND   = 'Blob ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½: %d ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_FETCHBLOBNOTSET     = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ FetchBlob ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_INDEXERROR          = 'Index ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (%d)';
+  EUIB_SIZENAME            = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (%s)';
+  EUIB_MUSTBEPREPARED      = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ (prepare) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_MUSTBEOPEN          = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_EXPLICITTRANS       = 'ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_EXCEPTIONNOTFOUND   = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ %s ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.';
+  EUIB_EXPTIONREGISTERED   = 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: %d ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½';
   EUIB_NOAUTOSTOP          = 'Transaction must be closed explicitly.';
   EUIB_NOGENERATOR         = 'Generator %s not found.';
   EUIB_NOFIELD             = 'Field not found.';
@@ -297,20 +301,20 @@ const
   sUIBFalse            = 'No';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Versión incorrecta del Servidor de Base de Datos, verifica las opciones del compilador.';
+  EUIB_INVALIDEIBVERSION   = 'Versiï¿½n incorrecta del Servidor de Base de Datos, verifica las opciones del compilador.';
   EUIB_CANTLOADLIB         = 'Imposible cargar la DLL: %s.';
-  EUIB_DBHANDLEALREADYSET  = 'El handle de la base de datos está asignado, primero desconecte la base de datos.';
-  EUIB_TRANSACTIONNOTDEF   = 'La transacción no está asignada.';
-  EUIB_DATABASENOTDEF      = 'La Base de Datos no está asignada.';
-  EUIB_QUERYNOTOPEN        = 'El query está cerrado.';
-  EUIB_CASTERROR           = 'Error en conversión.';
+  EUIB_DBHANDLEALREADYSET  = 'El handle de la base de datos estï¿½ asignado, primero desconecte la base de datos.';
+  EUIB_TRANSACTIONNOTDEF   = 'La transacciï¿½n no estï¿½ asignada.';
+  EUIB_DATABASENOTDEF      = 'La Base de Datos no estï¿½ asignada.';
+  EUIB_QUERYNOTOPEN        = 'El query estï¿½ cerrado.';
+  EUIB_CASTERROR           = 'Error en conversiï¿½n.';
   EUIB_UNEXPECTEDERROR     = 'Error inesperado.';
-  EUIB_FIELDNUMNOTFOUND    = 'Campo número: %d no encontrado.';
+  EUIB_FIELDNUMNOTFOUND    = 'Campo nï¿½mero: %d no encontrado.';
   EUIB_FIELDSTRNOTFOUND    = 'Campo "%s" no encontrado.';
   EUIB_PARAMSTRNOTFOUND    = 'Parametro "%s" no  encontrado.';
-  EUIB_BLOBFIELDNOTFOUND   = 'Campo Blob número: %d no  encontrado.';
-  EUIB_FETCHBLOBNOTSET     = 'La propiedad FetchBlob debe habilitarse para usar esté método';
-  EUIB_INDEXERROR          = 'Índice fuera de límite (%d)';
+  EUIB_BLOBFIELDNOTFOUND   = 'Campo Blob nï¿½mero: %d no  encontrado.';
+  EUIB_FETCHBLOBNOTSET     = 'La propiedad FetchBlob debe habilitarse para usar estï¿½ mï¿½todo';
+  EUIB_INDEXERROR          = 'ï¿½ndice fuera de lï¿½mite (%d)';
   EUIB_SIZENAME            = 'Nombre demasiado largo (%s)';
   EUIB_MUSTBEPREPARED      = 'El query debe prepararse primero.';
   EUIB_MUSTBEOPEN          = 'El query debe ser abierto primero.';
@@ -335,43 +339,43 @@ const
   {$ENDIF UIBLANG_ES}
 
   {$IFDEF UIBLANG_TR}
-  sUIBTrue  = 'Doðru';
-  sUIBFalse = 'Yanlýþ';
+  sUIBTrue  = 'Doï¿½ru';
+  sUIBFalse = 'Yanlï¿½ï¿½';
 
   // UIB Errors
-  EUIB_INVALIDEIBVERSION   = 'Hatalý Veritabaný Sunucusu sürümü, derleyici seçeneklerini kontrol ediniz.';
-  EUIB_CANTLOADLIB         = 'Kitaplýk yüklenemiyor: %s.';
-  EUIB_DBHANDLEALREADYSET  = 'Veritabaný tanýtýcýsý atanmýþ durumda, öncelikle veritabaný baðlantýsýný kesiniz.';
-  EUIB_TRANSACTIONNOTDEF   = 'Ýþlem grubu atanmamýþ.';
-  EUIB_DATABASENOTDEF      = 'Veritabaný atanmamýþ.';
-  EUIB_QUERYNOTOPEN        = 'Sorgu açýk deðil.';
-  EUIB_CASTERROR           = 'Tip atama hatasý.';
+  EUIB_INVALIDEIBVERSION   = 'Hatalï¿½ Veritabanï¿½ Sunucusu sï¿½rï¿½mï¿½, derleyici seï¿½eneklerini kontrol ediniz.';
+  EUIB_CANTLOADLIB         = 'Kitaplï¿½k yï¿½klenemiyor: %s.';
+  EUIB_DBHANDLEALREADYSET  = 'Veritabanï¿½ tanï¿½tï¿½cï¿½sï¿½ atanmï¿½ï¿½ durumda, ï¿½ncelikle veritabanï¿½ baï¿½lantï¿½sï¿½nï¿½ kesiniz.';
+  EUIB_TRANSACTIONNOTDEF   = 'ï¿½ï¿½lem grubu atanmamï¿½ï¿½.';
+  EUIB_DATABASENOTDEF      = 'Veritabanï¿½ atanmamï¿½ï¿½.';
+  EUIB_QUERYNOTOPEN        = 'Sorgu aï¿½ï¿½k deï¿½il.';
+  EUIB_CASTERROR           = 'Tip atama hatasï¿½.';
   EUIB_UNEXPECTEDERROR     = 'Beklenmeyen hata.';
-  EUIB_FIELDNUMNOTFOUND    = '%d numaralý saha bulunamadý.';
-  EUIB_FIELDSTRNOTFOUND    = '"%s" sahasý bulunamadý.';
-  EUIB_PARAMSTRNOTFOUND    = '"%s" parametresi bulunamadý.';
-  EUIB_BLOBFIELDNOTFOUND   = '%d numaralý Blob sahasý bulunamadý.';
-  EUIB_FETCHBLOBNOTSET     = 'Bu metodu kullanmak için FetchBlob niteliði ayarlanmalýdýr.';
-  EUIB_INDEXERROR          = 'Indeks sýnýr dýþýnda (%d)';
-  EUIB_SIZENAME            = 'Ad büyüklüðü çok yüksek (%s)';
-  EUIB_MUSTBEPREPARED      = 'Sorgu öncelikle hazýrlanmalýdýr.';
-  EUIB_MUSTBEOPEN          = 'Sorgu öncelikle açýlmalýdýr.';
-  EUIB_EXPLICITTRANS       = 'Ýþlem grubu elle baþlatýlmalýdýr.';
-  EUIB_EXCEPTIONNOTFOUND   = 'Kural dýþý nesnesi "%s" bulunamadý.';
-  EUIB_EXPTIONREGISTERED   = 'Kural dýþý: %d zaten kayýtlý.';
-  EUIB_NOAUTOSTOP          = 'Ýþlem grubu elle kapatýlmalýdýr.';
-  EUIB_NOGENERATOR         = '%s üreteci bulunamadý.';
-  EUIB_NOFIELD             = 'Saha bulunamadý.';
-  EUIB_TABLESTRNOTFOUND    = '"%s" tablosu bulunamadý.';
-  EUIB_DOMAINSTRNOTFOUND   = '"%s" etki alaný bulunamadý.';
-  EUIB_PROCSTRNOTFOUND     = '%s yordamý bulunamadý.';
-  EUIB_CACHEDFETCHNOTSET   = 'CachedFetch niteliði True olarak belirlenmemiþ.';
-  EUIB_PARSESQLDIALECT     = 'Ayrýþtýrma hatasý: SET SQL DIALECT';
-  EUIB_PARSESETNAMES       = 'Ayrýþtýrma hatasý: SET NAMES';
-  EUIB_CHARSETNOTFOUND     = '%s karakter seti bulunamadý.';
-  EUIB_UNEXPECTEDCASTERROR = 'Beklenmeyen tip atama hatasý.';
-  EUIB_INVALIDUSERNAME     = 'Geçersiz kullanýcý adý : "%s".';
-  EUIB_SERVICESPARSING     = 'Services API çýktýsý ayrýþtýrýlýrken hata oluþtu.';
+  EUIB_FIELDNUMNOTFOUND    = '%d numaralï¿½ saha bulunamadï¿½.';
+  EUIB_FIELDSTRNOTFOUND    = '"%s" sahasï¿½ bulunamadï¿½.';
+  EUIB_PARAMSTRNOTFOUND    = '"%s" parametresi bulunamadï¿½.';
+  EUIB_BLOBFIELDNOTFOUND   = '%d numaralï¿½ Blob sahasï¿½ bulunamadï¿½.';
+  EUIB_FETCHBLOBNOTSET     = 'Bu metodu kullanmak iï¿½in FetchBlob niteliï¿½i ayarlanmalï¿½dï¿½r.';
+  EUIB_INDEXERROR          = 'Indeks sï¿½nï¿½r dï¿½ï¿½ï¿½nda (%d)';
+  EUIB_SIZENAME            = 'Ad bï¿½yï¿½klï¿½ï¿½ï¿½ ï¿½ok yï¿½ksek (%s)';
+  EUIB_MUSTBEPREPARED      = 'Sorgu ï¿½ncelikle hazï¿½rlanmalï¿½dï¿½r.';
+  EUIB_MUSTBEOPEN          = 'Sorgu ï¿½ncelikle aï¿½ï¿½lmalï¿½dï¿½r.';
+  EUIB_EXPLICITTRANS       = 'ï¿½ï¿½lem grubu elle baï¿½latï¿½lmalï¿½dï¿½r.';
+  EUIB_EXCEPTIONNOTFOUND   = 'Kural dï¿½ï¿½ï¿½ nesnesi "%s" bulunamadï¿½.';
+  EUIB_EXPTIONREGISTERED   = 'Kural dï¿½ï¿½ï¿½: %d zaten kayï¿½tlï¿½.';
+  EUIB_NOAUTOSTOP          = 'ï¿½ï¿½lem grubu elle kapatï¿½lmalï¿½dï¿½r.';
+  EUIB_NOGENERATOR         = '%s ï¿½reteci bulunamadï¿½.';
+  EUIB_NOFIELD             = 'Saha bulunamadï¿½.';
+  EUIB_TABLESTRNOTFOUND    = '"%s" tablosu bulunamadï¿½.';
+  EUIB_DOMAINSTRNOTFOUND   = '"%s" etki alanï¿½ bulunamadï¿½.';
+  EUIB_PROCSTRNOTFOUND     = '%s yordamï¿½ bulunamadï¿½.';
+  EUIB_CACHEDFETCHNOTSET   = 'CachedFetch niteliï¿½i True olarak belirlenmemiï¿½.';
+  EUIB_PARSESQLDIALECT     = 'Ayrï¿½ï¿½tï¿½rma hatasï¿½: SET SQL DIALECT';
+  EUIB_PARSESETNAMES       = 'Ayrï¿½ï¿½tï¿½rma hatasï¿½: SET NAMES';
+  EUIB_CHARSETNOTFOUND     = '%s karakter seti bulunamadï¿½.';
+  EUIB_UNEXPECTEDCASTERROR = 'Beklenmeyen tip atama hatasï¿½.';
+  EUIB_INVALIDUSERNAME     = 'Geï¿½ersiz kullanï¿½cï¿½ adï¿½ : "%s".';
+  EUIB_SERVICESPARSING     = 'Services API ï¿½ï¿½ktï¿½sï¿½ ayrï¿½ï¿½tï¿½rï¿½lï¿½rken hata oluï¿½tu.';
   EUIB_NOT_NULLABLE        = 'Field "%s" is not nullable.';
 
   {$ENDIF UIBLANG_TR}

@@ -1,13 +1,13 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 1139
-  Height = 706
-  Top = 225
-  Width = 779
+  Left = 868
+  Height = 786
+  Top = 120
+  Width = 815
   BorderIcons = []
   BorderStyle = bsDialog
   Caption = 'Server Registration'
-  ClientHeight = 706
-  ClientWidth = 779
+  ClientHeight = 786
+  ClientWidth = 815
   Icon.Data = {
     7B4F22000000010001000000000001002000654F22001600000089504E470D0A
     1A0A0000000D49484452000004000000040008060000007F1D2B8300224F2C49
@@ -70285,61 +70285,61 @@ object fmServerRegistry: TfmServerRegistry
   LCLVersion = '2.2.6.0'
   object GroupBox1: TGroupBox
     Left = 0
-    Height = 657
+    Height = 737
     Top = 0
-    Width = 779
+    Width = 815
     Align = alClient
-    ClientHeight = 655
-    ClientWidth = 777
+    ClientHeight = 733
+    ClientWidth = 811
     TabOrder = 0
     OnClick = GroupBox1Click
     object cbServerAlias: TComboBox
       Left = 192
-      Height = 35
+      Height = 32
       Top = 16
       Width = 248
-      ItemHeight = 0
+      ItemHeight = 18
       OnChange = cbServerAliasChange
       Style = csOwnerDrawFixed
       TabOrder = 0
     end
     object Label1: TLabel
       Left = 20
-      Height = 19
+      Height = 18
       Top = 21
-      Width = 73
+      Width = 71
       Caption = 'Server Alias'
       ParentColor = False
     end
-    object Label2: TLabel
+    object lbHost: TLabel
       Left = 20
-      Height = 19
-      Top = 240
-      Width = 82
-      Caption = 'Server Name'
+      Height = 18
+      Top = 64
+      Width = 29
+      Caption = 'Host'
       ParentColor = False
     end
     object edtServerName: TEdit
       Left = 192
-      Height = 31
-      Top = 240
+      Height = 32
+      Top = 64
       Width = 248
       OnChange = edtServerNameChange
       TabOrder = 8
-      Text = 'Server Name'
+      Text = 'localhost'
     end
     object Label3: TLabel
       Left = 20
-      Height = 19
-      Top = 102
-      Width = 65
+      Height = 18
+      Top = 160
+      Width = 64
       Caption = 'Username'
       ParentColor = False
     end
     object edtUserName: TEdit
       Left = 192
-      Height = 31
-      Top = 102
+      Height = 32
+      Top = 160
       Width = 248
       OnChange = edtUserNameChange
       TabOrder = 4
@@ -70347,27 +70347,27 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtRole: TEdit
       Left = 192
-      Height = 31
-      Top = 203
+      Height = 32
+      Top = 288
       Width = 248
       OnChange = edtRoleChange
       TabOrder = 7
     end
     object lbPassword: TLabel
       Left = 20
-      Height = 19
-      Top = 141
-      Width = 58
+      Height = 18
+      Top = 208
+      Width = 59
       Caption = 'Password'
       ParentColor = False
       OnClick = lbPasswordClick
     end
     object cbProtocol: TComboBox
       Left = 192
-      Height = 31
-      Top = 61
+      Height = 32
+      Top = 112
       Width = 92
-      ItemHeight = 0
+      ItemHeight = 20
       ItemIndex = 0
       Items.Strings = (
         'TCP'
@@ -70387,16 +70387,16 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label5: TLabel
       Left = 20
-      Height = 19
-      Top = 203
+      Height = 18
+      Top = 288
       Width = 27
       Caption = 'Role'
       ParentColor = False
     end
     object edtPassword: TEdit
       Left = 192
-      Height = 31
-      Top = 136
+      Height = 32
+      Top = 208
       Width = 248
       EchoMode = emPassword
       OnChange = edtPasswordChange
@@ -70405,26 +70405,26 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label6: TLabel
       Left = 20
-      Height = 19
-      Top = 61
+      Height = 18
+      Top = 112
       Width = 51
       Caption = 'Protocol'
       ParentColor = False
     end
     object cbCharset: TComboBox
       Left = 192
-      Height = 35
-      Top = 280
+      Height = 32
+      Top = 336
       Width = 252
-      ItemHeight = 0
+      ItemHeight = 18
       OnChange = cbCharsetChange
       Style = csDropDownList
       TabOrder = 9
     end
     object edtClientLibraryPath: TEdit
       Left = 192
-      Height = 31
-      Top = 336
+      Height = 32
+      Top = 392
       Width = 529
       OnChange = edtClientLibraryPathChange
       TabStop = False
@@ -70432,32 +70432,32 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label7: TLabel
       Left = 20
-      Height = 19
-      Top = 280
+      Height = 18
+      Top = 336
       Width = 48
       Caption = 'Charset'
       ParentColor = False
     end
     object Label8: TLabel
       Left = 20
-      Height = 19
-      Top = 336
+      Height = 18
+      Top = 392
       Width = 74
       Caption = 'Clientlibrary'
       ParentColor = False
     end
     object chkSavePassword: TCheckBox
       Left = 192
-      Height = 21
-      Top = 172
-      Width = 114
+      Height = 22
+      Top = 248
+      Width = 115
       Caption = 'Save Password'
       TabOrder = 6
     end
     object btnClientLib: TButton
       Left = 736
       Height = 24
-      Top = 336
+      Top = 392
       Width = 32
       Caption = '...'
       OnClick = btnClientLibClick
@@ -70465,8 +70465,8 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtPort: TEdit
       Left = 360
-      Height = 31
-      Top = 61
+      Height = 32
+      Top = 112
       Width = 80
       OnChange = edtPortChange
       TabOrder = 14
@@ -70474,24 +70474,24 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label9: TLabel
       Left = 312
-      Height = 19
-      Top = 64
-      Width = 27
+      Height = 18
+      Top = 115
+      Width = 26
       Caption = 'Port'
       ParentColor = False
     end
     object lbFBConfigFile: TLabel
       Left = 20
-      Height = 19
-      Top = 464
-      Width = 64
+      Height = 18
+      Top = 520
+      Width = 65
       Caption = 'Config File'
       ParentColor = False
     end
     object edtConfigFilePath: TEdit
       Left = 193
-      Height = 31
-      Top = 464
+      Height = 32
+      Top = 520
       Width = 531
       OnChange = edtConfigFilePathChange
       ParentFont = False
@@ -70503,7 +70503,7 @@ object fmServerRegistry: TfmServerRegistry
     object btnfirebirdconffile: TButton
       Left = 736
       Height = 25
-      Top = 464
+      Top = 520
       Width = 32
       Caption = '...'
       OnClick = btnfirebirdconffileClick
@@ -70531,17 +70531,17 @@ object fmServerRegistry: TfmServerRegistry
     end
     object lbPortInfo: TLabel
       Left = 450
-      Height = 19
-      Top = 64
-      Width = 56
+      Height = 18
+      Top = 115
+      Width = 54
       Caption = 'Port Info'
       ParentColor = False
     end
     object lbDescription: TLabel
       Left = 450
-      Height = 19
-      Top = 112
-      Width = 67
+      Height = 18
+      Top = 163
+      Width = 66
       Caption = 'Description'
       Font.Style = [fsItalic]
       ParentColor = False
@@ -70549,9 +70549,9 @@ object fmServerRegistry: TfmServerRegistry
     end
     object cboxLoadRegisteredClientLib: TCheckBox
       Left = 192
-      Height = 21
-      Top = 376
-      Width = 249
+      Height = 22
+      Top = 432
+      Width = 248
       Caption = 'Load registered FireBird Clientlibrary'
       OnChange = cboxLoadRegisteredClientLibChange
       TabOrder = 15
@@ -70584,56 +70584,56 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label10: TLabel
       Left = 20
-      Height = 19
-      Top = 512
-      Width = 153
+      Height = 18
+      Top = 568
+      Width = 154
       Caption = 'Connection Timeout (ms)'
       ParentColor = False
     end
     object edtConnectionTimeout: TEdit
       Left = 192
-      Height = 31
-      Top = 512
+      Height = 32
+      Top = 568
       Width = 80
       TabOrder = 16
       Text = '2000'
     end
     object Label11: TLabel
       Left = 328
-      Height = 19
-      Top = 512
-      Width = 74
+      Height = 18
+      Top = 568
+      Width = 73
       Caption = 'Retry Count'
       ParentColor = False
     end
     object edtRetryCount: TEdit
       Left = 423
-      Height = 31
-      Top = 512
+      Height = 32
+      Top = 568
       Width = 80
       TabOrder = 17
       Text = '3'
     end
     object Label12: TLabel
       Left = 22
-      Height = 19
-      Top = 560
-      Width = 122
+      Height = 18
+      Top = 616
+      Width = 121
       Caption = 'Query Timeout (ms)'
       ParentColor = False
     end
     object edtQueryTimeout: TEdit
       Left = 193
-      Height = 31
-      Top = 560
+      Height = 32
+      Top = 616
       Width = 80
       TabOrder = 18
       Text = '0'
     end
     object Label13: TLabel
       Left = 296
-      Height = 19
-      Top = 560
+      Height = 18
+      Top = 616
       Width = 74
       Caption = '(0 = no limit)'
       Font.Style = [fsItalic]
@@ -70642,24 +70642,24 @@ object fmServerRegistry: TfmServerRegistry
     end
     object Label14: TLabel
       Left = 20
-      Height = 19
-      Top = 613
-      Width = 87
+      Height = 18
+      Top = 669
+      Width = 86
       Caption = 'Version String'
       ParentColor = False
     end
     object edtVersionString: TEdit
       Left = 193
-      Height = 31
-      Top = 613
+      Height = 32
+      Top = 669
       Width = 239
       ReadOnly = True
       TabOrder = 19
     end
     object Label15: TLabel
       Left = 448
-      Height = 19
-      Top = 616
+      Height = 18
+      Top = 672
       Width = 86
       Caption = 'Version Major'
       ParentColor = False
@@ -70667,16 +70667,16 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtVersionMajor: TEdit
       Left = 552
-      Height = 31
-      Top = 616
+      Height = 32
+      Top = 672
       Width = 45
       TabOrder = 20
       Visible = False
     end
     object Label16: TLabel
       Left = 616
-      Height = 19
-      Top = 616
+      Height = 18
+      Top = 672
       Width = 87
       Caption = 'Version Minor'
       ParentColor = False
@@ -70684,31 +70684,31 @@ object fmServerRegistry: TfmServerRegistry
     end
     object edtVersionMinor: TEdit
       Left = 722
-      Height = 31
-      Top = 613
+      Height = 32
+      Top = 669
       Width = 40
       TabOrder = 21
       Visible = False
     end
     object Label17: TLabel
       Left = 20
-      Height = 19
-      Top = 408
+      Height = 18
+      Top = 464
       Width = 60
       Caption = 'Root Path'
       ParentColor = False
     end
     object edtRootPath: TEdit
       Left = 192
-      Height = 31
-      Top = 408
+      Height = 32
+      Top = 464
       Width = 530
       TabOrder = 22
     end
     object btnOpenRootPath: TButton
       Left = 736
       Height = 25
-      Top = 408
+      Top = 464
       Width = 32
       Caption = '...'
       OnClick = btnOpenRootPathClick
@@ -70718,11 +70718,11 @@ object fmServerRegistry: TfmServerRegistry
   object Panel1: TPanel
     Left = 0
     Height = 49
-    Top = 657
-    Width = 779
+    Top = 737
+    Width = 815
     Align = alBottom
     ClientHeight = 49
-    ClientWidth = 779
+    ClientWidth = 815
     TabOrder = 1
     object bbTestConnection: TBitBtn
       Left = 194
@@ -70837,16 +70837,16 @@ object fmServerRegistry: TfmServerRegistry
     end
   end
   object OpenDlgLoadClientLib: TOpenDialog
-    Left = 616
-    Top = 504
+    Left = 528
+    Top = 328
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
-    Left = 640
-    Top = 208
+    Left = 528
+    Top = 200
   end
   object IBXServerProperties1: TIBXServerProperties
     TraceFlags = []
-    Left = 648
-    Top = 280
+    Left = 528
+    Top = 264
   end
 end

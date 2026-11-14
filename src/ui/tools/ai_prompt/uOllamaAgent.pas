@@ -237,6 +237,9 @@ begin
       q.Transaction := tr;
       q.Close;
       q.SQL.Text := SQL;
+      // Ensure transaction is active
+      if not tr.InTransaction then
+        tr.StartTransaction;
       q.Open;
 
       // Header

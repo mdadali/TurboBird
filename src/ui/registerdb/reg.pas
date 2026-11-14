@@ -16,17 +16,17 @@ uses
   Classes, SysUtils,  FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Buttons, ExtCtrls, IBDatabase, IBDatabaseInfo,
   IB, IBQuery,
+  IBTransactionEdit,
 
   turbocommon,
-  fbcommon,
   fServerSession,
-  uthemeselector;
+  uBaseForm;
 
 type
 
   { TfmReg }
 
-  TfmReg = class(TForm)
+  TfmReg = class(TfrmBaseForm)
     bbCancel: TBitBtn;
     bbReg: TBitBtn;
     bbTest: TBitBtn;
@@ -47,9 +47,9 @@ type
     edtUserName: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
+    grboxTransaction: TGroupBox;
     IBConnection1: TIBDatabase;
     IBDatabaseInfo1: TIBDatabaseInfo;
-    Image1: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label2: TLabel;
@@ -68,9 +68,12 @@ type
     procedure btnBrowseClientClick(Sender: TObject);
     procedure cboxServersChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
     { private declarations }
+    FTransForm:  TIBtransactionEditForm;
+
     function EditRegisteration(Index: Integer; Title, DatabaseName, UserName, Password, Charset, Role: string;
       SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
       OverwriteLoadedClientLib: boolean; ConnectOnApplicationStart: boolean): Boolean;
@@ -97,6 +100,8 @@ type
 
     procedure RefreshServerCombobox;
     procedure UpdateControlsForProtocol;
+
+    property TransactionForm:  TIBtransactionEditForm read   FTransForm;
   end;
 
 var
@@ -461,11 +466,23 @@ end;
 
 procedure TfmReg.FormCreate(Sender: TObject);
 begin
+  FTransForm := TIBtransactionEditForm.Create(grboxTransaction);
+  FTransForm.Parent := grboxTransaction;
+  FTransForm.Cancelbtn.Visible:=false;
+  FTransForm.OKBtn.Visible:=false;
+  FTransForm.Align := alClient;
+  FTransForm.Visible:=true;
+
   chkboxOverwriteServerClientLib.Hint :=
   'Use a custom Firebird client library.' + sLineBreak +
   sLineBreak +
   'If not checked,' + sLineBreak +
   'the library is inherited from the owning server''s registry settings.';
+end;
+
+procedure TfmReg.FormDestroy(Sender: TObject);
+begin
+  FTransForm.Free;
 end;
 
 procedure TfmReg.RefreshServerCombobox;
@@ -501,6 +518,7 @@ end;
 
 procedure TfmReg.FormShow(Sender: TObject);
 begin
+  inherited;
   // WICHTIG: UpdateControlsForProtocol nur aufrufen, wenn die
   // Felder noch nicht vorbefüllt sind. mnRegDBClick hat die
   // Felder (FBClient, Port, UserName, ...) bereits gesetzt.
@@ -509,8 +527,6 @@ begin
   // Vorbefüllung führt.
   if Trim(edtFBClient.Text) = '' then
     UpdateControlsForProtocol;
-
-  frmThemeSelector.btnApplyClick(self);
 end;
 
 { ============================================================
@@ -589,13 +605,14 @@ begin
     Rec.ServerName := ServerName;
     Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
     Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-
+    
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-
+    
     Rec.IsEmbedded := ServerRec.IsEmbedded;
-
+    Rec.TxConfig   := TransactionForm.TransactionParams.Text;
+    
     Write(F, Rec);
     CloseFile(F);
 
@@ -673,13 +690,14 @@ begin
     Rec.ServerName := ServerName;
     Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
     Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-
+    
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-
+    
     Rec.IsEmbedded := ServerRec.IsEmbedded;
-
+    Rec.TxConfig   := TransactionForm.TransactionParams.Text;
+    
     Write(F, Rec);
     CloseFile(F);
     Result:= True;

@@ -46,6 +46,7 @@ type
     btnSaveToFile: TButton;
     GroupBox1: TGroupBox;
     Cancelbtn: TButton;
+    GroupBox2: TGroupBox;
     OKBtn: TButton;
     OpenDialog1: TOpenDialog;
     rbOtherButton: TRadioButton;
@@ -54,9 +55,8 @@ type
     rbReadOnlyTableStability: TRadioButton;
     rbReadWriteTableStability: TRadioButton;
     SaveDialog1: TSaveDialog;
-    TransactionParams: TMemo;
     Panel1: TPanel;
-    Label1: TLabel;
+    TransactionParams: TMemo;
     procedure btnLoadFromFileClick(Sender: TObject);
     procedure btnSaveToFileClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -74,11 +74,11 @@ type
     { Private declarations }
     Transaction: TIBTransaction;
     function Edit: Boolean;
-    procedure ParseParams;
     procedure ClearParamSelection;
 
   public
     { Public declarations }
+    procedure ParseParams;
   end;
 
 var

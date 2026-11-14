@@ -194,11 +194,11 @@ begin
       //exit;
       continue;
 
-    {if c is TSynEdit then
+    if c is TSynEdit then
     begin
       TSynEdit(c).Gutter.Color := Theme.BackgroundColor;
         TSynEdit(c).Color := Theme.BackgroundColor;
-    end;}
+    end;
 
     if c is TForm then
     begin

@@ -1,10 +1,10 @@
 object fmMain: TfmMain
-  Left = 882
+  Left = 1281
   Height = 668
-  Top = 427
+  Top = 557
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 639
+  ClientHeight = 638
   ClientWidth = 1486
   Color = clForm
   DragMode = dmAutomatic
@@ -5582,15 +5582,15 @@ object fmMain: TfmMain
   WindowState = wsMaximized
   object Splitter1: TSplitter
     Left = 360
-    Height = 584
+    Height = 581
     Top = 34
     Width = 14
     Beveled = True
   end
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 21
-    Top = 618
+    Height = 23
+    Top = 615
     Width = 1486
     Panels = <    
       item
@@ -5687,7 +5687,7 @@ object fmMain: TfmMain
   end
   object PageControl1: TPageControl
     Left = 377
-    Height = 577
+    Height = 574
     Top = 37
     Width = 1106
     ActivePage = tsMain
@@ -5713,33 +5713,14 @@ object fmMain: TfmMain
     object tsMain: TTabSheet
       BorderWidth = 1
       Caption = 'Home'
-      ClientHeight = 545
-      ClientWidth = 1096
       Font.Color = clNavy
       Font.Name = 'Arial'
       ParentFont = False
-      object HtmlViewer1: THtmlViewer
-        Left = 0
-        Height = 545
-        Top = 0
-        Width = 1096
-        BorderStyle = htFocused
-        HistoryMaxCount = 0
-        NoSelect = False
-        PrintMarginBottom = 2
-        PrintMarginLeft = 2
-        PrintMarginRight = 2
-        PrintMarginTop = 2
-        PrintScale = 1
-        OnHotSpotClick = HtmlViewer1HotSpotClick
-        Align = alClient
-        TabOrder = 0
-      end
     end
   end
   object Button1: TButton
     Left = 0
-    Height = 584
+    Height = 581
     Top = 34
     Width = 27
     Align = alLeft
@@ -5749,17 +5730,17 @@ object fmMain: TfmMain
   end
   object pnlLeft: TPanel
     Left = 27
-    Height = 584
+    Height = 581
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 584
+    ClientHeight = 581
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 5
     object tvMain: TTreeView
       Left = 1
-      Height = 519
+      Height = 516
       Top = 64
       Width = 331
       Align = alClient
@@ -5792,13 +5773,13 @@ object fmMain: TfmMain
       Width = 331
       Align = alTop
       Caption = 'Object Filter'
-      ClientHeight = 43
-      ClientWidth = 329
+      ClientHeight = 33
+      ClientWidth = 327
       ParentBackground = False
       TabOrder = 1
       object edtFilter: TEdit
         Left = 32
-        Height = 31
+        Height = 32
         Top = 2
         Width = 285
         OnChange = edtFilterChange
@@ -5806,9 +5787,9 @@ object fmMain: TfmMain
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
-        Height = 21
+        Height = 20
         Top = 5
-        Width = 21
+        Width = 20
         Checked = True
         OnChange = CheckBoxFilterChange
         State = cbChecked
@@ -5817,7 +5798,7 @@ object fmMain: TfmMain
     end
     object Label1: TLabel
       Left = 41
-      Height = 19
+      Height = 18
       Top = 322
       Width = 41
       Caption = 'Label1'

@@ -55,6 +55,9 @@ type
       MetaUDF,
       MetaView,
       MetaProcedure,
+      MetaPackage,
+        MetaPackageProc,
+        MetaPackageFunc,
       MetaRole,
       MetaTable,
       MetaBaseField,         { Characteristics, Charset, Collation, Default ... }
@@ -93,6 +96,9 @@ type
   TMetaTableGrant = class;
   TMetaFieldGrant = class;
   TMetaDatabase = class;
+  TMetaPackage = class;
+  TMetaPackageProc = class;
+  TMetaPackageFunc = class;
 
   TMetaNodeClass = class of TMetaNode;
 
@@ -575,6 +581,56 @@ type
     property GrantsCount: Integer read GetProcedureGrantsCount;
   end;
 
+  { Package metadata classes - Firebird 3.0+ }
+  TMetaPackageMember = class(TMetaNode)
+  private
+    FSource: string;
+    procedure LoadFromStream(Stream: TStream); override;
+  public
+    procedure SaveToDDLNode(Stream: TStringStream; options: TDDLOptions); override;
+    procedure SaveToStream(Stream: TStream); override;
+    property Source: string read FSource;
+  end;
+
+  TMetaPackageProc = class(TMetaPackageMember)
+  public
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+  end;
+
+  TMetaPackageFunc = class(TMetaPackageMember)
+  public
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+  end;
+
+  TMetaPackage = class(TMetaNode)
+  private
+    FHeaderSource: string;
+    FBodySource: string;
+    procedure LoadFromQuery(QNames, QProcs, QFuncs: TUIBStatement;
+      OIDs: TOIDPackages);
+    procedure LoadFromStream(Stream: TStream); override;
+    function GetProcedures(const Index: Integer): TMetaPackageProc;
+    function GetProceduresCount: Integer;
+    function GetFunctions(const Index: Integer): TMetaPackageFunc;
+    function GetFunctionsCount: Integer;
+  public
+    constructor Create(AOwner: TMetaNode; ClassIndex: Integer); override;
+    procedure SaveToDDLNode(Stream: TStringStream; options: TDDLOptions); override;
+    procedure SaveHeaderToDDL(Stream: TStringStream; options: TDDLOptions);
+    procedure SaveBodyToDDL(Stream: TStringStream; options: TDDLOptions);
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+    procedure SaveToStream(Stream: TStream); override;
+    property HeaderSource: string read FHeaderSource;
+    property BodySource: string read FBodySource;
+    property Procedures[const Index: Integer]: TMetaPackageProc read GetProcedures;
+    property ProceduresCount: Integer read GetProceduresCount;
+    property Functions[const Index: Integer]: TMetaPackageFunc read GetFunctions;
+    property FunctionsCount: Integer read GetFunctionsCount;
+  end;
+
   TMetaException = class(TMetaNode)
   private
     FMessage: string;
@@ -655,6 +711,7 @@ type
     FOIDTables: TOIDTables;
     FOIDViews: TOIDViews;
     FOIDProcedures: TOIDProcedures;
+    FOIDPackages: TOIDPackages;
     FOIDUDFs: TOIDUDFs;
     FOIDRoles: TOIDRoles;
     FSysInfos: Boolean;
@@ -682,9 +739,12 @@ type
 
     procedure LoadFromStream(Stream: TStream); override;
     procedure LoadDependencies(QDeps: TUIBStatement);
+    function HasPackages(Transaction: TUIBTransaction): Boolean;
 
     function GetProcedures(const Index: Integer): TMetaProcedure;
     function GetProceduresCount: Integer;
+    function GetPackages(const Index: Integer): TMetaPackage;
+    function GetPackagesCount: Integer;
     function GetExceptions(const Index: Integer): TMetaException;
     function GetExceptionsCount: Integer;
     function GetUDFS(const Index: Integer): TMetaUDF;
@@ -701,6 +761,7 @@ type
     procedure SaveToStream(Stream: TStream); override;
     function FindTableName(const TableName: string): TMetaTable;
     function FindProcName(const ProcName: string): TMetaProcedure;
+    function FindPackageName(const PackageName: string): TMetaPackage;
     function FindExceptionName(const ExcepName: string): TMetaException;
     function FindGeneratorName(const GenName: string): TMetaGenerator;
     function FindUDFName(const UDFName: string): TMetaUDF;
@@ -739,6 +800,10 @@ type
     property Procedures[const Index: Integer]: TMetaProcedure read GetProcedures;
     property ProceduresCount: Integer read GetProceduresCount;
     property OIDProcedures: TOIDProcedures read FOIDProcedures write FOIDProcedures;
+
+    property Packages[const Index: Integer]: TMetaPackage read GetPackages;
+    property PackagesCount: Integer read GetPackagesCount;
+    property OIDPackages: TOIDPackages read FOIDPackages write FOIDPackages;
 
     property Exceptions[const Index: Integer]: TMetaException read GetExceptions;
     property ExceptionsCount: Integer read GetExceptionsCount;
@@ -1185,6 +1250,53 @@ const
     'order by ' +
     '  RDB$PROCEDURE_NAME';
 
+  { Firebird 3.0+: package procedures are also stored in RDB$PROCEDURES.
+    Exclude them from the standalone procedure list. }
+  QRYProceduresNoPackages =
+    'select ' +
+    '  RDB$PROCEDURE_NAME' +
+    ', RDB$PROCEDURE_SOURCE ' +
+    'from ' +
+    '  RDB$PROCEDURES ' +
+    'where ' +
+    '  RDB$PACKAGE_NAME is null ' +
+    'order by ' +
+    '  RDB$PROCEDURE_NAME';
+
+  QRYPackages =
+    'select ' +
+    '  RDB$PACKAGE_NAME' +
+    ', RDB$PACKAGE_HEADER_SOURCE' +
+    ', RDB$PACKAGE_BODY_SOURCE ' +
+    'from ' +
+    '  RDB$PACKAGES ' +
+    'where ' +
+    '  (RDB$SYSTEM_FLAG is null) or (RDB$SYSTEM_FLAG = 0) ' +
+    'order by ' +
+    '  RDB$PACKAGE_NAME';
+
+  QRYPackageProcs =
+    'select ' +
+    '  RDB$PROCEDURE_NAME' +
+    ', RDB$PROCEDURE_SOURCE ' +
+    'from ' +
+    '  RDB$PROCEDURES ' +
+    'where ' +
+    '  RDB$PACKAGE_NAME = ? ' +
+    'order by ' +
+    '  RDB$PROCEDURE_NAME';
+
+  QRYPackageFuncs =
+    'select ' +
+    '  RDB$FUNCTION_NAME' +
+    ', RDB$FUNCTION_SOURCE ' +
+    'from ' +
+    '  RDB$FUNCTIONS ' +
+    'where ' +
+    '  RDB$PACKAGE_NAME = ? ' +
+    'order by ' +
+    '  RDB$FUNCTION_NAME';
+
   QRYProcFields =
     'select ' +
     '  FLD.RDB$FIELD_TYPE ' +
@@ -1251,7 +1363,8 @@ const
     'from ' +
     '  RDB$FUNCTIONS ' +
     'where ' +
-    '  (RDB$SYSTEM_FLAG is null) or (RDB$SYSTEM_FLAG = 0) ' +
+    '  ((RDB$SYSTEM_FLAG is null) or (RDB$SYSTEM_FLAG = 0)) and ' +
+    '  (RDB$MODULE_NAME is not null) ' +
     'order by ' +
     '  RDB$FUNCTION_NAME';
 
@@ -1581,8 +1694,8 @@ function TMetaNode.GetDatabase: TMetaDatabase;
 begin
   case NodeType of
     MetaDatabase: Result := TMetaDatabase(Self);
-    MetaDomain, MetaTable, MetaView, MetaProcedure, MetaGenerator,
-      MetaException, MetaUDF, MetaRole: Result := TMetaDatabase(FOwner);
+    MetaDomain, MetaTable, MetaView, MetaProcedure, MetaPackage,
+      MetaGenerator, MetaException, MetaUDF, MetaRole: Result := TMetaDatabase(FOwner);
   else
     Result := TMetaDatabase(FOwner.FOwner);
   end;
@@ -1803,12 +1916,12 @@ begin
            (Current.UserType = Previous.UserType) and
            (Current.Grantor = Previous.Grantor) then
         begin
-          // Même privilège (avec option), même utilisateur
+          // Mï¿½me privilï¿½ge (avec option), mï¿½me utilisateur
           Fields.Add(string(FieldName));
         end
         else
         begin
-          // Utilisateur ou privilège différent
+          // Utilisateur ou privilï¿½ge diffï¿½rent
           Grant := FindFieldGrant(PreviousPrivilege, Previous.Option, Fields);
           if not Assigned(Grant) then
           begin
@@ -2513,6 +2626,7 @@ begin
   AddClass(TMetaTable);
   AddClass(TMetaView);
   AddClass(TMetaProcedure);
+  AddClass(TMetaPackage);
   AddClass(TMetaGenerator);
   AddClass(TMetaException);
   AddClass(TMetaUDF);
@@ -2522,6 +2636,7 @@ begin
   FOIDTables := ALLTables;
   FOIDViews := ALLViews;
   FOIDProcedures := ALLProcedures;
+  FOIDPackages := ALLPackages;
   FOIDUDFs := ALLUDFs;
   FOIDRoles := ALLRoles;
   FSysInfos := False;
@@ -2550,7 +2665,8 @@ type
   *)
   TObjectType = (otRelation, otView, otTrigger, otComputedField, otValidation,
     otProcedure, otExpressionIndex, otException, otUser, otField, otIndex,
-    otDependentCount, otUserGroup, otRole, otGenerator, otUDF, otBlobFilter);
+    otDependentCount, otUserGroup, otRole, otGenerator, otUDF, otBlobFilter,
+    otCollation, otPackage, otPackageBody);
 var
   DepName, DepOnName: String;
   DepType, DepOnType: TObjectType;
@@ -2574,6 +2690,8 @@ var
       otField:     Result := FindDomainName(Name);
       otGenerator: Result := FindGeneratorName(Name);
       otUDF:       Result := FindUDFName(Name);
+      otPackage,
+      otPackageBody: Result := FindPackageName(Name);
     else
       Result := nil;
     end;
@@ -2595,20 +2713,39 @@ begin
   end;
 end;
 
+function TMetaDataBase.HasPackages(Transaction: TUIBTransaction): Boolean;
+var
+  Query: TUIBStatement;
+begin
+  Query := TUIBStatement.Create{$IFNDEF UIB_NO_COMPONENT}(nil){$ENDIF};
+  try
+    Query.Transaction := Transaction;
+    Query.CachedFetch := False;
+    Query.SQL.Text :=
+      'select RDB$RELATION_NAME from RDB$RELATIONS ' +
+      'where RDB$RELATION_NAME = ''RDB$PACKAGES''';
+    Query.Open;
+    Result := not Query.Eof;
+  finally
+    Query.Free;
+  end;
+end;
+
 procedure TMetaDataBase.LoadFromDatabase(Transaction: TUIBTransaction);
 var
   I: Integer;
   ConStr, Str: string;
-  QNames, QFields, QCharset, QPrimary: TUIBQuery;
-  QIndex, QForeign, QCheck, QTrigger, QArrayDim: TUIBQuery;
-  QDependencies: TUIBQuery;
-  QDefaultCharset, QGrants, QFieldGrants: TUIBQuery;
-  procedure Configure(var Q: TUIBQuery; const Qry: string;
+  QNames, QFields, QCharset, QPrimary: TUIBStatement;
+  QIndex, QForeign, QCheck, QTrigger, QArrayDim: TUIBStatement;
+  QDependencies: TUIBStatement;
+  QDefaultCharset, QGrants, QFieldGrants: TUIBStatement;
+  QPackageProcs, QPackageFuncs: TUIBStatement;
+  HasPkg: Boolean;
+  procedure Configure(var Q: TUIBStatement; const Qry: string;
     CachedFetch: Boolean = False);
   begin
-    Q := TUIBQuery.Create(nil);
+    Q := TUIBStatement.Create{$IFNDEF UIB_NO_COMPONENT}(nil){$ENDIF};
     Q.Transaction := Transaction;
-    Q.Database := Transaction.DataBase;   //WICHTIG
     Q.CachedFetch := CachedFetch;
     Q.SQL.Text := Qry;
   end;
@@ -2617,6 +2754,7 @@ begin
   CheckTransaction(Transaction);
 
   FName := Transaction.DataBase.DatabaseName;
+  HasPkg := HasPackages(Transaction);
 
   Configure(QNames, '');
   if FSysInfos then
@@ -2634,6 +2772,8 @@ begin
   Configure(QGrants, QRYRelationGrants);
   Configure(QFieldGrants, QRYFieldGrants);
   Configure(QDependencies, QRYDependendies);
+  Configure(QPackageProcs, QRYPackageProcs);
+  Configure(QPackageFuncs, QRYPackageFuncs);
 
   try
     if OIDDBCharset in FOIDDatabases then
@@ -2770,13 +2910,30 @@ begin
     if OIDProcedure in FOIDDatabases then
     begin
       FNodeItems[Ord(OIDProcedure)].Childs.Clear;
-      QNames.SQL.Text := QRYProcedures;
+      if HasPkg then
+        QNames.SQL.Text := QRYProceduresNoPackages
+      else
+        QNames.SQL.Text := QRYProcedures;
       QFields.SQL.Text := QRYProcFields;
       QNames.Open;
       while not QNames.Eof do
       begin
         with TMetaProcedure.Create(Self, Ord(OIDProcedure)) do
           LoadFromQuery(QNames, QFields, QCharset, QArrayDim, QGrants, FOIDProcedures, FDefaultCharset);
+        QNames.Next;
+      end;
+    end;
+
+    // PACKAGES (Firebird 3.0+)
+    if HasPkg and (OIDPackage in FOIDDatabases) then
+    begin
+      FNodeItems[Ord(OIDPackage)].Childs.Clear;
+      QNames.SQL.Text := QRYPackages;
+      QNames.Open;
+      while not QNames.Eof do
+      begin
+        with TMetaPackage.Create(Self, Ord(OIDPackage)) do
+          LoadFromQuery(QNames, QPackageProcs, QPackageFuncs, FOIDPackages);
         QNames.Next;
       end;
     end;
@@ -2838,6 +2995,8 @@ begin
     QDependencies.Free;
     QFieldGrants.Free;
     QGrants.Free;
+    QPackageFuncs.Free;
+    QPackageProcs.Free;
     QNames.Free;
     QCharset.Free;
     QFields.Free;
@@ -2900,6 +3059,29 @@ var
     end;
   end;
 
+  procedure SavePackageNodes(Header: Boolean);
+  var
+    I: Integer;
+    P: TMetaPackage;
+  begin
+    if FNodeItems[Ord(OIDPackage)].Childs.Count = 0 then
+      Exit;
+    if Header then
+      Stream.WriteString('/* PACKAGE HEADERS */' + NewLine)
+    else
+      Stream.WriteString('/* PACKAGE BODIES */' + NewLine);
+    for I := 0 to FNodeItems[Ord(OIDPackage)].Childs.Count - 1 do
+    begin
+      P := TMetaPackage(GetItems(Ord(OIDPackage), I));
+      if Header then
+        P.SaveHeaderToDDL(Stream, options)
+      else
+        P.SaveBodyToDDL(Stream, options);
+      Stream.WriteString(NewLine);
+    end;
+    Stream.WriteString(NewLine);
+  end;
+
 begin
   SaveMainNodes('ROLES',              Ord(OIDRole));
   SaveMainNodes('FUNCTIONS',          Ord(OIDUDF),       NewLine);
@@ -2907,6 +3089,7 @@ begin
   SaveMainNodes('GENERATORS',         Ord(OIDGenerator), NewLine);
   SaveMainNodes('EXCEPTIONS',         Ord(OIDException));
   SaveMainNodes('PROCEDURES (Empty)', Ord(OIDProcedure), NewLine);
+  SavePackageNodes(True);
   SaveMainNodes('TABLES',             Ord(OIDTable),     NewLine);
   SaveMainNodes('VIEWS',              Ord(OIDView),      NewLine);
 
@@ -2927,6 +3110,8 @@ begin
       Stream.WriteString(NewLine + NewLine);
     end;
   end;
+
+  SavePackageNodes(False);
 
   { Grants }
   SaveChildNodes('GRANTS (Roles)',         Ord(OIDRole),      Ord(OIDRoleGrant));
@@ -3030,6 +3215,16 @@ begin
   Result := FNodeItems[Ord(OIDProcedure)].Childs.Count
 end;
 
+function TMetaDataBase.GetPackages(const Index: Integer): TMetaPackage;
+begin
+  Result := TMetaPackage(GetItems(Ord(OIDPackage), Index));
+end;
+
+function TMetaDataBase.GetPackagesCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDPackage)].Childs.Count
+end;
+
 function TMetaDataBase.GetExceptions(const Index: Integer): TMetaException;
 begin
   Result := TMetaException(GetItems(Ord(OIDException), Index));
@@ -3071,7 +3266,7 @@ var
 begin
   FSortedTables.Clear;
 
-  { Commence par ajouter les tables qui n'ont pas de dépendences }
+  { Commence par ajouter les tables qui n'ont pas de dï¿½pendences }
   ToAdd := TList.Create;
   try
     for I := 0 to GetTablesCount - 1 do
@@ -3082,8 +3277,8 @@ begin
         ToAdd.Add(GetTables(i));
     end;
 
-    { Ajoute ensuite les tables qui ont uniquement des dépendences sur les tables
-      qui sont déjà dans la liste }
+    { Ajoute ensuite les tables qui ont uniquement des dï¿½pendences sur les tables
+      qui sont dï¿½jï¿½ dans la liste }
     I := 0; O := 0;
     while ToAdd.Count > 0 do
     begin
@@ -3103,8 +3298,8 @@ begin
       CanAdd := true;
       for F := 0 to Current.ForeignCount - 1 do
       begin
-        { Il faut que toutes les dépendances de Current soient dans
-          FSortedTables. Ne tient pas compte des jointures auto-réflexives }
+        { Il faut que toutes les dï¿½pendances de Current soient dans
+          FSortedTables. Ne tient pas compte des jointures auto-rï¿½flexives }
         if (Current.Foreign[F].ForTable <> Current)
           and (FSortedTables.IndexOf(Current.Foreign[F].ForTable) < 0) then
         begin
@@ -3116,7 +3311,7 @@ begin
       begin
         FSortedTables.Add(Current);
         ToAdd.Remove(Current);
-        { Ne change pas I, comme on a supprimé un item, la même valeur de I
+        { Ne change pas I, comme on a supprimï¿½ un item, la mï¿½me valeur de I
           permettra d'avoir le suivant dans la liste }
       end
       else
@@ -3147,7 +3342,7 @@ var
 begin
   FSortedViews.Clear;
 
-  { Commence par ajouter les tables qui n'ont pas de dépendences }
+  { Commence par ajouter les tables qui n'ont pas de dï¿½pendences }
   ToAdd := TList.Create;
   try
     for I := 0 to GetViewsCount - 1 do
@@ -3158,8 +3353,8 @@ begin
         ToAdd.Add(GetViews(i));
     end;
 
-    { Ajoute ensuite les tables qui ont uniquement des dépendences sur les tables
-      qui sont déjà dans la liste }
+    { Ajoute ensuite les tables qui ont uniquement des dï¿½pendences sur les tables
+      qui sont dï¿½jï¿½ dans la liste }
     I := 0; O := 0;
     while ToAdd.Count > 0 do
     begin
@@ -3179,8 +3374,8 @@ begin
       CanAdd := true;
       for F := 0 to Current.DependedOnCount - 1 do
       begin
-        { Il faut que toutes les dépendances de Current soient dans
-          FSortedTables. Ne tient pas compte des jointures auto-réflexives }
+        { Il faut que toutes les dï¿½pendances de Current soient dans
+          FSortedTables. Ne tient pas compte des jointures auto-rï¿½flexives }
         if (Current.DependedOn[F].NodeType = MetaView) and (Current.DependedOn[F] <> Current)
           and (FSortedViews.IndexOf(Current.DependedOn[F]) < 0) then
         begin
@@ -3192,7 +3387,7 @@ begin
       begin
         FSortedViews.Add(Current);
         ToAdd.Remove(Current);
-        { Ne change pas I, comme on a supprimé un item, la même valeur de I
+        { Ne change pas I, comme on a supprimï¿½ un item, la mï¿½me valeur de I
           permettra d'avoir le suivant dans la liste }
       end
       else
@@ -3255,6 +3450,19 @@ begin
     if CompareText(Procedures[I].Name, ProcName) = 0 then
     begin
       Result := Procedures[I];
+      Exit;
+    end;
+end;
+
+function TMetaDataBase.FindPackageName(const PackageName: string): TMetaPackage;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to PackagesCount - 1 do
+    if CompareText(Packages[I].Name, PackageName) = 0 then
+    begin
+      Result := Packages[I];
       Exit;
     end;
 end;
@@ -4250,8 +4458,8 @@ begin
          (Current.Option = Previous.Option)
         ) then
     begin
-      // C'est exactement le même droit que le précédent, fait au même
-      // utilisateur avec la même option !
+      // C'est exactement le mï¿½me droit que le prï¿½cï¿½dent, fait au mï¿½me
+      // utilisateur avec la mï¿½me option !
     end
     else
     begin
@@ -4383,6 +4591,469 @@ begin
   finally
     stream.Free;
   end;
+end;
+
+{ Package member source extraction }
+
+function IsPackageIdentChar(Ch: Char): Boolean;
+begin
+  Result := (Ch in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) or (Ord(Ch) > 127);
+end;
+
+function IsPackageIdentStart(Ch: Char): Boolean;
+begin
+  Result := (Ch in ['A'..'Z', 'a'..'z', '_', '$']) or (Ord(Ch) > 127);
+end;
+
+{ Reads an unquoted or quoted identifier at position P and advances P past it. }
+function ReadPackageIdent(const S: string; var P: Integer): string;
+var
+  Start: Integer;
+begin
+  Result := '';
+  while (P <= Length(S)) and (S[P] in [' ', #9, #10, #13]) do
+    Inc(P);
+  if P > Length(S) then
+    Exit;
+
+  if S[P] = '"' then
+  begin
+    Start := P;
+    Inc(P);
+    while P <= Length(S) do
+    begin
+      if S[P] = '"' then
+      begin
+        if (P < Length(S)) and (S[P + 1] = '"') then
+          Inc(P, 2)
+        else
+        begin
+          Inc(P);
+          Break;
+        end;
+      end
+      else
+        Inc(P);
+    end;
+    Result := Copy(S, Start, P - Start);
+  end
+  else if IsPackageIdentStart(S[P]) then
+  begin
+    Start := P;
+    while (P <= Length(S)) and IsPackageIdentChar(S[P]) do
+      Inc(P);
+    Result := Copy(S, Start, P - Start);
+  end;
+end;
+
+{ Extracts a package member from RDB$PACKAGE_HEADER_SOURCE or
+  RDB$PACKAGE_BODY_SOURCE.
+
+  WantBody = True:
+    returns the complete implementation block starting with
+    PROCEDURE/FUNCTION and ending with the matching END.
+  WantBody = False:
+    returns the declaration from the header, without the trailing ';'.
+
+  Comments, string literals and quoted identifiers are skipped, and nested
+  BEGIN/CASE ... END blocks are tracked so that CASE expressions inside the
+  body do not truncate the result. }
+function ExtractPackageMemberSource(const Source, MemberName, Kind: string;
+  WantBody: Boolean): string;
+var
+  P, N, StartPos, EndPos: Integer;
+  Ch: Char;
+  Token, Ident: string;
+  Depth: Integer;
+  Started: Boolean;
+  InLineComment, InBlockComment, InString, InQuoted: Boolean;
+begin
+  Result := '';
+  if (Source = '') or (MemberName = '') then
+    Exit;
+
+  P := 1;
+  StartPos := 0;
+  EndPos := 0;
+  Depth := 0;
+  Started := False;
+  InLineComment := False;
+  InBlockComment := False;
+  InString := False;
+  InQuoted := False;
+
+  while P <= Length(Source) do
+  begin
+    Ch := Source[P];
+
+    if InLineComment then
+    begin
+      if Ch in [#10, #13] then
+        InLineComment := False;
+      Inc(P);
+      Continue;
+    end;
+
+    if InBlockComment then
+    begin
+      if (Ch = '*') and (P < Length(Source)) and (Source[P + 1] = '/') then
+      begin
+        InBlockComment := False;
+        Inc(P, 2);
+      end
+      else
+        Inc(P);
+      Continue;
+    end;
+
+    if InString then
+    begin
+      if Ch = '''' then
+      begin
+        if (P < Length(Source)) and (Source[P + 1] = '''') then
+          Inc(P, 2)
+        else
+        begin
+          InString := False;
+          Inc(P);
+        end;
+      end
+      else
+        Inc(P);
+      Continue;
+    end;
+
+    if InQuoted then
+    begin
+      if Ch = '"' then
+      begin
+        if (P < Length(Source)) and (Source[P + 1] = '"') then
+          Inc(P, 2)
+        else
+        begin
+          InQuoted := False;
+          Inc(P);
+        end;
+      end
+      else
+        Inc(P);
+      Continue;
+    end;
+
+    if (Ch = '-') and (P < Length(Source)) and (Source[P + 1] = '-') then
+    begin
+      InLineComment := True;
+      Inc(P, 2);
+      Continue;
+    end;
+
+    if (Ch = '/') and (P < Length(Source)) and (Source[P + 1] = '*') then
+    begin
+      InBlockComment := True;
+      Inc(P, 2);
+      Continue;
+    end;
+
+    if Ch = '''' then
+    begin
+      InString := True;
+      Inc(P);
+      Continue;
+    end;
+
+    if Ch = '"' then
+    begin
+      InQuoted := True;
+      Inc(P);
+      Continue;
+    end;
+
+    if IsPackageIdentStart(Ch) then
+    begin
+      N := P;
+      while (N <= Length(Source)) and IsPackageIdentChar(Source[N]) do
+        Inc(N);
+      Token := UpperCase(Copy(Source, P, N - P));
+
+      if (StartPos = 0) and (Token = Kind) then
+      begin
+        Ident := ReadPackageIdent(Source, N);
+        if SameText(SQLUnQuote(Ident), SQLUnQuote(MemberName)) then
+        begin
+          StartPos := P;
+          P := N;
+          Continue;
+        end;
+      end;
+
+      if StartPos > 0 then
+      begin
+        if WantBody then
+        begin
+          if (Token = 'BEGIN') or (Token = 'CASE') then
+          begin
+            Inc(Depth);
+            if Token = 'BEGIN' then
+              Started := True;
+          end
+          else if Token = 'END' then
+          begin
+            if Depth > 0 then
+              Dec(Depth);
+            if Started and (Depth = 0) then
+            begin
+              EndPos := N - 1;
+              Break;
+            end;
+          end;
+        end;
+      end;
+
+      P := N;
+      Continue;
+    end;
+
+    if (StartPos > 0) and not WantBody then
+    begin
+      if Ch = '(' then
+        Inc(Depth)
+      else if Ch = ')' then
+      begin
+        if Depth > 0 then
+          Dec(Depth);
+      end
+      else if (Ch = ';') and (Depth = 0) then
+      begin
+        EndPos := P - 1;
+        Break;
+      end;
+    end;
+
+    Inc(P);
+  end;
+
+  if (StartPos > 0) and (EndPos >= StartPos) then
+    Result := Trim(Copy(Source, StartPos, EndPos - StartPos + 1));
+end;
+
+{ TMetaPackageMember }
+
+procedure TMetaPackageMember.LoadFromStream(Stream: TStream);
+begin
+  ReadString(Stream, FName);
+  ReadString(Stream, FSource);
+end;
+
+procedure TMetaPackageMember.SaveToDDLNode(Stream: TStringStream;
+  options: TDDLOptions);
+var
+  S, Kind: string;
+  Pkg: TMetaPackage;
+begin
+  S := Trim(FSource);
+
+  { Streams created by older builds do not contain the extracted member
+    source. Re-extract it from the package body on demand. }
+  if (S = '') and (FOwner is TMetaPackage) then
+  begin
+    Pkg := TMetaPackage(FOwner);
+    if NodeType = MetaPackageFunc then
+      Kind := 'FUNCTION'
+    else
+      Kind := 'PROCEDURE';
+    S := ExtractPackageMemberSource(Pkg.BodySource, Name, Kind, True);
+    if S = '' then
+    begin
+      S := ExtractPackageMemberSource(Pkg.HeaderSource, Name, Kind, False);
+      if S <> '' then
+      begin
+        Stream.WriteString('/* ' + NodeClass + ' ' + Name +
+          ' is declared in the package header only */' + NewLine);
+        Stream.WriteString(S + ';');
+        Exit;
+      end;
+    end;
+  end;
+
+  if S <> '' then
+  begin
+    if SameText(Copy(S, 1, 9), 'PROCEDURE') then
+      S := 'PROCEDURE' + Copy(S, 10, MaxInt)
+    else if SameText(Copy(S, 1, 8), 'FUNCTION') then
+      S := 'FUNCTION' + Copy(S, 9, MaxInt);
+    Stream.WriteString('CREATE OR ALTER ' + S + ';');
+  end
+  else
+    Stream.WriteString('/* ' + NodeClass + ' ' + Name +
+      ' is defined in the package body */');
+end;
+
+procedure TMetaPackageMember.SaveToStream(Stream: TStream);
+begin
+  WriteString(Stream, FName);
+  WriteString(Stream, FSource);
+  inherited SaveToStream(Stream);
+end;
+
+{ TMetaPackageProc }
+
+class function TMetaPackageProc.NodeClass: string;
+begin
+  Result := 'Package Procedure';
+end;
+
+class function TMetaPackageProc.NodeType: TMetaNodeType;
+begin
+  Result := MetaPackageProc;
+end;
+
+{ TMetaPackageFunc }
+
+class function TMetaPackageFunc.NodeClass: string;
+begin
+  Result := 'Package Function';
+end;
+
+class function TMetaPackageFunc.NodeType: TMetaNodeType;
+begin
+  Result := MetaPackageFunc;
+end;
+
+{ TMetaPackage }
+
+constructor TMetaPackage.Create(AOwner: TMetaNode; ClassIndex: Integer);
+begin
+  inherited Create(AOwner, ClassIndex);
+  AddClass(TMetaPackageProc);
+  AddClass(TMetaPackageFunc);
+end;
+
+function TMetaPackage.GetProcedures(const Index: Integer): TMetaPackageProc;
+begin
+  Result := TMetaPackageProc(GetItems(Ord(OIDPackageProc), Index));
+end;
+
+function TMetaPackage.GetProceduresCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDPackageProc)].Childs.Count;
+end;
+
+function TMetaPackage.GetFunctions(const Index: Integer): TMetaPackageFunc;
+begin
+  Result := TMetaPackageFunc(GetItems(Ord(OIDPackageFunc), Index));
+end;
+
+function TMetaPackage.GetFunctionsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDPackageFunc)].Childs.Count;
+end;
+
+procedure TMetaPackage.LoadFromQuery(QNames, QProcs, QFuncs: TUIBStatement;
+  OIDs: TOIDPackages);
+begin
+  FName := MetaQuote(Trim(QNames.Fields.AsString[0]));
+
+  if not QNames.Fields.IsNull[1] then
+    QNames.ReadBlob(1, FHeaderSource);
+  if not QNames.Fields.IsNull[2] then
+    QNames.ReadBlob(2, FBodySource);
+
+  if OIDPackageProc in OIDs then
+  begin
+    QProcs.Params.AsString[0] := SQLUnQuote(FName);
+    QProcs.Open;
+    while not QProcs.Eof do
+    begin
+      with TMetaPackageProc.Create(Self, Ord(OIDPackageProc)) do
+      begin
+        FName := MetaQuote(Trim(QProcs.Fields.AsString[0]));
+        { RDB$PROCEDURE_SOURCE is null for package members on FB3+, so the
+          implementation is extracted from RDB$PACKAGE_BODY_SOURCE. }
+        FSource := ExtractPackageMemberSource(FBodySource, FName,
+          'PROCEDURE', True);
+      end;
+      QProcs.Next;
+    end;
+  end;
+
+  if OIDPackageFunc in OIDs then
+  begin
+    QFuncs.Params.AsString[0] := SQLUnQuote(FName);
+    QFuncs.Open;
+    while not QFuncs.Eof do
+    begin
+      with TMetaPackageFunc.Create(Self, Ord(OIDPackageFunc)) do
+      begin
+        FName := MetaQuote(Trim(QFuncs.Fields.AsString[0]));
+        { RDB$FUNCTION_SOURCE is null for package members on FB3+, so the
+          implementation is extracted from RDB$PACKAGE_BODY_SOURCE. }
+        FSource := ExtractPackageMemberSource(FBodySource, FName,
+          'FUNCTION', True);
+      end;
+      QFuncs.Next;
+    end;
+  end;
+end;
+
+procedure TMetaPackage.LoadFromStream(Stream: TStream);
+begin
+  ReadString(Stream, FName);
+  ReadString(Stream, FHeaderSource);
+  ReadString(Stream, FBodySource);
+end;
+
+procedure TMetaPackage.SaveHeaderToDDL(Stream: TStringStream;
+  options: TDDLOptions);
+begin
+  Stream.WriteString('CREATE OR ALTER PACKAGE ' + Name + ' AS' + NewLine);
+  if Trim(FHeaderSource) <> '' then
+    Stream.WriteString(Trim(FHeaderSource))
+  else
+    Stream.WriteString('BEGIN' + NewLine + 'END');
+  Stream.WriteString(';');
+end;
+
+procedure TMetaPackage.SaveBodyToDDL(Stream: TStringStream;
+  options: TDDLOptions);
+begin
+  if Trim(FBodySource) = '' then
+    Exit;
+  { Firebird 3 accepts RECREATE PACKAGE BODY but does not store the body source
+    when no body exists yet. DROP + CREATE works on Firebird 3 and newer and
+    keeps RDB$PACKAGE_BODY_SOURCE populated. }
+  Stream.WriteString('DROP PACKAGE BODY ' + Name + ';' + NewLine);
+  Stream.WriteString('CREATE PACKAGE BODY ' + Name + ' AS' + NewLine);
+  Stream.WriteString(Trim(FBodySource));
+  Stream.WriteString(';');
+end;
+
+procedure TMetaPackage.SaveToDDLNode(Stream: TStringStream;
+  options: TDDLOptions);
+begin
+  SaveHeaderToDDL(Stream, options);
+  if Trim(FBodySource) <> '' then
+  begin
+    Stream.WriteString(NewLine + NewLine);
+    SaveBodyToDDL(Stream, options);
+  end;
+end;
+
+class function TMetaPackage.NodeClass: string;
+begin
+  Result := 'Package';
+end;
+
+class function TMetaPackage.NodeType: TMetaNodeType;
+begin
+  Result := MetaPackage;
+end;
+
+procedure TMetaPackage.SaveToStream(Stream: TStream);
+begin
+  WriteString(Stream, FName);
+  WriteString(Stream, FHeaderSource);
+  WriteString(Stream, FBodySource);
+  inherited SaveToStream(Stream);
 end;
 
 { TMetaException }
@@ -4928,8 +5599,8 @@ begin
          (Current.Option = Previous.Option)
         ) then
     begin
-      // C'est exactement le même droit que le précédent, fait au même
-      // utilisateur avec la même option !
+      // C'est exactement le mï¿½me droit que le prï¿½cï¿½dent, fait au mï¿½me
+      // utilisateur avec la mï¿½me option !
     end
     else
     begin

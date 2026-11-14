@@ -18,19 +18,19 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
-  rxnew, FrameViewer09, memdslaz, datetimectrls, runtimetypeinfocontrols, main,
-  CreateDb, Reg, QueryWindow, ViewView, ViewTrigger, ViewSProc, ViewGen,
-  NewTable, NewGen, EnterPass, CreateTrigger, UDFInfo, ViewDomain, NewDomain,
-  SysTables, newForeignKey, NewEditField, Calen, Scriptdb, UserPermissions,
-  TableManage, CreateUser, ChangePass, PermissionManage, SQLHistory,
-  dynlibs, dbInfo, sysutils, Comparison, topologicalsort, turbocommon,
-  csvdocument, fServerSession, uthemeselector,
+  rxnew, jcuiscaler_rt, FrameViewer09, memdslaz, datetimectrls,
+  runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
+  ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen, EnterPass, CreateTrigger,
+  UDFInfo, ViewDomain, NewDomain, SysTables, newForeignKey, NewEditField, Calen,
+  Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
+  PermissionManage, SQLHistory, dynlibs, dbInfo, sysutils, Comparison,
+  topologicalsort, turbocommon, csvdocument, fServerSession, uthemeselector,
   lazdbexport, sdflaz, udb_firebird_struct_helper, udb_udf_Fetcher,
   udb_udr_func_fetcher, sqldblib, fbcommon, ucopytabledatarowbyrow, uReport,
   fTestFunction, fSetFBClient, fFirebirdConfig, updatechecker, QBEIBX, QBuilder,
   QBDirFrm, QBLnkFrm, fCheckDBIntegrity, fsqlmonitor, fdataexportersintrf,
-  fMarkDownTableExport, fhtmlexport, fpcstdexporters,
-  fserverregistry, tb_netutils,
+  fMarkDownTableExport, fhtmlexport, fpcstdexporters, fserverregistry,
+  tb_netutils,
 
 
   //DBAdmin
@@ -64,7 +64,7 @@ uses
   clone_table_to_external_table_dialog, clone_table_dialog,
   uCreateTableFromDataSet, uCrossRDBMSMain, ServerDBFieldSelector, About,
   uSystemInfo, uProblemFieldsDialog, uCopyTableDataFBIntf,
-  uCrossRDBMSProgress, uCrossRDBMSConnection;
+  uCrossRDBMSProgress, uCrossRDBMSConnection, uBaseForm;
 
 
 const
@@ -176,6 +176,7 @@ begin
   Application.CreateForm(TChgPasswordDlg, ChgPasswordDlg);
   Application.CreateForm(TExecuteSQLScriptDlg, ExecuteSQLScriptDlg);
   Application.CreateForm(TdmSystem, dmSystem);
+  Application.CreateForm(TfrmBaseForm, frmBaseForm);
   //Application.CreateForm(TfrmServerDBFieldSelector, frmServerDBFieldSelector);
   Application.Run;
 

@@ -460,8 +460,8 @@ const
 
 var
 
-   AppName: string;
-   WinCloseCanceled: Boolean = False;
+    AppName: string;
+    WinCloseCanceled: Boolean = False;
 
     MainTreeView: TTreeView;
 
@@ -6200,279 +6200,6 @@ begin
   Result:= ConfigDir;
 end;
 
-procedure ReadIniFile;
-var TempStr: string;
-begin
-  //FireBird
-  //InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '/opt/firebird/lib/libfbclient.so');
-  InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
-  //UI
-  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
-
-  //Backup
-  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
-
-  //Restore
-  DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
-  DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
-  RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
-  DefaultSegmentSize     := fIniFile.ReadString('Restore',  'DefaultSegmentSize', '64');
-  DefaultSegmentUnit     := fIniFile.ReadString('Restore',  'DefaultSegmentUnit', 'MB');
-
-  //Scripter
-  EchoInput := fIniFile.ReadBool('Scripter',  'EchoInput', true);
-  StopOnFirstError := fIniFile.ReadBool('Scripter',  'StopOnFirstError', false);
-  AutoDDL := fIniFile.ReadBool('Scripter',  'AutoDDL', true);
-  IgnoreCreateDatabase := fIniFile.ReadBool('Scripter',  'IgnoreCreateDatabase', false);
-  IgnoreGrants := fIniFile.ReadBool('Scripter',  'IgnoreGrants', false);
-  ShowAffectedRows := fIniFile.ReadBool('Scripter',  'ShowAffectedRows', true);
-  ShowPerformanceStats := fIniFile.ReadBool('Scripter',  'ShowPerformanceStats', true);
-
-  //ClipboardExport
-  MaxExportRows := fIniFile.ReadInteger('ClipboardExport',  'MaxExportRows', 200);
-
-  //MetaData
-  AlwaysQuoteIdentifiers   := fIniFile.ReadBool('MetaData',  'AlwaysQuoteIdentifiers', true);
-  CaseSensitiveObjectNames := fIniFile.ReadBool('MetaData',  'CaseSensitiveObjectNames', true);
-  ShowSystem               := fIniFile.ReadBool('MetaData',  'ShowSystem', false);
-
-  //IntelliSense
-  ReloadCacheOnNodeExpand := fIniFile.ReadBool('IntelliSense',  'ReloadCacheOnNodeExpand', false);
-
-  //MetaDataTableExtract
-  ExtractDomains := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractDomains', true);
-  ExtractIndex   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractIndex', true);
-  ExtractForeign := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractForeign', true);
-  ExtractCheck   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractCheck', true);
-  ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
-  ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
-  ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', false);
-
-
-  //Theme
-  AllowIniOverrides           :=  fIniFile.ReadBool('UI',  'AllowIniOverrides', true);
-
-  //MainTreeView
-  MainTreeViewAlwaysRefresh   :=  fIniFile.ReadBool('MainTreeView',  'AlwaysRefresh', false);
-  MainTreeViewColor           :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
-  MainTreeViewFontName        :=  fIniFile.Readstring('MainTreeView',  'FontName', 'Arial');
-  MainTreeViewFontStyle       :=  StrToFontStyles(fIniFile.Readstring('MainTreeView',  'FontStyle', 'fsNormal'));
-  MainTreeViewFontSize        :=  fIniFile.ReadInteger('MainTreeView',  'FontSize', 14);
-  MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
-  AutoFilter                  :=  fIniFile.ReadBool('MainTreeView',  'AutoFilter', false);
-
-  //QueryWindow
-  QWAutoCommit             := fIniFile.ReadBool('QueryWindow',  'AutoCommit', true);
-  QWExecMultiStatementsAsScript := fIniFile.ReadBool('QueryWindow',  'ExecMultiStatementsAsScript', true);
-  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
-  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clSilver'));
-  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
-  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
-  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
-  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
-
-  //TransactionConfig-Defaults
-  DefTxFileName := fIniFile.ReadString('TransactionDefaults','TxFileName','read_committed.txt');
-
-
-  //CSVExport
-  DefaultBatchSize := fIniFile.ReadInteger('CSVExport','DefaultBatchSize', 500000);
-  CSVExportDefaultPreset    := fIniFile.ReadString('CSVExport','DefaultPreset', 'csv_quoted');
-
-  //CSV Editor
-  CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
-  TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
-  if TempStr <> '' then
-    CSVDelimiter := TempStr[1]
-  else
-    CSVDelimiter := ',';
-
-  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
-  if TempStr <> '' then
-    CSVQuoteChar := TempStr[1]
-  else
-    CSVQuoteChar := '"';
-
-  TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','LF');
-  CSVLineEnding := CSVLineEndingNameToStr(TempStr);
-
-  CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
-  CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
-  CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
-
-  // Auto-Detect-Schalter — Default: alle an
-  AutoDetectLineEnding := fIniFile.ReadBool('CSVEditor','AutoDetectLineEnding', True);
-  AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
-  AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
-  AutoDetectDecimalSeparator  := fIniFile.ReadBool('CSVEditor','AutoDetectDecimalSeparator',  True);
-
-  // CSVRead Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
-  CSVBlockSizeBytes           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
-  CSVBufferSizeBytes          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
-  CSVInitialCellCapacity   := fIniFile.ReadInteger('CSVEditor','CSVInitialCellCapacity', 64);
-  CSVRowWidthScanMB         := fIniFile.ReadInteger('CSVEditor','CSVRowWidthScanMB', 10);
-  CSVMinRowsForRowWidthScan := fIniFile.ReadInteger('CSVEditor','CSVMinRowsForRowWidthScan', 1000);
-
-  // Sicherheitskorrektur: BufferSize muss >= BlockSize * 2 sein
-  if CSVBufferSizeBytes < CSVBlockSizeBytes * 2 then
-    CSVBufferSizeBytes := CSVBlockSizeBytes * 2;
-
-  CSVAutoTuneCSVBuffer := fIniFile.ReadBool('CSVEditor', 'CSVAutoTuneCSVBuffer', true);
-  CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
-
-  //CSV FileWriter Options
-  CSVSaveBufferSizeBytes:= fIniFile.ReadInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
-  CSVSaveProgressUpdatePercent:= fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
-  CSVSaveWriteBOM := fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
-  CSVSaveUseRange:= fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  True);
-  CSVSaveStopAfterRow:= fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
-
-  //UpdateChecker
-  AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
-  UnzipAfterDownload := fIniFile.ReadBool('UpdateChecker','UnzipAfterDownload', True);
-  RunNewVersionAfterUnzip:= fIniFile.ReadBool('UpdateChecker','RunNewVersionAfterUnzip', false);
-  DeleteOldVersions := fIniFile.ReadBool('UpdateChecker','DeleteOldVersions', false);
-
-  //Database
-  NumBuffers := fIniFile.ReadInteger('Database','NumBuffers', 1024);
-
-  //SQLMonitor
-  TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', false);
-  TraceFlags   := fIniFile.ReadString('SQLMonitor','TraceFlags', '');
-  SlowQueryThreshold := fIniFile.ReadInteger('SQLMonitor', 'SlowQueryThreshold', 5000);
-end;
-
-procedure WriteIniFile;
-var TempStr : string;
-begin
-  fIniFile.WriteString('UI', 'Language', Language);
-
-  //Backup
-  fIniFile.WriteBool('Backup',  'CloseDBBeforeBackup', CloseDBBeforeBackup);
-
-  //Restore
-  fIniFile.WriteInteger('Restore', 'DefaultPageSize', DefaultPageSize);
-  fIniFile.WriteInteger('Restore', 'DefaultNumBuffers', DefaultNumBuffers);
-  fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
-  fIniFile.WriteString('Restore',  'DefaultSegmentSize', DefaultSegmentSize);
-  fIniFile.WriteString('Restore',  'DefaultSegmentUnit', DefaultSegmentUnit);
-
-  //Scripter
-  fIniFile.WriteBool('Scripter',  'EchoInput', EchoInput);
-  fIniFile.WriteBool('Scripter',  'StopOnFirstError', StopOnFirstError);
-  fIniFile.WriteBool('Scripter',  'AutoDDL', AutoDDL);
-  fIniFile.WriteBool('Scripter',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
-  fIniFile.WriteBool('Scripter',  'IgnoreGrants', IgnoreGrants);
-  fIniFile.WriteBool('Scripter',  'ShowAffectedRows', ShowAffectedRows);
-  fIniFile.WriteBool('Scripter',  'ShowPerformanceStats', ShowPerformanceStats);
-
-  //ClipboardExport
-  fIniFile.WriteInteger('ClipboardExport',  'MaxExportRows', MaxExportRows);
-
-  //MetaData
-  fIniFile.WriteBool('MetaData',  'AlwaysQuoteIdentifiers', AlwaysQuoteIdentifiers);
-  fIniFile.WriteBool('MetaData',  'CaseSensitiveObjectNames', CaseSensitiveObjectNames);
-  fIniFile.WriteBool('MetaData',  'ShowSystem', ShowSystem);
-
-  //IntelliSense
-  fIniFile.WriteBool('IntelliSense',  'ReloadCacheOnNodeExpand', ReloadCacheOnNodeExpand);
-
-
-  //MetaDataTableExtract
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractDomains', ExtractDomains);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractIndex', ExtractIndex);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractForeign', ExtractForeign);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractCheck', ExtractCheck);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractTrigger', ExtractTrigger);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractGrant', ExtractGrant);
-  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractData', ExtractData);
-
-  //Theme
-  fIniFile.WriteBool('UI',  'AllowIniOverrides', AllowIniOverrides);
-
-  //MainTreeView
-  fIniFile.WriteBool('MainTreeView',  'AlwaysRefresh', MainTreeViewAlwaysRefresh);
-  fIniFile.WriteString('MainTreeView',  'FontName', MainTreeViewFontName);
-  fIniFile.WriteString('MainTreeView',  'FontStyle', FontStylesToStr(MainTreeViewFontStyle));
-  fIniFile.WriteInteger('MainTreeView',  'FontSize', MainTreeViewFontSize);
-  fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
-  fIniFile.WriteBool('MainTreeView',  'AutoFilter', AutoFilter);
-
-  //QueryWindow
-  fIniFile.WriteBool('QueryWindow',  'AutoCommit', QWAutoCommit);
-  fIniFile.WriteBool('QueryWindow',  'ExecMultiStatementsAsScript', QWExecMultiStatementsAsScript);
-  fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
-  fIniFile.WriteString('QueryWindow',  'BackgroundColor', ColorToString(QWEditorBackgroundColor));
-  fIniFile.WriteString('QueryWindow',  'FontName', QWEditorFontName);
-  fIniFile.WriteInteger('QueryWindow',  'FontSize', QWEditorFontSize);
-  fIniFile.WriteString('QueryWindow',  'FontColor', ColorToString(QWEditorFontColor));
-  fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
-
-  //Transaction-Default config
-  fIniFile.WriteString('TransactionDefaults', 'TxFileName', DefTxFileName);
-
-  //CSVExport
-  fIniFile.WriteInteger('CSVExport', 'DefaultBatchSize', DefaultBatchSize);
-  fIniFile.ReadString('CSVkExport','DefaultPreset', CSVExportDefaultPreset);
-
-  // CSV Editor
-  if CSVLineEnding = #13#10 then
-    TempStr := 'CRLF'
-  else if CSVLineEnding = #10 then
-    TempStr := 'LF'
-  else if CSVLineEnding = #13 then
-    TempStr := 'CR'
-  else if CSVLineEnding = LineEnding then
-    TempStr := 'SYSTEM'
-  else
-    TempStr := 'LF';
-  fIniFile.WriteString('CSVEditor','CSVLineEnding', TempStr);
-  fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
-  fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
-  fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
-  fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
-  fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
-  fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
-  // Auto-Detect-Schalter
-  fIniFile.WriteBool('CSVEditor','AutoDetectLineEnding', AutoDetectLineEnding);
-  fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
-  fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
-  fIniFile.WriteBool('CSVEditor','AutoDetectDecimalSeparator',  AutoDetectDecimalSeparator);
-
-  // Performance-Parameter
-  fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeBytes);
-  fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeBytes);
-  fIniFile.WriteInteger('CSVEditor','CSVInitialCellCapacity', CSVInitialCellCapacity);
-  fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
-  fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
-  fIniFile.WriteInteger('CSVEditor','CSVProgressUpdatePercent', CSVProgressUpdatePercent);
-  fIniFile.WriteBool('CSVEditor','CSVAutoTuneCSVBuffer', CSVAutoTuneCSVBuffer);
-
-
-  //CSV FileWriter Options
-  fIniFile.WriteInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
-  fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
-  fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
-  fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  False);
-  fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
-
-
-  //UpdateChecker
-  fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
-  fIniFile.WriteBool('UpdateChecker','UnzipAfterDownload', UnzipAfterDownload);
-  fIniFile.WriteBool('UpdateChecker','RunNewVersionAfterUnzip', RunNewVersionAfterUnzip);
-  fIniFile.WriteBool('UpdateChecker','DeleteOldVersions', DeleteOldVersions);
-
-  //Database
-  fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
-
-  //SQLMonitor
-  fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
-  fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
-  fIniFile.WriteInteger('SQLMonitor', 'SlowQueryThreshold', SlowQueryThreshold);
-end;
-
-
 function FirstRun: boolean;
 var DataDirectory: string;
 begin
@@ -8593,6 +8320,278 @@ begin
     // Fallback: liefert z.B. 'ftCursor', 'ftArray' etc.
     Result := 'Unknown FieldType';
   end;
+end;
+
+procedure ReadIniFile;
+var TempStr: string;
+begin
+  //FireBird
+  //InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '/opt/firebird/lib/libfbclient.so');
+  InitialFBClientLibPath := fIniFile.ReadString('FireBird',  'InitialFBClientLib', '');
+  //UI
+  Language  := fIniFile.ReadString('UI',  'Language', 'eng');
+
+  //Backup
+  CloseDBBeforeBackup :=  fIniFile.ReadBool('Backup',  'CloseDBBeforeBackup', true);
+
+  //Restore
+  DefaultPageSize        := fIniFile.ReadInteger('Restore', 'DefaultPageSize', 8192);
+  DefaultNumBuffers      := fIniFile.ReadInteger('Restore', 'DefaultNumBuffers', 2048);
+  RegisterDBAfterRestore := fIniFile.ReadBool('Restore',  'RegisterDBAfterRestore', true);
+  DefaultSegmentSize     := fIniFile.ReadString('Restore',  'DefaultSegmentSize', '64');
+  DefaultSegmentUnit     := fIniFile.ReadString('Restore',  'DefaultSegmentUnit', 'MB');
+
+  //Scripter
+  EchoInput := fIniFile.ReadBool('Scripter',  'EchoInput', true);
+  StopOnFirstError := fIniFile.ReadBool('Scripter',  'StopOnFirstError', false);
+  AutoDDL := fIniFile.ReadBool('Scripter',  'AutoDDL', true);
+  IgnoreCreateDatabase := fIniFile.ReadBool('Scripter',  'IgnoreCreateDatabase', false);
+  IgnoreGrants := fIniFile.ReadBool('Scripter',  'IgnoreGrants', false);
+  ShowAffectedRows := fIniFile.ReadBool('Scripter',  'ShowAffectedRows', true);
+  ShowPerformanceStats := fIniFile.ReadBool('Scripter',  'ShowPerformanceStats', true);
+
+  //ClipboardExport
+  MaxExportRows := fIniFile.ReadInteger('ClipboardExport',  'MaxExportRows', 200);
+
+  //MetaData
+  AlwaysQuoteIdentifiers   := fIniFile.ReadBool('MetaData',  'AlwaysQuoteIdentifiers', true);
+  CaseSensitiveObjectNames := fIniFile.ReadBool('MetaData',  'CaseSensitiveObjectNames', true);
+  ShowSystem               := fIniFile.ReadBool('MetaData',  'ShowSystem', false);
+
+  //IntelliSense
+  ReloadCacheOnNodeExpand := fIniFile.ReadBool('IntelliSense',  'ReloadCacheOnNodeExpand', false);
+
+  //MetaDataTableExtract
+  ExtractDomains := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractDomains', true);
+  ExtractIndex   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractIndex', true);
+  ExtractForeign := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractForeign', true);
+  ExtractCheck   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractCheck', true);
+  ExtractTrigger := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractTrigger', true);
+  ExtractGrant   := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractGrant', true);
+  ExtractData    := fIniFile.ReadBool('MetaDataTableExtract',  'ExtractData', false);
+
+
+  //Theme
+  AllowIniOverrides           :=  fIniFile.ReadBool('UI',  'AllowIniOverrides', true);
+
+  //MainTreeView
+  MainTreeViewAlwaysRefresh   :=  fIniFile.ReadBool('MainTreeView',  'AlwaysRefresh', false);
+  MainTreeViewColor           :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  MainTreeViewFontName        :=  fIniFile.Readstring('MainTreeView',  'FontName', 'Arial');
+  MainTreeViewFontStyle       :=  StrToFontStyles(fIniFile.Readstring('MainTreeView',  'FontStyle', 'fsNormal'));
+  MainTreeViewFontSize        :=  fIniFile.ReadInteger('MainTreeView',  'FontSize', 14);
+  MainTreeViewFontColor       :=  StringToColor(fIniFile.Readstring('MainTreeView',  'FontColor', 'clRed'));
+  AutoFilter                  :=  fIniFile.ReadBool('MainTreeView',  'AutoFilter', false);
+
+  //QueryWindow
+  QWAutoCommit             := fIniFile.ReadBool('QueryWindow',  'AutoCommit', true);
+  QWExecMultiStatementsAsScript := fIniFile.ReadBool('QueryWindow',  'ExecMultiStatementsAsScript', true);
+  QWShowNavigator          :=  fIniFile.ReadBool('QueryWindow',  'ShowNavigator', true);
+  QWEditorBackgroundColor  :=  StringToColor(fIniFile.ReadString('QueryWindow',  'BackgroundColor', 'clSilver'));
+  QWEditorFontName         :=  fIniFile.ReadString('QueryWindow',  'FontName', 'Courier New');
+  QWEditorFontSize         :=  fIniFile.ReadInteger('QueryWindow',  'FontSize', 10);
+  QWEditorFontColor        :=  StringToColor(fIniFile.ReadString('QueryWindow',  'FontColor', 'clBlack'));
+  QWEditorFontStyle        :=  StrToFontStyles(fIniFile.ReadString('QueryWindow',  'FontStyle', 'Arial'));
+
+  //TransactionConfig-Defaults
+  DefTxFileName := fIniFile.ReadString('TransactionDefaults','TxFileName','read_committed.txt');
+
+
+  //CSVExport
+  DefaultBatchSize := fIniFile.ReadInteger('CSVExport','DefaultBatchSize', 500000);
+  CSVExportDefaultPreset    := fIniFile.ReadString('CSVExport','DefaultPreset', 'csv_quoted');
+
+  //CSV Editor
+  CSVDefaultFieldLength := fIniFile.ReadInteger('CSVEditor','CSVDefaultFieldLength',50);
+  TempStr := fIniFile.ReadString('CSVEditor','CSVDelimiter',',');
+  if TempStr <> '' then
+    CSVDelimiter := TempStr[1]
+  else
+    CSVDelimiter := ',';
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVQuoteChar','"');
+  if TempStr <> '' then
+    CSVQuoteChar := TempStr[1]
+  else
+    CSVQuoteChar := '"';
+
+  TempStr := fIniFile.ReadString('CSVEditor','CSVLineEnding','LF');
+  CSVLineEnding := CSVLineEndingNameToStr(TempStr);
+
+  CSVFirstLineAsFieldNames := fIniFile.ReadBool('CSVEditor','CSVFirstLineAsFieldNames',True);
+  CSVIgnoreOuterWhitespace := fIniFile.ReadBool('CSVEditor','CSVIgnoreOuterWhitespace',True);
+  CSVQuoteOuterWhitespace  := fIniFile.ReadBool('CSVEditor','CSVQuoteOuterWhitespace',False);
+
+  // Auto-Detect-Schalter — Default: alle an
+  AutoDetectLineEnding := fIniFile.ReadBool('CSVEditor','AutoDetectLineEnding', True);
+  AutoDetectDelimiter  := fIniFile.ReadBool('CSVEditor','AutoDetectDelimiter',  True);
+  AutoDetectQuoteChar  := fIniFile.ReadBool('CSVEditor','AutoDetectQuoteChar',  True);
+  AutoDetectDecimalSeparator  := fIniFile.ReadBool('CSVEditor','AutoDetectDecimalSeparator',  True);
+
+  // CSVRead Performance-Parameter (TSVFastDataset) — in KB bzw. Anzahl
+  CSVBlockSizeBytes           := fIniFile.ReadInteger('CSVEditor','CSVBlockSize', 1024);
+  CSVBufferSizeBytes          := fIniFile.ReadInteger('CSVEditor','CSVBufferSize', 2048);
+  CSVInitialCellCapacity   := fIniFile.ReadInteger('CSVEditor','CSVInitialCellCapacity', 64);
+  CSVRowWidthScanMB         := fIniFile.ReadInteger('CSVEditor','CSVRowWidthScanMB', 10);
+  CSVMinRowsForRowWidthScan := fIniFile.ReadInteger('CSVEditor','CSVMinRowsForRowWidthScan', 1000);
+
+  // Sicherheitskorrektur: BufferSize muss >= BlockSize * 2 sein
+  if CSVBufferSizeBytes < CSVBlockSizeBytes * 2 then
+    CSVBufferSizeBytes := CSVBlockSizeBytes * 2;
+
+  CSVAutoTuneCSVBuffer := fIniFile.ReadBool('CSVEditor', 'CSVAutoTuneCSVBuffer', true);
+  CSVProgressUpdatePercent := fIniFile.ReadInteger('CSVEditor','CSVProgressUpdatePercent', 1);
+
+  //CSV FileWriter Options
+  CSVSaveBufferSizeBytes:= fIniFile.ReadInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
+  CSVSaveProgressUpdatePercent:= fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
+  CSVSaveWriteBOM := fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
+  CSVSaveUseRange:= fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  True);
+  CSVSaveStopAfterRow:= fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
+
+  //UpdateChecker
+  AutoSearchOnProgramStart := fIniFile.ReadBool('UpdateChecker','AutoSearchOnProgramStart', True);
+  UnzipAfterDownload := fIniFile.ReadBool('UpdateChecker','UnzipAfterDownload', True);
+  RunNewVersionAfterUnzip:= fIniFile.ReadBool('UpdateChecker','RunNewVersionAfterUnzip', false);
+  DeleteOldVersions := fIniFile.ReadBool('UpdateChecker','DeleteOldVersions', false);
+
+  //Database
+  NumBuffers := fIniFile.ReadInteger('Database','NumBuffers', 1024);
+
+  //SQLMonitor
+  TraceEnabled := fIniFile.ReadBool('SQLMonitor','TraceEnabled', false);
+  TraceFlags   := fIniFile.ReadString('SQLMonitor','TraceFlags', '');
+  SlowQueryThreshold := fIniFile.ReadInteger('SQLMonitor', 'SlowQueryThreshold', 5000);
+end;
+
+procedure WriteIniFile;
+var TempStr : string;
+begin
+  fIniFile.WriteString('UI', 'Language', Language);
+
+  //Backup
+  fIniFile.WriteBool('Backup',  'CloseDBBeforeBackup', CloseDBBeforeBackup);
+
+  //Restore
+  fIniFile.WriteInteger('Restore', 'DefaultPageSize', DefaultPageSize);
+  fIniFile.WriteInteger('Restore', 'DefaultNumBuffers', DefaultNumBuffers);
+  fIniFile.WriteBool('Restore',  'RegisterDBAfterRestore', RegisterDBAfterRestore);
+  fIniFile.WriteString('Restore',  'DefaultSegmentSize', DefaultSegmentSize);
+  fIniFile.WriteString('Restore',  'DefaultSegmentUnit', DefaultSegmentUnit);
+
+  //Scripter
+  fIniFile.WriteBool('Scripter',  'EchoInput', EchoInput);
+  fIniFile.WriteBool('Scripter',  'StopOnFirstError', StopOnFirstError);
+  fIniFile.WriteBool('Scripter',  'AutoDDL', AutoDDL);
+  fIniFile.WriteBool('Scripter',  'IgnoreCreateDatabase', IgnoreCreateDatabase);
+  fIniFile.WriteBool('Scripter',  'IgnoreGrants', IgnoreGrants);
+  fIniFile.WriteBool('Scripter',  'ShowAffectedRows', ShowAffectedRows);
+  fIniFile.WriteBool('Scripter',  'ShowPerformanceStats', ShowPerformanceStats);
+
+  //ClipboardExport
+  fIniFile.WriteInteger('ClipboardExport',  'MaxExportRows', MaxExportRows);
+
+  //MetaData
+  fIniFile.WriteBool('MetaData',  'AlwaysQuoteIdentifiers', AlwaysQuoteIdentifiers);
+  fIniFile.WriteBool('MetaData',  'CaseSensitiveObjectNames', CaseSensitiveObjectNames);
+  fIniFile.WriteBool('MetaData',  'ShowSystem', ShowSystem);
+
+  //IntelliSense
+  fIniFile.WriteBool('IntelliSense',  'ReloadCacheOnNodeExpand', ReloadCacheOnNodeExpand);
+
+
+  //MetaDataTableExtract
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractDomains', ExtractDomains);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractIndex', ExtractIndex);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractForeign', ExtractForeign);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractCheck', ExtractCheck);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractTrigger', ExtractTrigger);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractGrant', ExtractGrant);
+  fIniFile.WriteBool('MetaDataTableExtract',  'ExtractData', ExtractData);
+
+  //Theme
+  fIniFile.WriteBool('UI',  'AllowIniOverrides', AllowIniOverrides);
+
+  //MainTreeView
+  fIniFile.WriteBool('MainTreeView',  'AlwaysRefresh', MainTreeViewAlwaysRefresh);
+  fIniFile.WriteString('MainTreeView',  'FontName', MainTreeViewFontName);
+  fIniFile.WriteString('MainTreeView',  'FontStyle', FontStylesToStr(MainTreeViewFontStyle));
+  fIniFile.WriteInteger('MainTreeView',  'FontSize', MainTreeViewFontSize);
+  fIniFile.WriteString('MainTreeView',  'FontColor', ColorToString(MainTreeViewFontColor));
+  fIniFile.WriteBool('MainTreeView',  'AutoFilter', AutoFilter);
+
+  //QueryWindow
+  fIniFile.WriteBool('QueryWindow',  'AutoCommit', QWAutoCommit);
+  fIniFile.WriteBool('QueryWindow',  'ExecMultiStatementsAsScript', QWExecMultiStatementsAsScript);
+  fIniFile.WriteBool('QueryWindow',  'ShowNavigator', QWShowNavigator);
+  fIniFile.WriteString('QueryWindow',  'BackgroundColor', ColorToString(QWEditorBackgroundColor));
+  fIniFile.WriteString('QueryWindow',  'FontName', QWEditorFontName);
+  fIniFile.WriteInteger('QueryWindow',  'FontSize', QWEditorFontSize);
+  fIniFile.WriteString('QueryWindow',  'FontColor', ColorToString(QWEditorFontColor));
+  fIniFile.WriteString('QueryWindow',  'FontStyle', FontStylesToStr(QWEditorFontStyle));
+
+  //Transaction-Default config
+  fIniFile.WriteString('TransactionDefaults', 'TxFileName', DefTxFileName);
+
+  //CSVExport
+  fIniFile.WriteInteger('CSVExport', 'DefaultBatchSize', DefaultBatchSize);
+  fIniFile.ReadString('CSVkExport','DefaultPreset', CSVExportDefaultPreset);
+
+  // CSV Editor
+  if CSVLineEnding = #13#10 then
+    TempStr := 'CRLF'
+  else if CSVLineEnding = #10 then
+    TempStr := 'LF'
+  else if CSVLineEnding = #13 then
+    TempStr := 'CR'
+  else if CSVLineEnding = LineEnding then
+    TempStr := 'SYSTEM'
+  else
+    TempStr := 'LF';
+  fIniFile.WriteString('CSVEditor','CSVLineEnding', TempStr);
+  fIniFile.WriteInteger('CSVEditor','CSVDefaultFieldLength',CSVDefaultFieldLength);
+  fIniFile.WriteString('CSVEditor','CSVDelimiter',CSVDelimiter);
+  fIniFile.WriteString('CSVEditor','CSVQuoteChar',CSVQuoteChar);
+  fIniFile.WriteBool('CSVEditor','CSVFirstLineAsFieldNames',CSVFirstLineAsFieldNames);
+  fIniFile.WriteBool('CSVEditor','CSVIgnoreOuterWhitespace',CSVIgnoreOuterWhitespace);
+  fIniFile.WriteBool('CSVEditor','CSVQuoteOuterWhitespace',CSVQuoteOuterWhitespace);
+  // Auto-Detect-Schalter
+  fIniFile.WriteBool('CSVEditor','AutoDetectLineEnding', AutoDetectLineEnding);
+  fIniFile.WriteBool('CSVEditor','AutoDetectDelimiter',  AutoDetectDelimiter);
+  fIniFile.WriteBool('CSVEditor','AutoDetectQuoteChar',  AutoDetectQuoteChar);
+  fIniFile.WriteBool('CSVEditor','AutoDetectDecimalSeparator',  AutoDetectDecimalSeparator);
+
+  // Performance-Parameter
+  fIniFile.WriteInteger('CSVEditor','CSVBlockSize',          CSVBlockSizeBytes);
+  fIniFile.WriteInteger('CSVEditor','CSVBufferSize',         CSVBufferSizeBytes);
+  fIniFile.WriteInteger('CSVEditor','CSVInitialCellCapacity', CSVInitialCellCapacity);
+  fIniFile.WriteInteger('CSVEditor','CSVRowWidthScanMB', CSVRowWidthScanMB);
+  fIniFile.WriteInteger('CSVEditor','CSVMinRowsForRowWidthScan', CSVMinRowsForRowWidthScan);
+  fIniFile.WriteInteger('CSVEditor','CSVProgressUpdatePercent', CSVProgressUpdatePercent);
+  fIniFile.WriteBool('CSVEditor','CSVAutoTuneCSVBuffer', CSVAutoTuneCSVBuffer);
+
+
+  //CSV FileWriter Options
+  fIniFile.WriteInteger('CSVEditor','CSVSaveBufferSizeBytes', 8192);
+  fIniFile.ReadInteger('CSVEditor','CSVSaveProgressUpdatePercent', 5);
+  fIniFile.ReadBool('CSVEditor','CSVSaveWriteBOM',  True);
+  fIniFile.ReadBool('CSVEditor','CSVSaveUseRange',  False);
+  fIniFile.ReadInteger('CSVEditor','CSVSaveStopAfterRow', 1000);
+
+
+  //UpdateChecker
+  fIniFile.WriteBool('UpdateChecker','AutoSearchOnProgramStart', AutoSearchOnProgramStart);
+  fIniFile.WriteBool('UpdateChecker','UnzipAfterDownload', UnzipAfterDownload);
+  fIniFile.WriteBool('UpdateChecker','RunNewVersionAfterUnzip', RunNewVersionAfterUnzip);
+  fIniFile.WriteBool('UpdateChecker','DeleteOldVersions', DeleteOldVersions);
+
+  //Database
+  fIniFile.WriteInteger('Database','NumBuffers', NumBuffers);
+
+  //SQLMonitor
+  fIniFile.WriteBool('SQLMonitor','TraceEnabled', TraceEnabled);
+  fIniFile.WriteString('SQLMonitor','TraceFlags', TraceFlags);
+  fIniFile.WriteInteger('SQLMonitor', 'SlowQueryThreshold', SlowQueryThreshold);
 end;
 
 initialization

@@ -111,7 +111,8 @@ uses
   UpdateChecker
   , uAIContext
   , uAIContextImpl
-  , HtmlGlobals;
+  , HtmlGlobals
+  ,uBaseForm;
 
 {$i turbocommon.inc}
 
@@ -119,7 +120,7 @@ type
 
   { TfmMain }
 
-  TfmMain = class(TForm)
+  TfmMain = class(TfrmBaseForm)
     Button1: TButton;
     CheckBoxFilter: TCheckBox;
     edtFilter: TEdit;
@@ -127,7 +128,6 @@ type
     CurrentIBConnection: TIBDatabase;
     CurrentIBTransaction: TIBTransaction;
     grBoxObjectFilter: TGroupBox;
-    HtmlViewer1: THtmlViewer;
     Label1: TLabel;
     lmMaintenance: TMenuItem;
     lmBackupNew: TMenuItem;
@@ -682,13 +682,13 @@ begin
   IndexFile := ExtractFilePath(Application.ExeName) + PathDelim + 'data'  + PathDelim +  'help' + PathDelim + Language + PathDelim + 'index.html';
 
 
-  if FileExists(IndexFile) then
+  {if FileExists(IndexFile) then
     HtmlViewer1.LoadFromFile(IndexFile)
   else
     HtmlViewer1.LoadFromFile(
       IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'data' + PathDelim + 'help' + PathDelim + Language + PathDelim + 'filenotfound.html'
     );
-
+  }
 
   turbocommon.MainTreeView := tvMain;
 
@@ -734,7 +734,7 @@ procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
 var
   htmlPath, LocalAction, UrlLower: string;
 begin
-  htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
+  {htmlPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) +
               'data' + PathDelim + 'help' + PathDelim + Language + PathDelim;
   UrlLower := LowerCase(SRC);
 
@@ -840,6 +840,7 @@ begin
     OpenURL(SRC);
 
   Handled := true;
+  }
 end;
 
 
@@ -6096,10 +6097,10 @@ begin
   if not Assigned(IBTrans) then
     Exit;
 
+  WasInTransaction := IBTrans.InTransaction;
+
   // optional: sauberer als Event aufzurufen
   lmDisconnectClick(nil);
-
-  WasInTransaction := IBTrans.InTransaction;
 
   try
     // bewusst entscheiden: committen wir wirklich automatisch?
@@ -8505,6 +8506,9 @@ begin
 
   Rec:= RegisteredDatabases[TPNodeInfos(SelNode.Data)^.dbIndex].OrigRegRec;
 
+  fmReg.TransactionForm.TransactionParams.Text:= Rec.TxConfig;
+  fmReg.TransactionForm.ParseParams;
+
   fmReg.edDatabaseName.Text:= Rec.DatabaseName;
   fmReg.edTitle.Text:= Rec.Title;
   fmReg.edtUserName.Text:= Rec.UserName;
@@ -10592,9 +10596,7 @@ begin
 
             IBDatabase.TraceFlags := StringToTraceFlags(turbocommon.TraceFlags);
 
-            if Trim(RegRec.TxConfig) <> '' then
-              IBTransaction.Params.Text := RegRec.TxConfig
-            else
+            if Trim(RegRec.TxConfig) = '' then
             begin
               IBTransaction.Params.LoadFromFile(
                 IncludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName))
@@ -10603,6 +10605,11 @@ begin
                 + DefTxFileName
               );
               RegRec.TxConfig := IBTransaction.Params.Text;
+              fmReg.SaveRegistrations;
+            end
+            else
+            begin
+              IBTransaction.Params.Text := RegRec.TxConfig;
             end;
 
             IBQuery := TIBQuery.Create(nil);

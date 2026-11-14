@@ -10,9 +10,10 @@ uses
   Menus, Buttons, SynEdit, SynHighlighterSQL, RxDBGrid, RxDBGridExportPdf,
   RxDBGridPrintGrid, RxDBGridExportSpreadSheet, fpsDataset,
   IB, IBDatabase, IBQuery, IBTable,
-  turbocommon, SysTables, uthemeselector, uGenSQLFromCSVDataset,
+  turbocommon, SysTables, uGenSQLFromCSVDataset,
   uCSVFastDataset, uJSONFastDataSet, uCreateTableFromDataSet,
-  fdataexportersintrf, fpsTypes, uReport, uSystemInfo;
+  fdataexportersintrf, fpsTypes, uReport, uSystemInfo,
+  uBaseForm;
 
 type
   TCSVConfigStatus = (ccsOptimal, ccsSuboptimal, ccsBroken);
@@ -32,7 +33,7 @@ type
   TfrmDataEditor = class;
 
   { TfrmDataEditor }
-  TfrmDataEditor = class(TForm)
+  TfrmDataEditor = class(TfrmBaseForm)
     BitBtn1: TBitBtn;
     btnCopySQL: TButton;
     btnOpenFile: TButton;
@@ -1421,7 +1422,6 @@ begin
 
     BuildProgressForm;
     FProgressForm.Show;
-    frmThemeSelector.btnApplyClick(FProgressForm);
 
     FProgInfoLbl.Caption := Format('File: %s   (%s)',
       [ExtractFileName(FFileName), FormatBytesSmart(FileSize)]);
@@ -2071,8 +2071,8 @@ end;
 
 procedure TfrmDataEditor.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(Self);
-
+  //frmThemeSelector.btnApplyClick(Self);
+  inherited;
   SynEditSQL.Color      := QWEditorBackgroundColor;
   SynEditSQL.Font.Name  := QWEditorFontName;
   SynEditSQL.Font.Size  := QWEditorFontSize;

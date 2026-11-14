@@ -23,11 +23,11 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1525"/>
+      <BuildNr Value="1549"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
-      <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+      <Macro4 Name="LCLWidgetType" Value="qt5"/>
     </MacroValues>
     <BuildModes Count="15">
       <Item1 Name="x86_64-linux64-gtk2-debug" Default="True"/>
@@ -39,7 +39,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -90,7 +90,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -143,7 +143,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -193,7 +193,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -250,7 +250,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/PascalScript/Source;components/uib/source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -302,7 +302,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -358,7 +358,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/update;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;components/PascalScript/Source/ThirdParty/dialogs;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source/ThirdParty/uib;components/uib/source;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;ui/dialogs;ui/tools/sqlparser;ui/copytable_new;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -419,7 +419,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -470,7 +470,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -524,7 +524,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -579,7 +579,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -632,7 +632,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -697,7 +697,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -756,7 +756,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+            <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/uib/source;components/uib/misc/IFPS3;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/uib;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
             <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
           </SearchPaths>
           <Parsing>
@@ -811,10 +811,10 @@
         </CompilerOptions>
       </Item15>
       <SharedMatrixOptions Count="5">
-        <Item1 ID="844124804436" Modes="x86_64-linux64-gtk2-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item1 ID="844124804436" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
         <Item2 ID="875199933056" Modes="x86_64-linux64-gtk3-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
         <Item3 ID="013957187272" Modes="x86_64-darwin64-cocoa-debug,x86_64-darwin64-cocoa-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item4 ID="799143915312" Modes="x86_64-linux64-qt5-debug,x86_64-linux64-qt5-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item4 ID="799143915312" Modes="x86_64-linux64-qt5-debug,x86_64-linux64-qt5-release,x86_64-linux64-gtk2-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item5 ID="284256768967" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>
@@ -828,110 +828,113 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="33">
+    <RequiredPackages Count="34">
       <Item1>
-        <PackageName Value="fbintf"/>
+        <PackageName Value="jcuiscaler_rt"/>
       </Item1>
       <Item2>
-        <PackageName Value="atsynedit_package"/>
+        <PackageName Value="fbintf"/>
       </Item2>
       <Item3>
-        <PackageName Value="pascalscriptfcl"/>
+        <PackageName Value="atsynedit_package"/>
       </Item3>
       <Item4>
-        <PackageName Value="UIBLaz"/>
+        <PackageName Value="pascalscriptfcl"/>
       </Item4>
       <Item5>
-        <PackageName Value="TurboDataSets"/>
+        <PackageName Value="UIBLaz"/>
       </Item5>
       <Item6>
-        <PackageName Value="FrameViewer09"/>
+        <PackageName Value="TurboDataSets"/>
       </Item6>
       <Item7>
-        <PackageName Value="pascalscript"/>
+        <PackageName Value="FrameViewer09"/>
       </Item7>
       <Item8>
-        <PackageName Value="jvRuntimeDesign"/>
+        <PackageName Value="pascalscript"/>
       </Item8>
       <Item9>
-        <PackageName Value="DBFLaz"/>
+        <PackageName Value="jvRuntimeDesign"/>
       </Item9>
       <Item10>
-        <PackageName Value="SDFLaz"/>
+        <PackageName Value="DBFLaz"/>
       </Item10>
       <Item11>
-        <PackageName Value="laz_fpspreadsheet_dataset"/>
+        <PackageName Value="SDFLaz"/>
       </Item11>
       <Item12>
-        <PackageName Value="ibnongui"/>
+        <PackageName Value="laz_fpspreadsheet_dataset"/>
       </Item12>
       <Item13>
-        <PackageName Value="encconv_package"/>
+        <PackageName Value="ibnongui"/>
       </Item13>
       <Item14>
-        <PackageName Value="rxdbgrid_export_spreadsheet"/>
+        <PackageName Value="encconv_package"/>
       </Item14>
       <Item15>
-        <PackageName Value="rxdbgrid_print"/>
+        <PackageName Value="rxdbgrid_export_spreadsheet"/>
       </Item15>
       <Item16>
-        <PackageName Value="rxnew"/>
+        <PackageName Value="rxdbgrid_print"/>
       </Item16>
       <Item17>
-        <PackageName Value="indylaz"/>
+        <PackageName Value="rxnew"/>
       </Item17>
       <Item18>
-        <PackageName Value="pkg_gifanim"/>
+        <PackageName Value="indylaz"/>
       </Item18>
       <Item19>
-        <PackageName Value="atbinhex_package"/>
+        <PackageName Value="pkg_gifanim"/>
       </Item19>
       <Item20>
-        <PackageName Value="lazreport"/>
+        <PackageName Value="atbinhex_package"/>
       </Item20>
       <Item21>
-        <PackageName Value="lazdbexport"/>
+        <PackageName Value="lazreport"/>
       </Item21>
       <Item22>
-        <PackageName Value="RunTimeTypeInfoControls"/>
+        <PackageName Value="lazdbexport"/>
       </Item22>
       <Item23>
-        <PackageName Value="DateTimeCtrls"/>
+        <PackageName Value="RunTimeTypeInfoControls"/>
       </Item23>
       <Item24>
-        <PackageName Value="ibLegacyServices"/>
+        <PackageName Value="DateTimeCtrls"/>
       </Item24>
       <Item25>
-        <PackageName Value="dclibx"/>
+        <PackageName Value="ibLegacyServices"/>
       </Item25>
       <Item26>
-        <PackageName Value="iblocaldb"/>
+        <PackageName Value="dclibx"/>
       </Item26>
       <Item27>
-        <PackageName Value="ibcontrols"/>
+        <PackageName Value="iblocaldb"/>
       </Item27>
       <Item28>
-        <PackageName Value="ibexpress"/>
+        <PackageName Value="ibcontrols"/>
       </Item28>
       <Item29>
-        <PackageName Value="Abbrevia"/>
+        <PackageName Value="ibexpress"/>
       </Item29>
       <Item30>
-        <PackageName Value="MemDSLaz"/>
+        <PackageName Value="Abbrevia"/>
       </Item30>
       <Item31>
-        <PackageName Value="SynEdit"/>
-        <MinVersion Major="1" Valid="True"/>
+        <PackageName Value="MemDSLaz"/>
       </Item31>
       <Item32>
-        <PackageName Value="FCL"/>
+        <PackageName Value="SynEdit"/>
         <MinVersion Major="1" Valid="True"/>
       </Item32>
       <Item33>
-        <PackageName Value="LCL"/>
+        <PackageName Value="FCL"/>
+        <MinVersion Major="1" Valid="True"/>
       </Item33>
+      <Item34>
+        <PackageName Value="LCL"/>
+      </Item34>
     </RequiredPackages>
-    <Units Count="139">
+    <Units Count="140">
       <Unit0>
         <Filename Value="TurboBird.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -1775,6 +1778,14 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit138>
+      <Unit139>
+        <Filename Value="ui/base_form/ubaseform.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="frmBaseForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="uBaseForm"/>
+      </Unit139>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -1784,7 +1795,7 @@
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);components/uib/source;components/PascalScript/Source"/>
-      <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt"/>
+      <OtherUnitFiles Value="libs;getdeclarations;deps;common;ui/about;ui/createdb;ui/createtrigger;ui/enterpassword;ui/main;ui/newdomain;ui/newgenerator;ui/newtable;ui/querywindow;ui/registerdb;ui/tablemanage;ui/udfinfo;ui/viewdomain;ui/viewgenerator;ui/viewstoredprocedure;ui/viewtrigger;ui/viewview;ui/setfirebirdclient;ui/sqlhistory;ui/updatechecker;ui/userpermissions;ui/permissionmanage;ui/executer;ui/neweditfield;utils;ui/firebirdconfig;ui/calender;ui/createuser;ui/changepassword;ui/dbinfo;ui/comparison;ui/newconstraint;ui/DBAdmin/dlg;datamodules;ui/openquerybuilder;ui/CheckDBIntegrity;ui/sqlmonitor;utils/data_exporters;ui/loginservicemanager;ui/serverregistry;utils/gtk_theme_selector;ui/DBAdmin;ui/scriptengine;ui/servers;ui/activitymonitor;ui/edit_tabledata_new;ui/forign_key_table;ui/ibx_design;ui/tools/DBReader/DBReader;ui/tools/DBReader/NovaLib;ui/tools/DataEditor;ui/tools/PascalScript_IDE/source/designer;ui/tools/PascalScript_IDE/source/editor;ui/tools/PascalScript_IDE/source/common;components/PascalScript/Source;components/PascalScript/Source/ThirdParty/dialogs;components/PascalScript/Source/ThirdParty/common;components/PascalScript/Source/ThirdParty/IBX;components/PascalScript/Source/ThirdParty/dbctrls;components/jvdesign;ui/dialogs;ui/tools/sqlparser;ui/ServerDBFieldSelector;ui/csv_bulk_export;ui/clone_table;components/uib/source;components/uib/misc/IFPS3;ui/tools/CrossRDBMSTransfer;ui/tools/CrossRDBMSTransfer/OI_Connector;ui/tools/ai_prompt;ui/base_form"/>
       <UnitOutputDirectory Value="../bin/${BuildMode}/unitoutput"/>
     </SearchPaths>
     <Parsing>

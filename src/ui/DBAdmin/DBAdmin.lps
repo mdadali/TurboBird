@@ -41,10 +41,12 @@
         <ComponentName Value="DBLoginDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="22"/>
-        <CursorPos X="70" Y="37"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="15"/>
+        <CursorPos X="3" Y="32"/>
         <UsageCount Value="171"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="dlg/ShutdownDatabaseDlgUnit.pas"/>
@@ -74,10 +76,11 @@
         <ComponentName Value="BackupDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="56"/>
-        <CursorPos X="3" Y="72"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="11"/>
+        <CursorPos X="3" Y="27"/>
         <UsageCount Value="167"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="dlg/RestoreDlgUnit.pas"/>
@@ -1156,7 +1159,6 @@
       </Unit152>
       <Unit153>
         <Filename Value="../../common/turbocommon.pas"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="3"/>
         <TopLine Value="3"/>
         <CursorPos X="3" Y="19"/>
@@ -1164,7 +1166,7 @@
         <Loaded Value="True"/>
       </Unit153>
     </Units>
-    <JumpHistory Count="9" HistoryIndex="8">
+    <JumpHistory Count="12" HistoryIndex="9">
       <Position1>
         <Filename Value="MainFormUnit.pas"/>
         <Caret Line="1044" Column="14" TopLine="1028"/>
@@ -1199,8 +1201,20 @@
       </Position8>
       <Position9>
         <Filename Value="../../common/turbocommon.pas"/>
-        <Caret Line="13" Column="3" TopLine="601"/>
+        <Caret Line="19" Column="3" TopLine="3"/>
       </Position9>
+      <Position10>
+        <Filename Value="dlg/DBLoginDlgUnit.pas"/>
+        <Caret Line="31" Column="52" TopLine="15"/>
+      </Position10>
+      <Position11>
+        <Filename Value="dlg/DBLoginDlgUnit.pas"/>
+        <Caret Line="68" Column="5" TopLine="52"/>
+      </Position11>
+      <Position12>
+        <Filename Value="dlg/BackupDlgUnit.pas"/>
+        <Caret Line="27" Column="3" TopLine="11"/>
+      </Position12>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>

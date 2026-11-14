@@ -1,0 +1,13 @@
+object frmBaseForm: TfrmBaseForm
+  Left = 625
+  Height = 538
+  Top = 158
+  Width = 893
+  Caption = 'frmBaseForm'
+  OnShow = FormShow
+  LCLVersion = '2.2.6.0'
+  object JCScaler1: TJCScaler
+    Left = 122
+    Top = 69
+  end
+end

@@ -72,7 +72,7 @@ type
     lbFBConfigFile: TLabel;
     lbDescription: TLabel;
     lbPortInfo: TLabel;
-    Label2: TLabel;
+    lbHost: TLabel;
     Label3: TLabel;
     lbPassword: TLabel;
     Label5: TLabel;

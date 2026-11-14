@@ -64,40 +64,44 @@ type
 
 const
    NodeInfos: array[TMetaNodeType] of TNodeInfo = (
-     (icon: 0;  color : clBlack),   // MetaNode,
+     (icon: 0;  color : clBlack),   // MetaNode
      (icon: 1;  color : clBlack),   // MetaDatabase
-     (icon: 7;  color : clRed),     // MetaException
-     (icon: 6;  color : clMaroon),  // MetaGenerator
-     (icon: 15; color : clBlack),   // MetaCheck
-     (icon: 14; color : clBlack),   // MetaTrigger
-     (icon: 8;  color : clBlue),    // MetaUDF
+     (icon: 7;  color : clRed),   // MetaException
+     (icon: 6;  color : clMaroon),   // MetaGenerator
+     (icon: 15;  color : clBlack),   // MetaCheck
+     (icon: 14;  color : clBlack),   // MetaTrigger
+     (icon: 8;  color : clBlue),   // MetaUDF
      (icon: 4;  color : clGreen),   // MetaView
-     (icon: 5;  color : clTeal),    // MetaProcedure
+     (icon: 5;  color : clTeal),   // MetaProcedure
+     (icon: 5;  color : clTeal),   // MetaPackage
+     (icon: 10;  color : clNavy),   // MetaPackageProc
+     (icon: 10;  color : clNavy),   // MetaPackageFunc
      (icon: 9;  color : clBlack),   // MetaRole
      (icon: 3;  color : clGreen),   // MetaTable
-     (icon: 10; color : clNavy),    // MetaBaseField
-     (icon: 10; color : clNavy),    //   MetaUDFField
-     (icon: 10; color : clNavy),    //   MetaField
-     (icon: 10; color : clNavy),    //     MetaProcInField
-     (icon: 10; color : clNavy),    //     MetaProcOutField
-     (icon: 10; color : clNavy),    //     MetaTableField
-     (icon: 2;  color : clOlive),   //       MetaDomain
+     (icon: 10;  color : clNavy),   // MetaBaseField
+     (icon: 10;  color : clNavy),   // MetaUDFField
+     (icon: 10;  color : clNavy),   // MetaField
+     (icon: 10;  color : clNavy),   // MetaProcField
+     (icon: 10;  color : clNavy),   // MetaProcInField
+     (icon: 10;  color : clNavy),   // MetaProcOutField
+     (icon: 10;  color : clNavy),   // MetaTableField
+     (icon: 2;  color : clOlive),   // MetaDomain
      (icon: 0;  color : clBlack),   // MetaConstraint
-     (icon: 12; color : clBlack),   //   MetaForeign
-     (icon: 17;  color : clBlack),  //   MetaIndex
-     (icon: 11; color : clBlack),   //   MetaPrimary
-     (icon: 16; color : clBlack),   //   MetaUnique
+     (icon: 12;  color : clBlack),   // MetaForeign
+     (icon: 17;  color : clBlack),   // MetaIndex
+     (icon: 11;  color : clBlack),   // MetaPrimary
+     (icon: 16;  color : clBlack),   // MetaUnique
      (icon: 9;  color : clBlack),   // MetaGrant
-     (icon: 9;  color : clBlack),   //   MetaRoleGrant
-     (icon: 9;  color : clBlack),   //   MetaTableGrant
-     (icon: 9;  color : clBlack),   //   MetaFieldGrant
-     (icon: 9;  color : clBlack),   //   MetaProcedureGrant
+     (icon: 9;  color : clBlack),   // MetaRoleGrant
+     (icon: 9;  color : clBlack),   // MetaTableGrant
+     (icon: 9;  color : clBlack),   // MetaFieldGrant
+     (icon: 9;  color : clBlack),   // MetaProcedureGrant
      (icon: 9;  color : clBlack),   // MetaGrantee
-     (icon: 9;  color : clBlack),   //   MetaUserGrantee
-     (icon: 9;  color : clBlack),   //   MetaRoleGrantee
-     (icon: 9;  color : clBlack),   //   MetaProcedureGrantee
-     (icon: 9;  color : clBlack),   //   MetaTriggerGrantee
-     (icon: 9;  color : clBlack)    //   MetaViewGrantee
+     (icon: 9;  color : clBlack),   // MetaUserGrantee
+     (icon: 9;  color : clBlack),   // MetaRoleGrantee
+     (icon: 9;  color : clBlack),   // MetaProcedureGrantee
+     (icon: 9;  color : clBlack),   // MetaTriggerGrantee
+     (icon: 9;  color : clBlack)    // MetaViewGrantee
    );
 
 procedure TMainForm.ShowNodes(node: TMetaNode; from: TTreeNode);
