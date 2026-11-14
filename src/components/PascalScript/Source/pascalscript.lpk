@@ -8,6 +8,8 @@
     <CompilerOptions>
       <Version Value="11"/>
       <SearchPaths>
+        <IncludeFiles Value="../../uib/source"/>
+        <OtherUnitFiles Value="../../uib/misc/IFPS3;../../uib/source"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
       <Other>
@@ -56,7 +58,7 @@ Carlo Kok
 RemObjects Software
 "/>
     <Version Build="1"/>
-    <Files Count="17">
+    <Files Count="19">
       <Item1>
         <Filename Value="uPSR_stdctrls.pas"/>
         <UnitName Value="uPSR_stdctrls"/>
@@ -126,6 +128,14 @@ RemObjects Software
         <Filename Value="uPSR_menus.pas"/>
         <UnitName Value="uPSR_menus"/>
       </Item17>
+      <Item18>
+        <Filename Value="../../uib/misc/IFPS3/uPSI_uib.pas"/>
+        <UnitName Value="uPSI_uib"/>
+      </Item18>
+      <Item19>
+        <Filename Value="../../uib/source/uib.inc"/>
+        <Type Value="Include"/>
+      </Item19>
     </Files>
     <CompatibilityMode Value="True"/>
     <RequiredPkgs Count="1">

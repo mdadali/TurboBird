@@ -72,7 +72,7 @@ uses
   fserverregistry,
 
 
-  RxDBGrid, HtmlView,
+  RxDBGrid,
 
   fmetaquerys,
 
@@ -111,7 +111,6 @@ uses
   UpdateChecker
   , uAIContext
   , uAIContextImpl
-  , HtmlGlobals
   ,uBaseForm;
 
 {$i turbocommon.inc}
@@ -327,8 +326,8 @@ type
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
-      var Handled: Boolean);
+    //procedure HtmlViewer1HotSpotClick(Sender: TObject; const SRC: ThtString;
+      //var Handled: Boolean);
     procedure ImNewFBFunctionClick(Sender: TObject);
     procedure ImCreateNewPackageClick(Sender: TObject);
     procedure ImEditFBFunctionClick(Sender: TObject);
@@ -729,7 +728,7 @@ begin
     frmUpdateChecker.PerformAutoSearch;
 end;
 
-procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
+{procedure TfmMain.HtmlViewer1HotSpotClick(Sender: TObject;
   const SRC: ThtString; var Handled: Boolean);
 var
   htmlPath, LocalAction, UrlLower: string;
@@ -841,7 +840,7 @@ begin
 
   Handled := true;
   }
-end;
+end;  }
 
 
 procedure TfmMain.AppShowHint(var HintStr: string; var CanShow: Boolean; var HintInfo: THintInfo);
@@ -3462,7 +3461,7 @@ function TfmMain.GetFormFilePath: string;
 var
   SelNode: TTreeNode;
   ServerNode, DBNode: TTreeNode;
-  ServerName, DBAlias, FormName: string;
+  ServerAlias, DBAlias, FormName: string;
 begin
   Result := '';
   SelNode := tvMain.Selected;
@@ -3473,12 +3472,11 @@ begin
   DBNode := GetAncestorAtLevel(SelNode, 1);
   if (ServerNode = nil) or (DBNode = nil) then Exit;
 
-  ServerName := GetClearNodeText(ServerNode.Text);
-  DBAlias := GetClearNodeText(DBNode.Text);
-  FormName := GetClearNodeText(SelNode.Text);
+  ServerAlias := GetServerAliasFromNode(ServerNode);
+  DBAlias     := GetClearNodeText(DBNode.Text);
+  FormName    := GetClearNodeText(SelNode.Text);
 
-  // Pfad zur .cfrm-Datei zusammensetzen
-  Result := GetDBFormsPath(ServerName, DBAlias)
+  Result := GetDBFormsPath(ServerAlias, DBAlias)
             + FormName + PathDelim
             + FormName + '.cfrm';
 end;
@@ -6634,7 +6632,7 @@ var
   NodeType: TTreeViewObjectType;
 
   // Forms
-  ServerName, DBAlias, FormsPath, FormDir, CFrmFile, RopsFile: string;
+  ServerName, ServerAlias, DBAlias, FormsPath, FormDir, CFrmFile, RopsFile: string;
   ChildNode: TTreeNode;
   SearchRec: TSearchRec;
 
@@ -7510,14 +7508,19 @@ begin
         // ============================================================
         // FORMS (Filesystem-basiert)
         // ============================================================
+        // ============================================================
+        // FORMS (Filesystem-basiert)
+        // ============================================================
         tvotFormRoot: begin
           Node.DeleteChildren;
           Node.Text := ANodeText;
 
-          ServerName := GetClearNodeText(GetAncestorAtLevel(Node, 0).Text);  // Level 0 = Server
-          DBAlias    := GetClearNodeText(GetAncestorAtLevel(Node, 1).Text);  // Level 1 = DB
+          // Alias statt Node.Text — GetClearNodeText würde den
+          // Alias am ersten Leerzeichen abschneiden.
+          ServerAlias := GetServerAliasFromNode(GetAncestorAtLevel(Node, 0));
+          DBAlias     := GetClearNodeText(GetAncestorAtLevel(Node, 1).Text);
 
-          FormsPath := GetDBFormsPath(ServerName, DBAlias);
+          FormsPath := GetDBFormsPath(ServerAlias, DBAlias);
           ForceDirectories(FormsPath);
 
           if DirectoryExists(FormsPath) then

@@ -7,7 +7,7 @@ interface
 uses
   LCLIntf, LCLType, Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Spin, ExtCtrls, ComCtrls, Buttons, DBCtrls, DBGrids, SynEdit,
-  HtmlView, RxDBGrid, IBQuery, IBDatabase, fphttpclient, fpjson, jsonparser, DB,
+  RxDBGrid, IBQuery, IBDatabase, fphttpclient, fpjson, jsonparser, DB,
   uAiSettings, uOllamaAgent, uAIContext;
 
 type
@@ -19,7 +19,6 @@ type
     DBNavigator1: TDBNavigator;
     FPriceBtn: TButton;
     FResponseMemo: TMemo;
-    HtmlViewer1: THtmlViewer;
     IBDatabase1: TIBDatabase;
     IBQuery1: TIBQuery;
     IBTransaction1: TIBTransaction;
@@ -562,7 +561,7 @@ var
   i, j, k: Integer;
   URL: string;
 begin
-  if not Assigned(FAgentThread) then
+  {if not Assigned(FAgentThread) then
   begin
     FCheckTimer.Enabled := False;
     Exit;
@@ -630,7 +629,7 @@ begin
     Agent.Free;
     FSendBtn.Enabled := True;
     Screen.Cursor := crDefault;
-  end;
+  end; }
 end;
 
 function TfmAIPromptForm.GetSQLFromPrompt: string;

@@ -747,7 +747,7 @@ var    SessionPasswordCache: TStringList;
 
 //Forms
 function GetFormsBasePath: string;
-function GetDBFormsPath(const AServerName, ADBAlias: string): string;
+function GetDBFormsPath(const AServerAlias, ADBAlias: string): string;
 function SanitizeFileName(const AName: string): string;
 //
 
@@ -3931,10 +3931,10 @@ begin
             + 'data' + PathDelim + 'PSStudio' + PathDelim + 'Forms' + PathDelim;
 end;
 
-function GetDBFormsPath(const AServerName, ADBAlias: string): string;
+function GetDBFormsPath(const AServerAlias, ADBAlias: string): string;
 begin
   Result := GetFormsBasePath
-            + SanitizeFileName(AServerName) + PathDelim
+            + SanitizeFileName(AServerAlias) + PathDelim
             + SanitizeFileName(ADBAlias) + PathDelim;
 end;
 
