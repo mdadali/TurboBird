@@ -211,12 +211,13 @@ begin
 
   try
     FEngine.Execute;
-    Result := not FEngine.Stats.Cancelled;
+    { Auch bei Cancel → Report zeigen (Stats.Cancelled = True → "Status: CANCELLED") }
+    Result := True;
   except
     on E: Exception do
     begin
       MessageDlg('Transfer failed:' + sLineBreak + E.Message, mtError, [mbOK], 0);
-      Result := False;
+      Result := False;   { nur echte Fehler → kein Report }
     end;
   end;
 

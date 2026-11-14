@@ -1,10 +1,10 @@
 object fmQueryWindow: TfmQueryWindow
-  Left = 449
+  Left = 1227
   Height = 748
-  Top = 133
+  Top = 301
   Width = 1232
   Caption = 'fmQueryWindow'
-  ClientHeight = 742
+  ClientHeight = 748
   ClientWidth = 1232
   Color = clForm
   Icon.Data = {
@@ -70298,18 +70298,18 @@ object fmQueryWindow: TfmQueryWindow
   end
   object pnlOutputPanel: TPanel
     Left = 0
-    Height = 366
+    Height = 372
     Top = 376
     Width = 1232
     Align = alClient
     BevelOuter = bvNone
-    ClientHeight = 366
+    ClientHeight = 372
     ClientWidth = 1232
     ParentBackground = False
     TabOrder = 1
     object pgOutputPageCtl: TPageControl
       Left = 0
-      Height = 366
+      Height = 372
       Top = 0
       Width = 1232
       Align = alClient
@@ -70472,7 +70472,7 @@ object fmQueryWindow: TfmQueryWindow
     end
     object cxAutoCommit: TCheckBox
       Left = 498
-      Height = 21
+      Height = 22
       Hint = 'Auto Commit ON/OFF'
       Top = 2
       Width = 105
@@ -70511,8 +70511,8 @@ object fmQueryWindow: TfmQueryWindow
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
-      ClientHeight = 30
-      ClientWidth = 183
+      ClientHeight = 28
+      ClientWidth = 181
       Columns = 3
       ItemIndex = 0
       Items.Strings = (

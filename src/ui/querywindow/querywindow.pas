@@ -2502,9 +2502,15 @@ begin
     Exit;
   end;
 
-  if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then
+  if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) or (Key = VK_DECIMAL) then
+  //if (Key = VK_OEM_PERIOD) or (Key = Ord('.')) then
   begin
-    WordBefore := GetWordBeforeCursor(meQuery.Lines, meQuery.CaretY, meQuery.CaretX);
+    WordBefore := GetWordBeforeCursor(
+      meQuery.Lines,
+      meQuery.CaretY,
+      meQuery.LogicalCaretXY.X   // nicht CaretX!
+    );
+
     if WordBefore = '' then Exit;
 
     DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
@@ -2633,76 +2639,6 @@ begin
   end;
 end;
 
-{procedure TfmQueryWindow.LoadpmUnIntelliSense;
-var
-  TableItem, FieldItem, DummyItem: TMenuItem;
-  TableName, FieldName: string;
-  i, j: Integer;
-  DBNode: TTreeNode;
-  IntelliCache: TUnIntelliSenseCache;
-begin
-  pmUnIntelliSense.Items.Clear;
-
-  // Ancestor & Cache holen
-  DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
-  IntelliCache := TPNodeInfos(DBNode.Data)^.UnIntelliSenseCache;
-
-  if (IntelliCache = nil) or not IntelliCache.Initialized then
-  begin
-    MessageDlg(
-      'IntelliSense',
-      'The IntelliSense cache is not initialized yet.',
-      mtInformation,
-      [mbOK],
-      0
-    );
-    Exit;
-  end;
-
-  // Über Tabellen iterieren
-  for i := 0 to IntelliCache.TableCache.Count - 1 do
-  begin
-    TableName := IntelliCache.TableCache[i];
-
-    // Hauptmenü = Tabelle
-    TableItem := TMenuItem.Create(pmUnIntelliSense);
-    TableItem.Caption := TableName;
-    TableItem.OnClick := @pmUnIntelliSenseMaintemClick;
-
-
-    // DummyItem mit Tabellenname
-    DummyItem := TMenuItem.Create(TableItem);
-    DummyItem.Caption := TableName;
-    DummyItem.OnClick := @pmUnIntelliSenseSubItemClick;
-    TableItem.Add(DummyItem);
-
-    // Trennstrich
-    DummyItem := TMenuItem.Create(TableItem);
-    DummyItem.Caption := '-';
-    TableItem.Add(DummyItem);
-
-    // Felder aus Cache holen
-    {if (i <= High(IntelliCache.FieldCache)) and Assigned(IntelliCache.FieldCache[i]) then
-    begin
-      for j := 0 to IntelliCache.FieldCache[i].Count - 1 do
-      begin
-        FieldName := IntelliCache.FieldCache[i][j];
-
-        // Skip first entry? (falls erste Position TableName ist)
-        if j = 0 then Continue;
-
-        FieldItem := TMenuItem.Create(TableItem);
-        FieldItem.Caption := FieldName;
-        FieldItem.OnClick := @pmUnIntelliSenseSubItemClick;
-
-        TableItem.Add(FieldItem);
-      end;
-    end;
-    }
-    pmUnIntelliSense.Items.Add(TableItem);
-  end;
-end; }
-
 procedure TfmQueryWindow.LoadpmUnIntelliSense;
 var
   Context: TSQLContext;
@@ -2713,20 +2649,31 @@ var
   i: Integer;
   DBNode: TTreeNode;
   IntelliCache: TUnIntelliSenseCache;
+  TextBefore: string;
+  ShowOps: Boolean;
 begin
   pmUnIntelliSense.Items.Clear;
 
-  Parser := TSelectSQLParserExt.CreateFromString(meQuery.Text);
+  TextBefore := GetTextBeforeCaret(
+    meQuery.Lines,
+    meQuery.CaretY,
+    meQuery.LogicalCaretXY.X
+  );
+
+  Parser := TSelectSQLParserExt.CreateFromString(TextBefore);
   try
     Context := Parser.GetContext;
   finally
     Parser.Free;
   end;
 
+  ShowOps := (Context = ctxWhere) and ShouldShowWhereOperators(TextBefore);
+
   // Keywords
   Keywords := TStringList.Create;
   try
-    FillKeywords(Keywords, Context);
+    FillKeywords(Keywords, Context, ShowOps);
+
     for i := 0 to Keywords.Count - 1 do
     begin
       KeyItem := TMenuItem.Create(pmUnIntelliSense);
@@ -2745,8 +2692,9 @@ begin
     Keywords.Free;
   end;
 
-  // Tabellen in sinnvollen Kontexten
-  if Context in [ctxEmpty, ctxSelectList, ctxFrom, ctxWhere, ctxOrderGroup, ctxUnknown] then
+  // Tabellen: nach WHERE+Feld eher nicht nötig, sonst ja
+  if (not ShowOps) and
+     (Context in [ctxEmpty, ctxSelectList, ctxFrom, ctxWhere, ctxOrderGroup, ctxUnknown]) then
   begin
     DBNode := turbocommon.GetAncestorAtLevel(fmMain.tvMain.Selected, 1);
     if (DBNode = nil) or (DBNode.Data = nil) then Exit;

@@ -34,13 +34,11 @@ type
 
   { TfrmDataEditor }
   TfrmDataEditor = class(TfrmBaseForm)
-    BitBtn1: TBitBtn;
     btnCopySQL: TButton;
     btnOpenFile: TButton;
     btnExportAs: TButton;
     btnCreateSQL: TButton;
     btnCreateTable: TButton;
-    Button1: TButton;
     btnSaveFile: TButton;
     CheckBoxAutoDedectDelimiter: TCheckBox;
     CheckBoxAutoDedectLineEnding: TCheckBox;
@@ -119,11 +117,9 @@ type
     SdfDataSet1: TSdfDataSet;
     Separator1: TMenuItem;
     Separator2: TMenuItem;
-    SpeedButton1: TSpeedButton;
     sWorksheetDataset1: TsWorksheetDataset;
     SynEditSQL: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
-    ToggleBox1: TToggleBox;
     tsCommonSettings: TTabSheet;
     tsSQL: TTabSheet;
     tsGrid: TTabSheet;
@@ -136,7 +132,6 @@ type
     procedure btnOpenFileClick(Sender: TObject);
     procedure btnExportAsClick(Sender: TObject);
     procedure btnSaveFileClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure chkBoxAutoTuneCSVBufferChange(Sender: TObject);
     procedure cmbboxDelimiterChange(Sender: TObject);
     procedure cmbboxLineEndingChange(Sender: TObject);
@@ -2093,11 +2088,6 @@ end;
 procedure TfrmDataEditor.btnSaveFileClick(Sender: TObject);
 begin
   SaveFile(FFileName, True);
-end;
-
-procedure TfrmDataEditor.Button1Click(Sender: TObject);
-begin
-  ShowMessage(IntToStr(CSVFastDataset1.RecordCount));
 end;
 
 procedure TfrmDataEditor.chkBoxAutoTuneCSVBufferChange(Sender: TObject);

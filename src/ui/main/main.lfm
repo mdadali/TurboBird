@@ -1,7 +1,7 @@
-object fmMain: TfmMain
-  Left = 1281
+inherited fmMain: TfmMain
+  Left = 479
   Height = 668
-  Top = 557
+  Top = 120
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 638
@@ -5578,16 +5578,15 @@ object fmMain: TfmMain
   OnShow = FormShow
   Position = poScreenCenter
   ShowHint = True
-  LCLVersion = '2.2.6.0'
   WindowState = wsMaximized
-  object Splitter1: TSplitter
+  object Splitter1: TSplitter[0]
     Left = 360
     Height = 581
     Top = 34
     Width = 14
     Beveled = True
   end
-  object StatusBar1: TStatusBar
+  object StatusBar1: TStatusBar[1]
     Left = 0
     Height = 23
     Top = 615
@@ -5601,7 +5600,7 @@ object fmMain: TfmMain
       end>
     SimplePanel = False
   end
-  object ToolBar1: TToolBar
+  object ToolBar1: TToolBar[2]
     Left = 0
     Height = 34
     Top = 0
@@ -5685,7 +5684,7 @@ object fmMain: TfmMain
       OnClick = tbServerInventoryAsTextClick
     end
   end
-  object PageControl1: TPageControl
+  object PageControl1: TPageControl[3]
     Left = 377
     Height = 574
     Top = 37
@@ -5718,7 +5717,7 @@ object fmMain: TfmMain
       ParentFont = False
     end
   end
-  object Button1: TButton
+  object Button1: TButton[4]
     Left = 0
     Height = 581
     Top = 34
@@ -5728,7 +5727,7 @@ object fmMain: TfmMain
     OnClick = Button1Click
     TabOrder = 4
   end
-  object pnlLeft: TPanel
+  object pnlLeft: TPanel[5]
     Left = 27
     Height = 581
     Top = 34
@@ -5805,7 +5804,9 @@ object fmMain: TfmMain
       ParentColor = False
     end
   end
-  object MainMenu1: TMainMenu
+  inherited JCScaler1: TJCScaler[6]
+  end
+  object MainMenu1: TMainMenu[7]
     Images = ImageList1
     Left = 264
     Top = 480
@@ -5910,7 +5911,7 @@ object fmMain: TfmMain
       end
     end
   end
-  object ImageList1: TImageList
+  object ImageList1: TImageList[8]
     Left = 424
     Top = 104
     Bitmap = {
@@ -7102,7 +7103,7 @@ object fmMain: TfmMain
       373C7C6E5656D6C8FFDB36C74BFF1F12462C9C
     }
   end
-  object pmDatabase: TPopupMenu
+  object pmDatabase: TPopupMenu[9]
     Tag = 501
     Images = ImageList1
     OnPopup = pmDatabasePopup
@@ -8546,7 +8547,7 @@ object fmMain: TfmMain
       end
     end
   end
-  object mdsHistory: TMemDataset
+  object mdsHistory: TMemDataset[10]
     FieldDefs = <    
       item
         Name = 'Description'
@@ -8574,7 +8575,7 @@ object fmMain: TfmMain
     Left = 104
     Top = 360
   end
-  object toolbarImages: TImageList
+  object toolbarImages: TImageList[11]
     Height = 32
     Width = 32
     Left = 264
@@ -9124,7 +9125,7 @@ object fmMain: TfmMain
       07B9DAC87F
     }
   end
-  object editorFontDialog: TFontDialog
+  object editorFontDialog: TFontDialog[12]
     Font.Height = -14
     Font.Name = 'Ubuntu'
     MinFontSize = 0
@@ -9132,7 +9133,7 @@ object fmMain: TfmMain
     Left = 424
     Top = 336
   end
-  object ImageList2: TImageList
+  object ImageList2: TImageList[13]
     DrawingStyle = dsFocus
     Left = 424
     Top = 224
@@ -9259,7 +9260,7 @@ object fmMain: TfmMain
       69965B776ED773BA5DF55C1ED7FFF938F92722702651
     }
   end
-  object SQLQuery1: TIBQuery
+  object SQLQuery1: TIBQuery[14]
     AllowAutoActivateTransaction = True
     Database = CurrentIBConnection
     Transaction = CurrentIBTransaction
@@ -9280,7 +9281,7 @@ object fmMain: TfmMain
     Left = 104
     Top = 264
   end
-  object CurrentIBConnection: TIBDatabase
+  object CurrentIBConnection: TIBDatabase[15]
     Connected = False
     LoginPrompt = False
     CreateIfNotExists = False
@@ -9292,7 +9293,7 @@ object fmMain: TfmMain
     Left = 104
     Top = 104
   end
-  object CurrentIBTransaction: TIBTransaction
+  object CurrentIBTransaction: TIBTransaction[16]
     TransactionName = '{E7A93331-169C-407D-B805-831FABAB8845}'
     Active = False
     DefaultDatabase = CurrentIBConnection
@@ -9304,7 +9305,7 @@ object fmMain: TfmMain
     Left = 104
     Top = 184
   end
-  object PopupMenu1: TPopupMenu
+  object PopupMenu1: TPopupMenu[17]
     Left = 197
     Top = 136
   end

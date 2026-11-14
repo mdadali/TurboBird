@@ -34,15 +34,72 @@ type
   end;
 
   //Helper-intellisense
+  function GetLastToken(const S: string): string;
+  function IsWhereKeyword(const Token: string): Boolean;
+  function ShouldShowWhereOperators(const TextBeforeCaret: string): Boolean;
   function GetWordBeforeCursor(Lines: TStrings; CaretY, CaretX: Integer): string;
   function GetTextBeforeCaret(Lines: TStrings; CaretY, CaretX: Integer): string;
-  procedure FillKeywords(AList: TStrings; AContext: TSQLContext);
+  procedure FillKeywords(AList: TStrings; AContext: TSQLContext; ShowWhereOperators: Boolean = False);
   function GetSQLContext(const SQLText: string): TSQLContext;
 
 
 implementation
 
 { TSelectSQLParserExt }
+function GetLastToken(const S: string): string;
+var
+  i, EndPos: Integer;
+begin
+  Result := '';
+  if S = '' then Exit;
+
+  i := Length(S);
+  // trailing Spaces überspringen
+  while (i >= 1) and (S[i] <= ' ') do
+    Dec(i);
+  if i < 1 then Exit;
+
+  EndPos := i;
+
+  // Quoted Identifier?
+  if S[i] = '"' then
+  begin
+    Dec(i);
+    while (i >= 1) and (S[i] <> '"') do
+      Dec(i);
+    if (i >= 1) and (S[i] = '"') then
+      Result := Copy(S, i, EndPos - i + 1);
+    Exit;
+  end;
+
+  // normaler Identifier / Token
+  while (i >= 1) and (S[i] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$']) do
+    Dec(i);
+
+  Result := Copy(S, i + 1, EndPos - i);
+end;
+
+function IsWhereKeyword(const Token: string): Boolean;
+var
+  U: string;
+begin
+  U := UpperCase(Token);
+  Result :=
+    (U = 'WHERE') or (U = 'AND') or (U = 'OR') or (U = 'NOT') or
+    (U = 'ON') or (U = 'HAVING') or (U = 'EXISTS') or (U = 'SINGULAR') or
+    (U = 'BETWEEN') or (U = 'IN') or (U = 'LIKE') or
+    (U = 'CONTAINING') or (U = 'IS') or (U = 'NULL');
+end;
+
+function ShouldShowWhereOperators(const TextBeforeCaret: string): Boolean;
+var
+  Token: string;
+begin
+  Token := GetLastToken(TextBeforeCaret);
+  // Nach Identifier (Feld) → Operatoren
+  // Nach WHERE/AND/OR/( → keine Operatoren, sondern Felder
+  Result := (Token <> '') and not IsWhereKeyword(Token);
+end;
 
 constructor TSelectSQLParserExt.CreateFromString(const SQL: string);
 begin
@@ -335,7 +392,8 @@ begin
   end;
 end;
 
-procedure FillKeywords(AList: TStrings; AContext: TSQLContext);
+procedure FillKeywords(AList: TStrings; AContext: TSQLContext;
+  ShowWhereOperators: Boolean = False);
 begin
   AList.Clear;
 
@@ -346,7 +404,6 @@ begin
       AList.Add('SELECT * FROM ');
       AList.Add('SELECT COUNT(*) FROM ');
       AList.Add('SELECT FIRST 1000 * FROM ');
-
       AList.Add('INSERT INTO ');
       AList.Add('UPDATE ');
       AList.Add('DELETE FROM ');
@@ -414,10 +471,33 @@ begin
 
     ctxWhere:
     begin
-      // Direkt nach WHERE: eher Felder – nur wenig Keywords
-      AList.Add('NOT ');
-      AList.Add('EXISTS (');
-      AList.Add('SINGULAR (');
+      if ShowWhereOperators then
+      begin
+        // nach Feldnamen
+        AList.Add('= ');
+        AList.Add('<> ');
+        AList.Add('< ');
+        AList.Add('> ');
+        AList.Add('<= ');
+        AList.Add('>= ');
+        AList.Add('IS NULL');
+        AList.Add('IS NOT NULL');
+        AList.Add('BETWEEN ');
+        AList.Add('IN (');
+        AList.Add('LIKE ');
+        AList.Add('CONTAINING ');
+        AList.Add('STARTING WITH ');
+        AList.Add('SIMILAR TO ');
+        AList.Add('AND ');
+        AList.Add('OR ');
+      end
+      else
+      begin
+        // direkt nach WHERE / AND / OR
+        AList.Add('NOT ');
+        AList.Add('EXISTS (');
+        AList.Add('SINGULAR (');
+      end;
     end;
 
     ctxOrderGroup:
