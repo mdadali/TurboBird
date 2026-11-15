@@ -1,142 +1,309 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="utf-8">
-<title>TurboBird — Main (Welcome)</title>
+<title>TurboBird - Home</title>
+<style type="text/css">
+body        { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 13px; color: #333; background: #FAFAFA; margin: 0; padding: 0; }
+a           { color: #0277BD; text-decoration: none; }
+a:hover     { text-decoration: underline; }
+
+.header     { background: #37474F; color: #fff; padding: 12px 22px; }
+.header h1  { color: #fff; margin: 0; font-size: 24px; font-weight: bold; }
+.header .sub{ font-size: 11px; color: #B0BEC5; margin-top: 3px; }
+.logo-cell  { vertical-align: middle; width: 56px; }
+.content    { padding: 14px 22px 24px 22px; }
+
+.intro      { border: 2px solid #37474F; background: #F5F5F5;
+              padding: 14px 18px 12px 18px; margin: 0 0 16px 0; }
+.intro-title{ color: #37474F; font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+.intro-text { color: #333; font-size: 12px; line-height: 1.5; }
+.intro-note { margin-top: 10px; padding: 8px 12px; background: #FFF;
+              border-left: 3px solid #546E7A; font-size: 11px; color: #333; }
+
+.workflow   { width: 100%; margin: 12px 0 6px 0; border-collapse: collapse; }
+.workflow td{ vertical-align: middle; text-align: center; padding: 4px; }
+.wf-step    { background: #FFF; border: 1px solid #90A4AE; padding: 10px 6px !important; }
+.wf-num     { background: #37474F; color: #fff; width: 26px; height: 26px; line-height: 26px;
+              text-align: center; font-weight: bold; font-size: 14px; margin: 0 auto 4px auto; }
+.wf-label   { font-weight: bold; font-size: 11px; color: #37474F; }
+.wf-desc    { font-size: 10px; color: #757575; margin-top: 2px; }
+.wf-arrow   { font-size: 20px; color: #546E7A; font-weight: bold; width: 24px; }
+
+.section    { border: 1px solid #E0E0E0; background: #FFF; margin: 14px 0; }
+.section-title { background: #37474F; color: #fff; padding: 7px 12px;
+                 font-weight: bold; font-size: 13px; }
+.section-title-diag { background: #00897B; }
+.section-title .step-num { display: inline-block; background: #FFF;
+              color: #37474F; width: 20px; height: 20px; line-height: 20px;
+              text-align: center; margin-right: 8px; font-size: 11px; font-weight: bold; }
+.section-title-diag .step-num { color: #00897B; }
+.section-body { padding: 10px 12px 12px 12px; }
+.section-body .hint { margin: 0 0 10px 0; padding: 6px 10px; background: #F5F5F5;
+                      border-left: 3px solid #546E7A; font-size: 11px; color: #555; }
+.section-body .hint-diag { border-left-color: #00897B; }
+
+.cards { border-collapse: collapse; }
+.cards td { vertical-align: top; padding: 0; }
+
+.card {
+  display: inline-block; width: 158px; height: 86px; margin: 3px; padding: 8px;
+  background: #FFF; border: 1px solid #E0E0E0;
+  vertical-align: top; text-align: center;
+}
+.card:hover { background: #F5F5F5; border: 1px solid #546E7A; cursor: hand; }
+.card-featured { border: 2px solid #00897B; background: #FFF; }
+.card-featured:hover { background: #F5F5F5; border-color: #00695C; }
+
+.badge      { display: inline-block; width: 32px; height: 32px; line-height: 32px;
+              background: #546E7A; color: #fff; font-weight: bold; font-size: 11px;
+              text-align: center; margin-bottom: 4px; }
+.badge-alt  { background: #00897B; }
+.badge-gray { background: #9E9E9E; }
+.badge-hot  { background: #EF6C00; }
+.card .title{ font-weight: bold; color: #333; font-size: 12px; }
+.card .desc { font-size: 10px; color: #757575; margin-top: 2px; }
+.tag-rec    { display: inline-block; background: #EF6C00; color: #fff; font-size: 9px;
+              padding: 1px 5px; font-weight: bold; margin-left: 3px; }
+
+.subsection { margin: 10px 0 6px 0; }
+.subsection-title { color: #37474F; font-size: 12px; font-weight: bold;
+                    margin-bottom: 4px; border-bottom: 1px solid #E0E0E0;
+                    padding-bottom: 2px; }
+
+.btn        { display: inline-block; padding: 5px 12px; background: #0277BD;
+              color: #fff; margin: 2px 4px 2px 0; font-size: 12px; font-weight: bold; }
+.btn:hover  { background: #01579B; text-decoration: none; }
+.btn-sec    { background: #FFF; color: #0277BD;
+              border: 1px solid #0277BD; }
+.btn-sec:hover { background: #F5F5F5; }
+
+.changelog  { background: #F5F5F5; border-left: 3px solid #546E7A;
+              padding: 7px 11px; margin: 4px 0; font-size: 11px; color: #333; }
+.changelog .vdate { color: #37474F; font-weight: bold; }
+
+.footer     { text-align: center; color: #9E9E9E; font-size: 10px; padding: 10px;
+              border-top: 1px solid #E0E0E0; margin-top: 20px; }
+</style>
 </head>
+<body>
 
-<body bgcolor="#C0C0C0" text="#000000" link="#0645AD" vlink="#0B0080" alink="#FF0000">
+<div class="header">
+  <table><tr>
+    <td class="logo-cell"><img src="tb_transparent.ico" height="48" border="0" alt="TurboBird"></td>
+    <td style="padding-left: 14px;">
+      <h1>TurboBird</h1>
+      <div class="sub">Firebird Admin Tool &middot; Version 1.2.1.1288 &middot; Build 2026-10-10</div>
+    </td>
+  </tr></table>
+</div>
 
-<h1>Welcome to TurboBird XT</h1>
-<p>Database management tool for RDBMS Firebird</p>
+<div class="content">
 
-<img src="tb_transparent.ico" width="300" alt="TurboBird XT Logo">
+<div class="intro">
+  <div class="intro-title">Welcome to TurboBird</div>
+  <div class="intro-text">
+    TurboBird is an administration tool for Firebird databases.
+    On first start, the tree on the left is empty &mdash; this is normal.
+    TurboBird can only work with databases once two things are registered.
+    The order matters:
+  </div>
+  <table class="workflow"><tr>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">1</div>
+      <div class="wf-label">Register a server</div><div class="wf-desc">Where is Firebird running?</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">2</div>
+      <div class="wf-label">Add a database</div><div class="wf-desc">New, existing, or backup</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">3</div>
+      <div class="wf-label">Get to work</div><div class="wf-desc">All tools available</div></td>
+  </tr></table>
+  <div class="intro-note">
+    <b>First start?</b> The tree on the left is empty &mdash; begin with
+    <a href="tb://registerserver">Register Server</a>. Only after a server has
+    been added can you create a new database on that server or register an
+    existing one.
+  </div>
+</div>
 
-<p>Community Edition</p>
+<!-- Step 1: Server -->
+<div class="section">
+  <div class="section-title"><span class="step-num">1</span>Register a server</div>
+  <div class="section-body">
+    <div class="hint">
+      A <b>server</b> is the Firebird instance &mdash; either local or remote.
+      Without at least one registered server, no database can be managed.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://registerserver"><div class="card"><div class="badge">SRV</div>
+        <div class="title">Register Server</div>
+        <div class="desc">Add a new server or edit an existing one</div></div></a></td>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Select FB Client</div>
+        <div class="desc">Change the client library</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
 
-<br><br>
+<!-- Step 2: Database -->
+<div class="section">
+  <div class="section-title"><span class="step-num">2</span>Create, register, or restore a database</div>
+  <div class="section-body">
+    <div class="hint">
+      A <b>database</b> is a <tt>.fdb</tt> file on a server.
+      <b>Requirement:</b> a registered server.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://createdb"><div class="card"><div class="badge">NEW</div>
+        <div class="title">Create Database</div>
+        <div class="desc">Create a new empty Firebird database</div></div></a></td>
+      <td><a href="tb://registerdb"><div class="card"><div class="badge">REG</div>
+        <div class="title">Register Database</div>
+        <div class="desc">Bind an existing <tt>.fdb</tt> file</div></div></a></td>
+      <td><a href="tb://restore"><div class="card"><div class="badge">RST</div>
+        <div class="title">Restore Database</div>
+        <div class="desc">Restore from a <tt>.fbk</tt> backup</div></div></a></td>
+      <td><a href="tb://backup"><div class="card"><div class="badge">BAK</div>
+        <div class="title">Backup Database</div>
+        <div class="desc">Create a backup file (select DB)</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
 
-<!-- Getting Started -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>Getting Started</b>
-<ul>
-<li><a href="quickstart.html">Quickstart</a></li>
-<li><a href="connect.html">Connection & Configuration</a></li>
-<li><a href="tips.html">Tips & Tricks</a></li>
-</ul>
-</td></tr>
-</table>
+<!-- Step 3: Working with data -->
+<div class="section">
+  <div class="section-title"><span class="step-num">3</span>Working with data</div>
+  <div class="section-body">
+    <div class="hint">
+      <b>Double-click</b> an object to open it directly,
+      <b>right-click</b> to show the context menu.
+    </div>
+    <div class="subsection"><div class="subsection-title">Data tools</div>
+    <table class="cards"><tr>
+      <td><a href="tb://dataeditor"><div class="card"><div class="badge">EDT</div>
+        <div class="title">Data Editor</div>
+        <div class="desc">View and edit tables and CSV files</div></div></a></td>
+      <td><a href="tb://dbreader"><div class="card"><div class="badge">RDR</div>
+        <div class="title">DBReader</div>
+        <div class="desc">Data recovery from damaged DBs</div></div></a></td>
+      <td><a href="tb://bulkclone"><div class="card"><div class="badge">CLN</div>
+        <div class="title">Clone Table</div>
+        <div class="desc">Copy tables (select a table)</div></div></a></td>
+      <td><a href="tb://scriptengine"><div class="card"><div class="badge">SCR</div>
+        <div class="title">Script Engine</div>
+        <div class="desc">Run SQL scripts (select a DB)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://scriptdb"><div class="card"><div class="badge">DDL</div>
+        <div class="title">Script Database</div>
+        <div class="desc">Full DDL script (select a DB)</div></div></a></td>
+      <td><a href="tb://tablemanage"><div class="card"><div class="badge">TBL</div>
+        <div class="title">Table Manager</div>
+        <div class="desc">Fields, indexes, constraints (select a table)</div></div></a></td>
+      <td><a href="tb://csvbulkexport"><div class="card"><div class="badge">CSV</div>
+        <div class="title">CSV Bulk Export</div>
+        <div class="desc">CSV Fast Export (select a table)</div></div></a></td>
+    </tr></table>
+    </div>
+    <div class="subsection"><div class="subsection-title">Studio</div>
+    <table class="cards"><tr>
+      <td><a href="tb://passtudio"><div class="card"><div class="badge">PS</div>
+        <div class="title">PascalScript Studio</div>
+        <div class="desc">Design forms at runtime</div></div></a></td>
+      <td><a href="tb://newform"><div class="card"><div class="badge">FRM</div>
+        <div class="title">New Form</div>
+        <div class="desc">Create a new <tt>.cfrm</tt> file (select a DB)</div></div></a></td>
+    </tr></table>
+    </div>
+  </div>
+</div>
 
-<br>
+<!-- Diagnostics & Monitoring -->
+<div class="section">
+  <div class="section-title section-title-diag">Diagnostics &amp; Monitoring</div>
+  <div class="section-body">
+    <div class="hint hint-diag">
+      <b>Requirement:</b> a selected database in the tree on the left.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://activitymonitor"><div class="card card-featured"><div class="badge badge-hot">ACT</div>
+        <div class="title">Activity Monitor<span class="tag-rec">Recommended</span></div>
+        <div class="desc">Attachments and statements live</div></div></a></td>
+      <td><a href="tb://sqlmonitor"><div class="card"><div class="badge badge-alt">MON</div>
+        <div class="title">SQL Monitor</div>
+        <div class="desc">Trace SQL statements live</div></div></a></td>
+      <td><a href="tb://integrity"><div class="card"><div class="badge badge-alt">CHK</div>
+        <div class="title">DB Integrity</div>
+        <div class="desc">Validate field character sets</div></div></a></td>
+      <td><a href="tb://sqlparser"><div class="card"><div class="badge badge-alt">PRS</div>
+        <div class="title">SQL Parser</div>
+        <div class="desc">Analyze SQL (no DB required)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://recalcstats"><div class="card"><div class="badge badge-alt">STA</div>
+        <div class="title">Recalc Statistics</div>
+        <div class="desc">SET STATISTICS INDEX</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
 
-<!-- User Interface -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>User Interface</b>
-<ul>
-<li><a href="ui_toolbar.html">Toolbar</a></li>
-<li><a href="ui_menu.html">Menu</a></li>
-<li><a href="ui_navigation.html">Navigation Tree</a></li>
-</ul>
-</td></tr>
-</table>
+<!-- Configuration -->
+<div class="section">
+  <div class="section-title">Configuration</div>
+  <div class="section-body">
+    <div class="hint">
+      Global settings, stored in the INI file.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Select FB Client</div>
+        <div class="desc">Change the client library</div></div></a></td>
+      <td><a href="tb://theme"><div class="card"><div class="badge badge-gray">THM</div>
+        <div class="title">Theme</div>
+        <div class="desc">Change the color scheme</div></div></a></td>
+      <td><a href="tb://editorfont"><div class="card"><div class="badge badge-gray">FNT</div>
+        <div class="title">Editor Font</div>
+        <div class="desc">SQL editor font</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
 
-<br>
+<!-- What's new -->
+<div class="section">
+  <div class="section-title">What's New</div>
+  <div class="section-body">
+    <div class="changelog"><div class="vdate">Version 1.2.1.1288 &mdash; 2026-10-10</div>
+      FastCSVImport/Export &middot; Server aliases &middot; CloneTable with Firebird
+      row-by-row and batch API &middot; CSV Bulk Export with preset editor.</div>
+    <div class="changelog"><div class="vdate">Version 1.2.1.1286 &mdash; 2026-09-05</div>
+      IBX4Lazarus 2.7.12 &middot; DBReader "table from data" &middot;
+      PascalScript Studio re-enabled.</div>
+    <div class="changelog"><div class="vdate">Version 1.2.1.1280 &mdash; 2026-07-26</div>
+      CloneTable &middot; Data Editor massively extended &middot; Create Table from
+      DataSet &middot; Bulk Export &middot; Session password cache.</div>
+  </div>
+</div>
 
-<!-- Servers & Databases -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>Servers & Databases</b>
-<ul>
-<li><a href="server.html">Server Nodes</a></li>
-<li><a href="database.html">Database Nodes</a></li>
-</ul>
-</td></tr>
-</table>
+<!-- Help & Info -->
+<div class="section">
+  <div class="section-title">Help &amp; Info</div>
+  <div class="section-body">
+    <a href="tb://checkupdate" class="btn">Check for Updates</a>
+    <a href="tb://about" class="btn btn-sec">About TurboBird</a>
+    <a href="tb://exit" class="btn btn-sec">Exit</a>
+    <div style="margin-top: 10px; font-size: 11px; color: #757575;">
+      <b>Tip:</b> Select an object in the tree and press <b>Shift+F10</b>
+      to open the context menu.
+    </div>
+  </div>
+</div>
 
-<br>
+</div>
 
-<!-- Database Objects -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>Database Objects</b>
-<ul>
-<li><a href="tables.html">Tables</a></li>
-<li><a href="views.html">Views</a></li>
-<li><a href="stored_procedures.html">Stored Procedures</a></li>
-<li><a href="triggers.html">Triggers</a></li>
-<li><a href="generators.html">Generators / Sequences</a></li>
-<li><a href="udf.html">User-Defined Functions (UDF)</a></li>
-<li><a href="system_tables.html">System Tables</a></li>
-<li><a href="domains.html">Domains</a></li>
-<li><a href="roles.html">Roles</a></li>
-<li><a href="exceptions.html">Exceptions</a></li>
-<li><a href="users.html">Users</a></li>
-<li><a href="indexes.html">Indexes</a></li>
-<li><a href="constraints.html">Constraints</a></li>
-<li><a href="functions.html">Firebird Functions</a></li>
-<li><a href="procedures.html">Firebird Procedures</a></li>
-<li><a href="udr_functions.html">UDR Functions</a></li>
-<li><a href="udr_procedures.html">UDR Procedures</a></li>
-<li><a href="packages.html">Packages</a></li>
-<li><a href="package_functions.html">Package Functions</a></li>
-<li><a href="package_procedures.html">Package Procedures</a></li>
-<li><a href="package_udf_functions.html">Package UDF Functions</a></li>
-<li><a href="package_udr_functions.html">Package UDR Functions</a></li>
-<li><a href="package_udr_procedures.html">Package UDR Procedures</a></li>
-</ul>
-</td></tr>
-</table>
-
-<br>
-
-<!-- Queries & Tools -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>Queries & Tools</b>
-<ul>
-<li><a href="queries.html">SQL Queries</a></li>
-<li><a href="tools.html">Tools & Utilities</a></li>
-<li><a href="backup.html">Backup & Restore</a></li>
-<li><a href="monitoring.html">Monitoring</a></li>
-</ul>
-</td></tr>
-</table>
-
-<br>
-
-<!-- External Resources -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>External Resources</b>
-<ul>
-<li><a href="https://firebirdsql.org/" target="_blank">Official Firebird Documentation</a></li>
-<li><a href="https://github.com/" target="_blank">TurboBird GitHub</a></li>
-<li><a href="community.html">Community & FAQ</a></li>
-</ul>
-</td></tr>
-</table>
-
-<br>
-
-<!-- Firebird Help -->
-<table width="100%" border="1" cellspacing="0" cellpadding="8" bgcolor="#E0E0E0" bordercolor="#A0A0A0">
-<tr><td>
-<b>Firebird Help</b>
-<ul>
-<li><a href="firebird-feature-matrix.html">Firebird Feature Matrix</a></li>
-<li><a href="https://firebirdsql.org/manual/" target="_blank">Firebird SQL Language Reference</a></li>
-<li><a href="https://ibphoenix.com/" target="_blank">IBPhoenix Knowledge Base</a></li>
-</ul>
-</td></tr>
-</table>
-
-<br><br>
-
-<font size="2" color="#555555">
-TurboBird — Community project for Firebird administrators.
-</font>
+<div class="footer">
+  TurboBird &middot; Firebird Admin Tool &middot; &copy; 2026<br>
+  First steps: Register a server &rarr; Add a database &rarr; Get to work
+</div>
 
 </body>
 </html>

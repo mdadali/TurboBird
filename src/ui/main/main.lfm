@@ -1,7 +1,7 @@
 inherited fmMain: TfmMain
-  Left = 777
+  Left = 701
   Height = 668
-  Top = 313
+  Top = 399
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 638

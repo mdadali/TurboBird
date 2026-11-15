@@ -1,121 +1,185 @@
-What's New for TurboBird
+What's New in TurboBird
 ! : changed
 + : added
 * : fixed
 - : removed
 
 
+TurboBird v1.2.1.1290
+
+Build Date & Time:
+
+
++ Cross-RDBMS Data Transfer
+  Completely new, standalone module for data transfer between different database systems
+  with server-side data transformation (formulas).
+
+  Supported databases:
+    Firebird, SQLite, MySQL/MariaDB, PostgreSQL, MSSQL, Oracle, Sybase, ODBC.
+
+  Tested transfer routes:
+    Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL, ODBC.SQLite, ODBC.PostgreSQL, ODBC.MySQL8.
+
+
++ Alias support for server names
+  A server can be registered multiple times with different aliases within a single TurboBird instance.
+
+
+! Support for all ODS versions within a single TurboBird instance
+! Support for all Firebird versions within a single TurboBird instance
+
+
++ DataEditor: Fast CSV Bulk Import/Export between DataSets and CSV files
+  - Automatic detection of Delimiter, QuoteChar, DecimalSeparator, and LineEnding.
+  - Benchmark test: A 59.4 GB file was read in 14 minutes using the Fullscan option (initial scan
+    for the longest line across the entire file). (The same file caused the machine to crash
+    when using a well-known CSV library.)
+  - Firebird tables can be created directly from imported files, and the data transferred into them.
+
+  Test system:
+    Operating System: Debian GNU/Linux 13
+    KDE Plasma Version: 6.3.6
+    KDE Frameworks Version: 6.13.0
+    Qt Version: 6.8.2
+    Kernel Version: 6.12.113+deb13-amd64 (64-bit)
+    Graphics Platform: X11
+    Processors: 4 × Intel® Core™ i5-4210H CPU @ 2.90GHz
+    Memory: 16 GiB RAM (15.5 GiB usable)
+    Swap: 30 GB
+    Graphics Processor 1: Intel® HD Graphics 4600
+    Graphics Processor 2: llvmpipe
+    Manufacturer: Micro-Star International Co., Ltd.
+    Product Name: GP70 2PE
+    System Version: REV:1.0
+
+
+! Simple IntelliSense for QueryWindow has been improved:
+  - Pressing Ctrl + Space (Ctrl + Blank) displays tables and fields.
+  - Typing "Table/AliasName." displays the corresponding fields.
+  - Supports case-sensitive identifiers (primarily implemented for this purpose).
+
+
++ Transaction configuration integrated directly into the database registration form.
+
+
+* Fixed several critical bugs.
+
+
+---------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1288
 
-Build date & time: 10.10.2026, 15:00
+Build Date & Time: 10.10.2026, 15:00
 
 + CloneTable: Two new copy methods
   - Firebird API Row-by-Row:
-    Copies all data types reliably — including
-    arrays (n dimensions, recursive) and BLOBs
+    Reliably copies all data types — including
+    Arrays (n dimensions, recursive) and BLOBs
     (both TEXT and BINARY).
   - Firebird Batch API:
     High-performance batch processing for purely scalar fields.
     (Arrays and BLOBs are not supported.)
-    Available from Firebird 4.0.
-  - The method is selected automatically based on
-    field types and server version. For BLOBs, arrays or
-    Firebird < 4.0, it automatically switches to Row-by-Row.
+    Available starting from Firebird 4.0.
+  - The method is selected automatically depending on
+    field types and server version. For BLOBs, Arrays, or
+    Firebird < 4.0, it automatically falls back to Row-by-Row.
   - New option: Row-by-Row can be forced manually.
-  - Problem field detection: Depending on the selected
-    copy method, unsupported field types (BLOBs, arrays, etc.)
-    are automatically detected and marked in the field selection.
-    The user can specifically deselect these fields before
-    the copy process is started.
+  - Problem field detection: Depending on the selected copy method,
+    unsupported field types (BLOBs, Arrays, etc.)
+    are automatically detected and highlighted in the field selection.
+    The user can selectively deselect these fields before
+    starting the copy process.
 
 + CSV Bulk Export (New)
   - Exports Firebird tables as CSV files
   - Server-side formatting for maximum speed
-  - Batch processing with configurable size
+  - Batch processing with configurable batch size
   - Buffered stream for optimal write speed
-  - Progress display with timing and statistics
+  - Progress indicator with timing and statistics
   - Preset-based configuration with 9 included
     preset files:
     CSV Quoted, CSV Unquoted (numeric only), CSV German,
     CSV Header Quoted, CSV Data Quoted, TSV Quoted,
     Pipe Quoted, Fixed Format, JSON Export
   - Configurable per preset:
-    - Separator, decimal point, quote character
-    - Line ending (CRLF, LF, CR or System)
-    - Header on/off, header quoted or raw
+    - Separator, decimal separator, quote character
+    - Line ending (CRLF, LF, CR, or System)
+    - Toggle header on/off, header quoted or raw
     - Data quoted or raw
-    - Problem fields selectively skipped (arrays, BLOBs)
-    - Boolean representation configurable (TRUE/FALSE)
-    - Formulas per data type (e.g. BLOB truncation via SUBSTRING)
-  - Preset Editor: The current preset can be edited directly
-    from within the exporter and saved.
-    After saving, the presets are automatically reloaded
+    - Selectively skip problem fields (Arrays, BLOBs)
+    - Configurable Boolean representation (TRUE/FALSE)
+    - Formulas per data type (e.g., BLOB truncation via SUBSTRING)
+  - Preset Editor: The current preset can be edited and saved
+    directly from within the exporter.
+    After saving, presets are automatically reloaded
     and the preview is updated.
   - Preset Validator warns about critical configurations:
-    - ERROR if single quote is used as QuoteChar (SQL conflict)
-    - ERROR if Separator = QuoteChar
-    - ERROR if Separator = DecimalPoint
-    - WARNING for unquoted + free text (data loss risk)
-    - WARNING if Separator appears in formulas
-    - WARNING for unbalanced quotes in formulas
-    - WARNING for formulas without $1 placeholder
-  - Export report contains:
+    - ERROR when using single quote as QuoteChar (SQL conflict)
+    - ERROR when Separator = QuoteChar
+    - ERROR when Separator = DecimalPoint
+    - WARNING when unquoted + free text (risk of data loss)
+    - WARNING when Separator is used in formulas
+    - WARNING when quotes in formulas are unbalanced
+    - WARNING when formulas lack the $1 placeholder
+  - Export Report includes:
     - Preset name and description in the Options section
     - Full preset file content with
-      BEGIN/END markers and file name as reference
+      BEGIN/END markers and filename for reference
     - Client library version, server version
-    - Environment info (OS, CPU, RAM, disk)
+    - Environment info (OS, CPU, RAM, Disk)
 
-! Dialog "Bulk Export" replaced by "CSV Bulk Export"
+! Replaced "Bulk Export" form with "CSV Bulk Export"
 
-! Case-sensitive identifiers are handled correctly
-  throughout (mixedCase, CAMEL):
+! Case-sensitive identifiers are consistently handled
+  correctly (mixedCase, CAMEL):
   - MakeCaseSensitiveAuto() instead of unconditional quoting
-  - Affects CSV Bulk Export, CloneTable and DataEditor
-  - Formulas with $1 placeholder quote field names correctly
-  - Table names are quoted only when necessary
+  - Applies to CSV Bulk Export, CloneTable, and DataEditor
+  - Formulas using the $1 placeholder quote field names properly
+  - Table names are only quoted when necessary
 
-! DataEditor: Extensively revised for CSV roundtrip
+! DataEditor: Comprehensively overhauled for CSV roundtrip
   - Auto-detection when opening CSV files:
-    - Line ending (CRLF/LF/CR) by majority rule
-    - Delimiter (comma, semicolon, tab, pipe)
-    - Quote character (double quote, single quote, none)
-  - Auto-detect can be enabled individually per field via
+    - Line ending (CRLF/LF/CR) via majority rule
+    - Delimiter (Comma, Semicolon, Tab, Pipe)
+    - Quote character (Double quote, Single quote, none)
+  - Auto-detect individually toggleable per field via
     checkboxes in the CSV tab (LineEnding, Delimiter, QuoteChar).
-    Only enabled fields are detected when opening.
-    Settings are stored persistently in the INI.
-  - Dialog "CSV Auto-Detection" with three actions:
+    Only enabled fields are detected upon opening.
+    Settings are persistently saved in the INI file.
+  - "CSV Auto-Detection" dialog with three actions:
     - Use Detected — apply detected values
-      (only for fields with auto-detect checkbox enabled)
-    - Keep Current — keep current settings
+      (only for fields with enabled auto-detect checkbox)
+    - Keep Current — retain current settings
     - Cancel — do not load the file
-  - Disabled fields are marked as "(auto-off)" in the dialog.
-  - New ComboBoxes for LineEnding, Delimiter and QuoteChar:
+  - Disabled fields are marked as "(auto-off)"
+    in the dialog.
+  - New ComboBoxes for LineEnding, Delimiter, and QuoteChar:
     - LineEnding: CRLF, LF, CR, System
-    - Delimiter: comma, semicolon, tab, pipe, space
+    - Delimiter: Comma, Semicolon, Tab, Pipe, Space
     - QuoteChar: ", ', (none), Custom...
     - "Custom..." opens an input dialog for
       arbitrary quote characters
-    - Cancel in the custom dialog restores the previous value
-  - LOAD report reads values directly from the dataset instead
-    of from the form — always shows the actual
-    state including line ending symbol and (none) for QuoteChar.
+    - Cancel in the Custom dialog restores the previous value
+  - LOAD report reads values directly from the dataset instead of
+    the form — always showing the actual
+    state including LineEnding symbol and (none) for QuoteChar.
 
 ! Report fixes:
   - LOAD report shows CSV options from the dataset
-  - EXPORT report shows preset name + description
-  - Preset definition as full INI content with
+  - EXPORT report shows Preset Name + Description
+  - Preset definition included as full INI content with
     BEGIN/END markers
   - CANCELLED message is appended to OptionsExtra
     instead of overwriting it
 
 ! INI configuration:
-  - New section [CSVExport] for the CSV Bulk Exporter
+  - New [CSVExport] section for the CSV Bulk Exporter
   - New keys in [CSVEditor]:
     CSVLineEnding, AutoDetectLineEnding, AutoDetectDelimiter,
     AutoDetectQuoteChar
 
-* Multiple bugs fixed.
+* Fixed several bugs.
+
+
 
 
 

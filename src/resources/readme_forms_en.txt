@@ -2,14 +2,8 @@ PascalScript Forms – Storage Convention
 
 TurboBird stores custom forms in the following directory:
 
-text
-[TurboBird]/data/PSStudio/Forms/<Server>/<DBAlias>/<FormName>/
-Example:
-
-text
-/opt/TurboBird/data/PSStudio/Forms/MyServer/EmployeeDB/CustomerEditor/CustomerEditor.cfrm
-/opt/TurboBird/data/PSStudio/Forms/MyServer/EmployeeDB/CustomerEditor/CustomerEditor.rops
-Important Rules:
+text/Examples:
+[TurboBird]/data/PSStudio/Forms/<ServerAlias>/<DBAlias>/<FormName>/
 
 Each form resides in its own subdirectory, whose name matches the form name.
 

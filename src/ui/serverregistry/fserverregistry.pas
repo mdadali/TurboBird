@@ -34,8 +34,8 @@ type
     bbReg: TBitBtn;
     bbTestConnection: TBitBtn;
     btnfirebirdconffile: TButton;
-    btnAddServer: TButton;
-    btnDeleteServer: TButton;
+    btnRegisterServer: TButton;
+    btnUnRegisterServer: TButton;
     btnOpenRootPath: TButton;
     cbServerAlias: TComboBox;
     cboxLoadRegisteredClientLib: TCheckBox;
@@ -59,7 +59,6 @@ type
     chkSavePassword: TCheckBox;
     GroupBox1: TGroupBox;
     IBXServerProperties1: TIBXServerProperties;
-    Image1: TImage;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -87,8 +86,8 @@ type
     procedure bbCancelClick(Sender: TObject);
     procedure bbRegClick(Sender: TObject);
     procedure bbTestConnectionClick(Sender: TObject);
-    procedure btnAddServerClick(Sender: TObject);
-    procedure btnDeleteServerClick(Sender: TObject);
+    procedure btnRegisterServerClick(Sender: TObject);
+    procedure btnUnRegisterServerClick(Sender: TObject);
     procedure btnfirebirdconffileClick(Sender: TObject);
     procedure btnOpenRootPathClick(Sender: TObject);
     procedure cbCharsetChange(Sender: TObject);
@@ -117,12 +116,12 @@ type
     procedure PopulateCharsets;
     procedure PopulateProtocols;
 
-    procedure DeleteServer(const AServerName: string);
+    procedure UnregisterServer(const AAlias: string);
     procedure FillFormFromServerRecord(const Rec: TServerRecord);
     function  GetserverRecordFromForm: TServerRecord;
     procedure FillServerRecordFromForm(var Rec: TServerRecord);
 
-    procedure CreateServerSession(var AServerSession: TServerSession; AServerName: string);
+    procedure CreateServerSession(var AServerSession: TServerSession; AAlias: string);
 
     procedure FillServerCombobox;
 
@@ -262,6 +261,15 @@ begin
   PopulateCharsets;
 end;
 
+{ ============================================================
+  Init: Initialisiert die Maske für einen Server-Knoten.
+
+  NEU:
+    - FIsNewServer wird über Node.Visible bestimmt (neue
+      Server sind unsichtbar, bestehende sichtbar).
+    - Wenn FServerSession = nil (Fallback für alte Knoten ohne
+      Session), wird sie erstellt UND in Node.Data gespeichert.
+  ============================================================ }
 procedure TfmServerRegistry.init(ANode: TTreeNode);
 var
   Rec: TServerRecord;
@@ -269,24 +277,26 @@ var
   DisplayAlias: string;
 begin
   if not Assigned(ANode.Data) then
-    exit;
+    Exit;
 
   FServerSession := TPNodeInfos(ANode.Data)^.ServerSession;
 
   if FServerSession = nil then
   begin
+    // Fallback: Session erstellen und im Knoten speichern
     CreateServerSession(FServerSession, Trim(ANode.Text));
-    FIsNewServer := true;
+    TPNodeInfos(ANode.Data)^.ServerSession := FServerSession;
+    FIsNewServer := True;
     cbServerAlias.ItemIndex := -1;
   end
   else
-    FIsNewServer := false;
+  begin
+    // NEU: Neue Server sind unsichtbar, bestehende sichtbar
+    FIsNewServer := not ANode.Visible;
+  end;
 
-  // FSelectedServer IMMER setzen (echter Servername)
   FSelectedServer := FServerSession.ServerName;
 
-  // NEU: ComboBox-Index über den ALIAS setzen, nicht über den
-  // echten Servernamen — die ComboBox enthält Aliase.
   if not FIsNewServer then
   begin
     if Trim(FServerSession.ServerAlias) <> '' then
@@ -460,23 +470,30 @@ begin
     edtRootPath.Text := SelectDirectoryDialog1.FileName;
 end;
 
-procedure TfmServerRegistry.DeleteServer(const AServerName: string);
+{ ============================================================
+  UnregisterServer: Entfernt eine Server-REGISTRIERUNG aus
+  servers.reg.
+
+  Der physische Firebird-Server wird NICHT heruntergefahren
+  oder gelöscht — nur der TurboBird-Eintrag. Andere
+  Registrierungen mit demselben ServerName (z.B. 'localhost')
+  bleiben unberührt.
+
+  Umbenannt von DeleteServer → UnregisterServer:
+    - Konsistent zu lmUnregisterDatabaseClick (Unregister Database)
+    - Semantisch korrekt: Registrierung aufheben ≠ Server löschen
+    - Klar für den User
+  ============================================================ }
+procedure TfmServerRegistry.UnregisterServer(const AAlias: string);
 var
   FS: TFileStream;
   tmpList: TMemoryStream;
   Rec: TServerRecord;
   OutList: TMemoryStream;
+  DeleteAlias, RecAlias: string;
 begin
-  if Trim(AServerName) = '' then
-    Exit;
-
-  if MessageDlg(
-       'Do you really want to delete the server "' + AServerName + '"?' + sLineBreak +
-       'This action cannot be undone.',
-       mtConfirmation,
-       [mbYes, mbNo],
-       0
-     ) <> mrYes then
+  DeleteAlias := Trim(AAlias);
+  if DeleteAlias = '' then
     Exit;
 
   if not FileExists(GetConfigurationDirectory + ServersRegFile) then
@@ -493,12 +510,14 @@ begin
       FillChar(Rec, SizeOf(Rec), 0);
       tmpList.ReadBuffer(Rec, SizeOf(Rec));
 
-      // Nur Records behalten, die nicht den gewünschten ServerName haben
-      if not SameText(Trim(Rec.ServerName), Trim(AServerName)) then
+      RecAlias := Trim(Rec.ServerAlias);
+
+      // Nur den Record mit diesem Alias NICHT in die Ausgabedatei
+      // schreiben → er wird entfernt. Alle anderen bleiben.
+      if not SameText(RecAlias, DeleteAlias) then
         OutList.WriteBuffer(Rec, SizeOf(Rec));
     end;
 
-    // Datei neu schreiben
     FS := TFileStream.Create(GetConfigurationDirectory + ServersRegFile, fmCreate);
     try
       if OutList.Size > 0 then
@@ -515,64 +534,90 @@ begin
   end;
 end;
 
-procedure TfmServerRegistry.btnAddServerClick(Sender: TObject);
+{ ============================================================
+  btnAddServerClick: Legt einen neuen Server an.
+
+  NEU:
+    - InputQuery = ALIAS (nicht ServerName).
+    - Eindeutigkeitsprüfung über GetServerAliasListFromTreeView
+      (Aliase), nicht GetServerListFromTreeView (ServerNames).
+    - Session wird mit ServerName='127.0.0.1' (Default) und
+      ServerAlias=NewAlias direkt erstellt.
+    - Node.Data.ServerSession wird sofort gesetzt.
+    - FIsNewServer = true bleibt bis bbRegClick.
+  ============================================================ }
+procedure TfmServerRegistry.btnRegisterServerClick(Sender: TObject);
 var
-  NewServer: string;
+  NewAlias: string;
   i: Integer;
   Node: TTreeNode;
-  ServerList: TStringList;
+  AliasList: TStringList;
   AlreadyExists: Boolean;
 begin
-  if not InputQuery('Add New Server', 'Enter the server alias:', NewServer) then
+  if not InputQuery('Add New Server', 'Enter the server alias:', NewAlias) then
     Exit;
 
-  NewServer := Trim(NewServer);
-  if NewServer = '' then
+  NewAlias := Trim(NewAlias);
+  if NewAlias = '' then
   begin
-    MessageDlg('Server name cannot be empty.', mtError, [mbOK], 0);
+    MessageDlg('Server alias cannot be empty.', mtError, [mbOK], 0);
     Exit;
   end;
 
-  // Prüfen ob schon vorhanden — über die ECHTEN Servernamen
+  // Eindeutigkeit über ALIAS prüfen
   AlreadyExists := False;
-  ServerList := GetServerListFromTreeView;
-  if Assigned(ServerList) then
+  AliasList := GetServerAliasListFromTreeView;
+  if Assigned(AliasList) then
   begin
     try
-      for i := 0 to ServerList.Count - 1 do
+      for i := 0 to AliasList.Count - 1 do
       begin
-        if SameText(ServerList[i], NewServer) then
+        if SameText(AliasList[i], NewAlias) then
         begin
           AlreadyExists := True;
           Break;
         end;
       end;
     finally
-      ServerList.Free;
+      AliasList.Free;
     end;
   end;
 
   if AlreadyExists then
   begin
-    MessageDlg('This server already exists in the list.', mtInformation, [mbOK], 0);
+    MessageDlg('This server alias already exists in the list.',
+               mtInformation, [mbOK], 0);
     Exit;
   end;
 
   // Neuen Server-Knoten anlegen
-  Node := turbocommon.MainTreeView.Items.Add(nil, NewServer);
+  Node := turbocommon.MainTreeView.Items.Add(nil, NewAlias);
   TPNodeInfos(Node.Data)^.ObjectType := tvotServer;
   Node.Visible := false;
 
-  // WICHTIG: Den neuen Knoten merken. Er wird erst in bbRegClick
-  // sichtbar gemacht und auf den Alias umbenannt. Ohne diese
-  // Referenz würde GetServerNodeByServerName bei zwei Servern
-  // mit demselben echten Servernamen den FALSCHEN Knoten finden
-  // und umbenennen.
   FNewServerNode := Node;
+
+  // Session direkt erstellen (mit Default-ServerName)
+  FServerSession := TServerSession.Create(
+      '127.0.0.1',   // ServerName (Default)
+      NewAlias,      // ServerAlias
+      'SYSDBA',
+      '',
+      '',
+      TCP,
+      '3050',
+      'UTF8',
+      '/opt/firebird',
+      '/opt/firebird/lib/libfbclient.so',
+      '/opt/firebird/firebird.conf',
+      0, 0, false, false, 2000, 3, 0
+    );
+  TPNodeInfos(Node.Data)^.ServerSession := FServerSession;
+  FIsNewServer := true;
 
   bbTestConnection.Enabled := true;
 
-  MessageDlg('New server "' + NewServer + '" has been added.' + sLineBreak +
+  MessageDlg('New server alias "' + NewAlias + '" has been added.' + sLineBreak +
              'Please complete the details and save.', mtInformation, [mbOK], 0);
 
   ResetForm;
@@ -583,7 +628,7 @@ begin
   if cbServerAlias.Items.Count > 0 then
     cbServerAlias.ItemIndex := cbServerAlias.Items.Count - 1;
 
-  btnAddServer.Enabled := false;
+  btnRegisterServer.Enabled := false;
 end;
 
 procedure TfmServerRegistry.bbTestConnectionClick(Sender: TObject);
@@ -874,7 +919,7 @@ begin
       cbServerAlias.ItemIndex := 0;
   end;
 
-  btnAddServer.Enabled := true;
+  btnRegisterServer.Enabled := true;
 
   if MigratedCount > 0 then
     MessageDlg(IntToStr(MigratedCount) + ' database registration(s) were updated to the new server alias.',
@@ -908,88 +953,115 @@ begin
     FIsNewServer := false;
   end;
 
-  btnAddServer.Enabled := true;
+  btnRegisterServer.Enabled := true;
 end;
 
-procedure TfmServerRegistry.btnDeleteServerClick(Sender: TObject);
-var
-  ServerName: string;
-  ServerRec: TServerRecord;
-  idx: Integer;
-  Node: TTreeNode;
-begin
-  if cbServerAlias.ItemIndex < 0 then
+  { ============================================================
+    btnDeleteServerClick: Entfernt die ausgewählte Server-Registrierung
+    samt ihrer DB-Registrierungen.
+
+    Der physische Firebird-Server wird NICHT heruntergefahren oder
+    gelöscht — nur der TurboBird-Eintrag.
+
+    Alias-basiert:
+      - Kein ServerName-Fallback (Version ist nicht abwärtskompatibel,
+        ein leerer Alias wäre ein korrupter Record → Fehler + Abbruch).
+      - GetServerNodeByAlias (nicht ByServerName).
+      - UnregisterServer (nicht DeleteServer).
+    ============================================================ }
+  procedure TfmServerRegistry.btnUnRegisterServerClick(Sender: TObject);
+  var
+    DisplayAlias: string;
+    ServerRec: TServerRecord;
+    Node: TTreeNode;
   begin
-    MessageDlg('Please select a server to delete.', mtWarning, [mbOK], 0);
-    Exit;
-  end;
+    if cbServerAlias.ItemIndex < 0 then
+    begin
+      MessageDlg('Please select a server registration to remove.',
+                 mtWarning, [mbOK], 0);
+      Exit;
+    end;
 
-  // ComboBox zeigt den Alias — echten Servernamen holen
-  ServerRec := GetServerRecordFromFileByAlias(cbServerAlias.Text);
-  ServerName := Trim(ServerRec.ServerName);
+    // Server-Record über ALIAS holen (eindeutig)
+    ServerRec := GetServerRecordFromFileByAlias(cbServerAlias.Text);
 
-  if ServerName = '' then
-  begin
-    MessageDlg('Selected server record not found.', mtError, [mbOK], 0);
-    Exit;
-  end;
+    if Trim(ServerRec.ServerName) = '' then
+    begin
+      MessageDlg('Selected server registration not found.', mtError, [mbOK], 0);
+      Exit;
+    end;
 
-  //bbReg.Enabled := False;
-  Node := GetServerNodeByServerName(ServerName);
+    DisplayAlias := Trim(ServerRec.ServerAlias);
 
-  // Prüfen, ob Server in TreeView noch Childnodes hat
-  if Assigned(Node) then
-  begin
-    if Node.HasChildren then
+    // Kein Fallback auf ServerName — Version ist nicht abwärtskompatibel
+    if DisplayAlias = '' then
+    begin
+      MessageDlg('Server registration has no alias (corrupt record).' + sLineBreak +
+                 'Cannot remove it safely.',
+                 mtError, [mbOK], 0);
+      Exit;
+    end;
+
+    // Knoten über ALIAS finden
+    Node := GetServerNodeByAlias(DisplayAlias);
+
+    // Prüfen, ob DB-Registrierungen existieren
+    if Assigned(Node) and Node.HasChildren then
     begin
       if MessageDlg(
-           'The server "' + ServerName + '" still has registered databases.' + sLineBreak +
-           'Do you still want to delete it?',
+           'The server registration "' + DisplayAlias + '" still has registered databases.' +
+           sLineBreak + sLineBreak +
+           'Do you really want to remove this server registration ' +
+           'AND all its database registrations?' + sLineBreak +
+           sLineBreak +
+           'Note: The actual Firebird server is NOT affected — only the ' +
+           'registration in TurboBird.' + sLineBreak +
+           sLineBreak +
+           'This action cannot be undone.',
            mtWarning, [mbYes, mbNo], 0
          ) <> mrYes then
         Exit;
 
-      // Alle DB-ChildNodes still als gelöscht markieren
-      MarkAllServerDatabasesDeleted(Node.Text);
+      // DB-Registrierungen dieses Alias als gelöscht markieren
+      MarkAllServerDatabasesDeleted(DisplayAlias);
     end;
-  end;
 
-  // Sicherstellen, dass Datei konsistent bleibt
-  RemoveDeletedDBRegistrationsFromFile;
+    // Als gelöscht markierte DB-Records physisch entfernen
+    RemoveDeletedDBRegistrationsFromFile;
 
-  // Server wirklich löschen
-  DeleteServer(ServerName);
+    // Server-Registrierung entfernen
+    UnregisterServer(DisplayAlias);
 
-  // Server auch aus TreeView entfernen
-  turbocommon.MainTreeView.Selected := nil;
-  if Assigned(Node) then
-    turbocommon.MainTreeView.Items.Delete(Node);
+    // Aus TreeView entfernen
+    turbocommon.MainTreeView.Selected := nil;
+    if Assigned(Node) then
+      turbocommon.MainTreeView.Items.Delete(Node);
 
-  if Assigned(FServerSession) then
-  begin
-    if FServerSession.Connected then
+    // Session trennen
+    if Assigned(FServerSession) then
     begin
-      FServerSession.Disconnect;
-      Application.ProcessMessages;
+      if FServerSession.Connected then
+      begin
+        FServerSession.Disconnect;
+        Application.ProcessMessages;
+      end;
     end;
+
+    // ComboBox neu befüllen
+    FillServerCombobox;
+
+    if cbServerAlias.Items.Count > 0 then
+    begin
+      cbServerAlias.ItemIndex := 0;
+      cbServerAliasChange(nil);
+    end
+    else
+      ResetForm;
+
+    UpdateControlsForProtocol;
+    MessageDlg('Server registration "' + DisplayAlias + '" has been removed.',
+               mtInformation, [mbOK], 0);
   end;
-
-  // ComboBox neu befüllen (enthält künftig Aliase)
-  FillServerCombobox;
-
-  if cbServerAlias.Items.Count > 0 then
-  begin
-    cbServerAlias.ItemIndex := 0;
-    cbServerAliasChange(nil);
-  end else
-  begin
-    ResetForm;
-    //bbReg.Enabled := False;
-  end;
-
-  UpdateControlsForProtocol;
-  MessageDlg('Server "' + ServerName + '" has been deleted.', mtInformation, [mbOK], 0);
-end;
 
 procedure TfmServerRegistry.PopulateCharsets;
 var
@@ -1072,35 +1144,37 @@ begin
   Rec.QueryTimeoutMS   := StrToInt(edtQueryTimeout.Text);
 end;
 
-procedure TfmServerRegistry.CreateServerSession(var AServerSession: TServerSession; AServerName: string);
+{ ============================================================
+  CreateServerSession: Erstellt eine neue Session für einen
+  NEUEN Server.
+
+  NEU:
+    - AAlias ist der Alias (aus InputQuery).
+    - ServerName ist ein Default ('127.0.0.1'), den der User
+      in der Maske ändern kann.
+    - Der Alias wird in der Session gesetzt (nicht leer).
+  ============================================================ }
+procedure TfmServerRegistry.CreateServerSession(var AServerSession: TServerSession; AAlias: string);
 begin
-  // Default-Alias LEER lassen. Der Anzeige-Name fällt dann
-  // automatisch auf den echten Servernamen zurück (siehe
-  // GetServerAliasFromNode / GetServerAliasListFromTreeView).
-  //
-  // Würde hier "Alias for " + AServerName stehen, bekämen zwei
-  // Server mit demselben echten Servernamen denselben Default-
-  // Alias — und IsServerAliasUnique würde den zweiten Server
-  // blockieren, bis der Anwender manuell einen Alias eintippt.
   AServerSession := TServerSession.Create(
-      AServerName,
-      '',        //ServerAlias — leer, Anwender kann ihn im Dialog setzen
-      'SYSDBA',  //UserName
-      '',        //Password
-      '',        //Role
+      '127.0.0.1',   // ServerName (Default — User ändert ggf. in Maske)
+      AAlias,        // ServerAlias (aus InputQuery)
+      'SYSDBA',      // UserName
+      '',            // Password
+      '',            // Role
       TProtocol(cbProtocol.ItemIndex),
-      '3050',    //port
+      '3050',        // Port
       'UTF8',
       '/opt/firebird',
       '/opt/firebird/lib/libfbclient.so',
       '/opt/firebird/firebird.conf',
-      0,         //minor
-      0,         //major
-      false,
-      false,
-      2000,      //Connection Timeout in ms.
-      3,         //RetryCount
-      0          //Query Timeout in ms.
+      0,             // VersionMinor
+      0,             // VersionMajor
+      false,         // LoadRegisteredClientLib
+      false,         // IsEmbedded
+      2000,          // ConnectTimeoutMS
+      3,             // RetryCount
+      0              // QueryTimeoutMS
     );
 end;
 

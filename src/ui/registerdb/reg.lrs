@@ -1,7 +1,7 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmReg','FORMDATA',[
-  'TPF0'#241#6'TfmReg'#5'fmReg'#4'Left'#3#212#1#6'Height'#3#29#2#3'Top'#3#14#1#5
+  'TPF0'#241#6'TfmReg'#5'fmReg'#4'Left'#3#245#4#6'Height'#3#29#2#3'Top'#3#13#1#5
   +'Width'#3#7#4#11'BorderStyle'#7#8'bsSingle'#7'Caption'#6#26'Register Firebir'
   +'d Database'#12'ClientHeight'#3#29#2#11'ClientWidth'#3#7#4#5'Color'#7#6'clFo'
   +'rm'#9'Icon.Data'#10#127'O"'#0'{O"'#0#0#0#1#0#1#0#0#0#0#0#1#0' '#0'eO"'#0#22

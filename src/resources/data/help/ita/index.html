@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TurboBird - Home</title>
+<style type="text/css">
+body        { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 13px; color: #333; background: #f8f8f8; margin: 0; padding: 0; }
+a           { color: #D32F2F; text-decoration: none; }
+a:hover     { text-decoration: underline; }
+
+.header     { background: #D32F2F; color: #fff; padding: 12px 22px; }
+.header h1  { color: #fff; margin: 0; font-size: 24px; font-weight: bold; }
+.header .sub{ font-size: 11px; color: #ffcdd2; margin-top: 3px; }
+.logo-cell  { vertical-align: middle; width: 56px; }
+.content    { padding: 14px 22px 24px 22px; }
+
+.intro      { border: 2px solid #D32F2F; background: #fff9f9; padding: 14px 18px 12px 18px; margin: 0 0 16px 0; }
+.intro-title{ color: #D32F2F; font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+.intro-text { color: #444; font-size: 12px; line-height: 1.5; }
+.intro-note { margin-top: 10px; padding: 8px 12px; background: #fff; border-left: 3px solid #D32F2F; font-size: 11px; color: #444; }
+
+.workflow   { width: 100%; margin: 12px 0 6px 0; border-collapse: collapse; }
+.workflow td{ vertical-align: middle; text-align: center; padding: 4px; }
+.wf-step    { background: #fff; border: 1px solid #D32F2F; padding: 10px 6px !important; }
+.wf-num     { background: #D32F2F; color: #fff; width: 26px; height: 26px; line-height: 26px;
+              text-align: center; font-weight: bold; font-size: 14px; margin: 0 auto 4px auto; }
+.wf-label   { font-weight: bold; font-size: 11px; color: #D32F2F; }
+.wf-desc    { font-size: 10px; color: #666; margin-top: 2px; }
+.wf-arrow   { font-size: 20px; color: #D32F2F; font-weight: bold; width: 24px; }
+
+.section    { border: 1px solid #d0d0d0; background: #fff; margin: 14px 0; }
+.section-title { background: #D32F2F; color: #fff; padding: 7px 12px; font-weight: bold; font-size: 13px; }
+.section-title-diag { background: #1976D2; }
+.section-title .step-num { display: inline-block; background: #fff; color: #D32F2F;
+              width: 20px; height: 20px; line-height: 20px; text-align: center;
+              margin-right: 8px; font-size: 11px; font-weight: bold; }
+.section-body { padding: 10px 12px 12px 12px; }
+.section-body .hint { margin: 0 0 10px 0; padding: 6px 10px; background: #f4f4f4;
+                      border-left: 3px solid #D32F2F; font-size: 11px; color: #555; }
+.section-body .hint-diag { border-left-color: #1976D2; }
+
+/* Card layout: 4 per row, content centered */
+.cards { border-collapse: collapse; }
+.cards td { vertical-align: top; padding: 0; }
+
+.card {
+  display: inline-block;
+  width: 158px;
+  height: 86px;
+  margin: 3px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  vertical-align: top;
+  text-align: center;
+}
+.card:hover { background: #fff5f5; border: 1px solid #D32F2F; cursor: hand; }
+.card-featured { border: 2px solid #1976D2; background: #f5f9ff; }
+.card-featured:hover { background: #eaf2ff; border-color: #0d47a1; }
+
+.badge      { display: inline-block; width: 32px; height: 32px; line-height: 32px;
+              background: #D32F2F; color: #fff; font-weight: bold; font-size: 11px;
+              text-align: center; margin-bottom: 4px; }
+.badge-alt  { background: #1976D2; }
+.badge-gray { background: #777; }
+.badge-hot  { background: #F57C00; }
+.card .title{ font-weight: bold; color: #222; font-size: 12px; }
+.card .desc { font-size: 10px; color: #666; margin-top: 2px; }
+.tag-rec    { display: inline-block; background: #F57C00; color: #fff; font-size: 9px;
+              padding: 1px 5px; font-weight: bold; margin-left: 3px; }
+
+.subsection { margin: 10px 0 6px 0; }
+.subsection-title { color: #D32F2F; font-size: 12px; font-weight: bold; margin-bottom: 4px;
+                    border-bottom: 1px solid #eee; padding-bottom: 2px; }
+
+.btn        { display: inline-block; padding: 5px 12px; background: #D32F2F;
+              color: #fff; margin: 2px 4px 2px 0; font-size: 12px; font-weight: bold; }
+.btn:hover  { background: #b71c1c; text-decoration: none; }
+.btn-sec    { background: #fff; color: #D32F2F; border: 1px solid #D32F2F; }
+.btn-sec:hover { background: #fff5f5; color: #D32F2F; }
+
+.changelog  { background: #f9f9f9; border-left: 3px solid #D32F2F; padding: 7px 11px;
+              margin: 4px 0; font-size: 11px; color: #444; }
+.changelog .vdate { color: #D32F2F; font-weight: bold; }
+
+.footer     { text-align: center; color: #999; font-size: 10px; padding: 10px;
+              border-top: 1px solid #e0e0e0; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <table><tr>
+    <td class="logo-cell"><img src="tb_transparent.ico" height="48" border="0" alt="TurboBird"></td>
+    <td style="padding-left: 14px;">
+      <h1>TurboBird</h1>
+      <div class="sub">Strumento di amministrazione Firebird &middot; Versione 1.2.1.1288 &middot; Compilazione 2026-10-10</div>
+    </td>
+  </tr></table>
+</div>
+
+<div class="content">
+
+<div class="intro">
+  <div class="intro-title">Benvenuto in TurboBird</div>
+  <div class="intro-text">
+    TurboBird &egrave; uno strumento di amministrazione per database Firebird.
+    Al primo avvio, l'albero a sinistra &egrave; vuoto &mdash; questo &egrave;
+    normale. TurboBird pu&ograve; lavorare con i database solo dopo che due
+    cose sono state registrate. L'ordine &egrave; importante:
+  </div>
+  <table class="workflow"><tr>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">1</div>
+      <div class="wf-label">Registrare un server</div><div class="wf-desc">Dove gira Firebird?</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">2</div>
+      <div class="wf-label">Aggiungere un database</div><div class="wf-desc">Nuovo, esistente o backup</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">3</div>
+      <div class="wf-label">Iniziare a lavorare</div><div class="wf-desc">Tutti gli strumenti disponibili</div></td>
+  </tr></table>
+  <div class="intro-note">
+    <b>Primo avvio?</b> L'albero a sinistra &egrave; vuoto &mdash;
+    iniziare con <a href="tb://registerserver">Registra Server</a>. Solo dopo
+    aver aggiunto un server si potr&agrave; creare un nuovo database su quel
+    server o registrare un database esistente.
+  </div>
+</div>
+
+<!-- Passo 1: Server -->
+<div class="section">
+  <div class="section-title"><span class="step-num">1</span>Registrare un server</div>
+  <div class="section-body">
+    <div class="hint">
+      Un <b>server</b> &egrave; l'istanza di Firebird &mdash; locale o remota.
+      Senza almeno un server registrato, nessun database pu&ograve; essere
+      amministrato.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://registerserver"><div class="card"><div class="badge">SRV</div>
+        <div class="title">Registra Server</div>
+        <div class="desc">Aggiungi un nuovo server o modificane uno esistente</div></div></a></td>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Seleziona Client FB</div>
+        <div class="desc">Cambia la libreria client</div></div></a></td>
+      <td><a href="tb://servertools"><div class="card"><div class="badge badge-gray">INV</div>
+        <div class="title">Inventario Server</div>
+        <div class="desc">Panoramica testuale di tutti i server</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Passo 2: Database -->
+<div class="section">
+  <div class="section-title"><span class="step-num">2</span>Creare, registrare o ripristinare un database</div>
+  <div class="section-body">
+    <div class="hint">
+      Un <b>database</b> &egrave; un file <tt>.fdb</tt> su un server.
+      <b>Requisito:</b> un server registrato.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://createdb"><div class="card"><div class="badge">NEW</div>
+        <div class="title">Crea Database</div>
+        <div class="desc">Crea un nuovo database Firebird vuoto</div></div></a></td>
+      <td><a href="tb://registerdb"><div class="card"><div class="badge">REG</div>
+        <div class="title">Registra Database</div>
+        <div class="desc">Collega un file <tt>.fdb</tt> esistente</div></div></a></td>
+      <td><a href="tb://restore"><div class="card"><div class="badge">RST</div>
+        <div class="title">Ripristina Database</div>
+        <div class="desc">Ripristina da un backup <tt>.fbk</tt></div></div></a></td>
+      <td><a href="tb://backup"><div class="card"><div class="badge">BAK</div>
+        <div class="title">Backup del Database</div>
+        <div class="desc">Crea un file di backup (seleziona DB)</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Passo 3: Lavorare con i dati -->
+<div class="section">
+  <div class="section-title"><span class="step-num">3</span>Lavorare con i dati</div>
+  <div class="section-body">
+    <div class="hint">
+      <b>Doppio clic</b> su un oggetto per aprirlo direttamente,
+      <b>clic destro</b> per mostrare il menu contestuale.
+    </div>
+    <div class="subsection"><div class="subsection-title">Strumenti per i dati</div>
+    <table class="cards"><tr>
+      <td><a href="tb://dataeditor"><div class="card"><div class="badge">EDT</div>
+        <div class="title">Editor Dati</div>
+        <div class="desc">Visualizza e modifica tabelle e file CSV</div></div></a></td>
+      <td><a href="tb://dbreader"><div class="card"><div class="badge">RDR</div>
+        <div class="title">DBReader</div>
+        <div class="desc">Recupero dati da DB danneggiati</div></div></a></td>
+      <td><a href="tb://bulkclone"><div class="card"><div class="badge">CLN</div>
+        <div class="title">Clona Tabella</div>
+        <div class="desc">Copia tabelle (seleziona una tabella)</div></div></a></td>
+      <td><a href="tb://scriptengine"><div class="card"><div class="badge">SCR</div>
+        <div class="title">Motore di Script</div>
+        <div class="desc">Esegui script SQL (seleziona DB)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://scriptdb"><div class="card"><div class="badge">DDL</div>
+        <div class="title">Script del Database</div>
+        <div class="desc">DDL completo (seleziona DB)</div></div></a></td>
+      <td><a href="tb://tablemanage"><div class="card"><div class="badge">TBL</div>
+        <div class="title">Gestione Tabelle</div>
+        <div class="desc">Campi, indici, vincoli (seleziona tabella)</div></div></a></td>
+      <td><a href="tb://csvbulkexport"><div class="card"><div class="badge">CSV</div>
+        <div class="title">CSV Bulk Export</div>
+        <div class="desc">Esportazione rapida CSV (seleziona tabella)</div></div></a></td>
+    </tr></table>
+    </div>
+    <div class="subsection"><div class="subsection-title">Studio</div>
+    <table class="cards"><tr>
+      <td><a href="tb://passtudio"><div class="card"><div class="badge">PS</div>
+        <div class="title">PascalScript Studio</div>
+        <div class="desc">Progetta form a runtime</div></div></a></td>
+      <td><a href="tb://newform"><div class="card"><div class="badge">FRM</div>
+        <div class="title">Nuovo Form</div>
+        <div class="desc">Crea un file <tt>.cfrm</tt> (seleziona DB)</div></div></a></td>
+    </tr></table>
+    </div>
+  </div>
+</div>
+
+<!-- Diagnostica e monitoraggio -->
+<div class="section">
+  <div class="section-title section-title-diag">Diagnostica e Monitoraggio</div>
+  <div class="section-body">
+    <div class="hint hint-diag">
+      <b>Requisito:</b> un database selezionato nell'albero a sinistra.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://activitymonitor"><div class="card card-featured"><div class="badge badge-hot">ACT</div>
+        <div class="title">Activity Monitor<span class="tag-rec">Consigliato</span></div>
+        <div class="desc">Connessioni e statement in tempo reale</div></div></a></td>
+      <td><a href="tb://sqlmonitor"><div class="card"><div class="badge badge-alt">MON</div>
+        <div class="title">Monitor SQL</div>
+        <div class="desc">Traccia gli statement SQL in tempo reale</div></div></a></td>
+      <td><a href="tb://integrity"><div class="card"><div class="badge badge-alt">CHK</div>
+        <div class="title">Integrit&agrave; DB</div>
+        <div class="desc">Valida i set di caratteri dei campi</div></div></a></td>
+      <td><a href="tb://sqlparser"><div class="card"><div class="badge badge-alt">PRS</div>
+        <div class="title">Parser SQL</div>
+        <div class="desc">Analizza SQL (senza database)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://recalcstats"><div class="card"><div class="badge badge-alt">STA</div>
+        <div class="title">Ricalcola Statistiche</div>
+        <div class="desc">SET STATISTICS INDEX</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Configurazione -->
+<div class="section">
+  <div class="section-title">Configurazione</div>
+  <div class="section-body">
+    <div class="hint">
+      Impostazioni globali, memorizzate nel file INI.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Seleziona Client FB</div>
+        <div class="desc">Cambia la libreria client</div></div></a></td>
+      <td><a href="tb://theme"><div class="card"><div class="badge badge-gray">THM</div>
+        <div class="title">Tema</div>
+        <div class="desc">Cambia lo schema colori</div></div></a></td>
+      <td><a href="tb://editorfont"><div class="card"><div class="badge badge-gray">FNT</div>
+        <div class="title">Font dell'Editor</div>
+        <div class="desc">Font dell'editor SQL</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Novit&agrave; -->
+<div class="section">
+  <div class="section-title">Novit&agrave;</div>
+  <div class="section-body">
+    <div class="changelog"><div class="vdate">Versione 1.2.1.1288 &mdash; 2026-10-10</div>
+      FastCSVImport/Export &middot; Alias dei server &middot; CloneTable con
+      API Firebird Row-by-Row e Batch &middot; CSV Bulk Export con editor di
+      preset.</div>
+    <div class="changelog"><div class="vdate">Versione 1.2.1.1286 &mdash; 2026-09-05</div>
+      IBX4Lazarus 2.7.12 &middot; DBReader &quot;tabella da dati&quot; &middot;
+      PascalScript Studio riattivato.</div>
+    <div class="changelog"><div class="vdate">Versione 1.2.1.1280 &mdash; 2026-07-26</div>
+      CloneTable &middot; Data Editor notevolmente ampliato &middot; Create Table
+      from DataSet &middot; Bulk Export &middot; Cache password di sessione.</div>
+  </div>
+</div>
+
+<!-- Aiuto e informazioni -->
+<div class="section">
+  <div class="section-title">Aiuto e Informazioni</div>
+  <div class="section-body">
+    <a href="tb://checkupdate" class="btn">Cerca Aggiornamenti</a>
+    <a href="tb://about" class="btn btn-sec">Informazioni su TurboBird</a>
+    <a href="tb://exit" class="btn btn-sec">Esci</a>
+    <div style="margin-top: 10px; font-size: 11px; color: #666;">
+      <b>Suggerimento:</b> seleziona un oggetto nell'albero e premi
+      <b>Maiusc+F10</b> per aprire il menu contestuale.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  TurboBird &middot; Strumento di amministrazione Firebird &middot; &copy; 2026<br>
+  Primi passi: Registrare un server &rarr; Aggiungere un database &rarr; Iniziare a lavorare
+</div>
+
+</body>
+</html>

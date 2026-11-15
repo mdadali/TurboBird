@@ -1,10 +1,72 @@
 Neuigkeiten für TurboBird
 ! : geändert
-+: hinzugefügt
-*: behoben
--: entfernt
++ : hinzugefügt
+* : behoben
+- : entfernt
 
 
+TurboBird v1.2.1.1290
+
+Build-Datum & -Zeit:
+
+
++ Cross-RDBMS Data Transfer
+  Vollständig neues, eigenständiges Modul für den Datentransfer zwischen unterschiedlichen Datenbanksystemen
+  mit serverseitiger Datentransformation (Formeln).
+
+  Unterstützte Datenbanken:
+    Firebird, SQLite, MySQL/MariaDB, PostgreSQL, MSSQL, Oracle, Sybase, ODBC.
+
+  Getestete Transfer-Routen:
+    Firebird → SQLite, Firebird → PostgreSQL, PostgreSQL → Firebird, Firebird → MySQL, ODBC.SQLite, ODBC.PostgreSQL, ODBC.MySQL8.
+
+
++ Alias-Unterstützung für Servernamen
+  Ein Server kann innerhalb einer TurboBird-Instanz mit unterschiedlichen Aliasen mehrfach registriert werden.
+
+
+! Unterstützung aller ODS-Versionen innerhalb einer TurboBird-Instanz
+! Unterstützung aller Firebird-Versionen innerhalb einer TurboBird-Instanz
+
+
++ DataEditor: Schneller CSV-Bulk-Import/-Export zwischen DataSets und CSV-Dateien
+  - Automatische Erkennung von Delimiter, QuoteChar, DecimalSeparator und LineEnding.
+  - Benchmark-Test: Eine 59,4 GB große Datei wurde mit der Fullscan-Option (vorherige Suche nach der längsten Zeile
+    in der gesamten Datei) in 14 Minuten eingelesen. (Dieselbe Datei führte bei einer bekannten CSV-Bibliothek
+    zum Absturz des Rechners.)
+  - Aus eingelesenen Dateien können direkt Firebird-Tabellen erstellt und die Daten übernommen werden.
+
+  Testsystem:
+    Betriebssystem: Debian GNU/Linux 13
+    KDE-Plasma-Version: 6.3.6
+    KDE-Frameworks-Version: 6.13.0
+    Qt-Version: 6.8.2
+    Kernel-Version: 6.12.113+deb13-amd64 (64-bit)
+    Grafik-Plattform: X11
+    Prozessoren: 4 × Intel® Core™ i5-4210H CPU @ 2.90GHz
+    Speicher: 16 GiB RAM (15,5 GiB nutzbar)
+    Swap: 30 GB
+    Grafikprozessor 1: Intel® HD Graphics 4600
+    Grafikprozessor 2: llvmpipe
+    Hersteller: Micro-Star International Co., Ltd.
+    Produktname: GP70 2PE
+    Systemversion: REV:1.0
+
+
+! Simple IntelliSense für das QueryWindow wurde verbessert:
+  - Mit Strg + Leertaste (Ctrl + Blank) werden Tabellen und Felder angezeigt.
+  - Nach Eingabe von „Tabellen-/Aliasnamen.“ werden die zugehörigen Felder angezeigt.
+  - Unterstützt Case-Sensitive-Bezeichner (hauptsächlich dafür implementiert).
+
+
++ Transaktionskonfiguration direkt in die Datenbankregistrierungsmaske integriert.
+
+
+* Mehrere kritische Bugs behoben.
+
+
+
+---------------------------------------------------------------------------------------------
 TurboBird v1.2.1.1288
 
 Build-Datum & -Zeit: 10.10.2026, 15:00
@@ -23,7 +85,7 @@ Build-Datum & -Zeit: 10.10.2026, 15:00
     Firebird < 4.0 wird automatisch auf Row-by-Row umgeschaltet.
   - Neue Option: Row-by-Row kann manuell erzwungen werden.
   - Problemfelder-Erkennung: Je nach gewählter Kopiermethode
-    werden nicht unterstützte Feldtypen (BLOBs, Arrays, etc.)
+    werden nicht unterstützte Feldtypen (BLOBs, Arrays etc.)
     automatisch erkannt und in der Feldauswahl markiert.
     Der Anwender kann diese Felder gezielt abwählen, bevor
     der Kopiervorgang gestartet wird.
@@ -45,8 +107,8 @@ Build-Datum & -Zeit: 10.10.2026, 15:00
     - Header ein-/ausschalten, Header gequotet oder roh
     - Daten gequotet oder roh
     - Problemfelder gezielt überspringen (Arrays, BLOBs)
-    - Boolean-Darstellung konfigurierbar (TRUE/FALSE)
-    - Formeln pro Datentyp (z.B. BLOB-Kürzung via SUBSTRING)
+    - Boolean-Darstellung konfigurbar (TRUE/FALSE)
+    - Formeln pro Datentyp (z. B. BLOB-Kürzung via SUBSTRING)
   - Preset-Editor: Aktuelles Preset kann direkt aus dem
     Exporter heraus bearbeitet und gespeichert werden.
     Nach dem Speichern werden die Presets automatisch neu
@@ -66,7 +128,7 @@ Build-Datum & -Zeit: 10.10.2026, 15:00
     - Client-Lib-Version, Server-Version
     - Umgebungs-Info (OS, CPU, RAM, Disk)
 
-! Maske "Bulk Export" durch "CSV Bulk Export" ersetzt
+! Maske „Bulk Export“ durch „CSV Bulk Export“ ersetzt
 
 ! Case-sensitive Identifier werden durchgehend korrekt
   behandelt (mixedCase, CAMEL):
@@ -82,20 +144,20 @@ Build-Datum & -Zeit: 10.10.2026, 15:00
     - Quote-Zeichen (Doppelquote, Single-Quote, keine)
   - Auto-Detect pro Feld einzeln aktivierbar über
     Checkboxen im CSV-Tab (LineEnding, Delimiter, QuoteChar).
-    Nur aktivierte Felder werden beim Öffnen detectiert.
+    Nur aktivierte Felder werden beim Öffnen erkannt.
     Einstellungen werden in der INI persistent gespeichert.
-  - Dialog "CSV Auto-Detection" mit drei Aktionen:
+  - Dialog „CSV Auto-Detection“ mit drei Aktionen:
     - Use Detected — erkannte Werte übernehmen
       (nur für Felder mit aktivierter Auto-Detect-Checkbox)
     - Keep Current — aktuelle Einstellungen behalten
     - Cancel — Datei nicht laden
-  - Deaktivierte Felder werden im Dialog als "(auto-off)"
+  - Deaktivierte Felder werden im Dialog als „(auto-off)“
     gekennzeichnet.
   - Neue ComboBoxen für LineEnding, Delimiter und QuoteChar:
     - LineEnding: CRLF, LF, CR, System
     - Delimiter: Komma, Semikolon, Tab, Pipe, Space
     - QuoteChar: ", ', (none), Custom...
-    - "Custom..." öffnet einen Eingabedialog für
+    - „Custom...“ öffnet einen Eingabedialog für
       beliebige Quote-Zeichen
     - Cancel im Custom-Dialog stellt den vorherigen Wert wieder her
   - LOAD-Report liest Werte direkt aus dem Dataset statt
@@ -117,6 +179,9 @@ Build-Datum & -Zeit: 10.10.2026, 15:00
     AutoDetectQuoteChar
 
 * Mehrere Bugs behoben.
+
+
+
 
 
 ---------------------------------------------------------------------------------------

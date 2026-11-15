@@ -2,11 +2,7 @@ PascalScript Forms – Ablagekonvention
 
 TurboBird speichert benutzerdefinierte Formulare im folgenden Verzeichnis:
 
-[TurboBird]/data/PSStudio/Forms/<Server>/<DBAlias>/<Formularname>/
-
-Beispiel:
-/opt/TurboBird/data/PSStudio/Forms/MeinServer/EmployeeDB/KundenEditor/KundenEditor.cfrm
-/opt/TurboBird/data/PSStudio/Forms/MeinServer/EmployeeDB/KundenEditor/KundenEditor.rops
+[TurboBird]/data/PSStudio/Forms/<ServerAlias>/<DBAlias>/<Formularname>/
 
 
 Wichtige Regeln:

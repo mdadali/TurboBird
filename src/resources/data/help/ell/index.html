@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>TurboBird - Αρχική</title>
+<style type="text/css">
+body        { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 13px; color: #333; background: #f8f8f8; margin: 0; padding: 0; }
+a           { color: #D32F2F; text-decoration: none; }
+a:hover     { text-decoration: underline; }
+
+.header     { background: #D32F2F; color: #fff; padding: 12px 22px; }
+.header h1  { color: #fff; margin: 0; font-size: 24px; font-weight: bold; }
+.header .sub{ font-size: 11px; color: #ffcdd2; margin-top: 3px; }
+.logo-cell  { vertical-align: middle; width: 56px; }
+.content    { padding: 14px 22px 24px 22px; }
+
+.intro      { border: 2px solid #D32F2F; background: #fff9f9; padding: 14px 18px 12px 18px; margin: 0 0 16px 0; }
+.intro-title{ color: #D32F2F; font-size: 16px; font-weight: bold; margin-bottom: 6px; }
+.intro-text { color: #444; font-size: 12px; line-height: 1.5; }
+.intro-note { margin-top: 10px; padding: 8px 12px; background: #fff; border-left: 3px solid #D32F2F; font-size: 11px; color: #444; }
+
+.workflow   { width: 100%; margin: 12px 0 6px 0; border-collapse: collapse; }
+.workflow td{ vertical-align: middle; text-align: center; padding: 4px; }
+.wf-step    { background: #fff; border: 1px solid #D32F2F; padding: 10px 6px !important; }
+.wf-num     { background: #D32F2F; color: #fff; width: 26px; height: 26px; line-height: 26px;
+              text-align: center; font-weight: bold; font-size: 14px; margin: 0 auto 4px auto; }
+.wf-label   { font-weight: bold; font-size: 11px; color: #D32F2F; }
+.wf-desc    { font-size: 10px; color: #666; margin-top: 2px; }
+.wf-arrow   { font-size: 20px; color: #D32F2F; font-weight: bold; width: 24px; }
+
+.section    { border: 1px solid #d0d0d0; background: #fff; margin: 14px 0; }
+.section-title { background: #D32F2F; color: #fff; padding: 7px 12px; font-weight: bold; font-size: 13px; }
+.section-title-diag { background: #1976D2; }
+.section-title .step-num { display: inline-block; background: #fff; color: #D32F2F;
+              width: 20px; height: 20px; line-height: 20px; text-align: center;
+              margin-right: 8px; font-size: 11px; font-weight: bold; }
+.section-body { padding: 10px 12px 12px 12px; }
+.section-body .hint { margin: 0 0 10px 0; padding: 6px 10px; background: #f4f4f4;
+                      border-left: 3px solid #D32F2F; font-size: 11px; color: #555; }
+.section-body .hint-diag { border-left-color: #1976D2; }
+
+.cards { border-collapse: collapse; }
+.cards td { vertical-align: top; padding: 0; }
+
+.card {
+  display: inline-block;
+  width: 158px;
+  height: 86px;
+  margin: 3px;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #ddd;
+  vertical-align: top;
+  text-align: center;
+}
+.card:hover { background: #fff5f5; border: 1px solid #D32F2F; cursor: hand; }
+.card-featured { border: 2px solid #1976D2; background: #f5f9ff; }
+.card-featured:hover { background: #eaf2ff; border-color: #0d47a1; }
+
+.badge      { display: inline-block; width: 32px; height: 32px; line-height: 32px;
+              background: #D32F2F; color: #fff; font-weight: bold; font-size: 11px;
+              text-align: center; margin-bottom: 4px; }
+.badge-alt  { background: #1976D2; }
+.badge-gray { background: #777; }
+.badge-hot  { background: #F57C00; }
+.card .title{ font-weight: bold; color: #222; font-size: 12px; }
+.card .desc { font-size: 10px; color: #666; margin-top: 2px; }
+.tag-rec    { display: inline-block; background: #F57C00; color: #fff; font-size: 9px;
+              padding: 1px 5px; font-weight: bold; margin-left: 3px; }
+
+.subsection { margin: 10px 0 6px 0; }
+.subsection-title { color: #D32F2F; font-size: 12px; font-weight: bold; margin-bottom: 4px;
+                    border-bottom: 1px solid #eee; padding-bottom: 2px; }
+
+.btn        { display: inline-block; padding: 5px 12px; background: #D32F2F;
+              color: #fff; margin: 2px 4px 2px 0; font-size: 12px; font-weight: bold; }
+.btn:hover  { background: #b71c1c; text-decoration: none; }
+.btn-sec    { background: #fff; color: #D32F2F; border: 1px solid #D32F2F; }
+.btn-sec:hover { background: #fff5f5; color: #D32F2F; }
+
+.changelog  { background: #f9f9f9; border-left: 3px solid #D32F2F; padding: 7px 11px;
+              margin: 4px 0; font-size: 11px; color: #444; }
+.changelog .vdate { color: #D32F2F; font-weight: bold; }
+
+.footer     { text-align: center; color: #999; font-size: 10px; padding: 10px;
+              border-top: 1px solid #e0e0e0; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <table><tr>
+    <td class="logo-cell"><img src="tb_transparent.ico" height="48" border="0" alt="TurboBird"></td>
+    <td style="padding-left: 14px;">
+      <h1>TurboBird</h1>
+      <div class="sub">Εργαλείο διαχείρισης Firebird &middot; Έκδοση 1.2.1.1288 &middot; Μεταγλώττιση 2026-10-10</div>
+    </td>
+  </tr></table>
+</div>
+
+<div class="content">
+
+<div class="intro">
+  <div class="intro-title">Καλώς ήρθατε στο TurboBird</div>
+  <div class="intro-text">
+    Το TurboBird είναι ένα εργαλείο διαχείρισης για βάσεις δεδομένων Firebird.
+    Στην πρώτη εκκίνηση, το δέντρο στα αριστερά είναι κενό &mdash; αυτό είναι
+    φυσιολογικό. Το TurboBird μπορεί να εργαστεί με βάσεις δεδομένων μόνο
+    αφού καταχωριστούν δύο πράγματα. Η σειρά είναι σημαντική:
+  </div>
+  <table class="workflow"><tr>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">1</div>
+      <div class="wf-label">Καταχώριση διακομιστή</div><div class="wf-desc">Πού εκτελείται το Firebird;</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">2</div>
+      <div class="wf-label">Προσθήκη βάσης δεδομένων</div><div class="wf-desc">Νέα, υπάρχουσα ή αντίγραφο ασφαλείας</div></td>
+    <td class="wf-arrow">&rarr;</td>
+    <td class="wf-step" style="width: 30%;"><div class="wf-num">3</div>
+      <div class="wf-label">Έναρξη εργασίας</div><div class="wf-desc">Όλα τα εργαλεία διαθέσιμα</div></td>
+  </tr></table>
+  <div class="intro-note">
+    <b>Πρώτη εκκίνηση;</b> Το δέντρο στα αριστερά είναι κενό &mdash;
+    ξεκινήστε με <a href="tb://registerserver">Καταχώριση Διακομιστή</a>.
+    Μόνο αφού προσθέσετε έναν διακομιστή, θα μπορείτε να δημιουργήσετε
+    μια νέα βάση δεδομένων σε αυτόν ή να καταχωρίσετε μια υπάρχουσα.
+  </div>
+</div>
+
+<!-- Βήμα 1: Διακομιστής -->
+<div class="section">
+  <div class="section-title"><span class="step-num">1</span>Καταχώριση διακομιστή</div>
+  <div class="section-body">
+    <div class="hint">
+      Ένας <b>διακομιστής</b> είναι η εγκατάσταση του Firebird &mdash;
+      τοπική ή απομακρυσμένη. Χωρίς τουλάχιστον έναν καταχωρισμένο διακομιστή,
+      καμία βάση δεδομένων δεν μπορεί να διαχειριστεί.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://registerserver"><div class="card"><div class="badge">SRV</div>
+        <div class="title">Καταχώριση Διακομιστή</div>
+        <div class="desc">Προσθήκη νέου διακομιστή ή επεξεργασία υπάρχοντος</div></div></a></td>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Επιλογή Πελάτη FB</div>
+        <div class="desc">Αλλαγή βιβλιοθήκης πελάτη</div></div></a></td>
+      <td><a href="tb://servertools"><div class="card"><div class="badge badge-gray">INV</div>
+        <div class="title">Απογραφή Διακομιστών</div>
+        <div class="desc">Κειμενική επισκόπηση όλων των διακομιστών</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Βήμα 2: Βάση δεδομένων -->
+<div class="section">
+  <div class="section-title"><span class="step-num">2</span>Δημιουργία, καταχώριση ή επαναφορά βάσης δεδομένων</div>
+  <div class="section-body">
+    <div class="hint">
+      Μια <b>βάση δεδομένων</b> είναι ένα αρχείο <tt>.fdb</tt> σε έναν
+      διακομιστή. <b>Απαίτηση:</b> καταχωρισμένος διακομιστής.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://createdb"><div class="card"><div class="badge">NEW</div>
+        <div class="title">Δημιουργία Βάσης</div>
+        <div class="desc">Δημιουργία νέας κενής βάσης Firebird</div></div></a></td>
+      <td><a href="tb://registerdb"><div class="card"><div class="badge">REG</div>
+        <div class="title">Καταχώριση Βάσης</div>
+        <div class="desc">Σύνδεση υπάρχοντος αρχείου <tt>.fdb</tt></div></div></a></td>
+      <td><a href="tb://restore"><div class="card"><div class="badge">RST</div>
+        <div class="title">Επαναφορά Βάσης</div>
+        <div class="desc">Επαναφορά από αντίγραφο ασφαλείας <tt>.fbk</tt></div></div></a></td>
+      <td><a href="tb://backup"><div class="card"><div class="badge">BAK</div>
+        <div class="title">Αντίγραφο Ασφαλείας</div>
+        <div class="desc">Δημιουργία αρχείου αντιγράφου (επιλέξτε ΒΔ)</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Βήμα 3: Εργασία με δεδομένα -->
+<div class="section">
+  <div class="section-title"><span class="step-num">3</span>Εργασία με δεδομένα</div>
+  <div class="section-body">
+    <div class="hint">
+      <b>Διπλό κλικ</b> σε ένα αντικείμενο για άνοιγμα απευθείας,
+      <b>δεξί κλικ</b> για εμφάνιση του μενού περιβάλλοντος.
+    </div>
+    <div class="subsection"><div class="subsection-title">Εργαλεία δεδομένων</div>
+    <table class="cards"><tr>
+      <td><a href="tb://dataeditor"><div class="card"><div class="badge">EDT</div>
+        <div class="title">Επεξεργαστής Δεδομένων</div>
+        <div class="desc">Προβολή και επεξεργασία πινάκων και CSV</div></div></a></td>
+      <td><a href="tb://dbreader"><div class="card"><div class="badge">RDR</div>
+        <div class="title">DBReader</div>
+        <div class="desc">Ανάκτηση δεδομένων από κατεστραμμένες ΒΔ</div></div></a></td>
+      <td><a href="tb://bulkclone"><div class="card"><div class="badge">CLN</div>
+        <div class="title">Κλωνοποίηση Πίνακα</div>
+        <div class="desc">Αντιγραφή πινάκων (επιλέξτε πίνακα)</div></div></a></td>
+      <td><a href="tb://scriptengine"><div class="card"><div class="badge">SCR</div>
+        <div class="title">Μηχανή Σεναρίων</div>
+        <div class="desc">Εκτέλεση σεναρίων SQL (επιλέξτε ΒΔ)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://scriptdb"><div class="card"><div class="badge">DDL</div>
+        <div class="title">Σενάριο Βάσης</div>
+        <div class="desc">Πλήρες DDL (επιλέξτε ΒΔ)</div></div></a></td>
+      <td><a href="tb://tablemanage"><div class="card"><div class="badge">TBL</div>
+        <div class="title">Διαχείριση Πινάκων</div>
+        <div class="desc">Πεδία, ευρετήρια, περιορισμοί (επιλέξτε πίνακα)</div></div></a></td>
+      <td><a href="tb://csvbulkexport"><div class="card"><div class="badge">CSV</div>
+        <div class="title">CSV Bulk Export</div>
+        <div class="desc">Γρήγορη εξαγωγή CSV (επιλέξτε πίνακα)</div></div></a></td>
+    </tr></table>
+    </div>
+    <div class="subsection"><div class="subsection-title">Στούντιο</div>
+    <table class="cards"><tr>
+      <td><a href="tb://passtudio"><div class="card"><div class="badge">PS</div>
+        <div class="title">PascalScript Studio</div>
+        <div class="desc">Σχεδιασμός φορμών κατά την εκτέλεση</div></div></a></td>
+      <td><a href="tb://newform"><div class="card"><div class="badge">FRM</div>
+        <div class="title">Νέα Φόρμα</div>
+        <div class="desc">Δημιουργία αρχείου <tt>.cfrm</tt> (επιλέξτε ΒΔ)</div></div></a></td>
+    </tr></table>
+    </div>
+  </div>
+</div>
+
+<!-- Διάγνωση και Παρακολούθηση -->
+<div class="section">
+  <div class="section-title section-title-diag">Διάγνωση και Παρακολούθηση</div>
+  <div class="section-body">
+    <div class="hint hint-diag">
+      <b>Απαίτηση:</b> επιλεγμένη βάση δεδομένων στο δέντρο στα αριστερά.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://activitymonitor"><div class="card card-featured"><div class="badge badge-hot">ACT</div>
+        <div class="title">Παρακολούθηση Δραστηριότητας<span class="tag-rec">Προτεινόμενο</span></div>
+        <div class="desc">Συνδέσεις και εντολές σε πραγματικό χρόνο</div></div></a></td>
+      <td><a href="tb://sqlmonitor"><div class="card"><div class="badge badge-alt">MON</div>
+        <div class="title">Παρακολούθηση SQL</div>
+        <div class="desc">Παρακολούθηση εντολών SQL σε πραγματικό χρόνο</div></div></a></td>
+      <td><a href="tb://integrity"><div class="card"><div class="badge badge-alt">CHK</div>
+        <div class="title">Ακεραιότητα ΒΔ</div>
+        <div class="desc">Έλεγχος συνόλων χαρακτήρων πεδίων</div></div></a></td>
+      <td><a href="tb://sqlparser"><div class="card"><div class="badge badge-alt">PRS</div>
+        <div class="title">Αναλυτής SQL</div>
+        <div class="desc">Ανάλυση SQL (χωρίς βάση δεδομένων)</div></div></a></td>
+    </tr>
+    <tr>
+      <td><a href="tb://recalcstats"><div class="card"><div class="badge badge-alt">STA</div>
+        <div class="title">Επανυπολογισμός Στατιστικών</div>
+        <div class="desc">SET STATISTICS INDEX</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Διαμόρφωση -->
+<div class="section">
+  <div class="section-title">Διαμόρφωση</div>
+  <div class="section-body">
+    <div class="hint">
+      Καθολικές ρυθμίσεις, αποθηκευμένες στο αρχείο INI.
+    </div>
+    <table class="cards"><tr>
+      <td><a href="tb://setfbclient"><div class="card"><div class="badge badge-gray">LIB</div>
+        <div class="title">Επιλογή Πελάτη FB</div>
+        <div class="desc">Αλλαγή βιβλιοθήκης πελάτη</div></div></a></td>
+      <td><a href="tb://theme"><div class="card"><div class="badge badge-gray">THM</div>
+        <div class="title">Θέμα</div>
+        <div class="desc">Αλλαγή χρωματικού σχήματος</div></div></a></td>
+      <td><a href="tb://editorfont"><div class="card"><div class="badge badge-gray">FNT</div>
+        <div class="title">Γραμματοσειρά Επεξεργαστή</div>
+        <div class="desc">Γραμματοσειρά επεξεργαστή SQL</div></div></a></td>
+    </tr></table>
+  </div>
+</div>
+
+<!-- Τι νέο υπάρχει -->
+<div class="section">
+  <div class="section-title">Τι Νέο Υπάρχει</div>
+  <div class="section-body">
+    <div class="changelog"><div class="vdate">Έκδοση 1.2.1.1288 &mdash; 2026-10-10</div>
+      FastCSVImport/Export &middot; Ψευδώνυμα διακομιστών &middot; CloneTable με
+      Firebird Row-by-Row και Batch API &middot; CSV Bulk Export με επεξεργαστή
+      προεπιλογών.</div>
+    <div class="changelog"><div class="vdate">Έκδοση 1.2.1.1286 &mdash; 2026-09-05</div>
+      IBX4Lazarus 2.7.12 &middot; DBReader «πίνακας από δεδομένα» &middot;
+      PascalScript Studio ενεργοποιήθηκε ξανά.</div>
+    <div class="changelog"><div class="vdate">Έκδοση 1.2.1.1280 &mdash; 2026-07-26</div>
+      CloneTable &middot; Data Editor σημαντικά επεκτάθηκε &middot; Create Table
+      from DataSet &middot; Bulk Export &middot; Προσωρινή μνήμη κωδικών συνεδρίας.</div>
+  </div>
+</div>
+
+<!-- Βοήθεια και Πληροφορίες -->
+<div class="section">
+  <div class="section-title">Βοήθεια και Πληροφορίες</div>
+  <div class="section-body">
+    <a href="tb://checkupdate" class="btn">Έλεγχος για Ενημερώσεις</a>
+    <a href="tb://about" class="btn btn-sec">Σχετικά με το TurboBird</a>
+    <a href="tb://exit" class="btn btn-sec">Έξοδος</a>
+    <div style="margin-top: 10px; font-size: 11px; color: #666;">
+      <b>Συμβουλή:</b> επιλέξτε ένα αντικείμενο στο δέντρο και πατήστε
+      <b>Shift+F10</b> για να ανοίξετε το μενού περιβάλλοντος.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  TurboBird &middot; Εργαλείο διαχείρισης Firebird &middot; &copy; 2026<br>
+  Πρώτα βήματα: Καταχώριση διακομιστή &rarr; Προσθήκη βάσης &rarr; Έναρξη εργασίας
+</div>
+
+</body>
+</html>

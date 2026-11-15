@@ -535,6 +535,10 @@ end;
   DESIGN-REGEL 4 (strikt):
     ConnStr muss zum ausgewählten Server passen.
     Bei Diskrepanz: HARTE Fehlermeldung, kein Speichern.
+
+  DESIGN-REGEL 5 (strikt):
+    DB-Titel muss innerhalb des Servers eindeutig sein.
+    Bei Duplikat: HARTE Fehlermeldung, kein Speichern.
   ============================================================ }
 function TfmReg.RegisterDatabase(
   Title, DatabaseName, UserName, Password, Charset, Role: string;
@@ -559,6 +563,19 @@ begin
       sLineBreak + sLineBreak +
       WarningMsg + sLineBreak + sLineBreak +
       'Please correct the connection string before saving.',
+      mtError, [mbOK], 0);
+    Result := False;
+    Exit;
+  end;
+
+  // DESIGN-REGEL 5: DB-Titel eindeutig unter diesem Server
+  if not IsDBTitleUniqueForServer(Title, ServerName, -1) then
+  begin
+    MessageDlg(
+      'A database with the title "' + Title + '" is already registered ' +
+      'under this server.' + sLineBreak + sLineBreak +
+      'Database titles must be unique within a server.' + sLineBreak +
+      'Please choose a different title.',
       mtError, [mbOK], 0);
     Result := False;
     Exit;
@@ -605,14 +622,14 @@ begin
     Rec.ServerName := ServerName;
     Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
     Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-    
+
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-    
+
     Rec.IsEmbedded := ServerRec.IsEmbedded;
     Rec.TxConfig   := TransactionForm.TransactionParams.Text;
-    
+
     Write(F, Rec);
     CloseFile(F);
 
@@ -638,6 +655,11 @@ end;
   DESIGN-REGEL 4 (strikt):
     ConnStr muss zum ausgewählten Server passen.
     Bei Diskrepanz: HARTE Fehlermeldung, kein Speichern.
+
+  DESIGN-REGEL 5 (strikt):
+    DB-Titel muss innerhalb des Servers eindeutig sein.
+    Der aktuelle Record (Index) wird ausgeschlossen, damit
+    er sich nicht selbst als Duplikat erkennt.
   ============================================================ }
 function TfmReg.EditRegisteration(Index: Integer; Title, DatabaseName, UserName, Password, Charset, Role: string;
    SavePassword: Boolean; FBClient: string; SQLDialect: string; Port: string; ServerName: string;
@@ -659,6 +681,19 @@ begin
       sLineBreak + sLineBreak +
       WarningMsg + sLineBreak + sLineBreak +
       'Please correct the connection string before saving.',
+      mtError, [mbOK], 0);
+    Result := False;
+    Exit;
+  end;
+
+  // DESIGN-REGEL 5: DB-Titel eindeutig (aktuellen Record ausschließen)
+  if not IsDBTitleUniqueForServer(Title, ServerName, Index) then
+  begin
+    MessageDlg(
+      'A database with the title "' + Title + '" is already registered ' +
+      'under this server.' + sLineBreak + sLineBreak +
+      'Database titles must be unique within a server.' + sLineBreak +
+      'Please choose a different title.',
       mtError, [mbOK], 0);
     Result := False;
     Exit;
@@ -690,14 +725,14 @@ begin
     Rec.ServerName := ServerName;
     Rec.OverwriteLoadedClientLib := OverwriteLoadedClientLib;
     Rec.ConnectOnApplicationStart := ConnectOnApplicationStart;
-    
+
     Rec.ServerVersionString := ServerRec.VersionString;
     Rec.ServerVersionMajor  := ServerRec.VersionMajor;
     Rec.ServerVersionMinor  := ServerRec.VersionMinor;
-    
+
     Rec.IsEmbedded := ServerRec.IsEmbedded;
     Rec.TxConfig   := TransactionForm.TransactionParams.Text;
-    
+
     Write(F, Rec);
     CloseFile(F);
     Result:= True;

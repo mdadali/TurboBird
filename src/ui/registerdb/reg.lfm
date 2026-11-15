@@ -1,7 +1,7 @@
 inherited fmReg: TfmReg
-  Left = 468
+  Left = 1269
   Height = 541
-  Top = 270
+  Top = 269
   Width = 1031
   BorderStyle = bsSingle
   Caption = 'Register Firebird Database'

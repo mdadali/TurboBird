@@ -793,8 +793,9 @@ function GetServerMinorVersionFromIBDB(ADB: TIBDatabase): Word;
 
 function GetDBIndexByDatabase(Database: TIBDatabase): Integer;
 function GetDBTitlesForServer(const ADisplayAlias: string; AList: TStrings): Boolean;
+function IsDBTitleUniqueForServer(const ATitle, AServerAlias: string;
+  AExcludeFileIndex: Integer = -1): Boolean;
 function FindDBIndexByTitleAndServer(const ATitle, AServerName: string): Integer;
-
 
 function ConnectToDBAs(dbIndex: Integer; ForceConnectDialog: boolean=false): Boolean;
 
@@ -840,9 +841,9 @@ procedure ApplyServerRecordToSession(const Rec: TServerRecord; Session: TServerS
 function  BuildServerRecordFromSession(const Session: TServerSession; SavePwd: Boolean): TServerRecord;
 
 function GetServerAliasFromNode(ANode: TTreeNode): string;
-function GetServerNodeByAlias(const AAlias: string): TTreeNode;
 function GetServerNameFromNode(ANode: TTreeNode): string;
 function GetServerNodeByServerName(const AServerName: string): TTreeNode;
+function GetServerNodeByAlias(const AAlias: string): TTreeNode;
 
 function GetServerAliasListFromTreeView: TStringList;
 function GetServerListFromTreeView: TStringList;
@@ -5341,46 +5342,32 @@ begin
 end;
 
 { ============================================================
-  Prüft, ob ein Alias systemweit eindeutig ist.
+  IsServerAliasUnique: Prüft, ob ein Alias systemweit eindeutig ist.
 
-  ZWEI Ausschluss-Parameter:
+  NEU:
+    - Check 2 (Alias vs. anderer ServerName) ENTFERNT.
+    - Grund: Alias = ServerName eines anderen Servers ist
+      harmlos, weil Alias-Lookup (Pass 1) Vorrang hat.
+    - Alias = eigener ServerName ist ohnehin erlaubt
+      (excludeName-Check).
+    - Check 1 (Alias vs. Alias) bleibt: Aliase müssen
+      untereinander eindeutig sein.
 
-    AExcludeAlias      — der aktuelle Alias des zu bearbeitenden
-                         Servers (primärer Ausschluss, weil Alias
-                         der eindeutige Identifikator ist).
+  Damit sind erlaubt:
+    - Server A: ServerName='localhost', Alias='localhost'
+    - Server B: ServerName='localhost', Alias='Prod'
+    - Server C: ServerName='127.0.0.1', Alias='localhost'
+      → wird geblockt (weil Server A schon Alias='localhost' hat)
 
-    AExcludeServerName — der echte Servername des zu bearbeitenden
-                         Servers. Wird benötigt, um zwischen
-                         "echter Kollision mit anderem Server" und
-                         "derselbe physische Server" unterscheiden
-                         zu können.
-
-  Kollisionen:
-
-    1) Alias = Alias eines anderen Servers
-       → immer Kollision.
-
-    2) Alias = echter Servername eines anderen Servers
-       → Kollision, ABER NICHT wenn der andere Server
-         denselben echten Servernamen hat wie der editierte
-         Server (dann ist es derselbe physische Server, und
-         der Alias = eigene ServerName ist zulässig).
-
-  Warum Punkt 2 die Ausnahme braucht:
-    Wenn zwei Server auf demselben echten Server laufen
-    (Prod/Test → beide FB60Local) und einer davon den
-    Alias "FB60Local" trägt, würde die naive Prüfung
-    "Alias = echter Name eines anderen Servers" beim
-    Editieren des Prod-Servers fälschlich Kollision
-    melden — weil der Test-Server auch "FB60Local"
-    als echten Namen hat.
+  NICHT erlaubt:
+    - Zwei Server mit demselben Alias
   ============================================================ }
 function IsServerAliasUnique(const AAlias, AExcludeAlias, AExcludeServerName: string): Boolean;
 var
   fs: TFileStream;
   rec: TServerRecord;
   fileName: string;
-  compareAlias, excludeAlias, excludeName, recAlias, recName: string;
+  compareAlias, excludeAlias, excludeName, recAlias: string;
   IsSelfRecord: Boolean;
 begin
   Result := True;
@@ -5403,30 +5390,28 @@ begin
       fs.ReadBuffer(rec, SizeOf(TServerRecord));
 
       recAlias := Trim(rec.ServerAlias);
-      recName  := Trim(rec.ServerName);
 
       // ------------------------------------------------------
       // Ausschluss: aktuell bearbeiteter Record
       // ------------------------------------------------------
       IsSelfRecord := False;
 
-      // Fall A: Record hat einen Alias, der dem alten Alias
-      // des bearbeiteten Servers entspricht
+      // Fall A: Record hat den alten Alias (normaler Update)
       if (excludeAlias <> '') and (recAlias <> '') and
          SameText(recAlias, excludeAlias) then
         IsSelfRecord := True;
 
       // Fall B: Legacy-Record ohne Alias, dessen echter Name
-      // dem des bearbeiteten Servers entspricht
+      // dem bearbeiteten Server entspricht
       if (excludeAlias = '') and (excludeName <> '') and
-         (recAlias = '') and SameText(recName, excludeName) then
+         (recAlias = '') and SameText(Trim(rec.ServerName), excludeName) then
         IsSelfRecord := True;
 
       if IsSelfRecord then
         Continue;
 
       // ------------------------------------------------------
-      // Kollision 1: Alias = Alias eines anderen Servers
+      // Kollision: Alias = Alias eines anderen Servers
       // ------------------------------------------------------
       if (recAlias <> '') and SameText(recAlias, compareAlias) then
       begin
@@ -5434,19 +5419,8 @@ begin
         Exit;
       end;
 
-      // ------------------------------------------------------
-      // Kollision 2: Alias = echter Servername eines anderen
-      // Servers — ABER nur, wenn der andere Server einen
-      // ANDEREN echten Servernamen hat als der editierte.
-      // Wenn der echte Name derselbe ist, ist es derselbe
-      // physische Server → keine Kollision.
-      // ------------------------------------------------------
-      if SameText(recName, compareAlias) and
-         not SameText(recName, excludeName) then
-      begin
-        Result := False;
-        Exit;
-      end;
+      // Check 2 (Alias vs. anderer ServerName) wurde ENTFERNT.
+      // Alias = Servername eines anderen Servers ist erlaubt.
     end;
   finally
     fs.Free;
@@ -7746,6 +7720,57 @@ begin
   end;
 
   Result := True;
+end;
+
+{ ============================================================
+  IsDBTitleUniqueForServer: Prüft, ob ein DB-Titel unter einem
+  Server-Alias bereits vergeben ist.
+
+  DESIGN-REGEL 5: DB-Titel muss innerhalb eines Servers
+  eindeutig sein. (Alias = Server-Alias, nicht ServerName.)
+
+  AExcludeFileIndex: Datei-Position des aktuellen Records,
+  der ausgeschlossen werden soll (bei Edit). Bei neuen
+  Registrierungen: -1 (nichts ausschließen).
+
+  Warum Datei-Position statt Array-Index:
+    RegisteredDatabases[i].Index ist die Position in der
+    .reg-Datei (aus LoadRegisteredDatabases). RecPos in
+    Reg.pas ist ebenfalls die Datei-Position. Dadurch
+    funktioniert der Ausschluss zuverlässig, auch wenn
+    zwischenzeitlich Records gelöscht/hinzugefügt wurden.
+
+  Liefert True, wenn der Titel frei ist (oder der einzige
+  unter diesem Server ist).
+  ============================================================ }
+function IsDBTitleUniqueForServer(const ATitle, AServerAlias: string;
+  AExcludeFileIndex: Integer): Boolean;
+var
+  i: Integer;
+  Rec: TRegisteredDatabase;
+begin
+  Result := True;
+
+  for i := 0 to High(RegisteredDatabases) do
+  begin
+    // Aktuellen Record ausschließen (bei Edit)
+    if RegisteredDatabases[i].Index = AExcludeFileIndex then
+      Continue;
+
+    Rec := RegisteredDatabases[i].RegRec;
+
+    // Gelöschte Records ignorieren
+    if Rec.Deleted then
+      Continue;
+
+    // Kollision: gleicher Titel UND gleicher Server-Alias
+    if SameText(Trim(Rec.Title), Trim(ATitle)) and
+       SameText(Trim(Rec.ServerName), Trim(AServerAlias)) then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
 end;
 
 // --------------------------------------------------------------------------

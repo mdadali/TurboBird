@@ -1,5 +1,5 @@
 object fmServerRegistry: TfmServerRegistry
-  Left = 868
+  Left = 562
   Height = 786
   Top = 120
   Width = 815
@@ -70509,24 +70509,24 @@ object fmServerRegistry: TfmServerRegistry
       OnClick = btnfirebirdconffileClick
       TabOrder = 11
     end
-    object btnAddServer: TButton
+    object btnRegisterServer: TButton
       Left = 448
       Height = 25
       Hint = 'Add new Server'
       Top = 21
       Width = 24
       Caption = '+'
-      OnClick = btnAddServerClick
+      OnClick = btnRegisterServerClick
       TabOrder = 1
     end
-    object btnDeleteServer: TButton
+    object btnUnRegisterServer: TButton
       Left = 480
       Height = 25
       Hint = 'Delete Selected Server'
       Top = 21
       Width = 23
       Caption = '-'
-      OnClick = btnDeleteServerClick
+      OnClick = btnUnRegisterServerClick
       TabOrder = 2
     end
     object lbPortInfo: TLabel
@@ -70555,32 +70555,6 @@ object fmServerRegistry: TfmServerRegistry
       Caption = 'Load registered FireBird Clientlibrary'
       OnChange = cboxLoadRegisteredClientLibChange
       TabOrder = 15
-    end
-    object Image1: TImage
-      Left = 621
-      Height = 121
-      Top = 16
-      Width = 136
-      Picture.Data = {
-        1754506F727461626C654E6574776F726B47726170686963CC01000089504E47
-        0D0A1A0A0000000D49484452000000100000001008060000001FF3FF61000001
-        9349444154789C8DD14B4B02511806607F48CBFE487F22DABA69E5CA9DA0A0B8
-        51C2BB0879191A9B88212AF356E66DBC4559E265D14637623A4EA659A6649BB7
-        3382102972162FE7FA3DF09DA300A0F89F482C3AAF542A98CE661004017D4982
-        90CFFFACBBBBB22127438A4AA512BEA653B8DDEE0550BC2B811A48A492C8178B
-        F89C4C60F678204A7DB22ED003D1EB38845C0EE38F0F385DCE05405AA0072EC3
-        57C89236DEC763D86C36887D11725BD4C0D9C53952990C86A3111C0E077A0490
-        D7D4C029CF23914CE26D3884DD6E474F1471737B4B0F1C0559A4D269BC0E068B
-        16BABD1E22B1183DE00DF8912B142091EFB35AAD78E976711E0AD1033E86413A
-        9B5DFCBFC96482DFEF47F084A3073CDE43842311743A1D588C460408C872C7F4
-        80D96AF90E85C368B65A2892C7ACD66AB0BB5D736A601986619E542A956FD39D
-        B59B4AA5728B648F65D967B55A1D97E71CC76D6F041A8D86B1D96CD6E4D4EBF5
-        9787F2230AF75594CB65C8F376BB2D2DCF09B6BF0268B5DA5DBD5E6F22E38146
-        A349190C06FC0DCFF339F95C8E4EA7DB59D6FD02278D001D0A3E417000000000
-        49454E44AE426082
-      }
-      Stretch = True
-      Transparent = True
     end
     object Label10: TLabel
       Left = 20
@@ -70725,7 +70699,7 @@ object fmServerRegistry: TfmServerRegistry
     ClientWidth = 815
     TabOrder = 1
     object bbTestConnection: TBitBtn
-      Left = 194
+      Left = 24
       Height = 30
       Top = 8
       Width = 162
@@ -70736,7 +70710,7 @@ object fmServerRegistry: TfmServerRegistry
       TabOrder = 0
     end
     object bbCancel: TBitBtn
-      Left = 496
+      Left = 688
       Height = 30
       Top = 8
       Width = 115
@@ -70748,10 +70722,10 @@ object fmServerRegistry: TfmServerRegistry
       TabOrder = 1
     end
     object bbReg: TBitBtn
-      Left = 640
+      Left = 224
       Height = 30
       Top = 8
-      Width = 115
+      Width = 152
       Caption = 'Register'
       Color = clForm
       Default = True
