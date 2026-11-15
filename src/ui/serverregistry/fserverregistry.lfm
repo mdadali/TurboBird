@@ -70530,17 +70530,17 @@ object fmServerRegistry: TfmServerRegistry
       TabOrder = 2
     end
     object lbPortInfo: TLabel
-      Left = 450
+      Left = 448
       Height = 18
-      Top = 115
+      Top = 112
       Width = 54
       Caption = 'Port Info'
       ParentColor = False
     end
     object lbDescription: TLabel
-      Left = 450
+      Left = 448
       Height = 18
-      Top = 163
+      Top = 144
       Width = 66
       Caption = 'Description'
       Font.Style = [fsItalic]

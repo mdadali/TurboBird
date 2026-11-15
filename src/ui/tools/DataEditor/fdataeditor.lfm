@@ -1133,7 +1133,7 @@ inherited frmDataEditor: TfrmDataEditor
         object CheckBoxAutoDedectDelimiter: TCheckBox
           Left = 248
           Height = 22
-          Top = 24
+          Top = 60
           Width = 100
           Caption = 'Auto Dedect'
           Checked = True
@@ -1143,7 +1143,7 @@ inherited frmDataEditor: TfrmDataEditor
         object CheckBoxAutoDedectQuoteChar: TCheckBox
           Left = 248
           Height = 22
-          Top = 62
+          Top = 108
           Width = 100
           Caption = 'Auto Dedect'
           Checked = True
@@ -1153,7 +1153,7 @@ inherited frmDataEditor: TfrmDataEditor
         object CheckBoxAutoDedectLineEnding: TCheckBox
           Left = 248
           Height = 22
-          Top = 104
+          Top = 152
           Width = 100
           Caption = 'Auto Dedect'
           Checked = True
@@ -1185,7 +1185,7 @@ inherited frmDataEditor: TfrmDataEditor
         object CheckBoxAutoDedecDecimalSeparator: TCheckBox
           Left = 248
           Height = 22
-          Top = 152
+          Top = 200
           Width = 100
           Caption = 'Auto Dedect'
           Checked = True
@@ -1317,7 +1317,7 @@ inherited frmDataEditor: TfrmDataEditor
     TableLevel = 4
     FilterOptions = []
     Left = 976
-    Top = 296
+    Top = 344
   end
   object CSVFastDataset1: TCSVFastDataset[15]
     FieldDefs = <>

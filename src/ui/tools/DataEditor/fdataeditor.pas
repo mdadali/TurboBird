@@ -1356,7 +1356,6 @@ begin
 
     if not OpenDialog1.Execute then Exit;
 
-    PageControl1.ActivePage := tsGrid;
     FFileName := OpenDialog1.FileName;
 
     if not SelectDataSetByFileName(FFileName) then
@@ -1591,6 +1590,7 @@ begin
         Sleep(30);
 
         LoadSelectedDataset(FFileName, LoadErr);
+        PageControl1.ActivePage := tsGrid;
       except
         on E: EAbort do
         begin

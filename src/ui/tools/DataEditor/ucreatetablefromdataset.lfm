@@ -1,12 +1,12 @@
 object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
-  Left = 598
-  Height = 540
-  Top = 245
-  Width = 1016
+  Left = 506
+  Height = 633
+  Top = 152
+  Width = 1159
   BorderStyle = bsDialog
   Caption = 'Create Table from DataSet'
-  ClientHeight = 540
-  ClientWidth = 1016
+  ClientHeight = 633
+  ClientWidth = 1159
   OnCreate = FormCreate
   OnShow = FormShow
   Position = poMainFormCenter
@@ -14,12 +14,12 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   object grboxCopyOptions1: TGroupBox
     Left = 0
     Height = 140
-    Top = 327
-    Width = 1016
+    Top = 420
+    Width = 1159
     Align = alBottom
     Caption = 'Copy Options'
     ClientHeight = 110
-    ClientWidth = 1012
+    ClientWidth = 1155
     TabOrder = 0
     object rbAllRows: TRadioButton
       Left = 16
@@ -130,11 +130,11 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   object pnlBottom: TPanel
     Left = 0
     Height = 50
-    Top = 467
-    Width = 1016
+    Top = 560
+    Width = 1159
     Align = alBottom
     ClientHeight = 50
-    ClientWidth = 1016
+    ClientWidth = 1159
     TabOrder = 1
     object btnMainCancel: TButton
       Left = 776
@@ -166,36 +166,36 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object grBoxFields: TGroupBox
     Left = 0
-    Height = 232
-    Top = 96
-    Width = 1016
-    Align = alTop
+    Height = 308
+    Top = 112
+    Width = 1159
+    Align = alClient
     Caption = 'Fields'
-    ClientHeight = 202
-    ClientWidth = 1012
+    ClientHeight = 278
+    ClientWidth = 1155
     TabOrder = 2
     object sgFields: TStringGrid
       Left = 0
-      Height = 202
+      Height = 278
       Top = 0
-      Width = 679
+      Width = 822
       Align = alClient
       FixedCols = 0
       RowCount = 1
       TabOrder = 0
     end
     object pnlFields: TPanel
-      Left = 679
-      Height = 202
+      Left = 822
+      Height = 278
       Top = 0
       Width = 333
       Align = alRight
-      ClientHeight = 202
+      ClientHeight = 278
       ClientWidth = 333
       TabOrder = 1
       object chkLstFields: TCheckListBox
         Left = 1
-        Height = 159
+        Height = 223
         Top = 1
         Width = 331
         Align = alTop
@@ -203,9 +203,9 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
         TabOrder = 0
       end
       object btnSelectAll: TButton
-        Left = 8
+        Left = 16
         Height = 25
-        Top = 168
+        Top = 240
         Width = 111
         Caption = 'Select All'
         OnClick = btnSelectAllClick
@@ -214,7 +214,7 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
       object btnDeselectAll: TButton
         Left = 144
         Height = 25
-        Top = 168
+        Top = 240
         Width = 112
         Caption = 'Deselect All'
         OnClick = btnDeselectAllClick
@@ -224,70 +224,96 @@ object frmCreateTableFromDataSet: TfrmCreateTableFromDataSet
   end
   object Panel1: TPanel
     Left = 0
-    Height = 96
+    Height = 112
     Top = 0
-    Width = 1016
+    Width = 1159
     Align = alTop
-    ClientHeight = 96
-    ClientWidth = 1016
+    ClientHeight = 112
+    ClientWidth = 1159
     TabOrder = 3
     object Label1: TLabel
       Left = 24
       Height = 18
-      Top = 8
+      Top = 24
       Width = 46
       Caption = 'Servers'
       ParentColor = False
     end
     object Label2: TLabel
-      Left = 328
+      Left = 24
       Height = 18
-      Top = 8
+      Top = 68
       Width = 27
       Caption = 'DB''s'
       ParentColor = False
     end
     object cmbBoxServers: TComboBox
-      Left = 24
+      Left = 88
       Height = 32
-      Top = 32
-      Width = 248
+      Top = 16
+      Width = 416
       ItemHeight = 18
       OnChange = cmbBoxServersChange
       Style = csDropDownList
       TabOrder = 0
     end
     object cmbBoxDBs: TComboBox
-      Left = 328
+      Left = 88
       Height = 32
-      Top = 32
-      Width = 196
+      Top = 66
+      Width = 422
       ItemHeight = 18
       OnChange = cmbBoxDBsChange
       Style = csDropDownList
       TabOrder = 1
     end
     object Label4: TLabel
-      Left = 573
+      Left = 552
       Height = 18
-      Top = 8
+      Top = 24
       Width = 73
       Caption = 'Table Name'
       ParentColor = False
     end
     object edtDestTableName: TEdit
-      Left = 573
+      Left = 688
       Height = 32
-      Top = 32
-      Width = 411
+      Top = 16
+      Width = 416
       TabOrder = 2
+    end
+    object chkboxExternalTable: TCheckBox
+      Left = 552
+      Height = 22
+      Top = 68
+      Width = 110
+      Caption = 'External Table'
+      OnChange = chkboxExternalTableChange
+      TabOrder = 3
+    end
+    object edtExternalFile: TEdit
+      Left = 688
+      Height = 32
+      Top = 66
+      Width = 416
+      Enabled = False
+      TabOrder = 4
+    end
+    object btnExternalFile: TButton
+      Left = 1114
+      Height = 25
+      Top = 68
+      Width = 30
+      Caption = '...'
+      Enabled = False
+      TabOrder = 5
     end
   end
   object StatusBar1: TStatusBar
     Left = 0
     Height = 23
-    Top = 517
-    Width = 1016
+    Top = 610
+    Width = 1159
     Panels = <>
   end
 end

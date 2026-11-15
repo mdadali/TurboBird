@@ -23,10 +23,13 @@ type
     btnOK: TButton;
     btnSelectAll: TButton;
     btnRun: TButton;
+    btnExternalFile: TButton;
+    chkboxExternalTable: TCheckBox;
     chkboxCopyData: TCheckBox;
     chkLstFields: TCheckListBox;
     cmbBoxServers: TComboBox;
     cmbBoxDBs: TComboBox;
+    edtExternalFile: TEdit;
     edtLineBuffer: TEdit;
     edtDestTableName: TEdit;
     edtCommitInterval: TEdit;
@@ -53,6 +56,7 @@ type
     procedure btnRunClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnDeselectAllClick(Sender: TObject);
+    procedure chkboxExternalTableChange(Sender: TObject);
     procedure cmbBoxDBsChange(Sender: TObject);
     procedure cmbBoxServersChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -528,6 +532,12 @@ begin
     if i + 1 < sgFields.RowCount then
       sgFields.Cells[0, i + 1] := '0';
   end;
+end;
+
+procedure TfrmCreateTableFromDataSet.chkboxExternalTableChange(Sender: TObject);
+begin
+  edtExternalFile.Enabled := chkboxExternalTable.Checked;
+  btnExternalFile.Enabled := chkboxExternalTable.Checked;
 end;
 
 procedure TfrmCreateTableFromDataSet.cmbBoxDBsChange(Sender: TObject);
