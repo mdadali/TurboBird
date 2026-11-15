@@ -52,6 +52,7 @@ type
     rbRange: TRadioButton;
     sgFields: TStringGrid;
     StatusBar1: TStatusBar;
+    procedure btnExternalFileClick(Sender: TObject);
     procedure btnMainCancelClick(Sender: TObject);
     procedure btnRunClick(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
@@ -87,6 +88,7 @@ type
     function  GetFromRow: Int64;
     function  GetToRow: Int64;
     procedure RunFBInsertRowByRow(ADBIndex: Integer; const ATableName: string);
+    procedure RunFBInsertExternal(ADBIndex: Integer; const ATableName: string);
     procedure AssignParamFromField(Param: TParam; SourceField: TField;
       const TargetTypeString: string);
     procedure CancelButtonClick(Sender: TObject);
@@ -607,6 +609,24 @@ begin
   ModalResult := mrCancel;
 end;
 
+procedure TfrmCreateTableFromDataSet.btnExternalFileClick(Sender: TObject);
+var
+  Dlg: TSaveDialog;
+begin
+  Dlg := TSaveDialog.Create(nil);
+  try
+    Dlg.Title   := 'Select External Table File';
+    Dlg.Filter  := 'All files (*.*)|*.*';
+    Dlg.Options := Dlg.Options + [ofOverwritePrompt];
+    if Trim(edtExternalFile.Text) <> '' then
+      Dlg.FileName := edtExternalFile.Text;
+    if Dlg.Execute then
+      edtExternalFile.Text := Dlg.FileName;
+  finally
+    Dlg.Free;
+  end;
+end;
+
 procedure TfrmCreateTableFromDataSet.CancelButtonClick(Sender: TObject);
 begin
   FCancelled := True;
@@ -629,8 +649,7 @@ var
   DestTrans: TIBTransaction;
   Script: TIBXScript;
   StartTime: TDateTime;
-  TableAlreadyExists: Boolean;
-  DidCopyData: Boolean;
+  TableAlreadyExists, DidCopyData, IsExternal: Boolean;
 begin
   SyncFieldsFromGrid;
 
@@ -648,7 +667,15 @@ begin
     Exit;
   end;
 
-  DestDB   := RegisteredDatabases[DBIndex].IBDatabase;
+  IsExternal := chkboxExternalTable.Checked;
+
+  if IsExternal and (Trim(edtExternalFile.Text) = '') then
+  begin
+    ShowMessage('Please select an external file path.');
+    Exit;
+  end;
+
+  DestDB    := RegisteredDatabases[DBIndex].IBDatabase;
   DestTrans := RegisteredDatabases[DBIndex].IBTransaction;
 
   if not DestDB.Connected then
@@ -693,8 +720,11 @@ begin
         if FieldList <> '' then
           FieldList := FieldList + ',' + sLineBreak;
 
-        FieldList := FieldList + '  ' + QuoteFieldName(FFields[i].FieldName) + ' ' + FFields[i].FieldType;
-        if FFields[i].NotNull then
+        FieldList := FieldList + '  ' +
+          QuoteFieldName(FFields[i].FieldName) + ' ' + FFields[i].FieldType;
+
+        // NOT NULL nur bei normalen Tabellen (External Tables erlauben kein NOT NULL)
+        if FFields[i].NotNull and (not IsExternal) then
           FieldList := FieldList + ' NOT NULL';
       end;
 
@@ -704,8 +734,19 @@ begin
         Exit;
       end;
 
-      SQL := 'CREATE TABLE ' + TableName + ' (' + sLineBreak +
-             FieldList + sLineBreak + ')';
+      if IsExternal then
+      begin
+        SQL := 'CREATE TABLE ' + TableName + sLineBreak +
+               'EXTERNAL FILE ' + QuotedStr(Trim(edtExternalFile.Text)) + sLineBreak +
+               '(' + sLineBreak +
+               FieldList + sLineBreak +
+               ')';
+      end
+      else
+      begin
+        SQL := 'CREATE TABLE ' + TableName + ' (' + sLineBreak +
+               FieldList + sLineBreak + ')';
+      end;
 
       Script.ExecSQLScript(SQL);
       DestTrans.CommitRetaining;
@@ -721,8 +762,24 @@ begin
     // ========================================================================
     if chkboxCopyData.Checked then
     begin
-      RunFBInsertRowByRow(DBIndex, TableName);
-      DidCopyData := True;
+      if IsExternal then
+      begin
+        if MessageDlg(
+             'External Tables have no transaction control.' + sLineBreak +
+             'If an error occurs, partial data remains in the file.' + sLineBreak +
+             sLineBreak +
+             'Continue?',
+             mtWarning, [mbYes, mbNo], 0) = mrYes then
+        begin
+          RunFBInsertExternal(DBIndex, TableName);
+          DidCopyData := True;
+        end;
+      end
+      else
+      begin
+        RunFBInsertRowByRow(DBIndex, TableName);
+        DidCopyData := True;
+      end;
     end;
 
   finally
@@ -736,7 +793,7 @@ begin
 end;
 
 // ============================================================================
-// RowByRow Insert
+// RowByRow Insertt, firebird table
 // ============================================================================
 procedure TfrmCreateTableFromDataSet.RunFBInsertRowByRow(
   ADBIndex: Integer; const ATableName: string);
@@ -1022,6 +1079,315 @@ begin
         Format('  CANCELLED after %s of %s rows',
           [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
     end;
+
+  finally
+    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+    Query.Free;
+    ProgressForm.Free;
+  end;
+end;
+
+procedure TfrmCreateTableFromDataSet.RunFBInsertExternal(
+  ADBIndex: Integer; const ATableName: string);
+var
+  DestDB: TIBDatabase;
+  DestTrans: TIBTransaction;
+  Query: TIBQuery;
+  StartTime, EndTime: TDateTime;
+  ProgressForm: TForm;
+  ProgressLabel, LblElapsed, LblCommit: TLabel;
+  ProgressBar, CommitBar: TProgressBar;
+  BtnCancel: TButton;
+  FieldNames: string;
+  ParamNames: string;
+  CheckedFields: array of Integer;
+  CachedFields: array of TField;
+  CachedTypes: array of string;
+  FieldsPerRow: Integer;
+  FromRow, ToRow, TotalRows: Int64;
+  CurrentRow: Int64;
+  OldDecimalSep: Char;
+  ElapsedSec: Double;
+  RowsPerSec: Double;
+  f, i: Integer;
+
+  function NullAsDefaultFor(const AType: string): string;
+  var
+    BaseType: string;
+    LParen: Integer;
+  begin
+    LParen := Pos('(', AType);
+    if LParen > 0 then
+      BaseType := UpperCase(Trim(Copy(AType, 1, LParen - 1)))
+    else
+      BaseType := UpperCase(Trim(AType));
+
+    if (BaseType = 'VARCHAR') or (BaseType = 'CHAR') or
+       (BaseType = 'CSTRING') or (BaseType = 'TEXT') or
+       (BaseType = 'BLOB') then
+      Result := ''
+    else if (BaseType = 'SMALLINT') or (BaseType = 'INTEGER') or
+            (BaseType = 'BIGINT') or (BaseType = 'INT64') or
+            (BaseType = 'INT128') then
+      Result := '0'
+    else if (BaseType = 'DOUBLE PRECISION') or (BaseType = 'DOUBLE') or
+            (BaseType = 'FLOAT') or (BaseType = 'DECIMAL') or
+            (BaseType = 'NUMERIC') or (BaseType = 'DECFLOAT') then
+      Result := '0'
+    else if BaseType = 'DATE' then
+      Result := '2020-01-01'
+    else if (BaseType = 'TIME') or (BaseType = 'TIME WITH TIME ZONE') then
+      Result := '00:00:00'
+    else if (BaseType = 'TIMESTAMP') or (BaseType = 'TIMESTAMP WITH TIME ZONE') then
+      Result := '2020-01-01 00:00:00'
+    else if BaseType = 'BOOLEAN' then
+      Result := 'FALSE'
+    else
+      Result := '';
+  end;
+
+begin
+  DestDB    := RegisteredDatabases[ADBIndex].IBDatabase;
+  DestTrans := RegisteredDatabases[ADBIndex].IBTransaction;
+
+  if not DestDB.Connected then
+    DestDB.Connected := True;
+  if not DestTrans.InTransaction then
+    DestTrans.StartTransaction;
+
+  // ---- Felder sammeln ----
+  SetLength(CheckedFields, 0);
+  FieldNames := '';
+  ParamNames := '';
+  for i := 0 to High(FFields) do
+    if FFields[i].Checked then
+    begin
+      SetLength(CheckedFields, Length(CheckedFields) + 1);
+      CheckedFields[High(CheckedFields)] := i;
+      if FieldNames <> '' then
+      begin
+        FieldNames := FieldNames + ', ';
+        ParamNames := ParamNames + ', ';
+      end;
+      FieldNames := FieldNames + QuoteFieldName(FFields[i].FieldName);
+      ParamNames := ParamNames + ':p' + IntToStr(High(CheckedFields));
+    end;
+
+  FieldsPerRow := Length(CheckedFields);
+  if FieldsPerRow = 0 then
+  begin
+    ShowMessage('No fields selected.');
+    Exit;
+  end;
+
+  // ---- Bereich ----
+  FromRow := GetFromRow;
+  ToRow   := GetToRow;
+  if (FDataSet <> nil) and (ToRow > FDataSet.RecordCount) then
+    ToRow := FDataSet.RecordCount;
+
+  TotalRows := ToRow - FromRow + 1;
+  if TotalRows <= 0 then
+  begin
+    ShowMessage('No rows to copy.');
+    Exit;
+  end;
+
+  // ---- Caches ----
+  SetLength(CachedFields, FieldsPerRow);
+  SetLength(CachedTypes, FieldsPerRow);
+  for f := 0 to FieldsPerRow - 1 do
+  begin
+    CachedFields[f] := FDataSet.FieldByName(FFields[CheckedFields[f]].FieldName);
+    CachedTypes[f]  := FFields[CheckedFields[f]].FieldType;
+  end;
+
+  Query        := TIBQuery.Create(nil);
+  ProgressForm := TForm.Create(nil);
+  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+  StartTime    := Now;
+  CurrentRow   := 0;
+  FCancelled   := False;
+
+  try
+    DefaultFormatSettings.DecimalSeparator := '.';
+
+    Query.Database                   := DestDB;
+    Query.Transaction                := DestTrans;
+    Query.AllowAutoActivateTransaction := True;
+
+    // ---- Progress-Form ----
+    ProgressForm.FormStyle   := fsNormal;
+    ProgressForm.Caption     := 'Writing to external table ' + ATableName;
+    ProgressForm.Width       := 580;
+    ProgressForm.Height      := 280;
+    ProgressForm.Position    := poScreenCenter;
+    ProgressForm.BorderStyle := bsDialog;
+
+    ProgressLabel := TLabel.Create(ProgressForm);
+    ProgressLabel.Parent  := ProgressForm;
+    ProgressLabel.Left    := 16;
+    ProgressLabel.Top     := 16;
+    ProgressLabel.Width   := 540;
+    ProgressLabel.Caption := Format(
+      'Total: %s rows   |   Rows/sec: calculating...',
+      [FormatFloat('#,##0', TotalRows)]);
+
+    ProgressBar := TProgressBar.Create(ProgressForm);
+    ProgressBar.Parent   := ProgressForm;
+    ProgressBar.Left     := 16;
+    ProgressBar.Top      := 40;
+    ProgressBar.Width    := 540;
+    ProgressBar.Height   := 20;
+    ProgressBar.Min      := 0;
+    ProgressBar.Max      := TotalRows;
+    ProgressBar.Position := 0;
+
+    LblCommit := TLabel.Create(ProgressForm);
+    LblCommit.Parent := ProgressForm;
+    LblCommit.Left   := 16;
+    LblCommit.Top    := 75;
+    LblCommit.Width  := 540;
+    LblCommit.Caption := Format('Rows: 0 of %s',
+      [FormatFloat('#,##0', TotalRows)]);
+
+    CommitBar := TProgressBar.Create(ProgressForm);
+    CommitBar.Parent   := ProgressForm;
+    CommitBar.Left     := 16;
+    CommitBar.Top      := 100;
+    CommitBar.Width    := 540;
+    CommitBar.Height   := 20;
+    CommitBar.Min      := 0;
+    CommitBar.Max      := TotalRows;
+    CommitBar.Position := 0;
+
+    LblElapsed := TLabel.Create(ProgressForm);
+    LblElapsed.Parent  := ProgressForm;
+    LblElapsed.Left    := 16;
+    LblElapsed.Top     := 135;
+    LblElapsed.Width   := 540;
+    LblElapsed.Caption := 'Elapsed: 00:00:00   |   0 rows/sec';
+
+    BtnCancel := TButton.Create(ProgressForm);
+    BtnCancel.Parent  := ProgressForm;
+    BtnCancel.Caption := 'Cancel';
+    BtnCancel.Left    := 230;
+    BtnCancel.Top     := 180;
+    BtnCancel.Width   := 100;
+    BtnCancel.OnClick := @CancelButtonClick;
+
+    ProgressLabel.Caption := 'Please wait — preparing external INSERT...';
+    ProgressForm.Show;
+    ProgressForm.BringToFront;
+    Application.ProcessMessages;
+
+    // ---- Prepared INSERT ----
+    Query.SQL.Text := 'INSERT INTO ' + ATableName + ' (' + FieldNames +
+                      ') VALUES (' + ParamNames + ')';
+    Query.Prepare;
+
+    // ---- Schleife ----
+    FDataSet.DisableControls;
+    try
+      FDataSet.First;
+      for i := 1 to FromRow - 1 do
+        FDataSet.Next;
+
+      while (not FDataSet.EOF) and (CurrentRow < TotalRows) do
+      begin
+        if FCancelled then
+          Break;
+
+        for f := 0 to FieldsPerRow - 1 do
+        begin
+          if CachedFields[f].IsNull then
+            // External Tables: kein NULL → Default-Wert
+            AssignParamFromString(Query.Params[f],
+              NullAsDefaultFor(CachedTypes[f]), False, CachedTypes[f])
+          else
+            AssignParamFromString(Query.Params[f],
+              CachedFields[f].AsString, False, CachedTypes[f]);
+        end;
+
+        try
+          Query.ExecSQL;
+        except
+          on E: Exception do
+          begin
+            // External Table: kein echtes Rollback möglich,
+            // aber wir versuchen es trotzdem
+            if DestTrans.InTransaction then
+              DestTrans.Rollback;
+            raise Exception.CreateFmt(
+              'External INSERT failed at row %d: %s',
+              [CurrentRow + 1, E.Message]);
+          end;
+        end;
+
+        Inc(CurrentRow);
+        FDataSet.Next;
+
+        // Progress alle 1000 Zeilen (kein Commit — External Tables
+        // laufen außerhalb der Transaktion)
+        if (CurrentRow mod 1000) = 0 then
+        begin
+          CommitBar.Position   := CurrentRow;
+          ProgressBar.Position := CurrentRow;
+
+          ElapsedSec := (Now - StartTime) * SecsPerDay;
+          if ElapsedSec > 0.5 then
+            RowsPerSec := CurrentRow / ElapsedSec
+          else
+            RowsPerSec := 0;
+
+          LblElapsed.Caption :=
+            'Elapsed: ' + FormatDateTime('hh:nn:ss', ElapsedSec / SecsPerDay) +
+            '   |   ' + FormatFloat('#,##0', RowsPerSec) + ' rows/sec';
+          LblCommit.Caption := Format('Rows: %s of %s',
+            [FormatFloat('#,##0', CurrentRow),
+             FormatFloat('#,##0', TotalRows)]);
+          ProgressLabel.Caption := Format(
+            'Total: %s rows   |   Current: %s',
+            [FormatFloat('#,##0', TotalRows),
+             FormatFloat('#,##0', CurrentRow)]);
+
+          Application.ProcessMessages;
+        end;
+      end;
+
+      if not FCancelled then
+      begin
+        if DestTrans.InTransaction then
+          DestTrans.Commit;
+        Application.ProcessMessages;
+      end;
+
+    finally
+      EndTime := Now;
+      FDataSet.EnableControls;
+      SetLength(CachedFields, 0);
+      SetLength(CachedTypes, 0);
+      SetLength(CheckedFields, 0);
+      Query.UnPrepare;
+    end;
+
+    // ---- Statistik ----
+    FStats.RowsProcessed := CurrentRow;
+    ElapsedSec := (EndTime - StartTime) * SecsPerDay;
+    if ElapsedSec > 0 then
+      RowsPerSec := CurrentRow / ElapsedSec
+    else
+      RowsPerSec := 0;
+
+    FStats.OptionsExtra := Format(
+      'External Table INSERT (no transaction, %d rows), %.0f rows/sec',
+      [CurrentRow, RowsPerSec]);
+
+    if FCancelled then
+      FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
+        Format('  CANCELLED after %s of %s rows',
+          [FormatFloat('#,##0', CurrentRow),
+           FormatFloat('#,##0', TotalRows)]);
 
   finally
     DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
