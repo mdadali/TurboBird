@@ -1744,6 +1744,13 @@ procedure TCSVFastDataset.LoadFromCSVStream(AStream: TStream);
 var
   P: TCSVFastPacketReader;
 begin
+  if Active then
+  begin
+    Close;
+    Fields.Clear;
+    FieldDefs.Clear;
+  end;
+
   CheckInactive;
   FAborted := False;
 

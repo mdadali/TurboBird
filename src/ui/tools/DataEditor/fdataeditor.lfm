@@ -1,7 +1,7 @@
 inherited frmDataEditor: TfrmDataEditor
-  Left = 1224
+  Left = 501
   Height = 600
-  Top = 479
+  Top = 179
   Width = 1112
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 600
@@ -109,9 +109,9 @@ inherited frmDataEditor: TfrmDataEditor
     Height = 550
     Top = 50
     Width = 1112
-    ActivePage = tsGrid
+    ActivePage = tsSettings
     Align = alClient
-    TabIndex = 0
+    TabIndex = 3
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
@@ -722,8 +722,8 @@ inherited frmDataEditor: TfrmDataEditor
         TabOrder = 1
       end
     end
-    object tsCommonSettings: TTabSheet
-      Caption = 'Common Settings'
+    object tsSettings: TTabSheet
+      Caption = 'Settings'
       ClientHeight = 515
       ClientWidth = 1108
       object grboxCSVFileRead: TGroupBox
@@ -1196,6 +1196,8 @@ inherited frmDataEditor: TfrmDataEditor
     end
   end
   inherited JCScaler1: TJCScaler[2]
+    Left = 704
+    Top = 48
   end
   object DataSource1: TDataSource[3]
     Left = 504

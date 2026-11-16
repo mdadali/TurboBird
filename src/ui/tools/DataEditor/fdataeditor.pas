@@ -120,7 +120,7 @@ type
     sWorksheetDataset1: TsWorksheetDataset;
     SynEditSQL: TSynEdit;
     SynSQLSyn1: TSynSQLSyn;
-    tsCommonSettings: TTabSheet;
+    tsSettings: TTabSheet;
     tsSQL: TTabSheet;
     tsGrid: TTabSheet;
     tsDetail: TTabSheet;
@@ -264,6 +264,8 @@ type
     procedure MarkDataSetChanged;
     procedure ClearDataSetChanged;
     procedure GenericDatasetModified(DataSet: TDataSet);
+
+    procedure ResetCSVFastDatasetState;
   public
   end;
 
@@ -870,14 +872,29 @@ end;
 procedure TfrmDataEditor.ResetDataset(DS: TDataSet);
 begin
   if DS = nil then Exit;
-  if DS.Active then DS.DisableControls;
+
   try
-    try if DS.Active then DS.Close;         except end;
-    try DS.Fields.Clear;                    except end;
-    try DS.FieldDefs.Clear;                 except end;
-  finally
-    if DS.Active then DS.EnableControls;
+    if DS.ControlsDisabled then
+      DS.EnableControls;
+  except
   end;
+
+  try
+    if DS.Active then
+    begin
+      DS.DisableControls;
+      try
+        DS.Close;
+      finally
+        if DS.ControlsDisabled then
+          DS.EnableControls;
+      end;
+    end;
+  except
+  end;
+
+  try DS.Fields.Clear;    except end;
+  try DS.FieldDefs.Clear; except end;
 end;
 
 procedure TfrmDataEditor.ResetAllDatasets;
@@ -1164,6 +1181,7 @@ begin
   Ext := LowerCase(ExtractFileExt(AFileName));
 
   ResetAllDatasets;
+  ResetCSVFastDatasetState;
 
   if (Ext = '.csv') then
   begin
@@ -1301,10 +1319,29 @@ begin
   end;
 end;
 
+
+procedure TfrmDataEditor.ResetCSVFastDatasetState;
+begin
+  if not Assigned(CSVFastDataset1) then Exit;
+
+  // Reader-Runtime
+  CSVFastDataset1.OnProgress           := nil;
+  CSVFastDataset1.CancelFlag           := nil;
+  CSVFastDataset1.SkipFirstRows        := 0;
+  CSVFastDataset1.StopAfterRow         := 0;
+  CSVFastDataset1.TotalRowsForProgress := 0;
+
+  // Writer-Runtime (sicherheitshalber)
+  CSVFastDataset1.OnSaveProgress       := nil;
+  CSVFastDataset1.SaveCancelFlag       := nil;
+  CSVFastDataset1.SaveSkipFirstRows    := 0;
+  CSVFastDataset1.SaveStopAfterRow     := 0;
+end;
+
+
 { ==================================================================
   btnOpenFileClick
   ================================================================== }
-
 procedure TfrmDataEditor.btnOpenFileClick(Sender: TObject);
 var
   FileSize: Int64;
@@ -1564,6 +1601,8 @@ begin
       FLastProgressRows    := 0;
       FLastProgressBytes   := 0;
       FLastProgressSeconds := 0;
+
+      ResetCSVFastDatasetState;
 
       TCSVFastDataset(CSVFastDataset1).OnProgress := @HandleLoadProgress;
       TCSVFastDataset(CSVFastDataset1).TotalRowsForProgress := FProgTotalRows;
