@@ -1,11 +1,11 @@
 { This is an automatically generated lazarus resource file }
 
 LazarusResources.Add('TfmMain','FORMDATA',[
-  'TPF0'#241#7'TfmMain'#6'fmMain'#4'Left'#3#8#4#6'Height'#3#156#2#3'Top'#3#129#1
-  +#5'Width'#3#206#5#7'Caption'#6#28'TurboBird Admin for Firebird'#12'ClientHei'
-  +'ght'#3'~'#2#11'ClientWidth'#3#206#5#5'Color'#7#6'clForm'#8'DragMode'#7#11'd'
-  +'mAutomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10#239#182#2#0#235#182#2#0#0
-  +#0#1#0#6#0#0#0#0#0#1#0' '#0'}1'#1#0'f'#0#0#0#128#128#0#0#1#0' '#0'('#8#1#0
+  'TPF0'#241#7'TfmMain'#6'fmMain'#4'Left'#3#220#4#6'Height'#3#156#2#3'Top'#3#200
+  +#2#5'Width'#3#206#5#7'Caption'#6#28'TurboBird Admin for Firebird'#12'ClientH'
+  +'eight'#3'~'#2#11'ClientWidth'#3#206#5#5'Color'#7#6'clForm'#8'DragMode'#7#11
+  +'dmAutomatic'#9'Font.Name'#6#4'Sans'#9'Icon.Data'#10#239#182#2#0#235#182#2#0
+  +#0#0#1#0#6#0#0#0#0#0#1#0' '#0'}1'#1#0'f'#0#0#0#128#128#0#0#1#0' '#0'('#8#1#0
   +#227'1'#1#0'@@'#0#0#1#0' '#0'(B'#0#0#11':'#2#0'00'#0#0#1#0' '#0#168'%'#0#0'3'
   +'|'#2#0'  '#0#0#1#0' '#0#168#16#0#0#219#161#2#0#16#16#0#0#1#0' '#0'h'#4#0#0
   +#131#178#2#0#137'PNG'#13#10#26#10#0#0#0#13'IHDR'#0#0#1#0#0#0#1#0#8#6#0#0#0'\'

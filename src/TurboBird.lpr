@@ -56,8 +56,8 @@ uses
   IBSQLMonitor,
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
-  datamodulesystem, jvRuntimeDesign, uiblaz, pascalscript, pascalscriptfcl,
-  uPSI_uibconst, fservers, fActivityMonitor, edit_tabledata_new,
+  datamodulesystem, jvRuntimeDesign, pascalscript, pascalscriptfcl,
+  uPSI_uibconst, uiblaz, fservers, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, fdataeditor, fSQLParser,
   u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
   UniqueConstraints, CheckConstraints, NotNullConstraints,

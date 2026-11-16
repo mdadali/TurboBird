@@ -12,36 +12,44 @@ uses
   uGenSQLFromCSVDataset,
   uthemeselector,
   uReport,
-  uSystemInfo;
+  uSystemInfo,
+   uib, uiblib;
 
 type
   { TfrmCreateTableFromDataSet }
 
   TfrmCreateTableFromDataSet = class(TForm)
+    btnExternalFile: TButton;
     btnMainCancel: TButton;
     btnDeselectAll: TButton;
     btnOK: TButton;
     btnSelectAll: TButton;
     btnRun: TButton;
-    btnExternalFile: TButton;
-    chkboxExternalTable: TCheckBox;
     chkboxCopyData: TCheckBox;
+    chkboxExternalTable: TCheckBox;
     chkLstFields: TCheckListBox;
-    cmbBoxServers: TComboBox;
     cmbBoxDBs: TComboBox;
-    edtExternalFile: TEdit;
-    edtLineBuffer: TEdit;
+    cmbBoxServers: TComboBox;
+    edtRefreshInterval: TEdit;
     edtDestTableName: TEdit;
-    edtCommitInterval: TEdit;
+    edtExternalFile: TEdit;
     edtFrom: TEdit;
+    edtWriteBuffer: TEdit;
     edtTo: TEdit;
     grBoxCopyOptions1: TGroupBox;
+    grboxDestination: TGroupBox;
+    grboxExternalTable: TGroupBox;
     grBoxFields: TGroupBox;
+    GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label9: TLabel;
     lblHint: TLabel;
     Label8: TLabel;
     lblStatus: TLabel;
@@ -84,7 +92,6 @@ type
     procedure FillDBCombo;
     function  GetTargetDBIndex: Integer;
     function  GetTargetTable: string;
-    function  GetCommitInterval: Int64;
     function  GetFromRow: Int64;
     function  GetToRow: Int64;
     procedure RunFBInsertRowByRow(ADBIndex: Integer; const ATableName: string);
@@ -103,7 +110,9 @@ type
     procedure AssignParamFromString(Param: TParam; const Value: string;
       AIsNull: Boolean; const TargetTypeString: string);
     function  FieldValueToSQLLiteral(const AValue: string; AField: TField; const ADestType: string): string;
-    class function QuoteFieldName(const AName: string): string;
+    function QuoteFieldName(const AName: string): string;
+    function GetRefreshInterval: Int64;
+    function GetWriteBufferBytes: Integer;
   public
     procedure Init(ADataSet: TDataSet; const AFileName: string);
   end;
@@ -149,7 +158,7 @@ begin
   FStats.DestDatabase      := RegisteredDatabases[ADBIndex].RegRec.Title;
   FStats.DestTable         := ATableName;
   FStats.DestServerVersion := RegisteredDatabases[ADBIndex].RegRec.ServerVersionString;
-  FStats.BatchSize         := GetCommitInterval;
+  FStats.BatchSize         := GetRefreshInterval;
   FStats.FromRow           := GetFromRow;
   FStats.ToRow             := GetToRow;
 
@@ -211,7 +220,6 @@ begin
   SetupGridColumns;
   rbAllRows.OnChange := @rbAllRowsChange;
   rbRange.OnChange   := @rbAllRowsChange;
-  edtCommitInterval.Text := '100000';
   lblHint.Alignment := taCenter;
   lblHint.Layout    := tlCenter;
   lblHint.WordWrap  := True;
@@ -540,6 +548,7 @@ procedure TfrmCreateTableFromDataSet.chkboxExternalTableChange(Sender: TObject);
 begin
   edtExternalFile.Enabled := chkboxExternalTable.Checked;
   btnExternalFile.Enabled := chkboxExternalTable.Checked;
+  edtWriteBuffer.Enabled  := chkboxExternalTable.Checked;
 end;
 
 procedure TfrmCreateTableFromDataSet.cmbBoxDBsChange(Sender: TObject);
@@ -564,11 +573,23 @@ begin
   Result := Trim(edtDestTableName.Text);
 end;
 
-function TfrmCreateTableFromDataSet.GetCommitInterval: Int64;
+function TfrmCreateTableFromDataSet.GetRefreshInterval: Int64;
 begin
-  Result := StrToIntDef(edtCommitInterval.Text, 100000);
+  Result := StrToIntDef(Trim(edtRefreshInterval.Text), 10000);
   if Result < 1 then
-    Result := 100000;
+    Result := 10000;
+end;
+
+function TfrmCreateTableFromDataSet.GetWriteBufferBytes: Integer;
+var
+  MB: Integer;
+begin
+  MB := StrToIntDef(Trim(edtWriteBuffer.Text), 32);
+  if MB < 1 then
+    MB := 1
+  else if MB > 512 then
+    MB := 512;
+  Result := MB * 1024 * 1024;
 end;
 
 function TfrmCreateTableFromDataSet.GetFromRow: Int64;
@@ -797,6 +818,8 @@ end;
 // ============================================================================
 procedure TfrmCreateTableFromDataSet.RunFBInsertRowByRow(
   ADBIndex: Integer; const ATableName: string);
+const
+  MAX_INSERTS_PER_BLOCK = 256;
 var
   DestDB: TIBDatabase;
   DestTrans: TIBTransaction;
@@ -807,345 +830,23 @@ var
   ProgressBar, CommitBar: TProgressBar;
   BtnCancel: TButton;
   FieldNames: string;
-  ParamNames: string;
   CheckedFields: array of Integer;
   CachedFields: array of TField;
   CachedTypes: array of string;
   FieldsPerRow: Integer;
   FromRow, ToRow, TotalRows: Int64;
   CurrentRow: Int64;
+  RefreshEveryNRows: Int64;
+  RowsSinceRefresh: Int64;
+  MaxRowsPerBlock: Integer;
+  BlockRowCount: Integer;
   OldDecimalSep: Char;
-  ElapsedSec: Double;
-  RowsPerSec: Double;
-  CommitEveryNRows: Integer;
-  RowsSinceCommit: Integer;
+  ElapsedSec, RowsPerSec: Double;
+  InsertPrefix: string;
+  BlockSB: TStringBuilder;
+  RowValues: string;
+  ValLit: string;
   f, i: Integer;
-begin
-  DestDB   := RegisteredDatabases[ADBIndex].IBDatabase;
-  DestTrans := RegisteredDatabases[ADBIndex].IBTransaction;
-
-  if not DestDB.Connected then
-    DestDB.Connected := True;
-  if not DestTrans.InTransaction then
-    DestTrans.StartTransaction;
-
-  // Felder sammeln
-  SetLength(CheckedFields, 0);
-  FieldNames := '';
-  ParamNames := '';
-  for i := 0 to High(FFields) do
-    if FFields[i].Checked then
-    begin
-      SetLength(CheckedFields, Length(CheckedFields) + 1);
-      CheckedFields[High(CheckedFields)] := i;
-      if FieldNames <> '' then
-      begin
-        FieldNames := FieldNames + ', ';
-        ParamNames := ParamNames + ', ';
-      end;
-      FieldNames := FieldNames + QuoteFieldName(FFields[i].FieldName);
-      ParamNames := ParamNames + ':p' + IntToStr(High(CheckedFields));
-    end;
-
-  FieldsPerRow := Length(CheckedFields);
-  if FieldsPerRow = 0 then
-  begin
-    ShowMessage('No fields selected.');
-    Exit;
-  end;
-
-  // Bereich
-  FromRow := GetFromRow;
-  ToRow   := GetToRow;
-  if (FDataSet <> nil) and (ToRow > FDataSet.RecordCount) then
-    ToRow := FDataSet.RecordCount;
-
-  TotalRows := ToRow - FromRow + 1;
-  if TotalRows <= 0 then
-  begin
-    ShowMessage('No rows to copy.');
-    Exit;
-  end;
-
-  // Caches
-  SetLength(CachedFields, FieldsPerRow);
-  SetLength(CachedTypes, FieldsPerRow);
-  for f := 0 to FieldsPerRow - 1 do
-  begin
-    CachedFields[f] := FDataSet.FieldByName(FFields[CheckedFields[f]].FieldName);
-    CachedTypes[f]  := FFields[CheckedFields[f]].FieldType;
-  end;
-
-  // Commit-Intervall aus dem Edit-Feld (in Zeilen)
-  CommitEveryNRows := Max(1, GetCommitInterval);
-  RowsSinceCommit  := 0;
-
-  Query        := TIBQuery.Create(nil);
-
-  ProgressForm := TForm.Create(Self);
-  ProgressForm.Parent := self;
-  OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
-  StartTime    := Now;
-  CurrentRow   := 0;
-  FCancelled   := False;
-
-  try
-    DefaultFormatSettings.DecimalSeparator := '.';
-
-    Query.Database                   := DestDB;
-    Query.Transaction                := DestTrans;
-    Query.AllowAutoActivateTransaction := True;
-
-    // Progress-Form
-    ProgressForm.FormStyle   := fsNormal;
-    ProgressForm.Caption     := 'Copying data to ' + ATableName;
-    ProgressForm.Width       := 580;
-    ProgressForm.Height      := 280;
-    ProgressForm.BorderStyle := bsNone;
-    ProgressForm.Left := (self.Width - ProgressForm.Width) div 2 ;
-    ProgressForm.Top  := ((self.Height - ProgressForm.Height) div 2) + 20;
-
-    ProgressLabel := TLabel.Create(ProgressForm);
-    ProgressLabel.Parent  := ProgressForm;
-    ProgressLabel.Left    := 16;
-    ProgressLabel.Top     := 16;
-    ProgressLabel.Width   := 540;
-    ProgressLabel.Caption := Format(
-      'Total: %s rows   |   Rows/sec: calculating...',
-      [FormatFloat('#,##0', TotalRows)]);
-
-    ProgressBar := TProgressBar.Create(ProgressForm);
-    ProgressBar.Parent   := ProgressForm;
-    ProgressBar.Left     := 16;
-    ProgressBar.Top      := 40;
-    ProgressBar.Width    := 540;
-    ProgressBar.Height   := 20;
-    ProgressBar.Min      := 0;
-    ProgressBar.Max      := TotalRows;
-    ProgressBar.Position := 0;
-
-    LblCommit := TLabel.Create(ProgressForm);
-    LblCommit.Parent := ProgressForm;
-    LblCommit.Left   := 16;
-    LblCommit.Top    := 75;
-    LblCommit.Width  := 540;
-    LblCommit.Caption := Format('Rows: 0 of %s', [FormatFloat('#,##0', TotalRows)]);
-
-    CommitBar := TProgressBar.Create(ProgressForm);
-    CommitBar.Parent   := ProgressForm;
-    CommitBar.Left     := 16;
-    CommitBar.Top      := 100;
-    CommitBar.Width    := 540;
-    CommitBar.Height   := 20;
-    CommitBar.Min      := 0;
-    CommitBar.Max      := TotalRows;
-    CommitBar.Position := 0;
-
-    LblElapsed := TLabel.Create(ProgressForm);
-    LblElapsed.Parent  := ProgressForm;
-    LblElapsed.Left    := 16;
-    LblElapsed.Top     := 135;
-    LblElapsed.Width   := 540;
-    LblElapsed.Caption := 'Elapsed: 00:00:00   |   0 rows/sec';
-
-    BtnCancel := TButton.Create(ProgressForm);
-    BtnCancel.Parent  := ProgressForm;
-    BtnCancel.Caption := 'Cancel';
-    BtnCancel.Left    := 230;
-    BtnCancel.Top     := 180;
-    BtnCancel.Width   := 100;
-    BtnCancel.OnClick := @CancelButtonClick;
-
-    ProgressLabel.Caption := 'Please wait — preparing data...';
-
-    ProgressForm.Show;
-    frmThemeSelector.btnApplyClick(ProgressForm);
-    //ProgressForm.BringToFront;
-    Application.ProcessMessages;
-    //Sleep(30);
-
-    // Prepared INSERT einmal aufbauen (Parameter, kein SQL-String pro Zeile)
-    Query.SQL.Text := 'INSERT INTO ' + ATableName + ' (' + FieldNames +
-                      ') VALUES (' + ParamNames + ')';
-    Query.Prepare;
-
-    // Row-by-Row INSERT-Schleife
-    FDataSet.DisableControls;
-    try
-      FDataSet.First;
-      for i := 1 to FromRow - 1 do
-        FDataSet.Next;
-
-      ProgressLabel.Caption := 'Please wait — preparing data...';
-      Application.ProcessMessages;
-      while (not FDataSet.EOF) and (CurrentRow < TotalRows) do
-      begin
-        if FCancelled then
-          Break;
-
-        // Parameter aus dem Dataset füllen (zieltyp-aware)
-        for f := 0 to FieldsPerRow - 1 do
-        begin
-          if CachedFields[f].IsNull then
-            AssignParamFromString(Query.Params[f], '', True, CachedTypes[f])
-          else
-            AssignParamFromString(Query.Params[f], CachedFields[f].AsString, False, CachedTypes[f]);
-        end;
-
-        try
-          Query.ExecSQL;
-        except
-          on E: Exception do
-          begin
-            if DestTrans.InTransaction then
-              DestTrans.Rollback;
-            raise Exception.CreateFmt(
-              'INSERT failed at row %d: %s',
-              [CurrentRow + 1, E.Message]);
-          end;
-        end;
-
-        Inc(CurrentRow);
-        Inc(RowsSinceCommit);
-        FDataSet.Next;
-
-        // Commit nach dem konfigurierten Intervall (CommitRetaining + ProcessMessages)
-        if RowsSinceCommit >= CommitEveryNRows then
-        begin
-          DestTrans.CommitRetaining;
-          RowsSinceCommit := 0;
-
-          CommitBar.Position := CurrentRow;
-          ProgressBar.Position := CurrentRow;
-
-          ElapsedSec := (Now - StartTime) * SecsPerDay;
-          if ElapsedSec > 0.5 then
-            RowsPerSec := CurrentRow / ElapsedSec
-          else
-            RowsPerSec := 0;
-
-          LblElapsed.Caption :=
-            'Elapsed: ' + FormatDateTime('hh:nn:ss', ElapsedSec / SecsPerDay) +
-            '   |   ' + FormatFloat('#,##0', RowsPerSec) + ' rows/sec';
-          LblCommit.Caption := Format('Rows: %s of %s',
-            [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
-          ProgressLabel.Caption := Format(
-            'Total: %s rows   |   Current: %s',
-            [FormatFloat('#,##0', TotalRows), FormatFloat('#,##0', CurrentRow)]);
-
-          Application.ProcessMessages;
-        end;
-      end;
-
-      // Finaler Commit (kein CommitRetaining) + ProcessMessages
-      if not FCancelled then
-      begin
-        if DestTrans.InTransaction then
-          DestTrans.Commit;
-        Application.ProcessMessages;
-      end;
-
-    finally
-      EndTime := Now;
-      FDataSet.EnableControls;
-      SetLength(CachedFields, 0);
-      SetLength(CachedTypes, 0);
-      SetLength(CheckedFields, 0);
-      Query.UnPrepare;
-    end;
-
-    // Statistik
-    FStats.RowsProcessed := CurrentRow;
-    ElapsedSec := (EndTime - StartTime) * SecsPerDay;
-    if ElapsedSec > 0 then
-      RowsPerSec := CurrentRow / ElapsedSec
-    else
-      RowsPerSec := 0;
-
-    if FStats.OptionsExtra = '' then
-      FStats.OptionsExtra := Format(
-        'Row-by-Row INSERT (prepared, %d rows), %.0f rows/sec',
-        [CurrentRow, RowsPerSec])
-    else
-      FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
-        '  ' + Format('Row-by-Row INSERT (prepared, %d rows), %.0f rows/sec',
-          [CurrentRow, RowsPerSec]);
-
-    if FCancelled then
-    begin
-      if DestTrans.InTransaction then
-        DestTrans.Rollback;
-      FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
-        Format('  CANCELLED after %s of %s rows',
-          [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
-    end;
-
-  finally
-    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
-    Query.Free;
-    ProgressForm.Free;
-  end;
-end;
-
-procedure TfrmCreateTableFromDataSet.RunFBInsertExternal(
-  ADBIndex: Integer; const ATableName: string);
-var
-  DestDB: TIBDatabase;
-  DestTrans: TIBTransaction;
-  Query: TIBQuery;
-  StartTime, EndTime: TDateTime;
-  ProgressForm: TForm;
-  ProgressLabel, LblElapsed, LblCommit: TLabel;
-  ProgressBar, CommitBar: TProgressBar;
-  BtnCancel: TButton;
-  FieldNames: string;
-  ParamNames: string;
-  CheckedFields: array of Integer;
-  CachedFields: array of TField;
-  CachedTypes: array of string;
-  FieldsPerRow: Integer;
-  FromRow, ToRow, TotalRows: Int64;
-  CurrentRow: Int64;
-  OldDecimalSep: Char;
-  ElapsedSec: Double;
-  RowsPerSec: Double;
-  f, i: Integer;
-
-  function NullAsDefaultFor(const AType: string): string;
-  var
-    BaseType: string;
-    LParen: Integer;
-  begin
-    LParen := Pos('(', AType);
-    if LParen > 0 then
-      BaseType := UpperCase(Trim(Copy(AType, 1, LParen - 1)))
-    else
-      BaseType := UpperCase(Trim(AType));
-
-    if (BaseType = 'VARCHAR') or (BaseType = 'CHAR') or
-       (BaseType = 'CSTRING') or (BaseType = 'TEXT') or
-       (BaseType = 'BLOB') then
-      Result := ''
-    else if (BaseType = 'SMALLINT') or (BaseType = 'INTEGER') or
-            (BaseType = 'BIGINT') or (BaseType = 'INT64') or
-            (BaseType = 'INT128') then
-      Result := '0'
-    else if (BaseType = 'DOUBLE PRECISION') or (BaseType = 'DOUBLE') or
-            (BaseType = 'FLOAT') or (BaseType = 'DECIMAL') or
-            (BaseType = 'NUMERIC') or (BaseType = 'DECFLOAT') then
-      Result := '0'
-    else if BaseType = 'DATE' then
-      Result := '2020-01-01'
-    else if (BaseType = 'TIME') or (BaseType = 'TIME WITH TIME ZONE') then
-      Result := '00:00:00'
-    else if (BaseType = 'TIMESTAMP') or (BaseType = 'TIMESTAMP WITH TIME ZONE') then
-      Result := '2020-01-01 00:00:00'
-    else if BaseType = 'BOOLEAN' then
-      Result := 'FALSE'
-    else
-      Result := '';
-  end;
-
 begin
   DestDB    := RegisteredDatabases[ADBIndex].IBDatabase;
   DestTrans := RegisteredDatabases[ADBIndex].IBTransaction;
@@ -1158,19 +859,14 @@ begin
   // ---- Felder sammeln ----
   SetLength(CheckedFields, 0);
   FieldNames := '';
-  ParamNames := '';
   for i := 0 to High(FFields) do
     if FFields[i].Checked then
     begin
       SetLength(CheckedFields, Length(CheckedFields) + 1);
       CheckedFields[High(CheckedFields)] := i;
       if FieldNames <> '' then
-      begin
         FieldNames := FieldNames + ', ';
-        ParamNames := ParamNames + ', ';
-      end;
       FieldNames := FieldNames + QuoteFieldName(FFields[i].FieldName);
-      ParamNames := ParamNames + ':p' + IntToStr(High(CheckedFields));
     end;
 
   FieldsPerRow := Length(CheckedFields);
@@ -1202,8 +898,19 @@ begin
     CachedTypes[f]  := FFields[CheckedFields[f]].FieldType;
   end;
 
+  // Schutz gegen Firebirds 64-KB-BLR-Limit bei sehr breiten Tabellen (max. 256 Zeilen/Block)
+  MaxRowsPerBlock := Min(MAX_INSERTS_PER_BLOCK, Max(1, 3500 div Max(1, FieldsPerRow)));
+
+  // UI-Refresh-Intervall (umbenanntes edtRefreshInterval)
+  RefreshEveryNRows := Max(1, StrToIntDef(edtRefreshInterval.Text, 10000));
+  RowsSinceRefresh  := 0;
+
+  InsertPrefix := '  INSERT INTO ' + ATableName + ' (' + FieldNames + ') VALUES (';
+
   Query        := TIBQuery.Create(nil);
-  ProgressForm := TForm.Create(nil);
+  BlockSB      := TStringBuilder.Create(65536);
+  ProgressForm := TForm.Create(Self);
+  ProgressForm.Parent := Self;
   OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
   StartTime    := Now;
   CurrentRow   := 0;
@@ -1215,14 +922,16 @@ begin
     Query.Database                   := DestDB;
     Query.Transaction                := DestTrans;
     Query.AllowAutoActivateTransaction := True;
+    Query.ParamCheck                 := False; // Wichtig: Doppelpunkte in Strings/Zeiten nicht als Parameter parsen!
 
     // ---- Progress-Form ----
     ProgressForm.FormStyle   := fsNormal;
-    ProgressForm.Caption     := 'Writing to external table ' + ATableName;
+    ProgressForm.Caption     := 'Copying data to ' + ATableName;
     ProgressForm.Width       := 580;
     ProgressForm.Height      := 280;
-    ProgressForm.Position    := poScreenCenter;
-    ProgressForm.BorderStyle := bsDialog;
+    ProgressForm.BorderStyle := bsNone;
+    ProgressForm.Left        := (Self.Width - ProgressForm.Width) div 2;
+    ProgressForm.Top         := ((Self.Height - ProgressForm.Height) div 2) + 20;
 
     ProgressLabel := TLabel.Create(ProgressForm);
     ProgressLabel.Parent  := ProgressForm;
@@ -1244,12 +953,11 @@ begin
     ProgressBar.Position := 0;
 
     LblCommit := TLabel.Create(ProgressForm);
-    LblCommit.Parent := ProgressForm;
-    LblCommit.Left   := 16;
-    LblCommit.Top    := 75;
-    LblCommit.Width  := 540;
-    LblCommit.Caption := Format('Rows: 0 of %s',
-      [FormatFloat('#,##0', TotalRows)]);
+    LblCommit.Parent  := ProgressForm;
+    LblCommit.Left    := 16;
+    LblCommit.Top     := 75;
+    LblCommit.Width   := 540;
+    LblCommit.Caption := Format('Rows: 0 of %s', [FormatFloat('#,##0', TotalRows)]);
 
     CommitBar := TProgressBar.Create(ProgressForm);
     CommitBar.Parent   := ProgressForm;
@@ -1276,66 +984,84 @@ begin
     BtnCancel.Width   := 100;
     BtnCancel.OnClick := @CancelButtonClick;
 
-    ProgressLabel.Caption := 'Please wait — preparing external INSERT...';
+    ProgressLabel.Caption := 'Please wait — preparing EXECUTE BLOCK import...';
     ProgressForm.Show;
-    ProgressForm.BringToFront;
+    frmThemeSelector.btnApplyClick(ProgressForm);
     Application.ProcessMessages;
 
-    // ---- Prepared INSERT ----
-    Query.SQL.Text := 'INSERT INTO ' + ATableName + ' (' + FieldNames +
-                      ') VALUES (' + ParamNames + ')';
-    Query.Prepare;
-
-    // ---- Schleife ----
+    // ---- EXECUTE BLOCK Schleife ----
     FDataSet.DisableControls;
     try
       FDataSet.First;
       for i := 1 to FromRow - 1 do
         FDataSet.Next;
 
+      BlockSB.Clear;
+      BlockSB.AppendLine('EXECUTE BLOCK AS BEGIN');
+      BlockRowCount := 0;
+
       while (not FDataSet.EOF) and (CurrentRow < TotalRows) do
       begin
         if FCancelled then
           Break;
 
+        // Zeile als SQL-Literale zusammenbauen
+        BlockSB.Append(InsertPrefix);
         for f := 0 to FieldsPerRow - 1 do
         begin
-          if CachedFields[f].IsNull then
-            // External Tables: kein NULL → Default-Wert
-            AssignParamFromString(Query.Params[f],
-              NullAsDefaultFor(CachedTypes[f]), False, CachedTypes[f])
-          else
-            AssignParamFromString(Query.Params[f],
-              CachedFields[f].AsString, False, CachedTypes[f]);
-        end;
+          if f > 0 then
+            BlockSB.Append(', ');
 
-        try
-          Query.ExecSQL;
-        except
-          on E: Exception do
+          if CachedFields[f].IsNull then
+            BlockSB.Append('NULL')
+          else
           begin
-            // External Table: kein echtes Rollback möglich,
-            // aber wir versuchen es trotzdem
-            if DestTrans.InTransaction then
-              DestTrans.Rollback;
-            raise Exception.CreateFmt(
-              'External INSERT failed at row %d: %s',
-              [CurrentRow + 1, E.Message]);
+            ValLit := FieldValueToSQLLiteral(
+              CachedFields[f].AsString, CachedFields[f], CachedTypes[f]);
+            BlockSB.Append(ValLit);
           end;
         end;
+        BlockSB.AppendLine(');');
 
+        Inc(BlockRowCount);
         Inc(CurrentRow);
+        Inc(RowsSinceRefresh);
         FDataSet.Next;
 
-        // Progress alle 1000 Zeilen (kein Commit — External Tables
-        // laufen außerhalb der Transaktion)
-        if (CurrentRow mod 1000) = 0 then
+        // Block voll → EXECUTE BLOCK abfeuern + CommitRetaining (ohne ProcessMessages)
+        if BlockRowCount >= MaxRowsPerBlock then
         begin
+          BlockSB.Append('END');
+          try
+            Query.SQL.Text := BlockSB.ToString;
+            Query.ExecSQL;
+            DestTrans.CommitRetaining;
+          except
+            on E: Exception do
+            begin
+              if DestTrans.InTransaction then
+                DestTrans.Rollback;
+              raise Exception.CreateFmt(
+                'EXECUTE BLOCK failed around row %d: %s',
+                [CurrentRow, E.Message]);
+            end;
+          end;
+
+          BlockSB.Clear;
+          BlockSB.AppendLine('EXECUTE BLOCK AS BEGIN');
+          BlockRowCount := 0;
+        end;
+
+        // UI-Update nur im edtRefreshInterval-Takt (inkl. Application.ProcessMessages)
+        if RowsSinceRefresh >= RefreshEveryNRows then
+        begin
+          RowsSinceRefresh := 0;
+
           CommitBar.Position   := CurrentRow;
           ProgressBar.Position := CurrentRow;
 
           ElapsedSec := (Now - StartTime) * SecsPerDay;
-          if ElapsedSec > 0.5 then
+          if ElapsedSec > 0.2 then
             RowsPerSec := CurrentRow / ElapsedSec
           else
             RowsPerSec := 0;
@@ -1344,17 +1070,35 @@ begin
             'Elapsed: ' + FormatDateTime('hh:nn:ss', ElapsedSec / SecsPerDay) +
             '   |   ' + FormatFloat('#,##0', RowsPerSec) + ' rows/sec';
           LblCommit.Caption := Format('Rows: %s of %s',
-            [FormatFloat('#,##0', CurrentRow),
-             FormatFloat('#,##0', TotalRows)]);
+            [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
           ProgressLabel.Caption := Format(
             'Total: %s rows   |   Current: %s',
-            [FormatFloat('#,##0', TotalRows),
-             FormatFloat('#,##0', CurrentRow)]);
+            [FormatFloat('#,##0', TotalRows), FormatFloat('#,##0', CurrentRow)]);
 
           Application.ProcessMessages;
         end;
       end;
 
+      // Restlichen unvollständigen Block ausführen
+      if (not FCancelled) and (BlockRowCount > 0) then
+      begin
+        BlockSB.Append('END');
+        try
+          Query.SQL.Text := BlockSB.ToString;
+          Query.ExecSQL;
+        except
+          on E: Exception do
+          begin
+            if DestTrans.InTransaction then
+              DestTrans.Rollback;
+            raise Exception.CreateFmt(
+              'Final EXECUTE BLOCK failed around row %d: %s',
+              [CurrentRow, E.Message]);
+          end;
+        end;
+      end;
+
+      // Finaler Commit (kein CommitRetaining) + ProcessMessages
       if not FCancelled then
       begin
         if DestTrans.InTransaction then
@@ -1368,7 +1112,6 @@ begin
       SetLength(CachedFields, 0);
       SetLength(CachedTypes, 0);
       SetLength(CheckedFields, 0);
-      Query.UnPrepare;
     end;
 
     // ---- Statistik ----
@@ -1379,28 +1122,614 @@ begin
     else
       RowsPerSec := 0;
 
-    FStats.OptionsExtra := Format(
-      'External Table INSERT (no transaction, %d rows), %.0f rows/sec',
-      [CurrentRow, RowsPerSec]);
-
-    if FCancelled then
+    if FStats.OptionsExtra = '' then
+      FStats.OptionsExtra := Format(
+        'EXECUTE BLOCK INSERT (%d rows/block, %d rows total), %.0f rows/sec',
+        [MaxRowsPerBlock, CurrentRow, RowsPerSec])
+    else
       FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
-        Format('  CANCELLED after %s of %s rows',
-          [FormatFloat('#,##0', CurrentRow),
-           FormatFloat('#,##0', TotalRows)]);
+        '  ' + Format('EXECUTE BLOCK INSERT (%d rows/block, %d rows total), %.0f rows/sec',
 
-  finally
-    DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
-    Query.Free;
-    ProgressForm.Free;
-  end;
+        [MaxRowsPerBlock, CurrentRow, RowsPerSec]);
+        if FCancelled then
+        begin
+        if DestTrans.InTransaction then
+        DestTrans.Rollback;
+        FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
+        Format('  CANCELLED after %s of %s rows',
+        [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
+        end;
+        finally
+        DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+        BlockSB.Free;
+        Query.Free;
+        ProgressForm.Free;
+        end;
 end;
 
+procedure TfrmCreateTableFromDataSet.RunFBInsertExternal(
+  ADBIndex: Integer; const ATableName: string);
+type
+  TFBExtColKind = (
+    ekSmallInt, ekInteger, ekBigInt, ekInt128,
+    ekFloat, ekDouble, ekNumeric16, ekNumeric32, ekNumeric64,
+    ekChar, ekVarChar, ekBoolean,
+    ekDate, ekTime, ekTimestamp, ekTimeTZ, ekTimestampTZ
+  );
+  TFBExtColMeta = record
+    Kind: TFBExtColKind;
+    Offset: Integer;      // Byte-Offset innerhalb eines Records
+    ByteSize: Integer;    // Physische Byte-Größe im Record
+    CharLen: Integer;     // Zeichenlänge für CHAR / VARCHAR
+    Scale: Integer;       // Nachkommastellen für NUMERIC / DECIMAL
+  end;
+
+var
+  StartTime, EndTime: TDateTime;
+  ProgressForm: TForm;
+  ProgressLabel, LblElapsed, LblCommit: TLabel;
+  ProgressBar, CommitBar: TProgressBar;
+  BtnCancel: TButton;
+  CheckedFields: array of Integer;
+  CachedFields: array of TField;
+  ColMeta: array of TFBExtColMeta;
+  FieldsPerRow: Integer;
+  FromRow, ToRow, TotalRows: Int64;
+  CurrentRow: Int64;
+  UpdateEveryNRows: Int64;
+  RowsSinceUpdate: Int64;
+  OldDecimalSep: Char;
+  FSFloat: TFormatSettings;
+  DefaultFBDate: LongInt;
+  ElapsedSec, RowsPerSec: Double;
+  ExtFilePath: string;
+  FS: TFileStream;
+  WRITE_BUFFER_SIZE: Int64;
+  WriteBuf: TBytes;
+  WriteBufPos: Integer;
+  RecBuf: TBytes;
+  RecordSize, MaxAlign, ColAlign: Integer;
+  f, i: Integer;
+
+  function AlignUp(AValue, AAlign: Integer): Integer;
+  begin
+    if AAlign <= 1 then
+      Result := AValue
+    else
+      Result := (AValue + AAlign - 1) and not (AAlign - 1);
+  end;
+
+  procedure ParseTypeInfo(const ATypeStr: string;
+    out AKind: TFBExtColKind; out ASize, AAlign, ACharLen, AScale: Integer);
+  var
+    S, BaseType, Params: string;
+    LParen, RParen, CommaPos, Prec: Integer;
+  begin
+    S := UpperCase(Trim(ATypeStr));
+    ACharLen := 0;
+    AScale   := 0;
+    Prec     := 0;
+
+    LParen := Pos('(', S);
+    if LParen > 0 then
+    begin
+      BaseType := Trim(Copy(S, 1, LParen - 1));
+      RParen := Pos(')', S);
+      if RParen > LParen then
+      begin
+        Params := Trim(Copy(S, LParen + 1, RParen - LParen - 1));
+        CommaPos := Pos(',', Params);
+        if CommaPos > 0 then
+        begin
+          Prec   := StrToIntDef(Trim(Copy(Params, 1, CommaPos - 1)), 0);
+          AScale := StrToIntDef(Trim(Copy(Params, CommaPos + 1, MaxInt)), 0);
+        end
+        else
+          Prec := StrToIntDef(Params, 0);
+      end;
+    end
+    else
+      BaseType := S;
+
+    if BaseType = 'SMALLINT' then
+    begin
+      AKind := ekSmallInt; ASize := 2; AAlign := 2;
+    end
+    else if (BaseType = 'INTEGER') or (BaseType = 'INT') then
+    begin
+      AKind := ekInteger; ASize := 4; AAlign := 4;
+    end
+    else if (BaseType = 'BIGINT') or (BaseType = 'INT64') then
+    begin
+      AKind := ekBigInt; ASize := 8; AAlign := 8;
+    end
+    else if BaseType = 'INT128' then
+    begin
+      AKind := ekInt128; ASize := 16; AAlign := 8;
+    end
+    else if BaseType = 'FLOAT' then
+    begin
+      AKind := ekFloat; ASize := 4; AAlign := 4;
+    end
+    else if (BaseType = 'DOUBLE PRECISION') or (BaseType = 'DOUBLE') or
+            (BaseType = 'DECFLOAT') then
+    begin
+      AKind := ekDouble; ASize := 8; AAlign := 8;
+    end
+    else if (BaseType = 'NUMERIC') or (BaseType = 'DECIMAL') then
+    begin
+      if Prec <= 4 then
+      begin
+        AKind := ekNumeric16; ASize := 2; AAlign := 2;
+      end
+      else if Prec <= 9 then
+      begin
+        AKind := ekNumeric32; ASize := 4; AAlign := 4;
+      end
+      else
+      begin
+        AKind := ekNumeric64; ASize := 8; AAlign := 8;
+      end;
+    end
+    else if (BaseType = 'CHAR') or (BaseType = 'CSTRING') then
+    begin
+      ACharLen := Max(1, Prec);
+      AKind := ekChar; ASize := ACharLen; AAlign := 1;
+    end
+    else if (BaseType = 'VARCHAR') or (BaseType = 'TEXT') or (BaseType = 'BLOB') then
+    begin
+      ACharLen := Max(1, Prec);
+      AKind := ekVarChar; ASize := 2 + ACharLen; AAlign := 2;
+    end
+    else if BaseType = 'BOOLEAN' then
+    begin
+      AKind := ekBoolean; ASize := 1; AAlign := 1;
+    end
+    else if BaseType = 'DATE' then
+    begin
+      AKind := ekDate; ASize := 4; AAlign := 4;
+    end
+    else if BaseType = 'TIME' then
+    begin
+      AKind := ekTime; ASize := 4; AAlign := 4;
+    end
+    else if BaseType = 'TIMESTAMP' then
+    begin
+      AKind := ekTimestamp; ASize := 8; AAlign := 4;
+    end
+    else if BaseType = 'TIME WITH TIME ZONE' then
+    begin
+      AKind := ekTimeTZ; ASize := 8; AAlign := 4;
+    end
+    else if BaseType = 'TIMESTAMP WITH TIME ZONE' then
+    begin
+      AKind := ekTimestampTZ; ASize := 12; AAlign := 4;
+    end
+    else
+    begin
+      // Fallback: als CHAR(50) behandeln
+      ACharLen := 50;
+      AKind := ekChar; ASize := 50; AAlign := 1;
+    end;
+  end;
+
+  procedure FlushWriteBuffer;
+  begin
+    if WriteBufPos > 0 then
+    begin
+      FS.WriteBuffer(WriteBuf[0], WriteBufPos);
+      WriteBufPos := 0;
+    end;
+  end;
+
+  procedure WriteFieldToRecord(const AMeta: TFBExtColMeta; AField: TField);
+  var
+    P: PByte;
+    S, TrimmedS: string;
+    I64: Int64;
+    F64: Double;
+    DT: TDateTime;
+    CopyLen: Integer;
+  begin
+    P := @RecBuf[AMeta.Offset];
+
+    // Record-Bereich initialisieren (Strings mit Spaces, Zahlen/Datum mit 0)
+    if AMeta.Kind = ekChar then
+      FillChar(P^, AMeta.ByteSize, $20)
+    else
+      FillChar(P^, AMeta.ByteSize, 0);
+
+    // NULL → Standard-Defaultwert (0 / leer / 2020-01-01) belassen
+    if AField.IsNull then
+    begin
+      if AMeta.Kind in [ekDate, ekTimestamp, ekTimestampTZ] then
+        PLongInt(P)^ := DefaultFBDate;
+      Exit;
+    end;
+
+    // Fast-Path: Wenn das TField bereits numerisch/Datum/Boolean ist (kein String-Alloc!)
+    case AField.DataType of
+      ftSmallint, ftInteger, ftWord, ftLargeInt, ftAutoInc:
+      begin
+        I64 := AField.AsLargeInt;
+        case AMeta.Kind of
+          ekSmallInt: PSmallInt(P)^ := SmallInt(I64);
+          ekInteger:  PLongInt(P)^  := LongInt(I64);
+          ekBigInt:   PInt64(P)^    := I64;
+          ekInt128:
+          begin
+            PInt64(P)^ := I64;
+            if I64 < 0 then
+              PInt64(P + 8)^ := -1;
+          end;
+          ekFloat:    PSingle(P)^   := I64;
+          ekDouble:   PDouble(P)^   := I64;
+          ekBoolean:  if I64 <> 0 then P^ := 1;
+        end;
+        Exit;
+      end;
+
+      ftFloat, ftCurrency, ftBCD, ftFMTBcd:
+      begin
+        F64 := AField.AsFloat;
+        case AMeta.Kind of
+          ekFloat:     PSingle(P)^   := F64;
+          ekDouble:    PDouble(P)^   := F64;
+          ekNumeric16: PSmallInt(P)^ := SmallInt(Round(F64 * IntPower(10, AMeta.Scale)));
+          ekNumeric32: PLongInt(P)^  := LongInt(Round(F64 * IntPower(10, AMeta.Scale)));
+          ekNumeric64: PInt64(P)^    := Round(F64 * IntPower(10, AMeta.Scale));
+        end;
+        Exit;
+      end;
+
+      ftDate, ftTime, ftDateTime, ftTimeStamp:
+      begin
+        DT := AField.AsDateTime;
+        case AMeta.Kind of
+          ekDate:
+            PLongInt(P)^ := Trunc(DT) + 15018;
+          ekTime, ekTimeTZ:
+            PLongWord(P)^ := Round(Frac(DT) * 864000000.0);
+          ekTimestamp, ekTimestampTZ:
+          begin
+            PLongInt(P)^ := Trunc(DT) + 15018;
+            PLongWord(P + 4)^ := Round(Frac(DT) * 864000000.0);
+          end;
+        end;
+        Exit;
+      end;
+
+      ftBoolean:
+      begin
+        if AField.AsBoolean then
+          P^ := 1
+        else
+          P^ := 0;
+        Exit;
+      end;
+    end;
+
+    // String-Path (falls das Dataset Spalten als ftString/ftWideString hält)
+    S := AField.AsString;
+    if S = '' then
+    begin
+      if AMeta.Kind in [ekDate, ekTimestamp, ekTimestampTZ] then
+        PLongInt(P)^ := DefaultFBDate;
+      Exit;
+    end;
+
+    case AMeta.Kind of
+      ekChar:
+      begin
+        CopyLen := Min(Length(S), AMeta.CharLen);
+        if CopyLen > 0 then
+          Move(S[1], P^, CopyLen);
+      end;
+
+      ekVarChar:
+      begin
+        CopyLen := Min(Length(S), AMeta.CharLen);
+        PWord(P)^ := Word(CopyLen);
+        if CopyLen > 0 then
+          Move(S[1], (P + 2)^, CopyLen);
+      end;
+
+      ekSmallInt, ekInteger, ekBigInt, ekInt128:
+      begin
+        TrimmedS := Trim(S);
+        if TryStrToInt64(TrimmedS, I64) then
+        begin
+          case AMeta.Kind of
+            ekSmallInt: PSmallInt(P)^ := SmallInt(I64);
+            ekInteger:  PLongInt(P)^  := LongInt(I64);
+            ekBigInt:   PInt64(P)^    := I64;
+            ekInt128:
+            begin
+              PInt64(P)^ := I64;
+              if I64 < 0 then
+                PInt64(P + 8)^ := -1;
+            end;
+          end;
+        end;
+      end;
+
+      ekFloat, ekDouble, ekNumeric16, ekNumeric32, ekNumeric64:
+      begin
+        TrimmedS := Trim(S);
+        if TryStrToFloat(TrimmedS, F64, FSFloat) or TryStrToFloat(TrimmedS, F64) then
+        begin
+          case AMeta.Kind of
+            ekFloat:     PSingle(P)^   := F64;
+            ekDouble:    PDouble(P)^   := F64;
+            ekNumeric16: PSmallInt(P)^ := SmallInt(Round(F64 * IntPower(10, AMeta.Scale)));
+            ekNumeric32: PLongInt(P)^  := LongInt(Round(F64 * IntPower(10, AMeta.Scale)));
+            ekNumeric64: PInt64(P)^    := Round(F64 * IntPower(10, AMeta.Scale));
+          end;
+        end;
+      end;
+
+      ekBoolean:
+      begin
+        TrimmedS := Trim(S);
+        if SameText(TrimmedS, 'TRUE') or (TrimmedS = '1') then
+          P^ := 1;
+      end;
+
+      ekDate:
+      begin
+        TrimmedS := Trim(S);
+        if (TrimmedS <> '') and TryParseDateTimeEx(TrimmedS, DT) then
+          PLongInt(P)^ := Trunc(DT) + 15018
+        else
+          PLongInt(P)^ := DefaultFBDate;
+      end;
+
+      ekTime, ekTimeTZ:
+      begin
+        TrimmedS := Trim(S);
+        if (TrimmedS <> '') and TryParseDateTimeEx(TrimmedS, DT) then
+          PLongWord(P)^ := Round(Frac(DT) * 864000000.0);
+      end;
+
+      ekTimestamp, ekTimestampTZ:
+      begin
+        TrimmedS := Trim(S);
+        if (TrimmedS <> '') and TryParseDateTimeEx(TrimmedS, DT) then
+        begin
+        PLongInt(P)^ := Trunc(DT) + 15018;
+        PLongWord(P + 4)^ := Round(Frac(DT) * 864000000.0);
+        end
+        else
+        PLongInt(P)^ := DefaultFBDate;
+        end;
+        end;
+        end;
+
+begin
+        WRITE_BUFFER_SIZE := StrToIntDef(edtWriteBuffer.Text, 16) * 1024 * 1024; // 16 MB Schreibpuffer
+        ExtFilePath := Trim(edtExternalFile.Text);
+        if ExtFilePath = '' then
+        begin
+        ShowMessage('External file path is empty.');
+        Exit;
+        end;
+        // ---- Felder sammeln ----
+        SetLength(CheckedFields, 0);
+        for i := 0 to High(FFields) do
+        if FFields[i].Checked then
+        begin
+        SetLength(CheckedFields, Length(CheckedFields) + 1);
+        CheckedFields[High(CheckedFields)] := i;
+        end;
+        FieldsPerRow := Length(CheckedFields);
+        if FieldsPerRow = 0 then
+        begin
+        ShowMessage('No fields selected.');
+        Exit;
+        end;
+        // ---- Bereich ----
+        FromRow := GetFromRow;
+        ToRow   := GetToRow;
+        if (FDataSet <> nil) and (ToRow > FDataSet.RecordCount) then
+        ToRow := FDataSet.RecordCount;
+        TotalRows := ToRow - FromRow + 1;
+        if TotalRows <= 0 then
+        begin
+        ShowMessage('No rows to copy.');
+        Exit;
+        end;
+        // ---- Caches & Record-Layout berechnen (Firebird C-Struct Alignment) ----
+        SetLength(CachedFields, FieldsPerRow);
+        SetLength(ColMeta, FieldsPerRow);
+        RecordSize := 0;
+        MaxAlign   := 1;
+        for f := 0 to FieldsPerRow - 1 do
+        begin
+        CachedFields[f] := FDataSet.FieldByName(FFields[CheckedFields[f]].FieldName);
+        ParseTypeInfo(
+        FFields[CheckedFields[f]].FieldType,
+        ColMeta[f].Kind,
+        ColMeta[f].ByteSize,
+        ColAlign,
+        ColMeta[f].CharLen,
+        ColMeta[f].Scale
+        );
+        RecordSize := AlignUp(RecordSize, ColAlign);
+        ColMeta[f].Offset := RecordSize;
+        Inc(RecordSize, ColMeta[f].ByteSize);
+        if ColAlign > MaxAlign then
+        MaxAlign := ColAlign;
+        end;
+        // Gesamten Record auf das maximale Alignment auffüllen
+        RecordSize := AlignUp(RecordSize, MaxAlign);
+        SetLength(RecBuf, RecordSize);
+        SetLength(WriteBuf, WRITE_BUFFER_SIZE);
+        WriteBufPos := 0;
+        FSFloat := DefaultFormatSettings;
+        FSFloat.DecimalSeparator  := '.';
+        FSFloat.ThousandSeparator := #0;
+        DefaultFBDate := Trunc(EncodeDate(2020, 1, 1)) + 15018;
+        UpdateEveryNRows := Max(1, GetRefreshInterval);
+        RowsSinceUpdate  := 0;
+        ProgressForm := TForm.Create(Self);
+        ProgressForm.Parent := Self;
+        OldDecimalSep := DefaultFormatSettings.DecimalSeparator;
+        StartTime    := Now;
+        CurrentRow   := 0;
+        FCancelled   := False;
+        try
+        DefaultFormatSettings.DecimalSeparator := '.';
+        // ---- Progress-Form ----
+        ProgressForm.FormStyle   := fsNormal;
+        ProgressForm.Caption     := 'Writing binary external file for ' + ATableName;
+        ProgressForm.Width       := 580;
+        ProgressForm.Height      := 280;
+        ProgressForm.BorderStyle := bsNone;
+        ProgressForm.Left        := (Self.Width - ProgressForm.Width) div 2;
+        ProgressForm.Top         := ((Self.Height - ProgressForm.Height) div 2) + 20;
+        ProgressLabel := TLabel.Create(ProgressForm);
+        ProgressLabel.Parent  := ProgressForm;
+        ProgressLabel.Left    := 16;
+        ProgressLabel.Top     := 16;
+        ProgressLabel.Width   := 540;
+        ProgressLabel.Caption := Format(
+        'Total: %s rows   |   Rows/sec: calculating...',
+        [FormatFloat('#,##0', TotalRows)]);
+        ProgressBar := TProgressBar.Create(ProgressForm);
+        ProgressBar.Parent   := ProgressForm;
+        ProgressBar.Left     := 16;
+        ProgressBar.Top      := 40;
+        ProgressBar.Width    := 540;
+        ProgressBar.Height   := 20;
+        ProgressBar.Min      := 0;
+        ProgressBar.Max      := TotalRows;
+        ProgressBar.Position := 0;
+        LblCommit := TLabel.Create(ProgressForm);
+        LblCommit.Parent  := ProgressForm;
+        LblCommit.Left    := 16;
+        LblCommit.Top     := 75;
+        LblCommit.Width   := 540;
+        LblCommit.Caption := Format('Rows: 0 of %s', [FormatFloat('#,##0', TotalRows)]);
+        CommitBar := TProgressBar.Create(ProgressForm);
+        CommitBar.Parent   := ProgressForm;
+        CommitBar.Left     := 16;
+        CommitBar.Top      := 100;
+        CommitBar.Width    := 540;
+        CommitBar.Height   := 20;
+        CommitBar.Min      := 0;
+        CommitBar.Max      := TotalRows;
+        CommitBar.Position := 0;
+        LblElapsed := TLabel.Create(ProgressForm);
+        LblElapsed.Parent  := ProgressForm;
+        LblElapsed.Left    := 16;
+        LblElapsed.Top     := 135;
+        LblElapsed.Width   := 540;
+        LblElapsed.Caption := 'Elapsed: 00:00:00   |   0 rows/sec';
+        BtnCancel := TButton.Create(ProgressForm);
+        BtnCancel.Parent  := ProgressForm;
+        BtnCancel.Caption := 'Cancel';
+        BtnCancel.Left    := 230;
+        BtnCancel.Top     := 180;
+        BtnCancel.Width   := 100;
+        BtnCancel.OnClick := @CancelButtonClick;
+        ProgressForm.Show;
+        frmThemeSelector.btnApplyClick(ProgressForm);
+        Application.ProcessMessages;
+        // ---- Zieldatei öffnen (falls schon vorhanden, anhängen; sonst neu anlegen) ----
+        if FileExists(ExtFilePath) then
+        begin
+        FS := TFileStream.Create(ExtFilePath, fmOpenReadWrite or fmShareDenyWrite);
+        FS.Seek(0, soEnd);
+        end
+        else
+        FS := TFileStream.Create(ExtFilePath, fmCreate or fmShareDenyWrite);
+        FDataSet.DisableControls;
+        try
+        try
+        FDataSet.First;
+        for i := 1 to FromRow - 1 do
+        FDataSet.Next;
+        while (not FDataSet.EOF) and (CurrentRow < TotalRows) do
+        begin
+        if FCancelled then
+        Break;
+        // Alle Felder binär in RecBuf schreiben
+        for f := 0 to FieldsPerRow - 1 do
+        WriteFieldToRecord(ColMeta[f], CachedFields[f]);
+        // Wenn RecBuf nicht mehr in WriteBuf passt → erst flushen
+        if WriteBufPos + RecordSize > WRITE_BUFFER_SIZE then
+        FlushWriteBuffer;
+        Move(RecBuf[0], WriteBuf[WriteBufPos], RecordSize);
+        Inc(WriteBufPos, RecordSize);
+        Inc(CurrentRow);
+        Inc(RowsSinceUpdate);
+        FDataSet.Next;
+        // UI & Puffer-Flush im konfigurierten Intervall
+        if RowsSinceUpdate >= UpdateEveryNRows then
+        begin
+        FlushWriteBuffer;
+        RowsSinceUpdate := 0;
+        CommitBar.Position   := CurrentRow;
+        ProgressBar.Position := CurrentRow;
+        ElapsedSec := (Now - StartTime) * SecsPerDay;
+        if ElapsedSec > 0.2 then
+        RowsPerSec := CurrentRow / ElapsedSec
+        else
+        RowsPerSec := 0;
+        LblElapsed.Caption :=
+        'Elapsed: ' + FormatDateTime('hh:nn:ss', ElapsedSec / SecsPerDay) +
+        '   |   ' + FormatFloat('#,##0', RowsPerSec) + ' rows/sec';
+        LblCommit.Caption := Format('Rows: %s of %s',
+        [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
+        ProgressLabel.Caption := Format(
+        'Total: %s rows   |   Current: %s',
+        [FormatFloat('#,##0', TotalRows), FormatFloat('#,##0', CurrentRow)]);
+        Application.ProcessMessages;
+        end;
+        end;
+        // Restlichen Puffer auf Festplatte schreiben
+        FlushWriteBuffer;
+        finally
+        FS.Free;
+        end;
+        finally
+        EndTime := Now;
+        FDataSet.EnableControls;
+        SetLength(CachedFields, 0);
+        SetLength(ColMeta, 0);
+        SetLength(CheckedFields, 0);
+        SetLength(RecBuf, 0);
+        SetLength(WriteBuf, 0);
+        end;
+        // ---- Statistik ----
+        FStats.RowsProcessed := CurrentRow;
+        ElapsedSec := (EndTime - StartTime) * SecsPerDay;
+        if ElapsedSec > 0 then
+        RowsPerSec := CurrentRow / ElapsedSec
+        else
+        RowsPerSec := 0;
+        if FStats.OptionsExtra = '' then
+        FStats.OptionsExtra := Format(
+        'Direct Binary External File Write (%d rows, %d bytes/rec), %.0f rows/sec',
+        [CurrentRow, RecordSize, RowsPerSec])
+        else
+        FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
+        '  ' + Format('Direct Binary External File Write (%d rows, %d bytes/rec), %.0f rows/sec',
+        [CurrentRow, RecordSize, RowsPerSec]);
+        if FCancelled then
+        FStats.OptionsExtra := FStats.OptionsExtra + sLineBreak +
+        Format('  CANCELLED after %s of %s rows',
+        [FormatFloat('#,##0', CurrentRow), FormatFloat('#,##0', TotalRows)]);
+        finally
+        DefaultFormatSettings.DecimalSeparator := OldDecimalSep;
+        ProgressForm.Free;
+        end;
+        end;
 // ============================================================================
 // FELDNAME ZU SQL-IDENTIFIER (Case-Sensitive quotes bei gemischter Case)
 // ============================================================================
 
-class function TfrmCreateTableFromDataSet.QuoteFieldName(
+function TfrmCreateTableFromDataSet.QuoteFieldName(
   const AName: string): string;
 begin
   // Firebird: unquoted identifiers are case-insensitive (uppercased).

@@ -23,7 +23,7 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1576"/>
+      <BuildNr Value="1595"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
@@ -830,19 +830,19 @@
     </RunParams>
     <RequiredPackages Count="33">
       <Item1>
-        <PackageName Value="jcuiscaler_rt"/>
+        <PackageName Value="UIBLaz"/>
       </Item1>
       <Item2>
-        <PackageName Value="fbintf"/>
+        <PackageName Value="jcuiscaler_rt"/>
       </Item2>
       <Item3>
-        <PackageName Value="atsynedit_package"/>
+        <PackageName Value="fbintf"/>
       </Item3>
       <Item4>
-        <PackageName Value="pascalscriptfcl"/>
+        <PackageName Value="atsynedit_package"/>
       </Item4>
       <Item5>
-        <PackageName Value="UIBLaz"/>
+        <PackageName Value="pascalscriptfcl"/>
       </Item5>
       <Item6>
         <PackageName Value="TurboDataSets"/>

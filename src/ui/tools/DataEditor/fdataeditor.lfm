@@ -1,7 +1,7 @@
 inherited frmDataEditor: TfrmDataEditor
-  Left = 524
+  Left = 1224
   Height = 600
-  Top = 256
+  Top = 479
   Width = 1112
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 600
@@ -109,9 +109,9 @@ inherited frmDataEditor: TfrmDataEditor
     Height = 550
     Top = 50
     Width = 1112
-    ActivePage = tsCommonSettings
+    ActivePage = tsGrid
     Align = alClient
-    TabIndex = 3
+    TabIndex = 0
     TabOrder = 1
     object tsGrid: TTabSheet
       Caption = 'Grid View'
