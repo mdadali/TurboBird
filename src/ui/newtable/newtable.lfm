@@ -1,7 +1,7 @@
 object fmNewTable: TfmNewTable
-  Left = 766
+  Left = 619
   Height = 634
-  Top = 168
+  Top = 518
   Width = 1023
   ActiveControl = edNewTable
   Caption = 'New Table'
@@ -17,7 +17,7 @@ object fmNewTable: TfmNewTable
     Left = 8
     Height = 16
     Top = 12
-    Width = 85
+    Width = 86
     Caption = 'New Table name'
     Font.Height = -11
     ParentColor = False
@@ -25,7 +25,7 @@ object fmNewTable: TfmNewTable
   end
   object edNewTable: TEdit
     Left = 8
-    Height = 37
+    Height = 32
     Top = 32
     Width = 344
     OnKeyUp = edNewTableKeyUp
@@ -77,18 +77,18 @@ object fmNewTable: TfmNewTable
   end
   object cxCreateGen: TCheckBox
     Left = 18
-    Height = 24
-    Top = 493
-    Width = 333
+    Height = 22
+    Top = 495
+    Width = 303
     Anchors = [akLeft, akBottom]
     Caption = 'Create Auto increment Generator and Trigger'
     TabOrder = 2
   end
   object cxGrantPermission: TCheckBox
     Left = 18
-    Height = 24
-    Top = 543
-    Width = 64
+    Height = 22
+    Top = 545
+    Width = 59
     Anchors = [akLeft, akBottom]
     Caption = 'Grant'
     OnChange = cxGrantPermissionChange
@@ -101,7 +101,7 @@ object fmNewTable: TfmNewTable
     Width = 145
     Anchors = [akLeft, akBottom]
     Enabled = False
-    ItemHeight = 0
+    ItemHeight = 24
     ItemIndex = 0
     Items.Strings = (
       'Full'
@@ -114,9 +114,9 @@ object fmNewTable: TfmNewTable
   end
   object laPermission: TLabel
     Left = 248
-    Height = 20
-    Top = 545
-    Width = 91
+    Height = 18
+    Top = 547
+    Width = 84
     Anchors = [akLeft, akBottom]
     Caption = 'Permission to'
     ParentColor = False
@@ -124,11 +124,11 @@ object fmNewTable: TfmNewTable
   end
   object cbRolesUsers: TComboBox
     Left = 352
-    Height = 37
-    Top = 537
+    Height = 32
+    Top = 542
     Width = 181
     Anchors = [akLeft, akBottom]
-    ItemHeight = 0
+    ItemHeight = 24
     Items.Strings = (
       'Full'
       'Read '
@@ -332,5 +332,20 @@ object fmNewTable: TfmNewTable
       OnClick = Button1Click
       TabOrder = 1
     end
+  end
+  object IBXScript1: TIBXScript
+    IgnoreGrants = False
+    IgnoreCreateDatabase = True
+    Transaction = IBTransaction1
+    ShowAffectedRows = False
+    ShowPerformanceStats = False
+    Left = 357
+    Top = 205
+  end
+  object IBTransaction1: TIBTransaction
+    TransactionName = '{A3336EBD-7967-470C-B4CB-AD1BB34CA404}'
+    Active = False
+    Left = 480
+    Top = 208
   end
 end

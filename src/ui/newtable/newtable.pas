@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,  FileUtil, LResources, Forms, Controls,
   Graphics, Dialogs, StdCtrls, Grids, Buttons, ComCtrls, ExtCtrls, SynEdit, SynCompletion,
-  SynHighlighterSQL, LCLType,
+  SynHighlighterSQL, LCLType, ibxscript, IBDatabase,
   turbocommon,
   uthemeselector;
 
@@ -23,6 +23,8 @@ type
     cxGrantPermission: TCheckBox;
     cxCreateGen: TCheckBox;
     edNewTable: TEdit;
+    IBTransaction1: TIBTransaction;
+    IBXScript1: TIBXScript;
     Image1: TImage;
     Label1: TLabel;
     laPermission: TLabel;
@@ -54,8 +56,8 @@ type
     { public declarations }
   end; 
 
-//var
-  //fmNewTable: TfmNewTable;
+var
+  fmNewTable: TfmNewTable;
 
 implementation
 

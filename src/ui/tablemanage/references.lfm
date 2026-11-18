@@ -1,0 +1,67 @@
+object fmReferences: TfmReferences
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'References'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object sgReferences: TStringGrid
+    Left = 5
+    Height = 432
+    Top = 5
+    Width = 1388
+    Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Around = 5
+    ColCount = 4
+    Columns = <
+      item
+        Title.Caption = 'Constraint name'
+        Width = 332
+      end
+      item
+        Title.Caption = 'Foreign Table'
+        Width = 200
+      end
+      item
+        ButtonStyle = cbsPickList
+        PickList.Strings = (
+          'Asc'
+          'Desc'
+        )
+        Title.Caption = 'Foreign Field'
+        Width = 190
+      end
+      item
+        Title.Caption = 'On key'
+        Width = 190
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+    TabOrder = 0
+    TitleStyle = tsNative
+    ColWidths = (
+      332
+      200
+      190
+      190
+    )
+  end
+  object bbRefreshReferences: TBitBtn
+    Left = 1294
+    Height = 40
+    Top = 445
+    Width = 99
+    Anchors = [akRight, akBottom]
+    Caption = 'Refresh'
+    Color = clForm
+    Kind = bkRetry
+    OnClick = bbRefreshClick
+    TabOrder = 1
+  end
+end

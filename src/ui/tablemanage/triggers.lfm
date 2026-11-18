@@ -1,0 +1,85 @@
+object fmTriggers: TfmTriggers
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'Triggers'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object sgTriggers: TStringGrid
+    Left = 5
+    Height = 431
+    Top = 5
+    Width = 1388
+    Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Around = 5
+    ColCount = 2
+    Columns = <
+      item
+        Title.Caption = 'Trigger Name'
+        Width = 160
+      end
+      item
+        ButtonStyle = cbsCheckboxColumn
+        Title.Caption = 'Active'
+        Width = 100
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+    RowCount = 2
+    TabOrder = 0
+    TitleStyle = tsNative
+    OnDblClick = sgTriggersDblClick
+  end
+  object bbRefreshTriggers: TBitBtn
+    Left = 1293
+    Height = 40
+    Top = 445
+    Width = 87
+    Anchors = [akRight, akBottom]
+    Caption = 'Refresh'
+    Color = clForm
+    Kind = bkRetry
+    OnClick = bbRefreshClick
+    TabOrder = 1
+  end
+  object bbNewTrigger: TBitBtn
+    Left = 8
+    Height = 40
+    Top = 445
+    Width = 126
+    Anchors = [akLeft, akBottom]
+    Caption = 'New Trigger'
+    Color = clForm
+    OnClick = bbNewClick
+    TabOrder = 2
+  end
+  object bbEditTrigger: TBitBtn
+    Left = 152
+    Height = 40
+    Top = 445
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'Edit'
+    Color = clForm
+    OnClick = bbEditClick
+    TabOrder = 3
+  end
+  object bbDropTrigger: TBitBtn
+    Left = 231
+    Height = 40
+    Top = 445
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'Drop'
+    Color = clForm
+    Kind = bkIgnore
+    OnClick = bbDropClick
+    TabOrder = 4
+  end
+end

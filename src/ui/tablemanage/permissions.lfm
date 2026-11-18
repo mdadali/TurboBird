@@ -1,0 +1,148 @@
+object fmPermissions: TfmTablePermissions
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'Permissions'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object PageControl1: TPageControl
+    Left = 0
+    Height = 492
+    Top = 0
+    Width = 1398
+    Align = alClient
+    TabIndex = 0
+    TabOrder = 0
+    object tsOverview: TTabSheet
+      Caption = 'Overview'
+      ClientHeight = 492
+      ClientWidth = 1398
+      ImageIndex = 31
+      object sgPermissions: TStringGrid
+        Left = 5
+        Height = 432
+        Top = 5
+        Width = 1388
+        Align = alTop
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        BorderSpacing.Around = 5
+        ColCount = 12
+        Columns = <
+          item
+            Title.Caption = 'User/Role'
+            Width = 160
+          end
+          item
+            Title.Caption = 'Type'
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            ReadOnly = True
+            Title.Caption = 'Select'
+            Width = 100
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Insert'
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Update'
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Delete'
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'References'
+            Width = 80
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant Select'
+            Width = 90
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant Insert'
+            Width = 90
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant Update'
+            Width = 100
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant Delete'
+            Width = 90
+          end
+          item
+            ButtonStyle = cbsCheckboxColumn
+            Title.Caption = 'Grant References'
+            Width = 110
+          end>
+        FixedColor = 14539471
+        FixedCols = 0
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        RowCount = 2
+        TabOrder = 0
+        TitleStyle = tsNative
+        OnDblClick = sgPermissionsDblClick
+        ColWidths = (
+          160
+          50
+          100
+          50
+          50
+          50
+          80
+          90
+          90
+          100
+          90
+          110
+        )
+      end
+      object bbEditPermission: TBitBtn
+        Left = 182
+        Height = 41
+        Top = 445
+        Width = 75
+        Anchors = [akLeft, akBottom]
+        Caption = 'Edit'
+        Color = clForm
+        OnClick = bbEditPermissionClick
+        TabOrder = 1
+      end
+      object bbRefreshPermissions: TBitBtn
+        Left = 1292
+        Height = 41
+        Top = 445
+        Width = 87
+        Anchors = [akRight, akBottom]
+        Caption = 'Refresh'
+        Color = clForm
+        Kind = bkRetry
+        OnClick = bbRefreshClick
+        TabOrder = 2
+      end
+      object bbAddUser: TBitBtn
+        Left = 8
+        Height = 40
+        Top = 445
+        Width = 158
+        Anchors = [akLeft, akBottom]
+        Caption = 'Add User / Role'
+        Color = clForm
+        OnClick = bbAddUserClick
+        TabOrder = 3
+      end
+    end
+  end
+end

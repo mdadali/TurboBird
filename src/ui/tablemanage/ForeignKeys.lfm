@@ -1,0 +1,101 @@
+object fmForeignKeys: TfmForeignKeys
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'Foreign Keys'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object sgForeignKeys: TStringGrid
+    Left = 5
+    Height = 440
+    Top = 5
+    Width = 1388
+    Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Around = 5
+    ColCount = 7
+    Columns = <
+      item
+        Title.Caption = 'Constraint Name'
+        Width = 327
+      end
+      item
+        Title.Caption = 'Key name'
+        Width = 298
+      end
+      item
+        Title.Caption = 'On Fields'
+        Width = 120
+      end
+      item
+        Title.Caption = 'Foreign Table'
+        Width = 100
+      end
+      item
+        Title.Caption = 'Foreign Key'
+        Width = 100
+      end
+      item
+        Title.Caption = 'Update Rule'
+        Width = 100
+      end
+      item
+        Title.Caption = 'Delete Rule'
+        Width = 100
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+    RowCount = 2
+    TabOrder = 1
+    TitleStyle = tsNative
+    ColWidths = (
+      327
+      298
+      120
+      100
+      100
+      100
+      100
+    )
+  end
+  object bbRefreshForeignKeys: TBitBtn
+    Left = 1282
+    Height = 40
+    Top = 448
+    Width = 99
+    Anchors = [akRight, akBottom]
+    Caption = 'Refresh'
+    Color = clForm
+    Kind = bkRetry
+    OnClick = bbRefreshClick
+    TabOrder = 0
+  end
+  object bbNewForeignKey: TBitBtn
+    Left = 6
+    Height = 40
+    Top = 448
+    Width = 170
+    Anchors = [akLeft, akBottom]
+    Caption = 'New Foreign Key'
+    Color = clForm
+    OnClick = bbNewClick
+    TabOrder = 2
+  end
+  object bbDropForeignKey: TBitBtn
+    Left = 192
+    Height = 40
+    Top = 448
+    Width = 75
+    Anchors = [akLeft, akBottom]
+    Caption = 'Drop'
+    Color = clForm
+    Kind = bkIgnore
+    OnClick = bbDropClick
+    TabOrder = 3
+  end
+end

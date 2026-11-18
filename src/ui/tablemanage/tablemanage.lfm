@@ -1,12 +1,12 @@
 object fmTableManage: TfmTableManage
-  Left = 489
-  Height = 537
-  Top = 281
-  Width = 1184
+  Left = 421
+  Height = 552
+  Top = 199
+  Width = 1412
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
-  ClientHeight = 537
-  ClientWidth = 1184
+  ClientHeight = 552
+  ClientWidth = 1412
   KeyPreview = True
   OnClose = FormClose
   OnKeyDown = FormKeyDown
@@ -15,26 +15,29 @@ object fmTableManage: TfmTableManage
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 5
-    Height = 527
+    Height = 542
     Top = 5
-    Width = 1174
-    ActivePage = tsFields
+    Width = 1402
+    ActivePage = tsIndices
     Align = alClient
     BorderSpacing.Around = 5
     Images = ImageList2
-    TabIndex = 0
+    TabIndex = 2
     TabOrder = 0
+    object tsNewTable: TTabSheet
+      Caption = 'New Table'
+    end
     object tsFields: TTabSheet
       Caption = 'Fields'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 83
       OnShow = tsFieldsShow
       object sgFields: TStringGrid
         Left = 0
-        Height = 448
+        Height = 459
         Top = 0
-        Width = 1164
+        Width = 1398
         Align = alTop
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 11
@@ -120,7 +123,7 @@ object fmTableManage: TfmTableManage
       object bbEdit: TBitBtn
         Left = 136
         Height = 40
-        Top = 457
+        Top = 468
         Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
@@ -207,7 +210,7 @@ object fmTableManage: TfmTableManage
       object bbNew: TBitBtn
         Left = 8
         Height = 40
-        Top = 457
+        Top = 468
         Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'New Field'
@@ -254,7 +257,7 @@ object fmTableManage: TfmTableManage
       object edDrop: TBitBtn
         Left = 264
         Height = 40
-        Top = 456
+        Top = 467
         Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
@@ -266,7 +269,7 @@ object fmTableManage: TfmTableManage
       object bbRefreshFields: TBitBtn
         Left = 456
         Height = 40
-        Top = 456
+        Top = 467
         Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Refresh'
@@ -278,7 +281,7 @@ object fmTableManage: TfmTableManage
       object Button1: TButton
         Left = 592
         Height = 40
-        Top = 457
+        Top = 468
         Width = 115
         Anchors = [akLeft, akBottom]
         Caption = 'Close'
@@ -288,12 +291,12 @@ object fmTableManage: TfmTableManage
     end
     object tsIndices: TTabSheet
       Caption = 'Indices'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 73
       OnShow = tsIndicesShow
       object bbRefreshIndices: TBitBtn
-        Left = 1071
+        Left = 1305
         Height = 40
         Top = 4
         Width = 88
@@ -308,7 +311,7 @@ object fmTableManage: TfmTableManage
         Left = 0
         Height = 139
         Top = -2
-        Width = 1053
+        Width = 1287
         Anchors = [akTop, akLeft, akRight]
         BorderSpacing.Around = 5
         Columns = <        
@@ -357,21 +360,21 @@ object fmTableManage: TfmTableManage
       object GroupBox2: TGroupBox
         Left = 5
         Height = 215
-        Top = 276
-        Width = 1154
+        Top = 287
+        Width = 1388
         Align = alBottom
         BorderSpacing.Around = 5
         Caption = 'Create New Index'
-        ClientHeight = 213
-        ClientWidth = 1152
+        ClientHeight = 185
+        ClientWidth = 1384
         TabOrder = 2
         object cbIndexType: TComboBox
           Left = 125
-          Height = 31
+          Height = 32
           Top = 5
           Width = 150
           Color = 16249563
-          ItemHeight = 0
+          ItemHeight = 24
           ItemIndex = 1
           Items.Strings = (
             'Primary Key'
@@ -384,22 +387,22 @@ object fmTableManage: TfmTableManage
         end
         object edIndexName: TEdit
           Left = 125
-          Height = 31
+          Height = 32
           Top = 39
           Width = 150
           TabOrder = 1
         end
         object Label3: TLabel
           Left = 9
-          Height = 19
+          Height = 18
           Top = 39
-          Width = 101
+          Width = 102
           Caption = 'New index name'
           ParentColor = False
         end
         object cxUnique: TCheckBox
           Left = 9
-          Height = 21
+          Height = 22
           Top = 104
           Width = 83
           Caption = 'Is Unique'
@@ -407,11 +410,11 @@ object fmTableManage: TfmTableManage
         end
         object cbSortType: TComboBox
           Left = 125
-          Height = 31
+          Height = 32
           Top = 72
           Width = 150
           AutoDropDown = True
-          ItemHeight = 0
+          ItemHeight = 24
           ItemIndex = 0
           Items.Strings = (
             'Ascending'
@@ -437,15 +440,15 @@ object fmTableManage: TfmTableManage
         end
         object Label1: TLabel
           Left = 9
-          Height = 19
+          Height = 18
           Top = 8
-          Width = 30
+          Width = 29
           Caption = 'Type'
           ParentColor = False
         end
         object Label4: TLabel
           Left = 8
-          Height = 19
+          Height = 18
           Top = 72
           Width = 56
           Caption = 'Direction'
@@ -453,9 +456,9 @@ object fmTableManage: TfmTableManage
         end
         object Label2: TLabel
           Left = 320
-          Height = 19
+          Height = 18
           Top = 8
-          Width = 160
+          Width = 161
           Caption = 'Create new index on fields'
           ParentColor = False
         end
@@ -466,11 +469,10 @@ object fmTableManage: TfmTableManage
           Width = 458
           ItemHeight = 0
           TabOrder = 5
-          TopIndex = -1
         end
       end
       object bbDropIndices: TBitBtn
-        Left = 1072
+        Left = 1306
         Height = 40
         Top = 56
         Width = 87
@@ -487,14 +489,14 @@ object fmTableManage: TfmTableManage
     end
     object tsForeignKeys: TTabSheet
       Caption = 'Foreign Keys'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 88
       OnShow = tsForeignKeysShow
       object bbRefreshForeignKeys: TBitBtn
-        Left = 1048
+        Left = 1280
         Height = 40
-        Top = 452
+        Top = 463
         Width = 99
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
@@ -503,64 +505,10 @@ object fmTableManage: TfmTableManage
         OnClick = bbRefreshForeignKeysClick
         TabOrder = 0
       end
-      object sgForeignKeys: TStringGrid
-        Left = 5
-        Height = 444
-        Top = 5
-        Width = 1154
-        Align = alTop
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Around = 5
-        ColCount = 7
-        Columns = <        
-          item
-            Title.Caption = 'Constraint Name'
-            Width = 327
-          end        
-          item
-            Title.Caption = 'Key name'
-            Width = 298
-          end        
-          item
-            Title.Caption = 'On Fields'
-            Width = 120
-          end        
-          item
-            Title.Caption = 'Foreign Table'
-            Width = 100
-          end        
-          item
-            Title.Caption = 'Foreign Key'
-            Width = 100
-          end        
-          item
-            Title.Caption = 'Update Rule'
-            Width = 100
-          end        
-          item
-            Title.Caption = 'Delete Rule'
-            Width = 100
-          end>
-        FixedColor = 14539471
-        FixedCols = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        RowCount = 2
-        TabOrder = 1
-        TitleStyle = tsNative
-        ColWidths = (
-          327
-          298
-          120
-          100
-          100
-          100
-          100
-        )
-      end
       object bbNewForeignKey: TBitBtn
-        Left = 6
+        Left = 5
         Height = 40
-        Top = 452
+        Top = 463
         Width = 170
         Anchors = [akLeft, akBottom]
         Caption = 'New Foreign Key'
@@ -642,19 +590,19 @@ object fmTableManage: TfmTableManage
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = bbNewForeignKeyClick
-        TabOrder = 2
+        TabOrder = 1
       end
       object bbDropForeignKey: TBitBtn
         Left = 192
         Height = 40
-        Top = 452
+        Top = 463
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
         Color = clForm
         Kind = bkIgnore
         OnClick = bbDropForeignKeyClick
-        TabOrder = 3
+        TabOrder = 2
       end
     end
     object tsUniqueConstraints: TTabSheet
@@ -674,115 +622,45 @@ object fmTableManage: TfmTableManage
     end
     object tsReferences: TTabSheet
       Caption = 'References'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 75
       OnShow = tsReferencesShow
-      object sgReferences: TStringGrid
-        Left = 5
-        Height = 436
-        Top = 5
-        Width = 1154
-        Align = alTop
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Around = 5
-        ColCount = 4
-        Columns = <        
-          item
-            Title.Caption = 'Constraint name'
-            Width = 332
-          end        
-          item
-            Title.Caption = 'Foreign Table'
-            Width = 200
-          end        
-          item
-            ButtonStyle = cbsPickList
-            PickList.Strings = (
-              'Asc'
-              'Desc'
-            )
-            Title.Caption = 'Foreign Field'
-            Width = 190
-          end        
-          item
-            Title.Caption = 'On key'
-            Width = 190
-          end>
-        FixedColor = 14539471
-        FixedCols = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        TabOrder = 0
-        TitleStyle = tsNative
-        ColWidths = (
-          332
-          200
-          190
-          190
-        )
-      end
       object bbRefreshReferences: TBitBtn
-        Left = 1060
+        Left = 1294
         Height = 40
-        Top = 449
+        Top = 460
         Width = 99
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
         Color = clForm
         Kind = bkRetry
         OnClick = bbRefreshReferencesClick
-        TabOrder = 1
+        TabOrder = 0
       end
     end
     object tsTriggers: TTabSheet
       Caption = 'Triggers'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 8
       OnShow = tsTriggersShow
-      object sgTriggers: TStringGrid
-        Left = 5
-        Height = 435
-        Top = 5
-        Width = 1154
-        Align = alTop
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Around = 5
-        ColCount = 2
-        Columns = <        
-          item
-            Title.Caption = 'Trigger Name'
-            Width = 160
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Active'
-            Width = 100
-          end>
-        FixedColor = 14539471
-        FixedCols = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        RowCount = 2
-        TabOrder = 0
-        TitleStyle = tsNative
-        OnDblClick = sgTriggersDblClick
-      end
       object bbRefreshTriggers: TBitBtn
-        Left = 1059
+        Left = 1293
         Height = 40
-        Top = 449
+        Top = 460
         Width = 87
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
         Color = clForm
         Kind = bkRetry
         OnClick = bbRefreshTriggersClick
-        TabOrder = 1
+        TabOrder = 0
       end
       object bbNewTrigger: TBitBtn
         Left = 8
         Height = 40
-        Top = 449
+        Top = 460
         Width = 126
         Anchors = [akLeft, akBottom]
         Caption = 'New Trigger'
@@ -864,12 +742,12 @@ object fmTableManage: TfmTableManage
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = bbNewTriggerClick
-        TabOrder = 2
+        TabOrder = 1
       end
       object bbEditTrigger: TBitBtn
         Left = 152
         Height = 40
-        Top = 449
+        Top = 460
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
@@ -951,104 +829,31 @@ object fmTableManage: TfmTableManage
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = bbEditTriggerClick
-        TabOrder = 3
+        TabOrder = 2
       end
       object bbDropTrigger: TBitBtn
         Left = 231
         Height = 40
-        Top = 449
+        Top = 460
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Drop'
         Color = clForm
         Kind = bkIgnore
         OnClick = bbDropTriggerClick
-        TabOrder = 4
+        TabOrder = 3
       end
     end
     object tsPermissions: TTabSheet
       Caption = 'Permissions'
-      ClientHeight = 496
-      ClientWidth = 1164
+      ClientHeight = 507
+      ClientWidth = 1398
       ImageIndex = 31
       OnShow = tsPermissionsShow
-      object sgPermissions: TStringGrid
-        Left = 5
-        Height = 436
-        Top = 5
-        Width = 1154
-        Align = alTop
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        BorderSpacing.Around = 5
-        ColCount = 12
-        Columns = <        
-          item
-            Title.Caption = 'User/Role'
-            Width = 160
-          end        
-          item
-            Title.Caption = 'Type'
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            ReadOnly = True
-            Title.Caption = 'Select'
-            Width = 100
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Insert'
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Update'
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Delete'
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'References'
-            Width = 80
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Grant Select'
-            Width = 90
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Grant Insert'
-            Width = 90
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Grant Update'
-            Width = 100
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Grant Delete'
-            Width = 90
-          end        
-          item
-            ButtonStyle = cbsCheckboxColumn
-            Title.Caption = 'Grant References'
-            Width = 110
-          end>
-        FixedColor = 14539471
-        FixedCols = 0
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        RowCount = 2
-        TabOrder = 0
-        TitleStyle = tsNative
-        OnDblClick = sgPermissionsDblClick
-      end
       object bbEditPermission: TBitBtn
         Left = 182
         Height = 41
-        Top = 449
+        Top = 460
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Edit'
@@ -1130,24 +935,24 @@ object fmTableManage: TfmTableManage
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = bbEditPermissionClick
-        TabOrder = 1
+        TabOrder = 0
       end
       object bbRefreshPermissions: TBitBtn
-        Left = 1058
+        Left = 1292
         Height = 41
-        Top = 449
+        Top = 460
         Width = 87
         Anchors = [akRight, akBottom]
         Caption = 'Refresh'
         Color = clForm
         Kind = bkRetry
         OnClick = bbRefreshPermissionsClick
-        TabOrder = 2
+        TabOrder = 1
       end
       object bbAddUser: TBitBtn
         Left = 8
         Height = 40
-        Top = 449
+        Top = 460
         Width = 158
         Anchors = [akLeft, akBottom]
         Caption = 'Add User / Role'
@@ -1285,14 +1090,14 @@ object fmTableManage: TfmTableManage
           FF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00FFFFFF00
         }
         OnClick = bbAddUserClick
-        TabOrder = 3
+        TabOrder = 2
       end
     end
   end
   object ImageList1: TImageList
     DrawingStyle = dsFocus
-    Left = 696
-    Top = 192
+    Left = 688
+    Top = 216
     Bitmap = {
       4C7A070000001000000010000000261000000000000078DAED5867785555BADE
       91E28C52434D40424FA129880525C0087724A0D27B02A1864454BA225C0B0202
@@ -1427,8 +1232,8 @@ object fmTableManage: TfmTableManage
     }
   end
   object ImageList2: TImageList
-    Left = 428
-    Top = 132
+    Left = 528
+    Top = 208
     Bitmap = {
       4C7A5900000010000000100000001D9400000000000078DAECBD055855CBFB2F
       BED563C7318EDD2D76E7B1E3D889818ADD9DC73A7A6CEC16B1080B1B4510A44B
