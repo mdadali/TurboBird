@@ -1,14 +1,14 @@
 unit uibscriptbuilder;
 
 (* 
-  Génère un script d'insertion des données respectant les contraintes des
-  clés étrangères.  
+  Gï¿½nï¿½re un script d'insertion des donnï¿½es respectant les contraintes des
+  clï¿½s ï¿½trangï¿½res.  
   Par Pierre Y. - pierrey@users.sourceforge.net
   
-  Cas d'utilisation : Réplication de portions d'une base de données. 
-  Pré-conditions : La base contient des tables, les relations entre les
-    tables ont été créées. Les données exportées peuvent être filtrées
-    en utilisant la propriété filter (clause "WHERE").    
+  Cas d'utilisation : Rï¿½plication de portions d'une base de donnï¿½es. 
+  Prï¿½-conditions : La base contient des tables, les relations entre les
+    tables ont ï¿½tï¿½ crï¿½ï¿½es. Les donnï¿½es exportï¿½es peuvent ï¿½tre filtrï¿½es
+    en utilisant la propriï¿½tï¿½ filter (clause "WHERE").    
 *)
 
 {$I uib.inc}
@@ -87,20 +87,20 @@ begin
   FScript.Add('/* -- Start of data insertion script -- */');
   FScript.Add('');
 
-  { Efface la liste des tables exportées }
+  { Efface la liste des tables exportï¿½es }
   FTablesDone.Clear;
   
-  { Recherche la table dans les métadonnées de la base }
+  { Recherche la table dans les mï¿½tadonnï¿½es de la base }
   with Metadatas do
     OrgTable := FindTableName(TableName);
 
-  { Exporte la table d'après ses métadonnées }
+  { Exporte la table d'aprï¿½s ses mï¿½tadonnï¿½es }
   ExportTable(OrgTable);
 
   FScript.Add('/* -- End of data insertion script -- */');
 end;
 
-{ Renvoie les métadonnées associées à la base de données }
+{ Renvoie les mï¿½tadonnï¿½es associï¿½es ï¿½ la base de donnï¿½es }
 function TUIBScriptBuilder.GetMetadatas: TMetaDataBase;
 var
   T: TUIBTransaction;
@@ -116,7 +116,7 @@ begin
   end;
 end;
 
-{ Renvoie le script généré }
+{ Renvoie le script gï¿½nï¿½rï¿½ }
 function TUIBScriptBuilder.GetScript: TStrings;
 begin
   Result := FScript;
@@ -148,21 +148,21 @@ begin
   FScript.Add('');
 
   RdrTransaction := TUIBTransaction.Create(nil);
-  { Requête qui lit dans la base d'origine }
+  { Requï¿½te qui lit dans la base d'origine }
   RdrQuery := TUIBQuery.Create(nil);
   try
-    { Paramètrage des transactions }
+    { Paramï¿½trage des transactions }
     RdrTransaction.DataBase := FDB;
 
-    { Initialise et ouvre la requête de lecture }
+    { Initialise et ouvre la requï¿½te de lecture }
     RdrQuery.Transaction := RdrTransaction;
     RdrQuery.SQL.Text := SQL;
     RdrQuery.Open;
 
     if not RdrQuery.Eof then
     begin
-      { Construit la requête d'écriture d'après les champs qui sont utilisés
-        dans la requête de lecture }
+      { Construit la requï¿½te d'ï¿½criture d'aprï¿½s les champs qui sont utilisï¿½s
+        dans la requï¿½te de lecture }
       ins := format('INSERT INTO %s (%s', [Table.Name, RdrQuery.Fields.SqlName[0]]);
       for f := 1 to RdrQuery.Fields.FieldCount - 1 do
          ins := ins + ', ' + RdrQuery.Fields.SqlName[f];
@@ -186,13 +186,24 @@ begin
             uftSmallint,
             uftFloat,
             uftDoublePrecision,
-            uftInt64 :     vals := vals + RdrQuery.Fields.AsString[f];
+            uftInt64
+          {$IFDEF FB40_UP}
+            , uftDecFloat16, uftDecFloat34, uftInt128
+          {$ENDIF}
+              :     vals := vals + RdrQuery.Fields.AsString[f];
             uftChar,
             uftVarchar,
             uftCstring :   vals := vals + QuotedStr(Trim(RdrQuery.Fields.AsString[f]));
             uftTimestamp : vals := vals + QuotedStr(MakeFBTimeStamp(RdrQuery.Fields.AsDateTime[f]));
             uftDate :      vals := vals + QuotedStr(MakeFBDate(RdrQuery.Fields.AsDateTime[f]));
             uftTime :      vals := vals + QuotedStr(MakeFBTime(RdrQuery.Fields.AsDateTime[f]));
+          {$IFDEF FB40_UP}
+            uftTimeTZ,
+            uftTimeTZEx,
+            uftTimestampTZ,
+            uftTimestampTZEx:
+              vals := vals + QuotedStr(RdrQuery.Fields.AsString[f]);
+          {$ENDIF}
             else
               vals := vals + 'NULL';
             end;
@@ -233,8 +244,8 @@ begin
 
   for i := 0 to Table.ForeignCount - 1 do
   begin
-    { On n'exporte pas les jointures auto-réflexives ni les tables qui
-      ont déjà été exportées }
+    { On n'exporte pas les jointures auto-rï¿½flexives ni les tables qui
+      ont dï¿½jï¿½ ï¿½tï¿½ exportï¿½es }
     if (Table.Foreign[i].ForTable.Name <> Table.Name) and
         (FTablesDone.IndexOf(Table.Foreign[i].ForTable) = -1) then
     begin
@@ -274,12 +285,12 @@ begin
     Delete(sql,Length(sql) - 4,5);
     sql := sql + ')';
 
-    { Sauvegarde la pile à l'envers }
+    { Sauvegarde la pile ï¿½ l'envers }
     TempStack.Push(TablePile);
     Table := TablePile;
   end;
 
-  { Réempile les tables jointes pour la prochaine utilisation }
+  { Rï¿½empile les tables jointes pour la prochaine utilisation }
   while TempStack.Count > 0 do
     FTables.Push(TempStack.Pop);
 
@@ -290,7 +301,7 @@ begin
 
   BuildInsertSQL(OrgTable, sql);
 
-  { Ajoute la tabla a la liste des tables déjà exportées }
+  { Ajoute la tabla a la liste des tables dï¿½jï¿½ exportï¿½es }
   FTablesDone.Add(OrgTable);
 end;
 

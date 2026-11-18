@@ -595,10 +595,47 @@ begin
     dtype_sql_date  : Result := uftDate;
     dtype_int64     : Result := uftInt64;
     dtype_array     : Result := uftArray;
+{$IFDEF FB40_UP}
+    dtype_dec64     : Result := uftDecFloat16;
+    dtype_dec128    : Result := uftDecFloat34;
+    dtype_int128    : Result := uftInt128;
+    dtype_sql_time_tz: Result := uftTimeTZ;
+    dtype_timestamp_tz: Result := uftTimestampTZ;
+    dtype_ex_time_tz: Result := uftTimeTZEx;
+    dtype_ex_timestamp_tz: Result := uftTimestampTZEx;
+{$ENDIF}
   else
     Result := uftUnKnown;
   end;
 end;
+
+{$IFDEF FB40_UP}
+function DescIsFB4Type(Dtype: Word): Boolean;
+begin
+  case Dtype of
+    dtype_dec64, dtype_dec128, dtype_int128,
+    dtype_sql_time_tz, dtype_timestamp_tz,
+    dtype_ex_time_tz, dtype_ex_timestamp_tz: Result := True;
+  else
+    Result := False;
+  end;
+end;
+
+function DescFB4SqlCode(Dtype: Word): SmallInt;
+begin
+  case Dtype of
+    dtype_dec64          : Result := SQL_DEC16;
+    dtype_dec128         : Result := SQL_DEC34;
+    dtype_int128         : Result := SQL_INT128;
+    dtype_sql_time_tz    : Result := SQL_TIME_TZ;
+    dtype_timestamp_tz   : Result := SQL_TIMESTAMP_TZ;
+    dtype_ex_time_tz     : Result := SQL_TIME_TZ_EX;
+    dtype_ex_timestamp_tz: Result := SQL_TIMESTAMP_TZ_EX;
+  else
+    Result := 0;
+  end;
+end;
+{$ENDIF}
 
 //******************************************************************************
 // Standard data types
@@ -608,6 +645,18 @@ function DescGetAsInteger(Param: PParamDsc): Integer;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := Trunc(UIBDecFloatToDouble(Param.dsc_address, False)); Exit; end;
+    dtype_dec128: begin Result := Trunc(UIBDecFloatToDouble(Param.dsc_address, True)); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToInt64(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz, dtype_ex_time_tz: Exit;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -642,6 +691,15 @@ end;
 
 procedure DescSetAsInteger(Param: PParamDsc; Value: Integer);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromInt64(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   if (Param.dsc_scale < 0)  then
   begin
     case Param.dsc_dtype of
@@ -677,6 +735,21 @@ function DescGetAsDouble(Param: PParamDsc): Double;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToDouble(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToDouble(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToDouble(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, False) / TimeCoeff; Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, True) / TimeCoeff; Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -710,6 +783,15 @@ end;
 
 procedure DescSetAsDouble(Param: PParamDsc; Value: Double);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromDouble(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   if (Param.dsc_scale < 0)  then
   begin
     case Param.dsc_dtype of
@@ -745,6 +827,21 @@ function DescGetAsCurrency(Param: PParamDsc): Currency;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToDouble(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToDouble(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToDouble(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, False) / TimeCoeff; Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, True) / TimeCoeff; Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -807,6 +904,15 @@ end;
 
 procedure DescSetAsCurrency(Param: PParamDsc; const Value: Currency);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromDouble(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -847,6 +953,18 @@ function DescGetAsInt64(Param: PParamDsc): Int64;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToInt64(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToInt64(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToInt64(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz, dtype_ex_time_tz: Exit;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -880,6 +998,15 @@ end;
 
 procedure DescSetAsInt64(Param: PParamDsc; const Value: Int64);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromInt64(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -916,6 +1043,21 @@ function DescGetAsSingle(Param: PParamDsc): Single;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToDouble(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToDouble(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToDouble(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, False) / TimeCoeff; Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, True) / TimeCoeff; Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -949,6 +1091,15 @@ end;
 
 procedure DescSetAsSingle(Param: PParamDsc; const Value: Single);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromDouble(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -985,6 +1136,18 @@ function DescGetAsSmallint(Param: PParamDsc): Smallint;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := Trunc(UIBDecFloatToDouble(Param.dsc_address, False)); Exit; end;
+    dtype_dec128: begin Result := Trunc(UIBDecFloatToDouble(Param.dsc_address, True)); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToInt64(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz, dtype_ex_time_tz: Exit;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1018,6 +1181,15 @@ end;
 
 procedure DescSetAsSmallint(Param: PParamDsc; const Value: Smallint);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromInt64(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1056,6 +1228,21 @@ function DescGetAsString(Param: PParamDsc): AnsiString;
 begin
   Result := '';
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToString(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToString(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToString(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToString(Param.dsc_address, False, False); Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToString(Param.dsc_address, False, True); Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToString(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToString(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1090,6 +1277,15 @@ end;
 
 procedure DescSetAsString(Param: PParamDsc; const Value: AnsiString);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromString(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1126,6 +1322,21 @@ function DescGetAsDateTime(Param: PParamDsc): TDateTime;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToDouble(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToDouble(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToDouble(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, False) / TimeCoeff; Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, True) / TimeCoeff; Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDateTime(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1160,6 +1371,15 @@ end;
 procedure DescSetAsDateTime(Param: PParamDsc;
   const Value: TDateTime);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromDouble(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1196,6 +1416,18 @@ function DescGetAsDate(Param: PParamDsc): Integer;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToInt64(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToInt64(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToInt64(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz, dtype_ex_time_tz: Exit;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToDate(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1230,6 +1462,15 @@ end;
 
 procedure DescSetAsDate(Param: PParamDsc; const Value: Integer);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromInt64(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1266,6 +1507,21 @@ function DescGetAsTime(Param: PParamDsc): Cardinal;
 begin
   Result := 0;
   if DescGetIsNull(Param) then Exit;
+{$IFDEF FB40_UP}
+  case Param.dsc_dtype of
+    dtype_dec64 : begin Result := UIBDecFloatToInt64(Param.dsc_address, False); Exit; end;
+    dtype_dec128: begin Result := UIBDecFloatToInt64(Param.dsc_address, True); Exit; end;
+    dtype_int128: begin Result := UIBInt128ToInt64(Param.dsc_address); Exit; end;
+    dtype_sql_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, False); Exit; end;
+    dtype_ex_time_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, False, True); Exit; end;
+    dtype_timestamp_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, True, False); Exit; end;
+    dtype_ex_timestamp_tz:
+      begin Result := UIBTimeTZToTime(Param.dsc_address, True, True); Exit; end;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin
@@ -1300,6 +1556,15 @@ end;
 
 procedure DescSetAsTime(Param: PParamDsc; const Value: Cardinal);
 begin
+{$IFDEF FB40_UP}
+  if DescIsFB4Type(Param.dsc_dtype) then
+  begin
+    if not UIBSetFB4FromTime(Param.dsc_address,
+      DescFB4SqlCode(Param.dsc_dtype), Value) then Exit;
+    DescSetIsNull(Param, False);
+    Exit;
+  end;
+{$ENDIF}
   // Is Numeric ?
   if (Param.dsc_scale < 0)  then
   begin

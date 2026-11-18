@@ -35,6 +35,7 @@ type
 
   // Metadata Object Identifiers
   TOIDDatabase = (OIDDomain, OIDTable, OIDView, OIDProcedure, OIDPackage,
+    OIDStoredFunction, OIDUDRProcedure, OIDUDRFunction,
     OIDGenerator, OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies);
   TOIDDatabases = set of TOIDDatabase;
 
@@ -67,6 +68,7 @@ type
 
 const
   ALLOBjects = [OIDDomain, OIDTable, OIDView, OIDProcedure, OIDPackage,
+    OIDStoredFunction, OIDUDRProcedure, OIDUDRFunction,
     OIDGenerator, OIDException, OIDUDF, OIDRole, OIDDBCharset, OIDDependencies];
   ALLTables = [OIDTableField, OIDPrimary, OIDForeign, OIDTableTrigger,
     OIDUnique,OIDIndex, OIDCheck, OIDTableGrant, OIDTableFieldGrant];

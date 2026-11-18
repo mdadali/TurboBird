@@ -165,6 +165,18 @@ const
   FB_API_VER = 30;
 {$ENDIF FB30}
 
+{$IFDEF FB40}
+  FB_API_VER = 40;
+{$ENDIF FB40}
+
+{$IFDEF FB50}
+  FB_API_VER = 50;
+{$ENDIF FB50}
+
+{$IFDEF FB60}
+  FB_API_VER = 60;
+{$ENDIF FB60}
+
 
   GDS_TRUE = 1;
   GDS_FALSE = 0;
@@ -297,7 +309,66 @@ type
   TISCTimeStamp = ISC_TIMESTAMP;
   {$DEFINE ISC_TIMESTAMP_DEFINED}
 
+{$IFDEF FB40_UP}
+  PISCTimeTZ = ^TISCTimeTZ;
+  ISC_TIME_TZ = record
+    utc_time: ISC_TIME;
+    time_zone: ISC_USHORT;
+  end;
+  TISCTimeTZ = ISC_TIME_TZ;
+  {$DEFINE ISC_TIME_TZ_DEFINED}
+
+  PISCTimeTZEx = ^TISCTimeTZEx;
+  ISC_TIME_TZ_EX = record
+    utc_time: ISC_TIME;
+    time_zone: ISC_USHORT;
+    ext_offset: ISC_SHORT;
+  end;
+  TISCTimeTZEx = ISC_TIME_TZ_EX;
+  {$DEFINE ISC_TIME_TZ_EX_DEFINED}
+
+  PISCTimeStampTZ = ^TISCTimeStampTZ;
+  ISC_TIMESTAMP_TZ = record
+    utc_timestamp: ISC_TIMESTAMP;
+    time_zone: ISC_USHORT;
+  end;
+  TISCTimeStampTZ = ISC_TIMESTAMP_TZ;
+  {$DEFINE ISC_TIMESTAMP_TZ_DEFINED}
+
+  PISCTimeStampTZEx = ^TISCTimeStampTZEx;
+  ISC_TIMESTAMP_TZ_EX = record
+    utc_timestamp: ISC_TIMESTAMP;
+    time_zone: ISC_USHORT;
+    ext_offset: ISC_SHORT;
+  end;
+  TISCTimeStampTZEx = ISC_TIMESTAMP_TZ_EX;
+  {$DEFINE ISC_TIMESTAMP_TZ_EX_DEFINED}
+
+  PFBDec16 = ^TFBDec16;
+  FB_DEC16 = record
+    fb_data: array[0..0] of UInt64;
+  end;
+  TFBDec16 = FB_DEC16;
+
+  PFBDec34 = ^TFBDec34;
+  FB_DEC34 = record
+    fb_data: array[0..1] of UInt64;
+  end;
+  TFBDec34 = FB_DEC34;
+
+  PFBInt128 = ^TFBInt128;
+  FB_I128 = record
+    fb_data: array[0..1] of UInt64;
+  end;
+  TFBInt128 = FB_I128;
+{$ENDIF FB40_UP}
+
 const
+{$IFDEF FB40_UP}
+  FB_DEC16_SIZE = SizeOf(FB_DEC16);
+  FB_DEC34_SIZE = SizeOf(FB_DEC34);
+  FB_I128_SIZE  = SizeOf(FB_I128);
+{$ENDIF FB40_UP}
   ISC_TIME_SECONDS_PRECISION = 10000;
   ISC_TIME_SECONDS_PRECISION_SCALE = -4;
 
@@ -547,7 +618,18 @@ const
   dtype_dbkey = 20;
 {$IFDEF FB30_UP}
   dtype_boolean = 21;
+{$IFDEF FB40_UP}
+  dtype_dec64 = 22;
+  dtype_dec128 = 23;
+  dtype_int128 = 24;
+  dtype_sql_time_tz = 25;
+  dtype_timestamp_tz = 26;
+  dtype_ex_time_tz = 27;
+  dtype_ex_timestamp_tz = 28;
+  DTYPE_TYPE_MAX = 29;
+{$ELSE}
   DTYPE_TYPE_MAX = 22;
+{$ENDIF}
 {$ELSE}
   DTYPE_TYPE_MAX = 21;
 {$ENDIF}
@@ -842,6 +924,15 @@ const
 {$IFDEF FB30_UP}
   blr_bool = 23;
 {$ENDIF}
+{$IFDEF FB40_UP}
+  blr_dec64 = 24;
+  blr_dec128 = 25;
+  blr_int128 = 26;
+  blr_sql_time_tz = 28;
+  blr_timestamp_tz = 29;
+  blr_ex_time_tz = 30;
+  blr_ex_timestamp_tz = 31;
+{$ENDIF FB40_UP}
 
   blr_domain_type_of = 0;
   blr_domain_full = 1;
@@ -1393,6 +1484,30 @@ const
   isc_dpb_map_attach = 90;
 {$ENDIF}
 
+{$IFDEF FB40_UP}
+  isc_dpb_session_time_zone = 91;
+  isc_dpb_set_db_replica = 92;
+  isc_dpb_set_bind = 93;
+  isc_dpb_decfloat_round = 94;
+  isc_dpb_decfloat_traps = 95;
+  isc_dpb_clear_map = 96;
+{$ENDIF FB40_UP}
+
+{$IFDEF FB50_UP}
+  isc_dpb_upgrade_db = 97;
+  isc_dpb_parallel_workers = 100;
+  isc_dpb_worker_attach = 101;
+{$ENDIF FB50_UP}
+
+{$IFDEF FB60_UP}
+  isc_dpb_owner = 102;
+  isc_dpb_max_blob_cache_size = 103;
+  isc_dpb_max_inline_blob_size = 104;
+  isc_dpb_search_path = 105;
+  isc_dpb_blr_request_search_path = 106;
+  isc_dpb_gbak_restore_has_schema = 107;
+{$ENDIF FB60_UP}
+
 {$IFDEF IB65_UP}
   isc_dpb_gbak_ods_version = 68;
   isc_dpb_gbak_ods_minor_version = 69;
@@ -1424,6 +1539,15 @@ const
 {$IFDEF IB75}
   isc_dpb_Max_Value = 71;
 {$ELSE}
+{$IFDEF FB60}
+  isc_dpb_Max_Value = 107;
+{$ELSE}
+{$IFDEF FB50}
+  isc_dpb_Max_Value = 101;
+{$ELSE}
+{$IFDEF FB40}
+  isc_dpb_Max_Value = 96;
+{$ELSE}
 {$IFDEF FB30}
   isc_dpb_Max_Value = 90;
 {$ELSE}
@@ -1449,6 +1573,9 @@ const
 {$ENDIF FB21}
 {$ENDIF FB25}
 {$ENDIF FB30}
+{$ENDIF FB40}
+{$ENDIF FB50}
+{$ENDIF FB60}
 {$ENDIF IB75}
 {$ENDIF IB71}
 {$ENDIF IB7}
@@ -1594,6 +1721,14 @@ const
 {$IFDEF FB20_UP}
   isc_tpb_lock_timeout = #21;
 {$ENDIF}
+{$IFDEF FB40_UP}
+  isc_tpb_read_consistency = #22;
+  isc_tpb_at_snapshot_number = #23;
+{$ENDIF FB40_UP}
+{$IFDEF FB60_UP}
+  isc_tpb_auto_release_temp_blobid = #24;
+  isc_tpb_lock_table_schema = #25;
+{$ENDIF FB60_UP}
 
   (************************
    * Blob Parameter Block *
@@ -1824,11 +1959,65 @@ const
   fb_info_pages_used = 124;
   fb_info_pages_free = 125;
 
-  fb_info_crypt_state = 126;
+  fb_info_crypt_key = 133;
+  fb_info_crypt_state = 134;
 
   fb_info_crypt_encrypted = $01;
   fb_info_crypt_process = $02;
 {$ENDIF}
+
+{$IFDEF FB40_UP}
+  fb_info_ses_idle_timeout_db = 129;
+  fb_info_ses_idle_timeout_att = 130;
+  fb_info_ses_idle_timeout_run = 131;
+
+  fb_info_conn_flags = 132;
+
+  fb_info_statement_timeout_db = 135;
+  fb_info_statement_timeout_att = 136;
+
+  fb_info_protocol_version = 137;
+  fb_info_crypt_plugin = 138;
+
+  fb_info_creation_timestamp_tz = 139;
+
+  fb_info_wire_crypt = 140;
+
+  fb_info_features = 141;
+
+  fb_info_next_attachment = 142;
+  fb_info_next_statement = 143;
+
+  fb_info_db_guid = 144;
+  fb_info_db_file_id = 145;
+
+  fb_info_replica_mode = 146;
+
+  fb_info_username = 147;
+  fb_info_sqlrole = 148;
+{$ENDIF FB40_UP}
+
+{$IFDEF FB50_UP}
+  fb_info_parallel_workers = 149;
+{$ENDIF FB50_UP}
+
+{$IFDEF FB60_UP}
+  fb_info_wire_out_packets = 150;
+  fb_info_wire_in_packets = 151;
+  fb_info_wire_out_bytes = 152;
+  fb_info_wire_in_bytes = 153;
+  fb_info_wire_snd_packets = 154;
+  fb_info_wire_rcv_packets = 155;
+  fb_info_wire_snd_bytes = 156;
+  fb_info_wire_rcv_bytes = 157;
+  fb_info_wire_roundtrips = 158;
+
+  fb_info_max_blob_cache_size = 159;
+  fb_info_max_inline_blob_size = 160;
+
+  fb_info_counts_scope_att = 161;
+  fb_info_counts_scope_db = 162;
+{$ENDIF FB60_UP}
 
   isc_info_version = isc_info_isc_version;
 
@@ -2463,6 +2652,18 @@ const
   isc_info_sql_explain_plan = 26;
   isc_info_sql_stmt_flags = 27;
 {$ENDIF}
+
+{$IFDEF FB40_UP}
+  isc_info_sql_stmt_timeout_user = 28;
+  isc_info_sql_stmt_timeout_run = 29;
+  isc_info_sql_stmt_blob_align = 30;
+  isc_info_sql_exec_path_blr_bytes = 31;
+  isc_info_sql_exec_path_blr_text = 32;
+{$ENDIF FB40_UP}
+
+{$IFDEF FB60_UP}
+  isc_info_sql_relation_schema = 33;
+{$ENDIF FB60_UP}
 
 {$IFDEF IB71_UP}
   isc_info_sql_precision = 25;
@@ -3136,6 +3337,16 @@ const
   SQL_TYPE_TIME = 560;
   SQL_TYPE_DATE = 570;
   SQL_INT64 = 580;
+
+{$IFDEF FB40_UP}
+  SQL_TIMESTAMP_TZ_EX = 32748;
+  SQL_TIME_TZ_EX = 32750;
+  SQL_INT128 = 32752;
+  SQL_TIMESTAMP_TZ = 32754;
+  SQL_TIME_TZ = 32756;
+  SQL_DEC16 = 32760;
+  SQL_DEC34 = 32762;
+{$ENDIF FB40_UP}
 
 {$IFDEF FB30_UP}
   SQL_BOOLEAN = 32764;

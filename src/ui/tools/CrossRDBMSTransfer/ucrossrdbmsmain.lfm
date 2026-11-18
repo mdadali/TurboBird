@@ -1,7 +1,7 @@
 object frmCrossRDBMSMain: TfrmCrossRDBMSMain
-  Left = 1100
+  Left = 515
   Height = 893
-  Top = 407
+  Top = 260
   Width = 1376
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
@@ -78,21 +78,21 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
     TabOrder = 2
     object tsTransfer: TTabSheet
       Caption = 'Transfer'
-      ClientHeight = 796
-      ClientWidth = 1366
+      ClientHeight = 792
+      ClientWidth = 1372
       object grboxConnections: TGroupBox
         Left = 0
         Height = 293
         Top = 0
-        Width = 1366
+        Width = 1372
         Align = alTop
         Caption = 'Connections'
-        ClientHeight = 273
-        ClientWidth = 1364
+        ClientHeight = 263
+        ClientWidth = 1368
         TabOrder = 0
         object GroupBoxSource: TGroupBox
           Left = 0
-          Height = 273
+          Height = 263
           Top = 0
           Width = 470
           Align = alLeft
@@ -100,8 +100,8 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           TabOrder = 0
         end
         object GroupBoxDest: TGroupBox
-          Left = 894
-          Height = 273
+          Left = 898
+          Height = 263
           Top = 0
           Width = 470
           Align = alRight
@@ -110,30 +110,30 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         end
         object grboxSourceTableAndFields: TGroupBox
           Left = 475
-          Height = 273
+          Height = 263
           Top = 0
-          Width = 419
+          Width = 423
           Align = alClient
           Caption = 'Source Table/Fields'
-          ClientHeight = 253
-          ClientWidth = 417
+          ClientHeight = 233
+          ClientWidth = 419
           TabOrder = 2
           object comboboxSourceTables: TComboBox
             Left = 0
-            Height = 35
+            Height = 32
             Top = 0
-            Width = 417
+            Width = 419
             Align = alTop
-            ItemHeight = 0
+            ItemHeight = 18
             OnChange = comboboxSourceTablesChange
             Style = csDropDownList
             TabOrder = 0
           end
           object CheckGroupSourceFields: TCheckGroup
             Left = 0
-            Height = 218
-            Top = 35
-            Width = 417
+            Height = 201
+            Top = 32
+            Width = 419
             Align = alClient
             AutoFill = True
             Caption = 'Source Fields'
@@ -152,7 +152,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         end
         object Splitter6: TSplitter
           Left = 470
-          Height = 273
+          Height = 263
           Top = 0
           Width = 5
         end
@@ -162,32 +162,32 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
         Left = 0
         Height = 5
         Top = 293
-        Width = 1366
+        Width = 1372
         Align = alTop
         ResizeAnchor = akTop
       end
       object pnlCenter: TPanel
         Left = 0
-        Height = 311
+        Height = 307
         Top = 298
-        Width = 1366
+        Width = 1372
         Align = alClient
-        ClientHeight = 311
-        ClientWidth = 1366
+        ClientHeight = 307
+        ClientWidth = 1372
         TabOrder = 2
         object GroupBoxFormulas: TGroupBox
           Left = 1
-          Height = 309
+          Height = 305
           Top = 1
-          Width = 1364
+          Width = 1370
           Align = alClient
           Caption = 'Formulas'
-          ClientHeight = 289
-          ClientWidth = 1362
+          ClientHeight = 275
+          ClientWidth = 1366
           TabOrder = 0
           object sgFormulas: TStringGrid
             Left = 0
-            Height = 289
+            Height = 275
             Top = 0
             Width = 835
             Align = alLeft
@@ -196,19 +196,19 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object GroupBoxSQL: TGroupBox
             Left = 840
-            Height = 289
+            Height = 275
             Top = 0
-            Width = 522
+            Width = 526
             Align = alClient
             Caption = 'Generated SQL'
-            ClientHeight = 269
-            ClientWidth = 520
+            ClientHeight = 245
+            ClientWidth = 522
             TabOrder = 1
             inline SynEdit1: TSynEdit
               Left = 0
-              Height = 269
+              Height = 245
               Top = 0
-              Width = 520
+              Width = 522
               Align = alClient
               Font.Height = 13
               Font.Name = 'DejaVu Sans Mono'
@@ -705,7 +705,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object Splitter3: TSplitter
             Left = 835
-            Height = 289
+            Height = 275
             Top = 0
             Width = 5
           end
@@ -714,12 +714,12 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
       object GroupBoxOptions: TGroupBox
         Left = 0
         Height = 187
-        Top = 609
-        Width = 1366
+        Top = 605
+        Width = 1372
         Align = alBottom
         Caption = 'Options'
-        ClientHeight = 167
-        ClientWidth = 1364
+        ClientHeight = 157
+        ClientWidth = 1368
         TabOrder = 3
         object grBoxRows: TGroupBox
           Left = 14
@@ -727,12 +727,12 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Top = 8
           Width = 410
           Caption = 'Rows'
-          ClientHeight = 124
-          ClientWidth = 408
+          ClientHeight = 114
+          ClientWidth = 406
           TabOrder = 0
           object chkboxCopyData: TCheckBox
             Left = 16
-            Height = 21
+            Height = 22
             Top = 8
             Width = 87
             Caption = 'Copy Data'
@@ -742,9 +742,9 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object rbAllRows: TRadioButton
             Left = 16
-            Height = 21
+            Height = 22
             Top = 51
-            Width = 74
+            Width = 75
             Caption = 'All Rows'
             Checked = True
             OnChange = rbAllRowsChange
@@ -753,7 +753,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object rbRange: TRadioButton
             Left = 112
-            Height = 21
+            Height = 22
             Top = 51
             Width = 63
             Caption = 'Range'
@@ -761,7 +761,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object edtFrom: TEdit
             Left = 184
-            Height = 31
+            Height = 32
             Top = 48
             Width = 88
             Enabled = False
@@ -770,15 +770,15 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object Label5: TLabel
             Left = 280
-            Height = 19
+            Height = 18
             Top = 51
-            Width = 14
+            Width = 16
             Caption = ' - -'
             ParentColor = False
           end
           object edtTo: TEdit
             Left = 304
-            Height = 31
+            Height = 32
             Top = 51
             Width = 96
             Enabled = False
@@ -792,12 +792,12 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Top = 8
           Width = 304
           Caption = 'Dest Table'
-          ClientHeight = 124
-          ClientWidth = 302
+          ClientHeight = 114
+          ClientWidth = 300
           TabOrder = 1
           object Label1: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 8
             Width = 67
             Caption = 'Tablename'
@@ -805,7 +805,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object edtDestTable: TEdit
             Left = 112
-            Height = 31
+            Height = 32
             Top = 8
             Width = 168
             TabOrder = 0
@@ -813,7 +813,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object lblIfExists: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 56
             Width = 81
             Caption = 'If table exists'
@@ -821,10 +821,10 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object cmbIfExists: TComboBox
             Left = 112
-            Height = 31
+            Height = 32
             Top = 48
             Width = 168
-            ItemHeight = 0
+            ItemHeight = 24
             ItemIndex = 0
             Items.Strings = (
               'Recreate'
@@ -842,12 +842,12 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Top = 8
           Width = 296
           Caption = 'Copy Engine'
-          ClientHeight = 124
-          ClientWidth = 294
+          ClientHeight = 114
+          ClientWidth = 292
           TabOrder = 2
           object Label2: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 8
             Width = 50
             Caption = 'Enginee'
@@ -855,24 +855,24 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object cmbStrategy: TComboBox
             Left = 128
-            Height = 31
+            Height = 32
             Top = 8
             Width = 160
-            ItemHeight = 0
+            ItemHeight = 24
             TabOrder = 0
             Text = 'cmbStrategy'
           end
           object Label4: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 56
-            Width = 105
+            Width = 106
             Caption = 'Batch Size (Rows)'
             ParentColor = False
           end
           object edtBatchSize: TEdit
             Left = 128
-            Height = 31
+            Height = 32
             Top = 53
             Width = 160
             TabOrder = 1
@@ -880,7 +880,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object chkboxUseFormulas: TCheckBox
             Left = 16
-            Height = 21
+            Height = 22
             Top = 96
             Width = 108
             Caption = 'Use Formulas'
@@ -893,20 +893,20 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           Top = 8
           Width = 289
           Caption = 'Intervals'
-          ClientHeight = 124
-          ClientWidth = 287
+          ClientHeight = 114
+          ClientWidth = 285
           TabOrder = 3
           object lblRefreshInterval: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 10
-            Width = 183
+            Width = 181
             Caption = 'Progress RefreshInterval (ms)'
             ParentColor = False
           end
           object edtRefreshInterval: TEdit
             Left = 224
-            Height = 31
+            Height = 32
             Top = 8
             Width = 55
             TabOrder = 0
@@ -914,7 +914,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object Label3: TLabel
             Left = 16
-            Height = 19
+            Height = 18
             Top = 48
             Width = 143
             Caption = 'Commit Interval (Rows)'
@@ -922,7 +922,7 @@ object frmCrossRDBMSMain: TfrmCrossRDBMSMain
           end
           object edtCommitInterval: TEdit
             Left = 224
-            Height = 31
+            Height = 32
             Top = 48
             Width = 55
             TabOrder = 1

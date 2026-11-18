@@ -1,7 +1,7 @@
 object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
-  Left = 489
+  Left = 908
   Height = 254
-  Top = 126
+  Top = 72
   Width = 469
   Caption = 'frmCrossRDBMSConnection'
   ClientHeight = 254
@@ -16,23 +16,23 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
     Top = 0
     Width = 469
     Align = alClient
-    ClientHeight = 252
-    ClientWidth = 467
+    ClientHeight = 250
+    ClientWidth = 465
     TabOrder = 0
     object pnlInspector: TPanel
       Left = 0
-      Height = 252
+      Height = 250
       Top = 0
-      Width = 467
+      Width = 465
       Align = alClient
-      ClientHeight = 252
-      ClientWidth = 467
+      ClientHeight = 250
+      ClientWidth = 465
       TabOrder = 0
       object InspectorGrid: TTIPropertyGrid
         Left = 1
-        Height = 211
+        Height = 209
         Top = 40
-        Width = 465
+        Width = 463
         Align = alClient
         CheckboxForBoolean = False
         DefaultValueFont.Color = clWindowText
@@ -47,24 +47,24 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
         Left = 1
         Height = 39
         Top = 1
-        Width = 465
+        Width = 463
         Align = alTop
         ClientHeight = 39
-        ClientWidth = 465
+        ClientWidth = 463
         TabOrder = 1
         object cmbboxConnection: TComboBox
           Left = 1
           Height = 37
           Top = 1
-          Width = 383
+          Width = 381
           Align = alClient
-          ItemHeight = 0
+          ItemHeight = 18
           OnChange = cmbboxConnectionChange
           Style = csDropDownList
           TabOrder = 0
         end
         object bbtnSaveConnection: TBitBtn
-          Left = 424
+          Left = 422
           Height = 37
           Hint = 'Save Connection'
           Top = 1
@@ -112,7 +112,7 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
           TabOrder = 1
         end
         object bbtnLoadConnection: TBitBtn
-          Left = 384
+          Left = 382
           Height = 37
           Hint = 'Load Connection'
           Top = 1
@@ -196,8 +196,8 @@ object frmCrossRDBMSConnection: TfrmCrossRDBMSConnection
     KeepConnection = False
     Transaction = SQLTransaction
     SkipLibraryVersionCheck = True
-    Left = 304
-    Top = 104
+    Left = 360
+    Top = 112
   end
   object IBDatabase1: TIBDatabase
     Connected = False

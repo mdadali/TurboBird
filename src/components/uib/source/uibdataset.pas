@@ -224,6 +224,26 @@ type
 implementation
 {$IFDEF COMPILER6_UP}
   uses fmtbcd, Variants, Math;
+{$ELSE}
+  {$IFDEF FPC}
+  uses FmtBCD;
+  {$ENDIF}
+{$ENDIF}
+
+{$IFDEF FB40_UP}
+function UIBStringToBcd(const S: AnsiString): TBCD;
+begin
+{$IFDEF FPC}
+  if not TryStrToBCD(S, Result) then
+    FillChar(Result, SizeOf(Result), 0);
+{$ELSE}
+  try
+    Result := StrToBcd(S);
+  except
+    FillChar(Result, SizeOf(Result), 0);
+  end;
+{$ENDIF}
+end;
 {$ENDIF}
 
 { TUIBCustomDataSet }
@@ -275,6 +295,10 @@ function TUIBCustomDataSet.InternalGetFieldData(FieldNo: Integer;
   Buffer: Pointer; Native: Boolean): Boolean;
 var
   aFieldType: TUIBFieldType;
+{$IFDEF FB40_UP}
+  Bcd: TBCD;
+  Dt: Double;
+{$ENDIF}
 {$IFDEF UNICODE}
   uniStr: UnicodeString;
 {$ENDIF}
@@ -449,6 +473,36 @@ begin
           PInteger(Buffer)^ := PCardinal(sqldata)^ div 10 else
           PDouble(Buffer)^ := PCardinal(sqldata)^ / TimeCoeff;
       uftInt64:PInt64(Buffer)^ := PInt64(sqldata)^;
+    {$IFDEF FB40_UP}
+      uftDecFloat16, uftDecFloat34:
+        begin
+          if aFieldType = uftDecFloat16 then
+            Bcd := UIBStringToBcd(UIBDecFloatToString(sqldata, False))
+          else
+            Bcd := UIBStringToBcd(UIBDecFloatToString(sqldata, True));
+          Move(Bcd, Buffer^, SizeOf(TBCD));
+        end;
+      uftInt128:
+        begin
+          Bcd := UIBStringToBcd(UIBInt128ToString(sqldata));
+          Move(Bcd, Buffer^, SizeOf(TBCD));
+        end;
+      uftTimeTZ, uftTimeTZEx, uftTimestampTZ, uftTimestampTZEx:
+        begin
+          if (aFieldType = uftTimeTZ) or (aFieldType = uftTimeTZEx) then
+            Dt := UIBTimeTZToTime(sqldata, False,
+              aFieldType = uftTimeTZEx) / TimeCoeff
+          else
+            Dt := UIBTimeTZToDateTime(sqldata, True,
+              aFieldType = uftTimestampTZEx);
+          if Native then
+          begin
+            TTimeStamp(Buffer^) := DateTimeToTimeStamp(Dt);
+            Double(Buffer^) := TimeStampToMSecs(TTimeStamp(Buffer^));
+          end else
+            Double(Buffer^) := Dt;
+        end;
+    {$ENDIF}
     {$IFDEF IB7_UP}
       uftBoolean:
         {$IFDEF FPC}
@@ -844,6 +898,28 @@ begin
         uftDate : DataType := ftDate;
         uftTime : DataType := ftTime;
         uftInt64: DataType := ftLargeint;
+      {$IFDEF FB40_UP}
+        uftDecFloat16:
+          begin
+            DataType := ftFMTBcd;
+            Size := 16;
+            Precision := 16;
+          end;
+        uftDecFloat34:
+          begin
+            DataType := ftFMTBcd;
+            Size := 34;
+            Precision := 34;
+          end;
+        uftInt128:
+          begin
+            DataType := ftFMTBcd;
+            Size := 39;
+            Precision := 39;
+          end;
+        uftTimeTZ, uftTimeTZEx: DataType := ftTime;
+        uftTimestampTZ, uftTimestampTZEx: DataType := ftDateTime;
+      {$ENDIF}
       {$IFDEF UIB_HAVE_BOOLEAN}
         uftBoolean: DataType := ftBoolean;
       {$ENDIF}

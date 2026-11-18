@@ -872,7 +872,7 @@ type
     { If true the blob data is fetched with the record. }
     property FetchBlobs: boolean read FFetchBlobs write FFetchBlobs default False;
     { Use BufferChunks to get or set the number of records for which the query
-      allocates buffer space at any time. When the query’s buffer is full,
+      allocates buffer space at any time. When the queryï¿½s buffer is full,
       trying to fetch an additional record causes the dataset to reallocate
       the buffer so that it has enough memory to hold an additional BufferChunks
       records. <br>
@@ -3099,6 +3099,15 @@ begin
           {$ENDIF}
           {$IFDEF FB30_UP}
             blr_bool      : Params.AddFieldType(Trim(AsString[1]), uftBoolean);
+          {$ENDIF}
+          {$IFDEF FB40_UP}
+            blr_dec64     : Params.AddFieldType(Trim(AsString[1]), uftDecFloat16);
+            blr_dec128    : Params.AddFieldType(Trim(AsString[1]), uftDecFloat34);
+            blr_int128    : Params.AddFieldType(Trim(AsString[1]), uftInt128);
+            blr_sql_time_tz: Params.AddFieldType(Trim(AsString[1]), uftTimeTZ);
+            blr_timestamp_tz: Params.AddFieldType(Trim(AsString[1]), uftTimestampTZ);
+            blr_ex_time_tz: Params.AddFieldType(Trim(AsString[1]), uftTimeTZEx);
+            blr_ex_timestamp_tz: Params.AddFieldType(Trim(AsString[1]), uftTimestampTZEx);
           {$ENDIF}
           else
             // shouldn't occur but ...

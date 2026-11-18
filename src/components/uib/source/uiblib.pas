@@ -52,8 +52,12 @@ type
 
   TUIBFieldType = (uftUnKnown, uftNumeric, uftChar, uftVarchar, uftCstring, uftSmallint,
     uftInteger, uftQuad, uftFloat, uftDoublePrecision, uftTimestamp, uftBlob, uftBlobId,
-    uftDate, uftTime, uftInt64, uftArray {$IFDEF UIB_HAVE_BOOLEAN}, uftBoolean{$ENDIF}
-    {$IFDEF FB25_UP}, uftNull{$ENDIF});
+    uftDate, uftTime, uftInt64, uftArray, uftBoolean, uftNull
+    {$IFDEF FB40_UP}
+    , uftDecFloat16, uftDecFloat34, uftInt128
+    , uftTimeTZ, uftTimestampTZ, uftTimeTZEx, uftTimestampTZEx
+    {$ENDIF FB40_UP}
+    );
 
   TScale = 1..15;
 
@@ -1069,6 +1073,38 @@ const
   DateOffset = 15018;
   TimeCoeff = 864000000;
 
+{$IFDEF FB40_UP}
+  // Firebird 4+ value conversion helpers. Data points to the raw SQLDA data.
+  function UIBIsFB4Type(Code: SmallInt): Boolean;
+  function UIBDecFloatToDouble(Data: Pointer; Is128: Boolean): Double;
+  function UIBDecFloatToInt64(Data: Pointer; Is128: Boolean): Int64;
+  function UIBDecFloatToString(Data: Pointer; Is128: Boolean): AnsiString;
+  function UIBDecFloatFromString(const S: AnsiString; Is128: Boolean;
+    Data: Pointer): Boolean;
+  function UIBDecFloatFromDouble(Value: Double; Is128: Boolean;
+    Data: Pointer): Boolean;
+  function UIBInt128ToString(Data: Pointer): AnsiString;
+  function UIBInt128ToInt64(Data: Pointer): Int64;
+  function UIBInt128ToDouble(Data: Pointer): Double;
+  function UIBInt128FromString(const S: AnsiString; Data: Pointer): Boolean;
+  procedure UIBInt128FromInt64(Value: Int64; Data: Pointer);
+  function UIBInt128FromDouble(Value: Double; Data: Pointer): Boolean;
+  function UIBTimeTZToDateTime(Data: Pointer; IsTimestamp, IsEx: Boolean): TDateTime;
+  function UIBTimeTZToDate(Data: Pointer; IsTimestamp, IsEx: Boolean): Integer;
+  function UIBTimeTZToTime(Data: Pointer; IsTimestamp, IsEx: Boolean): Cardinal;
+  function UIBTimeTZToString(Data: Pointer; IsTimestamp, IsEx: Boolean): AnsiString;
+  function UIBTimeTZFromString(const S: AnsiString; IsTimestamp, IsEx: Boolean;
+    Data: Pointer): Boolean;
+  function UIBSetFB4FromString(Data: Pointer; Code: SmallInt;
+    const S: AnsiString): Boolean;
+  function UIBSetFB4FromDouble(Data: Pointer; Code: SmallInt;
+    Value: Double): Boolean;
+  function UIBSetFB4FromInt64(Data: Pointer; Code: SmallInt;
+    Value: Int64): Boolean;
+  function UIBSetFB4FromTime(Data: Pointer; Code: SmallInt;
+    Value: Cardinal): Boolean;
+{$ENDIF}
+
   procedure DecodeTimeStamp(v: PISCTimeStamp; out DateTime: Double); overload;
   procedure DecodeTimeStamp(v: PISCTimeStamp; out TimeStamp: TTimeStamp); overload;
   function  DecodeTimeStamp(v: PISCTimeStamp): Double; overload;
@@ -1216,6 +1252,29 @@ const
   ,(Name: 'nolinger';               ParamType: prNone)
   ,(Name: 'reset_icu';              ParamType: prNone)
   ,(Name: 'map_attach';             ParamType: prNone)
+{$ENDIF}
+{$IFDEF FB40_UP}
+  ,(Name: 'session_time_zone';      ParamType: prStrg)
+  ,(Name: 'set_db_replica';         ParamType: prCard)
+  ,(Name: 'set_bind';               ParamType: prStrg)
+  ,(Name: 'decfloat_round';         ParamType: prCard)
+  ,(Name: 'decfloat_traps';         ParamType: prCard)
+  ,(Name: 'clear_map';              ParamType: prNone)
+{$ENDIF}
+{$IFDEF FB50_UP}
+  ,(Name: 'upgrade_db';             ParamType: prCard)
+  ,(Name: '';                       ParamType: prIgno) // 98 (unused)
+  ,(Name: '';                       ParamType: prIgno) // 99 (unused)
+  ,(Name: 'parallel_workers';       ParamType: prCard)
+  ,(Name: 'worker_attach';          ParamType: prStrg)
+{$ENDIF}
+{$IFDEF FB60_UP}
+  ,(Name: 'owner';                  ParamType: prStrg)
+  ,(Name: 'max_blob_cache_size';    ParamType: prCard)
+  ,(Name: 'max_inline_blob_size';   ParamType: prCard)
+  ,(Name: 'search_path';            ParamType: prStrg)
+  ,(Name: 'blr_request_search_path';ParamType: prStrg)
+  ,(Name: 'gbak_restore_has_schema';ParamType: prNone)
 {$ENDIF}
    );
 
@@ -3106,6 +3165,1638 @@ type
     Result := Cardinal((Hour * 60 + Minute) * 60 + Second) * ISC_TIME_SECONDS_PRECISION + Fractions;
   end;
 
+//******************************************************************************
+// Firebird 4+ data type helpers (DECFLOAT, INT128, TIME/TIMESTAMP WITH TIME ZONE)
+//******************************************************************************
+{$IFDEF FB40_UP}
+{$I uibdpd.inc}
+
+const
+  UIB_DEC64_Bias  = 398;
+  UIB_DEC64_Ehigh = 767;
+  UIB_DEC64_Emax  = 384;
+  UIB_DEC64_Emin  = -383;
+  UIB_DEC64_Pmax  = 16;
+
+  UIB_DEC128_Bias  = 6176;
+  UIB_DEC128_Ehigh = 12287;
+  UIB_DEC128_Emax  = 6144;
+  UIB_DEC128_Emin  = -6143;
+  UIB_DEC128_Pmax  = 34;
+
+  UIB_DPD_COMBEXP: array[0..31] of Byte =
+    (0, 0, 0, 0, 0, 0, 0, 0,
+     1, 1, 1, 1, 1, 1, 1, 1,
+     2, 2, 2, 2, 2, 2, 2, 2,
+     0, 0, 1, 1, 2, 2, 3, 3);
+
+  UIB_DPD_COMBMSD: array[0..31] of Byte =
+    (0, 1, 2, 3, 4, 5, 6, 7,
+     0, 1, 2, 3, 4, 5, 6, 7,
+     0, 1, 2, 3, 4, 5, 6, 7,
+     8, 9, 8, 9, 8, 9, 0, 1);
+
+type
+  TUIBDecimalKind = (udkFinite, udkInfinity, udkQuietNaN, udkSignalingNaN);
+  TUIBDecimal = record
+    Kind       : TUIBDecimalKind;
+    Negative   : Boolean;
+    Exponent   : Integer;
+    Digits     : array[0..63] of Byte; // most significant digit first
+    DigitCount : Integer;
+    Sticky     : Boolean;              // non-zero digits were dropped while parsing
+  end;
+
+function UIBDecimalShouldRoundUp(First: Byte; AnyAfter: Boolean;
+  LastKept: Byte): Boolean;
+begin
+  if First > 5 then
+    Result := True
+  else if First < 5 then
+    Result := False
+  else if AnyAfter then
+    Result := True
+  else
+    Result := Odd(LastKept);
+end;
+
+procedure UIBDecimalDropDigits(var D: TUIBDecimal; Drop: Integer);
+var
+  Keep, I, LastKept: Integer;
+  First: Byte;
+  AnyAfter: Boolean;
+  RoundUp: Boolean;
+begin
+  if Drop <= 0 then
+    Exit;
+
+  Keep := D.DigitCount - Drop;
+  AnyAfter := D.Sticky;
+  RoundUp := False;
+
+  if Keep > 0 then
+  begin
+    First := D.Digits[Keep];
+    for I := Keep + 1 to D.DigitCount - 1 do
+      if D.Digits[I] <> 0 then
+      begin
+        AnyAfter := True;
+        Break;
+      end;
+    LastKept := D.Digits[Keep - 1];
+    RoundUp := UIBDecimalShouldRoundUp(First, AnyAfter, LastKept);
+    D.DigitCount := Keep;
+    Inc(D.Exponent, Drop);
+    if RoundUp then
+    begin
+      I := Keep - 1;
+      while I >= 0 do
+      begin
+        if D.Digits[I] < 9 then
+        begin
+          Inc(D.Digits[I]);
+          Break;
+        end;
+        D.Digits[I] := 0;
+        Dec(I);
+      end;
+      if I < 0 then
+      begin
+        // Carry beyond the most significant digit: 999... -> 1000...
+        D.Digits[0] := 1;
+        for I := 1 to Keep - 1 do
+          D.Digits[I] := 0;
+        Inc(D.Exponent);
+      end;
+    end;
+  end
+  else if Keep = 0 then
+  begin
+    First := D.Digits[0];
+    for I := 1 to D.DigitCount - 1 do
+      if D.Digits[I] <> 0 then
+      begin
+        AnyAfter := True;
+        Break;
+      end;
+    RoundUp := UIBDecimalShouldRoundUp(First, AnyAfter, 0);
+    Inc(D.Exponent, Drop);
+    if RoundUp then
+    begin
+      D.DigitCount := 1;
+      D.Digits[0] := 1;
+    end
+    else
+    begin
+      D.DigitCount := 1;
+      D.Digits[0] := 0;
+    end;
+  end
+  else
+  begin
+    // Dropped more digits than available: the value is below half an ulp.
+    Inc(D.Exponent, Drop);
+    D.DigitCount := 1;
+    D.Digits[0] := 0;
+  end;
+
+  D.Sticky := False;
+end;
+
+procedure UIBDecimalStripLeadingZeros(var D: TUIBDecimal);
+var
+  I, J: Integer;
+begin
+  I := 0;
+  while (I < D.DigitCount - 1) and (D.Digits[I] = 0) do
+    Inc(I);
+  if I > 0 then
+  begin
+    for J := 0 to D.DigitCount - I - 1 do
+      D.Digits[J] := D.Digits[J + I];
+    Dec(D.DigitCount, I);
+  end;
+  if D.DigitCount <= 0 then
+  begin
+    D.DigitCount := 1;
+    D.Digits[0] := 0;
+  end;
+end;
+
+function UIBDecimalParse(const S: AnsiString; var D: TUIBDecimal): Boolean;
+var
+  I, Len, ExpValue, FracDigits, Dropped: Integer;
+  HasPoint, HasDigits, ExpNeg: Boolean;
+  C: AnsiChar;
+  Upper: AnsiString;
+begin
+  FillChar(D, SizeOf(D), 0);
+  D.Kind := udkFinite;
+  D.DigitCount := 0;
+
+  Len := Length(S);
+  I := 1;
+  while (I <= Len) and (S[I] = ' ') do
+    Inc(I);
+  while (Len >= I) and (S[Len] = ' ') do
+    Dec(Len);
+  if I > Len then
+    Exit(False);
+
+  if (S[I] = '+') or (S[I] = '-') then
+  begin
+    D.Negative := S[I] = '-';
+    Inc(I);
+  end;
+  if I > Len then
+    Exit(False);
+
+  Upper := UpperCase(Copy(S, I, Len - I + 1));
+  if (Upper = 'INF') or (Upper = 'INFINITY') then
+  begin
+    D.Kind := udkInfinity;
+    Exit(True);
+  end;
+  if Upper = 'NAN' then
+  begin
+    D.Kind := udkQuietNaN;
+    Exit(True);
+  end;
+  if Upper = 'SNAN' then
+  begin
+    D.Kind := udkSignalingNaN;
+    Exit(True);
+  end;
+
+  ExpValue := 0;
+  FracDigits := 0;
+  Dropped := 0;
+  HasPoint := False;
+  HasDigits := False;
+  ExpNeg := False;
+
+  while I <= Len do
+  begin
+    C := S[I];
+    if (C >= '0') and (C <= '9') then
+    begin
+      HasDigits := True;
+      if D.DigitCount < SizeOf(D.Digits) then
+      begin
+        D.Digits[D.DigitCount] := Ord(C) - Ord('0');
+        Inc(D.DigitCount);
+      end
+      else
+      begin
+        Inc(Dropped);
+        if C <> '0' then
+          D.Sticky := True;
+      end;
+      if HasPoint then
+        Inc(FracDigits);
+    end
+    else if C = '.' then
+    begin
+      if HasPoint then
+        Exit(False);
+      HasPoint := True;
+    end
+    else if (C = 'E') or (C = 'e') or (C = 'D') or (C = 'd') then
+    begin
+      Inc(I);
+      Break;
+    end
+    else if C = ' ' then
+    begin
+      // ignore spaces inside the number
+    end
+    else
+      Exit(False);
+    Inc(I);
+  end;
+
+  if not HasDigits then
+    Exit(False);
+
+  if I <= Len then
+  begin
+    if (S[I] = '+') or (S[I] = '-') then
+    begin
+      ExpNeg := S[I] = '-';
+      Inc(I);
+    end;
+    while (I <= Len) and (S[I] = ' ') do
+      Inc(I);
+    if I > Len then
+      Exit(False);
+    while I <= Len do
+    begin
+      C := S[I];
+      if (C < '0') or (C > '9') then
+      begin
+        if C <> ' ' then
+          Exit(False);
+      end
+      else
+      begin
+        if ExpValue < 1000000 then
+          ExpValue := ExpValue * 10 + (Ord(C) - Ord('0'));
+      end;
+      Inc(I);
+    end;
+    if ExpNeg then
+      ExpValue := -ExpValue;
+  end;
+
+  D.Exponent := ExpValue - FracDigits + Dropped;
+  UIBDecimalStripLeadingZeros(D);
+
+  // If all digits are zero, normalize the exponent range.
+  Result := True;
+end;
+
+procedure UIBDecimalToWords(const D: TUIBDecimal; Is128: Boolean;
+  out W0, W1, W2, W3: Cardinal);
+var
+  X: TUIBDecimal;
+  I, G, Start, Val, ExpField, MinExp, Fold, Pmax, Bias, Ehigh, Emax, Emin: Integer;
+  Msd: Byte;
+  Padded: array[0..33] of Byte;
+  Lo64, Hi64, Coeff: QWord;
+  Comb, ExpCont, Exp2: Cardinal;
+  Sign: Cardinal;
+  AllZero: Boolean;
+
+  procedure PutDeclet(Index: Integer; Value: Cardinal);
+  var
+    BitPos: Integer;
+  begin
+    BitPos := Index * 10;
+    if BitPos < 64 then
+    begin
+      Lo64 := Lo64 or (QWord(Value) shl BitPos);
+      if BitPos > 54 then
+        Hi64 := Hi64 or (QWord(Value) shr (64 - BitPos));
+    end
+    else
+      Hi64 := Hi64 or (QWord(Value) shl (BitPos - 64));
+  end;
+
+begin
+  W0 := 0; W1 := 0; W2 := 0; W3 := 0;
+
+  if Is128 then
+  begin
+    Pmax := UIB_DEC128_Pmax; Bias := UIB_DEC128_Bias;
+    Ehigh := UIB_DEC128_Ehigh; Emax := UIB_DEC128_Emax;
+    Emin := UIB_DEC128_Emin;
+  end
+  else
+  begin
+    Pmax := UIB_DEC64_Pmax; Bias := UIB_DEC64_Bias;
+    Ehigh := UIB_DEC64_Ehigh; Emax := UIB_DEC64_Emax;
+    Emin := UIB_DEC64_Emin;
+  end;
+
+  Sign := 0;
+  if D.Negative then
+    Sign := $80000000;
+
+  if D.Kind <> udkFinite then
+  begin
+    case D.Kind of
+      udkInfinity     : Comb := $78;
+      udkQuietNaN     : Comb := $7C;
+      udkSignalingNaN : Comb := $7E;
+    else
+      Comb := 0;
+    end;
+    Comb := Comb shl 24;
+    if Is128 then
+      W3 := Sign or Comb
+    else
+      W1 := Sign or Comb;
+    Exit;
+  end;
+
+  X := D;
+  UIBDecimalDropDigits(X, X.DigitCount - Pmax);
+
+  AllZero := True;
+  for I := 0 to X.DigitCount - 1 do
+    if X.Digits[I] <> 0 then
+    begin
+      AllZero := False;
+      Break;
+    end;
+
+  if not AllZero then
+  begin
+    if X.Exponent + X.DigitCount - 1 > Emax then
+    begin
+      // Overflow -> infinity
+      if Is128 then
+        W3 := Sign or ($78 shl 24)
+      else
+        W1 := Sign or ($78 shl 24);
+      Exit;
+    end;
+
+    MinExp := Emin - (Pmax - 1);
+    if X.Exponent < MinExp then
+      UIBDecimalDropDigits(X, MinExp - X.Exponent);
+
+    // Re-check overflow after rounding.
+    if X.Exponent + X.DigitCount - 1 > Emax then
+    begin
+      if Is128 then
+        W3 := Sign or ($78 shl 24)
+      else
+        W1 := Sign or ($78 shl 24);
+      Exit;
+    end;
+
+    if X.Exponent < MinExp then
+      X.Exponent := MinExp;
+  end;
+
+  if AllZero then
+  begin
+    if X.Exponent < -Bias then
+      X.Exponent := -Bias;
+    if X.Exponent > Ehigh - Bias then
+      X.Exponent := Ehigh - Bias;
+  end
+  else
+  begin
+    // Fold-down: pad coefficient with zeros when the exponent is too large.
+    Fold := X.Exponent - (Ehigh - Bias);
+    if Fold > 0 then
+    begin
+      if X.DigitCount + Fold <= Pmax then
+      begin
+        for I := 1 to Fold do
+          X.Digits[X.DigitCount + I - 1] := 0;
+        Inc(X.DigitCount, Fold);
+        Dec(X.Exponent, Fold);
+      end
+      else
+        X.Exponent := Ehigh - Bias;
+    end;
+  end;
+
+  ExpField := X.Exponent + Bias;
+  if ExpField < 0 then
+    ExpField := 0;
+  if ExpField > Ehigh then
+    ExpField := Ehigh;
+
+  // Pad coefficient to Pmax digits (most significant first).
+  for I := 0 to Pmax - 1 do
+    Padded[I] := 0;
+  if X.DigitCount > Pmax then
+    X.DigitCount := Pmax;
+  for I := 0 to X.DigitCount - 1 do
+    Padded[Pmax - X.DigitCount + I] := X.Digits[I];
+
+  Msd := Padded[0];
+
+  Lo64 := 0;
+  Hi64 := 0;
+  for G := 0 to (Pmax div 3) - 1 do
+  begin
+    Start := Pmax - 3 * (G + 1);
+    Val := Padded[Start] * 100 + Padded[Start + 1] * 10 + Padded[Start + 2];
+    PutDeclet(G, UIB_BIN2DPD[Val]);
+  end;
+
+  if Is128 then
+  begin
+    Exp2 := (ExpField shr 12) and 3;
+    if Msd < 8 then
+      Comb := (Exp2 shl 3) or Msd
+    else
+      Comb := 24 or (Msd and 1);
+    ExpCont := Cardinal(ExpField) and $0FFF;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32);
+    W2 := Cardinal(Hi64);
+    W3 := Cardinal(Hi64 shr 32) and $3FFF;
+    W3 := W3 or (ExpCont shl 14) or (Comb shl 26) or Sign;
+  end
+  else
+  begin
+    Exp2 := (ExpField shr 8) and 3;
+    if Msd < 8 then
+      Comb := (Exp2 shl 3) or Msd
+    else
+      Comb := 24 or (Msd and 1);
+    ExpCont := Cardinal(ExpField) and $00FF;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32) and $0003FFFF;
+    W1 := W1 or (ExpCont shl 18) or (Comb shl 26) or Sign;
+  end;
+end;
+
+procedure UIBWordsToDecimal(W0, W1, W2, W3: Cardinal; Is128: Boolean;
+  var D: TUIBDecimal);
+var
+  Comb, Exp2, Msd, ExpField, I, G, Pos, Val: Integer;
+  Lo64, Hi64: QWord;
+  Declet: Cardinal;
+  Pmax: Integer;
+  CoeffCount: Integer;
+
+  function GetBits(BitPos: Integer): Cardinal;
+  begin
+    if BitPos <= 54 then
+      Result := Cardinal((Lo64 shr BitPos) and $3FF)
+    else if BitPos < 64 then
+      Result := Cardinal(((Lo64 shr BitPos) or (Hi64 shl (64 - BitPos))) and $3FF)
+    else
+      Result := Cardinal((Hi64 shr (BitPos - 64)) and $3FF);
+  end;
+
+begin
+  FillChar(D, SizeOf(D), 0);
+  D.Kind := udkFinite;
+  D.DigitCount := 1;
+  D.Digits[0] := 0;
+
+  if Is128 then
+  begin
+    Comb := (W3 shr 26) and $1F;
+    Exp2 := UIB_DPD_COMBEXP[Comb];
+    Msd := UIB_DPD_COMBMSD[Comb];
+    D.Negative := (W3 and $80000000) <> 0;
+    Pmax := UIB_DEC128_Pmax;
+    Lo64 := QWord(W0) or (QWord(W1) shl 32);
+    Hi64 := QWord(W2) or (QWord(W3 and $3FFF) shl 32);
+    if Exp2 = 3 then
+    begin
+      if Msd = 0 then
+        D.Kind := udkInfinity
+      else if (W3 and $02000000) <> 0 then
+        D.Kind := udkSignalingNaN
+      else
+        D.Kind := udkQuietNaN;
+      Exit;
+    end;
+    ExpField := (Exp2 shl 12) or Integer((W3 shr 14) and $0FFF);
+    D.Exponent := ExpField - UIB_DEC128_Bias;
+    CoeffCount := 11;
+  end
+  else
+  begin
+    Comb := (W1 shr 26) and $1F;
+    Exp2 := UIB_DPD_COMBEXP[Comb];
+    Msd := UIB_DPD_COMBMSD[Comb];
+    D.Negative := (W1 and $80000000) <> 0;
+    Pmax := UIB_DEC64_Pmax;
+    Lo64 := QWord(W0) or (QWord(W1 and $0003FFFF) shl 32);
+    Hi64 := 0;
+    if Exp2 = 3 then
+    begin
+      if Msd = 0 then
+        D.Kind := udkInfinity
+      else if (W1 and $02000000) <> 0 then
+        D.Kind := udkSignalingNaN
+      else
+        D.Kind := udkQuietNaN;
+      Exit;
+    end;
+    ExpField := (Exp2 shl 8) or Integer((W1 shr 18) and $00FF);
+    D.Exponent := ExpField - UIB_DEC64_Bias;
+    CoeffCount := 5;
+  end;
+
+  if Msd <> 0 then
+  begin
+    D.Digits[0] := Msd;
+    Pos := 1;
+    D.DigitCount := 1 + CoeffCount * 3;
+  end
+  else
+  begin
+    Pos := 0;
+    D.DigitCount := CoeffCount * 3;
+  end;
+
+  for G := CoeffCount - 1 downto 0 do
+  begin
+    Declet := GetBits(G * 10);
+    Val := UIB_DPD2BIN[Declet];
+    D.Digits[Pos] := Val div 100;
+    D.Digits[Pos + 1] := (Val div 10) mod 10;
+    D.Digits[Pos + 2] := Val mod 10;
+    Inc(Pos, 3);
+  end;
+
+  if Msd = 0 then
+    UIBDecimalStripLeadingZeros(D);
+end;
+
+function UIBDecFloatToDouble(Data: Pointer; Is128: Boolean): Double;
+var
+  D: TUIBDecimal;
+  W0, W1, W2, W3: Cardinal;
+  I: Integer;
+  X: Double;
+  Lo64, Hi64: QWord;
+begin
+  if Is128 then
+  begin
+    Lo64 := PUInt64(Data)^;
+    Hi64 := PUInt64(PAnsiChar(Data) + 8)^;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32);
+    W2 := Cardinal(Hi64);
+    W3 := Cardinal(Hi64 shr 32);
+  end
+  else
+  begin
+    Lo64 := PUInt64(Data)^;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32);
+    W2 := 0;
+    W3 := 0;
+  end;
+
+  UIBWordsToDecimal(W0, W1, W2, W3, Is128, D);
+  case D.Kind of
+    udkInfinity:
+      begin
+        if D.Negative then
+          Result := -Infinity
+        else
+          Result := Infinity;
+        Exit;
+      end;
+    udkQuietNaN, udkSignalingNaN:
+      begin
+        Result := NaN;
+        Exit;
+      end;
+  end;
+
+  X := 0;
+  for I := 0 to D.DigitCount - 1 do
+    X := X * 10 + D.Digits[I];
+  if X <> 0 then
+    X := X * Exp(D.Exponent * Ln(10));
+  if D.Negative then
+    X := -X;
+  Result := X;
+end;
+
+function UIBDecFloatToInt64(Data: Pointer; Is128: Boolean): Int64;
+var
+  V: Double;
+begin
+  V := UIBDecFloatToDouble(Data, Is128);
+  if IsNan(V) or IsInfinite(V) then
+    raise EUIBConvertError.Create(EUIB_CASTERROR);
+  if (V >= 9223372036854775808.0) or (V < -9223372036854775808.0) then
+    raise EUIBConvertError.Create(EUIB_CASTERROR);
+  Result := Trunc(V);
+end;
+
+function UIBDecFloatToString(Data: Pointer; Is128: Boolean): AnsiString;
+var
+  D: TUIBDecimal;
+  W0, W1, W2, W3: Cardinal;
+  I, Adjusted: Integer;
+  Digits, S: AnsiString;
+  Lo64, Hi64: QWord;
+
+  function Zeroes(Count: Integer): AnsiString;
+  begin
+    if Count > 0 then
+      SetLength(Result, Count)
+    else
+      Result := '';
+    if Count > 0 then
+      FillChar(Result[1], Count, '0');
+  end;
+
+begin
+  if Is128 then
+  begin
+    Lo64 := PUInt64(Data)^;
+    Hi64 := PUInt64(PAnsiChar(Data) + 8)^;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32);
+    W2 := Cardinal(Hi64);
+    W3 := Cardinal(Hi64 shr 32);
+  end
+  else
+  begin
+    Lo64 := PUInt64(Data)^;
+    W0 := Cardinal(Lo64);
+    W1 := Cardinal(Lo64 shr 32);
+    W2 := 0;
+    W3 := 0;
+  end;
+
+  UIBWordsToDecimal(W0, W1, W2, W3, Is128, D);
+
+  case D.Kind of
+    udkInfinity:
+      begin
+        if D.Negative then
+          Result := '-Infinity'
+        else
+          Result := 'Infinity';
+        Exit;
+      end;
+    udkQuietNaN:
+      begin
+        Result := 'NaN';
+        Exit;
+      end;
+    udkSignalingNaN:
+      begin
+        Result := 'sNaN';
+        Exit;
+      end;
+  end;
+
+  SetLength(Digits, D.DigitCount);
+  for I := 0 to D.DigitCount - 1 do
+    Digits[I + 1] := AnsiChar(Ord('0') + D.Digits[I]);
+
+  // Remove trailing zeros of a zero coefficient.
+  if Digits = StringOfChar('0', D.DigitCount) then
+  begin
+    if D.Negative then
+      Result := '-0'
+    else
+      Result := '0';
+    Exit;
+  end;
+
+  Adjusted := D.Exponent + D.DigitCount - 1;
+
+  if (D.Exponent <= 0) and (Adjusted >= -6) then
+  begin
+    if D.Exponent = 0 then
+      S := Digits
+    else if -D.Exponent < D.DigitCount then
+      S := Copy(Digits, 1, D.DigitCount + D.Exponent) + '.' +
+           Copy(Digits, D.DigitCount + D.Exponent + 1, -D.Exponent)
+    else
+      S := '0.' + Zeroes(-D.Exponent - D.DigitCount) + Digits;
+  end
+  else
+  begin
+    S := Copy(Digits, 1, 1);
+    if D.DigitCount > 1 then
+      S := S + '.' + Copy(Digits, 2, D.DigitCount - 1);
+    if Adjusted >= 0 then
+      S := S + 'E+' + IntToStr(Adjusted)
+    else
+      S := S + 'E-' + IntToStr(-Adjusted);
+  end;
+
+  if D.Negative then
+    Result := '-' + S
+  else
+    Result := S;
+end;
+
+function UIBDecFloatFromString(const S: AnsiString; Is128: Boolean;
+  Data: Pointer): Boolean;
+var
+  D: TUIBDecimal;
+  W0, W1, W2, W3: Cardinal;
+  Lo64, Hi64: QWord;
+  MaxDigits: Integer;
+begin
+  if not UIBDecimalParse(S, D) then
+    Exit(False);
+  if Is128 then
+    MaxDigits := UIB_DEC128_Pmax
+  else
+    MaxDigits := UIB_DEC64_Pmax;
+  UIBDecimalDropDigits(D, D.DigitCount - MaxDigits);
+  UIBDecimalToWords(D, Is128, W0, W1, W2, W3);
+  Lo64 := QWord(W0) or (QWord(W1) shl 32);
+  if Is128 then
+  begin
+    Hi64 := QWord(W2) or (QWord(W3) shl 32);
+    PUInt64(Data)^ := Lo64;
+    PUInt64(PAnsiChar(Data) + 8)^ := Hi64;
+  end
+  else
+    PUInt64(Data)^ := Lo64;
+  Result := True;
+end;
+
+function UIBDecFloatFromDouble(Value: Double; Is128: Boolean;
+  Data: Pointer): Boolean;
+var
+  S: AnsiString;
+begin
+  if IsNaN(Value) then
+    Exit(UIBDecFloatFromString('NaN', Is128, Data));
+  if IsInfinite(Value) then
+  begin
+    if Value < 0 then
+      Exit(UIBDecFloatFromString('-Infinity', Is128, Data))
+    else
+      Exit(UIBDecFloatFromString('Infinity', Is128, Data));
+  end;
+
+  S := FloatToStrF(Value, ffExponent, 17, 4);
+  if DecimalSeparator <> '.' then
+    S := StringReplace(S, DecimalSeparator, '.', [rfReplaceAll]);
+  Result := UIBDecFloatFromString(S, Is128, Data);
+end;
+
+// ---------------------------------------------------------------------------
+// INT128 helpers
+// ---------------------------------------------------------------------------
+
+procedure UIBInt128Read(Data: Pointer; out W0, W1, W2, W3: Cardinal);
+var
+  Lo64, Hi64: QWord;
+begin
+  Lo64 := PUInt64(Data)^;
+  Hi64 := PUInt64(PAnsiChar(Data) + 8)^;
+  W0 := Cardinal(Lo64);
+  W1 := Cardinal(Lo64 shr 32);
+  W2 := Cardinal(Hi64);
+  W3 := Cardinal(Hi64 shr 32);
+end;
+
+procedure UIBInt128Write(Data: Pointer; W0, W1, W2, W3: Cardinal);
+begin
+  PUInt64(Data)^ := QWord(W0) or (QWord(W1) shl 32);
+  PUInt64(PAnsiChar(Data) + 8)^ := QWord(W2) or (QWord(W3) shl 32);
+end;
+
+procedure UIBInt128Negate(var W0, W1, W2, W3: Cardinal);
+var
+  Carry: QWord;
+begin
+  Carry := QWord(Cardinal(not W0)) + 1;
+  W0 := Cardinal(Carry);
+  Carry := QWord(Cardinal(not W1)) + (Carry shr 32);
+  W1 := Cardinal(Carry);
+  Carry := QWord(Cardinal(not W2)) + (Carry shr 32);
+  W2 := Cardinal(Carry);
+  W3 := Cardinal(not W3) + (Carry shr 32);
+end;
+
+function UIBInt128ToString(Data: Pointer): AnsiString;
+var
+  W0, W1, W2, W3: Cardinal;
+  Words: array[0..3] of Cardinal;
+  Negative: Boolean;
+  I, Rem: Integer;
+  Cur: QWord;
+  S: AnsiString;
+  IsZero: Boolean;
+begin
+  UIBInt128Read(Data, W0, W1, W2, W3);
+  Negative := (W3 and $80000000) <> 0;
+  if Negative then
+    UIBInt128Negate(W0, W1, W2, W3);
+
+  Words[0] := W0; Words[1] := W1; Words[2] := W2; Words[3] := W3;
+  S := '';
+
+  repeat
+    IsZero := True;
+    for I := 0 to 3 do
+      if Words[I] <> 0 then
+      begin
+        IsZero := False;
+        Break;
+      end;
+    if IsZero then
+      Break;
+
+    Rem := 0;
+    for I := 3 downto 0 do
+    begin
+      Cur := (QWord(Rem) shl 32) or Words[I];
+      Words[I] := Cardinal(Cur div 10);
+      Rem := Integer(Cur mod 10);
+    end;
+    S := AnsiChar(Ord('0') + Rem) + S;
+  until False;
+
+  if S = '' then
+    S := '0';
+  if Negative then
+    S := '-' + S;
+  Result := S;
+end;
+
+function UIBInt128IsZero(W0, W1, W2, W3: Cardinal): Boolean;
+begin
+  Result := (W0 = 0) and (W1 = 0) and (W2 = 0) and (W3 = 0);
+end;
+
+function UIBInt128FromString(const S: AnsiString; Data: Pointer): Boolean;
+var
+  I, J, Len: Integer;
+  C: AnsiChar;
+  Negative: Boolean;
+  W0, W1, W2, W3: Cardinal;
+  Words: array[0..3] of Cardinal;
+  Digit, Carry, Cur: QWord;
+  HasDigits: Boolean;
+begin
+  Len := Length(S);
+  I := 1;
+  while (I <= Len) and (S[I] = ' ') do Inc(I);
+  while (Len >= I) and (S[Len] = ' ') do Dec(Len);
+  if I > Len then Exit(False);
+
+  Negative := False;
+  if (S[I] = '+') or (S[I] = '-') then
+  begin
+    Negative := S[I] = '-';
+    Inc(I);
+  end;
+
+  W0 := 0; W1 := 0; W2 := 0; W3 := 0;
+  HasDigits := False;
+  while I <= Len do
+  begin
+    C := S[I];
+    if (C < '0') or (C > '9') then
+    begin
+      if C = ' ' then
+      begin
+        Inc(I);
+        Continue;
+      end;
+      Exit(False);
+    end;
+    HasDigits := True;
+    Digit := QWord(Ord(C) - Ord('0'));
+    Words[0] := W0; Words[1] := W1; Words[2] := W2; Words[3] := W3;
+    Carry := Digit;
+    for J := 0 to 3 do
+    begin
+      Cur := QWord(Words[J]) * 10 + Carry;
+      Words[J] := Cardinal(Cur);
+      Carry := Cur shr 32;
+    end;
+    if Carry <> 0 then
+      Exit(False);
+    W0 := Words[0]; W1 := Words[1]; W2 := Words[2]; W3 := Words[3];
+    Inc(I);
+  end;
+
+  if not HasDigits then
+    Exit(False);
+
+  if Negative then
+  begin
+    // Magnitude may be up to 2^127.
+    if (W3 > $80000000) or ((W3 = $80000000) and ((W2 <> 0) or (W1 <> 0) or (W0 <> 0))) then
+      Exit(False);
+    UIBInt128Negate(W0, W1, W2, W3);
+  end
+  else if (W3 and $80000000) <> 0 then
+    Exit(False);
+
+  UIBInt128Write(Data, W0, W1, W2, W3);
+  Result := True;
+end;
+
+function UIBInt128ToInt64(Data: Pointer): Int64;
+var
+  W0, W1, W2, W3: Cardinal;
+  Negative: Boolean;
+begin
+  UIBInt128Read(Data, W0, W1, W2, W3);
+  Negative := (W3 and $80000000) <> 0;
+  if Negative then
+  begin
+    if (W3 <> $FFFFFFFF) or (W2 <> $FFFFFFFF) or ((W1 and $80000000) = 0) then
+      raise EUIBConvertError.Create(EUIB_CASTERROR);
+  end
+  else if (W3 <> 0) or (W2 <> 0) or ((W1 and $80000000) <> 0) then
+    raise EUIBConvertError.Create(EUIB_CASTERROR);
+
+  Result := Int64((QWord(W1) shl 32) or QWord(W0));
+end;
+
+function UIBInt128ToDouble(Data: Pointer): Double;
+var
+  W0, W1, W2, W3: Cardinal;
+  Negative: Boolean;
+begin
+  UIBInt128Read(Data, W0, W1, W2, W3);
+  Negative := (W3 and $80000000) <> 0;
+  if Negative then
+    UIBInt128Negate(W0, W1, W2, W3);
+
+  Result := QWord(W3) * 79228162514264337593543950336.0 +
+            QWord(W2) * 18446744073709551616.0 +
+            QWord(W1) * 4294967296.0 +
+            QWord(W0);
+  if Negative then
+    Result := -Result;
+end;
+
+procedure UIBInt128FromInt64(Value: Int64; Data: Pointer);
+var
+  W0, W1, W2, W3: Cardinal;
+  U: QWord;
+begin
+  U := QWord(Value);
+  W0 := Cardinal(U);
+  W1 := Cardinal(U shr 32);
+  if Value < 0 then
+  begin
+    W2 := $FFFFFFFF;
+    W3 := $FFFFFFFF;
+  end
+  else
+  begin
+    W2 := 0;
+    W3 := 0;
+  end;
+  UIBInt128Write(Data, W0, W1, W2, W3);
+end;
+
+function UIBInt128FromDouble(Value: Double; Data: Pointer): Boolean;
+var
+  AbsValue, Hi, Lo: Double;
+  W0, W1, W2, W3: Cardinal;
+  U: QWord;
+  Negative: Boolean;
+begin
+  if IsNaN(Value) or IsInfinite(Value) then
+    Exit(False);
+  Negative := Value < 0;
+  AbsValue := Abs(Value);
+
+  if AbsValue >= 170141183460469231731687303715884105728.0 then
+    Exit(False);
+
+  if AbsValue < 9223372036854775808.0 then
+  begin
+    UIBInt128FromInt64(Round(Value), Data);
+    Exit(True);
+  end;
+
+  Hi := Trunc(AbsValue / 18446744073709551616.0);
+  Lo := Trunc(AbsValue - Hi * 18446744073709551616.0);
+  U := QWord(Trunc(Lo));
+  W0 := Cardinal(U);
+  W1 := Cardinal(U shr 32);
+  U := QWord(Trunc(Hi));
+  W2 := Cardinal(U);
+  W3 := Cardinal(U shr 32);
+  if Negative then
+    UIBInt128Negate(W0, W1, W2, W3);
+  UIBInt128Write(Data, W0, W1, W2, W3);
+  Result := True;
+end;
+
+// ---------------------------------------------------------------------------
+// TIME / TIMESTAMP WITH TIME ZONE helpers
+// ---------------------------------------------------------------------------
+
+function UIBZoneOffset(Zone: Word; ExtOffset: Smallint; IsEx: Boolean;
+  out Known: Boolean): Integer;begin
+  Known := True;
+  if Zone = 65535 then
+    Result := 0
+  else if Zone <= 2880 then
+    Result := Integer(Zone) - 1440
+  else if IsEx then
+    Result := ExtOffset
+  else
+  begin
+    Result := 0;
+    Known := False;
+  end;
+end;
+
+function UIBZoneSuffix(Zone: Word; Offset: Integer; Known: Boolean): AnsiString;
+var
+  O: Integer;
+begin
+  if not Known then
+  begin
+    Result := Format(' UTC (zone %d)', [Zone]);
+    Exit;
+  end;
+
+  if Zone = 65535 then
+  begin
+    Result := ' GMT';
+    Exit;
+  end;
+
+  O := Offset;
+  if O < 0 then
+  begin
+    Result := Format(' -%.2d:%.2d', [(-O) div 60, (-O) mod 60]);
+  end
+  else
+    Result := Format(' +%.2d:%.2d', [O div 60, O mod 60]);
+end;
+
+function UIBFormatFBDate(Date: Integer): AnsiString;
+var
+  Y, M, D: Word;
+begin
+  DecodeDate(Date - DateOffset, Y, M, D);
+  Result := Format('%.4d-%.2d-%.2d', [Y, M, D]);
+end;
+
+function UIBFormatFBTime(Time: Cardinal): AnsiString;
+var
+  Secs, Frac: Cardinal;
+begin
+  Secs := Time div 10000;
+  Frac := Time mod 10000;
+  Result := Format('%.2d:%.2d:%.2d.%.4d',
+    [Secs div 3600, (Secs div 60) mod 60, Secs mod 60, Frac]);
+end;
+
+procedure UIBAddMinutesToDate(var Date: Integer; var Time: Cardinal;
+  Minutes: Integer);
+var
+  Total, DayTicks: Int64;
+begin
+  DayTicks := 864000000;
+  Total := Int64(Time) + Int64(Minutes) * 600000;
+  while Total < 0 do
+  begin
+    Inc(Date, -1);
+    Inc(Total, DayTicks);
+  end;
+  while Total >= DayTicks do
+  begin
+    Inc(Date);
+    Dec(Total, DayTicks);
+  end;
+  Time := Cardinal(Total);
+end;
+
+procedure UIBGetTimeTZRaw(Data: Pointer; IsTimestamp, IsEx: Boolean;
+  out Date: Integer; out Time: Cardinal; out Zone: Word; out ExtOffset: Smallint);
+begin
+  if IsTimestamp then
+  begin
+    if IsEx then
+    begin
+      Date := PISCTimeStampTZEx(Data).utc_timestamp.timestamp_date;
+      Time := PISCTimeStampTZEx(Data).utc_timestamp.timestamp_time;
+      Zone := PISCTimeStampTZEx(Data).time_zone;
+      ExtOffset := PISCTimeStampTZEx(Data).ext_offset;
+    end
+    else
+    begin
+      Date := PISCTimeStampTZ(Data).utc_timestamp.timestamp_date;
+      Time := PISCTimeStampTZ(Data).utc_timestamp.timestamp_time;
+      Zone := PISCTimeStampTZ(Data).time_zone;
+      ExtOffset := 0;
+    end;
+  end
+  else
+  begin
+    Date := 0;
+    if IsEx then
+    begin
+      Time := PISCTimeTZEx(Data).utc_time;
+      Zone := PISCTimeTZEx(Data).time_zone;
+      ExtOffset := PISCTimeTZEx(Data).ext_offset;
+    end
+    else
+    begin
+      Time := PISCTimeTZ(Data).utc_time;
+      Zone := PISCTimeTZ(Data).time_zone;
+      ExtOffset := 0;
+    end;
+  end;
+end;
+
+procedure UIBSetTimeTZRaw(Data: Pointer; IsTimestamp, IsEx: Boolean;
+  Date: Integer; Time: Cardinal; Zone: Word; ExtOffset: Smallint);
+begin
+  if IsTimestamp then
+  begin
+    if IsEx then
+    begin
+      PISCTimeStampTZEx(Data).utc_timestamp.timestamp_date := Date;
+      PISCTimeStampTZEx(Data).utc_timestamp.timestamp_time := Time;
+      PISCTimeStampTZEx(Data).time_zone := Zone;
+      PISCTimeStampTZEx(Data).ext_offset := ExtOffset;
+    end
+    else
+    begin
+      PISCTimeStampTZ(Data).utc_timestamp.timestamp_date := Date;
+      PISCTimeStampTZ(Data).utc_timestamp.timestamp_time := Time;
+      PISCTimeStampTZ(Data).time_zone := Zone;
+    end;
+  end
+  else
+  begin
+    if IsEx then
+    begin
+      PISCTimeTZEx(Data).utc_time := Time;
+      PISCTimeTZEx(Data).time_zone := Zone;
+      PISCTimeTZEx(Data).ext_offset := ExtOffset;
+    end
+    else
+    begin
+      PISCTimeTZ(Data).utc_time := Time;
+      PISCTimeTZ(Data).time_zone := Zone;
+    end;
+  end;
+end;
+
+function UIBTimeTZToDateTime(Data: Pointer; IsTimestamp, IsEx: Boolean): TDateTime;
+var
+  Date: Integer;
+  Time: Cardinal;
+  Zone: Word;
+  ExtOffset: Smallint;
+  Offset: Integer;
+  Known: Boolean;
+begin
+  UIBGetTimeTZRaw(Data, IsTimestamp, IsEx, Date, Time, Zone, ExtOffset);
+  Offset := UIBZoneOffset(Zone, ExtOffset, IsEx, Known);
+  if Known and (Offset <> 0) then
+    UIBAddMinutesToDate(Date, Time, Offset);
+  if IsTimestamp then
+    Result := Date - DateOffset + Time / TimeCoeff
+  else
+    Result := Time / TimeCoeff;
+end;
+
+function UIBTimeTZToDate(Data: Pointer; IsTimestamp, IsEx: Boolean): Integer;
+var
+  Date: Integer;
+  Time: Cardinal;
+  Zone: Word;
+  ExtOffset: Smallint;
+  Offset: Integer;
+  Known: Boolean;
+begin
+  UIBGetTimeTZRaw(Data, IsTimestamp, IsEx, Date, Time, Zone, ExtOffset);
+  Offset := UIBZoneOffset(Zone, ExtOffset, IsEx, Known);
+  if Known and (Offset <> 0) then
+    UIBAddMinutesToDate(Date, Time, Offset);
+  if IsTimestamp then
+    Result := Date - DateOffset
+  else
+    Result := 0;
+end;
+
+function UIBTimeTZToTime(Data: Pointer; IsTimestamp, IsEx: Boolean): Cardinal;
+var
+  Date: Integer;
+  Time: Cardinal;
+  Zone: Word;
+  ExtOffset: Smallint;
+  Offset: Integer;
+  Known: Boolean;
+begin
+  UIBGetTimeTZRaw(Data, IsTimestamp, IsEx, Date, Time, Zone, ExtOffset);
+  Offset := UIBZoneOffset(Zone, ExtOffset, IsEx, Known);
+  if Known and (Offset <> 0) then
+    UIBAddMinutesToDate(Date, Time, Offset);
+  Result := Time;
+end;
+
+function UIBTimeTZToString(Data: Pointer; IsTimestamp, IsEx: Boolean): AnsiString;
+var
+  Date: Integer;
+  Time: Cardinal;
+  Zone: Word;
+  ExtOffset: Smallint;
+  Offset: Integer;
+  Known: Boolean;
+begin
+  UIBGetTimeTZRaw(Data, IsTimestamp, IsEx, Date, Time, Zone, ExtOffset);
+  Offset := UIBZoneOffset(Zone, ExtOffset, IsEx, Known);
+
+  if Known and (Offset <> 0) then
+    UIBAddMinutesToDate(Date, Time, Offset);
+
+  if IsTimestamp then
+    Result := UIBFormatFBDate(Date) + ' ' + UIBFormatFBTime(Time)
+  else
+    Result := UIBFormatFBTime(Time);
+
+  if Known then
+    Result := Result + UIBZoneSuffix(Zone, Offset, True)
+  else
+    Result := Result + UIBZoneSuffix(Zone, 0, False);
+end;
+
+function UIBTryParseFBTime(const S: AnsiString; out Time: Cardinal): Boolean;
+var
+  I, Len, H, M, Sec, Frac, Digits: Integer;
+  Part: AnsiString;
+  C: AnsiChar;
+begin
+  Result := False;
+  Time := 0;
+  H := -1; M := -1; Sec := -1; Frac := 0;
+  Part := '';
+  Len := Length(S);
+  I := 1;
+
+  while I <= Len do
+  begin
+    C := S[I];
+    if (C = ':') or (C = '.') or (C = ',') then
+    begin
+      if Part = '' then
+        Exit;
+
+      if H < 0 then
+        H := StrToIntDef(Part, -1)
+      else if M < 0 then
+        M := StrToIntDef(Part, -1)
+      else if Sec < 0 then
+        Sec := StrToIntDef(Part, -1)
+      else
+        Exit;
+      Part := '';
+
+      if (C = '.') or (C = ',') then
+      begin
+        if (H < 0) or (M < 0) then
+          Exit;
+        Inc(I);
+        Digits := 0;
+        while (I <= Len) and (S[I] >= '0') and (S[I] <= '9') do
+        begin
+          if Digits < 4 then
+            Frac := Frac * 10 + (Ord(S[I]) - Ord('0'));
+          Inc(Digits);
+          Inc(I);
+        end;
+        while Digits < 4 do
+        begin
+          Frac := Frac * 10;
+          Inc(Digits);
+        end;
+        if I <= Len then
+          Exit;
+        Break;
+      end;
+    end
+    else if (C >= '0') and (C <= '9') then
+      Part := Part + C
+    else
+      Exit;
+    Inc(I);
+  end;
+
+  if (I > Len) and (Part <> '') then
+  begin
+    if H < 0 then
+      H := StrToIntDef(Part, -1)
+    else if M < 0 then
+      M := StrToIntDef(Part, -1)
+    else if Sec < 0 then
+      Sec := StrToIntDef(Part, -1)
+    else
+      Exit;
+  end;
+
+  if (H < 0) or (M < 0) then
+    Exit;
+  if Sec < 0 then
+    Sec := 0;
+  if (H > 23) or (M > 59) or (Sec > 59) then
+    Exit;
+  Time := Cardinal(((H * 60 + M) * 60 + Sec) * 10000 + Frac);
+  Result := True;
+end;
+
+function UIBTryParseFBDate(const S: AnsiString; out Date: Integer): Boolean;
+var
+  P1, P2: Integer;
+  A, B, C: AnsiString;
+  Y, M, D: Word;
+  V1, V2, V3: Integer;
+begin
+  Result := False;
+  Date := 0;
+  P1 := Pos('-', S);
+  if P1 > 0 then
+  begin
+    P2 := Pos('-', Copy(S, P1 + 1, Length(S)));
+    if P2 = 0 then Exit;
+    Inc(P2, P1);
+    A := Copy(S, 1, P1 - 1);
+    B := Copy(S, P1 + 1, P2 - P1 - 1);
+    C := Copy(S, P2 + 1, Length(S));
+    V1 := StrToIntDef(A, -1);
+    V2 := StrToIntDef(B, -1);
+    V3 := StrToIntDef(C, -1);
+    if (V1 < 0) or (V2 < 1) or (V3 < 1) then Exit;
+    Y := V1; M := V2; D := V3;
+  end
+  else
+  begin
+    P1 := Pos('.', S);
+    if P1 = 0 then Exit;
+    P2 := Pos('.', Copy(S, P1 + 1, Length(S)));
+    if P2 = 0 then Exit;
+    Inc(P2, P1);
+    A := Copy(S, 1, P1 - 1);
+    B := Copy(S, P1 + 1, P2 - P1 - 1);
+    C := Copy(S, P2 + 1, Length(S));
+    V1 := StrToIntDef(A, -1);
+    V2 := StrToIntDef(B, -1);
+    V3 := StrToIntDef(C, -1);
+    if (V1 < 1) or (V2 < 1) or (V3 < 0) then Exit;
+    D := V1; M := V2; Y := V3;
+  end;
+
+  if (Y < 1) or (Y > 9999) or (M < 1) or (M > 12) or (D < 1) or (D > 31) then
+    Exit;
+  try
+    Date := Trunc(EncodeDate(Y, M, D)) + DateOffset;
+  except
+    Exit;
+  end;
+  Result := True;
+end;
+
+function UIBTimeTZFromString(const S: AnsiString; IsTimestamp, IsEx: Boolean;
+  Data: Pointer): Boolean;
+var
+  Str, ZoneToken, TimePart, DatePart: AnsiString;
+  P, ZonePos, I, Offset, H, M: Integer;
+  Date: Integer;
+  Time: Cardinal;
+  Zone: Word;
+  Sign: Integer;
+  HasDate: Boolean;
+begin
+  Result := False;
+  Str := Trim(S);
+  Offset := 0;
+  Zone := 65535;
+
+  P := LastDelimiter(' ', Str);
+  if P > 0 then
+  begin
+    ZoneToken := UpperCase(Copy(Str, P + 1, Length(Str)));
+    if (ZoneToken = 'GMT') or (ZoneToken = 'UTC') or (ZoneToken = 'Z') then
+    begin
+      Offset := 0;
+      Zone := 65535;
+      Str := Trim(Copy(Str, 1, P - 1));
+    end
+    else if (ZoneToken <> '') and ((ZoneToken[1] = '+') or (ZoneToken[1] = '-')) then
+    begin
+      ZonePos := P;
+      Sign := 1;
+      if ZoneToken[1] = '-' then Sign := -1;
+      Delete(ZoneToken, 1, 1);
+      H := 0; M := 0;
+      P := Pos(':', ZoneToken);
+      if P > 0 then
+      begin
+        H := StrToIntDef(Copy(ZoneToken, 1, P - 1), -1);
+        M := StrToIntDef(Copy(ZoneToken, P + 1, Length(ZoneToken)), -1);
+      end
+      else
+        H := StrToIntDef(ZoneToken, -1);
+      if (H < 0) or (M < 0) or (H > 14) or (M > 59) then Exit;
+      Offset := Sign * (H * 60 + M);
+      if (Offset < -840) or (Offset > 840) then Exit;
+      if Offset = 0 then
+        Zone := 65535
+      else
+        Zone := Word(1440 + Offset);
+      Str := Trim(Copy(Str, 1, ZonePos - 1));
+    end;
+  end;
+
+  if IsTimestamp then
+  begin
+    P := Pos(' ', Str);
+    if P = 0 then
+      P := Pos('T', Str);
+    if P > 0 then
+    begin
+      DatePart := Copy(Str, 1, P - 1);
+      TimePart := Copy(Str, P + 1, Length(Str));
+      HasDate := True;
+    end
+    else
+    begin
+      DatePart := '';
+      TimePart := Str;
+      HasDate := False;
+    end;
+
+    if HasDate then
+    begin
+      if not UIBTryParseFBDate(DatePart, Date) then Exit;
+    end
+    else
+      Date := 0;
+
+    if not UIBTryParseFBTime(TimePart, Time) then Exit;
+  end
+  else
+  begin
+    Date := 0;
+    if not UIBTryParseFBTime(Str, Time) then Exit;
+  end;
+
+  if Offset <> 0 then
+    UIBAddMinutesToDate(Date, Time, -Offset);
+
+  UIBSetTimeTZRaw(Data, IsTimestamp, IsEx, Date, Time, Zone, Smallint(Offset));
+  Result := True;
+end;
+
+// ---------------------------------------------------------------------------
+// FB4+ setter helpers
+// ---------------------------------------------------------------------------
+
+function UIBIsFB4Type(Code: SmallInt): Boolean;
+begin
+  case Code of
+    SQL_DEC16, SQL_DEC34, SQL_INT128,
+    SQL_TIME_TZ, SQL_TIME_TZ_EX, SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+      Result := True;
+  else
+    Result := False;
+  end;
+end;
+
+function UIBSetFB4FromString(Data: Pointer; Code: SmallInt;
+  const S: AnsiString): Boolean;
+begin
+  case Code of
+    SQL_DEC16          : Result := UIBDecFloatFromString(S, False, Data);
+    SQL_DEC34          : Result := UIBDecFloatFromString(S, True, Data);
+    SQL_INT128         : Result := UIBInt128FromString(S, Data);
+    SQL_TIME_TZ        : Result := UIBTimeTZFromString(S, False, False, Data);
+    SQL_TIME_TZ_EX     : Result := UIBTimeTZFromString(S, False, True, Data);
+    SQL_TIMESTAMP_TZ   : Result := UIBTimeTZFromString(S, True, False, Data);
+    SQL_TIMESTAMP_TZ_EX: Result := UIBTimeTZFromString(S, True, True, Data);
+  else
+    Result := False;
+  end;
+end;
+
+function UIBSetFB4FromDouble(Data: Pointer; Code: SmallInt;
+  Value: Double): Boolean;
+var
+  DatePart: Integer;
+  TimePart: Cardinal;
+begin
+  case Code of
+    SQL_DEC16:
+      Result := UIBDecFloatFromDouble(Value, False, Data);
+    SQL_DEC34:
+      Result := UIBDecFloatFromDouble(Value, True, Data);
+    SQL_INT128:
+      Result := UIBInt128FromDouble(Value, Data);
+    SQL_TIME_TZ, SQL_TIME_TZ_EX:
+      begin
+        TimePart := Cardinal(Round(Abs(Frac(Value) * TimeCoeff)));
+        UIBSetTimeTZRaw(Data, False, Code = SQL_TIME_TZ_EX,
+          0, TimePart, 65535, 0);
+        Result := True;
+      end;
+    SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+      begin
+        DatePart := Round(Int(Value)) + DateOffset;
+        TimePart := Cardinal(Round(Abs(Frac(Value) * TimeCoeff)));
+        UIBSetTimeTZRaw(Data, True, Code = SQL_TIMESTAMP_TZ_EX,
+          DatePart, TimePart, 65535, 0);
+        Result := True;
+      end;
+  else
+    Result := False;
+  end;
+end;
+
+function UIBSetFB4FromInt64(Data: Pointer; Code: SmallInt;
+  Value: Int64): Boolean;
+begin
+  case Code of
+    SQL_DEC16:
+      Result := UIBDecFloatFromString(AnsiString(IntToStr(Value)), False, Data);
+    SQL_DEC34:
+      Result := UIBDecFloatFromString(AnsiString(IntToStr(Value)), True, Data);
+    SQL_INT128:
+      begin
+        UIBInt128FromInt64(Value, Data);
+        Result := True;
+      end;
+    SQL_TIME_TZ, SQL_TIME_TZ_EX:
+      begin
+        UIBSetTimeTZRaw(Data, False, Code = SQL_TIME_TZ_EX,
+          0, 0, 65535, 0);
+        Result := True;
+      end;
+    SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+      begin
+        UIBSetTimeTZRaw(Data, True, Code = SQL_TIMESTAMP_TZ_EX,
+          Integer(Value) + DateOffset, 0, 65535, 0);
+        Result := True;
+      end;
+  else
+    Result := False;
+  end;
+end;
+
+function UIBSetFB4FromTime(Data: Pointer; Code: SmallInt;
+  Value: Cardinal): Boolean;
+begin
+  case Code of
+    SQL_DEC16:
+      Result := UIBDecFloatFromDouble(Value, False, Data);
+    SQL_DEC34:
+      Result := UIBDecFloatFromDouble(Value, True, Data);
+    SQL_INT128:
+      begin
+        UIBInt128FromInt64(Value, Data);
+        Result := True;
+      end;
+    SQL_TIME_TZ:
+      begin
+        UIBSetTimeTZRaw(Data, False, False, 0, Value, 65535, 0);
+        Result := True;
+      end;
+    SQL_TIME_TZ_EX:
+      begin
+        UIBSetTimeTZRaw(Data, False, True, 0, Value, 65535, 0);
+        Result := True;
+      end;
+    SQL_TIMESTAMP_TZ:
+      begin
+        UIBSetTimeTZRaw(Data, True, False, DateOffset, Value, 65535, 0);
+        Result := True;
+      end;
+    SQL_TIMESTAMP_TZ_EX:
+      begin
+        UIBSetTimeTZRaw(Data, True, True, DateOffset, Value, 65535, 0);
+        Result := True;
+      end;
+  else
+    Result := False;
+  end;
+end;
+
+{$ENDIF FB40_UP}
+
  { TSQLDA }
 
   function TSQLDA.GetAllocatedFields: Word;
@@ -3494,7 +5185,13 @@ type
   function TSQLDA.GetIsNumeric(const Index: Word): boolean;
   begin
     CheckRange(Index);
-    result := (FXSQLDA.sqlvar[Index].SqlScale < 0);
+    Result := (FXSQLDA.sqlvar[Index].SqlScale < 0);
+{$IFDEF FB40_UP}
+    if not Result then
+      case FXSQLDA.sqlvar[Index].sqltype and not(1) of
+        SQL_DEC16, SQL_DEC34, SQL_INT128: Result := True;
+      end;
+{$ENDIF}
   end;
 
   // TSQLDA.GetAs...
@@ -3508,6 +5205,17 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToDouble(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToTime(sqldata, False, False) / TimeCoeff; Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, False, True) / TimeCoeff; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDateTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDateTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3558,6 +5266,17 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToInt64(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToInt64(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToInt64(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := 0; Exit; end;
+        SQL_TIME_TZ_EX: begin Result := 0; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDate(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDate(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3608,6 +5327,16 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToInt64(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToInt64(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToInt64(sqldata); Exit; end;
+        SQL_TIME_TZ, SQL_TIME_TZ_EX: begin Result := 0; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDate(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDate(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3658,6 +5387,17 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToDouble(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToTime(sqldata, False, False) / TimeCoeff; Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, False, True) / TimeCoeff; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDateTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDateTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3708,6 +5448,16 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToInt64(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToInt64(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToInt64(sqldata); Exit; end;
+        SQL_TIME_TZ, SQL_TIME_TZ_EX: begin Result := 0; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDate(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDate(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3769,6 +5519,17 @@ type
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToString(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToString(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToString(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToString(sqldata, False, False); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToString(sqldata, False, True); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToString(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToString(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3835,6 +5596,17 @@ type
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := RawByteString(UIBDecFloatToString(sqldata, False)); Exit; end;
+        SQL_DEC34: begin Result := RawByteString(UIBDecFloatToString(sqldata, True)); Exit; end;
+        SQL_INT128: begin Result := RawByteString(UIBInt128ToString(sqldata)); Exit; end;
+        SQL_TIME_TZ: begin Result := RawByteString(UIBTimeTZToString(sqldata, False, False)); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := RawByteString(UIBTimeTZToString(sqldata, False, True)); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := RawByteString(UIBTimeTZToString(sqldata, True, False)); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := RawByteString(UIBTimeTZToString(sqldata, True, True)); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3887,6 +5659,25 @@ type
       Result := NULL;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True); Exit; end;
+        SQL_INT128:
+          begin
+            try
+              Result := UIBInt128ToInt64(sqldata);
+            except
+              Result := UIBInt128ToString(sqldata);
+            end;
+            Exit;
+          end;
+        SQL_TIME_TZ: begin Result := TDateTime(UIBTimeTZToTime(sqldata, False, False) / TimeCoeff); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := TDateTime(UIBTimeTZToTime(sqldata, False, True) / TimeCoeff); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := TDateTime(UIBTimeTZToDateTime(sqldata, True, False)); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := TDateTime(UIBTimeTZToDateTime(sqldata, True, True)); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -3952,6 +5743,25 @@ type
       if (sqlind <> nil) and (sqlind^ = -1) then
         Exit(TValue.Empty);
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: Exit(TValue.From<Double>(UIBDecFloatToDouble(sqldata, False)));
+        SQL_DEC34: Exit(TValue.From<Double>(UIBDecFloatToDouble(sqldata, True)));
+        SQL_INT128:
+          begin
+            try
+              Result := TValue.From<Int64>(UIBInt128ToInt64(sqldata));
+            except
+              Result := TValue.From<string>(string(UIBInt128ToString(sqldata)));
+            end;
+            Exit;
+          end;
+        SQL_TIME_TZ: Exit(TValue.From<TDateTime>(TDateTime(UIBTimeTZToTime(sqldata, False, False) / TimeCoeff)));
+        SQL_TIME_TZ_EX: Exit(TValue.From<TDateTime>(TDateTime(UIBTimeTZToTime(sqldata, False, True) / TimeCoeff)));
+        SQL_TIMESTAMP_TZ: Exit(TValue.From<TDateTime>(TDateTime(UIBTimeTZToDateTime(sqldata, True, False))));
+        SQL_TIMESTAMP_TZ_EX: Exit(TValue.From<TDateTime>(TDateTime(UIBTimeTZToDateTime(sqldata, True, True))));
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4062,6 +5872,17 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToDouble(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToTime(sqldata, False, False) / TimeCoeff; Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, False, True) / TimeCoeff; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDateTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDateTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4113,6 +5934,17 @@ type
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToDouble(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToTime(sqldata, False, False) / TimeCoeff; Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, False, True) / TimeCoeff; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDateTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDateTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4190,6 +6022,17 @@ end;
       Result := False;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToDouble(sqldata, False) <> 0; Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToDouble(sqldata, True) <> 0; Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToDouble(sqldata) <> 0; Exit; end;
+        SQL_TIME_TZ, SQL_TIME_TZ_EX:
+          begin Result := UIBTimeTZToTime(sqldata, False, ASQLCode = SQL_TIME_TZ_EX) <> 0; Exit; end;
+        SQL_TIMESTAMP_TZ, SQL_TIMESTAMP_TZ_EX:
+          begin Result := UIBTimeTZToDateTime(sqldata, True, ASQLCode = SQL_TIMESTAMP_TZ_EX) <> 0; Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4239,6 +6082,17 @@ end;
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UnicodeString(UIBDecFloatToString(sqldata, False)); Exit; end;
+        SQL_DEC34: begin Result := UnicodeString(UIBDecFloatToString(sqldata, True)); Exit; end;
+        SQL_INT128: begin Result := UnicodeString(UIBInt128ToString(sqldata)); Exit; end;
+        SQL_TIME_TZ: begin Result := UnicodeString(UIBTimeTZToString(sqldata, False, False)); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UnicodeString(UIBTimeTZToString(sqldata, False, True)); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UnicodeString(UIBTimeTZToString(sqldata, True, False)); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UnicodeString(UIBTimeTZToString(sqldata, True, True)); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4289,6 +6143,16 @@ end;
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToInt64(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToInt64(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToInt64(sqldata); Exit; end;
+        SQL_TIME_TZ, SQL_TIME_TZ_EX: begin Result := 0; Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDate(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDate(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4339,6 +6203,17 @@ end;
       Result := 0;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToInt64(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToInt64(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToInt64(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToTime(sqldata, False, False); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, False, True); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4462,6 +6337,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromString(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4512,6 +6396,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromDouble(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4560,6 +6453,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromInt64(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4608,6 +6510,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromTime(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4656,6 +6567,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromInt64(sqldata, ASQLCode, Ord(Value)) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4701,6 +6621,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromInt64(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4749,6 +6678,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromDouble(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4797,6 +6735,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromInt64(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4855,6 +6802,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromString(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4906,6 +6862,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromString(sqldata, ASQLCode, AnsiString(Value)) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -4955,6 +6920,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromInt64(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -5003,6 +6977,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromDouble(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -5052,6 +7035,15 @@ end;
     with FXSQLDA.sqlvar[Index] do
     begin
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      if UIBIsFB4Type(ASQLCode) then
+      begin
+        if not UIBSetFB4FromDouble(sqldata, ASQLCode, Value) then
+          raise EUIBConvertError.Create(EUIB_CASTERROR);
+        if (sqlind <> nil) then sqlind^ := 0;
+        Exit;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -5422,6 +7414,15 @@ end;
       SQL_TYPE_DATE   : Result := uftDate;
       SQL_INT64       : Result := uftInt64;
       SQL_ARRAY       : Result := uftArray;
+{$IFDEF FB40_UP}
+      SQL_DEC16       : Result := uftDecFloat16;
+      SQL_DEC34       : Result := uftDecFloat34;
+      SQL_INT128      : Result := uftInt128;
+      SQL_TIME_TZ     : Result := uftTimeTZ;
+      SQL_TIMESTAMP_TZ: Result := uftTimestampTZ;
+      SQL_TIME_TZ_EX  : Result := uftTimeTZEx;
+      SQL_TIMESTAMP_TZ_EX: Result := uftTimestampTZEx;
+{$ENDIF}
 {$IFDEF FB25_UP}
       SQL_NULL        : Result := uftNull;
 {$ENDIF}
@@ -6007,6 +8008,17 @@ end;
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UIBDecFloatToString(sqldata, False); Exit; end;
+        SQL_DEC34: begin Result := UIBDecFloatToString(sqldata, True); Exit; end;
+        SQL_INT128: begin Result := UIBInt128ToString(sqldata); Exit; end;
+        SQL_TIME_TZ: begin Result := UIBTimeTZToString(sqldata, False, False); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UIBTimeTZToString(sqldata, False, True); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToString(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToString(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -6061,6 +8073,17 @@ end;
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := RawByteString(UIBDecFloatToString(sqldata, False)); Exit; end;
+        SQL_DEC34: begin Result := RawByteString(UIBDecFloatToString(sqldata, True)); Exit; end;
+        SQL_INT128: begin Result := RawByteString(UIBInt128ToString(sqldata)); Exit; end;
+        SQL_TIME_TZ: begin Result := RawByteString(UIBTimeTZToString(sqldata, False, False)); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := RawByteString(UIBTimeTZToString(sqldata, False, True)); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := RawByteString(UIBTimeTZToString(sqldata, True, False)); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := RawByteString(UIBTimeTZToString(sqldata, True, True)); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -6115,6 +8138,17 @@ end;
     begin
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := UnicodeString(UIBDecFloatToString(sqldata, False)); Exit; end;
+        SQL_DEC34: begin Result := UnicodeString(UIBDecFloatToString(sqldata, True)); Exit; end;
+        SQL_INT128: begin Result := UnicodeString(UIBInt128ToString(sqldata)); Exit; end;
+        SQL_TIME_TZ: begin Result := UnicodeString(UIBTimeTZToString(sqldata, False, False)); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := UnicodeString(UIBTimeTZToString(sqldata, False, True)); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UnicodeString(UIBTimeTZToString(sqldata, True, False)); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UnicodeString(UIBTimeTZToString(sqldata, True, True)); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -6169,6 +8203,17 @@ end;
       Result := NULL;
       if (sqlind <> nil) and (sqlind^ = -1) then Exit;
       ASQLCode := (sqltype and not(1));
+{$IFDEF FB40_UP}
+      case ASQLCode of
+        SQL_DEC16: begin Result := string(UIBDecFloatToString(sqldata, False)); Exit; end;
+        SQL_DEC34: begin Result := string(UIBDecFloatToString(sqldata, True)); Exit; end;
+        SQL_INT128: begin Result := string(UIBInt128ToString(sqldata)); Exit; end;
+        SQL_TIME_TZ: begin Result := TDateTime(UIBTimeTZToTime(sqldata, False, False) / TimeCoeff); Exit; end;
+        SQL_TIME_TZ_EX: begin Result := TDateTime(UIBTimeTZToTime(sqldata, False, True) / TimeCoeff); Exit; end;
+        SQL_TIMESTAMP_TZ: begin Result := UIBTimeTZToDateTime(sqldata, True, False); Exit; end;
+        SQL_TIMESTAMP_TZ_EX: begin Result := UIBTimeTZToDateTime(sqldata, True, True); Exit; end;
+      end;
+{$ENDIF}
       // Is Numeric ?
       if (sqlscale < 0)  then
       begin
@@ -6604,6 +8649,15 @@ procedure TSQLParams.AddFieldType(const Name: string; FieldType: TUIBFieldType;
   {$ENDIF}
   {$IFDEF FB30_UP}
       uftBoolean         : SetFieldType(AddField(name), SizeOf(Byte)         , SQL_BOOLEAN   + 1, 0);
+  {$ENDIF}
+  {$IFDEF FB40_UP}
+      uftDecFloat16      : SetFieldType(AddField(name), SizeOf(FB_DEC16)     , SQL_DEC16     + 1, 0);
+      uftDecFloat34      : SetFieldType(AddField(name), SizeOf(FB_DEC34)     , SQL_DEC34     + 1, 0);
+      uftInt128          : SetFieldType(AddField(name), SizeOf(FB_I128)      , SQL_INT128    + 1, 0);
+      uftTimeTZ          : SetFieldType(AddField(name), SizeOf(TISCTimeTZ)   , SQL_TIME_TZ   + 1, 0);
+      uftTimeTZEx        : SetFieldType(AddField(name), SizeOf(TISCTimeTZEx) , SQL_TIME_TZ_EX + 1, 0);
+      uftTimestampTZ     : SetFieldType(AddField(name), SizeOf(TISCTimeStampTZ), SQL_TIMESTAMP_TZ + 1, 0);
+      uftTimestampTZEx   : SetFieldType(AddField(name), SizeOf(TISCTimeStampTZEx), SQL_TIMESTAMP_TZ_EX + 1, 0);
   {$ENDIF}
     end;
   end;

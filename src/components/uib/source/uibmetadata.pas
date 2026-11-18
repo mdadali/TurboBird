@@ -55,9 +55,12 @@ type
       MetaUDF,
       MetaView,
       MetaProcedure,
-      MetaPackage,
-        MetaPackageProc,
-        MetaPackageFunc,
+      MetaStoredFunction,
+        MetaPackage,
+          MetaPackageProc,
+          MetaPackageFunc,
+        MetaUDRProcedure,
+        MetaUDRFunction,
       MetaRole,
       MetaTable,
       MetaBaseField,         { Characteristics, Charset, Collation, Default ... }
@@ -99,6 +102,9 @@ type
   TMetaPackage = class;
   TMetaPackageProc = class;
   TMetaPackageFunc = class;
+  TMetaStoredFunction = class;
+  TMetaUDRProcedure = class;
+  TMetaUDRFunction = class;
 
   TMetaNodeClass = class of TMetaNode;
 
@@ -683,6 +689,107 @@ type
     property FieldsCount: Integer read GetFieldsCount;
   end;
 
+  { Stored Functions (Firebird 3.0+ PSQL functions) }
+  TMetaStoredFunction = class(TMetaNode)
+  private
+    FSource: string;
+    procedure LoadFromQuery(QNames, QFields, QCharset, QArrayDim, QGrants: TUIBStatement;
+      OIDs: TOIDProcedures; DefaultCharset: TCharacterSet);
+    procedure LoadGrantsFromQuery(QGrants: TUIBStatement);
+    function GetInputFields(const Index: Integer): TMetaProcInField;
+    function GetInputFieldsCount: Integer;
+    function GetOutputFields(const Index: Integer): TMetaProcOutField;
+    function GetOutputFieldsCount: Integer;
+    procedure LoadFromStream(Stream: TStream); override;
+    procedure InternalSaveToDDL(Stream: TStringStream; Operation: string; options: TDDLOptions);
+    procedure SaveToCreateEmptyDDL(Stream: TStringStream; options: TDDLOptions);
+    function GetAsAlterDDL: string;
+    function GetAsCreateEmptyDDL: string;
+    function GetProcedureGrants(const Index: Integer): TMetaProcedureGrant;
+    function GetProcedureGrantsCount: Integer;
+    function GetAsAlterToEmptyDDL: string;
+  protected
+    function FindGrant(Option: Boolean): TMetaProcedureGrant;
+  public
+    procedure SaveToDDLNode(Stream: TStringStream; options: TDDLOptions); override;
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+    constructor Create(AOwner: TMetaNode; ClassIndex: Integer); override;
+    procedure SaveToStream(Stream: TStream); override;
+    procedure SaveToAlterDDL(Stream: TStringStream; options: TDDLOptions);
+
+    property Source: string read FSource;
+    property AsCreateEmptyDDL: string read GetAsCreateEmptyDDL;
+    property AsAlterDDL: string read GetAsAlterDDL;
+    property AsAlterToEmptyDLL: string read GetAsAlterToEmptyDDL;
+
+    property InputFields[const Index: Integer]: TMetaProcInField read GetInputFields;
+    property InputFieldsCount: Integer read GetInputFieldsCount;
+
+    property OutputFields[const Index: Integer]: TMetaProcOutField read GetOutputFields;
+    property OutputFieldsCount: Integer read GetOutputFieldsCount;
+
+    property Grants[const Index: Integer]: TMetaProcedureGrant read GetProcedureGrants;
+    property GrantsCount: Integer read GetProcedureGrantsCount;
+  end;
+
+  { UDR Procedures (Firebird 3.0+ external procedures) }
+  TMetaUDRProcedure = class(TMetaNode)
+  private
+    FSource: string;
+    FEntryPoint: string;
+    FEngineName: string;
+    procedure LoadFromQuery(QNames, QFields: TUIBStatement;
+      OIDs: TOIDProcedures);
+    procedure LoadFromStream(Stream: TStream); override;
+    function GetInputFields(const Index: Integer): TMetaProcInField;
+    function GetInputFieldsCount: Integer;
+    function GetOutputFields(const Index: Integer): TMetaProcOutField;
+    function GetOutputFieldsCount: Integer;
+  public
+    procedure SaveToDDLNode(Stream: TStringStream; options: TDDLOptions); override;
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+    constructor Create(AOwner: TMetaNode; ClassIndex: Integer); override;
+    procedure SaveToStream(Stream: TStream); override;
+
+    property Source: string read FSource;
+    property EntryPoint: string read FEntryPoint;
+    property EngineName: string read FEngineName;
+
+    property InputFields[const Index: Integer]: TMetaProcInField read GetInputFields;
+    property InputFieldsCount: Integer read GetInputFieldsCount;
+
+    property OutputFields[const Index: Integer]: TMetaProcOutField read GetOutputFields;
+    property OutputFieldsCount: Integer read GetOutputFieldsCount;
+  end;
+
+  { UDR Functions (Firebird 3.0+ external functions) }
+  TMetaUDRFunction = class(TMetaNode)
+  private
+    FModule: string;
+    FEntry: string;
+    FReturn: Smallint;
+    FSource: string;
+    procedure LoadFromQuery(QNames, QFields, QCharset, QArrayDim: TUIBStatement;
+      OIDs: TOIDUDFs; DefaultCharset: TCharacterSet);
+    procedure LoadFromStream(Stream: TStream); override;
+    function GetFields(const Index: Integer): TMetaUDFField;
+    function GetFieldsCount: Integer;
+  public
+    procedure SaveToDDLNode(Stream: TStringStream; options: TDDLOptions); override;
+    class function NodeClass: string; override;
+    class function NodeType: TMetaNodeType; override;
+    constructor Create(AOwner: TMetaNode; ClassIndex: Integer); override;
+    procedure SaveToStream(Stream: TStream); override;
+    property Module: string read FModule;
+    property Entry: string read FEntry;
+    property Return: Smallint read FReturn;
+    property Source: string read FSource;
+    property Fields[const Index: Integer]: TMetaUDFField read GetFields;
+    property FieldsCount: Integer read GetFieldsCount;
+  end;
+
   TMetaRole = class(TMetaNode)
   private
     FOwner: string;
@@ -711,6 +818,9 @@ type
     FOIDTables: TOIDTables;
     FOIDViews: TOIDViews;
     FOIDProcedures: TOIDProcedures;
+    FOIDStoredFunctions: TOIDProcedures;
+    FOIDUDRProcedures: TOIDProcedures;
+    FOIDUDRFunctions: TOIDUDFs;
     FOIDPackages: TOIDPackages;
     FOIDUDFs: TOIDUDFs;
     FOIDRoles: TOIDRoles;
@@ -743,6 +853,12 @@ type
 
     function GetProcedures(const Index: Integer): TMetaProcedure;
     function GetProceduresCount: Integer;
+    function GetStoredFunctions(const Index: Integer): TMetaStoredFunction;
+    function GetStoredFunctionsCount: Integer;
+    function GetUDRProcedures(const Index: Integer): TMetaUDRProcedure;
+    function GetUDRProceduresCount: Integer;
+    function GetUDRFunctions(const Index: Integer): TMetaUDRFunction;
+    function GetUDRFunctionsCount: Integer;
     function GetPackages(const Index: Integer): TMetaPackage;
     function GetPackagesCount: Integer;
     function GetExceptions(const Index: Integer): TMetaException;
@@ -761,6 +877,9 @@ type
     procedure SaveToStream(Stream: TStream); override;
     function FindTableName(const TableName: string): TMetaTable;
     function FindProcName(const ProcName: string): TMetaProcedure;
+    function FindStoredFunctionName(const Name: string): TMetaStoredFunction;
+    function FindUDRProcedureName(const Name: string): TMetaUDRProcedure;
+    function FindUDRFunctionName(const Name: string): TMetaUDRFunction;
     function FindPackageName(const PackageName: string): TMetaPackage;
     function FindExceptionName(const ExcepName: string): TMetaException;
     function FindGeneratorName(const GenName: string): TMetaGenerator;
@@ -800,6 +919,18 @@ type
     property Procedures[const Index: Integer]: TMetaProcedure read GetProcedures;
     property ProceduresCount: Integer read GetProceduresCount;
     property OIDProcedures: TOIDProcedures read FOIDProcedures write FOIDProcedures;
+
+    property StoredFunctions[const Index: Integer]: TMetaStoredFunction read GetStoredFunctions;
+    property StoredFunctionsCount: Integer read GetStoredFunctionsCount;
+    property OIDStoredFunctions: TOIDProcedures read FOIDStoredFunctions write FOIDStoredFunctions;
+
+    property UDRProcedures[const Index: Integer]: TMetaUDRProcedure read GetUDRProcedures;
+    property UDRProceduresCount: Integer read GetUDRProceduresCount;
+    property OIDUDRProcedures: TOIDProcedures read FOIDUDRProcedures write FOIDUDRProcedures;
+
+    property UDRFunctions[const Index: Integer]: TMetaUDRFunction read GetUDRFunctions;
+    property UDRFunctionsCount: Integer read GetUDRFunctionsCount;
+    property OIDUDRFunctions: TOIDUDFs read FOIDUDRFunctions write FOIDUDRFunctions;
 
     property Packages[const Index: Integer]: TMetaPackage read GetPackages;
     property PackagesCount: Integer read GetPackagesCount;
@@ -998,8 +1129,13 @@ const
   FieldTypes: array [TUIBFieldType] of string =
    ('', 'NUMERIC', 'CHAR', 'VARCHAR', 'CSTRING', 'SMALLINT', 'INTEGER', 'QUAD',
     'FLOAT', 'DOUBLE PRECISION', 'TIMESTAMP', 'BLOB', 'BLOBID', 'DATE', 'TIME',
-    'BIGINT' , 'ARRAY'{$IFDEF UIB_HAVE_BOOLEAN}, 'BOOLEAN' {$ENDIF}
-    {$IFDEF FB25_UP}, 'NULL'{$ENDIF});
+    'BIGINT' , 'ARRAY', 'BOOLEAN', 'NULL'
+    {$IFDEF FB40_UP}
+    , 'DECFLOAT(16)', 'DECFLOAT(34)', 'INT128',
+    'TIME WITH TIME ZONE', 'TIMESTAMP WITH TIME ZONE',
+    'TIME WITH TIME ZONE', 'TIMESTAMP WITH TIME ZONE'
+    {$ENDIF}
+    );
 
   QRYDefaultCharset =
     'select ' +
@@ -1389,6 +1525,50 @@ const
     'order by ' +
     '  RDB$ARGUMENT_POSITION';
 
+  { Firebird 3.0+: Stored Functions (PSQL functions) — stored in RDB$PROCEDURES with PROCEDURE_TYPE = 2 }
+  QRYStoredFunctions =
+    'select ' +
+    '  RDB$PROCEDURE_NAME' +
+    ', RDB$PROCEDURE_SOURCE ' +
+    'from ' +
+    '  RDB$PROCEDURES ' +
+    'where ' +
+    '  (RDB$PACKAGE_NAME is null) and ' +
+    '  (RDB$PROCEDURE_TYPE = 2) ' +
+    'order by ' +
+    '  RDB$PROCEDURE_NAME';
+
+  { Firebird 3.0+: UDR Procedures — RDB$PROCEDURES with PROCEDURE_TYPE = 1, no package }
+  QRYUDRProcedures =
+    'select ' +
+    '  RDB$PROCEDURE_NAME' +
+    ', RDB$PROCEDURE_SOURCE' +
+    ', RDB$ENGINE_NAME' +
+    ', RDB$ENTRYPOINT ' +
+    'from ' +
+    '  RDB$PROCEDURES ' +
+    'where ' +
+    '  (RDB$PACKAGE_NAME is null) and ' +
+    '  (RDB$PROCEDURE_TYPE = 1) ' +
+    'order by ' +
+    '  RDB$PROCEDURE_NAME';
+
+  { Firebird 3.0+: UDR Functions — RDB$FUNCTIONS with MODULE_NAME, no package }
+  QRYUDRFunctions =
+    'select ' +
+    '  RDB$FUNCTION_NAME' +
+    ', RDB$FUNCTION_SOURCE' +
+    ', RDB$MODULE_NAME' +
+    ', RDB$ENTRYPOINT' +
+    ', RDB$RETURN_ARGUMENT ' +
+    'from ' +
+    '  RDB$FUNCTIONS ' +
+    'where ' +
+    '  (RDB$PACKAGE_NAME is null) and ' +
+    '  (RDB$MODULE_NAME is not null) ' +
+    'order by ' +
+    '  RDB$FUNCTION_NAME';
+
   QRYRoles =
     'select ' +
     '  RDB$ROLE_NAME' +
@@ -1695,6 +1875,7 @@ begin
   case NodeType of
     MetaDatabase: Result := TMetaDatabase(Self);
     MetaDomain, MetaTable, MetaView, MetaProcedure, MetaPackage,
+      MetaStoredFunction, MetaUDRProcedure, MetaUDRFunction,
       MetaGenerator, MetaException, MetaUDF, MetaRole: Result := TMetaDatabase(FOwner);
   else
     Result := TMetaDatabase(FOwner.FOwner);
@@ -2532,6 +2713,22 @@ begin
       blr_bool:
         FFieldType := uftBoolean;
       {$ENDIF}
+      {$IFDEF FB40_UP}
+      blr_dec64:
+        FFieldType := uftDecFloat16;
+      blr_dec128:
+        FFieldType := uftDecFloat34;
+      blr_int128:
+        FFieldType := uftInt128;
+      blr_sql_time_tz:
+        FFieldType := uftTimeTZ;
+      blr_timestamp_tz:
+        FFieldType := uftTimestampTZ;
+      blr_ex_time_tz:
+        FFieldType := uftTimeTZEx;
+      blr_ex_timestamp_tz:
+        FFieldType := uftTimestampTZEx;
+      {$ENDIF}
     end;
   if (FFieldType in [uftChar, uftVarchar, uftCstring]) and
     not QField.Fields.IsNull[4] then
@@ -2627,6 +2824,9 @@ begin
   AddClass(TMetaView);
   AddClass(TMetaProcedure);
   AddClass(TMetaPackage);
+  AddClass(TMetaStoredFunction);
+  AddClass(TMetaUDRProcedure);
+  AddClass(TMetaUDRFunction);
   AddClass(TMetaGenerator);
   AddClass(TMetaException);
   AddClass(TMetaUDF);
@@ -2636,6 +2836,9 @@ begin
   FOIDTables := ALLTables;
   FOIDViews := ALLViews;
   FOIDProcedures := ALLProcedures;
+  FOIDStoredFunctions := ALLProcedures;
+  FOIDUDRProcedures := ALLProcedures;
+  FOIDUDRFunctions := ALLUDFs;
   FOIDPackages := ALLPackages;
   FOIDUDFs := ALLUDFs;
   FOIDRoles := ALLRoles;
@@ -2938,6 +3141,49 @@ begin
       end;
     end;
 
+    // STORED FUNCTIONS (Firebird 3.0+ PSQL functions)
+    if {$IFDEF FB30_UP}True{$ELSE}False{$ENDIF} and (OIDStoredFunction in FOIDDatabases) then
+    begin
+      FNodeItems[Ord(OIDStoredFunction)].Childs.Clear;
+      QNames.SQL.Text := QRYStoredFunctions;
+      QNames.FetchBlobs := True;
+      QNames.Open;
+      while not QNames.Eof do
+      begin
+        with TMetaStoredFunction.Create(Self, Ord(OIDStoredFunction)) do
+          LoadFromQuery(QNames, QFields, QCharset, QArrayDim, QGrants, FOIDStoredFunctions, FDefaultCharset);
+        QNames.Next;
+      end;
+    end;
+
+    // UDR PROCEDURES (Firebird 3.0+ external procedures)
+    if {$IFDEF FB30_UP}True{$ELSE}False{$ENDIF} and (OIDUDRProcedure in FOIDDatabases) then
+    begin
+      FNodeItems[Ord(OIDUDRProcedure)].Childs.Clear;
+      QNames.SQL.Text := QRYUDRProcedures;
+      QNames.Open;
+      while not QNames.Eof do
+      begin
+        with TMetaUDRProcedure.Create(Self, Ord(OIDUDRProcedure)) do
+          LoadFromQuery(QNames, QFields, FOIDUDRProcedures);
+        QNames.Next;
+      end;
+    end;
+
+    // UDR FUNCTIONS (Firebird 3.0+ external functions)
+    if {$IFDEF FB30_UP}True{$ELSE}False{$ENDIF} and (OIDUDRFunction in FOIDDatabases) then
+    begin
+      FNodeItems[Ord(OIDUDRFunction)].Childs.Clear;
+      QNames.SQL.Text := QRYUDRFunctions;
+      QNames.Open;
+      while not QNames.Eof do
+      begin
+        with TMetaUDRFunction.Create(Self, Ord(OIDUDRFunction)) do
+          LoadFromQuery(QNames, QFields, QCharset, QArrayDim, FOIDUDRFunctions, FDefaultCharset);
+        QNames.Next;
+      end;
+    end;
+
     // EXCEPTION
     if OIDException in FOIDDatabases then
     begin
@@ -3090,6 +3336,40 @@ begin
   SaveMainNodes('EXCEPTIONS',         Ord(OIDException));
   SaveMainNodes('PROCEDURES (Empty)', Ord(OIDProcedure), NewLine);
   SavePackageNodes(True);
+
+  { Stored Functions (FB 3.0+ PSQL functions) — with code body }
+  if StoredFunctionsCount > 0 then
+  begin
+    Stream.WriteString('/* STORED FUNCTIONS (Code) */' + NewLine);
+    for I := 0 to StoredFunctionsCount - 1 do
+    begin
+      StoredFunctions[I].SaveToAlterDDL(Stream, options);
+      Stream.WriteString(NewLine + NewLine);
+    end;
+  end;
+
+  { UDR Procedures (FB 3.0+ external procedures) }
+  if UDRProceduresCount > 0 then
+  begin
+    Stream.WriteString('/* UDR PROCEDURES */' + NewLine);
+    for I := 0 to UDRProceduresCount - 1 do
+    begin
+      UDRProcedures[I].SaveToDDLNode(Stream, options);
+      Stream.WriteString(NewLine);
+    end;
+  end;
+
+  { UDR Functions (FB 3.0+ external functions) }
+  if UDRFunctionsCount > 0 then
+  begin
+    Stream.WriteString('/* UDR FUNCTIONS */' + NewLine);
+    for I := 0 to UDRFunctionsCount - 1 do
+    begin
+      UDRFunctions[I].SaveToDDLNode(Stream, options);
+      Stream.WriteString(NewLine);
+    end;
+  end;
+
   SaveMainNodes('TABLES',             Ord(OIDTable),     NewLine);
   SaveMainNodes('VIEWS',              Ord(OIDView),      NewLine);
 
@@ -3120,6 +3400,7 @@ begin
   SaveChildNodes('GRANTS (Views)',         Ord(OIDView),      Ord(OIDViewGrant));
   SaveChildNodes('GRANTS (Views Fields)',  Ord(OIDView),      Ord(OIDViewFieldGrant));
   SaveChildNodes('GRANTS (Procedures)',    Ord(OIDProcedure), Ord(OIDProcedureGrant));
+  SaveChildNodes('GRANTS (Stored Functions)', Ord(OIDStoredFunction), Ord(OIDProcedureGrant));
 end;
 
 function TMetaDataBase.GetGenerators(const Index: Integer): TMetaGenerator;
@@ -3213,6 +3494,36 @@ end;
 function TMetaDataBase.GetProceduresCount: Integer;
 begin
   Result := FNodeItems[Ord(OIDProcedure)].Childs.Count
+end;
+
+function TMetaDataBase.GetStoredFunctions(const Index: Integer): TMetaStoredFunction;
+begin
+  Result := TMetaStoredFunction(GetItems(Ord(OIDStoredFunction), Index));
+end;
+
+function TMetaDataBase.GetStoredFunctionsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDStoredFunction)].Childs.Count
+end;
+
+function TMetaDataBase.GetUDRProcedures(const Index: Integer): TMetaUDRProcedure;
+begin
+  Result := TMetaUDRProcedure(GetItems(Ord(OIDUDRProcedure), Index));
+end;
+
+function TMetaDataBase.GetUDRProceduresCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDUDRProcedure)].Childs.Count
+end;
+
+function TMetaDataBase.GetUDRFunctions(const Index: Integer): TMetaUDRFunction;
+begin
+  Result := TMetaUDRFunction(GetItems(Ord(OIDUDRFunction), Index));
+end;
+
+function TMetaDataBase.GetUDRFunctionsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDUDRFunction)].Childs.Count
 end;
 
 function TMetaDataBase.GetPackages(const Index: Integer): TMetaPackage;
@@ -3450,6 +3761,45 @@ begin
     if CompareText(Procedures[I].Name, ProcName) = 0 then
     begin
       Result := Procedures[I];
+      Exit;
+    end;
+end;
+
+function TMetaDataBase.FindStoredFunctionName(const Name: string): TMetaStoredFunction;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to StoredFunctionsCount - 1 do
+    if CompareText(StoredFunctions[I].Name, Name) = 0 then
+    begin
+      Result := StoredFunctions[I];
+      Exit;
+    end;
+end;
+
+function TMetaDataBase.FindUDRProcedureName(const Name: string): TMetaUDRProcedure;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to UDRProceduresCount - 1 do
+    if CompareText(UDRProcedures[I].Name, Name) = 0 then
+    begin
+      Result := UDRProcedures[I];
+      Exit;
+    end;
+end;
+
+function TMetaDataBase.FindUDRFunctionName(const Name: string): TMetaUDRFunction;
+var
+  I: Integer;
+begin
+  Result := nil;
+  for I := 0 to UDRFunctionsCount - 1 do
+    if CompareText(UDRFunctions[I].Name, Name) = 0 then
+    begin
+      Result := UDRFunctions[I];
       Exit;
     end;
 end;
@@ -5202,7 +5552,474 @@ begin
   Result := MetaUDF;
 end;
 
+{ ========================================================================
+  TMetaStoredFunction — Firebird 3.0+ PSQL Stored Functions
+  ======================================================================== }
+
+constructor TMetaStoredFunction.Create(AOwner: TMetaNode; ClassIndex: Integer);
+begin
+  inherited Create(AOwner, ClassIndex);
+  AddClass(TMetaProcInField);
+  AddClass(TMetaProcOutField);
+  AddClass(TMetaProcedureGrant);
+end;
+
+procedure TMetaStoredFunction.LoadFromQuery(QNames, QFields,
+  QCharset, QArrayDim, QGrants: TUIBStatement; OIDs: TOIDProcedures;
+  DefaultCharset: TCharacterSet);
+begin
+  FName := MetaQuote(Trim(QNames.Fields.AsString[0]));
+  QNames.ReadBlob(1, FSource);
+  QFields.Params.AsString[0] := SQLUnQuote(FName);
+
+  if OIDProcFieldIn in OIDs then
+  begin
+    QFields.Params.AsSmallint[1] := 0; // in
+    QFields.Open;
+    while not QFields.Eof do
+    begin
+      TMetaProcInField.Create(Self, Ord(OIDProcFieldIn)).LoadFromQuery(QFields, QCharset, QArrayDim, DefaultCharset);
+      QFields.Next;
+    end;
+  end;
+
+  if OIDProcFieldOut in OIDs then
+  begin
+    QFields.Params.AsSmallint[1] := 1; // out
+    QFields.Open;
+    while not QFields.Eof do
+    begin
+      TMetaProcOutField.Create(Self, Ord(OIDProcFieldOut)).LoadFromQuery(QFields, QCharset, QArrayDim, DefaultCharset);
+      QFields.Next;
+    end;
+  end;
+
+  if OIDProcedureGrant in OIDs then
+  begin
+    QGrants.Params.AsInteger[0] := 5;
+    QGrants.Params.AsString[1] := SQLUnQuote(FName);
+    QGrants.Open;
+    LoadGrantsFromQuery(QGrants);
+  end;
+end;
+
+procedure TMetaStoredFunction.LoadGrantsFromQuery(QGrants: TUIBStatement);
+var
+  Current: TGrantee;
+  Previous: TGrantee;
+  G: TMetaProcedureGrant;
+begin
+  Current.UserType := -1;
+  Previous.UserType := -1;
+
+  while not QGrants.Eof do
+  begin
+    Current.User := Trim(QGrants.Fields.AsString[0]);
+    Current.Grantor := Trim(QGrants.Fields.AsString[1]);
+    Current.Option := QGrants.Fields.AsInteger[3] = 1;
+    Current.UserType := QGRants.Fields.AsInteger[4];
+
+    if (Previous.UserType <> -1) and (
+         (Current.UserType = Previous.UserType) and
+         (Current.User = Previous.User) and
+         (Current.Grantor = Previous.Grantor) and
+         (Current.Option = Previous.Option)
+       ) then
+    begin
+    end
+    else
+    begin
+      if Previous.UserType <> -1 then
+      begin
+        G := FindGrant(Previous.Option);
+        if not Assigned(G) then
+          G := TMetaProcedureGrant.Create(Self,Ord(OIDProcedureGrant));
+
+        G.LoadFromGrantee(Previous);
+
+        Previous := Current;
+      end
+      else
+      begin
+        Previous := Current;
+      end;
+    end;
+
+    QGrants.Next;
+  end;
+
+  if Current.UserType <> -1 then
+  begin
+    G := FindGrant(Current.Option);
+    if not Assigned(G) then
+      G := TMetaProcedureGrant.Create(Self,Ord(OIDProcedureGrant));
+
+    G.LoadFromGrantee(Current);
+  end;
+end;
+
+procedure TMetaStoredFunction.LoadFromStream(Stream: TStream);
+begin
+  ReadString(Stream, FName);
+  ReadString(Stream, FSource);
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaStoredFunction.SaveToStream(Stream: TStream);
+begin
+  WriteString(Stream, FName);
+  WriteString(Stream, FSource);
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaStoredFunction.InternalSaveToDDL(Stream: TStringStream; Operation: string; options: TDDLOptions);
+var S: String;
+begin
+  S := Trim(FSource);
+  if SameText(Copy(S,1,4),'decl') then
+    Insert('  ',S,1);
+
+  Stream.WriteString(Operation + ' FUNCTION ' + Name + ' ');
+  Stream.WriteString(NewLine + 'AS ');
+  Stream.WriteString(S);
+  Stream.WriteString(';');
+end;
+
+procedure TMetaStoredFunction.SaveToCreateEmptyDDL(Stream: TStringStream; options: TDDLOptions);
+begin
+  InternalSaveToDDL(Stream, {$IFDEF FB15_UP}'CREATE OR ALTER'{$ELSE}'CREATE'{$ENDIF}, options);
+  if OutputFieldsCount > 0 then
+    Stream.WriteString(NewLine + 'AS' + NewLine + 'begin' + NewLine + '  suspend;' + NewLine + 'end;') else
+    Stream.WriteString(NewLine + 'AS' + NewLine + 'begin' + NewLine + '  exit;' + NewLine + 'end;');
+end;
+
+procedure TMetaStoredFunction.SaveToDDLNode(Stream: TStringStream; options: TDDLOptions);
+var S: String;
+begin
+  S := Trim(FSource);
+  if SameText(Copy(S,1,4),'decl') then
+    Insert('  ',S,1);
+
+  InternalSaveToDDL(Stream, 'CREATE', options);
+  Stream.WriteString(NewLine + 'AS ');
+  Stream.WriteString(S);
+  Stream.WriteString(';');
+end;
+
+procedure TMetaStoredFunction.SaveToAlterDDL(Stream: TStringStream; options: TDDLOptions);
+var S: String;
+begin
+  S := Trim(FSource);
+  if SameText(Copy(S,1,4),'decl') then
+    Insert('  ',S,1);
+
+  InternalSaveToDDL(Stream, 'ALTER', options);
+  Stream.WriteString(NewLine + 'AS ' + NewLine);
+  Stream.WriteString(S);
+  Stream.WriteString(';');
+end;
+
+class function TMetaStoredFunction.NodeClass: string;
+begin
+  Result := 'Stored Function';
+end;
+
+class function TMetaStoredFunction.NodeType: TMetaNodeType;
+begin
+  Result := MetaStoredFunction;
+end;
+
+function TMetaStoredFunction.GetAsAlterDDL: string;
+var stream: TStringStream;
+begin
+  stream := TStringStream.Create('');
+  try
+    SaveToAlterDDL(stream, []);
+    Result := stream.DataString;
+  finally
+    stream.Free;
+  end;
+end;
+
+function TMetaStoredFunction.GetAsAlterToEmptyDDL: string;
+var stream: TStringStream;
+begin
+  stream := TStringStream.Create('');
+  try
+    InternalSaveToDDL(stream, 'ALTER', []);
+    if OutputFieldsCount > 0 then
+      Stream.WriteString(NewLine + 'AS' + NewLine + 'begin' + NewLine + '  suspend;' + NewLine + 'end;')
+    else
+      Stream.WriteString(NewLine + 'AS' + NewLine + 'begin' + NewLine + '  exit;' + NewLine + 'end;');
+    Result := stream.DataString;
+  finally
+    stream.Free;
+  end;
+end;
+
+function TMetaStoredFunction.GetAsCreateEmptyDDL: string;
+var stream: TStringStream;
+begin
+  stream := TStringStream.Create('');
+  try
+    SaveToCreateEmptyDDL(stream, []);
+    Result := stream.DataString;
+  finally
+    stream.Free;
+  end;
+end;
+
+function TMetaStoredFunction.GetProcedureGrants(const Index: Integer): TMetaProcedureGrant;
+begin
+  Result := TMetaProcedureGrant(GetItems(Ord(OIDProcedureGrant), Index));
+end;
+
+function TMetaStoredFunction.GetProcedureGrantsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDProcedureGrant)].Childs.Count;
+end;
+
+function TMetaStoredFunction.FindGrant(Option: Boolean): TMetaProcedureGrant;
+var I: Integer;
+begin
+  Result := nil;
+  for I := 0 to GrantsCount - 1 do
+    if (Grants[I].Option = Option) then
+    begin
+      Result := Grants[I];
+      Exit;
+    end;
+end;
+
+function TMetaStoredFunction.GetInputFields(const Index: Integer): TMetaProcInField;
+begin
+  Result := TMetaProcInField(GetItems(Ord(OIDProcFieldIn), Index));
+end;
+
+function TMetaStoredFunction.GetInputFieldsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDProcFieldIn)].Childs.Count;
+end;
+
+function TMetaStoredFunction.GetOutputFields(const Index: Integer): TMetaProcOutField;
+begin
+  Result := TMetaProcOutField(GetItems(Ord(OIDProcFieldOut), Index));
+end;
+
+function TMetaStoredFunction.GetOutputFieldsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDProcFieldOut)].Childs.Count;
+end;
+
+{ ========================================================================
+  TMetaUDRProcedure — Firebird 3.0+ UDR Procedures
+  ======================================================================== }
+
+constructor TMetaUDRProcedure.Create(AOwner: TMetaNode; ClassIndex: Integer);
+begin
+  inherited Create(AOwner, ClassIndex);
+  AddClass(TMetaProcInField);
+  AddClass(TMetaProcOutField);
+end;
+
+procedure TMetaUDRProcedure.LoadFromQuery(QNames, QFields: TUIBStatement;
+  OIDs: TOIDProcedures);
+begin
+  FName := MetaQuote(Trim(QNames.Fields.AsString[0]));
+  FSource := QNames.Fields.AsString[1];
+  if not QNames.Fields.IsNull[2] then
+    FEngineName := Trim(QNames.Fields.AsString[2]);
+  if not QNames.Fields.IsNull[3] then
+    FEntryPoint := Trim(QNames.Fields.AsString[3]);
+
+  QFields.Params.AsString[0] := SQLUnQuote(FName);
+
+  if OIDProcFieldIn in OIDs then
+  begin
+    QFields.Params.AsSmallint[1] := 0; // in
+    QFields.Open;
+    while not QFields.Eof do
+    begin
+      TMetaProcInField.Create(Self, Ord(OIDProcFieldIn)).LoadFromQuery(QFields, nil, nil, TCharacterSet.csNone);
+      QFields.Next;
+    end;
+  end;
+
+  if OIDProcFieldOut in OIDs then
+  begin
+    QFields.Params.AsSmallint[1] := 1; // out
+    QFields.Open;
+    while not QFields.Eof do
+    begin
+      TMetaProcOutField.Create(Self, Ord(OIDProcFieldOut)).LoadFromQuery(QFields, nil, nil, TCharacterSet.csNone);
+      QFields.Next;
+    end;
+  end;
+end;
+
+procedure TMetaUDRProcedure.LoadFromStream(Stream: TStream);
+begin
+  ReadString(Stream, FName);
+  ReadString(Stream, FSource);
+  ReadString(Stream, FEntryPoint);
+  ReadString(Stream, FEngineName);
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaUDRProcedure.SaveToStream(Stream: TStream);
+begin
+  WriteString(Stream, FName);
+  WriteString(Stream, FSource);
+  WriteString(Stream, FEntryPoint);
+  WriteString(Stream, FEngineName);
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaUDRProcedure.SaveToDDLNode(Stream: TStringStream; options: TDDLOptions);
+begin
+  Stream.WriteString('CREATE OR ALTER PROCEDURE ' + Name);
+  Stream.WriteString(' AS EXTERNAL NAME ' + QuotedStr(FEntryPoint));
+  if FEngineName <> '' then
+    Stream.WriteString(' ENGINE ' + FEngineName);
+  Stream.WriteString(';');
+end;
+
+class function TMetaUDRProcedure.NodeClass: string;
+begin
+  Result := 'UDR Procedure';
+end;
+
+class function TMetaUDRProcedure.NodeType: TMetaNodeType;
+begin
+  Result := MetaUDRProcedure;
+end;
+
+function TMetaUDRProcedure.GetInputFields(const Index: Integer): TMetaProcInField;
+begin
+  Result := TMetaProcInField(GetItems(Ord(OIDProcFieldIn), Index));
+end;
+
+function TMetaUDRProcedure.GetInputFieldsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDProcFieldIn)].Childs.Count;
+end;
+
+function TMetaUDRProcedure.GetOutputFields(const Index: Integer): TMetaProcOutField;
+begin
+  Result := TMetaProcOutField(GetItems(Ord(OIDProcFieldOut), Index));
+end;
+
+function TMetaUDRProcedure.GetOutputFieldsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDProcFieldOut)].Childs.Count;
+end;
+
+{ ========================================================================
+  TMetaUDRFunction — Firebird 3.0+ UDR Functions
+  ======================================================================== }
+
+constructor TMetaUDRFunction.Create(AOwner: TMetaNode; ClassIndex: Integer);
+begin
+  inherited Create(AOwner, ClassIndex);
+  AddClass(TMetaUDFField);
+end;
+
+procedure TMetaUDRFunction.LoadFromQuery(QNames, QFields, QCharset, QArrayDim: TUIBStatement;
+  OIDs: TOIDUDFs; DefaultCharset: TCharacterSet);
+begin
+  FName := MetaQuote(Trim(QNames.Fields.AsString[0]));
+  FSource := QNames.Fields.AsString[1];
+  if not QNames.Fields.IsNull[2] then
+    FModule := Trim(QNames.Fields.AsString[2]);
+  if not QNames.Fields.IsNull[3] then
+    FEntry := Trim(QNames.Fields.AsString[3]);
+  if not QNames.Fields.IsNull[4] then
+    FReturn := QNames.Fields.AsSmallint[4];
+
+  QFields.Params.AsString[0] := SQLUnQuote(FName);
+
+  if OIDUDFField in OIDs then
+  begin
+    QFields.Open;
+    while not QFields.Eof do
+    begin
+      TMetaUDFField.Create(Self, Ord(OIDUDFField)).LoadFromQuery(QFields, QCharset, QArrayDim, DefaultCharset);
+      QFields.Next;
+    end;
+  end;
+end;
+
+procedure TMetaUDRFunction.LoadFromStream(Stream: TStream);
+begin
+  ReadString(Stream, FName);
+  ReadString(Stream, FModule);
+  ReadString(Stream, FEntry);
+  ReadString(Stream, FSource);
+  Stream.Read(FReturn, SizeOf(FReturn));
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaUDRFunction.SaveToStream(Stream: TStream);
+begin
+  WriteString(Stream, FName);
+  WriteString(Stream, FModule);
+  WriteString(Stream, FEntry);
+  WriteString(Stream, FSource);
+  Stream.Write(FReturn, SizeOf(FReturn));
+  inherited SaveToStream(Stream);
+end;
+
+procedure TMetaUDRFunction.SaveToDDLNode(Stream: TStringStream; options: TDDLOptions);
+var
+  I, C: Integer;
+begin
+  Stream.WriteString(Format('DECLARE EXTERNAL FUNCTION %s', [Name]));
+  C := 0;
+
+  for I := 0 to FieldsCount - 1 do
+  begin
+    if C > 0 then
+      Stream.WriteString(',');
+    Stream.WriteString(NewLine + '  ');
+    Fields[I].SaveToDDL(Stream, options);
+    Inc(C);
+  end;
+
+  Stream.WriteString(NewLine + '  RETURNS ');
+  for I := 0 to FieldsCount - 1 do
+    if Fields[I].Position = FReturn then
+    begin
+      Fields[I].SaveToDDL(Stream, options);
+      Break;
+    end;
+
+  Stream.WriteString(NewLine + '  ENTRY_POINT ' + QuotedStr(FEntry));
+  Stream.WriteString(NewLine + '  MODULE_NAME ' + QuotedStr(FModule));
+  Stream.WriteString(';');
+end;
+
+class function TMetaUDRFunction.NodeClass: string;
+begin
+  Result := 'UDR Function';
+end;
+
+class function TMetaUDRFunction.NodeType: TMetaNodeType;
+begin
+  Result := MetaUDRFunction;
+end;
+
+function TMetaUDRFunction.GetFields(const Index: Integer): TMetaUDFField;
+begin
+  Result := TMetaUDFField(GetItems(Ord(OIDUDFField), Index));
+end;
+
+function TMetaUDRFunction.GetFieldsCount: Integer;
+begin
+  Result := FNodeItems[Ord(OIDUDFField)].Childs.Count;
+end;
+
 { TMetaTableField }
+
 
 function TMetaTableField.GetArrayBounds(const index: Integer): TArrayBound;
 begin

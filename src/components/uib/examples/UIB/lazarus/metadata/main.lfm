@@ -1,13 +1,13 @@
 object MainForm: TMainForm
-  Left = 468
+  Left = 420
   Height = 538
-  Top = 138
+  Top = 120
   Width = 1077
   HorzScrollBar.Page = 691
   VertScrollBar.Page = 518
   ActiveControl = TreeView
   Caption = 'Metadata explorer'
-  ClientHeight = 509
+  ClientHeight = 508
   ClientWidth = 1077
   Menu = MainMenu
   OnCreate = FormCreate
@@ -15,7 +15,7 @@ object MainForm: TMainForm
   LCLVersion = '2.2.6.0'
   object TreeView: TTreeView
     Left = 0
-    Height = 509
+    Height = 508
     Top = 0
     Width = 344
     Align = alLeft
@@ -26,7 +26,7 @@ object MainForm: TMainForm
   end
   inline Memo: TSynEdit
     Left = 344
-    Height = 509
+    Height = 508
     Top = 0
     Width = 733
     Align = alClient
@@ -442,8 +442,8 @@ object MainForm: TMainForm
   end
   object ImageList: TImageList
     Masked = True
-    Left = 96
-    Top = 64
+    Left = 168
+    Top = 144
     Bitmap = {
       4C7A1200000010000000100000005C0A00000000000078DAED9B0B5054D719C7
       571D6D27532BD574AA9D88DA90C607288F442544075F542B054189411D5BB56C
@@ -531,20 +531,20 @@ object MainForm: TMainForm
       A47F29AF37FFB3D6FF51D5FFFF00E5712502
     }
   end
-  object DataBase: TUIBDataBase
+  object DataBase1: TUIBDataBase
     Params.Strings = (
       'sql_dialect=3'
       'lc_ctype=NONE'
       'user_name=SYSDBA'
       'password=fb6'
     )
-    DatabaseName = '/opt/firebird3/examples/empbuild/employee.fdb'
+    DatabaseName = '/opt/firebird6/examples/empbuild/employee.fdb'
     CharacterSet = csNONE
     UserName = 'SYSDBA'
     PassWord = 'fb6'
     LibraryName = '/opt/firebird6/lib/libfbclient.so.6.0.0'
-    Left = 608
-    Top = 160
+    Left = 584
+    Top = 176
   end
   object OpenDialog: TOpenDialog
     Title = 'Ouvrir un fichier existant'
@@ -552,18 +552,18 @@ object MainForm: TMainForm
     Left = 48
     Top = 144
   end
-  object Transaction: TUIBTransaction
-    DataBase = DataBase
-    Left = 432
-    Top = 24
+  object Transaction1: TUIBTransaction
+    DataBase = DataBase1
+    Left = 448
+    Top = 48
   end
   object SynSQLSyn1: TSynSQLSyn
     DefaultFilter = 'Fichiers SQL (*.sql)|*.sql'
     Enabled = False
     CommentAttri.Foreground = clGreen
     SQLDialect = sqlFirebird40
-    Left = 432
-    Top = 160
+    Left = 448
+    Top = 176
   end
   object SaveDialog: TSaveDialog
     Title = 'Enregistrer le fichier sous'
@@ -572,10 +572,10 @@ object MainForm: TMainForm
     Top = 280
   end
   object UIBQuery1: TUIBQuery
-    DataBase = DataBase
+    DataBase = DataBase1
     FetchBlobs = True
     QuickScript = True
-    Left = 595
-    Top = 50
+    Left = 584
+    Top = 48
   end
 end

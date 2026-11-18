@@ -23,15 +23,18 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="2"/>
       <RevisionNr Value="1"/>
-      <BuildNr Value="1596"/>
+      <BuildNr Value="1608"/>
       <StringTable ProductName="Turbobird" ProductVersion="1.2.1.1289"/>
     </VersionInfo>
     <MacroValues Count="1">
-      <Macro4 Name="LCLWidgetType" Value="qt5"/>
+      <Macro1 Name="LCLWidgetType" Value="gtk2"/>
     </MacroValues>
     <BuildModes Count="15">
       <Item1 Name="x86_64-linux64-gtk2-debug" Default="True"/>
       <Item2 Name="x86_64-linux64-gtk2-release">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -83,6 +86,9 @@
         </CompilerOptions>
       </Item2>
       <Item3 Name="i386_linux32-gtk-debug">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -136,6 +142,9 @@
         </CompilerOptions>
       </Item3>
       <Item4 Name="i386_linux32-gtk2-release">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="gtk2"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <Target>
@@ -811,10 +820,10 @@
         </CompilerOptions>
       </Item15>
       <SharedMatrixOptions Count="5">
-        <Item1 ID="844124804436" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
+        <Item1 ID="844124804436" Modes="x86_64-linux64-gtk2-debug,x86_64-linux64-gtk2-release,i386_linux32-gtk-debug,i386_linux32-gtk2-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk2"/>
         <Item2 ID="875199933056" Modes="x86_64-linux64-gtk3-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="gtk3"/>
         <Item3 ID="013957187272" Modes="x86_64-darwin64-cocoa-debug,x86_64-darwin64-cocoa-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item4 ID="799143915312" Modes="x86_64-linux64-qt5-debug,x86_64-linux64-qt5-release,x86_64-linux64-gtk2-debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item4 ID="799143915312" Modes="x86_64-linux64-qt5-debug,x86_64-linux64-qt5-release" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item5 ID="284256768967" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>
@@ -1825,7 +1834,16 @@
 -dUseCThreads
 -dWITH_GTK2_IM
 -dSCRIPTER_EMBEDDED
--dPS_USESSUPPORT"/>
+-dPS_USESSUPPORT
+-dFB40"/>
+      <OtherDefines Count="6">
+        <Define0 Value="DEBUG"/>
+        <Define1 Value="UseCThreads"/>
+        <Define2 Value="WITH_GTK2_IM"/>
+        <Define3 Value="SCRIPTER_EMBEDDED"/>
+        <Define4 Value="PS_USESSUPPORT"/>
+        <Define5 Value="FB40"/>
+      </OtherDefines>
       <ExecuteBefore>
         <Command Value="./gen_versions_scripts.sh"/>
         <CompileReasons Compile="False" Build="False" Run="False"/>

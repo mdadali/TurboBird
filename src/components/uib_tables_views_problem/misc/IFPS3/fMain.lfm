@@ -1,0 +1,111 @@
+object Form1: TForm1
+  Left = 362
+  Height = 372
+  Top = 221
+  Width = 585
+  Caption = 'RemObjects Pascal Script - Test Application'
+  ClientHeight = 344
+  ClientWidth = 585
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Menu = MainMenu1
+  LCLVersion = '2.2.6.0'
+  object Splitter1: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 3
+    Top = 252
+    Width = 585
+    Align = alBottom
+    ResizeAnchor = akBottom
+  end
+  object Memo1: TMemo
+    Left = 0
+    Height = 252
+    Top = 0
+    Width = 585
+    Align = alClient
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Courier New'
+    Lines.Strings = (
+      'program dbtest;'
+      'var '
+      '  db: TUIBDatabase;'
+      '  tr: TUIBTransaction;'
+      '  qr: TUIBQuery;'
+      'begin'
+      '  db := TUIBDatabase.create(nil);'
+      '  tr := TUIBTransaction.create(nil);'
+      '  qr := TUIBQuery.create(nil);'
+      '  try'
+      '    db.username := ''SYSDBA'';'
+      '    db.password := ''masterkey'';'
+      '    db.LibraryName := ''/opt/firebird/lib/libfbclient.so.3.0.13'';'
+      '    db.databasename := ''/opt/firebird/examples/empbuild/employee.fdb''; '
+      '    db.connected := True;'
+      '    tr.database := db;'
+      '    qr.transaction := tr;'
+      '    qr.sql.text := ''select * from employee'';'
+      '    qr.open(true);'
+      '    while not qr.eof do'
+      '    begin'
+      '       writeln(qr.fields.asstring[1]);'
+      '       qr.next;'
+      '    end;'
+      '  finally'
+      '    qr.free;'
+      '    tr.free;'
+      '    db.free;'
+      '  end;'
+      'end.'
+    )
+    ParentFont = False
+    ScrollBars = ssBoth
+    TabOrder = 0
+    WordWrap = False
+  end
+  object Memo2: TMemo
+    Left = 0
+    Height = 89
+    Top = 255
+    Width = 585
+    Align = alBottom
+    ReadOnly = True
+    ScrollBars = ssVertical
+    TabOrder = 1
+    WordWrap = False
+  end
+  object PSScript: TPSScript
+    CompilerOptions = []
+    OnCompile = PSScriptCompile
+    OnExecute = PSScriptExecute
+    OnCompImport = IFPS3ClassesPlugin1CompImport
+    OnExecImport = IFPS3ClassesPlugin1ExecImport
+    Plugins = <    
+      item
+        Plugin = PS3DllPlugin
+      end>
+    UsePreProcessor = False
+    Left = 376
+    Top = 8
+  end
+  object PS3DllPlugin: TPSDllPlugin
+    Left = 480
+    Top = 8
+  end
+  object MainMenu1: TMainMenu
+    Left = 272
+    Top = 8
+    object Program1: TMenuItem
+      Caption = '&Program'
+      object Compile1: TMenuItem
+        Caption = '&Compile'
+        ShortCut = 120
+        OnClick = Compile1Click
+      end
+    end
+  end
+end

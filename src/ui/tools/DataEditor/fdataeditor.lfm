@@ -1,7 +1,7 @@
 inherited frmDataEditor: TfrmDataEditor
-  Left = 501
+  Left = 761
   Height = 600
-  Top = 179
+  Top = 246
   Width = 1112
   Caption = 'Turbobird - Data Editor'
   ClientHeight = 600

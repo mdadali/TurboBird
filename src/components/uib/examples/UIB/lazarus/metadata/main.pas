@@ -13,7 +13,7 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
-    DataBase: TUIBDataBase;
+    DataBase1: TUIBDataBase;
     ImageList: TImageList;
     MainMenu: TMainMenu;
     Memo: TSynEdit;
@@ -24,7 +24,7 @@ type
     OpenDialog: TOpenDialog;
     SaveDialog: TSaveDialog;
     SynSQLSyn1: TSynSQLSyn;
-    Transaction: TUIBTransaction;
+    Transaction1: TUIBTransaction;
     TreeView: TTreeView;
     UIBQuery1: TUIBQuery;
     procedure FormCreate(Sender: TObject);
@@ -61,21 +61,22 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-
   FreeAndNil(FMetaDB);
+  UIBQuery1.Close();
+  DataBase1.Connected:=false;
 end;
 
 procedure TMainForm.mOpenClick(Sender: TObject);
 begin
   try
-    DataBase.Connected := False;
-    DataBase.Connected := True;
+    DataBase1.Connected := False;
+    DataBase1.Connected := True;
 
     FreeAndNil(FMetaDB);
 
     Screen.Cursor := crHourGlass;
     try
-      FMetaDB := TMetaDatabase(DataBase.GetMetadata(True));
+      FMetaDB := TMetaDatabase(DataBase1.GetMetadata(True));
       FillTree;
     finally
       Screen.Cursor := crDefault;
@@ -173,6 +174,21 @@ begin
     for i := 0 to FMetaDB.PackagesCount - 1 do
       AddNodeWithChildren(TreeView.Items.AddChild(GroupNode, FMetaDB.Packages[i].Name), FMetaDB.Packages[i]);
 
+    // Stored Functions (Firebird 3.0+)
+    GroupNode := TreeView.Items.AddChild(RootNode, 'Stored Functions');
+    for i := 0 to FMetaDB.StoredFunctionsCount - 1 do
+      AddNodeWithChildren(TreeView.Items.AddChild(GroupNode, FMetaDB.StoredFunctions[i].Name), FMetaDB.StoredFunctions[i]);
+
+    // UDR Procedures (Firebird 3.0+)
+    GroupNode := TreeView.Items.AddChild(RootNode, 'UDR Procedures');
+    for i := 0 to FMetaDB.UDRProceduresCount - 1 do
+      AddNodeWithChildren(TreeView.Items.AddChild(GroupNode, FMetaDB.UDRProcedures[i].Name), FMetaDB.UDRProcedures[i]);
+
+    // UDR Functions (Firebird 3.0+)
+    GroupNode := TreeView.Items.AddChild(RootNode, 'UDR Functions');
+    for i := 0 to FMetaDB.UDRFunctionsCount - 1 do
+      AddNodeWithChildren(TreeView.Items.AddChild(GroupNode, FMetaDB.UDRFunctions[i].Name), FMetaDB.UDRFunctions[i]);
+
     // Generators
     GroupNode := TreeView.Items.AddChild(RootNode, 'Generators');
     for i := 0 to FMetaDB.GeneratorsCount - 1 do
@@ -255,13 +271,13 @@ type
 
   TMainForm = class(TForm)
     ImageList: TImageList;
-    DataBase: TUIBDataBase;
+    DataBase1: TUIBDataBase;
     Memo: TSynEdit;
     mSave: TMenuItem;
     mLoad: TMenuItem;
     SaveDialog: TSaveDialog;
     SynSQLSyn1: TSynSQLSyn;
-    Transaction: TUIBTransaction;
+    Transaction1: TUIBTransaction;
     MainMenu: TMainMenu;
     mOpen: TMenuItem;
     mFile: TMenuItem;
@@ -343,25 +359,25 @@ procedure TMainForm.mOpenClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
   begin
-    DataBase.Connected := false;
+    DataBase1.Connected := false;
     TreeView.Items.Clear;
 
     //OK
-    //DataBase.DatabaseName := '127.0.0.1/3030:/opt/firebird/examples/empbuild/employee.fdb';
-    //Database.LibraryName  := '/opt/firebird/lib/libfbclient.so.3.0.13';
+    //DataBase1.DatabaseName := '127.0.0.1/3030:/opt/firebird/examples/empbuild/employee.fdb';
+    //DataBase1.LibraryName  := '/opt/firebird/lib/libfbclient.so.3.0.13';
 
     //OK
-    //DataBase.DatabaseName := 'Firebird25/3125:/var/lib/firebird/backups/employee.fdb';
-    //Database.LibraryName  := '/opt/firebird/lib/libfbclient.so';
+    //DataBase1.DatabaseName := 'Firebird25/3125:/var/lib/firebird/backups/employee.fdb';
+    //DataBase1.LibraryName  := '/opt/firebird/lib/libfbclient.so';
 
-    //DataBase.DatabaseName := 'Firebird40/3140:/opt/firebird/examples/empbuild/employee.fdb';
-    //Database.LibraryName  := '/opt/FireBird/Firebird-4.0.6.3221-0.amd64/lib/libfbclient.so';
+    //DataBase1.DatabaseName := 'Firebird40/3140:/opt/firebird/examples/empbuild/employee.fdb';
+    //DataBase1.LibraryName  := '/opt/FireBird/Firebird-4.0.6.3221-0.amd64/lib/libfbclient.so';
 
-    DataBase.DatabaseName := 'localhost/3060:/opt/firebird6/examples/empbuild/employee.fdb';
-    Database.LibraryName := '/opt/firebird6/lib/libfbclient.so.6.0.0';
+    DataBase1.DatabaseName := 'localhost/3060:/opt/firebird6/examples/empbuild/employee.fdb';
+    DataBase1.LibraryName := '/opt/firebird6/lib/libfbclient.so.6.0.0';
 
-    DataBase.Connected := true;
-    Transaction.StartTransaction;
+    DataBase1.Connected := true;
+    Transaction1.StartTransaction;
 
     if Assigned(MetaData) then
       MetaData.Free;
@@ -369,9 +385,9 @@ begin
     MetaData := TMetaDataBase.Create(nil, 0);
     //MetaData.OIDDatabases := [OIDTable];  // nur Tabellen
     //MetaData.OIDTables := [];             // keine Details!
-    MetaData.LoadFromDatabase(Transaction);
+    MetaData.LoadFromDatabase(Transaction1);
 
-    Transaction.Commit;  //PFLICHT!
+    Transaction1.Commit;  //PFLICHT!
 
     ShowNodes(MetaData, nil);
   end;
@@ -393,7 +409,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-  DataBase.LibraryName := uiblib.GetClientLibrary;
+  DataBase1.LibraryName := uiblib.GetClientLibrary;
   with Memo do
   begin
     Parent := Self;
