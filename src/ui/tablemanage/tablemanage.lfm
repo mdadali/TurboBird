@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 423
+  Left = 466
   Height = 598
-  Top = 286
+  Top = 150
   Width = 1412
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -15,14 +15,14 @@ object fmTableManage: TfmTableManage
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 5
-    Height = 526
-    Top = 5
+    Height = 476
+    Top = 55
     Width = 1402
-    ActivePage = tsFields
+    ActivePage = tsCheckConstraints
     Align = alClient
     BorderSpacing.Around = 5
     Images = ImageList2
-    TabIndex = 0
+    TabIndex = 5
     TabOrder = 0
     object tsFields: TTabSheet
       Caption = 'Fields'
@@ -82,6 +82,32 @@ object fmTableManage: TfmTableManage
       Anchors = [akLeft, akBottom]
       Caption = 'Close'
       OnClick = btnCloseClick
+      TabOrder = 0
+    end
+  end
+  object pnlTop: TPanel
+    Left = 0
+    Height = 50
+    Top = 0
+    Width = 1412
+    Align = alTop
+    ClientHeight = 50
+    ClientWidth = 1412
+    TabOrder = 2
+    object lbTableName: TLabel
+      Left = 24
+      Height = 18
+      Top = 24
+      Width = 69
+      Caption = 'TableName'
+      ParentColor = False
+    end
+    object edtTableName: TEdit
+      Left = 128
+      Height = 32
+      Top = 16
+      Width = 328
+      OnChange = edtTableNameChange
       TabOrder = 0
     end
   end

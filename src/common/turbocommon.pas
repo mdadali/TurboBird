@@ -317,6 +317,9 @@ type
     end;
 
 
+type
+  TTableManageMode = (tmmCreate, tmmEdit);
+
   // ==========================================================================
   // Transfer-Statistik (für CloneTable, CSVExport, DataEditor)
   // ==========================================================================

@@ -582,8 +582,8 @@ type
     procedure ExtractTableMetaData(Quoted: boolean);
 
     function ShowTableManagement(DBIndex: Integer; const TableName: string;
-      NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
-
+                 NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0;
+                 Mode: TTableManageMode = tmmEdit): TfmTableManage;
     //Forms
     function GetFormFilePath: string;
 
@@ -609,7 +609,7 @@ implementation
 
 { TfmMain }
 
-uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewTable, NewGen,
+uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewGen,
      EnterPass, CreateTrigger, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, NewEditField, dbInfo, Comparison;
@@ -5028,58 +5028,19 @@ var
   SelNode: TTreeNode;
   NodeInfos: TPNodeInfos;
   dbIndex: Integer;
-  Form: TfmNewTable;
-  ATab: TTabSheet;
-  ShortTitle, FullHint, DBAlias: string;
 begin
   SelNode := tvMain.Selected;
   if SelNode = nil then Exit;
 
+  // Der Parent des "Tables"-Knotens ist der Datenbank-Knoten
+  if SelNode.Parent = nil then Exit;
   NodeInfos := TPNodeInfos(SelNode.Parent.Data);
   if NodeInfos = nil then Exit;
+
   dbIndex := NodeInfos^.dbIndex;
 
-  DBAlias := GetAncestorNodeText(SelNode, 1);
-
-  // Prüfen, ob ViewForm schon existiert
-  if Assigned(NodeInfos^.NewForm) and (NodeInfos^.NewForm is TfmNewTable) then
-    Form := TfmNewTable(NodeInfos^.NewForm)
-  else begin
-    Form := TfmNewTable.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := SelNode.ImageIndex;
-
-    Form.Parent := ATab;
-    Form.Align := alClient;
-    Form.BorderStyle := bsNone;
-
-    NodeInfos^.NewForm := Form;
-  end;
-
-  Form.Init(dbIndex, SelNode.Data);
-
-  // Tab vorbereiten
-  ATab := Form.Parent as TTabSheet;
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := dbIndex;
-
-  // Kurzer Titel
-  ShortTitle := 'New Table';
-  ATab.Caption := ShortTitle;
-  Form.Caption := ShortTitle;
-
-  // Tooltip
-  FullHint :=
-    'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-    'DBAlias:  ' + DBAlias + sLineBreak +
-    'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    'Action:   Create new table';
-  ATab.Hint := FullHint;
-  ATab.ShowHint := True;
-
-  Form.Show;
-  Form.edNewTable.SetFocus;
+  // Einheitliche Maske im Create-Modus öffnen
+  ShowTableManagement(dbIndex, '', NodeInfos, 0, tmmCreate);
 end;
 
 (*************  Create new UDF  ******************)
@@ -5841,98 +5802,9 @@ begin
   end;
 end;
 
-{function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
-  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
-var
-  ATab: TTabSheet;
-  SelNode: TTreeNode;
-  ShortTitle, FullHint, DBAlias: string;
-  i: Integer;
-  ExistingForm: TfmTableManage;
-  FormKey: string;
-begin
-  SelNode := tvMain.Selected;
-
-  // Eindeutiger Schlüssel: dbIndex + Tabellenname
-  FormKey := IntToStr(DBIndex) + '|' + UpperCase(TableName);
-
-  // Prüfen ob bereits ein TableManage für diese DB+Tabelle existiert
-  ExistingForm := nil;
-  for i := 0 to PageControl1.PageCount - 1 do
-  begin
-    if (PageControl1.Pages[i].Tag = DBIndex) then
-    begin
-      // Prüfen ob in diesem Tab ein TfmTableManage steckt
-      if (PageControl1.Pages[i].ControlCount > 0) and
-         (PageControl1.Pages[i].Controls[0] is TfmTableManage) then
-      begin
-        ExistingForm := TfmTableManage(PageControl1.Pages[i].Controls[0]);
-        // Prüfen ob es die gleiche Tabelle ist
-        if SameText(ExistingForm.Caption, GetClearNodeText(TableName) + '#' + IntToStr(DBIndex)) then
-          Break
-        else
-          ExistingForm := nil;
-      end;
-    end;
-  end;
-
-  if ExistingForm <> nil then
-  begin
-    Result := ExistingForm;
-    ATab := Result.Parent as TTabSheet;
-  end
-  else
-  begin
-    Result := TfmTableManage.Create(Application);
-    ATab := TTabSheet.Create(Self);
-    ATab.Parent := PageControl1;
-    ATab.ImageIndex := 4;
-    ATab.Tag := DBIndex;
-
-    Result.Parent := ATab;
-    Result.Align := alClient;
-    Result.BorderStyle := bsNone;
-
-    // Am Tabellen-Knoten speichern
-    if Assigned(NodeInfo) then
-      NodeInfo^.EditorForm := Result;
-  end;
-
-  // Tab vorbereiten
-  PageControl1.ActivePage := ATab;
-  ATab.Tag := DBIndex;
-
-  // Kurzer Titel
-  ShortTitle := GetClearNodeText(TableName) + '#' + IntToStr(DBIndex);
-  ATab.Caption := ShortTitle;
-  Result.Caption := ShortTitle;
-
-  // Tooltip
-  if SelNode <> nil then
-  begin
-    DBAlias := GetAncestorNodeText(SelNode, 1);
-    FullHint :=
-      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-      'DBAlias:  ' + DBAlias + sLineBreak +
-      'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
-      'Object type: Table' + sLineBreak +
-      'Table name: ' + TableName;
-    ATab.Hint := FullHint;
-    ATab.ShowHint := True;
-  end;
-
-  // Initialisierung
-  Result.Init(DBIndex, TableName, NodeInfo);
-
-  // Aktiven Tab setzen
-  if (ActiveTabIndex >= 0) and (ActiveTabIndex < Result.PageControl1.PageCount) then
-    Result.PageControl1.TabIndex := ActiveTabIndex;
-
-  Result.Show;
-end; }
-
 function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
-  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
+  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0;
+  Mode: TTableManageMode = tmmEdit): TfmTableManage;
 var
   ATab: TTabSheet;
   SelNode: TTreeNode;
@@ -5942,10 +5814,15 @@ var
 begin
   SelNode := tvMain.Selected;
   ExistingForm := nil;
+
+  // Stabiler Schlüssel für die TabSheet-Caption
+  if Mode = tmmCreate then
+    ShortTitle := 'New Table#' + IntToStr(DBIndex)
+  else
+    ShortTitle := GetClearNodeText(TableName) + '#' + IntToStr(DBIndex);
 
   // ----------------------------------------------------------
-  // Prüfen, ob bereits ein TableManage für diese DB + Tabelle
-  // geöffnet ist (Suche über Tag + Caption)
+  // Prüfen, ob bereits ein TableManage für diesen Schlüssel existiert
   // ----------------------------------------------------------
   for i := 0 to PageControl1.PageCount - 1 do
   begin
@@ -5953,14 +5830,11 @@ begin
        (PageControl1.Pages[i].ControlCount > 0) and
        (PageControl1.Pages[i].Controls[0] is TfmTableManage) then
     begin
-      ExistingForm := TfmTableManage(PageControl1.Pages[i].Controls[0]);
-
-      // Gleiche Tabelle?
-      if SameText(ExistingForm.Caption,
-                  GetClearNodeText(TableName) + '#' + IntToStr(DBIndex)) then
-        Break
-      else
-        ExistingForm := nil;
+      if SameText(PageControl1.Pages[i].Caption, ShortTitle) then
+      begin
+        ExistingForm := TfmTableManage(PageControl1.Pages[i].Controls[0]);
+        Break;
+      end;
     end;
   end;
 
@@ -5974,13 +5848,12 @@ begin
 
     PageControl1.ActivePage := ATab;
 
-    // Gewünschten Unter-Tab setzen
     if (ActiveTabIndex >= 0) and
        (ActiveTabIndex < Result.PageControl1.PageCount) then
       Result.PageControl1.TabIndex := ActiveTabIndex;
 
     Result.Show;
-    Exit;   // ← wichtig: kein Init mehr aufrufen!
+    Exit;
   end;
 
   // ----------------------------------------------------------
@@ -5992,42 +5865,42 @@ begin
   ATab.Parent     := PageControl1;
   ATab.ImageIndex := 4;
   ATab.Tag        := DBIndex;
+  ATab.Caption    := ShortTitle;
 
   Result.Parent      := ATab;
   Result.Align       := alClient;
   Result.BorderStyle := bsNone;
 
-  // EditorForm am übergebenen Node speichern
-  // (idealerweise sollte der Aufrufer den Tabellen-Knoten übergeben)
   if Assigned(NodeInfo) then
     NodeInfo^.EditorForm := Result;
-
-  // Titel + Caption
-  ShortTitle      := GetClearNodeText(TableName) + '#' + IntToStr(DBIndex);
-  ATab.Caption    := ShortTitle;
-  Result.Caption  := ShortTitle;
 
   // Tooltip
   if Assigned(SelNode) then
   begin
     DBAlias := GetAncestorNodeText(SelNode, 1);
-    FullHint :=
-      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
-      'DBAlias:  ' + DBAlias + sLineBreak +
-      'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
-      'Object type: Table' + sLineBreak +
-      'Table name: ' + TableName;
+    if Mode = tmmCreate then
+      FullHint :=
+        'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+        'DBAlias:  ' + DBAlias + sLineBreak +
+        'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
+        'Action:   Create new table'
+    else
+      FullHint :=
+        'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+        'DBAlias:  ' + DBAlias + sLineBreak +
+        'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
+        'Object type: Table' + sLineBreak +
+        'Table name: ' + TableName;
+
     ATab.Hint     := FullHint;
     ATab.ShowHint := True;
   end;
 
-  // Tab aktivieren
   PageControl1.ActivePage := ATab;
 
-  // Initialisierung (nur beim allerersten Öffnen)
-  Result.Init(DBIndex, TableName, NodeInfo);
+  // Initialisierung
+  Result.Init(DBIndex, TableName, NodeInfo, Mode);
 
-  // Gewünschten Unter-Tab setzen
   if (ActiveTabIndex >= 0) and
      (ActiveTabIndex < Result.PageControl1.PageCount) then
     Result.PageControl1.TabIndex := ActiveTabIndex;

@@ -19,7 +19,6 @@ uses
   UniqueConstraints,
   CheckConstraints,
   NotNullConstraints,
-  NewTable,
   References,
   ForeignKeys,
   Triggers,
@@ -34,9 +33,12 @@ type
 
   TfmTableManage = class(TForm)
     btnClose: TButton;
+    edtTableName: TEdit;
     ImageList2: TImageList;
     ImageList1: TImageList;
+    lbTableName: TLabel;
     PageControl1: TPageControl;
+    pnlTop: TPanel;
     pnlBottom: TPanel;
     tsNotNullConstraints: TTabSheet;
     tsCheckConstraints: TTabSheet;
@@ -49,6 +51,7 @@ type
     tsForeignKeys: TTabSheet;
     tsFields: TTabSheet;
     procedure btnCloseClick(Sender: TObject);
+    procedure edtTableNameChange(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormShow(Sender: TObject);
@@ -57,6 +60,7 @@ type
     FDBIndex: Integer;
     FTableName: string;
     FExtractor: TSimpleObjExtractor;
+    FMode: TTableManageMode;
 
     fmPrimaryKey: TfmPrimaryKey;
     fmUniqueConstraints: TfmUniqueConstraints;
@@ -68,8 +72,13 @@ type
     fmTablePermissions: TfmTablePermissions;
     fmIndices: TfmIndices;
     fmFields: TfmFields;
+
+    procedure HandleTableCreated(const ATableName: AnsiString);
+
+    procedure ApplyMode;
   public
-     procedure Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
+    procedure Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos;
+                       Mode: TTableManageMode = tmmEdit);
   end;
 
 var
@@ -141,12 +150,15 @@ begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
-procedure TfmTableManage.Init(dbIndex: Integer; TableName: string; ANodeInfos: TPNodeInfos);
+procedure TfmTableManage.Init(dbIndex: Integer; TableName: string;
+  ANodeInfos: TPNodeInfos; Mode: TTableManageMode);
 begin
+  FMode      := Mode;
   FNodeInfos := ANodeInfos;
   FDBIndex   := dbIndex;
   FTableName := TableName;
 
+  // Extractor nur einmal anlegen
   if not Assigned(FExtractor) then
     FExtractor := TSimpleObjExtractor.Create(dbIndex);
 
@@ -262,9 +274,16 @@ begin
       fmFields.Parent      := tsFields;
       fmFields.Align       := alClient;
       fmFields.BorderStyle := bsNone;
-      fmFields.Init(dbIndex, FTableName, FNodeInfos, FExtractor);
+      fmFields.Init(dbIndex, FTableName, FNodeInfos, FExtractor, FMode);
+      fmFields.OnTableCreated := @HandleTableCreated;
       fmFields.Visible     := True;
+    end
+    else
+    begin
+      fmFields.SetMode(FMode);
+      fmFields.OnTableCreated := @HandleTableCreated;
     end;
+
 
   except
     on E: Exception do
@@ -273,6 +292,82 @@ begin
                  mtError, [mbOk], 0);
     end;
   end;
+
+  // Mode-spezifische Oberfläche anpassen
+  ApplyMode;
+end;
+
+procedure TfmTableManage.ApplyMode;
+begin
+  case FMode of
+    tmmCreate:
+      begin
+        Caption := 'New Table';
+
+        if Assigned(pnlTop) then
+          pnlTop.Visible := True;
+        if Assigned(lbTableName) then
+          lbTableName.Caption := 'New Table name';
+        if Assigned(edtTableName) then
+        begin
+          edtTableName.Text := '';
+          edtTableName.ReadOnly := False;
+          edtTableName.Color := clWindow;
+        end;
+
+        if Assigned(fmFields) then
+          fmFields.UpdateTableName('');
+
+        tsFields.TabVisible             := True;
+        tsIndices.TabVisible            := False;
+        tsPrimaryKey.TabVisible         := False;
+        tsForeignKeys.TabVisible        := False;
+        tsUniqueConstraints.TabVisible  := False;
+        tsCheckConstraints.TabVisible   := False;
+        tsNotNullConstraints.TabVisible := False;
+        tsReferences.TabVisible         := False;
+        tsTriggers.TabVisible           := False;
+        tsPermissions.TabVisible        := False;
+
+        PageControl1.ActivePage := tsFields;
+
+        if Assigned(edtTableName) and edtTableName.CanFocus then
+          edtTableName.SetFocus;
+      end;
+
+    tmmEdit:
+      begin
+        if FTableName <> '' then
+          Caption := 'Table Management: ' + FTableName
+        else
+          Caption := 'Table Management';
+
+        if Assigned(pnlTop) then
+          pnlTop.Visible := True;
+        if Assigned(lbTableName) then
+          lbTableName.Caption := 'Table name';
+        if Assigned(edtTableName) then
+        begin
+          edtTableName.Text := FTableName;
+          edtTableName.ReadOnly := True;
+          edtTableName.Color := clBtnFace;
+        end;
+
+        if Assigned(fmFields) then
+          fmFields.UpdateTableName(FTableName);
+
+        tsFields.TabVisible             := True;
+        tsIndices.TabVisible            := True;
+        tsPrimaryKey.TabVisible         := True;
+        tsForeignKeys.TabVisible        := True;
+        tsUniqueConstraints.TabVisible  := True;
+        tsCheckConstraints.TabVisible   := True;
+        tsNotNullConstraints.TabVisible := True;
+        tsReferences.TabVisible         := True;
+        tsTriggers.TabVisible           := True;
+        tsPermissions.TabVisible        := True;
+      end;
+  end;
 end;
 
 procedure TfmTableManage.btnCloseClick(Sender: TObject);
@@ -280,6 +375,37 @@ begin
   turbocommon.MetaDataChanged := true;
   Close;
   Parent.Free;
+end;
+
+procedure TfmTableManage.edtTableNameChange(Sender: TObject);
+begin
+  if Assigned(fmFields) then
+      fmFields.UpdateTableName(edtTableName.Text);
+end;
+
+procedure TfmTableManage.HandleTableCreated(const ATableName: AnsiString);
+begin
+  FMode      := tmmEdit;
+  FTableName := ATableName;
+
+  if Assigned(edtTableName) then
+  begin
+    edtTableName.Text     := FTableName;
+    edtTableName.ReadOnly := True;
+    edtTableName.Color    := clBtnFace;
+  end;
+
+  ApplyMode;
+
+  if Assigned(fmFields) then
+  begin
+    fmFields.UpdateTableName(FTableName);
+    fmFields.SetMode(tmmEdit);
+  end;
+
+  Caption := 'Table Management: ' + FTableName;
+
+  turbocommon.MetaDataChanged := True;
 end;
 
 initialization
