@@ -88,8 +88,8 @@ end;
 
 procedure TfmReferences.FormShow(Sender: TObject);
 begin
+  FillReferences;
   frmThemeSelector.btnApplyClick(Self);
-  // FillReferences wird vom TabSheet-OnShow getriggert
 end;
 
 end.

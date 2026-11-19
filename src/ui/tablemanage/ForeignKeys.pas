@@ -194,6 +194,7 @@ end;
 
 procedure TfmForeignKeys.FormShow(Sender: TObject);
 begin
+  FillForeignKeys;
   frmThemeSelector.btnApplyClick(Self);
 end;
 

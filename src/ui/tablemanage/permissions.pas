@@ -285,6 +285,7 @@ end;
 
 procedure TfmTablePermissions.FormShow(Sender: TObject);
 begin
+  FillPermissions;
   frmThemeSelector.btnApplyClick(Self);
 end;
 

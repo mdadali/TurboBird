@@ -374,8 +374,8 @@ end;
 
 procedure TfmUniqueConstraints.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(Self);
   FillUniqueConstraints;
+  frmThemeSelector.btnApplyClick(Self);
 end;
 
 end.

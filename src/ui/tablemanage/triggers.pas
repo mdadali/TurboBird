@@ -137,6 +137,7 @@ end;
 
 procedure TfmTriggers.FormShow(Sender: TObject);
 begin
+  FillTriggers;
   frmThemeSelector.btnApplyClick(Self);
 end;
 

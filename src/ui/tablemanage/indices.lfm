@@ -1,0 +1,198 @@
+object fmIndices: TfmIndices
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'Indices'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object bbRefreshIndices: TBitBtn
+    Left = 1305
+    Height = 40
+    Top = 4
+    Width = 88
+    Anchors = [akTop, akRight]
+    Caption = 'Refresh'
+    Color = clForm
+    Kind = bkRetry
+    OnClick = bbRefreshClick
+    TabOrder = 0
+  end
+  object sgIndices: TStringGrid
+    Left = 0
+    Height = 139
+    Top = -2
+    Width = 1287
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Around = 5
+    Columns = <
+      item
+        Title.Caption = 'Index Name'
+        Width = 489
+      end
+      item
+        ButtonStyle = cbsCheckboxColumn
+        Title.Caption = 'Unique'
+        Width = 64
+      end
+      item
+        ButtonStyle = cbsPickList
+        PickList.Strings = (
+          'Asc'
+          'Desc'
+        )
+        Title.Caption = 'Sort'
+        Width = 64
+      end
+      item
+        Title.Caption = 'On Fields'
+        Width = 401
+      end
+      item
+        ButtonStyle = cbsCheckboxColumn
+        ReadOnly = True
+        Title.Color = 12514548
+        Title.Caption = 'Primary Key'
+        Width = 90
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+    TabOrder = 1
+    TitleStyle = tsNative
+    ColWidths = (
+      489
+      64
+      64
+      401
+      90
+    )
+  end
+  object GroupBox2: TGroupBox
+    Left = 5
+    Height = 215
+    Top = 272
+    Width = 1388
+    Align = alBottom
+    BorderSpacing.Around = 5
+    Caption = 'Create New Index'
+    ClientHeight = 185
+    ClientWidth = 1384
+    TabOrder = 2
+    object cbIndexType: TComboBox
+      Left = 125
+      Height = 32
+      Top = 5
+      Width = 150
+      Color = 16249563
+      ItemHeight = 24
+      ItemIndex = 1
+      Items.Strings = (
+        'Primary Key'
+        'Secondary Index'
+      )
+      OnChange = cbIndexTypeChange
+      Style = csDropDownList
+      TabOrder = 0
+      Text = 'Secondary Index'
+    end
+    object edIndexName: TEdit
+      Left = 125
+      Height = 32
+      Top = 39
+      Width = 150
+      TabOrder = 1
+    end
+    object Label3: TLabel
+      Left = 9
+      Height = 18
+      Top = 39
+      Width = 102
+      Caption = 'New index name'
+      ParentColor = False
+    end
+    object cxUnique: TCheckBox
+      Left = 9
+      Height = 22
+      Top = 104
+      Width = 83
+      Caption = 'Is Unique'
+      TabOrder = 2
+    end
+    object cbSortType: TComboBox
+      Left = 125
+      Height = 32
+      Top = 72
+      Width = 150
+      AutoDropDown = True
+      ItemHeight = 24
+      ItemIndex = 0
+      Items.Strings = (
+        'Ascending'
+        'Descending'
+      )
+      ParentColor = True
+      Style = csDropDownList
+      TabOrder = 3
+      Text = 'Ascending'
+    end
+    object bbCreateIndex: TBitBtn
+      Left = 8
+      Height = 40
+      Top = 143
+      Width = 124
+      Caption = 'Create Index'
+      Color = clForm
+      Default = True
+      Kind = bkOK
+      ModalResult = 1
+      OnClick = bbCreateClick
+      TabOrder = 4
+    end
+    object Label1: TLabel
+      Left = 9
+      Height = 18
+      Top = 8
+      Width = 29
+      Caption = 'Type'
+      ParentColor = False
+    end
+    object Label4: TLabel
+      Left = 8
+      Height = 18
+      Top = 72
+      Width = 56
+      Caption = 'Direction'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 320
+      Height = 18
+      Top = 8
+      Width = 161
+      Caption = 'Create new index on fields'
+      ParentColor = False
+    end
+    object clbFields: TCheckListBox
+      Left = 318
+      Height = 152
+      Top = 31
+      Width = 458
+      ItemHeight = 0
+      TabOrder = 5
+    end
+  end
+  object bbDropIndices: TBitBtn
+    Left = 1306
+    Height = 40
+    Top = 56
+    Width = 87
+    Anchors = [akTop, akRight]
+    Caption = 'Drop'
+    OnClick = bbDropClick
+    TabOrder = 3
+  end
+end

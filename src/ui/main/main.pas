@@ -880,33 +880,6 @@ begin
   CanShow := (HintStr <> '');
 end;
 
-{procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
-begin
-  try
-    ClearAllSessionPasswords;
-    Screen.Cursor := crSQLWait;
-    tvMain.BeginUpdate;
-    CheckBoxFilter.Checked := false;
-    try
-      SaveAndCloseSQLHistory;
-      // !!! lmDisconnectAllClick(nil) ENTFERNT – ruft CloseDB auf,
-      //     ReleaseRegisteredDatabases ruft CloseDB bereits korrekt auf.
-      ReleaseRegisteredDatabases;
-      CloseAction := caFree;
-    except
-      on E: Exception do
-      begin
-        Screen.Cursor := crDefault;
-        ShowMessage('Error while closing the databases: ' + E.Message);
-        CloseAction := caFree;
-      end;
-    end;
-  finally
-    tvMain.EndUpdate;
-
-  end;
-end;}
-
 procedure TfmMain.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 var
   i, j: Integer;
@@ -3700,10 +3673,6 @@ begin
     SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
     Strings := QWindow.meQuery.Lines;
 
-    //if IsObjectNameCaseSensitive(ATableName) then
-      //if not IsObjectNameQuoted(ATableName) then
-        //ATableName := MakeObjectNameQuoted(ATableName);
-
     SimpleObjExtractor.Extract(otData, ATableName, [], true, Strings);
   finally
     Screen.Cursor := crDefault;
@@ -5872,7 +5841,7 @@ begin
   end;
 end;
 
-function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
+{function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
   NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
 var
   ATab: TTabSheet;
@@ -5957,7 +5926,111 @@ begin
 
   // Aktiven Tab setzen
   if (ActiveTabIndex >= 0) and (ActiveTabIndex < Result.PageControl1.PageCount) then
-    Result.PageControl1.ActivePageIndex := ActiveTabIndex;
+    Result.PageControl1.TabIndex := ActiveTabIndex;
+
+  Result.Show;
+end; }
+
+function TfmMain.ShowTableManagement(DBIndex: Integer; const TableName: string;
+  NodeInfo: TPNodeInfos; ActiveTabIndex: Integer = 0): TfmTableManage;
+var
+  ATab: TTabSheet;
+  SelNode: TTreeNode;
+  ShortTitle, FullHint, DBAlias: string;
+  i: Integer;
+  ExistingForm: TfmTableManage;
+begin
+  SelNode := tvMain.Selected;
+  ExistingForm := nil;
+
+  // ----------------------------------------------------------
+  // Prüfen, ob bereits ein TableManage für diese DB + Tabelle
+  // geöffnet ist (Suche über Tag + Caption)
+  // ----------------------------------------------------------
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    if (PageControl1.Pages[i].Tag = DBIndex) and
+       (PageControl1.Pages[i].ControlCount > 0) and
+       (PageControl1.Pages[i].Controls[0] is TfmTableManage) then
+    begin
+      ExistingForm := TfmTableManage(PageControl1.Pages[i].Controls[0]);
+
+      // Gleiche Tabelle?
+      if SameText(ExistingForm.Caption,
+                  GetClearNodeText(TableName) + '#' + IntToStr(DBIndex)) then
+        Break
+      else
+        ExistingForm := nil;
+    end;
+  end;
+
+  // ----------------------------------------------------------
+  // Fall 1: Formular existiert bereits → nur Tab aktivieren
+  // ----------------------------------------------------------
+  if Assigned(ExistingForm) then
+  begin
+    Result := ExistingForm;
+    ATab   := Result.Parent as TTabSheet;
+
+    PageControl1.ActivePage := ATab;
+
+    // Gewünschten Unter-Tab setzen
+    if (ActiveTabIndex >= 0) and
+       (ActiveTabIndex < Result.PageControl1.PageCount) then
+      Result.PageControl1.TabIndex := ActiveTabIndex;
+
+    Result.Show;
+    Exit;   // ← wichtig: kein Init mehr aufrufen!
+  end;
+
+  // ----------------------------------------------------------
+  // Fall 2: Neues Formular anlegen
+  // ----------------------------------------------------------
+  Result := TfmTableManage.Create(Application);
+
+  ATab := TTabSheet.Create(Self);
+  ATab.Parent     := PageControl1;
+  ATab.ImageIndex := 4;
+  ATab.Tag        := DBIndex;
+
+  Result.Parent      := ATab;
+  Result.Align       := alClient;
+  Result.BorderStyle := bsNone;
+
+  // EditorForm am übergebenen Node speichern
+  // (idealerweise sollte der Aufrufer den Tabellen-Knoten übergeben)
+  if Assigned(NodeInfo) then
+    NodeInfo^.EditorForm := Result;
+
+  // Titel + Caption
+  ShortTitle      := GetClearNodeText(TableName) + '#' + IntToStr(DBIndex);
+  ATab.Caption    := ShortTitle;
+  Result.Caption  := ShortTitle;
+
+  // Tooltip
+  if Assigned(SelNode) then
+  begin
+    DBAlias := GetAncestorNodeText(SelNode, 1);
+    FullHint :=
+      'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
+      'DBAlias:  ' + DBAlias + sLineBreak +
+      'DBPath:   ' + RegisteredDatabases[DBIndex].IBDatabase.DatabaseName + sLineBreak +
+      'Object type: Table' + sLineBreak +
+      'Table name: ' + TableName;
+    ATab.Hint     := FullHint;
+    ATab.ShowHint := True;
+  end;
+
+  // Tab aktivieren
+  PageControl1.ActivePage := ATab;
+
+  // Initialisierung (nur beim allerersten Öffnen)
+  Result.Init(DBIndex, TableName, NodeInfo);
+
+  // Gewünschten Unter-Tab setzen
+  if (ActiveTabIndex >= 0) and
+     (ActiveTabIndex < Result.PageControl1.PageCount) then
+    Result.PageControl1.TabIndex := ActiveTabIndex;
 
   Result.Show;
 end;
@@ -9223,51 +9296,6 @@ begin
   Result := LoginForm;
 end;
 
-{function TfmMain.ConnectToServiceManager(ServerSession: TServerSession): Boolean;
-var
-  fmServerRegistry: TfmServerRegistry;
-  ServerRecord: TServerRecord;
-  mr: TModalResult;
-  SavePwd: Boolean;
-begin
-  Result := False;
-
-    if not ServerSession.Connected then
-    begin
-      ServerRecord := GetServerRecordFromFileByName(ServerSession.ServerName);
-      ApplyServerRecordToSession(ServerRecord,  ServerSession);
-
-      // zuerst versuchen mit gespeicherten Credentials
-      if (not ServerSession.IBXConnect) then
-      begin
-      // falls fehlgeschlagen -> interaktives Login
-        fmServerRegistry := TfmServerRegistry.Create(self);
-        fmServerRegistry.init(ServerSession);
-        try
-          repeat
-            mr := fmServerRegistry.ShowModal;
-
-            if mr = mrCancel then
-              Exit(False);
-
-            SavePwd := fmServerRegistry.chkSavePassword.Checked;
-            ServerSession.UserName := fmServerRegistry.edtUserName.Text;
-            ServerSession.Password := fmServerRegistry.edtPassword.Text;
-
-            if not ServerSession.IBXConnect then
-              ShowMessage('Connection failed. Please try again.');
-
-          until ServerSession.Connected;
-
-        finally
-          fmServerRegistry.Free;
-        end;
-      end;
-      // Versionsinfo übernehmen
-    end;
-  Result := ServerSession.Connected;
-end;}
-
 procedure TfmMain.CreateIntelliSenseCache(Data: PtrInt);
 var Node: TTreeNode;
     NodeInfo: TPNodeInfos;
@@ -9313,50 +9341,9 @@ begin
 
       if (NI <> nil) then
       begin
-        {case NI^.ObjectType of
-          tvotServer,
-          tvotDatabase,
-          tvotQueryWindow,
-
-          tvotTableRoot,
-          tvotGeneratorRoot,
-          tvotViewRoot,
-          tvotUDFRoot,
-          tvotProcedureRoot,
-          tvotFunctionRoot,
-          tvotDomainRoot,
-          tvotUserRoot,
-          tvotRoleRoot,
-          tvotExceptionRoot,
-
-          tvotTriggerRoot,
-          tvotTableTriggerRoot,
-          tvotDBTriggerRoot,
-          tvotDDLTriggerRoot,
-
-          tvotUDRRoot,
-          tvotUDRTriggerRoot,
-          tvotUDRTableTriggerRoot,
-          tvotUDRDBTriggerRoot,
-          tvotUDRDDLTriggerRoot,
-
-          tvotPackage,
-          tvotPackageRoot,
-          //tvotPackageUDFFunctionRoot,
-          tvotPackageFunctionRoot,
-          tvotPackageProcedureRoot,
-          tvotPackageUDRFunctionRoot,
-          tvotPackageUDRProcedureRoot,
-          //tvotPackageTriggerRoot,
-          //tvotPackageUDRTriggerRoot,
-
-          tvotSystemObjectRoot,
-          tvotSystemTableRoot:
-            Node.Visible := True}
-          if IsFilterScopeNode(Node)  then
+           if IsFilterScopeNode(Node)  then
             Node.Visible := True
-          else
-          begin
+        else begin
             if CheckBoxFilter.Checked then
             begin
               Node.Visible := MatchesFilter(Node.Text, FilterText);
@@ -9365,9 +9352,7 @@ begin
             end
             else
               Node.Visible := True;
-          end; //else
-
-        //end; //case
+        end; //else
       end;
 
       Node := Node.GetNext;
@@ -9959,34 +9944,33 @@ try
       // Tab-Indices: 0=Fields, 1=Indices, 2=PrimaryKey, 3=ForeignKeys,
       //              4=Unique, 5=Check, 6=NotNull, 7=References, 8=Triggers, 9=Permissions
       // ============================================================
-      // Table Field → Fields
-      tvotTableFieldRoot: begin
-        try
-          TableName := GetClearNodeText(Node.Parent.Text);
-          ShowTableManagement(DBIndex, TableName, NodeInfo, 0);
-        except
-          on E: Exception do
-            ShowMessage('Error while opening Table Field: ' + E.Message);
-        end;
-      end;
+             // Table Field → Fields
+              tvotTableFieldRoot: begin
+                try
+                  TableName := GetClearNodeText(Node.Parent.Text);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 0);
+                except
+                  on E: Exception do
+                  ShowMessage('Error while opening Table Field: ' + E.Message);
+                end;
+              end;
 
 
-      // Index
-      tvotIndexRoot: begin
-        try
-          TableName := GetClearNodeText(Node.Parent.Text);
-          ShowTableManagement(DBIndex, TableName, NodeInfo, 1);
-        except
-          on E: Exception do
-            ShowMessage('Error while opening Index: ' + E.Message);
-        end;
-      end;
+              tvotIndexRoot: begin
+                try
+                 TableName := GetClearNodeText(Node.Parent.Text);
+                 ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 1);
+                except
+                    on E: Exception do
+                    ShowMessage('Error while opening Index: ' + E.Message);
+                end;
+              end;
 
               // Primary Key
               tvotPrimaryKeyRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 2);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 2);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Primary Key: ' + E.Message);
@@ -9997,7 +9981,7 @@ try
               tvotForeignKeyRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 3);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 3);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Foreign Key: ' + E.Message);
@@ -10008,7 +9992,7 @@ try
               tvotUniqueConstraintRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 4);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 4);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Unique Constraint: ' + E.Message);
@@ -10019,7 +10003,7 @@ try
               tvotCheckConstraintRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 5);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 5);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Check Constraint: ' + E.Message);
@@ -10030,7 +10014,7 @@ try
               tvotNotNullConstraintRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 6);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 6);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Not Null Constraint: ' + E.Message);
@@ -10041,7 +10025,7 @@ try
               tvotTableReferencesRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 7);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 7);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Table references: ' + E.Message);
@@ -10054,7 +10038,7 @@ try
                 begin
                   try
                     TableName := GetClearNodeText(Node.Parent.Text);
-                    ShowTableManagement(DBIndex, TableName, NodeInfo, 8);
+                    ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 8);
                   except
                     on E: Exception do
                       ShowMessage('Error while opening Table Trigger: ' + E.Message);
@@ -10066,13 +10050,12 @@ try
               tvotTablePermissionsRoot: begin
                 try
                   TableName := GetClearNodeText(Node.Parent.Text);
-                  ShowTableManagement(DBIndex, TableName, NodeInfo, 9);
+                  ShowTableManagement(DBIndex, TableName, TPNodeInfos(Node.Parent.Data), 9);
                 except
                   on E: Exception do
                     ShowMessage('Error while opening Table Permissons: ' + E.Message);
                 end;
               end;
-
 
               // Form (PascalScript) – direkt ausführen
               tvotForm: begin

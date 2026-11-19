@@ -1,0 +1,145 @@
+object fmFields: TfmFields
+  Left = 0
+  Height = 492
+  Top = 0
+  Width = 1398
+  Caption = 'Fields'
+  ClientHeight = 492
+  ClientWidth = 1398
+  OnShow = FormShow
+  Position = poScreenCenter
+  LCLVersion = '2.2.6.0'
+  object sgFields: TStringGrid
+    Left = 0
+    Height = 444
+    Top = 0
+    Width = 1398
+    Align = alTop
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ColCount = 11
+    Columns = <
+      item
+        ButtonStyle = cbsCheckboxColumn
+        Color = 14408682
+        MaxSize = 50
+        ReadOnly = True
+        Title.Font.Color = 5526757
+        Title.Font.Height = -11
+        Title.Font.Style = [fsBold]
+        Title.Caption = 'P-Key'
+        Width = 50
+      end
+      item
+        Title.Caption = 'Field Name'
+        Width = 198
+      end
+      item
+        Title.Caption = 'Data Type'
+        Width = 120
+      end
+      item
+        Title.Font.Color = 16657685
+        Title.Font.Style = [fsBold]
+        Title.Caption = 'Size'
+        Width = 64
+      end
+      item
+        Title.Caption = 'Precision'
+        Width = 64
+      end
+      item
+        Title.Caption = 'Scale'
+        Width = 64
+      end
+      item
+        Title.Caption = 'CharSet'
+        Width = 64
+      end
+      item
+        Title.Caption = 'Collation'
+        Width = 64
+      end
+      item
+        ButtonStyle = cbsCheckboxColumn
+        Title.Caption = 'Allow Null'
+        Width = 90
+      end
+      item
+        Title.Caption = 'Default Value'
+        Width = 120
+      end
+      item
+        Title.Caption = 'Description'
+        Width = 200
+      end>
+    FixedColor = 14539471
+    FixedCols = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goRowSelect, goSmoothScroll]
+    RowCount = 4
+    ScrollBars = ssBoth
+    TabOrder = 0
+    TitleFont.Style = [fsBold]
+    TitleStyle = tsNative
+    UseXORFeatures = True
+    OnDblClick = sgFieldsDblClick
+    ColWidths = (
+      50
+      198
+      120
+      64
+      64
+      64
+      64
+      64
+      90
+      120
+      200
+    )
+  end
+  object bbNew: TBitBtn
+    Left = 8
+    Height = 40
+    Top = 453
+    Width = 115
+    Anchors = [akLeft, akBottom]
+    Caption = 'New Field'
+    Color = clForm
+    OnClick = bbNewClick
+    TabOrder = 0
+  end
+  object bbEdit: TBitBtn
+    Left = 136
+    Height = 40
+    Top = 453
+    Width = 115
+    Anchors = [akLeft, akBottom]
+    Caption = 'Edit'
+    Color = clForm
+    OnClick = bbEditClick
+    TabOrder = 1
+  end
+  object edDrop: TBitBtn
+    Left = 264
+    Height = 40
+    Top = 452
+    Width = 115
+    Anchors = [akLeft, akBottom]
+    Caption = 'Drop'
+    Color = clForm
+    Kind = bkIgnore
+    OnClick = edDropClick
+    TabOrder = 2
+  end
+  object bbRefreshFields: TBitBtn
+    Left = 456
+    Height = 40
+    Top = 452
+    Width = 115
+    Anchors = [akLeft, akBottom]
+    Caption = 'Refresh'
+    Color = clForm
+    Kind = bkRetry
+    OnClick = bbRefreshClick
+    TabOrder = 3
+  end
+end

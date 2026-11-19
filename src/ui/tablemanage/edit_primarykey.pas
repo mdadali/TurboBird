@@ -276,8 +276,8 @@ end;
 
 procedure TfmPrimaryKey.FormShow(Sender: TObject);
 begin
+  FillPrimaryKey;
   frmThemeSelector.btnApplyClick(Self);
-  //FillPrimaryKey;
 end;
 
 end.

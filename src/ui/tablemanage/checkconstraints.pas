@@ -360,8 +360,8 @@ end;
 
 procedure TfmCheckConstraints.FormShow(Sender: TObject);
 begin
+  FillCheckConstraints;
   frmThemeSelector.btnApplyClick(Self);
-  //FillCheckConstraints;
 end;
 
 end.
