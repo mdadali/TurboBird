@@ -8,12 +8,14 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs,
   Grids, Buttons, StdCtrls, CheckLst,
 
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
-
-  uthemeselector;
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
 
 type
 
@@ -46,7 +48,7 @@ type
     FTableName: string;
     FNodeInfos: TPNodeInfos;
     FExtractor: TSimpleObjExtractor;
-
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -58,7 +60,7 @@ implementation
 
 {$R *.lfm}
 
-uses Main, QueryWindow;
+uses Main;
 
 { TfmIndices }
 
@@ -121,24 +123,31 @@ procedure TfmIndices.bbDropClick(Sender: TObject);
 var
   Line, IndexName: string;
   ColonPos: Integer;
+  Script: string;
 begin
-  with sgIndices do
+  if sgIndices.RowCount <= 1 then
+    Exit;
+
+  Line := sgIndices.Cells[0, sgIndices.Row];
+  ColonPos := Pos(':', Line);
+  if ColonPos > 0 then
+    IndexName := Trim(Copy(Line, 1, ColonPos - 1))
+  else
+    IndexName := Trim(Line);
+
+  if IndexName = '' then
+    Exit;
+
+  if not MsgConfirm('Are you sure you want to drop index: ' + IndexName + '?',
+                    mkWarning) then
+    Exit;
+
+  Script := 'DROP INDEX ' + MakeCaseSensitiveAuto(IndexName) + ';';
+
+  if ExecuteSQL(Script) then
   begin
-    if RowCount <= 1 then Exit;
-
-    Line := Cells[0, Row];
-    ColonPos := Pos(':', Line);
-    if ColonPos > 0 then
-      IndexName := Trim(Copy(Line, 1, ColonPos - 1))
-    else
-      IndexName := Trim(Line);
-
-    if MessageDlg('Are you sure you want to drop index: ' + IndexName, mtConfirmation,
-      [mbYes, mbNo], 0) = mrYes then
-    begin
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop Index on table: ' + FTableName,
-        'DROP INDEX ' + IndexName, @bbRefreshClick);
-    end;
+    turbocommon.MetaDataChanged := True;
+    FillIndices;
   end;
 end;
 
@@ -146,32 +155,55 @@ procedure TfmIndices.bbCreateClick(Sender: TObject);
 var
   Fields: string;
   i: Integer;
-  QWindow: TfmQueryWindow;
+  Script: string;
   FirstLine: string;
+  DlgCaption: string;
 begin
   Fields := '';
   for i := 0 to clbFields.Count - 1 do
     if clbFields.Checked[i] then
-      Fields := Fields + Trim(clbFields.Items[i]) + ',';
-  Delete(Fields, Length(Fields), 1);
+    begin
+      if Fields <> '' then
+        Fields := Fields + ', ';
+      Fields := Fields + MakeCaseSensitiveAuto(Trim(clbFields.Items[i]));
+    end;
 
   if Trim(Fields) = '' then
-    MessageDlg('Error', 'You should select at least one field', mtError, [mbOk], 0)
-  else if Trim(edIndexName.Text) = '' then
-    MessageDlg('Error', 'You should enter the new index name', mtError, [mbOk], 0)
-  else
   begin
-    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Create new index');
-    QWindow.meQuery.Lines.Clear;
+    MsgError('You should select at least one field.');
+    Exit;
+  end;
 
-    FirstLine := 'CREATE ';
-    if cxUnique.Checked then
-      FirstLine := FirstLine + 'UNIQUE ';
-    FirstLine := FirstLine + cbSortType.Text + ' INDEX ' + edIndexName.Text;
-    QWindow.meQuery.Lines.Text := FirstLine + LineEnding + 'ON ' + FTableName + ' (' + Fields + ')';
+  if Trim(edIndexName.Text) = '' then
+  begin
+    MsgError('You should enter the new index name.');
+    Exit;
+  end;
 
-    QWindow.OnCommit := @bbRefreshClick;
-    QWindow.Show;
+  FirstLine := 'CREATE ';
+  if cxUnique.Checked then
+    FirstLine := FirstLine + 'UNIQUE ';
+
+  // Direction: ASCENDING / DESCENDING
+  if SameText(cbSortType.Text, 'Descending') then
+    FirstLine := FirstLine + 'DESCENDING '
+  else
+    FirstLine := FirstLine + 'ASCENDING ';
+
+  FirstLine := FirstLine + 'INDEX ' + MakeCaseSensitiveAuto(Trim(edIndexName.Text));
+
+  Script := FirstLine + LineEnding +
+            'ON ' + MakeCaseSensitiveAuto(FTableName) + ' (' + Fields + ');';
+
+  DlgCaption := 'Create Index on table: ' + FTableName;
+
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillIndices;
   end;
 end;
 
@@ -184,6 +216,58 @@ procedure TfmIndices.FormShow(Sender: TObject);
 begin
   FillIndices;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmIndices.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.

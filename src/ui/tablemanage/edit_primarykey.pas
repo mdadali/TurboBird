@@ -8,12 +8,14 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, Buttons,
   Grids, ComCtrls, ExtCtrls, CheckLst,
 
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
-
-  uthemeselector;
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
 
 type
 
@@ -45,6 +47,7 @@ type
     procedure LoadFields;        // Felder in CheckListBox laden
     procedure CheckPKFields;     // PK-Felder anhaken
 
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -57,7 +60,7 @@ implementation
 
 {$R *.lfm}
 
-uses Main, QueryWindow;
+uses Main;
 
 { TfmPrimaryKey }
 
@@ -156,13 +159,13 @@ end;
 
 procedure TfmPrimaryKey.bbEditClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   PKConstraintName, PKIndexName: string;
   CheckedFields: string;
   i: Integer;
   HasFields: Boolean;
+  Script: string;
+  DlgCaption: string;
 begin
-  // Gewählte Felder aus CheckListBox sammeln
   CheckedFields := '';
   HasFields := False;
   for i := 0 to chkLstBoxFields.Count - 1 do
@@ -178,60 +181,65 @@ begin
 
   if not HasFields then
   begin
-    ShowMessage('Please select at least one field for the Primary Key.');
+    MsgWarning('Please select at least one field for the Primary Key.');
     Exit;
   end;
 
-  // Constraint-Namen ermitteln
   PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
 
-  QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Primary Key: ' + FTableName);
-  QWindow.meQuery.Lines.Clear;
-  QWindow.meQuery.Lines.Add('SET TERM ^;');
-  QWindow.meQuery.Lines.Add('');
-
+  Script := '';
   if PKConstraintName <> '' then
   begin
-    QWindow.meQuery.Lines.Add('-- Drop existing Primary Key');
-    QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-      ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
-    QWindow.meQuery.Lines.Add('');
+    Script := Script + '-- Drop existing Primary Key' + LineEnding;
+    Script := Script + 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+              ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(PKConstraintName) + ';' + LineEnding;
+    Script := Script + LineEnding;
   end;
 
-  QWindow.meQuery.Lines.Add('-- Create new Primary Key');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD PRIMARY KEY (' + CheckedFields + ') ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  Script := Script + '-- Create new Primary Key' + LineEnding;
+  Script := Script + 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+            ' ADD PRIMARY KEY (' + CheckedFields + ');' + LineEnding;
 
-  QWindow.OnCommit := @bbRefreshClick;
-  QWindow.Show;
+  DlgCaption := 'Edit Primary Key: ' + FTableName;
+
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillPrimaryKey;
+  end;
 end;
 
 procedure TfmPrimaryKey.bbDropClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   PKConstraintName: string;
   PKIndexName: string;
+  Script: string;
 begin
-  if sgPrimaryKey.RowCount > 1 then
-  begin
-    if MessageDlg('Are you sure you want to drop the Primary Key from ' + FTableName + '?',
-      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
+  if sgPrimaryKey.RowCount <= 1 then
+    Exit;
 
-      QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Primary Key: ' + FTableName);
-      QWindow.meQuery.Lines.Clear;
-      QWindow.meQuery.Lines.Add('SET TERM ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-        ' DROP CONSTRAINT ' + PKConstraintName + ' ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('SET TERM ;^');
-      QWindow.OnCommit := @bbRefreshClick;
-      QWindow.Show;
-    end;
+  if not MsgConfirm(
+       'Are you sure you want to drop the Primary Key from ' + FTableName + '?',
+       mkWarning) then
+    Exit;
+
+  PKIndexName := FExtractor.GetPrimaryKeyIndexName(FTableName, PKConstraintName);
+  if PKConstraintName = '' then
+  begin
+    MsgWarning('No Primary Key constraint found.');
+    Exit;
+  end;
+
+  Script := 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+            ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(PKConstraintName) + ';';
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillPrimaryKey;
   end;
 end;
 
@@ -278,6 +286,60 @@ procedure TfmPrimaryKey.FormShow(Sender: TObject);
 begin
   FillPrimaryKey;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmPrimaryKey.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.

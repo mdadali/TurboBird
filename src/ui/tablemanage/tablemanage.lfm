@@ -1,7 +1,7 @@
 object fmTableManage: TfmTableManage
-  Left = 466
+  Left = 1116
   Height = 598
-  Top = 150
+  Top = 324
   Width = 1412
   Anchors = [akTop, akLeft, akRight]
   Caption = 'Table Management'
@@ -18,11 +18,11 @@ object fmTableManage: TfmTableManage
     Height = 476
     Top = 55
     Width = 1402
-    ActivePage = tsCheckConstraints
+    ActivePage = tsFields
     Align = alClient
     BorderSpacing.Around = 5
     Images = ImageList2
-    TabIndex = 5
+    TabIndex = 0
     TabOrder = 0
     object tsFields: TTabSheet
       Caption = 'Fields'

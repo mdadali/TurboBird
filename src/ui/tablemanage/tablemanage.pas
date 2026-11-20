@@ -388,6 +388,7 @@ begin
   FMode      := tmmEdit;
   FTableName := ATableName;
 
+  // Top-Panel: Name anzeigen (ReadOnly)
   if Assigned(edtTableName) then
   begin
     edtTableName.Text     := FTableName;
@@ -395,15 +396,80 @@ begin
     edtTableName.Color    := clBtnFace;
   end;
 
+  Caption := 'Table Management: ' + FTableName;
+
+  // Tabs sichtbar schalten
   ApplyMode;
 
+  // ----------------------------------------------------------
+  // Alle Child-Forms mit dem neuen Tabellennamen neu initialisieren
+  // und Daten laden
+  // ----------------------------------------------------------
+
+  // Fields
   if Assigned(fmFields) then
   begin
     fmFields.UpdateTableName(FTableName);
-    fmFields.SetMode(tmmEdit);
+    fmFields.SetMode(tmmEdit);   // lädt FillFields im Edit-Mode
   end;
 
-  Caption := 'Table Management: ' + FTableName;
+  // Primary Key
+  if Assigned(fmPrimaryKey) then
+  begin
+    fmPrimaryKey.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+    fmPrimaryKey.FillPrimaryKey;
+  end;
+
+  // Unique Constraints
+  if Assigned(fmUniqueConstraints) then
+  begin
+    fmUniqueConstraints.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+    // falls vorhanden:
+    // fmUniqueConstraints.FillUniqueConstraints;
+  end;
+
+  // Check Constraints
+  if Assigned(fmCheckConstraints) then
+  begin
+    fmCheckConstraints.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
+
+  // Not-Null Constraints
+  if Assigned(fmNotNullConstraints) then
+  begin
+    fmNotNullConstraints.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
+
+  // References
+  if Assigned(fmReferences) then
+  begin
+    fmReferences.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
+
+  // Foreign Keys
+  if Assigned(fmForeignKeys) then
+  begin
+    fmForeignKeys.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+    fmForeignKeys.FillForeignKeys;
+  end;
+
+  // Triggers
+  if Assigned(fmTriggers) then
+  begin
+    fmTriggers.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
+
+  // Permissions
+  if Assigned(fmTablePermissions) then
+  begin
+    fmTablePermissions.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
+
+  // Indices
+  if Assigned(fmIndices) then
+  begin
+    fmIndices.Init(FDBIndex, FTableName, FNodeInfos, FExtractor);
+  end;
 
   turbocommon.MetaDataChanged := True;
 end;

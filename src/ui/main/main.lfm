@@ -1,7 +1,7 @@
 inherited fmMain: TfmMain
-  Left = 432
+  Left = 661
   Height = 668
-  Top = 347
+  Top = 523
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
   ClientHeight = 638
@@ -5812,11 +5812,6 @@ inherited fmMain: TfmMain
     Top = 480
     object mnFile: TMenuItem
       Caption = '&File'
-      object lmServers: TMenuItem
-        Caption = 'Servers'
-        Visible = False
-        OnClick = lmServersClick
-      end
       object mnServerRegistry: TMenuItem
         Caption = 'Server Registry'
         ImageIndex = 25
@@ -8186,8 +8181,8 @@ inherited fmMain: TfmMain
       OnClick = lmDropStoredProcedureClick
     end
     object lmCreateTrigger: TMenuItem
-      Tag = 13
-      Caption = 'Create New Trigger'
+      Tag = 131
+      Caption = 'Create new Table Trigger'
       ImageIndex = 8
       OnClick = lmCreateTriggerClick
     end

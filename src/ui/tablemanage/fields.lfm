@@ -22,7 +22,7 @@ object fmFields: TfmFields
         ButtonStyle = cbsCheckboxColumn
         Color = 14408682
         MaxSize = 50
-        ReadOnly = True
+        ReadOnly = False
         Title.Font.Color = 5526757
         Title.Font.Height = -11
         Title.Font.Style = [fsBold]
@@ -75,7 +75,7 @@ object fmFields: TfmFields
     FixedColor = 14539471
     FixedCols = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goColSizing, goColMoving, goRowSelect, goSmoothScroll]
-    RowCount = 4
+    RowCount = 2
     ScrollBars = ssBoth
     TabOrder = 0
     TitleFont.Style = [fsBold]

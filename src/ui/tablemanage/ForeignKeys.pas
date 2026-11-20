@@ -7,12 +7,13 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids, Buttons,
 
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
-
-  uthemeselector;
+  uthemeselector,
+  umessagedlg;
 
 type
 
@@ -34,7 +35,7 @@ type
     FTableName: string;
     FNodeInfos: TPNodeInfos;
     FExtractor: TSimpleObjExtractor;
-
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -46,7 +47,7 @@ implementation
 
 {$R ForeignKeys.lfm}
 
-uses Main, QueryWindow, newForeignKey;
+uses Main, newForeignKey;
 
 { TfmForeignKeys }
 
@@ -96,16 +97,11 @@ var
   i: Integer;
   ServerVersionMajor: Word;
 begin
-  // ============================================================
-  // Versions-Check: FK-Anlage auf FB 1.5 nicht möglich
-  // (Server verlangt exklusiven Zugriff — TurboBird hält aber
-  //  mehrere Verbindungen offen: Main-Tree, Extractor, Form)
-  // ============================================================
   ServerVersionMajor := RegisteredDatabases[FDBIndex].RegRec.ServerVersionMajor;
 
   if ServerVersionMajor < 2 then
   begin
-    ShowMessage(
+    MsgWarning(
       'Foreign Key creation is not supported on Firebird 1.5.' + sLineBreak +
       sLineBreak +
       'Firebird 1.5 requires exclusive database access when adding ' +
@@ -114,16 +110,10 @@ begin
       sLineBreak +
       'Workaround:' + sLineBreak +
       '  Use isql or another tool with a single connection to create' + sLineBreak +
-      '  the Foreign Key, then refresh this tab.' + sLineBreak +
-      sLineBreak +
-      'See "Known Limitations" in the documentation for details.'
-    );
+      '  the Foreign Key, then refresh this tab.');
     Exit;
   end;
 
-  // ============================================================
-  // 1. Felder der aktuellen Tabelle (On-Fields)
-  // ============================================================
   FieldsList := TStringList.Create;
   try
     RawFields := FExtractor.GetTableFieldsRaw(FTableName);
@@ -139,13 +129,9 @@ begin
   fmNewForeignKey.edNewName.Text := 'FK_' + FTableName + '_' +
     IntToStr(sgForeignKeys.RowCount);
 
-  // ============================================================
-  // 2. Fremdtabellen-Liste (Ziel-Tabellen für FK)
-  // ============================================================
   TableList := TStringList.Create;
   try
     FExtractor.ExtractObjectNames(FDBIndex, otTables, false, TStrings(TableList), '');
-
     fmNewForeignKey.cbTables.Items.Clear;
     fmNewForeignKey.cbTables.Items.AddStrings(TableList);
   finally
@@ -156,34 +142,36 @@ begin
   fmNewForeignKey.laTable.Caption := FTableName;
   fmNewForeignKey.Caption := 'New Foreign Key for: ' + FTableName;
 
+  // newForeignKey führt selbst aus; bei Erfolg mrOK
   if fmNewForeignKey.ShowModal = mrOK then
   begin
-    if Assigned(fmNewForeignKey.QWindow) then
-      fmNewForeignKey.QWindow.OnCommit := @bbRefreshClick;   // ← jetzt lokale Methode
+    turbocommon.MetaDataChanged := True;
+    FillForeignKeys;
   end;
 end;
 
 procedure TfmForeignKeys.bbDropClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   FKName: string;
+  Script: string;
 begin
   if sgForeignKeys.Row <= 0 then
     Exit;
 
-  FKName := sgForeignKeys.Cells[0, sgForeignKeys.Row];
+  FKName := Trim(sgForeignKeys.Cells[0, sgForeignKeys.Row]);
   if FKName = '' then
     Exit;
 
-  if MessageDlg('Are you sure you want to drop ' + FKName + '?',
-    mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+  if not MsgConfirm('Are you sure you want to drop ' + FKName + '?', mkWarning) then
+    Exit;
+
+  Script := 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+            ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(FKName) + ';';
+
+  if ExecuteSQL(Script) then
   begin
-    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Foreign Key: ' + FKName);
-    QWindow.meQuery.Lines.Text :=
-      'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-      ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(FKName);
-    fmMain.Show;
-    QWindow.OnCommit := @bbRefreshClick;
+    turbocommon.MetaDataChanged := True;
+    FillForeignKeys;
   end;
 end;
 
@@ -196,6 +184,58 @@ procedure TfmForeignKeys.FormShow(Sender: TObject);
 begin
   FillForeignKeys;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmForeignKeys.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.

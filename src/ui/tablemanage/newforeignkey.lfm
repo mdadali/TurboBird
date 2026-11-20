@@ -13,17 +13,17 @@ object fmNewForeignKey: TfmNewForeignKey
   LCLVersion = '2.2.6.0'
   object Label1: TLabel
     Left = 8
-    Height = 19
+    Height = 18
     Top = 15
-    Width = 155
+    Width = 156
     Caption = 'New Foreign Key on table'
     ParentColor = False
   end
   object laTable: TLabel
     Left = 208
-    Height = 19
+    Height = 18
     Top = 15
-    Width = 47
+    Width = 46
     Caption = 'laTable'
     Font.Style = [fsBold]
     ParentColor = False
@@ -31,7 +31,7 @@ object fmNewForeignKey: TfmNewForeignKey
   end
   object Label6: TLabel
     Left = 8
-    Height = 19
+    Height = 18
     Top = 432
     Width = 86
     Caption = 'Update action'
@@ -39,9 +39,9 @@ object fmNewForeignKey: TfmNewForeignKey
   end
   object Label7: TLabel
     Left = 12
-    Height = 19
+    Height = 18
     Top = 472
-    Width = 82
+    Width = 81
     Caption = 'Delete action'
     ParentColor = False
   end
@@ -52,28 +52,28 @@ object fmNewForeignKey: TfmNewForeignKey
     Width = 530
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Current table'
-    ClientHeight = 150
-    ClientWidth = 528
+    ClientHeight = 140
+    ClientWidth = 526
     TabOrder = 0
     object Label2: TLabel
       Left = 8
-      Height = 19
+      Height = 18
       Top = 8
-      Width = 140
+      Width = 141
       Caption = 'New Foreign Key name'
       ParentColor = False
     end
     object Label3: TLabel
       Left = 10
-      Height = 19
+      Height = 18
       Top = 39
-      Width = 54
+      Width = 55
       Caption = 'On fields'
       ParentColor = False
     end
     object edNewName: TEdit
       Left = 160
-      Height = 31
+      Height = 32
       Top = 8
       Width = 324
       TabOrder = 0
@@ -86,7 +86,6 @@ object fmNewForeignKey: TfmNewForeignKey
       Width = 324
       ItemHeight = 0
       TabOrder = 1
-      TopIndex = -1
     end
   end
   object grForeignTable: TGroupBox
@@ -96,32 +95,32 @@ object fmNewForeignKey: TfmNewForeignKey
     Width = 530
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Foreign Table'
-    ClientHeight = 180
-    ClientWidth = 528
+    ClientHeight = 170
+    ClientWidth = 526
     TabOrder = 1
     OnClick = grForeignTableClick
     object Label4: TLabel
       Left = 11
-      Height = 19
+      Height = 18
       Top = 12
-      Width = 70
+      Width = 71
       Caption = 'Table name'
       ParentColor = False
     end
     object Label5: TLabel
       Left = 8
-      Height = 19
+      Height = 18
       Top = 52
-      Width = 100
+      Width = 98
       Caption = 'Reference fields'
       ParentColor = False
     end
     object cbTables: TComboBox
       Left = 160
-      Height = 35
+      Height = 32
       Top = 8
       Width = 324
-      ItemHeight = 0
+      ItemHeight = 18
       OnChange = cbTablesChange
       Style = csDropDownList
       TabOrder = 0
@@ -133,15 +132,14 @@ object fmNewForeignKey: TfmNewForeignKey
       Width = 324
       ItemHeight = 0
       TabOrder = 1
-      TopIndex = -1
     end
   end
   object cbUpdateAction: TComboBox
     Left = 160
-    Height = 31
+    Height = 32
     Top = 432
     Width = 320
-    ItemHeight = 0
+    ItemHeight = 24
     ItemIndex = 0
     Items.Strings = (
       'Restrict'
@@ -202,10 +200,10 @@ object fmNewForeignKey: TfmNewForeignKey
   end
   object cbDeleteAction: TComboBox
     Left = 160
-    Height = 31
+    Height = 32
     Top = 472
     Width = 321
-    ItemHeight = 0
+    ItemHeight = 24
     ItemIndex = 0
     Items.Strings = (
       'Restrict'

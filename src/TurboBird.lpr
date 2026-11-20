@@ -20,7 +20,7 @@ uses
   Forms, Dialogs, Controls, IniFiles, abbrevia, ibexpress, pkg_gifanim, indylaz,
   rxnew, jcuiscaler_rt, memdslaz, datetimectrls,
   runtimetypeinfocontrols, main, CreateDb, Reg, QueryWindow, ViewView,
-  ViewTrigger, ViewSProc, ViewGen, NewGen, EnterPass, CreateTrigger,
+  ViewTrigger, ViewSProc, ViewGen, NewGen, EnterPass, create_table_trigger,
   UDFInfo, ViewDomain, NewDomain, SysTables, newForeignKey, NewEditField, Calen,
   Scriptdb, UserPermissions, TableManage, CreateUser, ChangePass,
   PermissionManage, SQLHistory, dynlibs, dbInfo, sysutils, Comparison,
@@ -57,14 +57,14 @@ uses
 
   fsimpleobjextractor, uGenSQLFromCSVDataset, fClipboardExport,
   datamodulesystem, jvRuntimeDesign, pascalscript, pascalscriptfcl,
-  uPSI_uibconst, uiblaz, fservers, fActivityMonitor, edit_tabledata_new,
+  uPSI_uibconst, uiblaz, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, fdataeditor, fSQLParser,
   u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
-  UniqueConstraints, CheckConstraints, NotNullConstraints, fields,
-  clone_table_to_external_table_dialog, clone_table_dialog,
-  uCreateTableFromDataSet, uCrossRDBMSMain, About,
-  uProblemFieldsDialog, uCopyTableDataFBIntf,
-  uCrossRDBMSProgress, uCrossRDBMSConnection, uBaseForm;
+  UniqueConstraints, CheckConstraints, NotNullConstraints,
+  clone_table_to_external_table_dialog, confirm_query, umessagedlg,
+  clone_table_dialog, uCreateTableFromDataSet, uCrossRDBMSMain, About,
+  uProblemFieldsDialog, uCopyTableDataFBIntf, uCrossRDBMSProgress,
+  uCrossRDBMSConnection, uBaseForm;
 
 
 const
@@ -141,7 +141,7 @@ begin
   Application.CreateForm(TfmReg, fmReg);
   Application.CreateForm(TfmNewGen, fmNewGen);
   Application.CreateForm(TfmEnterPass, fmEnterPass);
-  Application.CreateForm(TfmCreateTrigger, fmCreateTrigger);
+  Application.CreateForm(TfmCreateTableTrigger, fmCreateTableTrigger);
   //Application.CreateForm(TfrmSetFBClient, frmSetFBClient);
   //Application.CreateForm(TfmEditTable, fmEditTable);
   Application.CreateForm(TfmNewDomain, fmNewDomain);

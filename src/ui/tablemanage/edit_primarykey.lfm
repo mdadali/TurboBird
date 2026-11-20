@@ -170,7 +170,6 @@ object fmPrimaryKey: TfmPrimaryKey
       ItemHeight = 0
       OnClickCheck = chkLstBoxFieldsClickCheck
       TabOrder = 1
-      TopIndex = -1
     end
   end
 end

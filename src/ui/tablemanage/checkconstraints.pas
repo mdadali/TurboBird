@@ -8,12 +8,14 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Grids,
   StdCtrls, Buttons, SynEdit, SynHighlighterSQL,
 
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
-
-  uthemeselector;
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
 
 type
 
@@ -59,6 +61,7 @@ type
     procedure LoadConstraintDetail(const ConstraintName: string);
     procedure ClearEditFields;
     procedure UpdateButtonStates;
+    function ExecuteSQL(const ASQL: string): Boolean;
 
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
@@ -71,7 +74,7 @@ implementation
 
 {$R *.lfm}
 
-uses Main, QueryWindow;
+uses Main;
 
 { TfmCheckConstraints }
 
@@ -235,62 +238,65 @@ end;
 
 procedure TfmCheckConstraints.bbPostClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   ConstraintName: string;
   IsNew: Boolean;
+  Script: string;
+  DlgCaption: string;
+  Expr: string;
 begin
   ConstraintName := Trim(edConstraintName.Text);
   if ConstraintName = '' then
   begin
-    ShowMessage('Please enter a constraint name.');
+    MsgWarning('Please enter a constraint name.');
     Exit;
   end;
 
-  if Trim(meCheckExpression.Text) = '' then
+  Expr := Trim(meCheckExpression.Text);
+  if Expr = '' then
   begin
-    ShowMessage('Please enter a check expression.');
+    MsgWarning('Please enter a check expression.');
     Exit;
   end;
 
   IsNew := (FEditingConstraintName = '');
 
-  if IsNew then
-    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'New Check Constraint: ' + ConstraintName)
-  else
-    QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Check Constraint: ' + ConstraintName);
-
-  QWindow.meQuery.Lines.Clear;
-
-  QWindow.meQuery.Lines.Add('SET TERM ^;');
-  QWindow.meQuery.Lines.Add('');
-
+  Script := '';
   if not IsNew then
   begin
-    QWindow.meQuery.Lines.Add('-- Drop existing Check Constraint');
-    QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-      ' DROP CONSTRAINT ' + FEditingConstraintName + ' ^;');
-    QWindow.meQuery.Lines.Add('');
+    Script := Script + '-- Drop existing Check Constraint' + LineEnding;
+    Script := Script + 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+              ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(FEditingConstraintName) + ';' + LineEnding;
+    Script := Script + LineEnding;
   end;
 
   if IsNew then
-    QWindow.meQuery.Lines.Add('-- Create new Check Constraint')
+    Script := Script + '-- Create new Check Constraint' + LineEnding
   else
-    QWindow.meQuery.Lines.Add('-- Create updated Check Constraint');
+    Script := Script + '-- Create updated Check Constraint' + LineEnding;
 
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD CONSTRAINT ' + ConstraintName + ' CHECK (');
-  QWindow.meQuery.Lines.AddStrings(meCheckExpression.Lines);
-  QWindow.meQuery.Lines.Add(') ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  Script := Script +
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' ADD CONSTRAINT ' + MakeCaseSensitiveAuto(ConstraintName) +
+    ' CHECK (' + LineEnding +
+    meCheckExpression.Text + LineEnding +
+    ');';
 
-  QWindow.OnCommit := @bbRefreshClick;
-  QWindow.Show;
+  if IsNew then
+    DlgCaption := 'New Check Constraint: ' + ConstraintName
+  else
+    DlgCaption := 'Edit Check Constraint: ' + ConstraintName;
 
-  FEditMode := False;
-  FEditingConstraintName := '';
-  ClearEditFields;
-  FillCheckConstraints;
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FEditMode := False;
+    FEditingConstraintName := '';
+    ClearEditFields;
+    FillCheckConstraints;
+  end;
 end;
 
 procedure TfmCheckConstraints.bbEditClick(Sender: TObject);
@@ -317,34 +323,37 @@ end;
 
 procedure TfmCheckConstraints.bbDropClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   ConstraintName: string;
   Line: string;
   ColonPos: Integer;
+  Script: string;
 begin
-  if sgCheckConstraints.RowCount > 1 then
-  begin
-    Line := sgCheckConstraints.Cells[0, sgCheckConstraints.Row];
-    ColonPos := Pos(':', Line);
-    if ColonPos > 0 then
-      ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
-    else
-      ConstraintName := Line;
+  if sgCheckConstraints.RowCount <= 1 then
+    Exit;
 
-    if MessageDlg('Are you sure you want to drop Check Constraint ' + ConstraintName + '?',
-      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Check Constraint: ' + ConstraintName);
-      QWindow.meQuery.Lines.Clear;
-      QWindow.meQuery.Lines.Add('SET TERM ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-        ' DROP CONSTRAINT ' + ConstraintName + ' ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('SET TERM ;^');
-      QWindow.OnCommit := @bbRefreshClick;
-      QWindow.Show;
-    end;
+  Line := sgCheckConstraints.Cells[0, sgCheckConstraints.Row];
+  ColonPos := Pos(':', Line);
+  if ColonPos > 0 then
+    ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
+  else
+    ConstraintName := Trim(Line);
+
+  if ConstraintName = '' then
+    Exit;
+
+  if not MsgConfirm(
+       'Are you sure you want to drop Check Constraint ' + ConstraintName + '?',
+       mkWarning) then
+    Exit;
+
+  Script :=
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(ConstraintName) + ';';
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillCheckConstraints;
   end;
 end;
 
@@ -362,6 +371,58 @@ procedure TfmCheckConstraints.FormShow(Sender: TObject);
 begin
   FillCheckConstraints;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmCheckConstraints.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.

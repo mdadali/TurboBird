@@ -8,12 +8,15 @@ uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, Grids,
   CheckLst, StdCtrls, Buttons,
 
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
 
-  uthemeselector;
 
 type
 
@@ -51,7 +54,7 @@ type
 
     procedure LoadFields;
     procedure LoadConstraintFields(const ConstraintName: string);
-
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -63,7 +66,7 @@ implementation
 
 {$R *.lfm}
 
-uses Main, QueryWindow;
+uses Main;
 
 { TfmUniqueConstraints }
 
@@ -224,18 +227,18 @@ end;
 
 procedure TfmUniqueConstraints.bbEditClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   ConstraintName: string;
   CheckedFields: string;
   i: Integer;
   HasFields: Boolean;
   Line: string;
   ColonPos: Integer;
+  Script: string;
+  DlgCaption: string;
 begin
   if sgUniqueConstraints.RowCount <= 1 then
     Exit;
 
-  // Aktuellen Constraint-Namen ermitteln
   Line := sgUniqueConstraints.Cells[0, sgUniqueConstraints.Row];
   ColonPos := Pos(':', Line);
   if ColonPos > 0 then
@@ -246,7 +249,6 @@ begin
   if ConstraintName = '' then
     Exit;
 
-  // Gewählte Felder aus CheckListBox sammeln
   CheckedFields := '';
   HasFields := False;
   for i := 0 to chkLstBoxFields.Count - 1 do
@@ -262,36 +264,40 @@ begin
 
   if not HasFields then
   begin
-    ShowMessage('Please select at least one field for the Unique Constraint.');
+    MsgWarning('Please select at least one field for the Unique Constraint.');
     Exit;
   end;
 
-  QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Edit Unique Constraint: ' + ConstraintName);
-  QWindow.meQuery.Lines.Clear;
-  QWindow.meQuery.Lines.Add('SET TERM ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('-- Drop existing Unique Constraint');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' DROP CONSTRAINT ' + ConstraintName + ' ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('-- Create new Unique Constraint');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD CONSTRAINT ' + ConstraintName + ' UNIQUE (' + CheckedFields + ') ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  Script :=
+    '-- Drop existing Unique Constraint' + LineEnding +
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(ConstraintName) + ';' + LineEnding +
+    LineEnding +
+    '-- Create new Unique Constraint' + LineEnding +
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' ADD CONSTRAINT ' + MakeCaseSensitiveAuto(ConstraintName) +
+    ' UNIQUE (' + CheckedFields + ');';
 
-  QWindow.OnCommit := @bbRefreshClick;
-  QWindow.Show;
+  DlgCaption := 'Edit Unique Constraint: ' + ConstraintName;
+
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillUniqueConstraints;
+  end;
 end;
 
 procedure TfmUniqueConstraints.bbNewClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   CheckedFields: string;
   i: Integer;
   NewName: string;
+  Script: string;
+  DlgCaption: string;
 begin
-  // Gewählte Felder aus CheckListBox sammeln
   CheckedFields := '';
   for i := 0 to chkLstBoxFields.Count - 1 do
   begin
@@ -305,60 +311,67 @@ begin
 
   if CheckedFields = '' then
   begin
-    ShowMessage('Please select at least one field.');
+    MsgWarning('Please select at least one field.');
     Exit;
   end;
 
   NewName := Trim(edConstraintName.Text);
   if NewName = '' then
   begin
-    ShowMessage('Please enter a constraint name.');
+    MsgWarning('Please enter a constraint name.');
     Exit;
   end;
 
-  QWindow := fmMain.ShowQueryWindow(FDBIndex, 'New Unique Constraint: ' + NewName);
-  QWindow.meQuery.Lines.Clear;
-  QWindow.meQuery.Lines.Add('SET TERM ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-    ' ADD CONSTRAINT ' + NewName + ' UNIQUE (' + CheckedFields + ') ^;');
-  QWindow.meQuery.Lines.Add('');
-  QWindow.meQuery.Lines.Add('SET TERM ;^');
+  Script :=
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' ADD CONSTRAINT ' + MakeCaseSensitiveAuto(NewName) +
+    ' UNIQUE (' + CheckedFields + ');';
 
-  QWindow.OnCommit := @bbRefreshClick;
-  QWindow.Show;
+  DlgCaption := 'New Unique Constraint: ' + NewName;
+
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillUniqueConstraints;
+  end;
 end;
 
 procedure TfmUniqueConstraints.bbDropClick(Sender: TObject);
 var
-  QWindow: TfmQueryWindow;
   ConstraintName: string;
   Line: string;
   ColonPos: Integer;
+  Script: string;
 begin
-  if sgUniqueConstraints.RowCount > 1 then
-  begin
-    Line := sgUniqueConstraints.Cells[0, sgUniqueConstraints.Row];
-    ColonPos := Pos(':', Line);
-    if ColonPos > 0 then
-      ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
-    else
-      ConstraintName := Line;
+  if sgUniqueConstraints.RowCount <= 1 then
+    Exit;
 
-    if MessageDlg('Are you sure you want to drop Unique Constraint ' + ConstraintName + '?',
-      mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-    begin
-      QWindow := fmMain.ShowQueryWindow(FDBIndex, 'Drop Unique Constraint: ' + ConstraintName);
-      QWindow.meQuery.Lines.Clear;
-      QWindow.meQuery.Lines.Add('SET TERM ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
-        ' DROP CONSTRAINT ' + ConstraintName + ' ^;');
-      QWindow.meQuery.Lines.Add('');
-      QWindow.meQuery.Lines.Add('SET TERM ;^');
-      QWindow.OnCommit := @bbRefreshClick;
-      QWindow.Show;
-    end;
+  Line := sgUniqueConstraints.Cells[0, sgUniqueConstraints.Row];
+  ColonPos := Pos(':', Line);
+  if ColonPos > 0 then
+    ConstraintName := Trim(Copy(Line, 1, ColonPos - 1))
+  else
+    ConstraintName := Trim(Line);
+
+  if ConstraintName = '' then
+    Exit;
+
+  if not MsgConfirm(
+       'Are you sure you want to drop Unique Constraint ' + ConstraintName + '?',
+       mkWarning) then
+    Exit;
+
+  Script :=
+    'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+    ' DROP CONSTRAINT ' + MakeCaseSensitiveAuto(ConstraintName) + ';';
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillUniqueConstraints;
   end;
 end;
 
@@ -376,6 +389,58 @@ procedure TfmUniqueConstraints.FormShow(Sender: TObject);
 begin
   FillUniqueConstraints;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmUniqueConstraints.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.

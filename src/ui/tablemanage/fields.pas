@@ -10,11 +10,13 @@ uses
 
   IBDatabase, IBXScript, IBSQL,
 
+  umessagedlg,
   SysTables,
   turbocommon,
   fbcommon,
   fsimpleobjextractor,
-  uthemeselector;
+  uthemeselector,
+  confirm_query;
 
 
  type
@@ -57,9 +59,10 @@ uses
     function  GenerateCreateSQL(var KeyField, GeneratorName: string): string;
     procedure bbCreateScriptClick(Sender: TObject);
 
-    function ExecuteCreateScript(const Script: string): Boolean;
+    function ExtractTableNameFromCreateSQL(const ASQL: string): string;
 
-   public
+    function ExecuteSQL(const Script: string): Boolean;
+  public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor;
                    Mode: TTableManageMode = tmmEdit);
@@ -73,9 +76,9 @@ uses
 
 implementation
 
-{$R *.lfm}
+{$R fields.lfm}
 
-uses Main, QueryWindow, NewEditField;
+uses Main,  NewEditField;
 
 { TfmFields }
 
@@ -227,7 +230,7 @@ begin
 
   if Trim(FTableName) = '' then
   begin
-    MessageDlg('Warning', 'You should enter a new table name', mtWarning, [mbOk], 0);
+    MsgWarning('You should enter a new table name.');
     Exit;
   end;
 
@@ -241,7 +244,7 @@ begin
 
   if not HasFields then
   begin
-    MessageDlg('Warning', 'You should enter at least one field', mtWarning, [mbOk], 0);
+    MsgWarning('You should enter at least one field.');
     Exit;
   end;
 
@@ -249,14 +252,12 @@ begin
   begin
     if (Trim(sgFields.Cells[1, i]) <> '') and (Trim(sgFields.Cells[2, i]) = '') then
     begin
-      MessageDlg('Warning', 'You should write a field type for the column: ' +
-                 sgFields.Cells[1, i], mtWarning, [mbOk], 0);
+      MsgWarning('You should write a field type for the column: ' + sgFields.Cells[1, i]);
       Exit;
     end;
     if (Trim(sgFields.Cells[1, i]) = '') and (Trim(sgFields.Cells[2, i]) <> '') then
     begin
-      MessageDlg('Warning', 'You should select a field name for the column number ' +
-                 IntToStr(i), mtWarning, [mbOk], 0);
+      MsgWarning('You should select a field name for the column number ' + IntToStr(i));
       Exit;
     end;
   end;
@@ -273,7 +274,7 @@ begin
 
     if not HasPK then
     begin
-      MessageDlg('Warning', 'There is no primary key field selected', mtWarning, [mbOk], 0);
+      MsgWarning('There is no primary key field selected.');
       Exit;
     end;
   end;
@@ -364,6 +365,7 @@ var
   List: TStringList;
   KeyField, GeneratorName, TableName: string;
   FullScript: string;
+  ExtractedName: string;
 begin
   if not ValidateCreate then
     Exit;
@@ -394,17 +396,28 @@ begin
 
     FullScript := List.Text;
 
-    // Lokal ausführen
-    if ExecuteCreateScript(FullScript) then
+    // Confirm-Query nur beim Create
+    if not TfrmConfirmQuery.Execute('Create Table: ' + FTableName, FullScript) then
+      Exit;
+
+    ExtractedName := ExtractTableNameFromCreateSQL(FullScript);
+    if ExtractedName <> '' then
+    begin
+      FTableName := ExtractedName;
+      UpdateTableName(ExtractedName);
+    end;
+
+    if ExecuteSQL(FullScript) then
     begin
       turbocommon.MetaDataChanged := True;
 
-      // Erfolg → Parent auf Edit-Mode umschalten
       if Assigned(FOnTableCreated) then
         FOnTableCreated(FTableName);
 
-      MessageDlg('Table "' + FTableName + '" created successfully.',
-                 mtInformation, [mbOk], 0);
+      MsgBox('Table "' + FTableName + '" created successfully.', mkInfo);
+
+      fmMain.FillObjectRoot(fmMain.tvMain.Selected);
+      fmMain.tvMain.Selected.Expand(False);
     end;
 
   finally
@@ -548,7 +561,7 @@ begin
 
   except
     on E: Exception do
-      MessageDlg('Error while reading table fields: ' + e.Message, mtError, [mbOk], 0);
+      MsgError('Error while reading table fields: ' + E.Message);
   end;
 end;
 
@@ -562,36 +575,39 @@ var
   DefaultValue, Characterset, Collation, Description: string;
   FieldOrder, FieldSize, FieldPrecision, FieldScale: Integer;
   AllowNull: Boolean;
+  S: string;
 begin
-  // ============================================================
+  if FMode = tmmCreate then
+    Exit;
+
+  if (sgFields.Row < 1) or (sgFields.Row >= sgFields.RowCount) then
+    Exit;
+
+  if Trim(sgFields.Cells[1, sgFields.Row]) = '' then
+    Exit;
+
   // Arrays können derzeit nicht editiert werden
-  // ============================================================
-  if (sgFields.Row >= 1) and (sgFields.Row < sgFields.RowCount) then
+  if Pos('[', sgFields.Cells[2, sgFields.Row]) > 0 then
   begin
-    if Pos('[', sgFields.Cells[2, sgFields.Row]) > 0 then
-    begin
-      MessageDlg(
-        'Array fields cannot be edited at this time.' + sLineBreak +
-        sLineBreak +
-        'A dedicated array editor is planned for a future release.',
-        mtInformation, [mbOK], 0);
-      Exit;
-    end;
+    MsgBox(
+          'Array fields cannot be edited at this time.' + sLineBreak +
+          sLineBreak +
+          'A dedicated array editor is planned for a future release.',
+          mkInfo);
+    Exit;
   end;
 
-  // ============================================================
   // Computed-Felder können nicht editiert werden
-  // ============================================================
   if Pos('COMPUTED BY', UpperCase(sgFields.Cells[2, sgFields.Row])) > 0 then
   begin
-    MessageDlg(
+    MsgBox(
       'Computed fields cannot be edited at this time.' + sLineBreak +
       sLineBreak +
       'Firebird does not allow modifying a computed column via ALTER.' + sLineBreak +
       'The column would need to be dropped and recreated.' + sLineBreak +
       sLineBreak +
       'A dedicated computed-field editor is planned for a future release.',
-      mtInformation, [mbOK], 0);
+      mkInfo);
     Exit;
   end;
 
@@ -601,21 +617,41 @@ begin
   begin
     FieldName := Trim(Cells[1, Row]);
     FieldType := Trim(Cells[2, Row]);
-    FieldSize := StrToInt(Trim(Cells[3, Row]));
-    if Trim(Cells[4, Row]) <> '' then
-      FieldPrecision := StrToInt(Trim(Cells[4, Row]))
+
+    // Size
+    S := Trim(Cells[3, Row]);
+    if S <> '' then
+      FieldSize := StrToIntDef(S, 0)
+    else
+      FieldSize := 0;
+
+    // Precision
+    S := Trim(Cells[4, Row]);
+    if S <> '' then
+      FieldPrecision := StrToIntDef(S, 0)
     else
       FieldPrecision := 0;
-    if Trim(Cells[5, Row]) <> '' then
-      FieldScale := StrToInt(Trim(Cells[5, Row]))
+
+    // Scale
+    S := Trim(Cells[5, Row]);
+    if S <> '' then
+      FieldScale := StrToIntDef(S, 0)
     else
       FieldScale := 0;
+
     Characterset := Trim(Cells[6, Row]);
-    Collation := Trim(Cells[7, Row]);
-    AllowNull := Boolean(StrToInt(Trim(Cells[8, Row])));
+    Collation   := Trim(Cells[7, Row]);
+
+    // Allow Null (Checkbox: '0'/'1')
+    S := Trim(Cells[8, Row]);
+    if S <> '' then
+      AllowNull := Boolean(StrToIntDef(S, 1))
+    else
+      AllowNull := True;
+
     DefaultValue := Trim(Cells[9, Row]);
-    Description := Trim(Cells[10, Row]);
-    FieldOrder := Row;
+    Description  := Trim(Cells[10, Row]);
+    FieldOrder   := Row;
 
     fmNewEditField.Init(FDBIndex, FTableName, foEdit,
       FieldName, FieldType, Characterset, Collation,
@@ -623,7 +659,7 @@ begin
       FieldSize, FieldPrecision, FieldScale, FieldOrder, AllowNull,
       bbRefreshFields, FExtractor);
 
-    Caption := 'Edit field: ' + OldFieldName;
+    Caption := 'Edit field: ' + FieldName;
 
     fmNewEditField.ShowModal;
   end;
@@ -652,16 +688,33 @@ end;
 // ============================================================
 procedure TfmFields.edDropClick(Sender: TObject);
 var
-  TmpFieldName: string;
+  FieldName: string;
+  SQL: string;
 begin
-  if MessageDlg('Are you sure you want to delete the field: ' + sgFields.Cells[1, sgFields.Row] +
-    ' with its data', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
-  begin
-    TmpFieldName := MakeCaseSensitiveAuto(sgFields.Cells[1, sgFields.Row]);
+  if FMode <> tmmEdit then
+    Exit;
 
-    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop field',
-      'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) + ' DROP ' + TmpFieldName,
-      @bbRefreshClick);
+  if (sgFields.Row < 1) or (sgFields.Row >= sgFields.RowCount) then
+    Exit;
+
+  FieldName := Trim(sgFields.Cells[1, sgFields.Row]);
+  if FieldName = '' then
+    Exit;
+
+  if not MsgConfirm(
+       'Do you really want to drop the field "' + FieldName + '" including its data?' +
+       sLineBreak + sLineBreak +
+       'This action cannot be undone.',
+       mkWarning) then
+    Exit;
+
+  SQL := 'ALTER TABLE ' + MakeCaseSensitiveAuto(FTableName) +
+         ' DROP ' + MakeCaseSensitiveAuto(FieldName);
+
+  if ExecuteSQL(SQL) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    FillFields;
   end;
 end;
 
@@ -672,6 +725,18 @@ end;
 
 procedure TfmFields.sgFieldsDblClick(Sender: TObject);
 begin
+  // Im Create-Mode kein Edit-Dialog
+  if FMode = tmmCreate then
+    Exit;
+
+  // Keine gültige Datenzeile
+  if (sgFields.Row < 1) or (sgFields.Row >= sgFields.RowCount) then
+    Exit;
+
+  // Leerer Feldname → nichts tun
+  if Trim(sgFields.Cells[1, sgFields.Row]) = '' then
+    Exit;
+
   bbEditClick(Sender);
 end;
 
@@ -688,7 +753,46 @@ begin
   FTableName := Trim(AName);
 end;
 
-function TfmFields.ExecuteCreateScript(const Script: string): Boolean;
+function TfmFields.ExtractTableNameFromCreateSQL(const ASQL: string): string;
+var
+  S, Token: string;
+  P, StartPos: Integer;
+begin
+  Result := '';
+  S := UpperCase(ASQL);
+
+  P := Pos('CREATE TABLE', S);
+  if P = 0 then
+    Exit;
+
+  // hinter "CREATE TABLE" weiter
+  StartPos := P + Length('CREATE TABLE');
+  while (StartPos <= Length(ASQL)) and (ASQL[StartPos] in [' ', #9, #10, #13]) do
+    Inc(StartPos);
+
+  if StartPos > Length(ASQL) then
+    Exit;
+
+  // optionalen Schema-Punkt überspringen (z.B. SCHEMA.TABLENAME)
+  Token := '';
+  P := StartPos;
+  while (P <= Length(ASQL)) and (ASQL[P] in ['A'..'Z', 'a'..'z', '0'..'9', '_', '$', '"', '.']) do
+  begin
+    Token := Token + ASQL[P];
+    Inc(P);
+  end;
+
+  // nur den letzten Teil nach dem Punkt nehmen (Tabellenname)
+  if Pos('.', Token) > 0 then
+    Token := Copy(Token, LastDelimiter('.', Token) + 1, MaxInt);
+
+  // Anführungszeichen entfernen
+  Result := AnsiDequotedStr(Token, '"');
+  if Result = Token then
+    Result := Trim(Token);
+end;
+
+function TfmFields.ExecuteSQL(const Script: string): Boolean;
 var
   Tr: TIBTransaction;
   ScriptEngine: TIBXScript;
@@ -698,7 +802,7 @@ begin
 
   if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
   begin
-    MessageDlg('Database is not connected.', mtError, [mbOk], 0);
+    MsgError('Database is not connected.');
     Exit;
   end;
 
@@ -708,13 +812,11 @@ begin
   try
     Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
     Tr.Params.Clear;
-    Tr.Params.Add('concurrency');
-    Tr.Params.Add('wait');
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
 
     ScriptEngine.Transaction := Tr;
     ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
 
-    // Script in Zeilen zerlegen und ausführen
     Lines.Text := Script;
 
     try
@@ -732,8 +834,7 @@ begin
       begin
         if Tr.InTransaction then
           Tr.Rollback;
-        MessageDlg('Error while creating table:' + sLineBreak + sLineBreak + E.Message,
-                   mtError, [mbOk], 0);
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
         Result := False;
       end;
     end;

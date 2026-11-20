@@ -33,8 +33,7 @@ uses
   fSQLParser,
   clone_table_dialog,
 
-
-  fservers,
+  fmetaquerys,
 
   udb_udf_fetcher,
 
@@ -68,13 +67,13 @@ uses
   fbcommon,
 
   fServerSession,
-  floginservicemanager,
+  //floginservicemanager,
   fserverregistry,
 
 
   RxDBGrid,
 
-  fmetaquerys,
+  //fmetaquerys,
 
   uExternalTable,
   clone_table_to_external_table_dialog,
@@ -111,7 +110,8 @@ uses
   UpdateChecker
   , uAIContext
   , uAIContextImpl
-  ,uBaseForm;
+  ,uBaseForm
+  ;
 
 {$i turbocommon.inc}
 
@@ -144,7 +144,6 @@ type
     lmExtractTableFields: TMenuItem;
     lmExtractTableMetaDataQuoted: TMenuItem;
     lmExtractTableMetaDataUnQuoted: TMenuItem;
-    lmServers: TMenuItem;
     lmActivityMonitor: TMenuItem;
     lmEditTableDataNew: TMenuItem;
     lmTransConfig: TMenuItem;
@@ -392,7 +391,7 @@ type
     procedure lmCreateStoredProcClick(Sender: TObject);
 
     procedure lmCreateTriggerClick(Sender: TObject);
-    procedure CreateNewTableTrigger(DBIndex: Integer);
+    procedure CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
     procedure CreateNewDBTrigger(DBIndex: Integer);
     procedure CreateNewDDLTrigger(DBIndex: Integer);
     procedure CreateNewUDRTableTrigger(DBIndex: Integer);
@@ -426,7 +425,6 @@ type
     procedure lmScriptTableCreateClick(Sender: TObject);
     procedure lmScriptUpdateClick(Sender: TObject);
     procedure lmServerRegistryClick(Sender: TObject);
-    procedure lmServersClick(Sender: TObject);
     procedure lmSetFBClientClick(Sender: TObject);
     procedure lmSetGenClick(Sender: TObject);
     procedure lmTableManageClick(Sender: TObject);
@@ -576,8 +574,6 @@ type
     function  ReadODSViaSQL(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
     function  TryReadODS(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
     function  GetODSVersion(dbIndex: Integer; out ODSMajor, ODSMinor: Integer): Boolean;
-    function  GetServerLoginDlg(AserverName: string): TfrmLoginServiceManager;
-    //function  ConnectToServiceManager(ServerSession: TServerSession): boolean;
 
     procedure ExtractTableMetaData(Quoted: boolean);
 
@@ -610,7 +606,7 @@ implementation
 { TfmMain }
 
 uses CreateDb, ViewView, ViewTrigger, ViewSProc, ViewGen, NewGen,
-     EnterPass, CreateTrigger, UDFInfo, ViewDomain,
+     EnterPass, create_table_trigger, UDFInfo, ViewDomain,
      NewDomain, SysTables, Scriptdb, UserPermissions,  CreateUser, ChangePass,
      PermissionManage, NewEditField, dbInfo, Comparison;
      // About,
@@ -3209,7 +3205,7 @@ begin
   DepStr := GetTriggerDeps(Rec.IBDatabase, tvMain.Selected.Text);
   if  DepStr = '' then
   begin
-    ShowCompleteQueryWindow(dbIndex, 'Drop Trigger ' + tvMain.Selected.Text, TmpQueryStr, nil);
+    ShowCompleteQueryWindow(dbIndex, 'Drop Trigger ' + StripTablePrefix(tvMain.Selected.Text), TmpQueryStr, nil);
   end else
   begin
     if MessageDlg(
@@ -3219,7 +3215,7 @@ begin
      mtWarning, [mbYes, mbCancel], 0) = mrYes then
      begin
        TmpQueryStr := 'DROP Trigger ' + tvMain.Selected.Text;
-       ShowCompleteQueryWindow(dbIndex, 'Drop Trigger ' + tvMain.Selected.Text, TmpQueryStr, nil);
+       ShowCompleteQueryWindow(dbIndex, 'Drop Trigger ' + StripTablePrefix(tvMain.Selected.Text), TmpQueryStr, nil);
      end;
   end;
 end;
@@ -4067,7 +4063,7 @@ var
   SelNode: TTreeNode;
 begin
   SelNode:= tvMain.Selected;
-  if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(SelNode.Text), True) then
+  if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(StripTablePrefix(SelNode.Text)), True) then
     MessageDlg('Trigger has been activated', mtInformation, [mbOk], 0);
 end;
 
@@ -4261,37 +4257,37 @@ begin
   Result:= False;
   if ATableName <> '' then
   begin
-    fmCreateTrigger.cbTables.Clear;
-    fmCreateTrigger.cbTables.Items.Add(ATableName);
-    fmCreateTrigger.cbTables.ItemIndex:= 0;
+    fmCreateTableTrigger.cbTables.Clear;
+    fmCreateTableTrigger.cbTables.Items.Add(ATableName);
+    fmCreateTableTrigger.cbTables.ItemIndex:= 0;
   end;
-  fmCreateTrigger.edTriggerName.Clear;
-  fmCreateTrigger.cxUpdate.Checked:= False;
-  fmCreateTrigger.cxInsert.Checked:= False;
-  fmCreateTrigger.cxDelete.Checked:= False;
+  fmCreateTableTrigger.edTriggerName.Clear;
+  fmCreateTableTrigger.cxUpdate.Checked:= False;
+  fmCreateTableTrigger.cxInsert.Checked:= False;
+  fmCreateTableTrigger.cxDelete.Checked:= False;
 
-  if fmCreateTrigger.ShowModal = mrOK then
+  if fmCreateTableTrigger.ShowModal = mrOK then
   begin
     Result:= True;
 
-    if fmCreateTrigger.rbAfter.Checked then
+    if fmCreateTableTrigger.rbAfter.Checked then
       TrigType:= 'After'
     else
       TrigType:= 'Before';
-    if fmCreateTrigger.cxInsert.Checked then
+    if fmCreateTableTrigger.cxInsert.Checked then
       TrigType:= TrigType + ' insert or';
-    if fmCreateTrigger.cxUpdate.Checked then
+    if fmCreateTableTrigger.cxUpdate.Checked then
       TrigType:= TrigType + ' update or';
-    if fmCreateTrigger.cxDelete.Checked then
+    if fmCreateTableTrigger.cxDelete.Checked then
       TrigType:= TrigType + ' delete or';
     Delete(TrigType, Length(TrigType) - 2, 3);
 
     QWindow:= ShowQueryWindow(dbIndex, 'New Trigger#' + IntToStr(dbIndex) + ':'
-                 + TrigType + ':' + fmCreateTrigger.edTriggerName.Text);
+                 + TrigType + ':' + fmCreateTableTrigger.edTriggerName.Text);
 
     QWindow.meQuery.Lines.Clear;
-    QWindow.meQuery.Lines.Add('CREATE TRIGGER ' + MakeCaseSensitiveAuto(fmCreateTrigger.edTriggerName.Text) + ' for ' +
-      MakeCaseSensitiveAuto(fmCreateTrigger.cbTables.Text));
+    QWindow.meQuery.Lines.Add('CREATE TRIGGER ' + MakeCaseSensitiveAuto(fmCreateTableTrigger.edTriggerName.Text) + ' for ' +
+      MakeCaseSensitiveAuto(fmCreateTableTrigger.cbTables.Text));
     QWindow.meQuery.Lines.Add('Active');
     QWindow.meQuery.Lines.Add(TrigType);
     QWindow.meQuery.Lines.Add('Position 0');
@@ -4324,9 +4320,14 @@ begin
   ObjectType := NodeInfo^.ObjectType;
 
   case ObjectType of
-    tvotTableTriggerRoot,
-    tvotTriggerRoot:
-      CreateNewTableTrigger(DBIndex);
+    tvotTableTriggerRoot:
+      if  TPNodeInfos(SelNode.Parent.Data)^.ObjectType =  tvotTable then
+        CreateNewTableTrigger(DBIndex, tvMain.Selected.Parent.Text)
+      else
+        CreateNewTableTrigger(DBIndex, '');
+
+    //tvotTriggerRoot:
+      //CreateNewTableTrigger(DBIndex);
 
     tvotDBTriggerRoot:
       CreateNewDBTrigger(DBIndex);
@@ -4344,18 +4345,18 @@ begin
       CreateNewUDRDDLTrigger(DBIndex);
 
   else
-    CreateNewTableTrigger(DBIndex);
+    //CreateNewTableTrigger(DBIndex);
   end;
 end;
 
-procedure TfmMain.CreateNewTableTrigger(DBIndex: Integer);
+procedure TfmMain.CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
 var
   TableNames: string;
   Count: Integer;
 begin
   TableNames := dmSysTables.GetDBObjectNames(DBIndex, otTables, Count);
-  fmCreateTrigger.cbTables.Items.CommaText := TableNames;
-  CreateNewTrigger(DBIndex, '');
+  fmCreateTableTrigger.cbTables.Items.CommaText := TableNames;
+  CreateNewTrigger(DBIndex, ATableName);
 end;
 
 procedure TfmMain.CreateNewDBTrigger(DBIndex: Integer);
@@ -4579,7 +4580,7 @@ var
   SelNode: TTreeNode;
 begin
   SelNode:= tvMain.Selected;
-  if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(SelNode.Text), False) then
+  if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(StripTablePrefix(SelNode.Text)), False) then
     MessageDlg('Trigger has been DeActivated', mtInformation, [mbOk], 0);
 end;
 
@@ -5758,15 +5759,6 @@ begin
     fmServerRegistry.Free;
   end;
 end;
-
-procedure TfmMain.lmServersClick(Sender: TObject);
-var frmServers: TfrmServers;
-begin
-  frmServers := TfrmServers.Create(self);
-  frmServers.ShowModal;
-  frmServers.Free;
-end;
-
 
 procedure TfmMain.lmSetFBClientClick(Sender: TObject);
 begin
@@ -8767,12 +8759,14 @@ begin
     tvotTable: Filter := 1;
     tvotTableFieldRoot:    Filter := 120;
     tvotTableField:        Filter := 121;
+    tvotTableTriggerRoot:  Filter := 131;
+    tvotTableTrigger:      Filter := 3;
 
     tvotGeneratorRoot: Filter:= 12;
     tvotGenerator: Filter := 2;
 
     tvotDBTriggerRoot,
-    tvotTableTriggerRoot,
+
     tvotDDLTriggerRoot: Filter := 13;
 
     tvotUDRTriggerRoot: Filter := 300;
@@ -8780,7 +8774,7 @@ begin
     tvotUDRDBTriggerRoot,
     tvotUDRDDLTriggerRoot: Filter := 13;
 
-    tvotTableTrigger,
+
     tvotDBTrigger,
     tvotDDLTrigger,
     tvotUDRTableTrigger,
@@ -9157,16 +9151,6 @@ begin
       end;
     end;
   end;
-end;
-
-function  TfmMain.GetServerLoginDlg(AServerName: string): TfrmLoginServiceManager;
-var LoginForm: TfrmLoginServiceManager;
-begin
-  LoginForm := TfrmLoginServiceManager.Create(nil);
-  LoginForm.lbSever.Caption := AServerName;
-  LoginForm.edtUserName.Text := 'SYSDBA';
-  LoginForm.edtPassword.Text := '';
-  Result := LoginForm;
 end;
 
 procedure TfmMain.CreateIntelliSenseCache(Data: PtrInt);

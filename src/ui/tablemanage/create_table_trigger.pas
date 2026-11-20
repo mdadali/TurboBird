@@ -1,4 +1,4 @@
-unit CreateTrigger;
+unit create_table_trigger;
 
 {$mode objfpc}{$H+}
 
@@ -11,9 +11,9 @@ uses
 
 type
 
-  { TfmCreateTrigger }
+  { TfmCreateTableTrigger }
 
-  TfmCreateTrigger = class(TForm)
+  TfmCreateTableTrigger = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
     cbTables: TComboBox;
@@ -34,13 +34,13 @@ type
   end; 
 
 var
-  fmCreateTrigger: TfmCreateTrigger;
+  fmCreateTableTrigger: TfmCreateTableTrigger;
 
 implementation
 
-{ TfmCreateTrigger }
+{ TfmCreateTableTrigger }
 
-procedure TfmCreateTrigger.BitBtn1Click(Sender: TObject);
+procedure TfmCreateTableTrigger.BitBtn1Click(Sender: TObject);
 begin
   if (Trim(edTriggerName.Text) = '') or (not (cxDelete.Checked or cxInsert.Checked or cxUpdate.Checked)) then
     MessageDlg('Incorrect configuration', mtError, [mbOk], 0)
@@ -48,13 +48,13 @@ begin
     ModalResult:= mrOK;
 end;
 
-procedure TfmCreateTrigger.FormShow(Sender: TObject);
+procedure TfmCreateTableTrigger.FormShow(Sender: TObject);
 begin
   frmThemeSelector.btnApplyClick(self);
 end;
 
 initialization
-  {$I createtrigger.lrs}
+  {$I create_table_trigger.lrs}
 
 end.
 

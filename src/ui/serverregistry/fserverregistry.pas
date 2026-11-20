@@ -7,6 +7,8 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, StdCtrls, Buttons, Dialogs, ComCtrls,
   Graphics, ExtCtrls,
+
+  uBaseForm,
   fServerSession,
   turbocommon,
   fbcommon,
@@ -29,7 +31,7 @@ type
 
   { TfmServerRegistry }
 
-  TfmServerRegistry = class(TForm)
+  TfmServerRegistry = class(TfrmBaseForm)
     bbCancel: TBitBtn;
     bbReg: TBitBtn;
     bbTestConnection: TBitBtn;

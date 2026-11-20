@@ -2060,19 +2060,6 @@ begin
   SetTransactionButtonsState(True);
 end;
 
-
-
-{ Close current Query window }
-{procedure TfmQueryWindow.lmCloseTabClick(Sender: TObject);
-begin
-  if (Trim(meQuery.Lines.Text) = '') or
-    (MessageDlg('Do you want to close this query window?', mtConfirmation, [mbNo, mbYes], 0) = mrYes) then
-  begin
-    Close;
-    Parent.Free;
-  end;
-end;}
-
 procedure TfmQueryWindow.lmCloseTabClick(Sender: TObject);
 begin
     Close;

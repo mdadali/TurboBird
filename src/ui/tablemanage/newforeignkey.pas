@@ -6,11 +6,17 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  StdCtrls, Buttons, CheckLst, QueryWindow,
+  StdCtrls, Buttons, CheckLst,
+
+  IBDatabase, IBXScript,
+
   turbocommon,
   fbcommon,
   fsimpleobjextractor,
-  uthemeselector;
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
+
 
 type
 
@@ -43,9 +49,9 @@ type
     FExtractor: TSimpleObjExtractor;
     FExtractorDBIndex: Integer;
     procedure UpdateGroupTitles;
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     DatabaseIndex: Integer;
-    QWindow: TfmQueryWindow;
   end;
 
 var
@@ -92,21 +98,16 @@ end;
 
 procedure TfmNewForeignKey.FormShow(Sender: TObject);
 begin
-  QWindow := nil;
+  frmThemeSelector.btnApplyClick(Self);
 
-  frmThemeSelector.btnApplyClick(self);
-
-  // Extractor für diese DB-Instanz sicherstellen.
   if not Assigned(FExtractor) or (FExtractorDBIndex <> DatabaseIndex) then
   begin
     if Assigned(FExtractor) then
       FreeAndNil(FExtractor);
-
     FExtractor := TSimpleObjExtractor.Create(DatabaseIndex);
     FExtractorDBIndex := DatabaseIndex;
   end;
 
-  // Titel initial setzen
   UpdateGroupTitles;
 end;
 
@@ -182,30 +183,23 @@ var
   i: Integer;
   TargetTable, RefTable: string;
   CountOn, CountFor: Integer;
+  Script: string;
+  DlgCaption: string;
 begin
-  // ============================================================
-  // 1. Validierung — Namen und Felder prüfen
-  // ============================================================
-
-  // FK-Name muss da sein
   if Trim(edNewName.Text) = '' then
   begin
-    ShowMessage('Please enter a name for the Foreign Key constraint.');
+    MsgWarning('Please enter a name for the Foreign Key constraint.');
     edNewName.SetFocus;
     Exit;
   end;
 
-  // Zieltabelle muss gewählt sein
   if Trim(cbTables.Text) = '' then
   begin
-    ShowMessage('Please select a foreign table.');
+    MsgWarning('Please select a foreign table.');
     cbTables.SetFocus;
     Exit;
   end;
 
-  // ============================================================
-  // 2. Felder zählen (links und rechts)
-  // ============================================================
   CountOn := 0;
   CountFor := 0;
 
@@ -217,38 +211,30 @@ begin
     if clxForFields.Checked[i] then
       Inc(CountFor);
 
-  // ============================================================
-  // 3. Validierung — Feldanzahl
-  // ============================================================
   if CountOn = 0 then
   begin
-    ShowMessage('Please select at least one field in "On fields".');
+    MsgWarning('Please select at least one field in "On fields".');
     clxOnFields.SetFocus;
     Exit;
   end;
 
   if CountFor = 0 then
   begin
-    ShowMessage('Please select at least one reference field.');
+    MsgWarning('Please select at least one reference field.');
     clxForFields.SetFocus;
     Exit;
   end;
 
   if CountOn <> CountFor then
   begin
-    ShowMessage(
+    MsgWarning(
       'The number of fields must match on both sides.' + sLineBreak +
       sLineBreak +
       'On fields:         ' + IntToStr(CountOn) + sLineBreak +
-      'Reference fields:  ' + IntToStr(CountFor) + sLineBreak +
-      sLineBreak +
-      'Please check your selection.');
+      'Reference fields:  ' + IntToStr(CountFor));
     Exit;
   end;
 
-  // ============================================================
-  // 4. Felder zusammenstellen — mit Auto-Quoting für DDL
-  // ============================================================
   CurrFields := '';
   ForFields := '';
 
@@ -257,39 +243,93 @@ begin
       CurrFields := CurrFields + MakeCaseSensitiveAuto(clxOnFields.Items[i]) + ', ';
 
   if CurrFields.EndsWith(', ') then
-    CurrFields := Copy(CurrFields, 1, Length(CurrFields)-2);
+    CurrFields := Copy(CurrFields, 1, Length(CurrFields) - 2);
 
   for i := 0 to clxForFields.Count - 1 do
     if clxForFields.Checked[i] then
       ForFields := ForFields + MakeCaseSensitiveAuto(clxForFields.Items[i]) + ', ';
 
   if ForFields.EndsWith(', ') then
-    ForFields := Copy(ForFields, 1, Length(ForFields)-2);
+    ForFields := Copy(ForFields, 1, Length(ForFields) - 2);
 
-  // ============================================================
-  // 5. Tabellen — Namen quoten wenn nötig
-  // ============================================================
   TargetTable := MakeCaseSensitiveAuto(laTable.Caption);
   RefTable    := MakeCaseSensitiveAuto(cbTables.Text);
 
-  // ============================================================
-  // 6. SQL bauen
-  // ============================================================
-  QWindow := fmMain.ShowQueryWindow(DatabaseIndex,
-    'New constraint on table: ' + TargetTable);
-  QWindow.meQuery.Lines.Text :=
+  Script :=
     'ALTER TABLE ' + TargetTable +
     ' ADD CONSTRAINT ' + MakeCaseSensitiveAuto(edNewName.Text) +
     ' FOREIGN KEY (' + CurrFields + ')' +
     ' REFERENCES ' + RefTable + ' (' + ForFields + ')';
 
   if cbUpdateAction.Text <> 'Restrict' then
-    QWindow.meQuery.Lines.Add(' ON UPDATE ' + cbUpdateAction.Text);
+    Script := Script + LineEnding + ' ON UPDATE ' + cbUpdateAction.Text;
   if cbDeleteAction.Text <> 'Restrict' then
-    QWindow.meQuery.Lines.Add(' ON DELETE ' + cbDeleteAction.Text);
+    Script := Script + LineEnding + ' ON DELETE ' + cbDeleteAction.Text;
 
-  fmMain.Show;
-  ModalResult := mrOK;
+  Script := Script + ';';
+
+  DlgCaption := 'New Foreign Key on table: ' + TargetTable;
+
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  if ExecuteSQL(Script) then
+  begin
+    turbocommon.MetaDataChanged := True;
+    ModalResult := mrOK;   // Parent refresht FillForeignKeys
+  end;
+end;
+
+function TfmNewForeignKey.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[DatabaseIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[DatabaseIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[DatabaseIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[DatabaseIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 initialization
