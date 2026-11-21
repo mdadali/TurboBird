@@ -1,10 +1,10 @@
 object fmPermissionManage: TfmPermissionManage
   Left = 590
-  Height = 363
+  Height = 431
   Top = 92
   Width = 538
   Caption = 'Permission Management'
-  ClientHeight = 363
+  ClientHeight = 431
   ClientWidth = 538
   OnClose = FormClose
   OnCreate = FormCreate
@@ -14,7 +14,7 @@ object fmPermissionManage: TfmPermissionManage
   LCLVersion = '2.2.6.0'
   object PageControl1: TPageControl
     Left = 0
-    Height = 339
+    Height = 407
     Top = 24
     Width = 538
     ActivePage = tsTables
@@ -23,7 +23,7 @@ object fmPermissionManage: TfmPermissionManage
     TabOrder = 0
     object tsTables: TTabSheet
       Caption = 'Tables'
-      ClientHeight = 308
+      ClientHeight = 376
       ClientWidth = 528
       object Label1: TLabel
         Left = 14
@@ -100,9 +100,9 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 5
       end
       object bbApplyTable: TBitBtn
-        Left = 6
+        Left = 8
         Height = 35
-        Top = 270
+        Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
@@ -185,7 +185,7 @@ object fmPermissionManage: TfmPermissionManage
     end
     object tsViews: TTabSheet
       Caption = 'Views'
-      ClientHeight = 308
+      ClientHeight = 376
       ClientWidth = 528
       object Label8: TLabel
         Left = 14
@@ -226,7 +226,7 @@ object fmPermissionManage: TfmPermissionManage
       object bbApplyView: TBitBtn
         Left = 6
         Height = 33
-        Top = 270
+        Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
@@ -345,7 +345,7 @@ object fmPermissionManage: TfmPermissionManage
     end
     object tsProcedures: TTabSheet
       Caption = 'Procedures'
-      ClientHeight = 308
+      ClientHeight = 376
       ClientWidth = 528
       object Label4: TLabel
         Left = 12
@@ -375,7 +375,7 @@ object fmPermissionManage: TfmPermissionManage
       end
       object clbProcedures: TCheckListBox
         Left = 246
-        Height = 228
+        Height = 296
         Top = 39
         Width = 211
         Anchors = [akTop, akLeft, akBottom]
@@ -388,7 +388,7 @@ object fmPermissionManage: TfmPermissionManage
       object bbApplyProc: TBitBtn
         Left = 6
         Height = 33
-        Top = 264
+        Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
@@ -399,7 +399,7 @@ object fmPermissionManage: TfmPermissionManage
       object cxProcGrant: TCheckBox
         Left = 246
         Height = 21
-        Top = 273
+        Top = 341
         Width = 90
         Anchors = [akLeft, akBottom]
         Caption = 'With Grant'
@@ -409,7 +409,7 @@ object fmPermissionManage: TfmPermissionManage
     end
     object tsRoles: TTabSheet
       Caption = 'Roles'
-      ClientHeight = 308
+      ClientHeight = 376
       ClientWidth = 528
       object Label6: TLabel
         Left = 12
@@ -438,9 +438,9 @@ object fmPermissionManage: TfmPermissionManage
         ParentColor = False
       end
       object bbApplyRoles: TBitBtn
-        Left = 12
+        Left = 6
         Height = 35
-        Top = 269
+        Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Apply'
@@ -450,7 +450,7 @@ object fmPermissionManage: TfmPermissionManage
       end
       object clbRoles: TCheckListBox
         Left = 246
-        Height = 228
+        Height = 296
         Top = 39
         Width = 211
         Anchors = [akTop, akLeft, akBottom]
@@ -463,7 +463,7 @@ object fmPermissionManage: TfmPermissionManage
       object BitBtn1: TBitBtn
         Left = 102
         Height = 35
-        Top = 269
+        Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]
         Caption = 'Refresh'
@@ -473,7 +473,7 @@ object fmPermissionManage: TfmPermissionManage
       object cxRoleGrant: TCheckBox
         Left = 246
         Height = 21
-        Top = 278
+        Top = 346
         Width = 95
         Anchors = [akLeft, akBottom]
         Caption = 'With Admin'
