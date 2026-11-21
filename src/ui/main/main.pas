@@ -4326,9 +4326,6 @@ begin
       else
         CreateNewTableTrigger(DBIndex, '');
 
-    //tvotTriggerRoot:
-      //CreateNewTableTrigger(DBIndex);
-
     tvotDBTriggerRoot:
       CreateNewDBTrigger(DBIndex);
 
@@ -4345,7 +4342,7 @@ begin
       CreateNewUDRDDLTrigger(DBIndex);
 
   else
-    //CreateNewTableTrigger(DBIndex);
+    CreateNewTableTrigger(DBIndex, '');
   end;
 end;
 
@@ -8723,7 +8720,7 @@ var
 begin
 end;
 
-(*****************   Database Popup menu   ********************)
+{(*****************   Database Popup menu   ********************)
 procedure TfmMain.pmDatabasePopup(Sender: TObject);
 var
   SelNode: TTreeNode;
@@ -8856,7 +8853,141 @@ begin
   for i:= 0 to pmDatabase.Items.Count - 1 do
     pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
       ((pmDatabase.Items[i].Tag = 100) and Refreshable);
+end; }
+
+(*****************   Database Popup menu   ********************)
+procedure TfmMain.pmDatabasePopup(Sender: TObject);
+var
+  SelNode: TTreeNode;
+  Filter: Integer;
+  i: Integer;
+  ParentNodeText: string;
+  NodeText: string;
+  ObjectType: TTreeViewObjectType;
+  Refreshable: boolean;
+begin
+  SelNode:= tvMain.Selected;
+
+  if SelNode = nil then
+  begin
+    // Kein Knoten selektiert → alle Menüpunkte ausblenden
+    for i:= 0 to pmDatabase.Items.Count - 1 do
+      pmDatabase.Items[i].Visible := False;
+    Exit;
+  end;
+
+  ObjectType := TPNodeInfos(SelNode.Data)^.ObjectType;
+
+  case  ObjectType of
+    tvotServer: Filter:= -2;
+    tvotDatabase: Filter:= 0;
+
+    tvotSystemTableRoot: Filter := 100;
+    tvotSystemTable: Filter:= 7;
+    tvotSystemTableFieldRoot: Filter := 110;
+    tvotSystemTableField:     Filter := 111;
+
+    tvotTableRoot: Filter := 11;
+    tvotTable: Filter := 1;
+    tvotTableFieldRoot:    Filter := 120;
+    tvotTableField:        Filter := 121;
+
+    tvotGeneratorRoot: Filter:= 12;
+    tvotGenerator: Filter := 2;
+
+    tvotDBTriggerRoot,
+    tvotTableTriggerRoot,
+    tvotDDLTriggerRoot: Filter := 13;
+
+    tvotUDRTriggerRoot: Filter := 300;
+    tvotUDRTableTriggerRoot,
+    tvotUDRDBTriggerRoot,
+    tvotUDRDDLTriggerRoot: Filter := 13;
+
+    tvotTableTrigger,
+    tvotDBTrigger,
+    tvotDDLTrigger,
+    tvotUDRTableTrigger,
+    tvotUDRDBTrigger,
+    tvotUDRDDLTrigger,
+    tvotUDRTrigger: Filter := 3;
+
+    tvotViewRoot: Filter := 14;
+    tvotView: Filter := 4;
+
+    tvotProcedureRoot: Filter := 15;
+    tvotProcedure: Filter := 5;
+
+    tvotUDFRoot: Filter := 16;
+    tvotUDF: Filter := 6;
+
+    tvotDomainRoot: Filter := 18;
+    tvotDomain: Filter := 8;
+
+    tvotRoleRoot: Filter := 19;
+    tvotRole: Filter := 9;
+
+    tvotExceptionRoot: Filter := 20;
+    tvotException: Filter := 10;
+
+    tvotUserRoot: Filter:= 21;
+    tvotUser: Filter:= 111;
+
+    tvotQueryWindow: Filter:= 30;
+
+    tvotFunctionRoot: Filter := 31;
+    tvotFunction: Filter := 311;
+
+    tvotPackageRoot: Filter:= 32;
+    tvotPackage: Filter:= 33;
+    tvotPackageFunctionRoot: Filter:= 331;
+    tvotPackageFunction: Filter:= 332;
+    tvotPackageProcedureRoot: Filter:= 333;
+    tvotPackageProcedure: Filter:= 334;
+    tvotPackageUDRFunctionRoot: Filter:= 335;
+    tvotPackageUDRFunction: Filter:= 336;
+    tvotPackageUDRProcedureRoot: Filter:= 337;
+    tvotPackageUDRProcedure: Filter := 338;
+
+    tvotUDRRoot: Filter:= 42;
+    tvotUDRFunctionRoot: Filter := 43;
+    tvotUDRFunction: Filter := 44;
+    tvotUDRProcedureRoot: Filter := 45;
+    tvotUDRProcedure: Filter := 46;
+
+
+    // Constraints & Indices   Roots are only Refreshable
+     //tvotPrimaryKeyRoot:       Filter := 400;
+     tvotPrimaryKey:           Filter := 281;
+     //tvotForeignKeyRoot:       Filter := 400;
+     tvotForeignKey:           Filter := 282;
+     //tvotUniqueConstraintRoot: Filter := 400;
+     tvotUniqueConstraint:     Filter := 283;
+     //tvotCheckConstraintRoot:  Filter := 400;
+     tvotCheckConstraint:      Filter := 284;
+     //tvotNotNullConstraintRoot:Filter := 400;
+     tvotNotNullConstraint:    Filter := 285;
+     //tvotIndexRoot:            Filter := 294;
+     tvotIndex:                Filter := 286;
+     //tvotTableReferencesRoot
+     //tvotTablePermissionsRoot
+
+
+     //Forms
+     tvotFormRoot:   Filter := 501;
+     tvotForm:       Filter := 500;
+
+  else
+    Filter:= -1;
+  end;
+
+  Refreshable := TPNodeInfos(SelNode.Data)^.Refreshable;
+
+  for i:= 0 to pmDatabase.Items.Count - 1 do
+    pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
+      ((pmDatabase.Items[i].Tag = 100) and Refreshable);
 end;
+
 
 procedure TfmMain.tbCheckDBIntegrityClick(Sender: TObject);
 var dbIndex: integer;
