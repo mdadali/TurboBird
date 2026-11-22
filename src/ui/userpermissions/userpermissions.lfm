@@ -1,7 +1,7 @@
 object fmUserPermissions: TfmUserPermissions
-  Left = 851
+  Left = 566
   Height = 523
-  Top = 116
+  Top = 128
   Width = 974
   ActiveControl = StringGrid1
   Caption = 'User Permissions'
@@ -15,7 +15,7 @@ object fmUserPermissions: TfmUserPermissions
   LCLVersion = '2.2.6.0'
   object StringGrid1: TStringGrid
     Left = 5
-    Height = 404
+    Height = 403
     Top = 55
     Width = 964
     Align = alClient
@@ -72,17 +72,17 @@ object fmUserPermissions: TfmUserPermissions
   end
   object pnlBottom: TPanel
     Left = 0
-    Height = 59
-    Top = 464
+    Height = 60
+    Top = 463
     Width = 974
     Align = alBottom
-    ClientHeight = 59
+    ClientHeight = 60
     ClientWidth = 974
     TabOrder = 2
     object bbRefreshPermissions: TBitBtn
       Left = 352
       Height = 40
-      Top = 16
+      Top = 9
       Width = 115
       Anchors = [akLeft, akBottom]
       Caption = 'Refresh'
@@ -90,6 +90,16 @@ object fmUserPermissions: TfmUserPermissions
       Kind = bkRetry
       OnClick = bbRefreshPermissionsClick
       TabOrder = 0
+    end
+    object bbClose: TBitBtn
+      Left = 860
+      Height = 40
+      Top = 8
+      Width = 99
+      Anchors = [akTop, akRight]
+      Caption = 'Close'
+      OnClick = bbCloseClick
+      TabOrder = 1
     end
   end
 end

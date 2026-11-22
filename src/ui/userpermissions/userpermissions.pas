@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  Grids, Buttons, StdCtrls, LCLType, ExtCtrls, DB,
+  Grids, Buttons, StdCtrls, ComCtrls, LCLType, ExtCtrls, DB,
 
   turbocommon,
   uthemeselector,
@@ -18,11 +18,13 @@ type
 
   TfmUserPermissions = class(TForm)
     bbRefreshPermissions: TBitBtn;
+    bbClose: TBitBtn;
     Label1: TLabel;
     laObject: TLabel;
     pnlBottom: TPanel;
     pnlTop: TPanel;
     StringGrid1: TStringGrid;
+    procedure bbCloseClick(Sender: TObject);
     procedure bbRefreshPermissionsClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -121,13 +123,18 @@ begin
   FillPermissions;
 end;
 
+procedure TfmUserPermissions.bbCloseClick(Sender: TObject);
+begin
+  Close;
+end;
+
 procedure TfmUserPermissions.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if Assigned(FNodeInfos) then
     FNodeInfos^.ViewForm := nil;
   CloseAction := caFree;
 
-  if Assigned(Parent) then
+  if (Parent is TTabSheet) then
     Parent.Free;
 end;
 

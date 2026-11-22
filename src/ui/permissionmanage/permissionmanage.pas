@@ -26,7 +26,7 @@ type
     bbApplyTable: TBitBtn;
     bbApplyProc: TBitBtn;
     bbApplyView: TBitBtn;
-    bbClose: TSpeedButton;
+    bbClose1: TBitBtn;
     BitBtn1: TBitBtn;
     cbRolesUser: TComboBox;
     cbTables: TComboBox;
@@ -73,7 +73,7 @@ type
     Label8: TLabel;
     Label9: TLabel;
     PageControl1: TPageControl;
-    Panel1: TPanel;
+    pnlBottom: TPanel;
     tsViews: TTabSheet;
     tsRoles: TTabSheet;
     tsProcedures: TTabSheet;
@@ -82,7 +82,7 @@ type
     procedure bbApplyRolesClick(Sender: TObject);
     procedure bbApplyTableClick(Sender: TObject);
     procedure bbApplyViewClick(Sender: TObject);
-    procedure bbCloseClick(Sender: TObject);
+    procedure bbClose1Click(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure cbProcUsersChange(Sender: TObject);
     procedure cbRolesUserChange(Sender: TObject);
@@ -156,6 +156,9 @@ begin
   FProcList.Free;
   FRoleList.Free;
   CloseAction := caFree;
+
+  if (Parent is TTabSheet) then
+    Parent.Free;
 end;
 
 procedure TfmPermissionManage.FormCreate(Sender: TObject);
@@ -575,10 +578,11 @@ begin
   end;
 end;
 
-procedure TfmPermissionManage.bbCloseClick(Sender: TObject);
+procedure TfmPermissionManage.bbClose1Click(Sender: TObject);
 begin
   Close;
-  Parent.Free;
+  if (Parent is TTabSheet) then
+    Parent.Free;
 end;
 
 procedure TfmPermissionManage.BitBtn1Click(Sender: TObject);
