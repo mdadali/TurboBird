@@ -2,7 +2,7 @@
 
 LazarusResources.Add('TfmPermissionManage','FORMDATA',[
   'TPF0'#19'TfmPermissionManage'#18'fmPermissionManage'#4'Left'#3'N'#2#6'Height'
-  +#3#175#1#3'Top'#2'\'#5'Width'#3#26#2#7'Caption'#6#21'Permission Management'
+  +#3#175#1#3'Top'#2't'#5'Width'#3#26#2#7'Caption'#6#21'Permission Management'
   +#12'ClientHeight'#3#175#1#11'ClientWidth'#3#26#2#7'OnClose'#7#9'FormClose'#8
   +'OnCreate'#7#10'FormCreate'#9'OnDestroy'#7#11'FormDestroy'#6'OnShow'#7#8'For'
   +'mShow'#8'Position'#7#14'poScreenCenter'#10'LCLVersion'#6#7'2.2.6.0'#0#12'TP'
@@ -25,7 +25,7 @@ LazarusResources.Add('TfmPermissionManage','FORMDATA',[
   +'x'#8'cxDelete'#4'Left'#3'='#1#6'Height'#2#21#3'Top'#3#236#0#5'Width'#2'B'#7
   +'Caption'#6#6'Delete'#8'TabOrder'#2#4#0#0#9'TCheckBox'#12'cxReferences'#4'Le'
   +'ft'#3'>'#1#6'Height'#2#21#3'Top'#3#31#1#5'Width'#2'^'#7'Caption'#6#10'Refer'
-  +'ences'#8'TabOrder'#2#5#0#0#7'TBitBtn'#12'bbApplyTable'#4'Left'#2#8#6'Height'
+  +'ences'#8'TabOrder'#2#5#0#0#7'TBitBtn'#12'bbApplyTable'#4'Left'#2#6#6'Height'
   +#2'#'#3'Top'#3'H'#1#5'Width'#2'K'#7'Anchors'#11#6'akLeft'#8'akBottom'#0#7'Ca'
   +'ption'#6#5'Apply'#4'Kind'#7#4'bkOK'#7'OnClick'#7#17'bbApplyTableClick'#8'Ta'
   +'bOrder'#2#6#0#0#9'TComboBox'#7'cbUsers'#4'Left'#2#14#6'Height'#2'#'#3'Top'#2
@@ -59,13 +59,13 @@ LazarusResources.Add('TfmPermissionManage','FORMDATA',[
   +#4'Kind'#7#4'bkOK'#7'OnClick'#7#16'bbApplyViewClick'#8'TabOrder'#2#2#0#0#6'T'
   +'Label'#7'Label10'#4'Left'#3'6'#1#6'Height'#2#19#3'Top'#2#10#5'Width'#2'J'#7
   +'Caption'#6#11'Permissions'#11'ParentColor'#8#0#0#9'TCheckBox'#9'cxViewAll'#4
-  +'Left'#3'>'#1#6'Height'#2#21#3'Top'#2'"'#5'Width'#2')'#7'Caption'#6#3'All'#10
-  +'Font.Style'#11#6'fsBold'#0#10'ParentFont'#8#8'TabOrder'#2#3#0#0#9'TCheckBox'
-  +#14'cxViewAllGrant'#4'Left'#3'Y'#1#6'Height'#2#21#3'Top'#2'1'#5'Width'#2'b'#7
-  +'Caption'#6#10'With Grant'#10'Font.Style'#11#6'fsBold'#0#10'ParentFont'#8#8
-  +'TabOrder'#2#4#0#0#9'TCheckBox'#12'cxViewSelect'#4'Left'#3'='#1#6'Height'#2
-  +#21#3'Top'#2'V'#5'Width'#2'='#7'Caption'#6#6'Select'#8'TabOrder'#2#5#0#0#9'T'
-  ,'CheckBox'#17'cxViewSelectGrant'#4'Left'#3'Y'#1#6'Height'#2#21#3'Top'#2'f'#5
+  +'Left'#3'>'#1#6'Height'#2#21#3'Top'#2'"'#5'Width'#2''''#7'Caption'#6#3'All'
+  +#10'Font.Style'#11#6'fsBold'#0#10'ParentFont'#8#8'TabOrder'#2#3#0#0#9'TCheck'
+  +'Box'#14'cxViewAllGrant'#4'Left'#3'Y'#1#6'Height'#2#21#3'Top'#2'1'#5'Width'#2
+  +'Z'#7'Caption'#6#10'With Grant'#10'Font.Style'#11#6'fsBold'#0#10'ParentFont'
+  +#8#8'TabOrder'#2#4#0#0#9'TCheckBox'#12'cxViewSelect'#4'Left'#3'='#1#6'Height'
+  +#2#21#3'Top'#2'V'#5'Width'#2'='#7'Caption'#6#6'Select'#8'TabOrder'#2#5#0#0#9
+  ,'TCheckBox'#17'cxViewSelectGrant'#4'Left'#3'Y'#1#6'Height'#2#21#3'Top'#2'f'#5
   +'Width'#2'Z'#7'Caption'#6#10'With Grant'#8'TabOrder'#2#6#0#0#9'TCheckBox'#12
   +'cxViewInsert'#4'Left'#3'>'#1#6'Height'#2#21#3'Top'#3#138#0#5'Width'#2'>'#7
   +'Caption'#6#6'Insert'#8'TabOrder'#2#7#0#0#9'TCheckBox'#17'cxViewInsertGrant'
@@ -105,7 +105,7 @@ LazarusResources.Add('TfmPermissionManage','FORMDATA',[
   +#2#0#8'OnChange'#7#17'cbRolesUserChange'#5'Style'#7#14'csDropDownList'#8'Tab'
   +'Order'#2#0#0#0#6'TLabel'#6'Label7'#4'Left'#3#230#0#6'Height'#2#19#3'Top'#2
   +#11#5'Width'#2'J'#7'Caption'#6#11'Permissions'#11'ParentColor'#8#0#0#7'TBitB'
-  +'tn'#12'bbApplyRoles'#4'Left'#2#6#6'Height'#2'#'#3'Top'#3'H'#1#5'Width'#2'K'
+  +'tn'#12'bbApplyRoles'#4'Left'#2#6#6'Height'#2'!'#3'Top'#3'H'#1#5'Width'#2'K'
   +#7'Anchors'#11#6'akLeft'#8'akBottom'#0#7'Caption'#6#5'Apply'#4'Kind'#7#4'bkO'
   +'K'#7'OnClick'#7#17'bbApplyRolesClick'#8'TabOrder'#2#1#0#0#13'TCheckListBox'
   +#8'clbRoles'#4'Left'#3#246#0#6'Height'#3'('#1#3'Top'#2''''#5'Width'#3#211#0#7

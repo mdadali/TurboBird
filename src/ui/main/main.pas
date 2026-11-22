@@ -515,6 +515,7 @@ type
     function EnsureServerRegistered: Boolean;
     function EnsureDatabaseSelected: Boolean;
     function EnsureTableSelected: Boolean;
+    procedure RefreshUserPermissionsIfOpen(Sender: TObject);
   protected
     // This procedure will receive the events that are logged by the connection:
   public
@@ -5110,24 +5111,21 @@ var
   frmUserPermissions: TfmUserPermissions;
   ATab: TTabSheet;
   ShortTitle, FullHint, DBAlias: string;
-  ds: TDataSet;
-  ObjName, ObjTypeName, PrivStr, Priv, CurrentObj: string;
-  ObjType: Integer;
-  RowIndex: Integer;
 begin
   SelNode := tvMain.Selected;
-  if (SelNode = nil) or (SelNode.Parent = nil) or (SelNode.Parent.Parent = nil) then Exit;
+  if (SelNode = nil) or (SelNode.Parent = nil) or (SelNode.Parent.Parent = nil) then
+    Exit;
 
   NodeInfos := TPNodeInfos(SelNode.Data);
-  if NodeInfos = nil then Exit;
+  if NodeInfos = nil then
+    Exit;
   dbIndex := NodeInfos^.dbIndex;
-
   UserName := SelNode.Text;
 
-  // Prüfen ob ViewForm schon existiert
   if Assigned(NodeInfos^.ViewForm) and (NodeInfos^.ViewForm is TfmUserPermissions) then
     frmUserPermissions := TfmUserPermissions(NodeInfos^.ViewForm)
-  else begin
+  else
+  begin
     frmUserPermissions := TfmUserPermissions.Create(Application);
     ATab := TTabSheet.Create(Self);
     ATab.Parent := PageControl1;
@@ -5135,90 +5133,29 @@ begin
     frmUserPermissions.Parent := ATab;
     frmUserPermissions.Align := alClient;
     frmUserPermissions.BorderStyle := bsNone;
-
     NodeInfos^.ViewForm := frmUserPermissions;
   end;
 
-  // Tab vorbereiten
   ATab := frmUserPermissions.Parent as TTabSheet;
   PageControl1.ActivePage := ATab;
   ATab.Tag := dbIndex;
 
-  // Kurzer Titel
   ShortTitle := UserName;
   ATab.Caption := ShortTitle;
   frmUserPermissions.Caption := ShortTitle;
 
-  // Detaillierte Infos als Hint
   DBAlias := GetAncestorNodeText(SelNode, 1);
   FullHint :=
     'Server:   ' + GetAncestorNodeText(SelNode, 0) + sLineBreak +
     'DBAlias:  ' + DBAlias + sLineBreak +
     'DBPath:   ' + RegisteredDatabases[dbIndex].IBDatabase.DatabaseName + sLineBreak +
-    //'Object type: Permissions' + sLineBreak +
     'Object type: User/Role' + sLineBreak +
     'User/Role: ' + UserName;
   ATab.Hint := FullHint;
   ATab.ShowHint := True;
 
-  // Grid zurücksetzen
-  frmUserPermissions.laObject.Caption := UserName;
-  frmUserPermissions.StringGrid1.RowCount := 1;
-  RowIndex := 1;
-  CurrentObj := '';
-  PrivStr := '';
-
-  // Daten auslesen
-  ds := dmSysTables.GetAllUserPermissions(dbIndex, UserName);
-  try
-    while not ds.EOF do
-    begin
-      ObjName := Trim(ds.FieldByName('RDB$RELATION_NAME').AsString);
-      Priv := Trim(ds.FieldByName('RDB$PRIVILEGE').AsString);
-      if ds.FieldByName('RDB$GRANT_OPTION').AsInteger <> 0 then
-        Priv := Priv + 'G';
-
-      if (ObjName <> CurrentObj) and (CurrentObj <> '') then
-      begin
-        frmUserPermissions.StringGrid1.RowCount := RowIndex + 1;
-        frmUserPermissions.StringGrid1.Cells[0, RowIndex] := ObjTypeName;
-        frmUserPermissions.StringGrid1.Cells[1, RowIndex] := CurrentObj;
-        frmUserPermissions.StringGrid1.Cells[2, RowIndex] := PrivStr;
-        Inc(RowIndex);
-        PrivStr := '';
-      end;
-
-      CurrentObj := ObjName;
-      ObjType := ds.FieldByName('RDB$OBJECT_TYPE').AsInteger;
-
-      case ObjType of
-        0: ObjTypeName := 'Table/View';
-        5: ObjTypeName := 'Procedure';
-        13: ObjTypeName := 'Role';
-      else
-        ObjTypeName := IntToStr(ObjType);
-      end;
-
-      if PrivStr <> '' then
-        PrivStr := PrivStr + ',';
-      PrivStr := PrivStr + Priv;
-
-      ds.Next;
-    end;
-
-    // letzte Zeile
-    if CurrentObj <> '' then
-    begin
-      frmUserPermissions.StringGrid1.RowCount := RowIndex + 1;
-      frmUserPermissions.StringGrid1.Cells[0, RowIndex] := ObjTypeName;
-      frmUserPermissions.StringGrid1.Cells[1, RowIndex] := CurrentObj;
-      frmUserPermissions.StringGrid1.Cells[2, RowIndex] := PrivStr;
-    end;
-  finally
-    // Dataset wird vom Modul verwaltet, kein Free nötig
-  end;
-
-  frmUserPermissions.Init(SelNode.Data);
+  frmUserPermissions.Init(NodeInfos, dbIndex, UserName);
+  frmUserPermissions.FillPermissions;
   frmUserPermissions.Show;
 end;
 
@@ -5386,8 +5323,26 @@ begin
   ATab.ShowHint := True;
 
   // Form initialisieren — mit AExtractor
-  fmPermissions.Init(NodeInfos, dbIndex, '', SelNode.Text, 2, AExtractor, nil);
+  fmPermissions.Init(NodeInfos, dbIndex, '', SelNode.Text, 2, AExtractor,
+                     @RefreshUserPermissionsIfOpen);
   fmPermissions.Show;
+end;
+
+procedure TfmMain.RefreshUserPermissionsIfOpen(Sender: TObject);
+var
+  i: Integer;
+  ATab: TTabSheet;
+  Frm: TfmUserPermissions;
+begin
+  for i := 0 to PageControl1.PageCount - 1 do
+  begin
+    ATab := PageControl1.Pages[i];
+    if (ATab.ControlCount > 0) and (ATab.Controls[0] is TfmUserPermissions) then
+    begin
+      Frm := TfmUserPermissions(ATab.Controls[0]);
+      Frm.FillPermissions;
+    end;
+  end;
 end;
 
 (***********  Refresh Click  *************)

@@ -7,10 +7,15 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   ComCtrls, StdCtrls, Buttons, CheckLst, ExtCtrls,
+
+  IBDatabase, IBXScript,
+
   fbcommon,
   turbocommon,
   fsimpleobjextractor,
-  uthemeselector;
+  uthemeselector,
+  umessagedlg,
+  confirm_query;
 
 type
 
@@ -121,6 +126,7 @@ type
     procedure UpdateRolePermissions;
     procedure ComposeTablePermissionSQL(ATableName: string; OptionName: string;
       Grant, WithGrant: Boolean; var List: TStringList);
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ANodeInfos: TPNodeInfos; dbIndex: Integer;
       ATableName, AUserName: string; UserType: Integer;
@@ -459,14 +465,16 @@ procedure TfmPermissionManage.bbApplyTableClick(Sender: TObject);
 var
   List: TStringList;
   TableName: string;
+  Script: AnsiString;
+  DlgCaption: string;
 begin
   if (cbUsers.Text = '') or (cbTables.ItemIndex = -1) then
   begin
-    ShowMessage('You should enter user/role and a table');
+    MsgWarning('You should enter user/role and a table.');
     Exit;
   end;
 
-  TableName := cbTables.Text;  // schon ohne Quotes aus dem Extractor
+  TableName := cbTables.Text;
 
   List := TStringList.Create;
   try
@@ -481,24 +489,48 @@ begin
       ComposeTablePermissionSQL(TableName, 'References', cxReferences.Checked, cxReferencesGrant.Checked, List);
     end;
 
-    fmMain.ShowCompleteQueryWindow(FDBIndex,
-      'Edit Permission for: ' + TableName, List.Text, FOnCommitProcedure);
+    if List.Count = 0 then
+    begin
+      MsgBox('There is no change.', mkInfo);
+      Exit;
+    end;
+
+    Script := List.Text;
+    DlgCaption := 'Edit Permission for: ' + TableName;
+
+    if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+      Exit;
+
+    if ExecuteSQL(Script) then
+    begin
+      turbocommon.MetaDataChanged := True;
+
+      // Zuerst Refresh der Overview (solange Parent noch lebt)
+      if Assigned(FOnCommitProcedure) then
+        FOnCommitProcedure(Self);
+
+      // Danach Sub-Tab schließen
+      Close;
+      if Assigned(Parent) then
+        Parent.Free;
+    end;
+
+
   finally
     List.Free;
   end;
-
-  Close;
-  Parent.Free;
 end;
 
 procedure TfmPermissionManage.bbApplyViewClick(Sender: TObject);
 var
   List: TStringList;
   ViewName: string;
+  Script: AnsiString;
+  DlgCaption: AnsiString;
 begin
   if (cbViewsUsers.Text = '') or (cbViews.ItemIndex = -1) then
   begin
-    ShowMessage('You should enter user/role and a view');
+    MsgWarning('You should enter user/role and a view.');
     Exit;
   end;
 
@@ -517,14 +549,30 @@ begin
       ComposeTablePermissionSQL(ViewName, 'References', cxViewReferences.Checked, cxViewReferencesGrant.Checked, List);
     end;
 
-    fmMain.ShowCompleteQueryWindow(FDBIndex,
-      'Edit Permission for: ' + ViewName, List.Text, FOnCommitProcedure);
+    if List.Count = 0 then
+    begin
+      MsgBox('There is no change.', mkInfo);
+      Exit;
+    end;
+
+    Script := List.Text;
+    DlgCaption := 'Edit Permission for: ' + ViewName;
+
+    if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+      Exit;
+
+    if ExecuteSQL(Script) then
+    begin
+      turbocommon.MetaDataChanged := True;
+      if Assigned(FOnCommitProcedure) then
+        FOnCommitProcedure(Self);
+      Close;
+      if Assigned(Parent) then
+        Parent.Free;
+    end;
   finally
     List.Free;
   end;
-
-  Close;
-  Parent.Free;
 end;
 
 procedure TfmPermissionManage.bbCloseClick(Sender: TObject);
@@ -547,9 +595,14 @@ var
   QuotedUser: string;
   ProcHas: Boolean;
   NewGrant, NewGrantOpt: Boolean;
+  Script: AnsiString;
+  DlgCaption: AnsiString;
 begin
   if Trim(cbProcUsers.Text) = '' then
+  begin
+    MsgWarning('Please select a user/role.');
     Exit;
+  end;
 
   QuotedUser := MakeCaseSensitiveAuto(cbProcUsers.Text);
 
@@ -565,7 +618,6 @@ begin
 
       if NewGrant and (not ProcHas) then
       begin
-        // Neuer Grant
         Line := 'GRANT EXECUTE ON PROCEDURE ' + MakeCaseSensitiveAuto(ProcName) +
                 ' TO ' + QuotedUser;
         if NewGrantOpt then
@@ -574,32 +626,40 @@ begin
       end
       else if NewGrant and ProcHas and (NewGrantOpt <> FOrigProcGrant[i]) then
       begin
-        // Grant-Option geändert
         if NewGrantOpt then
-          // Grant-Option hinzufügen
           List.Add('GRANT EXECUTE ON PROCEDURE ' + MakeCaseSensitiveAuto(ProcName) +
                    ' TO ' + QuotedUser + ' WITH GRANT OPTION;')
         else
-          // Grant-Option entfernen
           List.Add('REVOKE GRANT OPTION FOR EXECUTE ON PROCEDURE ' +
                    MakeCaseSensitiveAuto(ProcName) +
                    ' FROM ' + QuotedUser + ';');
       end
       else if (not NewGrant) and ProcHas then
-        // Grant entfernen
         List.Add('REVOKE EXECUTE ON PROCEDURE ' + MakeCaseSensitiveAuto(ProcName) +
                  ' FROM ' + QuotedUser + ';');
     end;
 
-    if List.Count > 0 then
+    if List.Count = 0 then
     begin
-      fmMain.ShowCompleteQueryWindow(FDBIndex,
-        'Edit Permission for: ' + cbProcUsers.Text, List.Text, FOnCommitProcedure);
+      MsgBox('There is no change.', mkInfo);
+      Exit;
+    end;
+
+    Script := List.Text;
+    DlgCaption := 'Edit Permission for: ' + cbProcUsers.Text;
+
+    if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+      Exit;
+
+    if ExecuteSQL(Script) then
+    begin
+      turbocommon.MetaDataChanged := True;
+      if Assigned(FOnCommitProcedure) then
+        FOnCommitProcedure(Self);
       Close;
-      Parent.Free;
-    end
-    else
-      ShowMessage('There is no change');
+      if Assigned(Parent) then
+        Parent.Free;
+    end;
   finally
     List.Free;
   end;
@@ -613,9 +673,14 @@ var
   RoleName: string;
   QuotedUser: string;
   RoleHas, NewGrant, NewGrantOpt: Boolean;
+  Script: AnsiString;
+  DlgCaption: AnsiString;
 begin
   if Trim(cbRolesUser.Text) = '' then
+  begin
+    MsgWarning('Please select a user.');
     Exit;
+  end;
 
   QuotedUser := MakeCaseSensitiveAuto(cbRolesUser.Text);
 
@@ -631,7 +696,6 @@ begin
 
       if NewGrant and (not RoleHas) then
       begin
-        // Neue Mitgliedschaft
         Line := 'GRANT ' + MakeCaseSensitiveAuto(RoleName) + ' TO ' + QuotedUser;
         if NewGrantOpt then
           Line := Line + ' WITH ADMIN OPTION';
@@ -639,7 +703,6 @@ begin
       end
       else if NewGrant and RoleHas and (NewGrantOpt <> FOrigRoleGrant[i]) then
       begin
-        // Admin-Option geändert
         if NewGrantOpt then
           List.Add('GRANT ' + MakeCaseSensitiveAuto(RoleName) + ' TO ' + QuotedUser +
                    ' WITH ADMIN OPTION;')
@@ -648,20 +711,31 @@ begin
                    ' FROM ' + QuotedUser + ';');
       end
       else if (not NewGrant) and RoleHas then
-        // Mitgliedschaft entfernen
         List.Add('REVOKE ' + MakeCaseSensitiveAuto(RoleName) +
                  ' FROM ' + QuotedUser + ';');
     end;
 
-    if List.Count > 0 then
+    if List.Count = 0 then
     begin
-      fmMain.ShowCompleteQueryWindow(FDBIndex,
-        'Edit Permission for: ' + cbRolesUser.Text, List.Text, FOnCommitProcedure);
+      MsgBox('There is no change.', mkInfo);
+      Exit;
+    end;
+
+    Script := List.Text;
+    DlgCaption := 'Edit Permission for: ' + cbRolesUser.Text;
+
+    if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+      Exit;
+
+    if ExecuteSQL(Script) then
+    begin
+      turbocommon.MetaDataChanged := True;
+      if Assigned(FOnCommitProcedure) then
+        FOnCommitProcedure(Self);
       Close;
-      Parent.Free;
-    end
-    else
-      ShowMessage('There is no change');
+      if Assigned(Parent) then
+        Parent.Free;
+    end;
   finally
     List.Free;
   end;
@@ -882,6 +956,58 @@ begin
   UpdateViewsPermissions;
   UpdateProcPermissions;
   UpdateRolePermissions;
+end;
+
+function TfmPermissionManage.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 initialization

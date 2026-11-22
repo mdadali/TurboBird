@@ -10,11 +10,9 @@ uses
 
   turbocommon,
   fbcommon,
-
   fsimpleobjextractor,
-
+  umessagedlg,
   uthemeselector,
-
   PermissionManage;
 
 type
@@ -241,7 +239,7 @@ var
 begin
   if sgPermissions.Row <= 0 then
   begin
-    ShowMessage('There is no selected user/role');
+    MsgWarning('There is no selected user/role.');
     Exit;
   end;
 

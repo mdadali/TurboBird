@@ -1,7 +1,7 @@
 object fmPermissionManage: TfmPermissionManage
   Left = 590
   Height = 431
-  Top = 92
+  Top = 116
   Width = 538
   Caption = 'Permission Management'
   ClientHeight = 431
@@ -100,7 +100,7 @@ object fmPermissionManage: TfmPermissionManage
         TabOrder = 5
       end
       object bbApplyTable: TBitBtn
-        Left = 8
+        Left = 6
         Height = 35
         Top = 328
         Width = 75
@@ -246,7 +246,7 @@ object fmPermissionManage: TfmPermissionManage
         Left = 318
         Height = 21
         Top = 34
-        Width = 41
+        Width = 39
         Caption = 'All'
         Font.Style = [fsBold]
         ParentFont = False
@@ -256,7 +256,7 @@ object fmPermissionManage: TfmPermissionManage
         Left = 345
         Height = 21
         Top = 49
-        Width = 98
+        Width = 90
         Caption = 'With Grant'
         Font.Style = [fsBold]
         ParentFont = False
@@ -439,7 +439,7 @@ object fmPermissionManage: TfmPermissionManage
       end
       object bbApplyRoles: TBitBtn
         Left = 6
-        Height = 35
+        Height = 33
         Top = 328
         Width = 75
         Anchors = [akLeft, akBottom]

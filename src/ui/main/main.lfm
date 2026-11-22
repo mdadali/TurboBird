@@ -1,10 +1,10 @@
 inherited fmMain: TfmMain
-  Left = 432
+  Left = 674
   Height = 668
   Top = 347
   Width = 1486
   Caption = 'TurboBird Admin for Firebird'
-  ClientHeight = 638
+  ClientHeight = 639
   ClientWidth = 1486
   Color = clForm
   DragMode = dmAutomatic
@@ -5581,15 +5581,15 @@ inherited fmMain: TfmMain
   WindowState = wsMaximized
   object Splitter1: TSplitter[0]
     Left = 360
-    Height = 581
+    Height = 584
     Top = 34
     Width = 14
     Beveled = True
   end
   object StatusBar1: TStatusBar[1]
     Left = 0
-    Height = 23
-    Top = 615
+    Height = 21
+    Top = 618
     Width = 1486
     Panels = <    
       item
@@ -5686,7 +5686,7 @@ inherited fmMain: TfmMain
   end
   object PageControl1: TPageControl[3]
     Left = 377
-    Height = 574
+    Height = 577
     Top = 37
     Width = 1106
     ActivePage = tsMain
@@ -5719,7 +5719,7 @@ inherited fmMain: TfmMain
   end
   object Button1: TButton[4]
     Left = 0
-    Height = 581
+    Height = 584
     Top = 34
     Width = 27
     Align = alLeft
@@ -5729,17 +5729,17 @@ inherited fmMain: TfmMain
   end
   object pnlLeft: TPanel[5]
     Left = 27
-    Height = 581
+    Height = 584
     Top = 34
     Width = 333
     Align = alLeft
-    ClientHeight = 581
+    ClientHeight = 584
     ClientWidth = 333
     ParentBackground = False
     TabOrder = 5
     object tvMain: TTreeView
       Left = 1
-      Height = 516
+      Height = 519
       Top = 64
       Width = 331
       Align = alClient
@@ -5772,13 +5772,13 @@ inherited fmMain: TfmMain
       Width = 331
       Align = alTop
       Caption = 'Object Filter'
-      ClientHeight = 33
-      ClientWidth = 327
+      ClientHeight = 43
+      ClientWidth = 329
       ParentBackground = False
       TabOrder = 1
       object edtFilter: TEdit
         Left = 32
-        Height = 32
+        Height = 31
         Top = 2
         Width = 285
         OnChange = edtFilterChange
@@ -5786,9 +5786,9 @@ inherited fmMain: TfmMain
       end
       object CheckBoxFilter: TCheckBox
         Left = 2
-        Height = 20
+        Height = 21
         Top = 5
-        Width = 20
+        Width = 21
         Checked = True
         OnChange = CheckBoxFilterChange
         State = cbChecked
@@ -5797,7 +5797,7 @@ inherited fmMain: TfmMain
     end
     object Label1: TLabel
       Left = 41
-      Height = 18
+      Height = 19
       Top = 322
       Width = 41
       Caption = 'Label1'
