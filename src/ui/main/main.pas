@@ -4272,12 +4272,18 @@ var
 begin
   Result := False;
 
-  if ATableName <> '' then
+  if not RegisteredDatabases[dbIndex].IBDatabase.Connected then
   begin
-    fmCreateTableTrigger.cbTables.Clear;
-    fmCreateTableTrigger.cbTables.Items.Add(ATableName);
-    fmCreateTableTrigger.cbTables.ItemIndex := 0;
+    MsgError('Database is not connected.');
+    Exit;
   end;
+
+  RegisteredDatabases[dbIndex].IBDatabase.GetTableNames(fmCreateTableTrigger.cbTables.Items);
+
+  if ATableName = '' then
+    fmCreateTableTrigger.cbTables.ItemIndex := 0
+  else
+    fmCreateTableTrigger.cbTables.ItemIndex := fmCreateTableTrigger.cbTables.Items.IndexOf(Trim(ATableName));
 
   fmCreateTableTrigger.edTriggerName.Clear;
   fmCreateTableTrigger.cxUpdate.Checked := False;
@@ -4319,13 +4325,6 @@ begin
 
   if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
     Exit;
-
-  // lokal ausführen
-  if not RegisteredDatabases[dbIndex].IBDatabase.Connected then
-  begin
-    MsgError('Database is not connected.');
-    Exit;
-  end;
 
   Tr := TIBTransaction.Create(nil);
   ScriptEngine := TIBXScript.Create(nil);
