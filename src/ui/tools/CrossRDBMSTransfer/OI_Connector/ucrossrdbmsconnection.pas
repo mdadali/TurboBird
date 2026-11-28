@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, SQLDB, PQConnection, IBConnection, SQLDBLib, mysql40conn,
   mysql41conn, mysql50conn, mysql51conn, mysql55conn, mysql56conn, mysql57conn,
-  mysql80conn, odbcconn, oracleconnection, MSSQLConn, SQLite3Conn, Forms,
+  mysql80conn, odbcconn, oracleconnection,  SQLite3Conn, Forms,  //MSSQLConn,
   Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Buttons, IBQuery, IBDatabase,
   RTTIGrids, PropEdits, IniFiles,
 

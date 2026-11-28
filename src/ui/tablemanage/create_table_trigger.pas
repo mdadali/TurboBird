@@ -7,7 +7,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
   StdCtrls, Buttons,
-  uthemeselector;
+  uthemeselector,
+  umessagedlg;
 
 type
 
@@ -28,10 +29,8 @@ type
     procedure BitBtn1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
-    { private declarations }
   public
-    { public declarations }
-  end; 
+  end;
 
 var
   fmCreateTableTrigger: TfmCreateTableTrigger;
@@ -42,19 +41,34 @@ implementation
 
 procedure TfmCreateTableTrigger.BitBtn1Click(Sender: TObject);
 begin
-  if (Trim(edTriggerName.Text) = '') or (not (cxDelete.Checked or cxInsert.Checked or cxUpdate.Checked)) then
-    MessageDlg('Incorrect configuration', mtError, [mbOk], 0)
-  else
-    ModalResult:= mrOK;
+  if Trim(edTriggerName.Text) = '' then
+  begin
+    MsgWarning('Please enter a trigger name.');
+    edTriggerName.SetFocus;
+    Exit;
+  end;
+
+  if not (cxDelete.Checked or cxInsert.Checked or cxUpdate.Checked) then
+  begin
+    MsgWarning('Please select at least one event (Insert / Update / Delete).');
+    Exit;
+  end;
+
+  if Trim(cbTables.Text) = '' then
+  begin
+    MsgWarning('Please select a table.');
+    Exit;
+  end;
+
+  ModalResult := mrOK;
 end;
 
 procedure TfmCreateTableTrigger.FormShow(Sender: TObject);
 begin
-  frmThemeSelector.btnApplyClick(self);
+  frmThemeSelector.btnApplyClick(Self);
 end;
 
 initialization
   {$I create_table_trigger.lrs}
 
 end.
-

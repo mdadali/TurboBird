@@ -1,5 +1,5 @@
 inherited fmMain: TfmMain
-  Left = 674
+  Left = 432
   Height = 668
   Top = 347
   Width = 1486

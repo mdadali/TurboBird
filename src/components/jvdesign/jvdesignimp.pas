@@ -8,7 +8,7 @@ uses
   {$IFDEF UNITVERSIONING}
   JclUnitVersioning,
   {$ENDIF UNITVERSIONING}
-  LCLProc, LCLType, LResources, LCLIntf, LMessages, SysUtils, Classes, Controls, Graphics,
+  LCLProc, LCLType, LResources, LCLIntf, LMessages, Types, SysUtils, Classes, Controls, Graphics,
   Forms, ExtCtrls, Contnrs, JvDesignUtils,
   JvDesignSurface;
 

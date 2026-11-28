@@ -9,7 +9,7 @@ uses
   Math, DateUtils, Dialogs,
   Graphics, StdCtrls, ExtCtrls,
   SynEdit, SynHighlighterSQL, Grids, CheckLst, ComCtrls, DB, BufStream,
-  IBDatabase, IBQuery, IBSQL, IBXScript, IBDataOutput, ATSynEdit,
+  IBDatabase, IBQuery, IBSQL, IBXScript, IBDataOutput,
 
   SysTables,
   turbocommon,

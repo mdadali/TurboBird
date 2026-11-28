@@ -16,6 +16,8 @@ uses
   dbugintf, turbocommon, DB,
   IniFiles, Types,   SynEdit,
 
+  confirm_query, umessagedlg,
+
   IBInternals,
   IBSQLMonitor,
   IB,
@@ -391,7 +393,7 @@ type
     procedure lmCreateStoredProcClick(Sender: TObject);
 
     procedure lmCreateTriggerClick(Sender: TObject);
-    procedure CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
+    //procedure CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
     procedure CreateNewDBTrigger(DBIndex: Integer);
     procedure CreateNewDDLTrigger(DBIndex: Integer);
     procedure CreateNewUDRTableTrigger(DBIndex: Integer);
@@ -1691,89 +1693,97 @@ var
   SelNode: TTreeNode;
   dbIndex: Integer;
   DummyCreated, DummyJustCreated: Boolean;
-  ServerVersionMajor: word;
+  ServerVersionMajor: Word;
+  UserName: string;
 begin
   with fmCreateUser do
   try
     SelNode := tvMain.Selected;
-    dbIndex := TPNodeInfos(SelNode.Parent.Data)^.dbIndex;
-    //Init(dbIndex);
+    if (SelNode = nil) or (SelNode.Parent = nil) or (SelNode.Parent.Data = nil) then
+      Exit;
 
+    dbIndex := TPNodeInfos(SelNode.Parent.Data)^.dbIndex;
 
     edUserName.Clear;
     edPassword.Clear;
 
-    if ShowModal = mrOK then
+    if ShowModal <> mrOK then
+      Exit;
+
+    UserName := Trim(edUserName.Text);
+
+    // Create user
+    if RegisteredDatabases[dbIndex].IBQuery.Active then
+      RegisteredDatabases[dbIndex].IBQuery.Close;
+    RegisteredDatabases[dbIndex].IBQuery.SQL.Text :=
+      'CREATE USER "' + UserName + '" PASSWORD ' + QuotedStr(edPassword.Text);
+    RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
+
+    DummyCreated := False;
+    DummyJustCreated := False;
+
+    ServerVersionMajor := GetServerMajorVersionFromIBDB(
+      RegisteredDatabases[dbIndex].IBDatabase);
+
+    if ServerVersionMajor < 3 then
     begin
-      // Create user
-      if RegisteredDatabases[dbIndex].IBQuery.Active then
-        RegisteredDatabases[dbIndex].IBQuery.Close;
-      RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'CREATE USER "' + edUserName.Text + '" PASSWORD ' + QuotedStr(edPassword.Text);
-      RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
-
-      DummyCreated := False;
-      DummyJustCreated := False;
-
-      // FB 2.5: Dummy-Rolle prüfen / anlegen und ggf. zuweisen
-
-      //ServerVersionMajor := RegisteredDatabases[dbIndex].RegRec.ServerVersionMajor;
-
-      ServerVersionMajor := GetServerMajorVersionFromIBDB(RegisteredDatabases[dbIndex].IBDatabase);
-
-      if ServerVersionMajor < 3 then
+      if not dmSysTables.DummyRoleExists then
       begin
-        if not dmSysTables.DummyRoleExists then
+        if dmSysTables.EnsureDummyRole then
         begin
-          // Dummy-Rolle existiert nicht → erstellen
-          if dmSysTables.EnsureDummyRole then
-          begin
-            DummyJustCreated := True;
-            DummyCreated := True;
-          end
-          else
-          begin
-            ShowMessage('Error creating the Dummy role. The new user will still be created, but may not appear in the user list.');
-          end;
+          DummyJustCreated := True;
+          DummyCreated := True;
         end
         else
-          DummyCreated := True;
+          MsgWarning(
+            'Error creating the Dummy role. The new user will still be created, ' +
+            'but may not appear in the user list.');
+      end
+      else
+        DummyCreated := True;
 
-        // Dummy-Rolle zuweisen
-        if DummyCreated then
-        begin
-          RegisteredDatabases[dbIndex].IBQuery.Close;
-          RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'GRANT DUMMYROLE TO "' + edUserName.Text + '"';
-          RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
-
-          if DummyJustCreated then
-            ShowMessage('A Dummy role has been created and automatically assigned to the new user because you are working with Firebird version < 3. ' +
-                        'Without this Dummy role, a user without any other rights would not appear in the user list.')
-          else
-            ShowMessage('The Dummy role already exists and has been automatically assigned to the new user. ' +
-                        'This ensures that the user is visible in the user list while working with Firebird version < 3.');
-        end;
-      end;
-
-      // Grant role, falls ausgewählt
-      if cxGrantRole.Checked and (Trim(cbRoles.Text) <> '') then
+      if DummyCreated then
       begin
         RegisteredDatabases[dbIndex].IBQuery.Close;
-        RegisteredDatabases[dbIndex].IBQuery.SQL.Text := 'GRANT "' + cbRoles.Text + '" TO "' + edUserName.Text + '"';
+        RegisteredDatabases[dbIndex].IBQuery.SQL.Text :=
+          'GRANT DUMMYROLE TO "' + UserName + '"';
         RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
+
+        if DummyJustCreated then
+          MsgBox(
+            'A Dummy role has been created and automatically assigned to the new user ' +
+            'because you are working with Firebird version < 3. ' +
+            'Without this Dummy role, a user without any other rights would not appear ' +
+            'in the user list.',
+            mkInfo)
+        else
+          MsgBox(
+            'The Dummy role already exists and has been automatically assigned to the new user. ' +
+            'This ensures that the user is visible in the user list while working with ' +
+            'Firebird version < 3.',
+            mkInfo);
       end;
-
-      RegisteredDatabases[dbIndex].IBTransaction.CommitRetaining;
-
-      MessageDlg('New user (' + edUserName.Text + ') has been created successfully', mtInformation, [mbOk], 0);
-
-      lmRefresh.Click;
     end;
+
+    // Grant role, falls ausgewählt
+    if cxGrantRole.Checked and (Trim(cbRoles.Text) <> '') then
+    begin
+      RegisteredDatabases[dbIndex].IBQuery.Close;
+      RegisteredDatabases[dbIndex].IBQuery.SQL.Text :=
+        'GRANT "' + cbRoles.Text + '" TO "' + UserName + '"';
+      RegisteredDatabases[dbIndex].IBQuery.ExecSQL;
+    end;
+
+    RegisteredDatabases[dbIndex].IBTransaction.CommitRetaining;
+
+    MsgBox('New user (' + UserName + ') has been created successfully.', mkInfo);
+
+    lmRefresh.Click;
   except
     on E: Exception do
-      MessageDlg('Error while creating new user: ' + E.Message, mtError, [mbOk], 0);
+      MsgError('Error while creating new user: ' + E.Message);
   end;
 end;
-
 
 procedure TfmMain.mnServerRegistryClick(Sender: TObject);
 begin
@@ -1856,7 +1866,7 @@ begin
 
   if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
-    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    MsgError(ServerErrStr);
     Exit;
   end;
 
@@ -1988,8 +1998,8 @@ var
 begin
   if tvMain.Items.Count = 0 then
   begin
-    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
-    exit;
+    MsgError('Please register a server first!');
+    Exit;
   end;
 
   DBNode := nil;
@@ -2010,7 +2020,7 @@ begin
 
   if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
-    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    MsgError(ServerErrStr);
     Exit;
   end;
 
@@ -2196,7 +2206,7 @@ begin
          ' password ' + QuotedStr(fmChangePass.edPassword.Text);
        dmSysTables.sqQuery.ExecSQL;
        dmSysTables.stTrans.CommitRetaining;
-       MessageDlg('Password has been changed', mtInformation, [mbOk], 0);
+       MsgBox('Password has been changed.', mkInfo);
     except
       on E: Exception do
         ShowMessage('Error while changing password: ' + e.Message);
@@ -2529,7 +2539,7 @@ var
 begin
   if tvMain.Items.Count = 0 then
   begin
-    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
+    MsgError('Please register a server first!');
     exit;
   end;
 
@@ -2538,7 +2548,7 @@ begin
   begin
     if Assigned(AliasList) then
       AliasList.Free;
-    MessageDlg('No servers registered.', mtWarning, [mbOK], 0);
+    MsgWarning('No servers registered.');
     Exit;
   end;
 
@@ -2550,7 +2560,7 @@ begin
 
     if SelectedServerNode = nil then
     begin
-      MessageDlg('Please select a server node first.', mtWarning, [mbOK], 0);
+      MsgWarning('Please select a server node first.');
       Exit;
     end;
 
@@ -2559,7 +2569,7 @@ begin
 
     if not IsServerReachable(RealServerName, ServerErrStr) then
     begin
-      MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+      MsgError(ServerErrStr);
       Exit;
     end;
 
@@ -2616,7 +2626,7 @@ begin
 
   if not IsServerReachable(RealServerName, ServerErrStr) then
   begin
-    MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+    MsgError(ServerErrStr);
     Exit;
   end;
 
@@ -2780,7 +2790,7 @@ begin
               except
                 on E2: Exception do
                 begin
-                  MessageDlg('Commit error for "' + dbName + '": ' + E2.Message, mtError, [mbOK], 0);
+                  MsgError('Commit error for "' + dbName + '": ' + E2.Message);
                   CommitOK := False;
                 end;
               end;
@@ -2795,7 +2805,7 @@ begin
                 AIBTransaction.Rollback;
             except
               on E3: Exception do
-                MessageDlg('Rollback error for "' + dbName + '": ' + E3.Message, mtError, [mbOK], 0);
+                MsgError('Rollback error for "' + dbName + '": ' + E3.Message);
             end;
             Result := False;
           end;
@@ -2808,7 +2818,7 @@ begin
         except
           on E: Exception do
           begin
-            MessageDlg('Rollback error for "' + dbName + '": ' + E.Message, mtError, [mbOK], 0);
+            MsgError('Rollback error for "' + dbName + '": ' + E.Message);
             Result := False;
           end;
         end;
@@ -2920,9 +2930,8 @@ begin
   except
     on E: Exception do
       if not Silent then
-        MessageDlg('Database Close Error',
-                   'Error closing ' + DBName + LineEnding + E.Message,
-                   mtError, [mbOK], 0);
+      MsgError('Database Close Error' + sLineBreak + sLineBreak +
+               'Error closing ' + DBName + sLineBreak + E.Message);
   end;
 end;
 
@@ -3034,9 +3043,9 @@ begin
 
   if not IsNative then
   begin
-    MessageDlg(
-      Format('Function "%s" is not a native Firebird PSQL function and cannot be dropped using this operation.', [FuncName]),
-      mtWarning, [mbOK], 0);
+    MsgWarning(Format(
+      'Function "%s" is not a native Firebird PSQL function and cannot be dropped using this operation.',
+      [FuncName]));
     Exit;
   end;
 
@@ -3168,9 +3177,9 @@ begin
 
   if not IsNative then
   begin
-    MessageDlg(
-      Format('Procedure "%s" is not a native Firebird PSQL procedure and cannot be dropped using this operation.', [ProcName]),
-      mtWarning, [mbOK], 0);
+    MsgWarning(Format(
+      'Procedure "%s" is not a native Firebird PSQL procedure and cannot be dropped using this operation.',
+      [ProcName]));
     Exit;
   end;
 
@@ -3280,9 +3289,9 @@ begin
 
   if not IsUDR then
   begin
-    MessageDlg(
-      Format('Function "%s" is not a UDR function and cannot be dropped using this operation.', [FunctionName]),
-      mtWarning, [mbOK], 0);
+    MsgWarning(Format(
+      'Function "%s" is not a UDR function and cannot be dropped using this operation.',
+      [FunctionName]));
     Exit;
   end;
 
@@ -3340,9 +3349,9 @@ begin
 
   if not IsUDR then
   begin
-    MessageDlg(
-      Format('Procedure "%s" is not a UDR procedure and cannot be dropped using this operation.', [ProcName]),
-      mtWarning, [mbOK], 0);
+    MsgWarning(Format(
+      'Procedure "%s" is not a UDR procedure and cannot be dropped using this operation.',
+      [ProcName]));
     Exit;
   end;
 
@@ -3670,6 +3679,7 @@ begin
     SimpleObjExtractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
     Strings := QWindow.meQuery.Lines;
 
+    //ATableName := turbocommon.MakeCaseSensitiveAuto(ATableName);
     SimpleObjExtractor.Extract(otData, ATableName, [], true, Strings);
   finally
     Screen.Cursor := crDefault;
@@ -4065,7 +4075,7 @@ var
 begin
   SelNode:= tvMain.Selected;
   if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(StripTablePrefix(SelNode.Text)), True) then
-    MessageDlg('Trigger has been activated', mtInformation, [mbOk], 0);
+    MsgBox('Trigger has been activated.', mkInfo);
 end;
 
 procedure TfmMain.CallRoutine(ARoutineType: TRoutineType);
@@ -4250,57 +4260,112 @@ begin
 end;
 
 (***************  Create new Trigger  ****************)
-Function TfmMain.CreateNewTrigger(dbIndex: Integer; ATableName: string; OnCommitProcedure: TNotifyEvent = nil): Boolean;
+function TfmMain.CreateNewTrigger(dbIndex: Integer; ATableName: string;
+  OnCommitProcedure: TNotifyEvent = nil): Boolean;
 var
-  QWindow: TfmQueryWindow;
   TrigType: string;
+  Script: string;
+  DlgCaption: string;
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
 begin
-  Result:= False;
+  Result := False;
+
   if ATableName <> '' then
   begin
     fmCreateTableTrigger.cbTables.Clear;
     fmCreateTableTrigger.cbTables.Items.Add(ATableName);
-    fmCreateTableTrigger.cbTables.ItemIndex:= 0;
+    fmCreateTableTrigger.cbTables.ItemIndex := 0;
   end;
+
   fmCreateTableTrigger.edTriggerName.Clear;
-  fmCreateTableTrigger.cxUpdate.Checked:= False;
-  fmCreateTableTrigger.cxInsert.Checked:= False;
-  fmCreateTableTrigger.cxDelete.Checked:= False;
+  fmCreateTableTrigger.cxUpdate.Checked := False;
+  fmCreateTableTrigger.cxInsert.Checked := False;
+  fmCreateTableTrigger.cxDelete.Checked := False;
 
-  if fmCreateTableTrigger.ShowModal = mrOK then
-  begin
-    Result:= True;
+  if fmCreateTableTrigger.ShowModal <> mrOK then
+    Exit;
 
-    if fmCreateTableTrigger.rbAfter.Checked then
-      TrigType:= 'After'
-    else
-      TrigType:= 'Before';
-    if fmCreateTableTrigger.cxInsert.Checked then
-      TrigType:= TrigType + ' insert or';
-    if fmCreateTableTrigger.cxUpdate.Checked then
-      TrigType:= TrigType + ' update or';
-    if fmCreateTableTrigger.cxDelete.Checked then
-      TrigType:= TrigType + ' delete or';
+  if fmCreateTableTrigger.rbAfter.Checked then
+    TrigType := 'After'
+  else
+    TrigType := 'Before';
+
+  if fmCreateTableTrigger.cxInsert.Checked then
+    TrigType := TrigType + ' insert or';
+  if fmCreateTableTrigger.cxUpdate.Checked then
+    TrigType := TrigType + ' update or';
+  if fmCreateTableTrigger.cxDelete.Checked then
+    TrigType := TrigType + ' delete or';
+
+  // trailing " or" entfernen
+  if (Length(TrigType) >= 3) and (Copy(TrigType, Length(TrigType) - 2, 3) = ' or') then
     Delete(TrigType, Length(TrigType) - 2, 3);
 
-    QWindow:= ShowQueryWindow(dbIndex, 'New Trigger#' + IntToStr(dbIndex) + ':'
-                 + TrigType + ':' + fmCreateTableTrigger.edTriggerName.Text);
+  Script :=
+    'CREATE TRIGGER ' + MakeCaseSensitiveAuto(fmCreateTableTrigger.edTriggerName.Text) +
+    ' FOR ' + MakeCaseSensitiveAuto(fmCreateTableTrigger.cbTables.Text) + LineEnding +
+    'ACTIVE' + LineEnding +
+    TrigType + LineEnding +
+    'POSITION 0' + LineEnding +
+    'AS' + LineEnding +
+    'BEGIN' + LineEnding +
+    '  -- Your code here' + LineEnding +
+    '  -- New.FieldName = YourData;' + LineEnding +
+    'END;';
 
-    QWindow.meQuery.Lines.Clear;
-    QWindow.meQuery.Lines.Add('CREATE TRIGGER ' + MakeCaseSensitiveAuto(fmCreateTableTrigger.edTriggerName.Text) + ' for ' +
-      MakeCaseSensitiveAuto(fmCreateTableTrigger.cbTables.Text));
-    QWindow.meQuery.Lines.Add('Active');
-    QWindow.meQuery.Lines.Add(TrigType);
-    QWindow.meQuery.Lines.Add('Position 0');
-    QWindow.meQuery.Lines.Add('AS');
-    QWindow.meQuery.Lines.Add('BEGIN');
-    QWindow.meQuery.Lines.Add(' -- Your code here');
-    QWindow.meQuery.Lines.Add(' -- New.FieldName = YourData;');
-    QWindow.meQuery.Lines.Add('END;');
-    fmMain.Show;
+  DlgCaption := 'New Trigger: ' + fmCreateTableTrigger.edTriggerName.Text;
 
-    if OnCommitProcedure <> nil then
-      QWindow.OnCommit:= OnCommitProcedure;
+  if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+    Exit;
+
+  // lokal ausführen
+  if not RegisteredDatabases[dbIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[dbIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[dbIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[dbIndex].IBDatabase;
+    Lines.Text := Script;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+      turbocommon.MetaDataChanged := True;
+
+      if Assigned(OnCommitProcedure) then
+        OnCommitProcedure(Self);
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
   end;
 end;
 
@@ -4323,9 +4388,9 @@ begin
   case ObjectType of
     tvotTableTriggerRoot:
       if  TPNodeInfos(SelNode.Parent.Data)^.ObjectType =  tvotTable then
-        CreateNewTableTrigger(DBIndex, tvMain.Selected.Parent.Text)
+        CreateNewTrigger(DBIndex, tvMain.Selected.Parent.Text)
       else
-        CreateNewTableTrigger(DBIndex, '');
+        CreateNewTrigger(DBIndex, '');
 
     tvotDBTriggerRoot:
       CreateNewDBTrigger(DBIndex);
@@ -4343,11 +4408,11 @@ begin
       CreateNewUDRDDLTrigger(DBIndex);
 
   else
-    CreateNewTableTrigger(DBIndex, '');
+    CreateNewTrigger(DBIndex, '');
   end;
 end;
 
-procedure TfmMain.CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
+{procedure TfmMain.CreateNewTableTrigger(DBIndex: Integer; ATableName: string);
 var
   TableNames: string;
   Count: Integer;
@@ -4355,7 +4420,7 @@ begin
   TableNames := dmSysTables.GetDBObjectNames(DBIndex, otTables, Count);
   fmCreateTableTrigger.cbTables.Items.CommaText := TableNames;
   CreateNewTrigger(DBIndex, ATableName);
-end;
+end;}
 
 procedure TfmMain.CreateNewDBTrigger(DBIndex: Integer);
 var
@@ -4579,7 +4644,7 @@ var
 begin
   SelNode:= tvMain.Selected;
   if ChangeTriggerActivity(TPNodeInfos(SelNode.Parent.Parent.Data)^.dbIndex, MakeCaseSensitiveAuto(StripTablePrefix(SelNode.Text)), False) then
-    MessageDlg('Trigger has been DeActivated', mtInformation, [mbOk], 0);
+    MsgBox('Trigger has been deactivated.', mkInfo);
 end;
 
 (***************  Display view top 1000 records  ************)
@@ -4665,8 +4730,7 @@ begin
   Extractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
   if not Assigned(Extractor) then
   begin
-    MessageDlg('Metadata extractor not initialized. Please reopen the database node.',
-      mtError, [mbOK], 0);
+    MsgError('Metadata extractor not initialized. Please reopen the database node.');
     Exit;
   end;
 
@@ -4677,8 +4741,7 @@ begin
 
     if Script.Count = 0 then
     begin
-      MessageDlg('Could not read trigger "' + ATriggerName + '".',
-        mtWarning, [mbOK], 0);
+      MsgWarning('Could not read trigger "' + ATriggerName + '".');
       Exit;
     end;
 
@@ -6195,7 +6258,7 @@ begin
     end;
   except
     on E: Exception do
-      MessageDlg('Error while getting stored procedure information: ' + e.Message, mtError, [mbOk], 0);
+      MsgError('Error while getting stored procedure information: ' + E.Message);
   end;
 end;
 
@@ -7761,8 +7824,7 @@ begin
   Extractor := TPNodeInfos(DBNode.Data)^.SimpleObjExtractor;
   if not Assigned(Extractor) then
   begin
-    MessageDlg('Metadata extractor not initialized. Please reopen the database node.',
-      mtError, [mbOK], 0);
+    MsgError('Metadata extractor not initialized. Please reopen the database node.');
     Exit;
   end;
 
@@ -7772,8 +7834,7 @@ begin
   Info := Extractor.GetTriggerInfo(ATriggerName);
   if Info.TriggerName = '' then
   begin
-    MessageDlg('Could not read trigger "' + ATriggerName + '".',
-      mtWarning, [mbOK], 0);
+    MsgWarning('Could not read trigger "' + ATriggerName + '".');
     Exit;
   end;
 
@@ -8088,29 +8149,26 @@ begin
                TPNodeInfos(tvMain.Selected.Data)^.dbIndex,
                Processed, Failed, FirstError) then
       begin
-        MessageDlg(
-          Format('Recalculation of index statistics complete for %d indices.',
-                 [Processed]),
-          mtInformation, [mbOK], 0);
+        MsgBox(Format(
+          'Recalculation of index statistics complete for %d indices.',
+          [Processed]), mkInfo);
       end
       else
       begin
         if Processed = 0 then
-          MessageDlg('Could not recalculate index statistics:' + sLineBreak +
-                     sLineBreak + FirstError,
-                     mtError, [mbOK], 0)
+        MsgError('Could not recalculate index statistics:' + sLineBreak +
+                 sLineBreak + FirstError)
         else
-          MessageDlg(
-            Format('Recalculated %d of %d indices.' + sLineBreak +
-                   sLineBreak +
-                   'First error: %s',
-                   [Processed, Processed + Failed, FirstError]),
-            mtWarning, [mbOK], 0);
+ MsgWarning(Format('Recalculated %d of %d indices.' + sLineBreak +
+                  sLineBreak +
+                  'First error: %s',
+                  [Processed, Processed + Failed, FirstError]));
+
       end;
     except
       on E: Exception do
-        MessageDlg('Error recalculating index statistics:' + sLineBreak +
-                   E.Message, mtError, [mbOK], 0);
+      MsgError('Error recalculating index statistics:' + sLineBreak +
+               E.Message);
     end;
   finally
     // äußerer try..finally — Cursor wird IMMER zurückgesetzt
@@ -8232,7 +8290,7 @@ var
 begin
   if tvMain.Items.Count = 0 then
   begin
-    MessageDlg('Please register a server first!', mtError, [mbOK], 0);
+    MsgError('Please register a server first!');
     exit;
   end;
 
@@ -8267,8 +8325,7 @@ begin
     fmReg.cboxServers.ItemIndex := Idx
   else
   begin
-    MessageDlg('Server "' + DisplayAlias + '" not found in registry.',
-      mtError, [mbOK], 0);
+    MsgError('Server "' + DisplayAlias + '" not found in registry.');
     Exit;
   end;
 
@@ -8506,55 +8563,6 @@ begin
   end;
 end;
 
-{procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
-var
-  i: Integer;
-  tmpCloseAction: TCloseAction;
-begin
-  for i:= 0 to Application.ComponentCount - 1 do
-    if Application.Components[i] is TfmQueryWindow then
-    begin
-      (Application.Components[i] as TfmQueryWindow).lmCloseTabClick(nil);
-      Break;
-    end;
-end;}
-
-{procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
-var
-  i: Integer;
-  ts: TTabSheet;
-  ctrl: TControl;
-begin
-  // Ermittle, welches Tab geschlossen werden soll
-  ts := PageControl1.ActivePage;
-  if ts = nil then Exit;
-
-  if ts.TabIndex = 0 then
-    exit;
-
-  // Falls im Tab ein Formular eingebettet ist, schließe es korrekt
-  for i := 0 to ts.ControlCount - 1 do
-  begin
-    ctrl := ts.Controls[i];
-    if ctrl is TForm then
-    begin
-      // Formular-spezifische Logik aufrufen
-      if ctrl is TfmQueryWindow then
-        (ctrl as TfmQueryWindow).lmCloseTabClick(nil)
-      //else if ctrl is TfmDBInfo then
-        //(ctrl as TfmDBInfo).Close // Beispiel
-      else
-        (ctrl as TForm).Close; // Standard
-    end
-    else
-      ctrl.Free; // Sonstige Controls (Frames, Panels etc.)
-  end;
-
-  // Danach das Tab selbst freigeben
-  if not (ctrl is TfmQueryWindow) then
-    ts.Free;
-end;}
-
 procedure TfmMain.PageControl1CloseTabClicked(Sender: TObject);
 var
   i: Integer;
@@ -8675,141 +8683,6 @@ var
 begin
 end;
 
-{(*****************   Database Popup menu   ********************)
-procedure TfmMain.pmDatabasePopup(Sender: TObject);
-var
-  SelNode: TTreeNode;
-  Filter: Integer;
-  i: Integer;
-  ParentNodeText: string;
-  NodeText: string;
-  ObjectType: TTreeViewObjectType;
-  Refreshable: boolean;
-begin
-  SelNode:= tvMain.Selected;
-
-  if SelNode = nil then
-  begin
-    // Kein Knoten selektiert → alle Menüpunkte ausblenden
-    for i:= 0 to pmDatabase.Items.Count - 1 do
-      pmDatabase.Items[i].Visible := False;
-    Exit;
-  end;
-
-  ObjectType := TPNodeInfos(SelNode.Data)^.ObjectType;
-
-  case  ObjectType of
-    tvotServer: Filter:= -2;
-    tvotDatabase: Filter:= 0;
-
-    tvotSystemTableRoot: Filter := 100;
-    tvotSystemTable: Filter:= 7;
-    tvotSystemTableFieldRoot: Filter := 110;
-    tvotSystemTableField:     Filter := 111;
-
-    tvotTableRoot: Filter := 11;
-    tvotTable: Filter := 1;
-    tvotTableFieldRoot:    Filter := 120;
-    tvotTableField:        Filter := 121;
-    tvotTableTriggerRoot:  Filter := 131;
-    tvotTableTrigger:      Filter := 3;
-
-    tvotGeneratorRoot: Filter:= 12;
-    tvotGenerator: Filter := 2;
-
-    tvotDBTriggerRoot,
-
-    tvotDDLTriggerRoot: Filter := 13;
-
-    tvotUDRTriggerRoot: Filter := 300;
-    tvotUDRTableTriggerRoot,
-    tvotUDRDBTriggerRoot,
-    tvotUDRDDLTriggerRoot: Filter := 13;
-
-
-    tvotDBTrigger,
-    tvotDDLTrigger,
-    tvotUDRTableTrigger,
-    tvotUDRDBTrigger,
-    tvotUDRDDLTrigger,
-    tvotUDRTrigger: Filter := 3;
-
-    tvotViewRoot: Filter := 14;
-    tvotView: Filter := 4;
-
-    tvotProcedureRoot: Filter := 15;
-    tvotProcedure: Filter := 5;
-
-    tvotUDFRoot: Filter := 16;
-    tvotUDF: Filter := 6;
-
-    tvotDomainRoot: Filter := 18;
-    tvotDomain: Filter := 8;
-
-    tvotRoleRoot: Filter := 19;
-    tvotRole: Filter := 9;
-
-    tvotExceptionRoot: Filter := 20;
-    tvotException: Filter := 10;
-
-    tvotUserRoot: Filter:= 21;
-    tvotUser: Filter:= 111;
-
-    tvotQueryWindow: Filter:= 30;
-
-    tvotFunctionRoot: Filter := 31;
-    tvotFunction: Filter := 311;
-
-    tvotPackageRoot: Filter:= 32;
-    tvotPackage: Filter:= 33;
-    tvotPackageFunctionRoot: Filter:= 331;
-    tvotPackageFunction: Filter:= 332;
-    tvotPackageProcedureRoot: Filter:= 333;
-    tvotPackageProcedure: Filter:= 334;
-    tvotPackageUDRFunctionRoot: Filter:= 335;
-    tvotPackageUDRFunction: Filter:= 336;
-    tvotPackageUDRProcedureRoot: Filter:= 337;
-    tvotPackageUDRProcedure: Filter := 338;
-
-    tvotUDRRoot: Filter:= 42;
-    tvotUDRFunctionRoot: Filter := 43;
-    tvotUDRFunction: Filter := 44;
-    tvotUDRProcedureRoot: Filter := 45;
-    tvotUDRProcedure: Filter := 46;
-
-
-    // Constraints & Indices   Roots are only Refreshable
-     //tvotPrimaryKeyRoot:       Filter := 400;
-     tvotPrimaryKey:           Filter := 281;
-     //tvotForeignKeyRoot:       Filter := 400;
-     tvotForeignKey:           Filter := 282;
-     //tvotUniqueConstraintRoot: Filter := 400;
-     tvotUniqueConstraint:     Filter := 283;
-     //tvotCheckConstraintRoot:  Filter := 400;
-     tvotCheckConstraint:      Filter := 284;
-     //tvotNotNullConstraintRoot:Filter := 400;
-     tvotNotNullConstraint:    Filter := 285;
-     //tvotIndexRoot:            Filter := 294;
-     tvotIndex:                Filter := 286;
-     //tvotTableReferencesRoot
-     //tvotTablePermissionsRoot
-
-
-     //Forms
-     tvotFormRoot:   Filter := 501;
-     tvotForm:       Filter := 500;
-
-  else
-    Filter:= -1;
-  end;
-
-  Refreshable := TPNodeInfos(SelNode.Data)^.Refreshable;
-
-  for i:= 0 to pmDatabase.Items.Count - 1 do
-    pmDatabase.Items[i].Visible:= (pmDatabase.Items[i].Tag = Filter) or
-      ((pmDatabase.Items[i].Tag = 100) and Refreshable);
-end; }
-
 (*****************   Database Popup menu   ********************)
 procedure TfmMain.pmDatabasePopup(Sender: TObject);
 var
@@ -8926,7 +8799,6 @@ begin
      tvotIndex:                Filter := 286;
      //tvotTableReferencesRoot
      //tvotTablePermissionsRoot
-
 
      //Forms
      tvotFormRoot:   Filter := 501;
@@ -9389,7 +9261,7 @@ begin
       begin
         AllowExpansion := False;
         if ServerErrStr <> 'Login cancelled by user.' then
-          MessageDlg(ServerErrStr, mtError, [mbOK], 0);
+          MsgError(ServerErrStr);
         Exit;
       end;
 
@@ -9404,8 +9276,7 @@ begin
         if ServerSession = nil then
         begin
           AllowExpansion := False;
-          MessageDlg('Server record not found for "' + DisplayAlias + '".',
-            mtError, [mbOK], 0);
+          MsgError('Server record not found for "' + DisplayAlias + '".');
           Exit;
         end;
 
@@ -9484,11 +9355,11 @@ begin
 
               if RetryCount >= MAX_CONNECT_RETRIES then
               begin
-                MessageDlg('Database connection failed after ' +
-                           IntToStr(MAX_CONNECT_RETRIES) + ' attempts.' + sLineBreak +
-                           sLineBreak +
-                           'Last error: ' + E.Message,
-                           mtError, [mbOK], 0);
+                MsgError('Database connection failed after ' +
+                         IntToStr(MAX_CONNECT_RETRIES) + ' attempts.' + sLineBreak +
+                         sLineBreak +
+                         'Last error: ' + E.Message);
+
                 RegisteredDatabases[NodeInfo^.dbIndex].IBDatabase.Params.Values['password'] := '';
                 AllowExpansion := False;
                 Exit;
@@ -10051,7 +9922,7 @@ end;
 
 procedure TfmMain.GlobalException(Sender: TObject; E : Exception);
 begin
-  MessageDlg('Exception', e.Message, mtError, [mbOk], 0);
+  MsgError('Exception:' + sLineBreak + e.Message);
 end;
 
 
@@ -10887,11 +10758,11 @@ end;
   begin
     Result := Length(RegisteredServers) > 0;
     if not Result then
-      MessageDlg(
+      MsgWarning(
         'No server has been registered yet.' + LineEnding + LineEnding +
         'Please register a server first (Step 1 on the home page) before you ' +
-        'can create, register, or manage databases.',
-        mtWarning, [mbOK], 0);
+        'can create, register, or manage databases.');
+
   end;
 
   function TfmMain.EnsureDatabaseSelected: Boolean;
@@ -10901,11 +10772,10 @@ end;
 
     if (tvMain.Selected = nil) or (tvMain.Selected.Level < 1) then
     begin
-      MessageDlg(
+      MsgWarning(
         'Please select a database in the tree on the left first.' + LineEnding +
         LineEnding +
-        'This action refers to a specific database.',
-        mtWarning, [mbOK], 0);
+        'This action refers to a specific database.');
       Result := False;
     end;
   end;
@@ -10920,11 +10790,10 @@ end;
     NodeInfo := TPNodeInfos(tvMain.Selected.Data);
     if (NodeInfo = nil) or (NodeInfo^.ObjectType <> tvotTable) then
     begin
-      MessageDlg(
+      MsgWarning(
         'Please select a table in the tree on the left first.' + LineEnding +
         LineEnding +
-        'This action refers to a specific table.',
-        mtWarning, [mbOK], 0);
+        'This action refers to a specific table.');
       Result := False;
     end;
   end;

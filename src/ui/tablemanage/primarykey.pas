@@ -1,4 +1,4 @@
-unit edit_primarykey;
+unit primarykey;
 
 {$mode objfpc}{$H+}
 

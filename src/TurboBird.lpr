@@ -59,7 +59,7 @@ uses
   datamodulesystem, jvRuntimeDesign, pascalscript, pascalscriptfcl,
   uPSI_uibconst, uiblaz, fActivityMonitor, edit_tabledata_new,
   foreign_key_table, ibsqleditor, IBTransactionEdit, fdataeditor, fSQLParser,
-  u_psstudio, u_consoleide, db_reader, DbGridForm, edit_primarykey,
+  u_psstudio, u_consoleide, db_reader, DbGridForm, primarykey,
   UniqueConstraints, CheckConstraints, NotNullConstraints,
   clone_table_to_external_table_dialog, confirm_query, umessagedlg,
   clone_table_dialog, uCreateTableFromDataSet, uCrossRDBMSMain, About,

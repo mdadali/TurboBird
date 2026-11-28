@@ -470,6 +470,7 @@ begin
   FTransForm.Parent := grboxTransaction;
   FTransForm.Cancelbtn.Visible:=false;
   FTransForm.OKBtn.Visible:=false;
+  FTransForm.BorderStyle := bsNone;
   FTransForm.Align := alClient;
   FTransForm.Visible:=true;
 

@@ -15,7 +15,7 @@ uses
 
   uthemeselector,
 
-  edit_primarykey,
+  primarykey,
   UniqueConstraints,
   CheckConstraints,
   NotNullConstraints,

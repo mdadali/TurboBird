@@ -7,11 +7,15 @@ interface
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, Grids, Buttons,
 
+  IBDatabase,
+  IBXScript,
+
   turbocommon,
   fbcommon,
 
+  confirm_query,
+  umessagedlg,
   fsimpleobjextractor,
-
   uthemeselector;
 
 type
@@ -38,6 +42,7 @@ type
     FNodeInfos: TPNodeInfos;
     FExtractor: TSimpleObjExtractor;
 
+    function ExecuteSQL(const ASQL: string): Boolean;
   public
     procedure Init(ADBIndex: Integer; const ATableName: string;
                    ANodeInfos: TPNodeInfos; AExtractor: TSimpleObjExtractor);
@@ -49,7 +54,7 @@ implementation
 
 {$R triggers.lfm}
 
-uses Main, QueryWindow;
+uses Main;
 
 { TfmTriggers }
 
@@ -98,30 +103,63 @@ procedure TfmTriggers.bbEditClick(Sender: TObject);
 var
   ATriggerName: string;
   List: TStringList;
+  Script: string;
+  DlgCaption: string;
 begin
-  if sgTriggers.RowCount > 1 then
-  begin
-    List := TStringList.Create;
-    try
-      ATriggerName := sgTriggers.Cells[0, sgTriggers.Row];
-      FExtractor.GetTriggerScript(ATriggerName, List);
-      fmMain.ShowCompleteQueryWindow(FDBIndex, 'Edit Trigger', List.Text, @bbRefreshClick);
-    finally
-      List.Free;
+  if sgTriggers.RowCount <= 1 then
+    Exit;
+
+  ATriggerName := Trim(sgTriggers.Cells[0, sgTriggers.Row]);
+  if ATriggerName = '' then
+    Exit;
+
+  List := TStringList.Create;
+  try
+    FExtractor.GetTriggerScript(ATriggerName, List);
+    if List.Count = 0 then
+    begin
+      MsgWarning('Could not read trigger "' + ATriggerName + '".');
+      Exit;
     end;
+
+    Script := List.Text;
+    DlgCaption := 'Edit Trigger: ' + ATriggerName;
+
+    if not TfrmConfirmQuery.Execute(DlgCaption, Script) then
+      Exit;
+
+    if ExecuteSQL(Script) then
+    begin
+      turbocommon.MetaDataChanged := True;
+      FillTriggers;
+    end;
+  finally
+    List.Free;
   end;
 end;
 
 procedure TfmTriggers.bbDropClick(Sender: TObject);
 var
   ATriggerName: string;
+  Script: string;
 begin
-  if (sgTriggers.RowCount > 1) and
-    (MessageDlg('Are You sure to drop this trigger', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+  if sgTriggers.RowCount <= 1 then
+    Exit;
+
+  ATriggerName := Trim(sgTriggers.Cells[0, sgTriggers.Row]);
+  if ATriggerName = '' then
+    Exit;
+
+  if not MsgConfirm('Are you sure you want to drop trigger "' + ATriggerName + '"?',
+                    mkWarning) then
+    Exit;
+
+  Script := 'DROP TRIGGER ' + MakeCaseSensitiveAuto(ATriggerName) + ';';
+
+  if ExecuteSQL(Script) then
   begin
-    ATriggerName := sgTriggers.Cells[0, sgTriggers.Row];
-    fmMain.ShowCompleteQueryWindow(FDBIndex, 'Drop Trigger : ' + ATriggerName,
-      'drop trigger ' + ATriggerName, @bbRefreshClick);
+    turbocommon.MetaDataChanged := True;
+    FillTriggers;
   end;
 end;
 
@@ -139,6 +177,58 @@ procedure TfmTriggers.FormShow(Sender: TObject);
 begin
   FillTriggers;
   frmThemeSelector.btnApplyClick(Self);
+end;
+
+function TfmTriggers.ExecuteSQL(const ASQL: string): Boolean;
+var
+  Tr: TIBTransaction;
+  ScriptEngine: TIBXScript;
+  Lines: TStringList;
+begin
+  Result := False;
+
+  if not RegisteredDatabases[FDBIndex].IBDatabase.Connected then
+  begin
+    MsgError('Database is not connected.');
+    Exit;
+  end;
+
+  Tr := TIBTransaction.Create(nil);
+  ScriptEngine := TIBXScript.Create(nil);
+  Lines := TStringList.Create;
+  try
+    Tr.DefaultDatabase := RegisteredDatabases[FDBIndex].IBDatabase;
+    Tr.Params.Clear;
+    Tr.Params.Assign(RegisteredDatabases[FDBIndex].IBTransaction.Params);
+
+    ScriptEngine.Transaction := Tr;
+    ScriptEngine.Database    := RegisteredDatabases[FDBIndex].IBDatabase;
+    Lines.Text := ASQL;
+
+    try
+      if not Tr.InTransaction then
+        Tr.StartTransaction;
+
+      ScriptEngine.ExecSQLScript(Lines.Text);
+
+      if Tr.InTransaction then
+        Tr.Commit;
+
+      Result := True;
+    except
+      on E: Exception do
+      begin
+        if Tr.InTransaction then
+          Tr.Rollback;
+        MsgError('Error while executing SQL:' + sLineBreak + sLineBreak + E.Message);
+        Result := False;
+      end;
+    end;
+  finally
+    Lines.Free;
+    ScriptEngine.Free;
+    Tr.Free;
+  end;
 end;
 
 end.
